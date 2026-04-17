@@ -34,6 +34,9 @@ public:
     bool Mount(const std::string& EntityId, const std::string& TreeJson);
     bool Unmount(const std::string& EntityId);
 
+    void SetDebugModeEnabled(bool bEnabled);
+    bool IsDebugModeEnabled() const;
+
     std::string DrainPendingUpdatesJson();
     std::string GetDrawablesJson(const std::string& EntityId) const;
 

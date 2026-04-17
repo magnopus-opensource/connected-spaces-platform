@@ -189,6 +189,12 @@ export function button(label, props = {}) {
     nextProps.text = String(label ?? '');
     return createNode('button', nextProps, []);
 }
+
+export function setDebugMode(enabled) {
+    if (typeof __setUIDebugMode === 'function') {
+        __setUIDebugMode(!!enabled);
+    }
+}
 )UI";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
@@ -339,6 +345,16 @@ std::string BuildAttributeValueLiteral(const csp::multiplayer::CodeAttribute& At
         return fmt::format("{:.9g}", static_cast<double>(Attribute.FloatValue));
     case csp::multiplayer::CodePropertyType::String:
         return "'" + EscapeJSStringLiteral(Attribute.StringValue.c_str()) + "'";
+    case csp::multiplayer::CodePropertyType::Vector2:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.Vector2Value));
+    case csp::multiplayer::CodePropertyType::Vector3:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.Vector3Value));
+    case csp::multiplayer::CodePropertyType::Vector4:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.Vector4Value));
+    case csp::multiplayer::CodePropertyType::Quaternion:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.QuaternionValue));
+    case csp::multiplayer::CodePropertyType::Color:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.ColorValue));
     case csp::multiplayer::CodePropertyType::EntityQuery:
         return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.EntityQueryValue));
     case csp::multiplayer::CodePropertyType::ModelAsset:
@@ -435,15 +451,22 @@ export function createScriptRegistry() {
         return value && typeof value === 'object' && !Array.isArray(value);
     }
 
-    function cloneValue(value) {
+    const CLONE_VALUE_MAX_DEPTH = 64;
+
+    function cloneValue(value, depth = 0) {
+        if (depth > CLONE_VALUE_MAX_DEPTH) {
+            console.error(`[NGX UI][runtime] cloneValue exceeded max depth (${CLONE_VALUE_MAX_DEPTH}) — possible cyclic object in UI prop. Returning null.`);
+            return null;
+        }
+
         if (Array.isArray(value)) {
-            return value.map((item) => cloneValue(item));
+            return value.map((item) => cloneValue(item, depth + 1));
         }
 
         if (isObject(value)) {
             const result = {};
             for (const key of Object.keys(value)) {
-                result[key] = cloneValue(value[key]);
+                result[key] = cloneValue(value[key], depth + 1);
             }
             return result;
         }
@@ -457,6 +480,22 @@ export function createScriptRegistry() {
 
     function sortedKeys(value) {
         return Object.keys(isObject(value) ? value : {}).sort();
+    }
+
+    function isFiniteNumber(value) {
+        return typeof value === 'number' && Number.isFinite(value);
+    }
+
+    function isNumericArray(value, expectedLength) {
+        return Array.isArray(value) && value.length === expectedLength && value.every(isFiniteNumber);
+    }
+
+    function isObjectVector(value, keys) {
+        if (!isObject(value)) {
+            return false;
+        }
+
+        return keys.every((key) => isFiniteNumber(value[key]));
     }
 
     function warn(entityId, message) {
@@ -483,6 +522,26 @@ export function createScriptRegistry() {
 
         if (lower === 'string') {
             return 'string';
+        }
+
+        if (lower === 'vector2' || lower === 'vec2') {
+            return 'vector2';
+        }
+
+        if (lower === 'vector3' || lower === 'vec3') {
+            return 'vector3';
+        }
+
+        if (lower === 'vector4' || lower === 'vec4') {
+            return 'vector4';
+        }
+
+        if (lower === 'quaternion') {
+            return 'quaternion';
+        }
+
+        if (lower === 'color') {
+            return 'color';
         }
 
         if (lower === 'entity') {
@@ -515,6 +574,26 @@ export function createScriptRegistry() {
 
         if (type === 'string') {
             return typeof value === 'string';
+        }
+
+        if (type === 'vector2') {
+            return isNumericArray(value, 2) || isObjectVector(value, ['x', 'y']);
+        }
+
+        if (type === 'vector3') {
+            return isNumericArray(value, 3) || isObjectVector(value, ['x', 'y', 'z']);
+        }
+
+        if (type === 'vector4') {
+            return isNumericArray(value, 4) || isObjectVector(value, ['x', 'y', 'z', 'w']);
+        }
+
+        if (type === 'quaternion') {
+            return isNumericArray(value, 4) || isObjectVector(value, ['x', 'y', 'z', 'w']);
+        }
+
+        if (type === 'color') {
+            return isNumericArray(value, 3) || isObjectVector(value, ['r', 'g', 'b']) || isObjectVector(value, ['x', 'y', 'z']);
         }
 
         if (type === 'entity') {
@@ -696,6 +775,26 @@ export function createScriptRegistry() {
 
         if (type === 'string') {
             return '';
+        }
+
+        if (type === 'vector2') {
+            return [0, 0];
+        }
+
+        if (type === 'vector3') {
+            return [0, 0, 0];
+        }
+
+        if (type === 'vector4') {
+            return [0, 0, 0, 0];
+        }
+
+        if (type === 'quaternion') {
+            return [0, 0, 0, 1];
+        }
+
+        if (type === 'color') {
+            return [0, 0, 0];
         }
 
         if (type === 'entity') {
@@ -1113,7 +1212,14 @@ export function createScriptRegistry() {
         return null;
     }
 
-    function normalizeUINode(node, entityId, handlerMap, path = 'root') {
+    const UI_TREE_MAX_DEPTH = 256;
+
+    function normalizeUINode(node, entityId, handlerMap, path = 'root', depth = 0) {
+        if (depth > UI_TREE_MAX_DEPTH) {
+            console.error(`[NGX UI][runtime] normalizeUINode exceeded max depth (${UI_TREE_MAX_DEPTH}) at path '${path}' — bailing out (possible cyclic or runaway tree).`);
+            return null;
+        }
+
         if (!node || typeof node !== 'object') {
             return null;
         }
@@ -1136,10 +1242,43 @@ export function createScriptRegistry() {
                 continue;
             }
 
-            if (key === 'onClick' && typeof value === 'function') {
-                const handlerId = `${path}:click`;
-                handlerMap.set(handlerId, value);
-                normalized.props.onClickHandlerId = handlerId;
+            if (typeof value === 'function') {
+                if (key === 'onClick') {
+                    const handlerId = `${path}:click`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onClickHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onHover') {
+                    const handlerId = `${path}:hover`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onHoverHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onPointerEnter') {
+                    const handlerId = `${path}:pointerEnter`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onPointerEnterHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onPointerLeave') {
+                    const handlerId = `${path}:pointerLeave`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onPointerLeaveHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onPointerDown') {
+                    const handlerId = `${path}:pointerDown`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onPointerDownHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onPointerUp') {
+                    const handlerId = `${path}:pointerUp`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onPointerUpHandlerId = handlerId;
+                    continue;
+                } else if (key === 'onDrag') {
+                    const handlerId = `${path}:drag`;
+                    handlerMap.set(handlerId, value);
+                    normalized.props.onDragHandlerId = handlerId;
+                    continue;
+                }
                 continue;
             }
 
@@ -1148,10 +1287,6 @@ export function createScriptRegistry() {
                 if (normalizedEntity) {
                     normalized.props.targetEntityId = normalizedEntity;
                 }
-                continue;
-            }
-
-            if (typeof value === 'function') {
                 continue;
             }
 
@@ -1170,7 +1305,7 @@ export function createScriptRegistry() {
 
         const children = flattenUIChildren(node.children);
         normalized.children = children
-            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`))
+            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`, depth + 1))
             .filter((child) => child !== null);
 
         return normalized;
@@ -1271,7 +1406,19 @@ export function createScriptRegistry() {
                     return;
                 }
 
-                queueUIFlush(entityId, entry, JSON.stringify(normalizedTree), nextHandlers);
+                let serializedTree = null;
+                try {
+                    serializedTree = JSON.stringify(normalizedTree);
+                } catch (stringifyError) {
+                    const detail = stringifyError instanceof Error
+                        ? (typeof stringifyError.stack === 'string' && stringifyError.stack.length > 0 ? stringifyError.stack : String(stringifyError))
+                        : String(stringifyError);
+                    console.error(`[NGX UI][runtime] JSON.stringify(normalizedTree) failed for entity ${entityId}. Tree shape: type='${normalizedTree.type}', id='${normalizedTree.id}', childCount=${Array.isArray(normalizedTree.children) ? normalizedTree.children.length : 'n/a'}, propKeys=${JSON.stringify(Object.keys(normalizedTree.props || {}))}. Error: ${detail}`);
+                    queueUIFlush(entityId, entry, null, new Map());
+                    return;
+                }
+
+                queueUIFlush(entityId, entry, serializedTree, nextHandlers);
             } catch (error) {
                 console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
                 queueUIFlush(entityId, entry, null, new Map());
@@ -1304,14 +1451,29 @@ export function createScriptRegistry() {
         unmountUI(entityId);
     }
 
-    function dispatchUIAction(entityId, handlerId) {
+    function dispatchUIAction(entityId, handlerId, eventData) {
         const entry = codeComponents.get(entityId);
+        console.log('[NGX UI][runtime] dispatchUIAction called', {
+            entityId,
+            handlerId,
+            hasEntry: !!entry,
+            isDisposing: entry && entry.isDisposing,
+            isDestroying,
+            hasUiHandlers: !!(entry && entry.uiHandlers),
+            uiHandlerCount: entry && entry.uiHandlers ? entry.uiHandlers.size : 0,
+            registeredHandlerIds: entry && entry.uiHandlers ? Array.from(entry.uiHandlers.keys()) : []
+        });
         if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {
+            console.log('[NGX UI][runtime] dispatchUIAction early-exit (entry/handlers missing)');
             return false;
         }
 
         const handler = entry.uiHandlers.get(handlerId);
         if (typeof handler !== 'function') {
+            console.log('[NGX UI][runtime] dispatchUIAction handler not found', {
+                handlerId,
+                registeredHandlerIds: Array.from(entry.uiHandlers.keys())
+            });
             return false;
         }
 
@@ -1322,8 +1484,9 @@ export function createScriptRegistry() {
                 batch(() => {
                     handler({
                         entityId,
-                        type: 'click',
+                        type: eventData && eventData.type ? eventData.type : 'click',
                         thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,
+                        ...(eventData ? eventData : {})
                     });
                 });
             } finally {

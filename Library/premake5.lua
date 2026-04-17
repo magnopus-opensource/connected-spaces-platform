@@ -282,13 +282,14 @@ if not Project then
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
                 "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
-                "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
-                "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
-                "-sINITIAL_MEMORY=33554432",
-                "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
-                "-sEXPORTED_RUNTIME_METHODS=[" ..
-                    "'ccall'," ..
-                    "'setValue'," ..
+	                "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
+	                "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
+	                "-sINITIAL_MEMORY=33554432",
+	                "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
+	                "-sSTACK_SIZE=10MB",                                            -- complex debug scripts can exhaust the default WASM stack
+	                "-sEXPORTED_RUNTIME_METHODS=[" ..
+	                    "'ccall'," ..
+	                    "'setValue'," ..
                     "'getValue'," ..
                     "'addFunction'," ..
                     "'removeFunction'," ..

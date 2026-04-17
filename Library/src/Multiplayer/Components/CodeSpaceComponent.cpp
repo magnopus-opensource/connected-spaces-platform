@@ -17,6 +17,7 @@
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
+#include <cmath>
 #include <rapidjson/document.h>
 
 namespace csp::multiplayer
@@ -120,6 +121,58 @@ constexpr const char* MODEL_ASSET_ASSET_ID_KEY = "assetId";
 constexpr const char* IMAGE_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
 constexpr const char* IMAGE_ASSET_ID_KEY = "imageAssetId";
 
+bool TryGetJsonNumber(const rapidjson::Value& Value, float& OutValue)
+{
+    if (!Value.IsNumber())
+    {
+        return false;
+    }
+
+    OutValue = static_cast<float>(Value.GetDouble());
+    return std::isfinite(OutValue);
+}
+
+bool TryParseVector2Default(const rapidjson::Value& DefaultValue, csp::common::Vector2& OutValue)
+{
+    if (!DefaultValue.IsArray() || (DefaultValue.Size() != 2))
+    {
+        return false;
+    }
+
+    float X = 0.0f;
+    float Y = 0.0f;
+    return TryGetJsonNumber(DefaultValue[0], X) && TryGetJsonNumber(DefaultValue[1], Y) && (OutValue = csp::common::Vector2(X, Y), true);
+}
+
+bool TryParseVector3Default(const rapidjson::Value& DefaultValue, csp::common::Vector3& OutValue)
+{
+    if (!DefaultValue.IsArray() || (DefaultValue.Size() != 3))
+    {
+        return false;
+    }
+
+    float X = 0.0f;
+    float Y = 0.0f;
+    float Z = 0.0f;
+    return TryGetJsonNumber(DefaultValue[0], X) && TryGetJsonNumber(DefaultValue[1], Y) && TryGetJsonNumber(DefaultValue[2], Z)
+        && (OutValue = csp::common::Vector3(X, Y, Z), true);
+}
+
+bool TryParseVector4Default(const rapidjson::Value& DefaultValue, csp::common::Vector4& OutValue)
+{
+    if (!DefaultValue.IsArray() || (DefaultValue.Size() != 4))
+    {
+        return false;
+    }
+
+    float X = 0.0f;
+    float Y = 0.0f;
+    float Z = 0.0f;
+    float W = 0.0f;
+    return TryGetJsonNumber(DefaultValue[0], X) && TryGetJsonNumber(DefaultValue[1], Y) && TryGetJsonNumber(DefaultValue[2], Z)
+        && TryGetJsonNumber(DefaultValue[3], W) && (OutValue = csp::common::Vector4(X, Y, Z, W), true);
+}
+
 ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
 {
     if (!TypeString)
@@ -145,6 +198,31 @@ ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
     if (strcmp(TypeString, "string") == 0)
     {
         return ScriptAttributeType::String;
+    }
+
+    if ((strcmp(TypeString, "vector2") == 0) || (strcmp(TypeString, "vec2") == 0))
+    {
+        return ScriptAttributeType::Vector2;
+    }
+
+    if ((strcmp(TypeString, "vector3") == 0) || (strcmp(TypeString, "vec3") == 0))
+    {
+        return ScriptAttributeType::Vector3;
+    }
+
+    if ((strcmp(TypeString, "vector4") == 0) || (strcmp(TypeString, "vec4") == 0))
+    {
+        return ScriptAttributeType::Vector4;
+    }
+
+    if (strcmp(TypeString, "quaternion") == 0)
+    {
+        return ScriptAttributeType::Quaternion;
+    }
+
+    if (strcmp(TypeString, "color") == 0)
+    {
+        return ScriptAttributeType::Color;
     }
 
     if (strcmp(TypeString, "entity") == 0)
@@ -181,6 +259,16 @@ csp::common::ReplicatedValue ExtractScalarFromCodeAttribute(const CodeAttribute&
         return csp::common::ReplicatedValue(Attr.FloatValue);
     case CodePropertyType::String:
         return csp::common::ReplicatedValue(Attr.StringValue);
+    case CodePropertyType::Vector2:
+        return csp::common::ReplicatedValue(Attr.Vector2Value);
+    case CodePropertyType::Vector3:
+        return csp::common::ReplicatedValue(Attr.Vector3Value);
+    case CodePropertyType::Vector4:
+        return csp::common::ReplicatedValue(Attr.Vector4Value);
+    case CodePropertyType::Quaternion:
+        return csp::common::ReplicatedValue(Attr.QuaternionValue);
+    case CodePropertyType::Color:
+        return csp::common::ReplicatedValue(Attr.ColorValue);
     case CodePropertyType::EntityQuery:
         return csp::common::ReplicatedValue(Attr.EntityQueryValue);
     case CodePropertyType::ModelAsset:
@@ -233,6 +321,51 @@ bool TryApplySchemaDefault(const rapidjson::Value& Entry, ScriptAttributeType Ty
         }
         OutAttribute.Value = csp::common::ReplicatedValue(csp::common::String(DefaultValue.GetString()));
         return true;
+
+    case ScriptAttributeType::Vector2:
+    {
+        csp::common::Vector2 ParsedValue;
+        if (!TryParseVector2Default(DefaultValue, ParsedValue))
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(ParsedValue);
+        return true;
+    }
+
+    case ScriptAttributeType::Vector3:
+    {
+        csp::common::Vector3 ParsedValue;
+        if (!TryParseVector3Default(DefaultValue, ParsedValue))
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(ParsedValue);
+        return true;
+    }
+
+    case ScriptAttributeType::Vector4:
+    case ScriptAttributeType::Quaternion:
+    {
+        csp::common::Vector4 ParsedValue;
+        if (!TryParseVector4Default(DefaultValue, ParsedValue))
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(ParsedValue);
+        return true;
+    }
+
+    case ScriptAttributeType::Color:
+    {
+        csp::common::Vector3 ParsedValue;
+        if (!TryParseVector3Default(DefaultValue, ParsedValue))
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(ParsedValue);
+        return true;
+    }
 
     case ScriptAttributeType::EntityQuery:
         if (DefaultValue.IsString())
@@ -327,6 +460,26 @@ void ApplyBuiltInTypeDefault(ScriptAttributeType Type, NgxScriptAttribute& OutAt
 
     case ScriptAttributeType::String:
         OutAttribute.Value = csp::common::ReplicatedValue(csp::common::String(""));
+        break;
+
+    case ScriptAttributeType::Vector2:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::Vector2(0.0f, 0.0f));
+        break;
+
+    case ScriptAttributeType::Vector3:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::Vector3(0.0f, 0.0f, 0.0f));
+        break;
+
+    case ScriptAttributeType::Vector4:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+        break;
+
+    case ScriptAttributeType::Quaternion:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+        break;
+
+    case ScriptAttributeType::Color:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::Vector3(0.0f, 0.0f, 0.0f));
         break;
 
     case ScriptAttributeType::EntityQuery:

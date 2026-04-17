@@ -24,6 +24,11 @@ constexpr const char* ATTRIBUTE_BOOLEAN_VALUE_KEY = "boolValue";
 constexpr const char* ATTRIBUTE_INTEGER_VALUE_KEY = "intValue";
 constexpr const char* ATTRIBUTE_FLOAT_VALUE_KEY = "floatValue";
 constexpr const char* ATTRIBUTE_STRING_VALUE_KEY = "stringValue";
+constexpr const char* ATTRIBUTE_VECTOR2_VALUE_KEY = "vector2Value";
+constexpr const char* ATTRIBUTE_VECTOR3_VALUE_KEY = "vector3Value";
+constexpr const char* ATTRIBUTE_VECTOR4_VALUE_KEY = "vector4Value";
+constexpr const char* ATTRIBUTE_QUATERNION_VALUE_KEY = "quaternionValue";
+constexpr const char* ATTRIBUTE_COLOR_VALUE_KEY = "colorValue";
 constexpr const char* ATTRIBUTE_ENTITY_QUERY_VALUE_KEY = "entityQueryValue";
 constexpr const char* ATTRIBUTE_MODEL_ASSET_VALUE_KEY = "modelAssetValue";
 constexpr const char* ATTRIBUTE_IMAGE_ASSET_VALUE_KEY = "imageAssetValue";
@@ -182,6 +187,11 @@ CodeAttribute::CodeAttribute()
     , IntegerValue(0)
     , FloatValue(0.0f)
     , StringValue("")
+    , Vector2Value()
+    , Vector3Value()
+    , Vector4Value()
+    , QuaternionValue(0.0f, 0.0f, 0.0f, 1.0f)
+    , ColorValue()
     , EntityQueryValue()
     , ModelAssetValue()
     , ImageAssetValue()
@@ -218,6 +228,81 @@ CodeAttribute CodeAttribute::FromString(const csp::common::String& Value)
     Attribute.Type = CodePropertyType::String;
     Attribute.StringValue = Value;
     return Attribute;
+}
+
+CodeAttribute CodeAttribute::FromVector2(const csp::common::Vector2& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetVector2Value(Value);
+    return Attribute;
+}
+
+CodeAttribute CodeAttribute::FromVector3(const csp::common::Vector3& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetVector3Value(Value);
+    return Attribute;
+}
+
+CodeAttribute CodeAttribute::FromVector4(const csp::common::Vector4& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetVector4Value(Value);
+    return Attribute;
+}
+
+CodeAttribute CodeAttribute::FromQuaternion(const csp::common::Vector4& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetQuaternionValue(Value);
+    return Attribute;
+}
+
+CodeAttribute CodeAttribute::FromColor(const csp::common::Vector3& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetColorValue(Value);
+    return Attribute;
+}
+
+const csp::common::Vector2& CodeAttribute::GetVector2Value() const { return Vector2Value; }
+
+void CodeAttribute::SetVector2Value(const csp::common::Vector2& Value)
+{
+    Type = CodePropertyType::Vector2;
+    Vector2Value = Value;
+}
+
+const csp::common::Vector3& CodeAttribute::GetVector3Value() const { return Vector3Value; }
+
+void CodeAttribute::SetVector3Value(const csp::common::Vector3& Value)
+{
+    Type = CodePropertyType::Vector3;
+    Vector3Value = Value;
+}
+
+const csp::common::Vector4& CodeAttribute::GetVector4Value() const { return Vector4Value; }
+
+void CodeAttribute::SetVector4Value(const csp::common::Vector4& Value)
+{
+    Type = CodePropertyType::Vector4;
+    Vector4Value = Value;
+}
+
+const csp::common::Vector4& CodeAttribute::GetQuaternionValue() const { return QuaternionValue; }
+
+void CodeAttribute::SetQuaternionValue(const csp::common::Vector4& Value)
+{
+    Type = CodePropertyType::Quaternion;
+    QuaternionValue = Value;
+}
+
+const csp::common::Vector3& CodeAttribute::GetColorValue() const { return ColorValue; }
+
+void CodeAttribute::SetColorValue(const csp::common::Vector3& Value)
+{
+    Type = CodePropertyType::Color;
+    ColorValue = Value;
 }
 
 CodeAttribute CodeAttribute::FromEntityQuery(const EntityQueryValueType& Value)
@@ -300,6 +385,11 @@ csp::common::ReplicatedValue CodeAttribute::ToReplicatedValue() const
     SerializedValue[ATTRIBUTE_INTEGER_VALUE_KEY] = IntegerValue;
     SerializedValue[ATTRIBUTE_FLOAT_VALUE_KEY] = FloatValue;
     SerializedValue[ATTRIBUTE_STRING_VALUE_KEY] = StringValue;
+    SerializedValue[ATTRIBUTE_VECTOR2_VALUE_KEY] = Vector2Value;
+    SerializedValue[ATTRIBUTE_VECTOR3_VALUE_KEY] = Vector3Value;
+    SerializedValue[ATTRIBUTE_VECTOR4_VALUE_KEY] = Vector4Value;
+    SerializedValue[ATTRIBUTE_QUATERNION_VALUE_KEY] = QuaternionValue;
+    SerializedValue[ATTRIBUTE_COLOR_VALUE_KEY] = ColorValue;
     SerializedValue[ATTRIBUTE_ENTITY_QUERY_VALUE_KEY] = EntityQueryValue;
     SerializedValue[ATTRIBUTE_MODEL_ASSET_VALUE_KEY] = ModelAssetValue;
     SerializedValue[ATTRIBUTE_IMAGE_ASSET_VALUE_KEY] = ImageAssetValue;
@@ -351,6 +441,66 @@ bool CodeAttribute::TryFromReplicatedValue(const csp::common::ReplicatedValue& I
     if ((StringValueIt != SerializedValue.end()) && (StringValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::String))
     {
         OutAttribute.StringValue = StringValueIt->second.GetString();
+    }
+
+    const auto Vector2ValueIt = SerializedValue.Find(ATTRIBUTE_VECTOR2_VALUE_KEY);
+    if ((Vector2ValueIt != SerializedValue.end()) && (Vector2ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2))
+    {
+        OutAttribute.Vector2Value = Vector2ValueIt->second.GetVector2();
+    }
+
+    const auto Vector3ValueIt = SerializedValue.Find(ATTRIBUTE_VECTOR3_VALUE_KEY);
+    if ((Vector3ValueIt != SerializedValue.end()) && (Vector3ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3))
+    {
+        OutAttribute.Vector3Value = Vector3ValueIt->second.GetVector3();
+    }
+
+    const auto Vector4ValueIt = SerializedValue.Find(ATTRIBUTE_VECTOR4_VALUE_KEY);
+    if ((Vector4ValueIt != SerializedValue.end()) && (Vector4ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4))
+    {
+        OutAttribute.Vector4Value = Vector4ValueIt->second.GetVector4();
+    }
+
+    const auto QuaternionValueIt = SerializedValue.Find(ATTRIBUTE_QUATERNION_VALUE_KEY);
+    if ((QuaternionValueIt != SerializedValue.end()) && (QuaternionValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4))
+    {
+        OutAttribute.QuaternionValue = QuaternionValueIt->second.GetVector4();
+    }
+
+    const auto ColorValueIt = SerializedValue.Find(ATTRIBUTE_COLOR_VALUE_KEY);
+    if ((ColorValueIt != SerializedValue.end()) && (ColorValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3))
+    {
+        OutAttribute.ColorValue = ColorValueIt->second.GetVector3();
+    }
+
+    if (OutAttribute.Type == CodePropertyType::Vector2)
+    {
+        return Vector2ValueIt != SerializedValue.end()
+            && (Vector2ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2);
+    }
+
+    if (OutAttribute.Type == CodePropertyType::Vector3)
+    {
+        return Vector3ValueIt != SerializedValue.end()
+            && (Vector3ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3);
+    }
+
+    if (OutAttribute.Type == CodePropertyType::Vector4)
+    {
+        return Vector4ValueIt != SerializedValue.end()
+            && (Vector4ValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4);
+    }
+
+    if (OutAttribute.Type == CodePropertyType::Quaternion)
+    {
+        return QuaternionValueIt != SerializedValue.end()
+            && (QuaternionValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4);
+    }
+
+    if (OutAttribute.Type == CodePropertyType::Color)
+    {
+        return ColorValueIt != SerializedValue.end()
+            && (ColorValueIt->second.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3);
     }
 
     if (OutAttribute.Type == CodePropertyType::EntityQuery)
@@ -410,8 +560,11 @@ bool CodeAttribute::TryFromReplicatedValue(const csp::common::ReplicatedValue& I
 bool CodeAttribute::operator==(const CodeAttribute& Other) const
 {
     return (Type == Other.Type) && (BooleanValue == Other.BooleanValue) && (IntegerValue == Other.IntegerValue)
-        && (FloatValue == Other.FloatValue) && (StringValue == Other.StringValue) && (EntityQueryValue == Other.EntityQueryValue)
-        && (ModelAssetValue == Other.ModelAssetValue) && (ImageAssetValue == Other.ImageAssetValue);
+        && (FloatValue == Other.FloatValue) && (StringValue == Other.StringValue) && (Vector2Value == Other.Vector2Value)
+        && (Vector3Value == Other.Vector3Value) && (Vector4Value == Other.Vector4Value)
+        && (QuaternionValue == Other.QuaternionValue) && (ColorValue == Other.ColorValue)
+        && (EntityQueryValue == Other.EntityQueryValue) && (ModelAssetValue == Other.ModelAssetValue)
+        && (ImageAssetValue == Other.ImageAssetValue);
 }
 
 bool CodeAttribute::operator!=(const CodeAttribute& Other) const { return !(*this == Other); }

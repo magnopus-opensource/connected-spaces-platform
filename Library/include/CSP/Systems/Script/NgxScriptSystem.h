@@ -118,7 +118,13 @@ public:
     csp::common::String DrainPendingUIUpdates();
 
     // Dispatch a click action back into the scripted UI runtime.
-    bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId);
+    bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId, const csp::common::String& EventDataJson = "");
+
+    // Toggle Clay's built-in debug overlay (bounding boxes, layout layers) for all active UI surfaces.
+    void SetUIDebugModeEnabled(bool bEnabled);
+
+    // Query the current Clay debug overlay state.
+    bool IsUIDebugModeEnabled() const;
 
     CSP_START_IGNORE
     typedef std::function<void(const csp::common::String& Text, float FontSize, const csp::common::String& FontWeight,

@@ -50,12 +50,24 @@
 
 namespace
 {
+constexpr size_t NGX_SCRIPT_MEMORY_LIMIT_BYTES = 256 * 1024 * 1024;
+constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 4 * 1024 * 1024;
 
 constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
 constexpr const char* CODECOMPONENT_JSON_RESULT_SLOT = "__cspCodeComponentJsonResult";
 constexpr const char* CODECOMPONENT_BOOL_RESULT_SLOT = "__cspCodeComponentBoolResult";
 constexpr const char* EMPTY_JSON_OBJECT_STRING = "{}";
 constexpr const char* ASSET_BLOB_CHANGED_RECEIVER_ID = "CSPInternal::NgxScriptSystem";
+
+void ApplyNgxRuntimeLimits(qjs::Runtime& Runtime)
+{
+    JS_SetMemoryLimit(Runtime.rt, NGX_SCRIPT_MEMORY_LIMIT_BYTES);
+#ifdef CSP_WASM
+    // QuickJS defaults to a 256 KB stack guard, which is too small for complex
+    // development-mode scripts in the browser/WASM build.
+    JS_SetMaxStackSize(Runtime.rt, NGX_SCRIPT_WASM_MAX_STACK_BYTES);
+#endif
+}
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -389,7 +401,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , GcTickCounter(0)
     , TickEventHandler(std::make_unique<NgxScriptTickEventHandler>(this))
 {
-    JS_SetMemoryLimit(Runtime->rt, 256 * 1024 * 1024);
+    ApplyNgxRuntimeLimits(*Runtime);
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, TickEventHandler.get());
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: System constructed and tick listener registered.");
 }
@@ -767,36 +779,78 @@ csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
     return UIRuntime->DrainPendingUpdatesJson().c_str();
 }
 
-bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId)
+void NgxScriptSystem::SetUIDebugModeEnabled(bool bEnabled)
 {
+    std::scoped_lock UILock(UIMutex);
+    if (UIRuntime)
+    {
+        UIRuntime->SetDebugModeEnabled(bEnabled);
+        const std::string Message
+            = fmt::format("NgxScript Trace: UI debug overlay {}.", bEnabled ? "enabled" : "disabled");
+        LogSystem.LogMsg(csp::common::LogLevel::Log, Message.c_str());
+    }
+}
+
+bool NgxScriptSystem::IsUIDebugModeEnabled() const
+{
+    std::scoped_lock UILock(UIMutex);
+    return UIRuntime ? UIRuntime->IsDebugModeEnabled() : false;
+}
+
+bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId, const csp::common::String& EventDataJson)
+{
+    const std::string EntryMessage
+        = fmt::format("NgxScript Trace: DispatchUIAction(entityId='{}', handlerId='{}', eventDataJson='{}') called.",
+            EntityId.c_str(), HandlerId.c_str(), EventDataJson.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Log, EntryMessage.c_str());
+
     if (EntityId.IsEmpty() || HandlerId.IsEmpty())
     {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript Trace: DispatchUIAction aborted (empty entityId or handlerId).");
         return false;
     }
 
     const std::string Snippet = fmt::format(
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function') {{ "
-        "globalThis.{} = !!globalThis.scriptRegistry.dispatchUIAction('{}', '{}'); }} else {{ globalThis.{} = false; }}",
+        "(function() {{ "
+        "  if (typeof csp !== 'undefined' && typeof csp.__log === 'function') {{ "
+        "    csp.__log('[NGX UI][dispatch-snippet] entered', 'hasRegistry=' + (!!globalThis.scriptRegistry), 'hasFn=' + (!!(globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function'))); "
+        "  }} "
+        "  if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function') {{ "
+        "    globalThis.{} = !!globalThis.scriptRegistry.dispatchUIAction('{}', '{}', {}); "
+        "  }} else {{ "
+        "    globalThis.{} = false; "
+        "    if (typeof csp !== 'undefined' && typeof csp.__warn === 'function') {{ "
+        "      csp.__warn('[NGX UI][dispatch-snippet] scriptRegistry.dispatchUIAction is not a function'); "
+        "    }} "
+        "  }} "
+        "}})();",
         CODECOMPONENT_BOOL_RESULT_SLOT, EscapeJSStringLiteral(EntityId.c_str()), EscapeJSStringLiteral(HandlerId.c_str()),
+        EventDataJson.IsEmpty() ? "null" : EventDataJson.c_str(),
         CODECOMPONENT_BOOL_RESULT_SLOT);
 
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)
     {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript Trace: DispatchUIAction aborted (no Context).");
         return false;
     }
 
     if (Context->eval(Snippet, "<ngx-dispatch-ui-action>", JS_EVAL_TYPE_GLOBAL).isException())
     {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript Trace: DispatchUIAction eval threw exception.");
         return false;
     }
 
     try
     {
-        return Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
+        const bool Result = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
+        const std::string ResultMessage = fmt::format("NgxScript Trace: DispatchUIAction returning {}.", Result);
+        LogSystem.LogMsg(csp::common::LogLevel::Log, ResultMessage.c_str());
+        return Result;
     }
     catch (...)
     {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript Trace: DispatchUIAction result read threw exception.");
         return false;
     }
 }
@@ -938,7 +992,7 @@ void NgxScriptSystem::RebuildContext()
         if (!Runtime)
         {
             Runtime = std::make_unique<qjs::Runtime>();
-            JS_SetMemoryLimit(Runtime->rt, 256 * 1024 * 1024);
+            ApplyNgxRuntimeLimits(*Runtime);
         }
 
         // Collect any cyclic garbage left over from the old context before
@@ -1023,6 +1077,7 @@ void NgxScriptSystem::InstallHostBindings()
     CSPModule.function("__log", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Log, JoinArgs(Args).c_str()); });
     CSPModule.function("__warn", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Warning, JoinArgs(Args).c_str()); });
     CSPModule.function("__error", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Error, JoinArgs(Args).c_str()); });
+    CSPModule.function("__setUIDebugMode", [this](bool bEnabled) { if (UIRuntime) { UIRuntime->SetDebugModeEnabled(bEnabled); } });
     CSPModule.function("__getLocalPlayerCameraPosition", [this]() { return ToJSVector(GetLocalPlayerCameraPosition()); });
     CSPModule.function("__getLocalPlayerCameraRotation", [this]() { return ToJSVector(GetLocalPlayerCameraRotation()); });
     CSPModule.function("__getLocalPlayerCameraForward", [this]() { return ToJSVector(GetLocalPlayerCameraForward()); });

@@ -48,8 +48,9 @@ The relevant hooks are:
 - `NgxScriptSystem::SubmitUITextMeasureResults(resultsJson)`
   - Call this after the client measures pending text requests.
   - `resultsJson` should be a JSON array shaped like `{ text, fontSize, width, height }`.
-- `NgxScriptSystem::DispatchUIAction(entityId, handlerId)`
-  - Call when the client determines that a clickable drawable was activated.
+- `NgxScriptSystem::DispatchUIAction(entityId, handlerId, eventDataJson)`
+  - Call when the client determines that a clickable drawable or interactive area was activated.
+  - Passes an optional JSON payload `{}` stringified to `eventDataJson` which binds natively to callback arguments like pointer coordinates. 
   - Returns `true` if the handler existed and ran.
 
 There are also host bindings such as `csp.__uiMount(...)` and `csp.__uiUnmount(...)`, but those are internal to the script runtime and are not the client integration surface.
@@ -84,7 +85,13 @@ There are also host bindings such as `csp.__uiMount(...)` and `csp.__uiUnmount(.
       "fontSize": 16,
       "assetCollectionId": "",
       "imageAssetId": "",
-      "handlerId": "root.0.1:click",
+      "onClickHandlerId": "root.0.1:click",
+      "onHoverHandlerId": "root.0.1:hover",
+      "onPointerEnterHandlerId": "root.0.1:pointerEnter",
+      "onPointerLeaveHandlerId": "root.0.1:pointerLeave",
+      "onPointerDownHandlerId": "root.0.1:pointerDown",
+      "onPointerUpHandlerId": "root.0.1:pointerUp",
+      "onDragHandlerId": "root.0.1:drag",
       "enabled": true
     }
   }
@@ -109,7 +116,8 @@ Important fields on each drawable:
 - `id`
   - Stable drawable id within an entity's mounted UI.
 - `type`
-  - Current values are `rectangle`, `text`, `image`, and `button`.
+  - Current values are `rectangle`, `text`, `image`, `button`, `scissor_start`, and `scissor_end`.
+  - `scissor_start` and `scissor_end` are emitted as a pair when a container defines an `overflow` configuration (like `hidden` or `scrollY`). Visuals rendered sequentially between these start and end markers MUST be clipped by the client to the logical `x`, `y`, `width`, and `height` bounds denoted on the `scissor_start` drawable.
 - `surface`
   - `screen` or `world`.
 - `targetEntityId`
@@ -130,8 +138,8 @@ Important fields on each drawable:
   - Wrapped or multi-line text currently appears as one `text` drawable per rendered line.
 - `assetCollectionId`, `imageAssetId`
   - Image identity for image drawables.
-- `handlerId`
-  - Present on interactive drawables such as buttons.
+- `onClickHandlerId`, `onHoverHandlerId`, `onPointerEnterHandlerId`, `onPointerLeaveHandlerId`, `onPointerDownHandlerId`, `onPointerUpHandlerId`, `onDragHandlerId`
+  - Present on interactive drawables that have defined corresponding callback properties. 
 - `enabled`
   - Disabled drawables should not dispatch interaction.
 
@@ -171,13 +179,13 @@ The shared library is already doing layout. The client's job is only to place th
 
 ## Interaction
 
-The current interaction model is click-only.
+The interaction model supports click, hover, drag, and pointer callbacks.
 
 Recommended flow:
 
-1. Build hit-test entries only for drawables with a non-empty `handlerId` and `enabled == true`.
-2. On pointer or controller activation, hit test against the appropriate surface.
-3. If a hit succeeds, call `DispatchUIAction(entityId, handlerId)`.
+1. Build hit-test entries only for drawables with a non-empty handler ID (e.g. `onClickHandlerId`) and `enabled == true`.
+2. On pointer or controller activation/movement, hit test against the appropriate surface.
+3. If a hit succeeds, call `DispatchUIAction(entityId, handlerId, eventDataJson)` mapping the pointer event data to the JSON string.
 
 Screen interaction:
 
@@ -191,10 +199,9 @@ World interaction:
 
 Current limitations:
 
-- No hover callbacks.
 - No keyboard focus model.
 - No text input.
-- No drag or scroll event dispatch.
+- No scroll physics. While the layout engine resolves `overflow` constraints into `scissor_start` / `scissor_end` clipping boundaries, there is currently no engine-side scroll acceleration or implicit scroll views. Clients must manually manage scroll positions by passing scroll-drag interactions into script handlers, or map an explicit UI view model to Native scrollable boundaries.
 
 ## Text Measurement
 

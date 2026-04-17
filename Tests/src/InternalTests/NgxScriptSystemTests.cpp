@@ -277,6 +277,25 @@ const rapidjson::Value* FindDrawableById(const rapidjson::Document& Document, co
     return nullptr;
 }
 
+rapidjson::SizeType FindDrawableIndexById(const rapidjson::Document& Document, const char* Id)
+{
+    if (!Document.IsArray())
+    {
+        return 0;
+    }
+
+    for (rapidjson::SizeType Index = 0; Index < Document.Size(); ++Index)
+    {
+        const rapidjson::Value& Entry = Document[Index];
+        if (Entry.IsObject() && Entry.HasMember("id") && Entry["id"].IsString() && std::string(Entry["id"].GetString()) == Id)
+        {
+            return Index;
+        }
+    }
+
+    return Document.Size();
+}
+
 const rapidjson::Value* FindUpdateDrawableByType(const rapidjson::Document& Document, const char* Op, const char* Type)
 {
     if (!Document.IsArray())
@@ -2609,6 +2628,155 @@ export function ui() {
     ASSERT_NE(FourthButton, nullptr);
     EXPECT_NEAR((*FirstButton)["y"].GetFloat(), (*ThirdButton)["y"].GetFloat(), 0.01f);
     EXPECT_GT((*FourthButton)["y"].GetFloat(), (*FirstButton)["y"].GetFloat());
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeEmitsScissorDrawablesForOverflowPanels)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(800.0f, 600.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-overflow-scroll.js", R"(
+import { screen, column, button } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 360, height: 220, alignX: 'center', alignY: 'center', padding: 12, backgroundColor: '#020617FF' },
+        column(
+            { key: 'viewport', width: 180, height: 96, gap: 8, overflow: 'scrollY', backgroundColor: '#111827FF' },
+            button('One', { key: 'first', height: 40, backgroundColor: '#334155FF', textColor: '#FFFFFFFF' }),
+            button('Two', { key: 'second', height: 40, backgroundColor: '#334155FF', textColor: '#FFFFFFFF' }),
+            button('Three', { key: 'third', height: 40, backgroundColor: '#334155FF', textColor: '#FFFFFFFF' })
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-overflow-scroll-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-overflow-scroll-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-overflow-scroll.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* PanelDrawable = FindDrawableById(Drawables, "root.0:viewport");
+    const rapidjson::Value* ScissorStartDrawable = FindDrawableById(Drawables, "root.0:viewport.!scissor_start");
+    const rapidjson::Value* ScissorEndDrawable = FindDrawableById(Drawables, "root.0:viewport.~scissor_end");
+    const rapidjson::Value* FirstButtonDrawable = FindDrawableById(Drawables, "root.0:viewport.0:first");
+    ASSERT_NE(PanelDrawable, nullptr);
+    ASSERT_NE(ScissorStartDrawable, nullptr);
+    ASSERT_NE(ScissorEndDrawable, nullptr);
+    ASSERT_NE(FirstButtonDrawable, nullptr);
+    EXPECT_STREQ((*ScissorStartDrawable)["type"].GetString(), "scissor_start");
+    EXPECT_STREQ((*ScissorEndDrawable)["type"].GetString(), "scissor_end");
+    ASSERT_TRUE((*ScissorStartDrawable).HasMember("overflow"));
+    EXPECT_STREQ((*ScissorStartDrawable)["overflow"].GetString(), "scrollY");
+    EXPECT_FLOAT_EQ((*ScissorStartDrawable)["x"].GetFloat(), (*PanelDrawable)["x"].GetFloat());
+    EXPECT_FLOAT_EQ((*ScissorStartDrawable)["y"].GetFloat(), (*PanelDrawable)["y"].GetFloat());
+    EXPECT_FLOAT_EQ((*ScissorStartDrawable)["width"].GetFloat(), (*PanelDrawable)["width"].GetFloat());
+    EXPECT_FLOAT_EQ((*ScissorStartDrawable)["height"].GetFloat(), (*PanelDrawable)["height"].GetFloat());
+
+    const rapidjson::SizeType ScissorStartIndex = FindDrawableIndexById(Drawables, "root.0:viewport.!scissor_start");
+    const rapidjson::SizeType FirstButtonIndex = FindDrawableIndexById(Drawables, "root.0:viewport.0:first");
+    const rapidjson::SizeType ScissorEndIndex = FindDrawableIndexById(Drawables, "root.0:viewport.~scissor_end");
+    ASSERT_LT(ScissorStartIndex, Drawables.Size());
+    ASSERT_LT(FirstButtonIndex, Drawables.Size());
+    ASSERT_LT(ScissorEndIndex, Drawables.Size());
+    EXPECT_LT(ScissorStartIndex, FirstButtonIndex);
+    EXPECT_LT(FirstButtonIndex, ScissorEndIndex);
+
+    const rapidjson::Document Updates = ParseJson(NgxScriptSystem.DrainPendingUIUpdates().c_str());
+    EXPECT_NE(FindUpdateDrawableByType(Updates, "add", "scissor_start"), nullptr);
+    EXPECT_NE(FindUpdateDrawableByType(Updates, "add", "scissor_end"), nullptr);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeMarksUnclippedFloatingSubtreesForClipEscape)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(800.0f, 600.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-floating-escape.js", R"(
+import { screen, column, button, floating } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 360, height: 220, alignX: 'center', alignY: 'center', padding: 12, backgroundColor: '#020617FF' },
+        column(
+            { key: 'viewport', width: 180, height: 96, gap: 8, overflow: 'scrollY', backgroundColor: '#111827FF' },
+            button('Trigger', { key: 'trigger', height: 40, backgroundColor: '#334155FF', textColor: '#FFFFFFFF' }),
+            floating(
+                { key: 'menu', attachTo: 'parent', attachX: 'left', attachY: 'bottom', offset: { x: 0, y: 4 }, zIndex: 10, clipToParent: false },
+                column(
+                    { key: 'menu_panel', width: 180, height: 96, gap: 4, padding: 4, overflow: 'scrollY', backgroundColor: '#0F172AFF' },
+                    button('One', { key: 'first', height: 28, backgroundColor: '#1E293BFF', textColor: '#FFFFFFFF' }),
+                    button('Two', { key: 'second', height: 28, backgroundColor: '#1E293BFF', textColor: '#FFFFFFFF' }),
+                    button('Three', { key: 'third', height: 28, backgroundColor: '#1E293BFF', textColor: '#FFFFFFFF' }),
+                    button('Four', { key: 'fourth', height: 28, backgroundColor: '#1E293BFF', textColor: '#FFFFFFFF' })
+                )
+            )
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-floating-escape-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-floating-escape-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-floating-escape.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* ViewportScissorStart = FindDrawableById(Drawables, "root.0:viewport.!scissor_start");
+    const rapidjson::Value* FloatingRoot = FindDrawableById(Drawables, "root.0:viewport.1:menu");
+    const rapidjson::Value* FloatingPanel = FindDrawableById(Drawables, "root.0:viewport.1:menu.0:menu_panel");
+    const rapidjson::Value* FloatingPanelScissorStart = FindDrawableById(Drawables, "root.0:viewport.1:menu.0:menu_panel.!scissor_start");
+    const rapidjson::Value* FloatingOption = FindDrawableById(Drawables, "root.0:viewport.1:menu.0:menu_panel.0:first");
+    const rapidjson::Value* FloatingOptionLabel = FindDrawableById(Drawables, "root.0:viewport.1:menu.0:menu_panel.0:first__label");
+    ASSERT_NE(ViewportScissorStart, nullptr);
+    ASSERT_NE(FloatingRoot, nullptr);
+    ASSERT_NE(FloatingPanel, nullptr);
+    ASSERT_NE(FloatingPanelScissorStart, nullptr);
+    ASSERT_NE(FloatingOption, nullptr);
+    ASSERT_NE(FloatingOptionLabel, nullptr);
+
+    ASSERT_TRUE((*ViewportScissorStart).HasMember("clipEscapeRootId"));
+    EXPECT_STREQ((*ViewportScissorStart)["clipEscapeRootId"].GetString(), "");
+    EXPECT_STREQ((*FloatingRoot)["clipEscapeRootId"].GetString(), "root.0:viewport.1:menu");
+    EXPECT_STREQ((*FloatingPanel)["clipEscapeRootId"].GetString(), "root.0:viewport.1:menu");
+    EXPECT_STREQ((*FloatingPanelScissorStart)["clipEscapeRootId"].GetString(), "root.0:viewport.1:menu");
+    EXPECT_STREQ((*FloatingOption)["clipEscapeRootId"].GetString(), "root.0:viewport.1:menu");
+    EXPECT_STREQ((*FloatingOptionLabel)["clipEscapeRootId"].GetString(), "root.0:viewport.1:menu");
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();

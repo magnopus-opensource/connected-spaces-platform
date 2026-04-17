@@ -87,8 +87,8 @@ if not Tests then
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
                 "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory   
-                "-sPROXY_TO_PTHREAD",
-                "-sSTACK_SIZE=5MB",
+                "-sPROXY_TO_PTHREAD=1",
+                "-sSTACK_SIZE=20MB",
                 "-sEXIT_RUNTIME",
                 "-sEXPORTED_RUNTIME_METHODS=[" ..
                     "'ccall'," ..

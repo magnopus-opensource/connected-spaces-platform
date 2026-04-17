@@ -17,6 +17,7 @@ fi
 read -r emsdk_version < emsdk_version.txt
 export emsdk_version=$emsdk_version;
 cd ../..
+source ./venv/bin/activate
 rm Makefile
 
 if [ -z "$1" ]

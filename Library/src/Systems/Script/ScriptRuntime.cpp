@@ -47,6 +47,11 @@ ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
     : TheScriptSystem(InScriptSystem)
     , Runtime(new qjs::Runtime())
 {
+#ifdef CSP_WASM
+    // Match the NGX runtime stack increase so legacy script execution does not
+    // trip the default QuickJS 256 KB stack limit in WASM.
+    JS_SetMaxStackSize(Runtime->rt, 4 * 1024 * 1024);
+#endif
 }
 
 ScriptRuntime::~ScriptRuntime()

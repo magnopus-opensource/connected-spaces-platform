@@ -31,9 +31,14 @@ enum class CodePropertyType
     Integer = 2,
     Float = 3,
     String = 4,
-    EntityQuery = 5,
-    ModelAsset = 6,
-    ImageAsset = 7,
+    Vector2 = 5,
+    Vector3 = 6,
+    Vector4 = 7,
+    Quaternion = 8,
+    Color = 9,
+    EntityQuery = 10,
+    ModelAsset = 11,
+    ImageAsset = 12,
     Num
 };
 
@@ -50,9 +55,29 @@ public:
     static CodeAttribute FromInteger(int64_t Value);
     static CodeAttribute FromFloat(float Value);
     static CodeAttribute FromString(const csp::common::String& Value);
+    static CodeAttribute FromVector2(const csp::common::Vector2& Value);
+    static CodeAttribute FromVector3(const csp::common::Vector3& Value);
+    static CodeAttribute FromVector4(const csp::common::Vector4& Value);
+    static CodeAttribute FromQuaternion(const csp::common::Vector4& Value);
+    static CodeAttribute FromColor(const csp::common::Vector3& Value);
     static CodeAttribute FromEntityQuery(const EntityQueryValueType& Value);
     static CodeAttribute FromModelAsset(const ModelAssetValueType& Value);
     static CodeAttribute FromImageAsset(const ImageAssetValueType& Value);
+
+    const csp::common::Vector2& GetVector2Value() const;
+    void SetVector2Value(const csp::common::Vector2& Value);
+
+    const csp::common::Vector3& GetVector3Value() const;
+    void SetVector3Value(const csp::common::Vector3& Value);
+
+    const csp::common::Vector4& GetVector4Value() const;
+    void SetVector4Value(const csp::common::Vector4& Value);
+
+    const csp::common::Vector4& GetQuaternionValue() const;
+    void SetQuaternionValue(const csp::common::Vector4& Value);
+
+    const csp::common::Vector3& GetColorValue() const;
+    void SetColorValue(const csp::common::Vector3& Value);
 
     static bool IsValidEntityQueryValue(const EntityQueryValueType& Value);
     const EntityQueryValueType& GetEntityQueryValue() const;
@@ -77,6 +102,11 @@ public:
     int64_t IntegerValue;
     float FloatValue;
     csp::common::String StringValue;
+    csp::common::Vector2 Vector2Value;
+    csp::common::Vector3 Vector3Value;
+    csp::common::Vector4 Vector4Value;
+    csp::common::Vector4 QuaternionValue;
+    csp::common::Vector3 ColorValue;
     EntityQueryValueType EntityQueryValue;
     ModelAssetValueType ModelAssetValue;
     ImageAssetValueType ImageAssetValue;

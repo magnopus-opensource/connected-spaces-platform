@@ -156,10 +156,17 @@ struct UINode
     std::string Text;
     std::string AssetCollectionId;
     std::string ImageAssetId;
-    std::string HandlerId;
+    std::string OnClickHandlerId;
+    std::string OnHoverHandlerId;
+    std::string OnPointerEnterHandlerId;
+    std::string OnPointerLeaveHandlerId;
+    std::string OnPointerDownHandlerId;
+    std::string OnPointerUpHandlerId;
+    std::string OnDragHandlerId;
     std::string TargetEntityId;
     csp::common::Vector3 WorldOffset;
     std::string BillboardMode;
+    std::string Overflow;
     std::vector<UINode> Children;
 
     UINode()
@@ -186,6 +193,7 @@ struct UINode
         , TextAlign("left")
         , AspectRatio(0.0f)
         , WorldOffset(0.0f, 0.0f, 0.0f)
+        , Overflow("")
     {
     }
 };
@@ -194,6 +202,8 @@ struct UIDrawable
 {
     std::string Id;
     std::string Type;
+    std::string Overflow;
+    std::string ClipEscapeRootId;
     std::string Surface;
     std::string TargetEntityId;
     float SurfaceWidth;
@@ -213,11 +223,19 @@ struct UIDrawable
     std::string FontWeight;
     std::string AssetCollectionId;
     std::string ImageAssetId;
-    std::string HandlerId;
+    std::string OnClickHandlerId;
+    std::string OnHoverHandlerId;
+    std::string OnPointerEnterHandlerId;
+    std::string OnPointerLeaveHandlerId;
+    std::string OnPointerDownHandlerId;
+    std::string OnPointerUpHandlerId;
+    std::string OnDragHandlerId;
     bool Enabled;
 
     UIDrawable()
-        : SurfaceWidth(0.0f)
+        : Overflow("")
+        , ClipEscapeRootId("")
+        , SurfaceWidth(0.0f)
         , SurfaceHeight(0.0f)
         , WorldOffset(0.0f, 0.0f, 0.0f)
         , X(0.0f)
@@ -258,6 +276,8 @@ struct ClayNodeMetadata
     std::string Id;
     std::string EntityId;
     std::string Surface;
+    std::string Overflow;
+    std::string ClipEscapeRootId;
     std::string TargetEntityId;
     float SurfaceWidth;
     float SurfaceHeight;
@@ -273,11 +293,20 @@ struct ClayNodeMetadata
     std::string FontWeight;
     std::string AssetCollectionId;
     std::string ImageAssetId;
-    std::string HandlerId;
+    std::string OnClickHandlerId;
+    std::string OnHoverHandlerId;
+    std::string OnPointerEnterHandlerId;
+    std::string OnPointerLeaveHandlerId;
+    std::string OnPointerDownHandlerId;
+    std::string OnPointerUpHandlerId;
+    std::string OnDragHandlerId;
     bool Enabled;
+    bool IsButtonLabel;
 
     ClayNodeMetadata()
-        : SurfaceWidth(0.0f)
+        : Overflow("")
+        , ClipEscapeRootId("")
+        , SurfaceWidth(0.0f)
         , SurfaceHeight(0.0f)
         , WorldOffset(0.0f, 0.0f, 0.0f)
         , WidgetKind(UIWidgetKind::Column)
@@ -285,6 +314,7 @@ struct ClayNodeMetadata
         , Opacity(1.0f)
         , FontSize(16.0f)
         , Enabled(true)
+        , IsButtonLabel(false)
     {
     }
 };
@@ -675,6 +705,19 @@ std::string WidgetKindToString(UIWidgetKind Kind)
     }
 }
 
+std::string BuildScissorDrawableId(const std::string& BaseId, Clay_RenderCommandType CommandType)
+{
+    switch (CommandType)
+    {
+    case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START:
+        return BaseId + ".!scissor_start";
+    case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END:
+        return BaseId + ".~scissor_end";
+    default:
+        return BaseId;
+    }
+}
+
 const char* RenderCommandTypeToString(Clay_RenderCommandType CommandType)
 {
     switch (CommandType)
@@ -703,6 +746,8 @@ const char* RenderCommandTypeToString(Clay_RenderCommandType CommandType)
 bool DrawablesEqual(const UIDrawable& Left, const UIDrawable& Right)
 {
     return Left.Type == Right.Type
+        && Left.Overflow == Right.Overflow
+        && Left.ClipEscapeRootId == Right.ClipEscapeRootId
         && Left.Surface == Right.Surface
         && Left.TargetEntityId == Right.TargetEntityId
         && std::fabs(Left.SurfaceWidth - Right.SurfaceWidth) < 0.01f
@@ -730,7 +775,13 @@ bool DrawablesEqual(const UIDrawable& Left, const UIDrawable& Right)
         && Left.FontWeight == Right.FontWeight
         && Left.AssetCollectionId == Right.AssetCollectionId
         && Left.ImageAssetId == Right.ImageAssetId
-        && Left.HandlerId == Right.HandlerId
+        && Left.OnClickHandlerId == Right.OnClickHandlerId
+        && Left.OnHoverHandlerId == Right.OnHoverHandlerId
+        && Left.OnPointerEnterHandlerId == Right.OnPointerEnterHandlerId
+        && Left.OnPointerLeaveHandlerId == Right.OnPointerLeaveHandlerId
+        && Left.OnPointerDownHandlerId == Right.OnPointerDownHandlerId
+        && Left.OnPointerUpHandlerId == Right.OnPointerUpHandlerId
+        && Left.OnDragHandlerId == Right.OnDragHandlerId
         && Left.Enabled == Right.Enabled;
 }
 
@@ -784,6 +835,7 @@ struct NgxUIRuntime::Impl
     TextMeasureCallback MeasureCallback;
     bool HasWarnedFallbackMeasurement;
     bool HasWarnedWasmCallbackLimitation;
+    bool DebugModeEnabled = false;
     std::vector<char> ClayArenaMemory;
     Clay_Context* ClayContext;
     std::map<std::string, UIEntityState> Entities;
@@ -1102,10 +1154,17 @@ struct NgxUIRuntime::Impl
             {
                 OutNode.ImageAssetId = ParseStringOrDefault(Props["imageAssetId"], "");
             }
-            if (Props.HasMember("onClickHandlerId"))
-            {
-                OutNode.HandlerId = ParseStringOrDefault(Props["onClickHandlerId"], "");
-            }
+            #define PARSE_HANDLER(MemberName, JsonName)             if (Props.HasMember(#JsonName)) { OutNode.MemberName = ParseStringOrDefault(Props[#JsonName], ""); }
+
+            PARSE_HANDLER(OnClickHandlerId, onClickHandlerId)
+            PARSE_HANDLER(OnHoverHandlerId, onHoverHandlerId)
+            PARSE_HANDLER(OnPointerEnterHandlerId, onPointerEnterHandlerId)
+            PARSE_HANDLER(OnPointerLeaveHandlerId, onPointerLeaveHandlerId)
+            PARSE_HANDLER(OnPointerDownHandlerId, onPointerDownHandlerId)
+            PARSE_HANDLER(OnPointerUpHandlerId, onPointerUpHandlerId)
+            PARSE_HANDLER(OnDragHandlerId, onDragHandlerId)
+
+#undef PARSE_HANDLER
             if (Props.HasMember("targetEntityId"))
             {
                 OutNode.TargetEntityId = ParseStringOrDefault(Props["targetEntityId"], EntityId);
@@ -1181,6 +1240,10 @@ struct NgxUIRuntime::Impl
             if (Props.HasMember("pointerPassthrough"))
             {
                 OutNode.FloatingPointerPassthrough = ParseBoolOrDefault(Props["pointerPassthrough"], OutNode.FloatingPointerPassthrough);
+            }
+            if (Props.HasMember("overflow"))
+            {
+                OutNode.Overflow = ParseStringOrDefault(Props["overflow"], "");
             }
         }
 
@@ -1321,13 +1384,15 @@ struct NgxUIRuntime::Impl
     }
 
     ClayNodeMetadata* CreateMetadata(std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage, const std::string& EntityId, const UINode& Node,
-        const std::string& DrawableId, UIWidgetKind WidgetKindOverride)
+        const std::string& DrawableId, UIWidgetKind WidgetKindOverride, const std::string& ClipEscapeRootId)
     {
         MetadataStorage.emplace_back(std::make_unique<ClayNodeMetadata>());
         ClayNodeMetadata& Meta = *MetadataStorage.back();
         Meta.Id = DrawableId;
         Meta.EntityId = EntityId;
         Meta.Surface = Node.Surface == UISurfaceKind::World ? "world" : "screen";
+        Meta.Overflow = Node.Overflow;
+        Meta.ClipEscapeRootId = ClipEscapeRootId;
         Meta.TargetEntityId = Node.TargetEntityId;
         Meta.WorldOffset = Node.WorldOffset;
         Meta.BillboardMode = Node.BillboardMode;
@@ -1341,7 +1406,13 @@ struct NgxUIRuntime::Impl
         Meta.FontWeight = Node.FontWeight;
         Meta.AssetCollectionId = Node.AssetCollectionId;
         Meta.ImageAssetId = Node.ImageAssetId;
-        Meta.HandlerId = Node.HandlerId;
+        Meta.OnClickHandlerId = Node.OnClickHandlerId;
+        Meta.OnHoverHandlerId = Node.OnHoverHandlerId;
+        Meta.OnPointerEnterHandlerId = Node.OnPointerEnterHandlerId;
+        Meta.OnPointerLeaveHandlerId = Node.OnPointerLeaveHandlerId;
+        Meta.OnPointerDownHandlerId = Node.OnPointerDownHandlerId;
+        Meta.OnPointerUpHandlerId = Node.OnPointerUpHandlerId;
+        Meta.OnDragHandlerId = Node.OnDragHandlerId;
         Meta.Enabled = Node.Enabled;
         return &Meta;
     }
@@ -1366,28 +1437,40 @@ struct NgxUIRuntime::Impl
 
     void EmitButtonLabel(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
         std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage,
-        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage)
+        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage, const std::string& ClipEscapeRootId)
     {
         UINode LabelNode = Node;
-        LabelNode.HandlerId.clear();
+        LabelNode.OnClickHandlerId.clear();
+        LabelNode.OnHoverHandlerId.clear();
+        LabelNode.OnPointerEnterHandlerId.clear();
+        LabelNode.OnPointerLeaveHandlerId.clear();
+        LabelNode.OnPointerDownHandlerId.clear();
+        LabelNode.OnPointerUpHandlerId.clear();
+        LabelNode.OnDragHandlerId.clear();
         LabelNode.Enabled = false;
-        ClayNodeMetadata* Metadata = CreateMetadata(MetadataStorage, EntityId, LabelNode, Node.Id + "__label", UIWidgetKind::Text);
+        ClayNodeMetadata* Metadata
+            = CreateMetadata(MetadataStorage, EntityId, LabelNode, Node.Id + "__label", UIWidgetKind::Text, ClipEscapeRootId);
+        Metadata->IsButtonLabel = true;
         Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, TextUserDataStorage, LabelNode, Metadata);
         Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
     }
 
     void EmitNodeToClay(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
         std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage,
-        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage)
+        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage, const std::string& InheritedClipEscapeRootId = "")
     {
         if (!Node.Visible)
         {
             return;
         }
 
+        const std::string ClipEscapeRootId
+            = !InheritedClipEscapeRootId.empty() ? InheritedClipEscapeRootId
+            : (Node.Kind == UIWidgetKind::Floating && !Node.FloatingClipToParent ? Node.Id : "");
+
         if (Node.Kind == UIWidgetKind::Text)
         {
-            ClayNodeMetadata* Metadata = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind);
+            ClayNodeMetadata* Metadata = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind, ClipEscapeRootId);
             Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, TextUserDataStorage, Node, Metadata);
             Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
             return;
@@ -1417,7 +1500,7 @@ struct NgxUIRuntime::Impl
         const bool HasCustom = Node.Kind == UIWidgetKind::Button;
         if (HasCustom)
         {
-            CustomConfig.customData = const_cast<char*>(Node.HandlerId.c_str());
+            CustomConfig.customData = const_cast<char*>(Node.OnClickHandlerId.c_str()); // Note: only used by Clay internally, client uses hits.
         }
 
         Clay_FloatingElementConfig FloatingConfig = CLAY__DEFAULT_STRUCT;
@@ -1457,20 +1540,34 @@ struct NgxUIRuntime::Impl
         {
             Declaration.floating = FloatingConfig;
         }
-        Declaration.userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind);
+
+        const bool bIsOverflowHidden = Node.Overflow == "hidden";
+        const bool bIsScrollX = Node.Overflow == "scrollX" || Node.Overflow == "scrollXY";
+        const bool bIsScrollY = Node.Overflow == "scrollY" || Node.Overflow == "scrollXY";
+
+        if (bIsOverflowHidden || bIsScrollX || bIsScrollY)
+        {
+            Clay_ClipElementConfig ClipConfig;
+            std::memset(&ClipConfig, 0, sizeof(ClipConfig));
+            ClipConfig.horizontal = bIsOverflowHidden || bIsScrollX;
+            ClipConfig.vertical = bIsOverflowHidden || bIsScrollY;
+            Declaration.clip = ClipConfig;
+        }
+
+        Declaration.userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind, ClipEscapeRootId);
 
         Clay__OpenElementWithId(Clay_GetElementId(ToClayString(Node.Id)));
         Clay__ConfigureOpenElement(Declaration);
 
         if (Node.Kind == UIWidgetKind::Button)
         {
-            EmitButtonLabel(EntityId, Node, MetadataStorage, TextConfigStorage, TextUserDataStorage);
+            EmitButtonLabel(EntityId, Node, MetadataStorage, TextConfigStorage, TextUserDataStorage, ClipEscapeRootId);
         }
         else
         {
             for (size_t Index = 0; Index < Node.Children.size(); ++Index)
             {
-                EmitNodeToClay(EntityId, Node.Children[Index], MetadataStorage, TextConfigStorage, TextUserDataStorage);
+                EmitNodeToClay(EntityId, Node.Children[Index], MetadataStorage, TextConfigStorage, TextUserDataStorage, ClipEscapeRootId);
             }
         }
 
@@ -1562,9 +1659,16 @@ struct NgxUIRuntime::Impl
                 continue;
             }
 
+            if (Meta.IsButtonLabel && Command->commandType == CLAY_RENDER_COMMAND_TYPE_TEXT)
+            {
+                continue;
+            }
+
             UIDrawable Drawable;
             Drawable.Id = Meta.Id;
             Drawable.Type = WidgetKindToString(Meta.WidgetKind);
+            Drawable.Overflow = Meta.Overflow;
+            Drawable.ClipEscapeRootId = Meta.ClipEscapeRootId;
             Drawable.Surface = Meta.Surface;
             Drawable.TargetEntityId = Meta.TargetEntityId;
             Drawable.SurfaceWidth = SurfaceWidth;
@@ -1584,16 +1688,46 @@ struct NgxUIRuntime::Impl
             Drawable.FontWeight = Meta.FontWeight;
             Drawable.AssetCollectionId = Meta.AssetCollectionId;
             Drawable.ImageAssetId = Meta.ImageAssetId;
-            Drawable.HandlerId = Meta.HandlerId;
+            Drawable.OnClickHandlerId = Meta.OnClickHandlerId;
+            Drawable.OnHoverHandlerId = Meta.OnHoverHandlerId;
+            Drawable.OnPointerEnterHandlerId = Meta.OnPointerEnterHandlerId;
+            Drawable.OnPointerLeaveHandlerId = Meta.OnPointerLeaveHandlerId;
+            Drawable.OnPointerDownHandlerId = Meta.OnPointerDownHandlerId;
+            Drawable.OnPointerUpHandlerId = Meta.OnPointerUpHandlerId;
+            Drawable.OnDragHandlerId = Meta.OnDragHandlerId;
             Drawable.Enabled = Meta.Enabled;
 
             if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_CUSTOM)
             {
                 Drawable.Type = Meta.WidgetKind == UIWidgetKind::Button ? "button" : WidgetKindToString(Meta.WidgetKind);
-                if (Meta.WidgetKind == UIWidgetKind::Button)
-                {
-                    Drawable.Text.clear();
-                }
+            }
+            else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
+            {
+                Drawable.Id = BuildScissorDrawableId(Meta.Id, Command->commandType);
+                Drawable.Type = "scissor_start";
+                Drawable.Text.clear();
+                Drawable.OnClickHandlerId.clear();
+                Drawable.OnHoverHandlerId.clear();
+                Drawable.OnPointerEnterHandlerId.clear();
+                Drawable.OnPointerLeaveHandlerId.clear();
+                Drawable.OnPointerDownHandlerId.clear();
+                Drawable.OnPointerUpHandlerId.clear();
+                Drawable.OnDragHandlerId.clear();
+                Drawable.Enabled = false;
+            }
+            else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_END)
+            {
+                Drawable.Id = BuildScissorDrawableId(Meta.Id, Command->commandType);
+                Drawable.Type = "scissor_end";
+                Drawable.Text.clear();
+                Drawable.OnClickHandlerId.clear();
+                Drawable.OnHoverHandlerId.clear();
+                Drawable.OnPointerEnterHandlerId.clear();
+                Drawable.OnPointerLeaveHandlerId.clear();
+                Drawable.OnPointerDownHandlerId.clear();
+                Drawable.OnPointerUpHandlerId.clear();
+                Drawable.OnDragHandlerId.clear();
+                Drawable.Enabled = false;
             }
             else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_TEXT)
             {
@@ -1700,6 +1834,8 @@ struct NgxUIRuntime::Impl
         rapidjson::Value Value(rapidjson::kObjectType);
         Value.AddMember("id", rapidjson::Value(Drawable.Id.c_str(), Allocator), Allocator);
         Value.AddMember("type", rapidjson::Value(Drawable.Type.c_str(), Allocator), Allocator);
+        Value.AddMember("overflow", rapidjson::Value(Drawable.Overflow.c_str(), Allocator), Allocator);
+        Value.AddMember("clipEscapeRootId", rapidjson::Value(Drawable.ClipEscapeRootId.c_str(), Allocator), Allocator);
         Value.AddMember("surface", rapidjson::Value(Drawable.Surface.c_str(), Allocator), Allocator);
         Value.AddMember("targetEntityId", rapidjson::Value(Drawable.TargetEntityId.c_str(), Allocator), Allocator);
         Value.AddMember("surfaceWidth", Drawable.SurfaceWidth, Allocator);
@@ -1727,7 +1863,14 @@ struct NgxUIRuntime::Impl
         Value.AddMember("fontWeight", rapidjson::Value(Drawable.FontWeight.c_str(), Allocator), Allocator);
         Value.AddMember("assetCollectionId", rapidjson::Value(Drawable.AssetCollectionId.c_str(), Allocator), Allocator);
         Value.AddMember("imageAssetId", rapidjson::Value(Drawable.ImageAssetId.c_str(), Allocator), Allocator);
-        Value.AddMember("handlerId", rapidjson::Value(Drawable.HandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("handlerId", rapidjson::Value(Drawable.OnClickHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onClickHandlerId", rapidjson::Value(Drawable.OnClickHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onHoverHandlerId", rapidjson::Value(Drawable.OnHoverHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onPointerEnterHandlerId", rapidjson::Value(Drawable.OnPointerEnterHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onPointerLeaveHandlerId", rapidjson::Value(Drawable.OnPointerLeaveHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onPointerDownHandlerId", rapidjson::Value(Drawable.OnPointerDownHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onPointerUpHandlerId", rapidjson::Value(Drawable.OnPointerUpHandlerId.c_str(), Allocator), Allocator);
+        Value.AddMember("onDragHandlerId", rapidjson::Value(Drawable.OnDragHandlerId.c_str(), Allocator), Allocator);
         Value.AddMember("enabled", Drawable.Enabled, Allocator);
         return Value;
     }
@@ -1914,6 +2057,17 @@ std::string NgxUIRuntime::DrainPendingUpdatesJson()
     rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
     Document.Accept(Writer);
     return Buffer.GetString();
+}
+
+void NgxUIRuntime::SetDebugModeEnabled(bool bEnabled)
+{
+    Pimpl->DebugModeEnabled = bEnabled;
+    Clay_SetDebugModeEnabled(bEnabled);
+}
+
+bool NgxUIRuntime::IsDebugModeEnabled() const
+{
+    return Pimpl->DebugModeEnabled;
 }
 
 std::string NgxUIRuntime::GetDrawablesJson(const std::string& EntityId) const
