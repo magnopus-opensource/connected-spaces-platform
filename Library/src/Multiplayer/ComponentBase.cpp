@@ -61,13 +61,7 @@ ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSyst
     }
 }
 
-ComponentBase::~ComponentBase()
-{
-    if (ScriptInterface)
-    {
-        delete (ScriptInterface);
-    }
-}
+ComponentBase::~ComponentBase() { }
 
 uint16_t ComponentBase::GetId() const { return Id; }
 
@@ -293,9 +287,9 @@ SpaceEntity* ComponentBase::GetParent() { return Parent; }
 
 void ComponentBase::OnLocalDelete() { }
 
-void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface) { ScriptInterface = InScriptInterface; }
+void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface) { ScriptInterface.reset(InScriptInterface); }
 
-ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInterface; }
+ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInterface.get(); }
 
 void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message)
 {
