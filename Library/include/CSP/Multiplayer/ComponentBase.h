@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 
 #include <functional>
+#include <memory>
 
 CSP_START_IGNORE
 #ifdef CSP_TESTS
@@ -208,7 +209,7 @@ protected:
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> Properties;
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyProperties;
 
-    ComponentScriptInterface* ScriptInterface;
+    std::unique_ptr<ComponentScriptInterface> ScriptInterface;
 
     // May be null, should check before use.
     csp::common::LogSystem* LogSystem = nullptr;
