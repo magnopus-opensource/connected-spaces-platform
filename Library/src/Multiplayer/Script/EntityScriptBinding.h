@@ -17,6 +17,8 @@
 
 #include "CSP/Common/Interfaces/IScriptBinding.h"
 
+#include <memory>
+
 namespace csp::common
 {
 class LogSystem;
@@ -31,6 +33,8 @@ class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
     EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem);
+    ~EntityScriptBinding();
+
     void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
 
     static EntityScriptBinding* BindEntitySystem(
@@ -38,6 +42,9 @@ public:
     static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
+    class SchemaCacheImpl;
+    std::unique_ptr<SchemaCacheImpl> SchemaCache;
+
     csp::common::IRealtimeEngine* EntitySystem;
     csp::common::LogSystem& LogSystem;
 };

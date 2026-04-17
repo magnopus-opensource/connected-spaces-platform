@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
 #include <memory>
 
@@ -116,7 +115,6 @@ const ComponentSchema& AnimatedModelSpaceComponent::GetSchema() { return Schema;
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new AnimatedModelSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */

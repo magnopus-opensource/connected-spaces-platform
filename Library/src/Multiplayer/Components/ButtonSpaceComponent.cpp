@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -83,7 +82,6 @@ const ComponentSchema& ButtonSpaceComponent::GetSchema() { return Schema; }
 ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ButtonSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ButtonSpaceComponent::GetLabelText() const

@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -68,7 +67,6 @@ const ComponentSchema& PortalSpaceComponent::GetSchema() { return Schema; }
 PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new PortalSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& PortalSpaceComponent::GetSpaceId() const { return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId)); }

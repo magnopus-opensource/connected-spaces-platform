@@ -21,32 +21,23 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
+
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
+
+#include <fmt/format.h>
+
+#include <unordered_map>
+#include <utility>
 
 namespace csp::multiplayer
 {
@@ -82,6 +73,106 @@ namespace
         LockFuncValueT _LockFunc;
         UnlockFuncValueT _UnlockFunc;
     };
+
+    // Creates a JS prototype for a specific component type, baking in specialized accessors
+    // that map directly to the correctly typed proxy property.
+    template <typename ScriptInterfaceType = ComponentScriptInterface>
+    qjs::Value MakeComponentPrototype(qjs::Context& Context, const ComponentSchema& Schema)
+    {
+        static_assert(std::is_base_of_v<ScriptInterfaceType, ComponentScriptInterface>);
+
+        const auto ClassId = qjs::js_traits<std::shared_ptr<ScriptInterfaceType>>::QJSClassId;
+        const auto BasePrototype = qjs::Value { Context.ctx, JS_GetClassProto(Context.ctx, ClassId) };
+        const auto SchemaDerivedPrototype = qjs::Value { Context.ctx, JS_NewObjectProto(Context.ctx, BasePrototype.v) };
+
+        auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
+        {
+            using T = std::decay_t<decltype(V)>;
+
+            if constexpr (IsScriptableV<T>)
+            {
+                const auto Getter = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int Magic) -> JSValue
+                {
+                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
+                    if (!Self)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto Result = (*Self)->GetProperty(static_cast<ComponentProperty::KeyType>(Magic));
+                    if (!Result)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto* CheckedResult = std::get_if<ScriptTypeT<T>>(&*Result);
+                    if (CheckedResult == nullptr)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    return qjs::js_traits<ScriptTypeT<T>>::wrap(Context, std::move(*CheckedResult));
+                };
+
+                const auto Setter = [](JSContext* Context, JSValueConst This, int ArgC, JSValueConst* ArgV, int Magic) -> JSValue
+                {
+                    if (ArgC <= 0)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
+                    if (!Self)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto Result = qjs::js_traits<std::optional<ScriptTypeT<T>>>::unwrap(Context, ArgV[0]);
+                    if (!Result)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    (*Self)->SetProperty(static_cast<ComponentProperty::KeyType>(Magic), std::move(*Result));
+
+                    return JS_UNDEFINED;
+                };
+
+                return std::make_pair(Getter, Setter);
+            }
+            else
+            {
+                return std::nullopt;
+            }
+        };
+
+        for (const auto& Property : Schema.Properties)
+        {
+            if (!IsScriptable(Property))
+            {
+                continue;
+            }
+
+            auto MaybeAccessors = std::visit(CreateAccessors, Property.DefaultValue.GetValue());
+            if (!MaybeAccessors)
+            {
+                continue;
+            }
+
+            const auto [Getter, Setter] = *MaybeAccessors;
+
+            const auto Magic = static_cast<int>(Property.Key);
+            const auto PropertyName = JS_NewAtom(Context.ctx, Property.Name.c_str());
+
+            JS_DefinePropertyGetSet(Context.ctx, SchemaDerivedPrototype.v, PropertyName,
+                JS_NewCFunctionMagic(Context.ctx, Getter, "get", 0, JS_CFUNC_generic_magic, Magic),
+                JS_NewCFunctionMagic(Context.ctx, Setter, "set", 1, JS_CFUNC_generic_magic, Magic), JS_PROP_C_W_E);
+
+            JS_FreeAtom(Context.ctx, PropertyName);
+        }
+
+        return SchemaDerivedPrototype;
+    }
 }
 
 class EntitySystemScriptInterface
@@ -91,6 +182,8 @@ public:
         : EntitySystem(InEntitySystem)
     {
     }
+
+    ~EntitySystemScriptInterface() { }
 
     std::vector<uint64_t> GetEntityIds()
     {
@@ -260,11 +353,34 @@ void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSys
     LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
+class EntityScriptBinding::SchemaCacheImpl
+{
+public:
+    qjs::Value GetProto(qjs::Context& Context, const ComponentSchema& Schema) { return GetOrCreate(Context, Schema); }
+
+private:
+    const qjs::Value& GetOrCreate(qjs::Context& Context, const ComponentSchema& Schema)
+    {
+        const auto It = Cache.find(Schema.TypeId);
+        if (It != Cache.end())
+        {
+            return It->second;
+        }
+
+        return Cache.emplace(Schema.TypeId, MakeComponentPrototype(Context, Schema)).first->second;
+    }
+
+    std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> Cache;
+};
+
 EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
-    : EntitySystem(InEntitySystem)
+    : SchemaCache(std::make_unique<SchemaCacheImpl>())
+    , EntitySystem(InEntitySystem)
     , LogSystem(LogSystem)
 {
 }
+
+EntityScriptBinding::~EntityScriptBinding() = default;
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
     csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
@@ -287,56 +403,6 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, cs
 
 void BindComponents(qjs::Context::Module* Module)
 {
-    Module->class_<ButtonSpaceComponentScriptInterface>("ButtonSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ButtonSpaceComponent, LabelText, "labelText")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IconAssetId, "iconAssetId")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, AssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsEnabled, "isEnabled");
-
-    Module->class_<LightSpaceComponentScriptInterface>("LightSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(LightSpaceComponent, LightType, "lightType")
-        .PROPERTY_GET_SET(LightSpaceComponent, Intensity, "Intensity")
-        .PROPERTY_GET_SET(LightSpaceComponent, Range, "range")
-        .PROPERTY_GET_SET(LightSpaceComponent, InnerConeAngle, "innerConeAngle")
-        .PROPERTY_GET_SET(LightSpaceComponent, OuterConeAngle, "outerConeAngle")
-        .PROPERTY_GET_SET(LightSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(LightSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(LightSpaceComponent, Color, "color")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, LightCookieAssetId, "cookieAssetId")
-        .PROPERTY_GET_SET(LightSpaceComponent, LightCookieType, "lightCookieType");
-
-    Module->class_<AnimatedModelSpaceComponentScriptInterface>("AnimatedModelSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetId, "modelAssetId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsLoopPlayback, "isLoopPlayback")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsPlaying, "isPlaying")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex");
-
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -363,58 +429,6 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, AudioType, "audioType")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume");
 
-    Module->class_<AvatarSpaceComponentScriptInterface>("AvatarSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarId, "avatarId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, UserId, "userId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, State, "state")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AgoraUserId, "agoraUserId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarUrl, "avatarUrl")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsHandIKEnabled, "isHandIKEnabled")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, TargetHandIKTargetLocation, "targetHandIKTargetLocation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, HandRotation, "handRotation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, HeadRotation, "headRotation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, WalkRunBlendPercentage, "walkRunBlendPercentage")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, TorsoTwistAlpha, "torsoTwistAlpha")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarPlayMode, "avatarPlayMode")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, LocomotionModel, "locomotionModel")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
-    Module->class_<ExternalLinkSpaceComponentScriptInterface>("ExternalLinkSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, LinkUrl, "linkUrl")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, DisplayText, "displayText")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
-    Module->class_<FogSpaceComponentScriptInterface>("FogSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(FogSpaceComponent, FogMode, "fogMode")
-        .PROPERTY_GET_SET(FogSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(FogSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(FogSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(FogSpaceComponent, StartDistance, "startDistance")
-        .PROPERTY_GET_SET(FogSpaceComponent, EndDistance, "endDistance")
-        .PROPERTY_GET_SET(FogSpaceComponent, Color, "color")
-        .PROPERTY_GET_SET(FogSpaceComponent, Density, "density")
-        .PROPERTY_GET_SET(FogSpaceComponent, HeightFalloff, "heightFalloff")
-        .PROPERTY_GET_SET(FogSpaceComponent, MaxOpacity, "maxOpacity")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -431,62 +445,6 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Aperture, "aperture")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsEnabled, "isEnabled")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
-
-    Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ImageSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(ImageSpaceComponent, ImageAssetId, "imageAssetId")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ImageSpaceComponent, BillboardMode, "billboardMode")
-        .PROPERTY_GET_SET(ImageSpaceComponent, DisplayMode, "displayMode")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsEmissive, "isEmissive")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
-    Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(TextSpaceComponent, Text, "text")
-        .PROPERTY_GET_SET(TextSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(TextSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(TextSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(TextSpaceComponent, TextColor, "textColor")
-        .PROPERTY_GET_SET(TextSpaceComponent, BackgroundColor, "backgroundColor")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsBackgroundVisible, "isBackgroundVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, Width, "width")
-        .PROPERTY_GET_SET(TextSpaceComponent, Height, "height")
-        .PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
-    Module->class_<StaticModelSpaceComponentScriptInterface>("StaticModelSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetId, "modelAssetId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual");
-
-    Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(PortalSpaceComponent, SpaceId, "spaceId")
-        .PROPERTY_GET_SET(PortalSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(PortalSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(PortalSpaceComponent, Radius, "radius");
 
     Module->class_<CustomSpaceComponentScriptInterface>("CustomSpaceComponent")
         .constructor<>()
@@ -506,18 +464,6 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
 
-    Module->class_<ConversationSpaceComponentScriptInterface>("ConversationSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ConversationSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, IsActive, "isActive")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Title, "title")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Resolved, "resolved")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraPosition, "conversationCameraPosition")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraRotation, "conversationCameraRotation");
-
     Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -531,37 +477,6 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AudioSpaceComponent, TimeSincePlay, "timeSincePlay")
         .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume");
 
-    Module->class_<ECommerceSpaceComponentScriptInterface>("ECommerceSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ECommerceSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ECommerceSpaceComponent, ProductId, "productId");
-
-    Module->class_<FiducialMarkerSpaceComponentScriptInterface>("FiducialMarkerSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, MarkerAssetId, "markerAssetId")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVirtualVisible, "isVirtualVisible");
-
-    Module->class_<GaussianSplatSpaceComponentScriptInterface>("GaussianSplatSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
-
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -573,29 +488,6 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
-
-    Module->class_<ScreenSharingSpaceComponentScriptInterface>("ScreenSharingSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, UserId, "userId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageCollectionId, "defaultImageCollectionId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageAssetId, "defaultImageAssetId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, AttenuationRadius, "attenuationRadius")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsShadowCaster, "isShadowCaster");
-
-    Module->class_<AIChatbotSpaceComponentScriptInterface>("AIChatbotSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Voice, "voice")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetCollectionId, "guardrailAssetCollectionId")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, VisualState, "visualState");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -605,44 +497,62 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
 
-    Module->class_<EntityScriptInterface>("Entity")
+    const auto RegisterDynamicComponentGetters = [this, Context, ContextId](auto&& ClassRegistrar) -> decltype(auto)
+    {
+        for (const auto& [TypeId, Schema] : EntitySystem->GetComponentSchemaRegistry()->GetUnderlying())
+        {
+            if (IsScriptable(Schema))
+            {
+                const auto ComponentType = static_cast<csp::multiplayer::ComponentType>(TypeId);
+
+                const auto& ComponentScriptName = Schema.Name;
+                const auto GetterName = fmt::format("get{}Components", ComponentScriptName.c_str());
+
+                ClassRegistrar.fun(GetterName.c_str(),
+                    [this, ComponentType, Schema = Schema, Context, ContextId]() -> std::vector<qjs::Value>
+                    {
+                        auto* MaybeEntity = EntitySystem->FindSpaceEntityById(ContextId);
+                        if (!MaybeEntity)
+                        {
+                            return {};
+                        }
+
+                        auto& Entity = *MaybeEntity->GetScriptInterface();
+                        auto Wrapped = std::vector<qjs::Value>();
+
+                        for (auto* Component : Entity.GetComponentsOfType<ComponentScriptInterface>(ComponentType))
+                        {
+                            const auto Proto = SchemaCache->GetProto(*Context, Schema);
+
+                            auto Instance = qjs::js_traits<ComponentScriptInterface*>::wrap(Context->ctx, Component);
+                            JS_SetPrototype(Context->ctx, Instance, Proto.v); // Overwrite the prototype
+
+                            Wrapped.push_back({ Context->ctx, std::move(Instance) });
+                        }
+
+                        return Wrapped;
+                    });
+            }
+        }
+
+        return std::forward<decltype(ClassRegistrar)>(ClassRegistrar);
+    };
+
+    RegisterDynamicComponentGetters(Module->class_<EntityScriptInterface>("Entity"))
         .constructor<>()
         .fun<&EntityScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&EntityScriptInterface::SubscribeToMessage>("subscribeToMessage")
         .fun<&EntityScriptInterface::PostMessageToScript>("postMessage")
         .fun<&EntityScriptInterface::ClaimScriptOwnership>("claimScriptOwnership")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>>(
             "getVideoPlayerComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>>(
-            "getAnimatedModelComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AvatarSpaceComponentScriptInterface, ComponentType::AvatarData>>("getAvatarComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>>(
-            "getExternalLinkComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>>(
-            "getStaticModelComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ImageSpaceComponentScriptInterface, ComponentType::Image>>("getImageComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<CustomSpaceComponentScriptInterface, ComponentType::Custom>>("getCustomComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<PortalSpaceComponentScriptInterface, ComponentType::Portal>>("getPortalComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ConversationSpaceComponentScriptInterface, ComponentType::Conversation>>(
-            "getConversationComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>>(
             "getCinematicCameraComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
-            "getFiducialMarkerComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
-            "getGaussianSplatComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ScreenSharingSpaceComponentScriptInterface, ComponentType::ScreenSharing>>(
-            "getScreenSharingComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AIChatbotSpaceComponentScriptInterface, ComponentType::AIChatbot>>("getAIChatbotComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
         .property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")

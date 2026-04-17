@@ -15,10 +15,12 @@
  */
 #pragma once
 
-#include "CSP/CSPCommon.h"
 #include "Multiplayer/Script/ComponentScriptMacros.h"
 
+#include <cstdint>
+#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace csp::multiplayer
@@ -35,6 +37,14 @@ public:
     using Vector3 = std::vector<float>;
     using Vector4 = std::vector<float>;
 
+    using Value = std::variant<
+        bool,
+        float,
+        int64_t,
+        std::string,
+        std::vector<float>
+    >;
+
     ComponentScriptInterface(ComponentBase* InComponent = nullptr);
     virtual ~ComponentScriptInterface() = default;
 
@@ -49,6 +59,9 @@ public:
 
     void SendPropertyUpdate();
 
+    std::optional<Value> GetProperty(uint16_t Key) const;
+    void SetProperty(uint16_t Key, Value);
+    
 protected:
     ComponentBase* Component;
 };

@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -44,7 +43,6 @@ const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
 ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ECommerceSpaceComponentScriptInterface(this));
 }
 
 /* IPositionComponent */

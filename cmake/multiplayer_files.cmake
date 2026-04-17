@@ -121,29 +121,13 @@ set(CSP_MULTIPLAYER_SOURCES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.cpp
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AIChatbotComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/FogSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ImageSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/LightSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/PortalSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/SplineSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/TextSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.cpp
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRClient.cpp
@@ -181,29 +165,12 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ScriptHelpers.h
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AIChatbotComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/FogSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/LightSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/TextSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/ISignalRConnection.h

@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -54,7 +53,6 @@ const ComponentSchema& AIChatbotSpaceComponent::GetSchema() { return Schema; }
 csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new AIChatbotSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AIChatbotSpaceComponent::GetVoice() const

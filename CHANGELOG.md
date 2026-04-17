@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🍰 🙌 New Features
 
+- [OF-1849] feat: Bind components created w/ Schemas into scripts automatically. By @mag-lt.
+  Components defined in terms of a schema description will have their properties bound into the
+  scripting system automatically where possible. This moves a large portion of CSP's own components
+  over to this pattern, with only a handful still being registered manually due to some remaining
+  edge cases.
+
 - [OF-1830] feat: Inital integration of new build system by MAG-mv
   This adds the start of our new build system that uses conan and cmake.
   At this point, only support for local Windows and Mac builds has been added, and had only been tested on 1 machine.
