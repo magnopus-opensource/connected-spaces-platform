@@ -459,7 +459,6 @@ export function createScriptRegistry() {
     codeComponents.clear();
     const pendingSchemaSyncs = new Set();
     const pendingModuleActivations = new Set();
-    const pendingUIFlushes = new Set();
     let isDestroying = false;
 
     function isObject(value) {
@@ -1200,138 +1199,12 @@ export function createScriptRegistry() {
     }
 
     // --- UI tree management ---
-
-    function flattenUIChildren(children, out = []) {
-        for (const child of Array.isArray(children) ? children : []) {
-            if (Array.isArray(child)) {
-                flattenUIChildren(child, out);
-            } else if (child !== null && typeof child !== 'undefined' && child !== false) {
-                out.push(child);
-            }
-        }
-        return out;
-    }
-
-    function normalizeUIEntityId(value) {
-        if (typeof value === 'string') {
-            return value;
-        }
-        if (value && typeof value === 'object') {
-            if (typeof value.id === 'string') {
-                return value.id;
-            }
-            if (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0) {
-                return String(value.id);
-            }
-        }
-        return null;
-    }
-
-    const UI_TREE_MAX_DEPTH = 256;
-
-    function normalizeUINode(node, entityId, handlerMap, path = 'root', depth = 0) {
-        if (depth > UI_TREE_MAX_DEPTH) {
-            console.error(`[NGX UI][runtime] normalizeUINode exceeded max depth (${UI_TREE_MAX_DEPTH}) at path '${path}' — bailing out (possible cyclic or runaway tree).`);
-            return null;
-        }
-
-        if (!node || typeof node !== 'object') {
-            return null;
-        }
-
-        const type = typeof node.type === 'string' ? node.type : null;
-        if (!type) {
-            return null;
-        }
-
-        const props = isObject(node.props) ? { ...node.props } : {};
-        const normalized = {
-            type,
-            id: (typeof props.key === 'string' && props.key.length > 0) ? `${path}:${props.key}` : path,
-            props: {},
-            children: [],
-        };
-
-        for (const [key, value] of Object.entries(props)) {
-            if (key === 'key') {
-                continue;
-            }
-
-            if (typeof value === 'function') {
-                if (key === 'onClick') {
-                    const handlerId = `${path}:click`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onClickHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onHover') {
-                    const handlerId = `${path}:hover`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onHoverHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onPointerEnter') {
-                    const handlerId = `${path}:pointerEnter`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onPointerEnterHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onPointerLeave') {
-                    const handlerId = `${path}:pointerLeave`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onPointerLeaveHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onPointerDown') {
-                    const handlerId = `${path}:pointerDown`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onPointerDownHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onPointerUp') {
-                    const handlerId = `${path}:pointerUp`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onPointerUpHandlerId = handlerId;
-                    continue;
-                } else if (key === 'onDrag') {
-                    const handlerId = `${path}:drag`;
-                    handlerMap.set(handlerId, value);
-                    normalized.props.onDragHandlerId = handlerId;
-                    continue;
-                }
-                continue;
-            }
-
-            if (key === 'targetEntity' || key === 'entity') {
-                const normalizedEntity = normalizeUIEntityId(value);
-                if (normalizedEntity) {
-                    normalized.props.targetEntityId = normalizedEntity;
-                }
-                continue;
-            }
-
-            if (Array.isArray(value)) {
-                normalized.props[key] = value.map((item) => cloneValue(item));
-            } else if (isObject(value)) {
-                normalized.props[key] = cloneValue(value);
-            } else if (typeof value !== 'undefined') {
-                normalized.props[key] = value;
-            }
-        }
-
-        if (type === 'world' && !normalized.props.targetEntityId) {
-            normalized.props.targetEntityId = entityId;
-        }
-
-        const children = flattenUIChildren(node.children);
-        normalized.children = children
-            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`, depth + 1))
-            .filter((child) => child !== null);
-
-        return normalized;
-    }
-
-    function clearUIHandlers(entry) {
-        entry.uiHandlers.clear();
-        if (entry.pendingUIHandlers) {
-            entry.pendingUIHandlers.clear();
-        }
-    }
+    //
+    // The C++ NgxUIRuntime walks the raw JS tree directly (see ParseNodeFromJS
+    // in NgxUIRuntime.cpp). We hand the exact object returned by the user's
+    // ui() function to csp.__uiMount — no normalization, no JSON round-trip.
+    // Handler functions are captured on the native side and looked up by
+    // (entityId, handlerId) when native events fire.
 
     function unmountUI(entityId) {
         if (globalThis.csp && typeof globalThis.csp.__uiUnmount === 'function') {
@@ -1339,53 +1212,6 @@ export function createScriptRegistry() {
                 globalThis.csp.__uiUnmount(entityId);
             } catch (error) {
                 console.error(`NgxCodeComponentRuntime: failed to unmount UI for entity ${entityId}`, error);
-            }
-        }
-    }
-
-    function queueUIFlush(entityId, entry, treeJson, handlerMap) {
-        if (!entry || entry.isDisposing || isDestroying) {
-            return;
-        }
-
-        entry.pendingUITreeJson = treeJson;
-        entry.pendingUIHandlers = handlerMap;
-        entry.uiDirty = true;
-        pendingUIFlushes.add(entityId);
-    }
-
-    function flushPendingUI(entityId, entry) {
-        if (!entry || !entry.uiDirty || entry.isDisposing || isDestroying) {
-            if (entry) {
-                entry.uiDirty = false;
-                entry.pendingUITreeJson = null;
-                if (entry.pendingUIHandlers) {
-                    entry.pendingUIHandlers.clear();
-                }
-            }
-            pendingUIFlushes.delete(entityId);
-            return;
-        }
-
-        entry.uiDirty = false;
-        pendingUIFlushes.delete(entityId);
-
-        entry.uiHandlers = entry.pendingUIHandlers instanceof Map ? entry.pendingUIHandlers : new Map();
-        entry.pendingUIHandlers = new Map();
-
-        const treeJson = typeof entry.pendingUITreeJson === 'string' ? entry.pendingUITreeJson : null;
-        if (!treeJson) {
-            unmountUI(entityId);
-            return;
-        }
-
-        if (globalThis.csp && typeof globalThis.csp.__uiMount === 'function') {
-            try {
-                globalThis.csp.__uiMount(entityId, treeJson);
-            } catch (error) {
-                console.error(`NgxCodeComponentRuntime: failed to mount UI for entity ${entityId}`, error);
-                entry.uiHandlers.clear();
-                unmountUI(entityId);
             }
         }
     }
@@ -1412,31 +1238,23 @@ export function createScriptRegistry() {
             globalThis.__cspCurrentEntityId = entityId;
             globalThis.__cspUiRenderActive = true;
             try {
-                const nextHandlers = new Map();
                 const rawTree = entry.module.ui({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
-                const normalizedTree = normalizeUINode(rawTree, entityId, nextHandlers);
-
-                if (!normalizedTree) {
-                    queueUIFlush(entityId, entry, null, nextHandlers);
+                if (!rawTree || typeof rawTree !== 'object') {
+                    unmountUI(entityId);
                     return;
                 }
 
-                let serializedTree = null;
-                try {
-                    serializedTree = JSON.stringify(normalizedTree);
-                } catch (stringifyError) {
-                    const detail = stringifyError instanceof Error
-                        ? (typeof stringifyError.stack === 'string' && stringifyError.stack.length > 0 ? stringifyError.stack : String(stringifyError))
-                        : String(stringifyError);
-                    console.error(`[NGX UI][runtime] JSON.stringify(normalizedTree) failed for entity ${entityId}. Tree shape: type='${normalizedTree.type}', id='${normalizedTree.id}', childCount=${Array.isArray(normalizedTree.children) ? normalizedTree.children.length : 'n/a'}, propKeys=${JSON.stringify(Object.keys(normalizedTree.props || {}))}. Error: ${detail}`);
-                    queueUIFlush(entityId, entry, null, new Map());
-                    return;
+                if (globalThis.csp && typeof globalThis.csp.__uiMount === 'function') {
+                    try {
+                        globalThis.csp.__uiMount(entityId, rawTree);
+                    } catch (error) {
+                        console.error(`NgxCodeComponentRuntime: __uiMount threw for entity ${entityId}`, error);
+                        unmountUI(entityId);
+                    }
                 }
-
-                queueUIFlush(entityId, entry, serializedTree, nextHandlers);
             } catch (error) {
                 console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
-                queueUIFlush(entityId, entry, null, new Map());
+                unmountUI(entityId);
             } finally {
                 reconcileUiEffects(entityId, entry);
                 globalThis.__cspUiRenderActive = previousUiRenderActive;
@@ -1458,22 +1276,19 @@ export function createScriptRegistry() {
             }
         }
         entry.uiDispose = null;
-        pendingUIFlushes.delete(entityId);
-        entry.uiDirty = false;
-        entry.pendingUITreeJson = null;
         disposeUiEffects(entry);
-        clearUIHandlers(entry);
         unmountUI(entityId);
     }
 
-    function dispatchUIAction(entityId, handlerId, eventData) {
-        const entry = codeComponents.get(entityId);
-        if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {
+    // Called from C++ DispatchUIAction via JS_Call. The handler function is
+    // looked up in the native handler table and passed directly — we only
+    // need to wrap in batch() + set thisEntity context.
+    function dispatchUIActionDirect(entityId, handler, eventData) {
+        if (isDestroying || typeof handler !== 'function') {
             return false;
         }
-
-        const handler = entry.uiHandlers.get(handlerId);
-        if (typeof handler !== 'function') {
+        const entry = codeComponents.get(entityId);
+        if (!entry || entry.isDisposing) {
             return false;
         }
 
@@ -1822,13 +1637,9 @@ export function createScriptRegistry() {
             entityRefStates: {},
             effects: [],
             uiDispose: null,
-            uiHandlers: new Map(),
-            pendingUIHandlers: new Map(),
-            pendingUITreeJson: null,
             uiEffects: [],
             pendingUiEffectCallbacks: [],
             uiEffectCursor: 0,
-            uiDirty: false,
             isDisposing: false,
         };
 
@@ -1954,17 +1765,6 @@ export function createScriptRegistry() {
                 tryImportCodeComponentModule(entityId, entry, 'tick-retry');
             }
         }
-
-        const dirtyUIIds = Array.from(pendingUIFlushes);
-        for (const entityId of dirtyUIIds) {
-            const entry = codeComponents.get(entityId);
-            if (!entry || !entry.initialized) {
-                pendingUIFlushes.delete(entityId);
-                continue;
-            }
-
-            flushPendingUI(entityId, entry);
-        }
     }
 
     function drainPendingSchemaSyncs() {
@@ -1985,7 +1785,6 @@ export function createScriptRegistry() {
         codeComponents.clear();
         pendingSchemaSyncs.clear();
         pendingModuleActivations.clear();
-        pendingUIFlushes.clear();
         isDestroying = false;
     }
 
@@ -1995,7 +1794,7 @@ export function createScriptRegistry() {
         syncCodeComponentAttributes,
         updateAttributeForEntity,
         removeCodeComponent,
-        dispatchUIAction,
+        dispatchUIActionDirect,
         tick,
         drainPendingSchemaSyncs,
         destroy,

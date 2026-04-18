@@ -253,7 +253,7 @@ struct UIDrawable
 
 struct UIEntityState
 {
-    std::string TreeJson;
+    UINode Tree;
     std::map<std::string, UIDrawable> Drawables;
 };
 
@@ -530,71 +530,146 @@ void ApplyDefaultColors(UINode& Node)
     }
 }
 
-UISizeSpec ParseSizeSpec(const rapidjson::Value& Value, UISizeMode DefaultMode)
+// --- QuickJS value-walking helpers ------------------------------------------
+
+struct ScopedJSValue
+{
+    JSContext* Ctx;
+    JSValue V;
+    ScopedJSValue(JSContext* InCtx, JSValue InV)
+        : Ctx(InCtx)
+        , V(InV)
+    {
+    }
+    ~ScopedJSValue()
+    {
+        JS_FreeValue(Ctx, V);
+    }
+    ScopedJSValue(const ScopedJSValue&) = delete;
+    ScopedJSValue& operator=(const ScopedJSValue&) = delete;
+};
+
+bool JSIsValidObject(JSContext* Ctx, JSValueConst Val)
+{
+    return JS_IsObject(Val) && !JS_IsArray(Ctx, Val) && !JS_IsFunction(Ctx, Val);
+}
+
+std::string JSToStdString(JSContext* Ctx, JSValueConst Val)
+{
+    if (!JS_IsString(Val))
+    {
+        return std::string();
+    }
+    size_t Len = 0;
+    const char* Str = JS_ToCStringLen(Ctx, &Len, Val);
+    if (Str == nullptr)
+    {
+        return std::string();
+    }
+    std::string Result(Str, Len);
+    JS_FreeCString(Ctx, Str);
+    return Result;
+}
+
+float JSToFloatOrDefault(JSContext* Ctx, JSValueConst Val, float DefaultValue)
+{
+    if (!JS_IsNumber(Val))
+    {
+        return DefaultValue;
+    }
+    double Tmp = 0.0;
+    if (JS_ToFloat64(Ctx, &Tmp, Val) < 0)
+    {
+        return DefaultValue;
+    }
+    return static_cast<float>(Tmp);
+}
+
+bool JSToBoolOrDefault(JSContext* Ctx, JSValueConst Val, bool DefaultValue)
+{
+    if (!JS_IsBool(Val))
+    {
+        return DefaultValue;
+    }
+    return JS_ToBool(Ctx, Val) > 0;
+}
+
+std::string JSGetStringOrDefault(JSContext* Ctx, JSValueConst Object, const char* Key, const std::string& DefaultValue)
+{
+    ScopedJSValue Val { Ctx, JS_GetPropertyStr(Ctx, Object, Key) };
+    return JS_IsString(Val.V) ? JSToStdString(Ctx, Val.V) : DefaultValue;
+}
+
+float JSGetNumberOrDefault(JSContext* Ctx, JSValueConst Object, const char* Key, float DefaultValue)
+{
+    ScopedJSValue Val { Ctx, JS_GetPropertyStr(Ctx, Object, Key) };
+    return JSToFloatOrDefault(Ctx, Val.V, DefaultValue);
+}
+
+bool JSGetBoolOrDefault(JSContext* Ctx, JSValueConst Object, const char* Key, bool DefaultValue)
+{
+    ScopedJSValue Val { Ctx, JS_GetPropertyStr(Ctx, Object, Key) };
+    return JSToBoolOrDefault(Ctx, Val.V, DefaultValue);
+}
+
+bool JSHasOwnProperty(JSContext* Ctx, JSValueConst Object, const char* Key)
+{
+    // HasProperty walks the prototype chain; our JS trees are plain literals so
+    // treating any defined value as "has" matches the rapidjson HasMember
+    // semantics the old parser relied on.
+    ScopedJSValue Val { Ctx, JS_GetPropertyStr(Ctx, Object, Key) };
+    return !JS_IsUndefined(Val.V) && !JS_IsException(Val.V);
+}
+
+UISizeSpec ParseSizeSpecJS(JSContext* Ctx, JSValueConst Value, UISizeMode DefaultMode)
 {
     UISizeSpec Result;
     Result.Mode = DefaultMode;
-    const auto ParseLocalNumberOrDefault = [](const rapidjson::Value& InValue, float DefaultValue) -> float
-    {
-        return InValue.IsNumber() ? static_cast<float>(InValue.GetDouble()) : DefaultValue;
-    };
 
-    if (Value.IsNumber())
+    if (JS_IsNumber(Value))
     {
+        double Tmp = 0.0;
+        JS_ToFloat64(Ctx, &Tmp, Value);
         Result.Mode = UISizeMode::Fixed;
-        Result.Value = std::max(0.0f, static_cast<float>(Value.GetDouble()));
+        Result.Value = std::max(0.0f, static_cast<float>(Tmp));
         Result.MinValue = Result.Value;
         Result.MaxValue = Result.Value;
         return Result;
     }
 
-    if (Value.IsString())
+    if (JS_IsString(Value))
     {
-        const std::string Text = Value.GetString();
+        const std::string Text = JSToStdString(Ctx, Value);
         if (Text == "grow")
         {
             Result.Mode = UISizeMode::Grow;
-        }
-        else if (Text == "fit")
-        {
-            Result.Mode = UISizeMode::Fit;
         }
         else
         {
             Result.Mode = UISizeMode::Fit;
         }
+        return Result;
     }
-    else if (Value.IsObject())
+
+    if (JSIsValidObject(Ctx, Value))
     {
-        if (Value.HasMember("mode"))
+        const std::string ModeText = JSGetStringOrDefault(Ctx, Value, "mode", "");
+        if (ModeText == "grow")
         {
-            const std::string ModeText = Value["mode"].IsString() ? std::string(Value["mode"].GetString()) : "";
-            if (ModeText == "grow")
-            {
-                Result.Mode = UISizeMode::Grow;
-            }
-            else if (ModeText == "fixed")
-            {
-                Result.Mode = UISizeMode::Fixed;
-            }
-            else if (ModeText == "fit")
-            {
-                Result.Mode = UISizeMode::Fit;
-            }
+            Result.Mode = UISizeMode::Grow;
+        }
+        else if (ModeText == "fixed")
+        {
+            Result.Mode = UISizeMode::Fixed;
+        }
+        else if (ModeText == "fit")
+        {
+            Result.Mode = UISizeMode::Fit;
         }
 
-        if (Value.HasMember("value"))
-        {
-            Result.Value = std::max(0.0f, ParseLocalNumberOrDefault(Value["value"], Result.Value));
-        }
-        if (Value.HasMember("min"))
-        {
-            Result.MinValue = std::max(0.0f, ParseLocalNumberOrDefault(Value["min"], Result.MinValue));
-        }
-        if (Value.HasMember("max"))
-        {
-            Result.MaxValue = std::max(0.0f, ParseLocalNumberOrDefault(Value["max"], Result.MaxValue));
-        }
+        Result.Value = std::max(0.0f, JSGetNumberOrDefault(Ctx, Value, "value", Result.Value));
+        Result.MinValue = std::max(0.0f, JSGetNumberOrDefault(Ctx, Value, "min", Result.MinValue));
+        Result.MaxValue = std::max(0.0f, JSGetNumberOrDefault(Ctx, Value, "max", Result.MaxValue));
 
         if (Result.Mode == UISizeMode::Fixed)
         {
@@ -614,52 +689,14 @@ UISizeSpec ParseSizeSpec(const rapidjson::Value& Value, UISizeMode DefaultMode)
     return Result;
 }
 
-float ParseNumberOrDefault(const rapidjson::Value& Value, float DefaultValue)
-{
-    return Value.IsNumber() ? static_cast<float>(Value.GetDouble()) : DefaultValue;
-}
-
-csp::common::Vector3 ParseVector3(const rapidjson::Value& Value)
-{
-    csp::common::Vector3 Result(0.0f, 0.0f, 0.0f);
-
-    if (!Value.IsObject())
-    {
-        return Result;
-    }
-
-    if (Value.HasMember("x"))
-    {
-        Result.X = ParseNumberOrDefault(Value["x"], Result.X);
-    }
-    if (Value.HasMember("y"))
-    {
-        Result.Y = ParseNumberOrDefault(Value["y"], Result.Y);
-    }
-    if (Value.HasMember("z"))
-    {
-        Result.Z = ParseNumberOrDefault(Value["z"], Result.Z);
-    }
-
-    return Result;
-}
-
-bool ParseBoolOrDefault(const rapidjson::Value& Value, bool DefaultValue)
-{
-    return Value.IsBool() ? Value.GetBool() : DefaultValue;
-}
-
-std::string ParseStringOrDefault(const rapidjson::Value& Value, const std::string& DefaultValue)
-{
-    return Value.IsString() ? std::string(Value.GetString()) : DefaultValue;
-}
-
-UIPadding ParsePadding(const rapidjson::Value& Value)
+UIPadding ParsePaddingJS(JSContext* Ctx, JSValueConst Value)
 {
     UIPadding Padding;
-    if (Value.IsNumber())
+    if (JS_IsNumber(Value))
     {
-        const float Uniform = static_cast<float>(Value.GetDouble());
+        double Tmp = 0.0;
+        JS_ToFloat64(Ctx, &Tmp, Value);
+        const float Uniform = static_cast<float>(Tmp);
         Padding.Left = Uniform;
         Padding.Right = Uniform;
         Padding.Top = Uniform;
@@ -667,27 +704,58 @@ UIPadding ParsePadding(const rapidjson::Value& Value)
         return Padding;
     }
 
-    if (Value.IsObject())
+    if (JSIsValidObject(Ctx, Value))
     {
-        if (Value.HasMember("left"))
-        {
-            Padding.Left = ParseNumberOrDefault(Value["left"], Padding.Left);
-        }
-        if (Value.HasMember("right"))
-        {
-            Padding.Right = ParseNumberOrDefault(Value["right"], Padding.Right);
-        }
-        if (Value.HasMember("top"))
-        {
-            Padding.Top = ParseNumberOrDefault(Value["top"], Padding.Top);
-        }
-        if (Value.HasMember("bottom"))
-        {
-            Padding.Bottom = ParseNumberOrDefault(Value["bottom"], Padding.Bottom);
-        }
+        Padding.Left = JSGetNumberOrDefault(Ctx, Value, "left", Padding.Left);
+        Padding.Right = JSGetNumberOrDefault(Ctx, Value, "right", Padding.Right);
+        Padding.Top = JSGetNumberOrDefault(Ctx, Value, "top", Padding.Top);
+        Padding.Bottom = JSGetNumberOrDefault(Ctx, Value, "bottom", Padding.Bottom);
     }
 
     return Padding;
+}
+
+csp::common::Vector3 ParseVector3JS(JSContext* Ctx, JSValueConst Value)
+{
+    csp::common::Vector3 Result(0.0f, 0.0f, 0.0f);
+    if (!JSIsValidObject(Ctx, Value))
+    {
+        return Result;
+    }
+    Result.X = JSGetNumberOrDefault(Ctx, Value, "x", Result.X);
+    Result.Y = JSGetNumberOrDefault(Ctx, Value, "y", Result.Y);
+    Result.Z = JSGetNumberOrDefault(Ctx, Value, "z", Result.Z);
+    return Result;
+}
+
+// Recursively flatten a children array, discarding null/undefined/false and
+// unwrapping nested arrays (equivalent to JSX-style children flattening). The
+// caller owns the returned JSValues and must JS_FreeValue each one.
+void FlattenChildrenJS(JSContext* Ctx, JSValueConst ArrayVal, std::vector<JSValue>& Out)
+{
+    ScopedJSValue LenVal { Ctx, JS_GetPropertyStr(Ctx, ArrayVal, "length") };
+    uint32_t Length = 0;
+    if (JS_ToUint32(Ctx, &Length, LenVal.V) < 0)
+    {
+        return;
+    }
+
+    for (uint32_t Index = 0; Index < Length; ++Index)
+    {
+        JSValue Elem = JS_GetPropertyUint32(Ctx, ArrayVal, Index);
+        if (JS_IsArray(Ctx, Elem))
+        {
+            FlattenChildrenJS(Ctx, Elem, Out);
+            JS_FreeValue(Ctx, Elem);
+            continue;
+        }
+        if (JS_IsNull(Elem) || JS_IsUndefined(Elem) || (JS_IsBool(Elem) && JS_ToBool(Ctx, Elem) == 0))
+        {
+            JS_FreeValue(Ctx, Elem);
+            continue;
+        }
+        Out.push_back(Elem); // transfer ownership
+    }
 }
 
 std::string WidgetKindToString(UIWidgetKind Kind)
@@ -844,6 +912,39 @@ struct NgxUIRuntime::Impl
     std::vector<UITextMeasureRequest> PendingTextMeasureRequests;
     std::unordered_set<std::string> PendingTextMeasureRequestKeys;
 
+    // Handler functions captured from the JS tree at Mount time, keyed by
+    // (entityId, handlerId). Dup'd JSValues owned by the runtime; freed when
+    // the entity is unmounted, on re-Mount, or during Clear().
+    struct EntityHandlerTable
+    {
+        JSContext* Ctx = nullptr;
+        std::unordered_map<std::string, JSValue> Handlers;
+
+        void Reset()
+        {
+            if (Ctx != nullptr)
+            {
+                for (std::pair<const std::string, JSValue>& Entry : Handlers)
+                {
+                    JS_FreeValue(Ctx, Entry.second);
+                }
+            }
+            Handlers.clear();
+        }
+    };
+
+    std::unordered_map<std::string, EntityHandlerTable> HandlerTablesByEntity;
+
+    void ClearHandlerTable(const std::string& EntityId)
+    {
+        std::unordered_map<std::string, EntityHandlerTable>::iterator It = HandlerTablesByEntity.find(EntityId);
+        if (It != HandlerTablesByEntity.end())
+        {
+            It->second.Reset();
+            HandlerTablesByEntity.erase(It);
+        }
+    }
+
     void QueueTextMeasureRequest(const std::string& Text, float FontSize, const std::string& FontWeight)
     {
         const std::string Key = BuildTextMeasureRequestKey(Text, FontSize, FontWeight);
@@ -949,14 +1050,59 @@ struct NgxUIRuntime::Impl
         return Dimensions;
     }
 
-    bool ParseNode(const rapidjson::Value& Value, const std::string& EntityId, UINode& OutNode)
+    static constexpr int UI_TREE_MAX_DEPTH = 256;
+
+    void RegisterUIHandler(EntityHandlerTable& Table, JSContext* Ctx, const std::string& HandlerId, JSValueConst FnValue)
     {
-        if (!Value.IsObject() || !Value.HasMember("type") || !Value["type"].IsString())
+        Table.Ctx = Ctx;
+        std::unordered_map<std::string, JSValue>::iterator It = Table.Handlers.find(HandlerId);
+        if (It != Table.Handlers.end())
+        {
+            JS_FreeValue(Ctx, It->second);
+            It->second = JS_DupValue(Ctx, FnValue);
+        }
+        else
+        {
+            Table.Handlers.emplace(HandlerId, JS_DupValue(Ctx, FnValue));
+        }
+    }
+
+    void CaptureHandlerProp(JSContext* Ctx, JSValueConst Props, const char* PropName, const char* IdSuffix,
+        const std::string& Path, EntityHandlerTable& Table, std::string& OutHandlerId)
+    {
+        ScopedJSValue FnVal { Ctx, JS_GetPropertyStr(Ctx, Props, PropName) };
+        if (!JS_IsFunction(Ctx, FnVal.V))
+        {
+            return;
+        }
+        OutHandlerId = Path + ":" + IdSuffix;
+        RegisterUIHandler(Table, Ctx, OutHandlerId, FnVal.V);
+    }
+
+    bool ParseNodeFromJS(JSContext* Ctx, JSValueConst NodeValue, const std::string& EntityId,
+        const std::string& Path, UINode& OutNode, int Depth)
+    {
+        if (Depth > UI_TREE_MAX_DEPTH)
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxUIRuntime: UI tree exceeded max depth; bailing out.");
+            return false;
+        }
+
+        if (!JSIsValidObject(Ctx, NodeValue))
         {
             return false;
         }
 
-        const std::string Type = Value["type"].GetString();
+        std::string Type;
+        {
+            ScopedJSValue TypeVal { Ctx, JS_GetPropertyStr(Ctx, NodeValue, "type") };
+            if (!JS_IsString(TypeVal.V))
+            {
+                return false;
+            }
+            Type = JSToStdString(Ctx, TypeVal.V);
+        }
+
         if (Type == "screen")
         {
             OutNode.Kind = UIWidgetKind::ScreenRoot;
@@ -1011,50 +1157,70 @@ struct NgxUIRuntime::Impl
             return false;
         }
 
-        OutNode.Id = Value.HasMember("id") ? ParseStringOrDefault(Value["id"], "") : "";
-        if (OutNode.Id.empty())
+        ScopedJSValue Props { Ctx, JS_GetPropertyStr(Ctx, NodeValue, "props") };
+        const bool HasProps = JSIsValidObject(Ctx, Props.V);
+
+        std::string Id = Path;
+        if (HasProps)
+        {
+            ScopedJSValue KeyVal { Ctx, JS_GetPropertyStr(Ctx, Props.V, "key") };
+            if (JS_IsString(KeyVal.V))
+            {
+                const std::string KeyStr = JSToStdString(Ctx, KeyVal.V);
+                if (!KeyStr.empty())
+                {
+                    Id = Path + ":" + KeyStr;
+                }
+            }
+        }
+        if (Id.empty())
         {
             return false;
         }
+        OutNode.Id = Id;
 
         ApplyDefaultColors(OutNode);
 
-        if (Value.HasMember("props") && Value["props"].IsObject())
+        EntityHandlerTable& Handlers = HandlerTablesByEntity[EntityId];
+
+        if (HasProps)
         {
-            const rapidjson::Value& Props = Value["props"];
-            if (Props.HasMember("width"))
+            if (JSHasOwnProperty(Ctx, Props.V, "width"))
             {
-                OutNode.Width = ParseSizeSpec(Props["width"], UISizeMode::Fit);
+                ScopedJSValue V { Ctx, JS_GetPropertyStr(Ctx, Props.V, "width") };
+                OutNode.Width = ParseSizeSpecJS(Ctx, V.V, UISizeMode::Fit);
             }
-            if (Props.HasMember("height"))
+            if (JSHasOwnProperty(Ctx, Props.V, "height"))
             {
-                OutNode.Height = ParseSizeSpec(Props["height"], UISizeMode::Fit);
+                ScopedJSValue V { Ctx, JS_GetPropertyStr(Ctx, Props.V, "height") };
+                OutNode.Height = ParseSizeSpecJS(Ctx, V.V, UISizeMode::Fit);
             }
-            if (Props.HasMember("padding"))
+            if (JSHasOwnProperty(Ctx, Props.V, "padding"))
             {
-                OutNode.Padding = ParsePadding(Props["padding"]);
+                ScopedJSValue V { Ctx, JS_GetPropertyStr(Ctx, Props.V, "padding") };
+                OutNode.Padding = ParsePaddingJS(Ctx, V.V);
             }
-            if (Props.HasMember("gap"))
+            if (JSHasOwnProperty(Ctx, Props.V, "gap"))
             {
-                OutNode.Gap = ParseNumberOrDefault(Props["gap"], OutNode.Gap);
+                OutNode.Gap = JSGetNumberOrDefault(Ctx, Props.V, "gap", OutNode.Gap);
                 OutNode.RowGap = OutNode.Gap;
                 OutNode.ColumnGap = OutNode.Gap;
             }
-            if (Props.HasMember("rowGap"))
+            if (JSHasOwnProperty(Ctx, Props.V, "rowGap"))
             {
-                OutNode.RowGap = ParseNumberOrDefault(Props["rowGap"], OutNode.RowGap);
+                OutNode.RowGap = JSGetNumberOrDefault(Ctx, Props.V, "rowGap", OutNode.RowGap);
             }
-            if (Props.HasMember("columnGap"))
+            if (JSHasOwnProperty(Ctx, Props.V, "columnGap"))
             {
-                OutNode.ColumnGap = ParseNumberOrDefault(Props["columnGap"], OutNode.ColumnGap);
+                OutNode.ColumnGap = JSGetNumberOrDefault(Ctx, Props.V, "columnGap", OutNode.ColumnGap);
             }
-            if (Props.HasMember("margin"))
+            if (JSHasOwnProperty(Ctx, Props.V, "margin"))
             {
-                OutNode.Margin = ParseNumberOrDefault(Props["margin"], OutNode.Margin);
+                OutNode.Margin = JSGetNumberOrDefault(Ctx, Props.V, "margin", OutNode.Margin);
             }
-            if (Props.HasMember("alignX"))
+            if (JSHasOwnProperty(Ctx, Props.V, "alignX"))
             {
-                const std::string AlignValue = ParseStringOrDefault(Props["alignX"], "");
+                const std::string AlignValue = JSGetStringOrDefault(Ctx, Props.V, "alignX", "");
                 if (OutNode.Kind == UIWidgetKind::ScreenRoot || OutNode.Kind == UIWidgetKind::WorldRoot)
                 {
                     OutNode.SurfaceAlignX = AlignValue;
@@ -1064,9 +1230,9 @@ struct NgxUIRuntime::Impl
                     OutNode.AlignX = AlignValue;
                 }
             }
-            if (Props.HasMember("alignY"))
+            if (JSHasOwnProperty(Ctx, Props.V, "alignY"))
             {
-                const std::string AlignValue = ParseStringOrDefault(Props["alignY"], "");
+                const std::string AlignValue = JSGetStringOrDefault(Ctx, Props.V, "alignY", "");
                 if (OutNode.Kind == UIWidgetKind::ScreenRoot || OutNode.Kind == UIWidgetKind::WorldRoot)
                 {
                     OutNode.SurfaceAlignY = AlignValue;
@@ -1076,175 +1242,199 @@ struct NgxUIRuntime::Impl
                     OutNode.AlignY = AlignValue;
                 }
             }
-            if (Props.HasMember("backgroundColor"))
+            if (JSHasOwnProperty(Ctx, Props.V, "backgroundColor"))
             {
-                OutNode.BackgroundColor = ParseColorString(ParseStringOrDefault(Props["backgroundColor"], ""));
+                OutNode.BackgroundColor = ParseColorString(JSGetStringOrDefault(Ctx, Props.V, "backgroundColor", ""));
             }
-            if (Props.HasMember("textColor"))
+            if (JSHasOwnProperty(Ctx, Props.V, "textColor"))
             {
-                OutNode.TextColor = ParseColorString(ParseStringOrDefault(Props["textColor"], ""));
+                OutNode.TextColor = ParseColorString(JSGetStringOrDefault(Ctx, Props.V, "textColor", ""));
             }
-            else if (Props.HasMember("color"))
+            else if (JSHasOwnProperty(Ctx, Props.V, "color"))
             {
-                OutNode.TextColor = ParseColorString(ParseStringOrDefault(Props["color"], ""));
+                OutNode.TextColor = ParseColorString(JSGetStringOrDefault(Ctx, Props.V, "color", ""));
             }
-            else if (Props.HasMember("colour"))
+            else if (JSHasOwnProperty(Ctx, Props.V, "colour"))
             {
-                OutNode.TextColor = ParseColorString(ParseStringOrDefault(Props["colour"], ""));
+                OutNode.TextColor = ParseColorString(JSGetStringOrDefault(Ctx, Props.V, "colour", ""));
             }
-            if (Props.HasMember("opacity"))
+            if (JSHasOwnProperty(Ctx, Props.V, "opacity"))
             {
-                OutNode.Opacity = ParseNumberOrDefault(Props["opacity"], OutNode.Opacity);
+                OutNode.Opacity = JSGetNumberOrDefault(Ctx, Props.V, "opacity", OutNode.Opacity);
             }
-            if (Props.HasMember("cornerRadius"))
+            if (JSHasOwnProperty(Ctx, Props.V, "cornerRadius"))
             {
-                OutNode.CornerRadius = ParseNumberOrDefault(Props["cornerRadius"], OutNode.CornerRadius);
+                OutNode.CornerRadius = JSGetNumberOrDefault(Ctx, Props.V, "cornerRadius", OutNode.CornerRadius);
             }
-            if (Props.HasMember("visible"))
+            if (JSHasOwnProperty(Ctx, Props.V, "visible"))
             {
-                OutNode.Visible = ParseBoolOrDefault(Props["visible"], OutNode.Visible);
+                OutNode.Visible = JSGetBoolOrDefault(Ctx, Props.V, "visible", OutNode.Visible);
             }
-            if (Props.HasMember("enabled"))
+            if (JSHasOwnProperty(Ctx, Props.V, "enabled"))
             {
-                OutNode.Enabled = ParseBoolOrDefault(Props["enabled"], OutNode.Enabled);
+                OutNode.Enabled = JSGetBoolOrDefault(Ctx, Props.V, "enabled", OutNode.Enabled);
             }
-            if (Props.HasMember("fontSize"))
+            if (JSHasOwnProperty(Ctx, Props.V, "fontSize"))
             {
-                OutNode.FontSize = ParseNumberOrDefault(Props["fontSize"], OutNode.FontSize);
+                OutNode.FontSize = JSGetNumberOrDefault(Ctx, Props.V, "fontSize", OutNode.FontSize);
             }
-            if (Props.HasMember("fontWeight"))
+            if (JSHasOwnProperty(Ctx, Props.V, "fontWeight"))
             {
-                if (Props["fontWeight"].IsString())
+                ScopedJSValue FW { Ctx, JS_GetPropertyStr(Ctx, Props.V, "fontWeight") };
+                if (JS_IsString(FW.V))
                 {
-                    OutNode.FontWeight = NormalizeFontWeight(ParseStringOrDefault(Props["fontWeight"], OutNode.FontWeight));
+                    OutNode.FontWeight = NormalizeFontWeight(JSToStdString(Ctx, FW.V));
                 }
-                else if (Props["fontWeight"].IsNumber())
+                else if (JS_IsNumber(FW.V))
                 {
-                    OutNode.FontWeight = Props["fontWeight"].GetDouble() >= 600.0 ? "bold" : "normal";
+                    double FWNum = 0.0;
+                    JS_ToFloat64(Ctx, &FWNum, FW.V);
+                    OutNode.FontWeight = FWNum >= 600.0 ? "bold" : "normal";
                 }
-                else if (Props["fontWeight"].IsBool())
+                else if (JS_IsBool(FW.V))
                 {
-                    OutNode.FontWeight = Props["fontWeight"].GetBool() ? "bold" : "normal";
+                    OutNode.FontWeight = JS_ToBool(Ctx, FW.V) > 0 ? "bold" : "normal";
                 }
             }
-            else if (Props.HasMember("bold"))
+            else if (JSHasOwnProperty(Ctx, Props.V, "bold"))
             {
-                OutNode.FontWeight = ParseBoolOrDefault(Props["bold"], false) ? "bold" : "normal";
+                OutNode.FontWeight = JSGetBoolOrDefault(Ctx, Props.V, "bold", false) ? "bold" : "normal";
             }
-            if (Props.HasMember("aspectRatio"))
+            if (JSHasOwnProperty(Ctx, Props.V, "aspectRatio"))
             {
-                OutNode.AspectRatio = std::max(0.0f, ParseNumberOrDefault(Props["aspectRatio"], OutNode.AspectRatio));
+                OutNode.AspectRatio = std::max(0.0f, JSGetNumberOrDefault(Ctx, Props.V, "aspectRatio", OutNode.AspectRatio));
             }
-            if (Props.HasMember("textAlign"))
+            if (JSHasOwnProperty(Ctx, Props.V, "textAlign"))
             {
-                OutNode.TextAlign = ParseStringOrDefault(Props["textAlign"], OutNode.TextAlign);
+                OutNode.TextAlign = JSGetStringOrDefault(Ctx, Props.V, "textAlign", OutNode.TextAlign);
             }
-            else if (Props.HasMember("textAlignment"))
+            else if (JSHasOwnProperty(Ctx, Props.V, "textAlignment"))
             {
-                OutNode.TextAlign = ParseStringOrDefault(Props["textAlignment"], OutNode.TextAlign);
+                OutNode.TextAlign = JSGetStringOrDefault(Ctx, Props.V, "textAlignment", OutNode.TextAlign);
             }
-            if (Props.HasMember("text"))
+            if (JSHasOwnProperty(Ctx, Props.V, "text"))
             {
-                OutNode.Text = ParseStringOrDefault(Props["text"], "");
+                OutNode.Text = JSGetStringOrDefault(Ctx, Props.V, "text", "");
             }
-            if (Props.HasMember("assetCollectionId"))
+            if (JSHasOwnProperty(Ctx, Props.V, "assetCollectionId"))
             {
-                OutNode.AssetCollectionId = ParseStringOrDefault(Props["assetCollectionId"], "");
+                OutNode.AssetCollectionId = JSGetStringOrDefault(Ctx, Props.V, "assetCollectionId", "");
             }
-            if (Props.HasMember("imageAssetId"))
+            if (JSHasOwnProperty(Ctx, Props.V, "imageAssetId"))
             {
-                OutNode.ImageAssetId = ParseStringOrDefault(Props["imageAssetId"], "");
+                OutNode.ImageAssetId = JSGetStringOrDefault(Ctx, Props.V, "imageAssetId", "");
             }
-            #define PARSE_HANDLER(MemberName, JsonName)             if (Props.HasMember(#JsonName)) { OutNode.MemberName = ParseStringOrDefault(Props[#JsonName], ""); }
 
-            PARSE_HANDLER(OnClickHandlerId, onClickHandlerId)
-            PARSE_HANDLER(OnHoverHandlerId, onHoverHandlerId)
-            PARSE_HANDLER(OnPointerEnterHandlerId, onPointerEnterHandlerId)
-            PARSE_HANDLER(OnPointerLeaveHandlerId, onPointerLeaveHandlerId)
-            PARSE_HANDLER(OnPointerDownHandlerId, onPointerDownHandlerId)
-            PARSE_HANDLER(OnPointerUpHandlerId, onPointerUpHandlerId)
-            PARSE_HANDLER(OnDragHandlerId, onDragHandlerId)
+            CaptureHandlerProp(Ctx, Props.V, "onClick", "click", Path, Handlers, OutNode.OnClickHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onHover", "hover", Path, Handlers, OutNode.OnHoverHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onPointerEnter", "pointerEnter", Path, Handlers, OutNode.OnPointerEnterHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onPointerLeave", "pointerLeave", Path, Handlers, OutNode.OnPointerLeaveHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onPointerDown", "pointerDown", Path, Handlers, OutNode.OnPointerDownHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onPointerUp", "pointerUp", Path, Handlers, OutNode.OnPointerUpHandlerId);
+            CaptureHandlerProp(Ctx, Props.V, "onDrag", "drag", Path, Handlers, OutNode.OnDragHandlerId);
 
-#undef PARSE_HANDLER
-            if (Props.HasMember("targetEntityId"))
+            // targetEntity: accept either a string or an object { id: string|number }
+            // (mirrors the JS normalizer's 'targetEntity'/'entity' coercion).
+            if (JSHasOwnProperty(Ctx, Props.V, "targetEntity") || JSHasOwnProperty(Ctx, Props.V, "entity"))
             {
-                OutNode.TargetEntityId = ParseStringOrDefault(Props["targetEntityId"], EntityId);
-            }
-            if (Props.HasMember("billboardMode"))
-            {
-                OutNode.BillboardMode = ParseStringOrDefault(Props["billboardMode"], "");
-            }
-            if (Props.HasMember("worldOffset"))
-            {
-                OutNode.WorldOffset = ParseVector3(Props["worldOffset"]);
-            }
-            if (Props.HasMember("attachTo"))
-            {
-                OutNode.FloatingAttachTo = ParseStringOrDefault(Props["attachTo"], OutNode.FloatingAttachTo);
-            }
-            if (Props.HasMember("attachX"))
-            {
-                OutNode.FloatingAttachX = ParseStringOrDefault(Props["attachX"], OutNode.FloatingAttachX);
-            }
-            if (Props.HasMember("attachY"))
-            {
-                OutNode.FloatingAttachY = ParseStringOrDefault(Props["attachY"], OutNode.FloatingAttachY);
-            }
-            if (Props.HasMember("offset") && Props["offset"].IsObject())
-            {
-                const rapidjson::Value& Offset = Props["offset"];
-                if (Offset.HasMember("x"))
+                const char* Key = JSHasOwnProperty(Ctx, Props.V, "targetEntity") ? "targetEntity" : "entity";
+                ScopedJSValue EntV { Ctx, JS_GetPropertyStr(Ctx, Props.V, Key) };
+                if (JS_IsString(EntV.V))
                 {
-                    OutNode.FloatingOffsetX = ParseNumberOrDefault(Offset["x"], OutNode.FloatingOffsetX);
+                    OutNode.TargetEntityId = JSToStdString(Ctx, EntV.V);
                 }
-                if (Offset.HasMember("y"))
+                else if (JSIsValidObject(Ctx, EntV.V))
                 {
-                    OutNode.FloatingOffsetY = ParseNumberOrDefault(Offset["y"], OutNode.FloatingOffsetY);
+                    ScopedJSValue IdV { Ctx, JS_GetPropertyStr(Ctx, EntV.V, "id") };
+                    if (JS_IsString(IdV.V))
+                    {
+                        OutNode.TargetEntityId = JSToStdString(Ctx, IdV.V);
+                    }
+                    else if (JS_IsNumber(IdV.V))
+                    {
+                        double Num = 0.0;
+                        JS_ToFloat64(Ctx, &Num, IdV.V);
+                        if (std::isfinite(Num) && Num > 0.0)
+                        {
+                            OutNode.TargetEntityId = std::to_string(static_cast<int64_t>(Num));
+                        }
+                    }
                 }
             }
-            if (Props.HasMember("offsetX"))
+            if (JSHasOwnProperty(Ctx, Props.V, "targetEntityId"))
             {
-                OutNode.FloatingOffsetX = ParseNumberOrDefault(Props["offsetX"], OutNode.FloatingOffsetX);
+                OutNode.TargetEntityId = JSGetStringOrDefault(Ctx, Props.V, "targetEntityId", OutNode.TargetEntityId);
             }
-            if (Props.HasMember("offsetY"))
+            if (JSHasOwnProperty(Ctx, Props.V, "billboardMode"))
             {
-                OutNode.FloatingOffsetY = ParseNumberOrDefault(Props["offsetY"], OutNode.FloatingOffsetY);
+                OutNode.BillboardMode = JSGetStringOrDefault(Ctx, Props.V, "billboardMode", "");
             }
-            if (Props.HasMember("expand") && Props["expand"].IsObject())
+            if (JSHasOwnProperty(Ctx, Props.V, "worldOffset"))
             {
-                const rapidjson::Value& Expand = Props["expand"];
-                if (Expand.HasMember("width"))
+                ScopedJSValue V { Ctx, JS_GetPropertyStr(Ctx, Props.V, "worldOffset") };
+                OutNode.WorldOffset = ParseVector3JS(Ctx, V.V);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "attachTo"))
+            {
+                OutNode.FloatingAttachTo = JSGetStringOrDefault(Ctx, Props.V, "attachTo", OutNode.FloatingAttachTo);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "attachX"))
+            {
+                OutNode.FloatingAttachX = JSGetStringOrDefault(Ctx, Props.V, "attachX", OutNode.FloatingAttachX);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "attachY"))
+            {
+                OutNode.FloatingAttachY = JSGetStringOrDefault(Ctx, Props.V, "attachY", OutNode.FloatingAttachY);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "offset"))
+            {
+                ScopedJSValue Offset { Ctx, JS_GetPropertyStr(Ctx, Props.V, "offset") };
+                if (JSIsValidObject(Ctx, Offset.V))
                 {
-                    OutNode.FloatingExpandWidth = ParseNumberOrDefault(Expand["width"], OutNode.FloatingExpandWidth);
+                    OutNode.FloatingOffsetX = JSGetNumberOrDefault(Ctx, Offset.V, "x", OutNode.FloatingOffsetX);
+                    OutNode.FloatingOffsetY = JSGetNumberOrDefault(Ctx, Offset.V, "y", OutNode.FloatingOffsetY);
                 }
-                if (Expand.HasMember("height"))
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "offsetX"))
+            {
+                OutNode.FloatingOffsetX = JSGetNumberOrDefault(Ctx, Props.V, "offsetX", OutNode.FloatingOffsetX);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "offsetY"))
+            {
+                OutNode.FloatingOffsetY = JSGetNumberOrDefault(Ctx, Props.V, "offsetY", OutNode.FloatingOffsetY);
+            }
+            if (JSHasOwnProperty(Ctx, Props.V, "expand"))
+            {
+                ScopedJSValue Expand { Ctx, JS_GetPropertyStr(Ctx, Props.V, "expand") };
+                if (JSIsValidObject(Ctx, Expand.V))
                 {
-                    OutNode.FloatingExpandHeight = ParseNumberOrDefault(Expand["height"], OutNode.FloatingExpandHeight);
+                    OutNode.FloatingExpandWidth = JSGetNumberOrDefault(Ctx, Expand.V, "width", OutNode.FloatingExpandWidth);
+                    OutNode.FloatingExpandHeight = JSGetNumberOrDefault(Ctx, Expand.V, "height", OutNode.FloatingExpandHeight);
                 }
             }
-            if (Props.HasMember("expandWidth"))
+            if (JSHasOwnProperty(Ctx, Props.V, "expandWidth"))
             {
-                OutNode.FloatingExpandWidth = ParseNumberOrDefault(Props["expandWidth"], OutNode.FloatingExpandWidth);
+                OutNode.FloatingExpandWidth = JSGetNumberOrDefault(Ctx, Props.V, "expandWidth", OutNode.FloatingExpandWidth);
             }
-            if (Props.HasMember("expandHeight"))
+            if (JSHasOwnProperty(Ctx, Props.V, "expandHeight"))
             {
-                OutNode.FloatingExpandHeight = ParseNumberOrDefault(Props["expandHeight"], OutNode.FloatingExpandHeight);
+                OutNode.FloatingExpandHeight = JSGetNumberOrDefault(Ctx, Props.V, "expandHeight", OutNode.FloatingExpandHeight);
             }
-            if (Props.HasMember("zIndex"))
+            if (JSHasOwnProperty(Ctx, Props.V, "zIndex"))
             {
-                OutNode.FloatingZIndex = static_cast<int16_t>(ParseNumberOrDefault(Props["zIndex"], static_cast<float>(OutNode.FloatingZIndex)));
+                OutNode.FloatingZIndex = static_cast<int16_t>(JSGetNumberOrDefault(Ctx, Props.V, "zIndex", static_cast<float>(OutNode.FloatingZIndex)));
             }
-            if (Props.HasMember("clipToParent"))
+            if (JSHasOwnProperty(Ctx, Props.V, "clipToParent"))
             {
-                OutNode.FloatingClipToParent = ParseBoolOrDefault(Props["clipToParent"], OutNode.FloatingClipToParent);
+                OutNode.FloatingClipToParent = JSGetBoolOrDefault(Ctx, Props.V, "clipToParent", OutNode.FloatingClipToParent);
             }
-            if (Props.HasMember("pointerPassthrough"))
+            if (JSHasOwnProperty(Ctx, Props.V, "pointerPassthrough"))
             {
-                OutNode.FloatingPointerPassthrough = ParseBoolOrDefault(Props["pointerPassthrough"], OutNode.FloatingPointerPassthrough);
+                OutNode.FloatingPointerPassthrough = JSGetBoolOrDefault(Ctx, Props.V, "pointerPassthrough", OutNode.FloatingPointerPassthrough);
             }
-            if (Props.HasMember("overflow"))
+            if (JSHasOwnProperty(Ctx, Props.V, "overflow"))
             {
-                OutNode.Overflow = ParseStringOrDefault(Props["overflow"], "");
+                OutNode.Overflow = JSGetStringOrDefault(Ctx, Props.V, "overflow", "");
             }
         }
 
@@ -1253,19 +1443,25 @@ struct NgxUIRuntime::Impl
             OutNode.TargetEntityId = EntityId;
         }
 
-        if (Value.HasMember("children") && Value["children"].IsArray())
+        ScopedJSValue ChildrenVal { Ctx, JS_GetPropertyStr(Ctx, NodeValue, "children") };
+        if (JS_IsArray(Ctx, ChildrenVal.V))
         {
-            const rapidjson::Value& Children = Value["children"];
-            for (rapidjson::SizeType Index = 0; Index < Children.Size(); ++Index)
+            std::vector<JSValue> Flat;
+            FlattenChildrenJS(Ctx, ChildrenVal.V, Flat);
+            for (size_t Index = 0; Index < Flat.size(); ++Index)
             {
                 UINode Child;
                 Child.Surface = OutNode.Surface;
-                if (!ParseNode(Children[Index], EntityId, Child))
+                const std::string ChildPath = Id + "." + std::to_string(Index);
+                if (ParseNodeFromJS(Ctx, Flat[Index], EntityId, ChildPath, Child, Depth + 1))
                 {
-                    continue;
+                    Child.Surface = OutNode.Surface;
+                    OutNode.Children.push_back(std::move(Child));
                 }
-                Child.Surface = OutNode.Surface;
-                OutNode.Children.push_back(Child);
+            }
+            for (size_t Index = 0; Index < Flat.size(); ++Index)
+            {
+                JS_FreeValue(Ctx, Flat[Index]);
             }
         }
 
@@ -1821,6 +2017,26 @@ struct NgxUIRuntime::Impl
         }
     }
 
+    // Re-layout a stored UINode (used by viewport changes and text-measure
+    // callbacks — avoids re-walking JS on every pixel change).
+    bool RelayoutStoredTree(const std::string& EntityId)
+    {
+        const std::map<std::string, UIEntityState>::iterator It = Entities.find(EntityId);
+        if (It == Entities.end())
+        {
+            return false;
+        }
+
+        const float RootAvailableWidth = It->second.Tree.Surface == UISurfaceKind::Screen
+            ? ViewportWidth
+            : (It->second.Tree.Width.Mode == UISizeMode::Fixed && It->second.Tree.Width.Value > 0.0f ? It->second.Tree.Width.Value : 1024.0f);
+        UINode Expanded = ExpandFlowRows(It->second.Tree, RootAvailableWidth);
+        const std::map<std::string, UIDrawable> NextDrawables = BuildDrawables(EntityId, Expanded);
+        QueueDiff(EntityId, It->second.Drawables, NextDrawables);
+        It->second.Drawables = NextDrawables;
+        return true;
+    }
+
     void WriteColor(rapidjson::Value& Target, const UIColor& Color, rapidjson::Document::AllocatorType& Allocator) const
     {
         Target.SetObject();
@@ -1891,6 +2107,12 @@ void NgxUIRuntime::Clear()
         Pimpl->QueueDiff(It->first, It->second.Drawables, std::map<std::string, UIDrawable>());
     }
     Pimpl->Entities.clear();
+    for (std::unordered_map<std::string, Impl::EntityHandlerTable>::iterator It = Pimpl->HandlerTablesByEntity.begin();
+         It != Pimpl->HandlerTablesByEntity.end(); ++It)
+    {
+        It->second.Reset();
+    }
+    Pimpl->HandlerTablesByEntity.clear();
     Pimpl->PendingTextMeasureRequests.clear();
     Pimpl->PendingTextMeasureRequestKeys.clear();
 }
@@ -1905,9 +2127,15 @@ void NgxUIRuntime::SetViewportSize(float Width, float Height)
     Pimpl->ViewportWidth = Width;
     Pimpl->ViewportHeight = Height;
 
-    for (std::map<std::string, UIEntityState>::iterator It = Pimpl->Entities.begin(); It != Pimpl->Entities.end(); ++It)
+    std::vector<std::string> EntityIds;
+    EntityIds.reserve(Pimpl->Entities.size());
+    for (std::map<std::string, UIEntityState>::const_iterator It = Pimpl->Entities.begin(); It != Pimpl->Entities.end(); ++It)
     {
-        Mount(It->first, It->second.TreeJson);
+        EntityIds.push_back(It->first);
+    }
+    for (size_t Index = 0; Index < EntityIds.size(); ++Index)
+    {
+        Pimpl->RelayoutStoredTree(EntityIds[Index]);
     }
 }
 
@@ -1980,33 +2208,35 @@ bool NgxUIRuntime::SubmitTextMeasureResultsJson(const std::string& ResultsJson)
     if (bAppliedAnyResults)
     {
         Pimpl->HasWarnedFallbackMeasurement = false;
-        std::vector<std::pair<std::string, std::string>> Trees;
-        Trees.reserve(Pimpl->Entities.size());
+        std::vector<std::string> EntityIds;
+        EntityIds.reserve(Pimpl->Entities.size());
         for (std::map<std::string, UIEntityState>::const_iterator It = Pimpl->Entities.begin(); It != Pimpl->Entities.end(); ++It)
         {
-            Trees.push_back(std::make_pair(It->first, It->second.TreeJson));
+            EntityIds.push_back(It->first);
         }
 
-        for (size_t Index = 0; Index < Trees.size(); ++Index)
+        for (size_t Index = 0; Index < EntityIds.size(); ++Index)
         {
-            Mount(Trees[Index].first, Trees[Index].second);
+            Pimpl->RelayoutStoredTree(EntityIds[Index]);
         }
     }
 
     return true;
 }
 
-bool NgxUIRuntime::Mount(const std::string& EntityId, const std::string& TreeJson)
+bool NgxUIRuntime::Mount(const std::string& EntityId, JSContext* Ctx, JSValueConst TreeValue)
 {
-    rapidjson::Document Document;
-    Document.Parse(TreeJson.c_str());
-    if (Document.HasParseError())
+    if (Ctx == nullptr)
     {
         return false;
     }
 
+    // Drop any handler references from a previous mount of this entity before
+    // the walker captures new ones. The old JSValues are released here.
+    Pimpl->ClearHandlerTable(EntityId);
+
     UINode Root;
-    if (!Pimpl->ParseNode(Document, EntityId, Root))
+    if (!Pimpl->ParseNodeFromJS(Ctx, TreeValue, EntityId, std::string("root"), Root, 0))
     {
         return false;
     }
@@ -2014,12 +2244,12 @@ bool NgxUIRuntime::Mount(const std::string& EntityId, const std::string& TreeJso
     const float RootAvailableWidth = Root.Surface == UISurfaceKind::Screen
         ? Pimpl->ViewportWidth
         : (Root.Width.Mode == UISizeMode::Fixed && Root.Width.Value > 0.0f ? Root.Width.Value : 1024.0f);
-    Root = Pimpl->ExpandFlowRows(Root, RootAvailableWidth);
+    UINode Expanded = Pimpl->ExpandFlowRows(Root, RootAvailableWidth);
 
-    const std::map<std::string, UIDrawable> NextDrawables = Pimpl->BuildDrawables(EntityId, Root);
+    const std::map<std::string, UIDrawable> NextDrawables = Pimpl->BuildDrawables(EntityId, Expanded);
     UIEntityState& State = Pimpl->Entities[EntityId];
     Pimpl->QueueDiff(EntityId, State.Drawables, NextDrawables);
-    State.TreeJson = TreeJson;
+    State.Tree = Root;
     State.Drawables = NextDrawables;
     return true;
 }
@@ -2029,12 +2259,29 @@ bool NgxUIRuntime::Unmount(const std::string& EntityId)
     const std::map<std::string, UIEntityState>::iterator It = Pimpl->Entities.find(EntityId);
     if (It == Pimpl->Entities.end())
     {
+        Pimpl->ClearHandlerTable(EntityId);
         return false;
     }
 
     Pimpl->QueueDiff(EntityId, It->second.Drawables, std::map<std::string, UIDrawable>());
     Pimpl->Entities.erase(It);
+    Pimpl->ClearHandlerTable(EntityId);
     return true;
+}
+
+JSValueConst NgxUIRuntime::GetHandler(const std::string& EntityId, const std::string& HandlerId) const
+{
+    const std::unordered_map<std::string, Impl::EntityHandlerTable>::const_iterator It = Pimpl->HandlerTablesByEntity.find(EntityId);
+    if (It == Pimpl->HandlerTablesByEntity.end())
+    {
+        return JS_UNDEFINED;
+    }
+    const std::unordered_map<std::string, JSValue>::const_iterator FnIt = It->second.Handlers.find(HandlerId);
+    if (FnIt == It->second.Handlers.end())
+    {
+        return JS_UNDEFINED;
+    }
+    return FnIt->second;
 }
 
 std::string NgxUIRuntime::DrainPendingUpdatesJson()

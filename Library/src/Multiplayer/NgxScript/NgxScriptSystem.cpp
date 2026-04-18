@@ -807,37 +807,89 @@ bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, cons
         return false;
     }
 
-    const std::string Snippet = fmt::format(
-        "(function() {{ "
-        "  if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function') {{ "
-        "    globalThis.{} = !!globalThis.scriptRegistry.dispatchUIAction('{}', '{}', {}); "
-        "  }} else {{ "
-        "    globalThis.{} = false; "
-        "  }} "
-        "}})();",
-        CODECOMPONENT_BOOL_RESULT_SLOT, EscapeJSStringLiteral(EntityId.c_str()), EscapeJSStringLiteral(HandlerId.c_str()),
-        EventDataJson.IsEmpty() ? "null" : EventDataJson.c_str(),
-        CODECOMPONENT_BOOL_RESULT_SLOT);
-
+    // Look up the handler JSValue via the C++-owned handler table. We never
+    // evaluate a JS snippet for each event — the old path chained parser ->
+    // eval -> scriptRegistry.dispatchUIAction and blew the WASM stack on burst
+    // clicks. Now we call the captured JS function directly with JS_Call.
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)
     {
         return false;
     }
+    JSContext* Ctx = Context->ctx;
 
-    if (Context->eval(Snippet, "<ngx-dispatch-ui-action>", JS_EVAL_TYPE_GLOBAL).isException())
+    JSValueConst HandlerFn = JS_UNDEFINED;
+    {
+        std::scoped_lock UILock(UIMutex);
+        if (!UIRuntime)
+        {
+            return false;
+        }
+        HandlerFn = UIRuntime->GetHandler(std::string(EntityId.c_str()), std::string(HandlerId.c_str()));
+    }
+
+    if (!JS_IsFunction(Ctx, HandlerFn))
     {
         return false;
     }
 
-    try
+    JSValue EventObj = JS_UNDEFINED;
+    if (!EventDataJson.IsEmpty())
     {
-        return Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
+        EventObj = JS_ParseJSON(Ctx, EventDataJson.c_str(), EventDataJson.Length(), "<ngx-dispatch-ui-event>");
+        if (JS_IsException(EventObj))
+        {
+            JS_FreeValue(Ctx, EventObj);
+            EventObj = JS_NULL;
+        }
     }
-    catch (...)
+    else
     {
-        return false;
+        EventObj = JS_NULL;
     }
+
+    // Hand off to the registry's batch-aware wrapper so signal effects still
+    // flush in a single batch() pass. The wrapper sets thisEntity context too.
+    JSValue GlobalObj = JS_GetGlobalObject(Ctx);
+    JSValue Registry = JS_GetPropertyStr(Ctx, GlobalObj, "scriptRegistry");
+    bool bResult = false;
+    if (JS_IsObject(Registry))
+    {
+        JSValue Dispatcher = JS_GetPropertyStr(Ctx, Registry, "dispatchUIActionDirect");
+        if (JS_IsFunction(Ctx, Dispatcher))
+        {
+            JSValue EntityIdStr = JS_NewString(Ctx, EntityId.c_str());
+            JSValueConst Args[3];
+            Args[0] = EntityIdStr;
+            Args[1] = HandlerFn;
+            Args[2] = EventObj;
+            JSValue CallResult = JS_Call(Ctx, Dispatcher, Registry, 3, Args);
+            if (!JS_IsException(CallResult))
+            {
+                bResult = JS_ToBool(Ctx, CallResult) > 0;
+            }
+            else
+            {
+                JSValue ExceptionValue = JS_GetException(Ctx);
+                const char* ExceptionStr = JS_ToCString(Ctx, ExceptionValue);
+                LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    std::string("NgxScript: dispatchUIActionDirect threw: ").append(ExceptionStr ? ExceptionStr : "<unknown>").c_str());
+                if (ExceptionStr != nullptr)
+                {
+                    JS_FreeCString(Ctx, ExceptionStr);
+                }
+                JS_FreeValue(Ctx, ExceptionValue);
+            }
+            JS_FreeValue(Ctx, CallResult);
+            JS_FreeValue(Ctx, EntityIdStr);
+        }
+        JS_FreeValue(Ctx, Dispatcher);
+    }
+    JS_FreeValue(Ctx, Registry);
+    JS_FreeValue(Ctx, GlobalObj);
+    JS_FreeValue(Ctx, EventObj);
+
+    return bResult;
 }
 
 void NgxScriptSystem::ClearAllEntityEventListeners()
@@ -1268,10 +1320,14 @@ void NgxScriptSystem::InstallHostBindings()
             return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
         });
     CSPModule.function("__uiMount",
-        [this](const std::string& EntityIdText, const std::string& TreeJson) -> bool
+        [this](const std::string& EntityIdText, qjs::Value TreeValue) -> bool
         {
             std::scoped_lock UILock(UIMutex);
-            return UIRuntime->Mount(EntityIdText, TreeJson);
+            if (!UIRuntime || TreeValue.ctx == nullptr)
+            {
+                return false;
+            }
+            return UIRuntime->Mount(EntityIdText, TreeValue.ctx, TreeValue.v);
         });
     CSPModule.function("__uiUnmount",
         [this](const std::string& EntityIdText) -> bool
