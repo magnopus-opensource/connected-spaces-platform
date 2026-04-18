@@ -886,6 +886,7 @@ struct NgxUIRuntime::Impl
             Clay_Dimensions { ViewportWidth, ViewportHeight }, ErrorHandler);
         Clay_SetCurrentContext(ClayContext);
         Clay_SetMeasureTextFunction(&Impl::MeasureTextThunk, this);
+        Clay_SetCullingEnabled(false);
     }
 
     static Clay_Dimensions MeasureTextThunk(Clay_StringSlice Text, Clay_TextElementConfig* Config, void* UserData)
