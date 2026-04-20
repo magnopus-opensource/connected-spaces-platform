@@ -108,6 +108,10 @@ public:
         const csp::common::Vector3& Forward, const csp::common::Vector3& ForwardFlat, const csp::common::Vector3& Right,
         const csp::common::Vector3& RightFlat, const csp::common::Vector3& Up);
 
+    // Cache whether the local client is currently in an immersive WebXR session, for script queries
+    // (e.g. AttachmentSpaceComponent anchor resolution or VR-specific UI layout choices).
+    void SetLocalPlayerXrActive(bool bActive);
+
     // Update the logical viewport size used for screen-space UI layout.
     void SetUIViewportSize(float Width, float Height);
 
@@ -203,6 +207,7 @@ private:
     csp::common::Vector3 GetLocalPlayerCameraRight() const;
     csp::common::Vector3 GetLocalPlayerCameraRightFlat() const;
     csp::common::Vector3 GetLocalPlayerCameraUp() const;
+    bool GetLocalPlayerXrActive() const;
 
     csp::common::LogSystem& LogSystem;
     csp::common::IRealtimeEngine* ActiveRealtimeEngine;
@@ -231,6 +236,7 @@ private:
     csp::common::Vector3 LocalPlayerCameraRight;
     csp::common::Vector3 LocalPlayerCameraRightFlat;
     csp::common::Vector3 LocalPlayerCameraUp;
+    bool LocalPlayerXrActive;
     std::unique_ptr<NgxUIRuntime> UIRuntime;
     std::unique_ptr<csp::multiplayer::NgxAssetScriptBinding> AssetBinding;
     bool bAssetDetailBlobChangedListenerRegistered;

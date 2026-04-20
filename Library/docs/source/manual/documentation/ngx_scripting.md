@@ -483,6 +483,39 @@ export function script() {
 - `teleportCharacter(x, y, z)`
 - `setFirstPersonEnabled(enabled)`
 - camera query helpers such as `getCameraPosition()` and `getCameraForward()`
+- `isVrActive()` returns `true` when the local client is currently in a WebXR session (useful for choosing VR-specific layouts or deciding whether to attach a UI to a controller). Returns `false` outside VR.
+
+## Visual Attachment To Anchors
+
+An entity can be visually parented to a named anchor point (an XR controller, for example) without changing the CSP scene hierarchy. Add an `AttachmentSpaceComponent` and set `anchorPath`:
+
+```js
+import { useEffect } from "@csp/hooks";
+import { ThePlayerController } from "@csp/code";
+
+export function script({ thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    const attachment = entity.addAttachmentComponent();
+    attachment.anchorPath = ThePlayerController.isVrActive() ? "/xr/left-hand" : "";
+
+    return () => attachment.destroy();
+  });
+}
+```
+
+When the path resolves, the entity's `SpaceTransform` is interpreted as **local** to the anchor — `(0, 0, 0)` sits at the anchor root. World-mounted NGX UIs hosted by the entity follow automatically via the renderer scene graph.
+
+Supported paths (MVP):
+
+- `/xr/left-hand` — the local client's left controller grip node
+- `/xr/right-hand` — the local client's right controller grip node
+
+Path resolution is local: each observer resolves `/xr/*` against their own controllers, so a UI attached on one client's hand is not visible on another client's hand. If the path does not resolve (XR not active, controller missing, unknown scheme, or empty string), the entity falls back to rendering at its `SpaceTransform` in world space — so non-VR users see the UI as an ordinary world panel.
 
 ## Accessing Other Entities
 

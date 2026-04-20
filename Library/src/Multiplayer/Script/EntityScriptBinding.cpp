@@ -24,6 +24,7 @@
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
@@ -469,6 +470,11 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterialPaths>("__getMaterialPaths")
         .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterial>("__getMaterial");
 
+    Module->class_<AttachmentSpaceComponentScriptInterface>("AttachmentSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .PROPERTY_GET_SET(AttachmentSpaceComponent, AnchorPath, "anchorPath");
+
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -776,6 +782,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
             "getVideoPlayerComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>>(
             "getAnimatedModelComponents")
+        .fun<&EntityScriptInterface::GetComponentsOfType<AttachmentSpaceComponentScriptInterface, ComponentType::Attachment>>(
+            "getAttachmentComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AvatarSpaceComponentScriptInterface, ComponentType::AvatarData>>("getAvatarComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>>(
             "getExternalLinkComponents")
@@ -821,6 +829,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::RemoveTag>("removeTag")
         .fun<&EntityScriptInterface::AddStaticModelComponent>("addStaticModelComponent")
         .fun<&EntityScriptInterface::AddAnimatedModelComponent>("addAnimatedModelComponent")
+        .fun<&EntityScriptInterface::AddAttachmentComponent>("addAttachmentComponent")
         .fun<&EntityScriptInterface::AddAudioComponent>("addAudioComponent")
         .fun<&EntityScriptInterface::AddButtonComponent>("addButtonComponent")
         .fun<&EntityScriptInterface::AddCinematicCameraComponent>("addCinematicCameraComponent")

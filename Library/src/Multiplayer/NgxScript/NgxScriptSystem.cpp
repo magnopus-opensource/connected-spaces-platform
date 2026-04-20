@@ -399,6 +399,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , ScriptModulesLoaded(false)
     , LastEvaluationDeferred(false)
     , PendingJobPumpActive(false)
+    , LocalPlayerXrActive(false)
     , UIRuntime(std::make_unique<NgxUIRuntime>(InLogSystem))
     , bAssetDetailBlobChangedListenerRegistered(false)
     , GcTickCounter(0)
@@ -1010,6 +1011,18 @@ csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraUp() const
     return LocalPlayerCameraUp;
 }
 
+void NgxScriptSystem::SetLocalPlayerXrActive(bool bActive)
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    LocalPlayerXrActive = bActive;
+}
+
+bool NgxScriptSystem::GetLocalPlayerXrActive() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerXrActive;
+}
+
 void NgxScriptSystem::RebuildContext()
 {
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: RebuildContext begin.");
@@ -1126,6 +1139,7 @@ void NgxScriptSystem::InstallHostBindings()
     CSPModule.function("__getLocalPlayerCameraRight", [this]() { return ToJSVector(GetLocalPlayerCameraRight()); });
     CSPModule.function("__getLocalPlayerCameraRightFlat", [this]() { return ToJSVector(GetLocalPlayerCameraRightFlat()); });
     CSPModule.function("__getLocalPlayerCameraUp", [this]() { return ToJSVector(GetLocalPlayerCameraUp()); });
+    CSPModule.function("__isXrActive", [this]() { return GetLocalPlayerXrActive(); });
     CSPModule.function("__resolveEntityQuery",
         [this](const std::string& QueryJson) -> std::string
         {
@@ -1341,7 +1355,11 @@ globalThis.csp = csp;
 
 // Format a single console argument. For Error objects we use the stack
 // property (when available) so callers get a useful trace. Plain objects
-// are serialised with JSON.stringify.
+// are serialised via a depth-limited, cycle-safe iterator so that deep
+// reactive graphs (signals holding entity references, etc.) cannot blow
+// the WASM stack. Unbounded JSON.stringify was the cause of repeated
+// "Maximum call stack size exceeded" tick crashes.
+const __CSP_FORMAT_MAX_DEPTH = 6;
 function __cspFormatArg(value) {
     if (value instanceof Error) {
         return typeof value.stack === 'string' && value.stack.length > 0
@@ -1349,7 +1367,41 @@ function __cspFormatArg(value) {
             : String(value);
     }
     if (value !== null && typeof value === 'object') {
-        try { return JSON.stringify(value); } catch { return String(value); }
+        try {
+            const seen = new WeakSet();
+            const sanitize = (node, depth) => {
+                if (node === null) return null;
+                const t = typeof node;
+                if (t === 'string' || t === 'number' || t === 'boolean') return node;
+                if (t === 'function') return '[Function]';
+                if (t === 'undefined') return undefined;
+                if (t === 'bigint' || t === 'symbol') return String(node);
+                if (t !== 'object') return String(node);
+                if (depth >= __CSP_FORMAT_MAX_DEPTH) return '[Object]';
+                if (seen.has(node)) return '[Circular]';
+                seen.add(node);
+                if (Array.isArray(node)) {
+                    const out = [];
+                    const limit = Math.min(node.length, 64);
+                    for (let i = 0; i < limit; i += 1) {
+                        try { out.push(sanitize(node[i], depth + 1)); }
+                        catch { out.push('[Error]'); }
+                    }
+                    if (node.length > limit) out.push(`[+${node.length - limit} more]`);
+                    return out;
+                }
+                const out = {};
+                let count = 0;
+                for (const k of Object.keys(node)) {
+                    if (count >= 32) { out['...'] = '[+more]'; break; }
+                    try { out[k] = sanitize(node[k], depth + 1); }
+                    catch { out[k] = '[Error]'; }
+                    count += 1;
+                }
+                return out;
+            };
+            return JSON.stringify(sanitize(value, 0));
+        } catch { return String(value); }
     }
     return String(value);
 }

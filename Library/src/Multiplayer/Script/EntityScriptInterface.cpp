@@ -21,6 +21,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
@@ -535,6 +536,11 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
     }
 
     return Components;
+}
+
+AttachmentSpaceComponentScriptInterface* EntityScriptInterface::AddAttachmentComponent()
+{
+    return AddComponentForScript<AttachmentSpaceComponentScriptInterface, ComponentType::Attachment>();
 }
 
 StaticModelSpaceComponentScriptInterface* EntityScriptInterface::AddStaticModelComponent()

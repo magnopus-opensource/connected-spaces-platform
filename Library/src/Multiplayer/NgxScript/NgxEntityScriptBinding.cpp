@@ -254,6 +254,11 @@ globalThis.__cspPlayerController.getCameraUp = () =>
     ? globalThis.csp.__getLocalPlayerCameraUp()
     : [0, 1, 0];
 
+globalThis.__cspPlayerController.isVrActive = () =>
+  (globalThis.csp && typeof globalThis.csp.__isXrActive === "function")
+    ? !!globalThis.csp.__isXrActive()
+    : false;
+
 async function __ngxWaitForMaterial(material) {
   for (;;) {
     if (!material || material.status !== "loading") {

@@ -27,6 +27,7 @@ namespace csp::multiplayer
 
 class SpaceEntity;
 class ComponentScriptInterface;
+class AttachmentSpaceComponentScriptInterface;
 class LightSpaceComponentScriptInterface;
 class ButtonSpaceComponentScriptInterface;
 class VideoPlayerSpaceComponentScriptInterface;
@@ -105,6 +106,7 @@ public:
     void ClearEventListeners();
 
     std::vector<ComponentScriptInterface*> GetComponents();
+    AttachmentSpaceComponentScriptInterface* AddAttachmentComponent();
     StaticModelSpaceComponentScriptInterface* AddStaticModelComponent();
     AnimatedModelSpaceComponentScriptInterface* AddAnimatedModelComponent();
     AudioSpaceComponentScriptInterface* AddAudioComponent();

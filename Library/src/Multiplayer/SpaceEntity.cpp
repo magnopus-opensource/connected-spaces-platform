@@ -20,6 +20,7 @@
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
+#include "CSP/Multiplayer/Components/AttachmentSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
@@ -721,6 +722,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::AIChatbot:
         Component = new AIChatbotSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::Attachment:
+        Component = new AttachmentSpaceComponent(LogSystem, this);
         break;
     default:
     {
