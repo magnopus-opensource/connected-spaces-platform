@@ -81,7 +81,8 @@ async function copyTypeScriptArtifacts(): Promise<void> {
   const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
   const tsDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web"),
-    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web")
+    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web"),
+    join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform")
   ];
 
   for (const tsDestPath of tsDestPaths) {
@@ -158,11 +159,12 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
   step++;
 
 
-  // Step 5: Copy binary files to both destinations
+  // Step 5: Copy binary files to all destinations
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
   const binaryDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
-    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized)
+    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
+    join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform", buildTypeCapitalized)
   ];
   for (const binaryDestPath of binaryDestPaths) {
     console.log(`\n[${step}/${totalSteps}] Copying binary files from ${binarySourcePath} to ${binaryDestPath}...`);
@@ -184,11 +186,12 @@ async function copyFilesOnly(buildType: string) {
   
   console.log(`\nPerforming copy operations for ${buildType} build...`);
   
-  // Step 1: Copy binary files to both destinations
+  // Step 1: Copy binary files to all destinations
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
   const binaryDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
-    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized)
+    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
+    join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform", buildTypeCapitalized)
   ];
   for (const binaryDestPath of binaryDestPaths) {
     console.log(`\n[1/2] Copying binary files from ${binarySourcePath} to ${binaryDestPath}...`);
