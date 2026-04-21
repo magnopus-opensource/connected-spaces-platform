@@ -72,7 +72,7 @@ compile_commands.json
 SonarScanner.log
 vs-tmp.txt
 Tools/Emscripten/EmscriptenBuild.log
-
+mac-build
 # Ignore auto-generated XCode project files
 *.xcworkspace
 *.xcodeproj
