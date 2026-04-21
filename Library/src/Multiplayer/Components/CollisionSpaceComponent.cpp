@@ -16,6 +16,7 @@
 
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -30,21 +31,63 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 namespace csp::multiplayer
 {
 
-CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Collision, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape)] = static_cast<int64_t>(CollisionShape::Box);
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)] = static_cast<int64_t>(CollisionMode::CollisionStatic);
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId)] = "";
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Friction)] = 0.5f;
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Restitution)] = 0.0f;
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Mass)] = 1.0f;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Collision,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Scale),
+            csp::common::Vector3 { 1, 1, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionShape),
+            static_cast<int64_t>(CollisionShape::Box),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionMode),
+            static_cast<int64_t>(CollisionMode::Collision),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::AssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::ThirdPartyComponentRef),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::IsEnabled),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Friction),
+            0.5f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Restitution),
+            0.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Mass),
+            1.0f,
+        },
+    },
+};
 
+CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }
 
@@ -193,5 +236,9 @@ void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::Strin
 {
     SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
+
+bool CollisionSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled)); }
+
+void CollisionSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), Value); }
 
 } // namespace csp::multiplayer

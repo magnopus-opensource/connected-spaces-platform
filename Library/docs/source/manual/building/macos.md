@@ -29,7 +29,7 @@ First of all you'll need to run the following script:
  > If you get an error with premake not found, this is the first module built so you'll need to checkout the submodules with `git submodule update --init --recursive`.
 4. Open up Terminal in the Foundation Root Folder and run :
 
-`xcodebuild BITCODE_GENERATION_MODE=bitcode OTHER_CFLAGS="-fembed-bitcode" -configuration ReleaseDLL -project Library/ConnectedSpacesPlatform.xcodeproj`
+`xcodebuild -configuration ReleaseDLL -project Library/ConnectedSpacesPlatform.xcodeproj`
 
 _Note: To Build Debug DLLs replace `ReleaseDLL` with `DebugDLL` and likewise with the directory location._
 

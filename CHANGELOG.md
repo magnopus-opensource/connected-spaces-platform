@@ -2,9 +2,69 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.33.0]
+
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] test: Address issue with flackey ValidExpiryLengthInTokenOptionsTest by MAG-AdamThorn
+  The test ValidExpiryLengthInTokenOptionsTest was failing when run against live services on our CI due to network latency. Adressed the flackiness and also removed calls to `NotifyRefreshTokenHasChanged()` from the UserSystem as this is already being done within the `LoginStateResult::OnResponse()`, resulting in the `UserSystem NewLoginTokenReceivedCallback` callback being fired twice.
+
+
+## [6.32.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1625] feat: Add enabled property to `CollisionSpaceComponent`. By @mag-lt.
+
+- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
+  This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
+
+###💫 💥 Code Refactors
+
+- [OF-1848] refac: Add internal constructor to `ComponentBase` for constructing from a `Schema` structure. By @mag-lt
+  This is an internal refactor step towards more easily defining new components. All existing components
+  have been refactored to specify their properties this way and delegate to this new constructor.
+
+- [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to ensure compatibility with SignalR wire representation. By @mag-lt
+  This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
+  the existing constaints into the type system.
+  
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix tasks dropping in signalR scheduler by @MAG-ElliotMorris
+  Address issue where signalR scheduler can drop tasks in rare instances where scheduler threads are almost completely busy.
+
+## [6.31.0]
+
+###🔥 ❗Breaking Changes
+
+- [OF-1771] refac!: Remove `username` as an option for account management by @MAG-ElliotMorris
+  Login has traditionally accepted either an email or a username, but username
+  has rarely/never been used, and dealing with both creates some complexity in
+  the error handling behaviour which we can just do without. Login with email
+  now, you probably already are.
+  Removes username as an option from public api:
+    - UserSystem::Login
+    - UserSystem::CreateUser
+    - UserSystem::UpgradeGuestAccount
+
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Add validation for optional fields in PointOfInterest DTO. by mag-lt
+  Recent changes to MCS, which resulted in only sending fields that are populated
+  (instead of default initialised values), exposed that CSP was naively assuming
+  that various optional fields are always set, resulting in `bad_optional_access`
+  exceptions being thrown.
+  
+- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
+  The SignalR threading library by default, constructs several instances of the scheduler,
+  (and thus several sets of threads) during initialization. These are never cleared on WASM,
+  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
+  generally under a similar motivation, as we don't need 5 threads.
+
 ## [6.30.0]
 
-### 🔥 ❗Breaking Changes
+###🔥 ❗Breaking Changes
 
 - [OF-1843] chore!: Remove mutable `csp::common::String& GetUri()` from `UriResult`. The const getter remains available. By @MAG-ElliotMorris
 
@@ -12,6 +72,15 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley
   Resolving a potential crash that can occur when callbacks are executed in response to heartbeat invocations by the ScopeLeadershipManager.
+
+- [NT-0] fix: Fixed logs firing that state the scope already has a leader when thw first client joins. by MAG-mv
+  Uninitialized memory was causing the leader election system to think there is a leader.
+
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] fix: Fixing UpdateScopeByIdTest + temporarily disabling GetScopeLeaderTest" by MAG-mv
+  Disabling GetScopeLeaderTest means we can't verify this function is working as intended.
+  However, this function is currently only used for CSP internal testing, and is likely failing due to timing, rather than broken logic.
 
 ## [6.29.0]
 

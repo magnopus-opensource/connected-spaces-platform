@@ -195,7 +195,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateScopeByIdTest)
     const csp::common::String NewScopeName = ScopeId + "NewName";
     const csp::systems::PubSubModelType NewType = csp::systems::PubSubModelType::Object;
     const double NewRadius = 99.0;
-    const bool NewManagedLeaderElection = true;
+    const bool NewManagedLeaderElection = false;
 
     csp::systems::Scope NewScope = DefaultScope;
     NewScope.Name = NewScopeName;

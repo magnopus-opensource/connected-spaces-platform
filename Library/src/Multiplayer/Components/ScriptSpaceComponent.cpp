@@ -18,16 +18,32 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
+#include "Multiplayer/Component/Schema.h"
+
 namespace csp::multiplayer
 {
 
-ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ScriptData, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource)] = "";
-    Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)] = static_cast<int64_t>(0);
-    Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope)] = static_cast<int64_t>(ScriptScope::Owner);
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::ScriptData,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::ScriptSource),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::OwnerId),
+            static_cast<int64_t>(0),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::ScriptScope),
+            static_cast<int64_t>(ScriptScope::Owner),
+        },
+    },
+};
 
+ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     Parent->GetScript().SetScriptSpaceComponent(this);
 }
 

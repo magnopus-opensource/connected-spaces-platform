@@ -18,6 +18,7 @@
 
 #include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CallHelpers.h"
 #include "LODHelpers.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
@@ -349,13 +350,14 @@ AssetSystem::AssetSystem()
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, common::LogSystem& LogSystem)
+AssetSystem::AssetSystem(
+    web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
 {
     PrototypeAPI = new chs::PrototypeApi(WebClient);
     AssetDetailAPI = new chs::AssetDetailApi(WebClient);
 
-    FileManager = new web::RemoteFileManager(WebClient);
+    FileManager = new web::RemoteFileManager(WebClient, InAuthContext);
 
     RegisterSystemCallback();
 }

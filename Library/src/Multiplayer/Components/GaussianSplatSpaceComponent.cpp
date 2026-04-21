@@ -16,25 +16,61 @@
 
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::GaussianSplat, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)] = "";
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)] = true;
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::GaussianSplat,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Rotation),
+            csp::common::Vector4::Identity(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsShadowCaster),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Tint),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
 

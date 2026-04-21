@@ -70,6 +70,7 @@ public:
     const std::map<std::string, std::string>& HTTPHeaders() const override;
 
 private:
+    signalr::signalr_client_config config;
     signalr::hub_connection Connection;
 
     // We tracking pending invocations so that we can guarantee that the connection is not stopped until all
@@ -77,7 +78,6 @@ private:
     // avatar entity, and we need to ensure that message has gone through before destroying the connection.
     std::atomic_uint PendingInvocations;
     std::function<void(std::exception_ptr)> PendingStopCallback;
-    signalr::signalr_client_config config;
 };
 
 } // namespace csp::multiplayer

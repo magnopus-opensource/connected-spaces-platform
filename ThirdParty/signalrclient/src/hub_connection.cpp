@@ -12,10 +12,10 @@
 
 namespace signalr
 {
-    hub_connection::hub_connection(const std::string& url, std::unique_ptr<hub_protocol>&& hub_protocol,
+    hub_connection::hub_connection(const std::string& url, std::unique_ptr<hub_protocol>&& hub_protocol, signalr_client_config client_config,
         trace_level trace_level, std::shared_ptr<log_writer> log_writer, std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,
         std::function<std::shared_ptr<websocket_client>(const signalr_client_config&)> websocket_factory, const bool skip_negotiation)
-        : m_pImpl(hub_connection_impl::create(url, std::move(hub_protocol), trace_level, log_writer, http_client_factory, websocket_factory, skip_negotiation))
+        : m_pImpl(hub_connection_impl::create(url, std::move(hub_protocol), std::move(client_config), trace_level, log_writer, http_client_factory, websocket_factory, skip_negotiation))
     {}
 
     hub_connection::hub_connection(hub_connection&& rhs) noexcept

@@ -2,7 +2,7 @@
 {{!    Template for class methods    }}
 {{! -------------------------------- }}
 
-async {{ name }}(
+{{# is_static }}static {{/ is_static }}async {{ name }}(
 {{# parameters }}
     {{ name }}: {{# type }}{{> TypeName }}{{# is_optional }} | null {{/ is_optional }}{{/ type }}{{> Comma }}
 {{/ parameters }}
@@ -135,7 +135,9 @@ async {{ name }}(
         "{{ unique_name }}",
         "void",
         [
+{{^ is_static }}
             "number",
+{{/ is_static }}
 {{# parameters }}
             "{{type.call_param_type}}"
             ,
@@ -144,7 +146,9 @@ async {{ name }}(
             "number"
         ],
         [
+{{^ is_static }}
             this.pointer,
+{{/ is_static }}
 {{# parameters }}
 {{# type.is_optional }}
 {{# type.is_class_or_interface }}

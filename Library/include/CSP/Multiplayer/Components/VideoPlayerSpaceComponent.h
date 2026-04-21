@@ -60,7 +60,7 @@ enum class VideoPlayerSourceType
 };
 
 /// @brief Enumerates the list of properties that can be replicated for a video player component.
-enum class VideoPlayerPropertyKeys
+enum class VideoPlayerPropertyKeys : uint16_t
 {
     Name_DEPRECATED = 0,
     VideoAssetId,

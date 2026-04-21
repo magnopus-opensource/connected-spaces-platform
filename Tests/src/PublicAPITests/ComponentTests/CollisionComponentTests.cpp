@@ -85,6 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Box);
     EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "");
     EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "");
+    EXPECT_EQ(CollisionComponent->GetIsEnabled(), true);
 
     // Set new values
     CollisionComponent->SetPosition(csp::common::Vector3::One());
@@ -93,6 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     CollisionComponent->SetCollisionShape(csp::multiplayer::CollisionShape::Mesh);
     CollisionComponent->SetCollisionAssetId("TestAssetID");
     CollisionComponent->SetAssetCollectionId("TestAssetCollectionID");
+    CollisionComponent->SetIsEnabled(false);
 
     // Ensure values are set correctly
     EXPECT_EQ(CollisionComponent->GetPosition(), csp::common::Vector3::One());
@@ -105,6 +107,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Mesh);
     EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "TestAssetID");
     EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "TestAssetCollectionID");
+    EXPECT_EQ(CollisionComponent->GetIsEnabled(), false);
 
     CollisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::CollisionDynamic);
     EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::CollisionDynamic);

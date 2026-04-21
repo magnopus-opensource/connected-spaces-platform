@@ -15,31 +15,85 @@
  */
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Light, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(LightPropertyKeys::LightType)] = static_cast<int64_t>(LightType::Point);
-    Properties[static_cast<uint32_t>(LightPropertyKeys::Color)] = csp::common::Vector3 { 255, 255, 255 };
-    Properties[static_cast<uint32_t>(LightPropertyKeys::Intensity)] = 5000.0f;
-    Properties[static_cast<uint32_t>(LightPropertyKeys::Range)] = 1000.0f;
-    Properties[static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle)] = 0.0f;
-    Properties[static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle)] = 0.78539816339f; // Pi / 4
-    Properties[static_cast<uint32_t>(LightPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(LightPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(LightPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetId)] = "";
-    Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieType)] = static_cast<int64_t>(LightCookieType::NoCookie);
-    Properties[static_cast<uint32_t>(LightPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef)] = "";
-    Properties[static_cast<uint32_t>(LightPropertyKeys::LightShadowType)] = static_cast<int64_t>(LightShadowType::None);
-    Properties[static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Light,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightType),
+            static_cast<int64_t>(LightType::Point),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Color),
+            csp::common::Vector3 { 255, 255, 255 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Intensity),
+            5000.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Range),
+            1000.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::InnerConeAngle),
+            0.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::OuterConeAngle),
+            0.78539816339f, // Pi / 4
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieAssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieType),
+            static_cast<int64_t>(LightCookieType::NoCookie),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::ThirdPartyComponentRef),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightShadowType),
+            static_cast<int64_t>(LightShadowType::None),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new LightSpaceComponentScriptInterface(this));
 }
 

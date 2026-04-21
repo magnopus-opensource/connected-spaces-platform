@@ -29,7 +29,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for an avatar component.
-enum class AvatarComponentPropertyKeys
+enum class AvatarComponentPropertyKeys : uint16_t
 {
     AvatarId = 0,
     UserId,

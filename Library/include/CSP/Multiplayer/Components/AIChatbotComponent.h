@@ -27,7 +27,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a AI chatbot component.
-enum class AIChatbotPropertyKeys
+enum class AIChatbotPropertyKeys : uint16_t
 {
     Position = 0,
     Voice,

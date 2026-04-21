@@ -50,7 +50,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a conversation component.
-enum class ConversationPropertyKeys
+enum class ConversationPropertyKeys : uint16_t
 {
     ConversationId = 0,
     IsVisible,

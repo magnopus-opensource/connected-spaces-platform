@@ -8,12 +8,10 @@ export const TEST_ACCOUNT_PASSWORD = "3R{d2}3C<x[J7=jU";
 export async function CreateTestUser(): Promise<Systems.ProfileResult> {
   const userSystem = Systems.SystemsManager.get().getUserSystem();
 
-  const uniqueUserName = "CSP-TEST-NAME" + uuidv4();
   const testDisplayName = "CSP-TEST-DISPLAY";
   const uniqueEmail = "testnopus.pokemon+" + uuidv4() + "@magnopus.com";
 
   const user = await userSystem.createUser(
-    uniqueUserName,                         // userName
     testDisplayName,                        // displayName
     uniqueEmail,                            // email
     TEST_ACCOUNT_PASSWORD,                  // password
@@ -31,7 +29,7 @@ export async function LoginAsUser(creds: Systems.ProfileResult){
   const userSystem = Systems.SystemsManager.get().getUserSystem();
 
   // Logs or errors are validated in the invoking test.
-  const loginResult = await userSystem.login('', creds.getProfile().email, TEST_ACCOUNT_PASSWORD, true, true, null);
+  const loginResult = await userSystem.login(creds.getProfile().email, TEST_ACCOUNT_PASSWORD, true, true, null);
   if (loginResult.getResultCode() == Systems.EResultCode.Success){
     console.log("Successfully logged in");
   }

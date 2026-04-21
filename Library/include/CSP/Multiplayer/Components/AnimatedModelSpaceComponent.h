@@ -43,7 +43,7 @@ enum class AnimatedModelActions
 };
 
 /// @brief Enumerates the list of properties that can be replicated for an animated model component.
-enum class AnimatedModelPropertyKeys
+enum class AnimatedModelPropertyKeys : uint16_t
 {
     Name_DEPRECATED = 0,
     ExternalResourceAssetId,

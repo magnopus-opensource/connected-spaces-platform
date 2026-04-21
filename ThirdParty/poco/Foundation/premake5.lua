@@ -85,6 +85,10 @@ if not POCO.Foundation then
         filter "platforms:Android"
             linkoptions { "-lm" } -- For gcc's math lib
             staticruntime("On")
+        filter { "platforms:macosx or ios" }
+            -- workaround POCO's vendored version of zlib causing issues in Xcode 16.3+
+            -- this should be removed when upgrading to POCO 1.14.0 or above
+            buildoptions { "-fno-define-target-os-macros" }
         filter {}
     end
 end

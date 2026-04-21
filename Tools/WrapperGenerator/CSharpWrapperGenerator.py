@@ -70,6 +70,8 @@ class CSharpWrapperGenerator:
             obj.base = "byte"
         elif t == "uint16_t" or t == "unsigned short":
             obj.base = "ushort"
+        elif t == "uint64_t" or t == "unsigned long long":
+            obj.base = "ulong"
 
     def __translate_type(self, obj: TypeMetadata) -> None:
         self.__translate_namespace(obj)

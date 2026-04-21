@@ -29,11 +29,6 @@ void ProfileLiteDtoToBasicProfile(const chs::ProfileLiteDto& Dto, csp::systems::
     Profile.UserId = Dto.GetId();
     Profile.AvatarId = Dto.GetAvatarId();
 
-    if (Dto.HasUserName())
-    {
-        Profile.UserName = Dto.GetUserName();
-    }
-
     if (Dto.HasDisplayName())
     {
         Profile.DisplayName = Dto.GetDisplayName();
@@ -55,11 +50,6 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
     }
 
     Profile.AvatarId = Dto.GetAvatarId();
-
-    if (Dto.HasUserName())
-    {
-        Profile.UserName = Dto.GetUserName();
-    }
 
     if (Dto.HasDisplayName())
     {
@@ -112,7 +102,7 @@ namespace csp::systems
 
 bool BasicProfile::operator==(const BasicProfile& Other) const
 {
-    return UserId == Other.UserId && UserName == Other.UserName && DisplayName == Other.DisplayName && AvatarId == Other.AvatarId;
+    return UserId == Other.UserId && DisplayName == Other.DisplayName && AvatarId == Other.AvatarId;
 }
 
 bool BasicProfile::operator!=(const BasicProfile& Other) const { return !(*this == Other); }

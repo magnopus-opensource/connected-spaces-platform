@@ -221,13 +221,12 @@ const csp::common::LoginState& UserSystem::GetLoginState() const { return Curren
 
 void UserSystem::SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback) { RefreshTokenChangedCallback = Callback; }
 
-void UserSystem::Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
-    LoginStateResultCallback Callback)
+void UserSystem::Login(const csp::common::String& Email, const csp::common::String& Password, bool CreateMultiplayerConnection,
+    const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
 {
-    if (UserName.IsEmpty() && Email.IsEmpty())
+    if (Email.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::Login, One of either Username or Email must not be empty.");
+        CSP_LOG_ERROR_MSG("UserSystem::Login, Email must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
         return;
     }
@@ -244,7 +243,6 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
 
         auto Request = std::make_shared<chs_user::LoginRequest>();
         Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-        Request->SetUserName(UserName);
         Request->SetEmail(Email);
         Request->SetPassword(Password);
         Request->SetTenant(csp::CSPFoundation::GetTenant());
@@ -274,8 +272,6 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
         {
             if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
             {
-                NotifyRefreshTokenHasChanged();
-
                 csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
                     = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
                 {
@@ -554,8 +550,9 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
             const auto AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
 
             auto AuthoriseURL = csp::common::StringFormat(
-                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post", AuthoriseUrl.c_str(),
-                ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(), RedirectURL.c_str());
+                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post",
+                AuthoriseUrl.c_str(), ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(),
+                RedirectURL.c_str());
 
             StringResult SuccessResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
             SuccessResult.SetValue(AuthoriseURL);
@@ -614,8 +611,6 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            NotifyRefreshTokenHasChanged();
-
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
                 = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
@@ -713,17 +708,11 @@ void UserSystem::Logout(NullResultCallback Callback)
     }
 }
 
-void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& UserName, const csp::common::Optional<csp::common::String>& DisplayName,
-    const csp::common::String& Email, const csp::common::String& Password, bool ReceiveNewsletter, bool HasVerifiedAge,
-    const csp::common::Optional<csp::common::String>& RedirectUrl, const csp::common::Optional<csp::common::String>& InviteToken,
-    ProfileResultCallback Callback)
+void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email,
+    const csp::common::String& Password, bool ReceiveNewsletter, bool HasVerifiedAge, const csp::common::Optional<csp::common::String>& RedirectUrl,
+    const csp::common::Optional<csp::common::String>& InviteToken, ProfileResultCallback Callback)
 {
     auto Request = std::make_shared<chs_user::CreateUserRequest>();
-
-    if (UserName.HasValue())
-    {
-        Request->SetUserName(*UserName);
-    }
 
     if (DisplayName.HasValue())
     {
@@ -757,14 +746,13 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
     static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersPost({ Request }, ResponseHandler);
 }
 
-void UserSystem::UpgradeGuestAccount(const csp::common::String& UserName, const csp::common::String& DisplayName, const csp::common::String& Email,
-    const csp::common::String& Password, ProfileResultCallback Callback)
+void UserSystem::UpgradeGuestAccount(
+    const csp::common::String& DisplayName, const csp::common::String& Email, const csp::common::String& Password, ProfileResultCallback Callback)
 {
     const csp::common::String UserId = CurrentLoginState.UserId;
 
     auto Request = std::make_shared<chs_user::UpgradeGuestRequest>();
 
-    Request->SetUserName(UserName);
     Request->SetDisplayName(DisplayName);
     Request->SetEmail(Email);
     Request->SetPassword(Password);

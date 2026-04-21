@@ -27,7 +27,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a custom component.
-enum class CustomComponentPropertyKeys
+enum class CustomComponentPropertyKeys : uint16_t
 {
     ApplicationOrigin,
     CustomPropertyList,

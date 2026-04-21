@@ -123,7 +123,7 @@ namespace signalr
 
         std::thread([=]()
             {
-                std::vector<thread> threads{ 5 };
+                std::vector<thread> threads{ 2 };
 
                 std::unique_lock<std::mutex> lock(internals->m_callback_lock);
 
@@ -148,9 +148,9 @@ namespace signalr
                     // find the first callback that is ready to run, find a thread to run it and remove it from the list
                     auto curr_time = std::chrono::steady_clock::now();
                     auto it = callbacks.begin();
-                    auto found = false;
                     while (it != callbacks.end())
                     {
+                        auto found = false;
                         if (it->second <= curr_time)
                         {
                             for (auto& thread : threads)
