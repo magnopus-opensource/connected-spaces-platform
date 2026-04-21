@@ -1452,6 +1452,13 @@ struct NgxUIRuntime::Impl
             {
                 UINode Child;
                 Child.Surface = OutNode.Surface;
+                // World placement props are declared on the world root but only travel to the client
+                // via emitted drawables. The root itself often has a transparent background and is
+                // dropped by Clay, so we inherit these into descendants so at least one emitted
+                // drawable carries them. ParseNodeFromJS will override if the child sets its own.
+                Child.TargetEntityId = OutNode.TargetEntityId;
+                Child.WorldOffset = OutNode.WorldOffset;
+                Child.BillboardMode = OutNode.BillboardMode;
                 const std::string ChildPath = Id + "." + std::to_string(Index);
                 if (ParseNodeFromJS(Ctx, Flat[Index], EntityId, ChildPath, Child, Depth + 1))
                 {

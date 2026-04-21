@@ -42,6 +42,9 @@ Library/docs/source/api/**/*
 # Ignore auto-generated code
 */generated/*
 /Tools/WrapperGenerator/Output/*
+!/Tools/WrapperGenerator/Output/TypeScript/
+/Tools/WrapperGenerator/Output/TypeScript/*
+!/Tools/WrapperGenerator/Output/TypeScript/package.json
 Library/codegen/generated/**/*
 
 # Ignore OlympusBuildTool intermediate files
