@@ -1,0 +1,15 @@
+{
+  "name": "connected-spaces-platform.web",
+  "displayName": "connected-spaces-platform.web",
+  "version": "6.30.0",
+  "description": "This package provides the binaries required to interface with the Connected Spaces Platform API.",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "type":"module",
+  "main": "./connectedspacesplatform.js",
+  "types": "./connectedspacesplatform.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": "https://github.com/magnopus-opensource/connected-spaces-platform"
+}
