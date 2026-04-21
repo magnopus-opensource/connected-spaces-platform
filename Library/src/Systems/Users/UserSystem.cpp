@@ -561,8 +561,8 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             const auto ProviderRedirectUrl = ProviderDetailsRes.GetDetails().ProviderRedirectURL;
+            ThirdPartyAuthStateId = ProviderDetailsRes.GetDetails().ThirdPartyAuthStateId;
 
-            ThirdPartyAuthStateId = csp::GenerateUUID().c_str();
             ThirdPartyRequestedAuthProvider = AuthProvider;
             ThirdPartyAuthRedirectURL = RedirectURL;
 

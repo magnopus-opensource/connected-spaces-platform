@@ -146,28 +146,6 @@ csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSyste
     return GetProfileResult.GetProfile();
 }
 
-// Decode a percent-encoded URL
-std::string DecodeURL(const std::string& EncodedURL)
-{
-    std::string DecodedURL;
-    DecodedURL.reserve(EncodedURL.size());
-    for (size_t i = 0; i < EncodedURL.size(); ++i)
-    {
-        if (EncodedURL[i] == '%' && i + 2 < EncodedURL.size())
-        {
-            std::string HexCode = std::string(EncodedURL.substr(i + 1, 2));
-            int Hex = std::stoi(HexCode, nullptr, 16);
-            DecodedURL += static_cast<char>(Hex);
-            i += 2;
-        }
-        else
-        {
-            DecodedURL += EncodedURL[i];
-        }
-    }
-    return DecodedURL;
-}
-
 void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL)
 {
     EXPECT_FALSE(AuthoriseURL.IsEmpty());
@@ -229,10 +207,7 @@ void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, con
     EXPECT_GT(ClientId.length(), 0);
     EXPECT_GE(Scope.length(), 0);
 
-    // AuthoriseURL is encoded and must be decoded before comparing
-    std::string DecodedRedirectURL(DecodeURL(RetrievedRedirectURL));
-
-    EXPECT_EQ(DecodedRedirectURL, RedirectURL.c_str());
+    EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)

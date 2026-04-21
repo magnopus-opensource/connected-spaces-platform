@@ -50,6 +50,9 @@ public:
     // @brief URL of the provider's authentication endpoint
     csp::common::String ProviderAuthURL;
 
+    // @brief A unique state Id to correlate the authorization request and response from the social provider.
+    csp::common::String ThirdPartyAuthStateId;
+
     // @brief URL of the provider's token endpoint used to initiate the authorization flow
     csp::common::String ProviderRedirectURL;
 };

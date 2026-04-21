@@ -52,6 +52,11 @@ void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, 
         ProviderDetails.ProviderAuthURL = Dto.GetAuthorizeEndpoint();
     }
 
+    if (Dto.HasThirdPartyAuthStateId())
+    {
+        ProviderDetails.ThirdPartyAuthStateId = Dto.GetThirdPartyAuthStateId();
+    }
+
     if (Dto.HasRedirectUri())
     {
         ProviderDetails.ProviderRedirectURL = Dto.GetRedirectUri();
