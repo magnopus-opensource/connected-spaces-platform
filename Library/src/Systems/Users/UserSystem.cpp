@@ -93,6 +93,32 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
     return false;
 }
 
+inline std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ClientType)
+{
+    if (!ClientType.HasValue())
+    {
+        return std::nullopt;
+    }
+
+    switch (*ClientType)
+    {
+    case csp::systems::EThirdPartyPlatform::Unreal:
+    {
+        return "Unreal";
+    }
+    case csp::systems::EThirdPartyPlatform::Unity:
+    {
+        return "Unity";
+    }
+    case csp::systems::EThirdPartyPlatform::Web:
+    {
+        return "Web";
+    }
+    }
+
+    return std::nullopt;
+}
+
 }
 
 namespace csp::systems
@@ -581,20 +607,14 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         }
     };
 
-    std::optional<csp::common::String> ClientTypeString;
-
-    if (ClientType.HasValue() && *ClientType != csp::systems::EThirdPartyPlatform::None)
-    {
-        ClientTypeString = csp::systems::ThirdPartyPlatformToString(*ClientType).c_str();
-    }
+    std::optional<csp::common::String> Client = ThirdPartyPlatformToString(ClientType);
 
     const csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<ProviderDetailsResultCallback, ProviderDetailsResult, void, chs_user::SocialProviderInfo>(
             ThirdPartyAuthenticationDetailsCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
-        ->social_providersProviderGet(
-            { ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), ClientTypeString }, ResponseHandler);
+        ->social_providersProviderGet({ ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), Client }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,

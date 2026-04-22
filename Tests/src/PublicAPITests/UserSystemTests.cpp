@@ -953,6 +953,24 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
     ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTestWithClient)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+
+    csp::systems::EThirdPartyPlatform Client = csp::systems::EThirdPartyPlatform::Unity;
+
+    // Retrieve Authorize URL for Google
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, Client);
+    EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
