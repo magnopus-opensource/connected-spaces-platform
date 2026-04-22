@@ -10,6 +10,8 @@ project(QuickJS VERSION 1.0
     DESCRIPTION "CSP QuickJS"
     LANGUAGES C)
 
+include(GNUInstallDirs)
+
 add_library(csp-quickjs STATIC)
 
 target_compile_features(csp-quickjs PUBLIC cxx_std_17)
@@ -18,12 +20,23 @@ file(GLOB_RECURSE QUICKJS_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 )
 
-target_sources(csp-quickjs PRIVATE
+file(GLOB_RECURSE QUICKJS_PUBLIC_HEADERS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+)
+
+target_sources(csp-quickjs
+  PRIVATE
     ${QUICKJS_SOURCES}
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+    FILES ${QUICKJS_PUBLIC_HEADERS}
 )
 
 target_include_directories(csp-quickjs
-    SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+  SYSTEM PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 target_compile_definitions(csp-quickjs
@@ -39,4 +52,13 @@ target_compile_options(csp-quickjs PRIVATE
 
 target_link_options(csp-quickjs PUBLIC
   $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
+)
+
+install(TARGETS csp-quickjs
+  EXPORT CSPTargets
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

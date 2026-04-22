@@ -8,7 +8,7 @@ set (CSP_VERSION_STRING "${CSP_VERSION}")
 
 project(CSP
     DESCRIPTION "Connected Spaces Platform" VERSION ${CSP_VERSION_STRING}
-    LANGUAGES CXX)
+    LANGUAGES C CXX)
 
 # ------------------------------------------------------------------------------------------------------------------
 # First populate variables with our files
@@ -231,6 +231,50 @@ configure_file(
     ${CMAKE_SOURCE_DIR}/cmake/version.h.in
     # When we remove support for the old build system, we should probably move this into the binary dir
     ${CSP_INCLUDE_DIR}/CSP/version.h
+)
+
+# Install ---------------------------------------------------------
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+# Optional local alias for build-tree use
+add_library(CSP::csp-lib ALIAS csp-lib)
+
+# Where package config files go
+set(CSP_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/CSP")
+
+install(TARGETS csp-lib
+  EXPORT CSPTargets
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
+  INSTALL_DESTINATION ${CSP_CONFIG_INSTALL_DIR}
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake
+  DESTINATION ${CSP_CONFIG_INSTALL_DIR}
+)
+
+install(EXPORT CSPTargets
+  FILE CSPTargets.cmake
+  NAMESPACE CSP::
+  DESTINATION ${CSP_CONFIG_INSTALL_DIR}
 )
 
 # ------------------------------------------------------------------------------------------------------------------
