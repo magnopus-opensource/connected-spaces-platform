@@ -783,6 +783,22 @@ csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
     return UIRuntime->DrainPendingUpdatesJson().c_str();
 }
 
+void NgxScriptSystem::UnmountUIForInactiveEntities(const std::unordered_set<std::string>& ActiveEntityIds)
+{
+    std::scoped_lock UILock(UIMutex);
+    if (!UIRuntime)
+    {
+        return;
+    }
+
+    const size_t StaleCount = UIRuntime->UnmountEntitiesNotIn(ActiveEntityIds);
+    if (StaleCount > 0)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            fmt::format("NgxScriptSystem Trace: UnmountUIForInactiveEntities reclaimed {} orphan UI mount(s).", StaleCount).c_str());
+    }
+}
+
 void NgxScriptSystem::SetUIDebugModeEnabled(bool bEnabled)
 {
     std::scoped_lock UILock(UIMutex);
@@ -1347,7 +1363,7 @@ void NgxScriptSystem::InstallHostBindings()
         [this](const std::string& EntityIdText) -> bool
         {
             std::scoped_lock UILock(UIMutex);
-            return UIRuntime->Unmount(EntityIdText);
+            return UIRuntime ? UIRuntime->Unmount(EntityIdText) : false;
         });
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
@@ -1414,6 +1430,8 @@ globalThis.console = {
 
 const __cspAnimationFrameState = {
     nextId: 1,
+    // id -> { callback, entityId } — entityId is the owning code component
+    // at registration time (null for rAFs registered outside a component).
     callbacks: new Map(),
 };
 
@@ -1425,7 +1443,8 @@ globalThis.requestAnimationFrame = (callback) => {
     }
 
     const id = __cspAnimationFrameState.nextId++;
-    __cspAnimationFrameState.callbacks.set(id, callback);
+    const entityId = globalThis.__cspCurrentEntityId ?? null;
+    __cspAnimationFrameState.callbacks.set(id, { callback, entityId });
     globalThis.__cspRafPendingCount = __cspAnimationFrameState.callbacks.size;
     return id;
 };
@@ -1445,15 +1464,47 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
         return;
     }
 
-    const frameCallbacks = Array.from(__cspAnimationFrameState.callbacks.values());
+    const frameEntries = Array.from(__cspAnimationFrameState.callbacks.values());
     __cspAnimationFrameState.callbacks.clear();
     globalThis.__cspRafPendingCount = 0;
 
-    for (const callback of frameCallbacks) {
+    const registry = globalThis.scriptRegistry;
+    const isEntityRegistered = registry && typeof registry.isEntityRegistered === 'function'
+        ? (id) => registry.isEntityRegistered(id)
+        : null;
+
+    // Track which entities we've already warned about this tick so one dead
+    // animation loop doesn't flood the log with a message per frame.
+    const warnedDeadEntities = globalThis.__cspRafWarnedDeadEntities
+        ?? (globalThis.__cspRafWarnedDeadEntities = new Set());
+
+    for (const entry of frameEntries) {
+        // Skip callbacks owned by a code component that is no longer registered —
+        // animation loops must not outlive their owning script. rAFs registered
+        // without an entity context (entityId === null) always run.
+        if (entry.entityId != null && isEntityRegistered && !isEntityRegistered(entry.entityId)) {
+            if (!warnedDeadEntities.has(entry.entityId)) {
+                warnedDeadEntities.add(entry.entityId);
+                csp.__log(`NgxScript Trace: Skipping rAF callback for deregistered entity ${entry.entityId}.`);
+            }
+            continue;
+        }
+
+        // If the entity is alive again, clear the warn flag so a future death is logged again.
+        if (entry.entityId != null) {
+            warnedDeadEntities.delete(entry.entityId);
+        }
+
+        const previousEntityId = globalThis.__cspCurrentEntityId;
+        if (entry.entityId != null) {
+            globalThis.__cspCurrentEntityId = entry.entityId;
+        }
         try {
-            callback(timestampMs);
+            entry.callback(timestampMs);
         } catch (error) {
             csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
+        } finally {
+            globalThis.__cspCurrentEntityId = previousEntityId;
         }
     }
 };

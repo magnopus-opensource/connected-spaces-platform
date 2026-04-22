@@ -2325,6 +2325,32 @@ bool NgxUIRuntime::IsDebugModeEnabled() const
     return Pimpl->DebugModeEnabled;
 }
 
+size_t NgxUIRuntime::UnmountEntitiesNotIn(const std::unordered_set<std::string>& ActiveEntityIds)
+{
+    std::vector<std::string> StaleEntityIds;
+    for (const auto& Pair : Pimpl->Entities)
+    {
+        if (ActiveEntityIds.find(Pair.first) == ActiveEntityIds.end())
+        {
+            StaleEntityIds.push_back(Pair.first);
+        }
+    }
+
+    for (const std::string& EntityId : StaleEntityIds)
+    {
+        const std::map<std::string, UIEntityState>::iterator It = Pimpl->Entities.find(EntityId);
+        if (It == Pimpl->Entities.end())
+        {
+            continue;
+        }
+        Pimpl->QueueDiff(EntityId, It->second.Drawables, std::map<std::string, UIDrawable>());
+        Pimpl->Entities.erase(It);
+        Pimpl->ClearHandlerTable(EntityId);
+    }
+
+    return StaleEntityIds.size();
+}
+
 std::string NgxUIRuntime::GetDrawablesJson(const std::string& EntityId) const
 {
     rapidjson::Document Document;

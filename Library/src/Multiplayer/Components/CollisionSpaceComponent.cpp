@@ -52,7 +52,7 @@ const auto Schema = ComponentBase::ComponentSchema {
         },
         {
             static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionMode),
-            static_cast<int64_t>(CollisionMode::Collision),
+            static_cast<int64_t>(CollisionMode::CollisionStatic),
         },
         {
             static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionAssetId),

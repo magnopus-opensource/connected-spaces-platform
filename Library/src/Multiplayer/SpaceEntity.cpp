@@ -827,6 +827,11 @@ void SpaceEntity::QueueUpdate()
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 {
+    // Selection is local-only: we do not replicate it or persist it with the
+    // entity. A previous design replicated SelectedClientId via the state
+    // patcher, which latched ghost selection state on the server and caused
+    // code components to spuriously activate when an entity was "selected"
+    // by no visible UI action. Every client now tracks its own selection.
     uint64_t LocalClientId = (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         ? static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->GetMultiplayerConnectionInstance()->GetClientId()
         : csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
@@ -835,13 +840,6 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
     {
         if (!IsSelected())
         {
-            // Set a pending selection property
-            if (StatePatcher != nullptr)
-            {
-                // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(LocalClientId));
-            }
-
             bool Added = EntitySystem->AddEntityToSelectedEntities(this);
             if (Added)
             {
@@ -856,13 +854,6 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
     {
         if (IsSelected())
         {
-            // Set a pending selection property (deselection I'm guessing, being zero)
-            if (StatePatcher != nullptr)
-            {
-                // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(0));
-            }
-
             bool Removed = EntitySystem->RemoveEntityFromSelectedEntities(this);
             if (Removed)
             {
@@ -1182,11 +1173,8 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
             [&Scale = Transform.Scale]() { return csp::common::ReplicatedValue { Scale }; },
             [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Transform.Scale, Value.GetVector3(), UPDATE_FLAGS_SCALE); }
         },
-        {
-            SpaceEntityComponentKey::SelectedClientId, UPDATE_FLAGS_SELECTION_ID,
-            [&SelectedId = SelectedId]() { return csp::common::ReplicatedValue { static_cast<int64_t>(SelectedId) }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(SelectedId, Value.GetInt(), UPDATE_FLAGS_SELECTION_ID); }
-        },
+        // SelectedClientId is intentionally not bound — selection is a purely
+        // local property, never replicated or persisted. See Select/Deselect.
         {
             SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF,
             [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },

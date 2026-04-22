@@ -18,10 +18,7 @@
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
-#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
-#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Events/EventId.h"
@@ -34,11 +31,10 @@
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <unordered_set>
 
 namespace
 {
-
-constexpr const char* PLAYER_CONTROLLER_CONFIG_TAG = "player-controller-config";
 
 constexpr const char* CODECOMPONENT_ASSET_REGISTRY_MODULE = "/scripts/engine/registry.js";
 constexpr const char* CODECOMPONENT_REGISTRY_MODULE = "/__csp/internal/codecomponent/registry.js";
@@ -245,11 +241,6 @@ const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
     default:
         return "Unknown";
     }
-}
-
-bool IsPlayerControllerConfigEntity(const csp::multiplayer::SpaceEntity* Entity)
-{
-    return (Entity != nullptr) && Entity->HasTag(PLAYER_CONTROLLER_CONFIG_TAG);
 }
 
 std::string EscapeJSStringLiteral(const std::string& Input)
@@ -1798,6 +1789,7 @@ export function createScriptRegistry() {
         tick,
         drainPendingSchemaSyncs,
         destroy,
+        isEntityRegistered: (entityId) => codeComponents.has(entityId),
     };
 }
 
@@ -1972,6 +1964,18 @@ void NgxCodeComponentRuntime::OnTick()
     ScriptSystem.FlushPendingCodeComponentUI();
     ScriptSystem.PumpPendingJobs();
 
+    // Reclaim any UI left mounted for entities that are no longer active
+    // code components (e.g. scope changes or mode transitions where the JS
+    // teardown raced the C++ tick). Uses LastEntitySnapshots as the source
+    // of truth for "currently active" — SyncSnapshots has already updated it.
+    std::unordered_set<std::string> ActiveEntityIds;
+    ActiveEntityIds.reserve(LastEntitySnapshots.size());
+    for (const auto& Pair : LastEntitySnapshots)
+    {
+        ActiveEntityIds.insert(std::to_string(Pair.first));
+    }
+    ScriptSystem.UnmountUIForInactiveEntities(ActiveEntityIds);
+
     // requestAnimationFrame callbacks are driven by the client display loop via NgxScriptSystem::TickAnimationFrame.
     // Keep animation-frame dispatch decoupled from foundation tick cadence.
 }
@@ -2087,7 +2091,19 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
     {
         if (CurrentSnapshots.find(PreviousEntityPair.first) == CurrentSnapshots.end())
         {
-            bAllOperationsApplied = RemoveEntityFromRegistry(PreviousEntityPair.first) && bAllOperationsApplied;
+            LogSystem.LogMsg(csp::common::LogLevel::Log,
+                fmt::format("NgxCodeComponentRuntime Trace: Deactivating entity {} (no longer activatable in runtimeMode={}).",
+                    PreviousEntityPair.first, RuntimeModeToString(GetRuntimeMode()))
+                    .c_str());
+            const bool bRemoved = RemoveEntityFromRegistry(PreviousEntityPair.first);
+            if (!bRemoved)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                    fmt::format("NgxCodeComponentRuntime Trace: Deactivation of entity {} did not complete (deferred={}).",
+                        PreviousEntityPair.first, ScriptSystem.WasLastEvaluationDeferred() ? "true" : "false")
+                        .c_str());
+            }
+            bAllOperationsApplied = bRemoved && bAllOperationsApplied;
         }
     }
 
@@ -2099,6 +2115,14 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         const auto PreviousSnapshotIt = LastEntitySnapshots.find(EntityId);
         if (PreviousSnapshotIt == LastEntitySnapshots.end())
         {
+            LogSystem.LogMsg(csp::common::LogLevel::Log,
+                fmt::format("NgxCodeComponentRuntime Trace: Activating entity {} (scope={}, path='{}', runtimeMode={}).",
+                    EntityId,
+                    CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Local      ? "Local"
+                        : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Editor ? "Editor"
+                        : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Server ? "Server" : "Unknown",
+                    CurrentSnapshot.ScriptAssetPath, RuntimeModeToString(CurrentSnapshot.RuntimeMode))
+                    .c_str());
             bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
             continue;
         }
@@ -2107,6 +2131,14 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         if ((CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != PreviousSnapshot.ScopeType)
             || (CurrentSnapshot.RuntimeMode != PreviousSnapshot.RuntimeMode))
         {
+            const char* ScopeLabel = CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Local      ? "Local"
+                : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Editor ? "Editor"
+                : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Server ? "Server" : "Unknown";
+            LogSystem.LogMsg(csp::common::LogLevel::Log,
+                fmt::format("NgxCodeComponentRuntime Trace: Reactivating entity {} (scope={}, runtimeMode {} -> {}, path={}).",
+                    EntityId, ScopeLabel, RuntimeModeToString(PreviousSnapshot.RuntimeMode), RuntimeModeToString(CurrentSnapshot.RuntimeMode),
+                    CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath ? "changed" : "unchanged")
+                    .c_str());
             bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
             continue;
         }
@@ -2142,42 +2174,16 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
     {
         LastEntitySnapshots = CurrentSnapshots;
     }
+    else
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning,
+            "NgxCodeComponentRuntime Trace: SyncSnapshots finished with deferred operations; LastEntitySnapshots not committed, will retry next tick.");
+    }
 }
 
 csp::systems::ESpaceRuntimeMode NgxCodeComponentRuntime::GetRuntimeMode() const
 {
     return csp::systems::SpaceSystem::GetGlobalRuntimeMode();
-}
-
-uint64_t NgxCodeComponentRuntime::GetLocalClientId() const
-{
-    if ((ActiveRealtimeEngine != nullptr) && (ActiveRealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online))
-    {
-        const auto* OnlineRealtimeEngine = static_cast<const csp::multiplayer::OnlineRealtimeEngine*>(ActiveRealtimeEngine);
-        if (OnlineRealtimeEngine != nullptr)
-        {
-            if (auto* MultiplayerConnection = OnlineRealtimeEngine->GetMultiplayerConnectionInstance(); MultiplayerConnection != nullptr)
-            {
-                return MultiplayerConnection->GetClientId();
-            }
-        }
-    }
-
-    return csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
-}
-
-bool NgxCodeComponentRuntime::IsEntityOrAncestorSelectedByLocalClient(const csp::multiplayer::SpaceEntity* Entity) const
-{
-    const uint64_t LocalClientId = GetLocalClientId();
-    for (auto* CurrentEntity = Entity; CurrentEntity != nullptr; CurrentEntity = CurrentEntity->GetParentEntity())
-    {
-        if (CurrentEntity->IsSelected() && (CurrentEntity->GetSelectingClientID() == LocalClientId))
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
@@ -2188,25 +2194,15 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
         return false;
     }
 
+    // Scope semantics are intentionally strict: a code component runs only when
+    // its scope matches the current runtime mode. Edit-time script previews must
+    // use CodeScopeType::Editor explicitly — Local/Edit has no implicit
+    // activation path (a previous "runs in Edit when selected" shortcut caused
+    // ghost-activation from stale replicated SelectedId state).
     switch (CodeComponent->GetCodeScopeType())
     {
     case csp::multiplayer::CodeScopeType::Local:
-        if (IsPlayerControllerConfigEntity(Entity))
-        {
-            return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play;
-        }
-
-        if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Unset)
-        {
-            return false;
-        }
-
-        if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play)
-        {
-            return true;
-        }
-
-        return (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit) && IsEntityOrAncestorSelectedByLocalClient(Entity);
+        return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play;
 
     case csp::multiplayer::CodeScopeType::Editor:
         return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit;

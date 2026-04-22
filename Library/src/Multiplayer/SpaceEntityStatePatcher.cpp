@@ -399,6 +399,11 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
                     ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
                     Property->Set(Value);
                 }
+                else if (ComponentDataPair.first == static_cast<uint16_t>(SpaceEntityComponentKey::SelectedClientId))
+                {
+                    // Selection state was formerly replicated & persisted; it is now a purely
+                    // local property. Silently ignore legacy persisted values on load.
+                }
                 else
                 {
                     LogSystem.LogMsg(csp::common::LogLevel::Error, "NewFromObjectMessage: No Property with the specified key found!");

@@ -126,6 +126,11 @@ public:
     // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
     csp::common::String DrainPendingUIUpdates();
 
+    // Unmount any UI whose entity id is not in the supplied active-id set.
+    // Safety net for screen/world UIs left mounted when a code component
+    // deactivates without its JS teardown reaching csp.__uiUnmount.
+    CSP_NO_EXPORT void UnmountUIForInactiveEntities(const std::unordered_set<std::string>& ActiveEntityIds);
+
     // Dispatch a click action back into the scripted UI runtime.
     bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId, const csp::common::String& EventDataJson = "");
 

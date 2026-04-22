@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace csp::common
@@ -51,6 +52,11 @@ public:
 
     std::string DrainPendingUpdatesJson();
     std::string GetDrawablesJson(const std::string& EntityId) const;
+
+    // Unmount any entity whose id is not in the given set. Used after a
+    // SyncSnapshots pass to reclaim screen UI left behind by code components
+    // that deactivated without flushing their unmount through the JS path.
+    size_t UnmountEntitiesNotIn(const std::unordered_set<std::string>& ActiveEntityIds);
 
 private:
     struct Impl;
