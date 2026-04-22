@@ -40,11 +40,25 @@ target_include_directories(csp-signalr
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/third_party_code/jsoncpp
 )
 
-target_link_libraries(csp-signalr PRIVATE msgpack-cxx)
+target_link_libraries(csp-signalr
+  PRIVATE
+    msgpack-cxx
+)
 
-target_compile_definitions(csp-signalr 
-    # Allows us to link statically
-    PUBLIC NO_SIGNALRCLIENT_EXPORTS
-    # We use message pack for signalr serialization
-    PUBLIC USE_MSGPACK
+target_compile_definitions(csp-signalr
+  PUBLIC
+    NO_SIGNALRCLIENT_EXPORTS
+    USE_MSGPACK
+)
+
+target_compile_options(csp-signalr PRIVATE
+  $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
+)
+
+target_link_options(csp-signalr PUBLIC
+  $<$<PLATFORM_ID:Emscripten>:
+    -pthread
+    -fwasm-exceptions
+    -lwebsocket.js
+  >
 )

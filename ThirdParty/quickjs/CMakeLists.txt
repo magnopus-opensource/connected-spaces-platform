@@ -27,10 +27,16 @@ target_include_directories(csp-quickjs
 )
 
 target_compile_definitions(csp-quickjs
-    PRIVATE
-        # Disable exceptions
-        _HAS_EXCEPTIONS=0
-    PUBLIC
-         # Allows us to compile on MSVC x64
-        JS_STRICT_NAN_BOXING
+  PRIVATE
+    _HAS_EXCEPTIONS=0
+  PUBLIC
+    JS_STRICT_NAN_BOXING
+)
+
+target_compile_options(csp-quickjs PRIVATE
+  $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
+)
+
+target_link_options(csp-quickjs PUBLIC
+  $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
 )

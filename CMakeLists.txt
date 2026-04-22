@@ -212,6 +212,18 @@ target_compile_options(csp-lib
 	    # Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
 	    -Wno-ignored-qualifiers
     >
+
+    $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
+)
+
+
+
+target_link_options(csp-lib PRIVATE
+  $<$<PLATFORM_ID:Emscripten>:
+    -pthread
+    -fwasm-exceptions
+    -sFETCH
+  >
 )
 
 # Generate version header
