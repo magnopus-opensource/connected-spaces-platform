@@ -24,17 +24,24 @@ jobs:
           repository: magnopus-opensource/connected-spaces-platform-unity
           path: connected-spaces-platform-unity
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '8.x'
+      - name: Download CSP artifacts from TeamCity
+        shell: bash
+        env:
+          TC_TOKEN: ${{ secrets.TEAMCITY_TOKEN }}
+        run: |
+          mkdir -p CSP
+          base="https://magnopus.teamcity.com/repository/download/Olympus_Foundation_X64_DebugDLLCSharp/.lastSuccessful/DebugDLL-CSharp"
+          curl -fSL -H "Authorization: Bearer $TC_TOKEN" -o include.zip "$base/include.zip"
+          curl -fSL -H "Authorization: Bearer $TC_TOKEN" -o lib.zip     "$base/lib.zip"
+          unzip -o include.zip -d CSP
+          unzip -o lib.zip     -d CSP
 
       # ENABLE_UNITY_EXTENSIONS must be OFF so xUnit tests can build — with
       # Unity extensions enabled the SWIG bindings reference Unity types that
       # are not available outside the editor.
       - name: Configure
         working-directory: connected-spaces-platform-unity
-        run: cmake -S . -B build -DENABLE_UNITY_EXTENSIONS=OFF
+        run: cmake -S . -B build -DENABLE_UNITY_EXTENSIONS=OFF -DCSP_ROOT_DIR="$GITHUB_WORKSPACE/CSP"
 
       - name: Build
         working-directory: connected-spaces-platform-unity
