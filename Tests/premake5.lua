@@ -107,6 +107,9 @@ if not Tests then
                     "'instantiateWasm'," ..
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
+                    "'noExitRuntime'," ..
+                    "'onAbort'," ..
+                    "'onExit'," ..
                     "'wasmMemory'," ..
                     "'arguments'" ..
                 "]"

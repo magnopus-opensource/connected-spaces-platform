@@ -2,8 +2,21 @@
 
 var Module : any = {};
 
+// CSP is a --no-entry library: we never want the wasm runtime to auto-exit just because
+// main has no work queued or a pthread finished. Without this, native wasm EH (default since
+// Emscripten 4.0.2) can tear down the whole runtime on an uncaught pthread exception.
+Module["noExitRuntime"] = true;
+
 Module["fetchSettings"] = function() {
   return "{ credentials: 'include' }";
+};
+
+Module["onAbort"] = function(reason: any) {
+  console.error("CSP WASM aborted:", reason);
+};
+
+Module["onExit"] = function(status: number) {
+  console.error("CSP WASM runtime exited with status:", status);
 };
 
 function assert(condition: unknown): asserts condition {
@@ -43,10 +56,6 @@ export class CspOptions {
    * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
    */
   wasmUrl!: string
-  /**
-   * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
-   */
-  workerUrl!: string
 }
 
 export function ready(args: boolean | CspOptions = false) {
@@ -66,8 +75,7 @@ export function ready(args: boolean | CspOptions = false) {
     };
     
     Module["locateFilePaths"] = {
-      "ConnectedSpacesPlatform_WASM.wasm": args.wasmUrl,
-      "ConnectedSpacesPlatform_WASM.worker.js": args.workerUrl
+      "ConnectedSpacesPlatform_WASM.wasm": args.wasmUrl
     };
 
     Module["mainScriptUrlOrBlob"] = args.wrapperUrl;

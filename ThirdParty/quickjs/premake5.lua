@@ -32,6 +32,12 @@ function QuickJS.AddProject()
         }
     filter "platforms:Android"
         staticruntime("On")
+    filter "platforms:wasm"
+        defines {
+            "_GNU_SOURCE",       -- expose environ and sighandler_t (musl hides them by default in emsdk 5.0+)
+            "EMSCRIPTEN",        -- quickjs.c checks `defined(EMSCRIPTEN)` (bare, not __EMSCRIPTEN__) to skip malloc_usable_size
+            "CONFIG_STACK_CHECK" -- enable js_check_stack_overflow; without it JS_SetMaxStackSize is a no-op and deep recursion falls through to V8's RangeError
+        }
     filter {}
 	
     files {

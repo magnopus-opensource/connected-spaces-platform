@@ -77,8 +77,7 @@ config = Config(
         ],
         wasm=[
             "ConnectedSpacesPlatform_WASM.js",
-            "ConnectedSpacesPlatform_WASM.wasm",
-            "ConnectedSpacesPlatform_WASM.worker.js"
+            "ConnectedSpacesPlatform_WASM.wasm"
         ],
     ),
 )

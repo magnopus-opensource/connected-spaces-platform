@@ -51,10 +51,13 @@
 
 namespace
 {
-constexpr size_t NGX_SCRIPT_MEMORY_LIMIT_BYTES = 256 * 1024 * 1024;
-// 0 disables QuickJS's own stack check; we rely on the WASM linker stack
-// (-sSTACK_SIZE) instead so debug sessions do not abort on deep call chains.
-constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 0;
+// QuickJS bounds its own recursion against a saved stack-top baseline. Must be
+// smaller than V8's native stack budget so QuickJS throws InternalError: stack
+// overflow (with a JS-level trace) before V8 throws an opaque RangeError from
+// inside JS_CallInternal. DevTools shrinks V8's budget significantly, so keep
+// this well under ~1MB. 256KB ≈ ~256 QuickJS frames — shallow enough to trip
+// first under DevTools, deep enough for typical script recursion.
+constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 256 * 1024;
 
 constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
 constexpr const char* CODECOMPONENT_JSON_RESULT_SLOT = "__cspCodeComponentJsonResult";
@@ -62,15 +65,20 @@ constexpr const char* CODECOMPONENT_BOOL_RESULT_SLOT = "__cspCodeComponentBoolRe
 constexpr const char* EMPTY_JSON_OBJECT_STRING = "{}";
 constexpr const char* ASSET_BLOB_CHANGED_RECEIVER_ID = "CSPInternal::NgxScriptSystem";
 
-void ApplyNgxRuntimeLimits(qjs::Runtime& Runtime)
-{
-    JS_SetMemoryLimit(Runtime.rt, NGX_SCRIPT_MEMORY_LIMIT_BYTES);
 #ifdef CSP_WASM
-    // QuickJS defaults to a 256 KB stack guard, which is too small for complex
-    // development-mode scripts in the browser/WASM build.
+// Re-baselines QuickJS's stack-overflow check to the caller's current SP.
+// JS_NewRuntime captured stack_top at system-construction time (deep inside
+// Module.ready resolution); any later entry (rAF tick, SignalR callback →
+// ccall → eval, direct bindings) runs from a shallower stack. Without a fresh
+// baseline the check is always "not overflowing" and V8 surfaces the overflow
+// instead. Call this at every external entry into QuickJS, then re-apply the
+// size so the limit (= top − size) is computed against the current frame.
+void RebaseQuickJsStackCheck(qjs::Runtime& Runtime)
+{
+    JS_UpdateStackTop(Runtime.rt);
     JS_SetMaxStackSize(Runtime.rt, NGX_SCRIPT_WASM_MAX_STACK_BYTES);
-#endif
 }
+#endif
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -405,7 +413,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , GcTickCounter(0)
     , TickEventHandler(std::make_unique<NgxScriptTickEventHandler>(this))
 {
-    ApplyNgxRuntimeLimits(*Runtime);
+    //ApplyNgxRuntimeLimits(*Runtime);
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, TickEventHandler.get());
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: System constructed and tick listener registered.");
 }
@@ -1058,7 +1066,7 @@ void NgxScriptSystem::RebuildContext()
         if (!Runtime)
         {
             Runtime = std::make_unique<qjs::Runtime>();
-            ApplyNgxRuntimeLimits(*Runtime);
+           //ApplyNgxRuntimeLimits(*Runtime);
         }
 
         // Collect any cyclic garbage left over from the old context before
@@ -1968,6 +1976,10 @@ bool NgxScriptSystem::EvaluateGlobalScript(const std::string& ScriptText, const 
         return false;
     }
 
+#ifdef CSP_WASM
+    RebaseQuickJsStackCheck(*Runtime);
+#endif
+
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_GLOBAL);
     if (!EvalResult.isException())
     {
@@ -2023,6 +2035,10 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
     {
         return false;
     }
+
+#ifdef CSP_WASM
+    RebaseQuickJsStackCheck(*Runtime);
+#endif
 
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_MODULE);
     if (!EvalResult.isException())
@@ -2097,6 +2113,13 @@ void NgxScriptSystem::PumpPendingJobs()
         return;
     }
 
+#ifdef CSP_WASM
+    if (Runtime)
+    {
+        RebaseQuickJsStackCheck(*Runtime);
+    }
+#endif
+
     DrainPendingJobs();
     PendingJobPumpActive.store(false);
 }
@@ -2125,6 +2148,8 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
         {
             return false;
         }
+
+        RebaseQuickJsStackCheck(*Runtime);
 #else
         std::scoped_lock ContextLock(ContextMutex);
 #endif

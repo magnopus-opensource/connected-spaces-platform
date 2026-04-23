@@ -303,6 +303,9 @@ if not Project then
                     "'instantiateWasm'," ..
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
+                    "'noExitRuntime'," ..
+                    "'onAbort'," ..
+                    "'onExit'," ..
                     "'wasmMemory'" ..
                 "]",
                 --"-sUSE_ES6_IMPORT_META=0"                                       -- disable use of import.meta as it is not yet supported everywhere
@@ -320,14 +323,16 @@ if not Project then
 
         filter { "platforms:wasm", "configurations:*Debug*" }
             buildoptions {
-                "-gdwarf-5",
+                "-gdwarf-4",
                 "-gseparate-dwarf"  -- preserve debug information (DWARF)
             }
 
             linkoptions {
-                "-gdwarf-5",
+                "-gdwarf-4",
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
-                "-sSEPARATE_DWARF_URL=../Debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
+                "-sSEPARATE_DWARF_URL=../Debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm",
+                "-sASSERTIONS=2",           -- surface the cause of aborts/exits with full diagnostics
+                "-sSTACK_OVERFLOW_CHECK=2"  -- detect stack overflows in pthreads
             }
         filter { "platforms:wasm", "configurations:*Release*" }
             -- We want to reduce the size of Release builds as much as possible

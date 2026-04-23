@@ -276,7 +276,10 @@ public:
         }
 
         auto After = CurrentSize - Index;
-        std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
+        // Trivial-relocate shift: byte-move elements right by one slot. The old slot at Index is overwritten
+        // below by placement-new + assignment, so no destructor runs on the moved-from bytes. void* casts
+        // silence -Wnontrivial-memcall (added in clang 16) since T may not be trivially copyable.
+        std::memmove(static_cast<void*>(ObjectArray + (Index + 1)), static_cast<const void*>(ObjectArray + Index), sizeof(T) * After);
         ++CurrentSize;
 
         T* ObjectPtr = &ObjectArray[Index];
