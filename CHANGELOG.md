@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OB-5310] feat: Added Volume and AudioType properties to `VideoPlayerSpaceComponent`. By @MAG-ME.
 
+- [OB-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
+  This isn't currently a public-facing change. However, it includes internal changes to the internal usage of tinyspline. This should not have any effect on behaviour.
+
 ## [6.33.0]
 
 ### 🙈 🙉 🙊 Test Changes
