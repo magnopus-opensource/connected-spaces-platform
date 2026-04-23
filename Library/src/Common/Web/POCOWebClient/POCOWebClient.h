@@ -83,6 +83,24 @@ protected:
 
     std::vector<Poco::Net::HTTPCookie>* Cookies;
     std::mutex CookiesMutex;
+
+private:
+    /// @brief Specifies how the request body will be sent.
+    enum class ERequestBodyMode
+    {
+        // No body is sent with the request
+        None,
+        // Body is streamed in chunks with progress tracking and cancellation support
+        Streamed,
+        // Body is written inline to the request stream in a single operation
+        Inline
+    };
+
+    bool PrepareAndSendRequest(
+        HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode);
+
+    std::istream& ReceiveResponse(
+        Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request);
 };
 
 } // namespace csp::web
