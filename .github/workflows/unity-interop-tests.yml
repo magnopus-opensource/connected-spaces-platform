@@ -1,0 +1,53 @@
+name: Unity Interop xUnit Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        build_type: [Debug]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout connected-spaces-platform-unity
+        uses: actions/checkout@v4
+        with:
+          repository: magnopus-opensource/connected-spaces-platform-unity
+          path: connected-spaces-platform-unity
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.x'
+
+      # ENABLE_UNITY_EXTENSIONS must be OFF so xUnit tests can build — with
+      # Unity extensions enabled the SWIG bindings reference Unity types that
+      # are not available outside the editor.
+      - name: Configure
+        working-directory: connected-spaces-platform-unity
+        run: cmake -S . -B build -DENABLE_UNITY_EXTENSIONS=OFF
+
+      - name: Build
+        working-directory: connected-spaces-platform-unity
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: ${{ runner.job_count }}
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      - name: Install
+        working-directory: connected-spaces-platform-unity
+        run: cmake --install build --config ${{ matrix.build_type }}
+
+      - name: Test
+        working-directory: connected-spaces-platform-unity/InteropTestsXUnit
+        env:
+          RUN_LONG_RUNNING_TESTS: 1
+        run: dotnet test -c ${{ matrix.build_type }} --logger "console;verbosity=detailed" --blame-hang --blame-hang-timeout 90s
