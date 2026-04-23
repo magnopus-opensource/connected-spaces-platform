@@ -146,3 +146,24 @@ cmake --build --preset <PRESET>
 ## Output
 
  A CSP binary will be output in the build folder.
+
+## Installing
+
+After building the project, you can install it using:
+
+```sh
+cmake --install <BUILD_DIR> --config <CONFIG> --prefix <INSTALL_DIR>
+```
+
+### Parameters
+
+* `<BUILD_DIR>`
+  Path to the build directory
+
+* `<CONFIG>`
+  Build configuration: `Debug` or `Release`
+
+* `<INSTALL_DIR>`
+ Destination directory for the installation
+
+This will install the CSP library, including: headers, and configured runtime binaries.
