@@ -19,6 +19,9 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Events/EventId.h"
@@ -1723,9 +1726,20 @@ export function createScriptRegistry() {
     }
 
     function tick() {
+        // Throttle activations to one entity per tick. Activating a user module
+        // runs script() + initial ui() + their signal/effect chains synchronously
+        // in the foundation tick call stack; doing several in the same tick stacks
+        // all those JS call chains on top of each other and blows V8's per-WASM
+        // stack frame budget (notably when DevTools is open and adds per-call
+        // instrumentation overhead). Pending activations queue up and drain over
+        // subsequent ticks instead — a few dozen ms of startup staggering is
+        // invisible to users and costs nothing in steady state.
+        let activationBudget = 1;
+
         for (const [entityId, entry] of codeComponents) {
-            if (pendingModuleActivations.has(entityId)) {
+            if (activationBudget > 0 && pendingModuleActivations.has(entityId)) {
                 pendingModuleActivations.delete(entityId);
+                activationBudget -= 1;
                 try {
                     activateImportedModule(entityId, entry);
                 } catch (error) {
@@ -2066,6 +2080,7 @@ bool NgxCodeComponentRuntime::CaptureEntitySnapshots(EntitySnapshotMap& OutSnaps
         Snapshot.ScriptAssetPath = CodeComponent->GetScriptAssetPath().c_str();
         Snapshot.ScopeType = CodeComponent->GetCodeScopeType();
         Snapshot.RuntimeMode = GetRuntimeMode();
+        Snapshot.IsLocallySelected = Entity->IsSelected() && (Entity->GetSelectingClientID() == GetLocalClientId());
 
         const auto AttributeKeys = CodeComponent->GetAttributeKeys();
         for (size_t KeyIndex = 0; KeyIndex < AttributeKeys.Size(); ++KeyIndex)
@@ -2128,6 +2143,18 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         }
 
         const CodeComponentSnapshot& PreviousSnapshot = PreviousSnapshotIt->second;
+
+        // Selection transitions fire an entity-scoped event so JS scripts can
+        // listen via `thisEntity.on('select', cb)` / `thisEntity.on('deselect', cb)`.
+        // Selection is local-only; the event mirrors whatever this client did
+        // via SpaceEntity::Select()/Deselect() since the last tick.
+        if (CurrentSnapshot.IsLocallySelected != PreviousSnapshot.IsLocallySelected)
+        {
+            const csp::common::String EntityIdStr(std::to_string(EntityId).c_str());
+            const csp::common::String EventName(CurrentSnapshot.IsLocallySelected ? "select" : "deselect");
+            ScriptSystem.FireEntityEvent(EntityIdStr, EventName, csp::common::String("{}"));
+        }
+
         if ((CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != PreviousSnapshot.ScopeType)
             || (CurrentSnapshot.RuntimeMode != PreviousSnapshot.RuntimeMode))
         {
@@ -2186,6 +2213,37 @@ csp::systems::ESpaceRuntimeMode NgxCodeComponentRuntime::GetRuntimeMode() const
     return csp::systems::SpaceSystem::GetGlobalRuntimeMode();
 }
 
+uint64_t NgxCodeComponentRuntime::GetLocalClientId() const
+{
+    if ((ActiveRealtimeEngine != nullptr) && (ActiveRealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online))
+    {
+        const auto* OnlineRealtimeEngine = static_cast<const csp::multiplayer::OnlineRealtimeEngine*>(ActiveRealtimeEngine);
+        if (OnlineRealtimeEngine != nullptr)
+        {
+            if (auto* MultiplayerConnection = OnlineRealtimeEngine->GetMultiplayerConnectionInstance(); MultiplayerConnection != nullptr)
+            {
+                return MultiplayerConnection->GetClientId();
+            }
+        }
+    }
+
+    return csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
+}
+
+bool NgxCodeComponentRuntime::IsEntityOrAncestorSelectedByLocalClient(const csp::multiplayer::SpaceEntity* Entity) const
+{
+    const uint64_t LocalClientId = GetLocalClientId();
+    for (auto* CurrentEntity = Entity; CurrentEntity != nullptr; CurrentEntity = CurrentEntity->GetParentEntity())
+    {
+        if (CurrentEntity->IsSelected() && (CurrentEntity->GetSelectingClientID() == LocalClientId))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
     const csp::multiplayer::SpaceEntity* Entity, const csp::multiplayer::CodeSpaceComponent* CodeComponent) const
 {
@@ -2194,15 +2252,29 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
         return false;
     }
 
-    // Scope semantics are intentionally strict: a code component runs only when
-    // its scope matches the current runtime mode. Edit-time script previews must
-    // use CodeScopeType::Editor explicitly — Local/Edit has no implicit
-    // activation path (a previous "runs in Edit when selected" shortcut caused
-    // ghost-activation from stale replicated SelectedId state).
+    // Scope semantics:
+    //   Local  — runs in Play; also in Edit when the entity (or an ancestor) is
+    //            selected by this client, so authors can preview a script while
+    //            editing. Safe because SelectedId is now local-only: ghost
+    //            replicated selections can no longer activate scripts.
+    //   Editor — runs only in Edit. For scene-authoring helpers unrelated to
+    //            Play-mode runtime.
+    //   Server — runs only in Server.
     switch (CodeComponent->GetCodeScopeType())
     {
     case csp::multiplayer::CodeScopeType::Local:
-        return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play;
+    {
+        const auto Mode = GetRuntimeMode();
+        if (Mode == csp::systems::ESpaceRuntimeMode::Play)
+        {
+            return true;
+        }
+        if (Mode == csp::systems::ESpaceRuntimeMode::Edit)
+        {
+            return IsEntityOrAncestorSelectedByLocalClient(Entity);
+        }
+        return false;
+    }
 
     case csp::multiplayer::CodeScopeType::Editor:
         return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit;

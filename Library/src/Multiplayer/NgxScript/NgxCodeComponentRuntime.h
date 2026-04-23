@@ -59,6 +59,7 @@ private:
         csp::multiplayer::CodeScopeType ScopeType;
         csp::systems::ESpaceRuntimeMode RuntimeMode;
         std::map<std::string, csp::multiplayer::CodeAttribute> Attributes;
+        bool IsLocallySelected = false;
     };
 
     using EntitySnapshotMap = std::map<uint64_t, CodeComponentSnapshot>;
@@ -71,6 +72,8 @@ private:
     void SyncSnapshots(const EntitySnapshotMap& CurrentSnapshots);
     bool BootstrapRegistryIfReady();
     csp::systems::ESpaceRuntimeMode GetRuntimeMode() const;
+    uint64_t GetLocalClientId() const;
+    bool IsEntityOrAncestorSelectedByLocalClient(const csp::multiplayer::SpaceEntity* Entity) const;
     bool ShouldActivateCodeComponent(
         const csp::multiplayer::SpaceEntity* Entity, const csp::multiplayer::CodeSpaceComponent* CodeComponent) const;
 
