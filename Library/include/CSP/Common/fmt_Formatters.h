@@ -73,6 +73,9 @@ template <> struct fmt::formatter<csp::web::HttpRequest> : formatter<std::string
         case csp::web::ERequestVerb::Head:
             Verb = "HEAD";
             break;
+        case csp::web::ERequestVerb::Patch:
+            Verb = "PATCH";
+            break;
         default:
             Verb = "UNKNOWN";
             break;

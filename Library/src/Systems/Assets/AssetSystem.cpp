@@ -852,7 +852,7 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const Stri
         }
         else if (ThirdPartyPackagedAssetIdentifier.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::NONE));
+            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
         }
         else if (ThirdPartyPlatform.HasValue())
         {
@@ -902,7 +902,7 @@ async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& AssetCo
         }
         else if (ThirdPartyPackagedAssetIdentifier.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::NONE));
+            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
         }
         else if (ThirdPartyPlatform.HasValue())
         {

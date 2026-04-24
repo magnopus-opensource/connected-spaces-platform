@@ -29,7 +29,6 @@ namespace csp::common
 /// @brief Enum which represents possible login states of a CSP client.
 enum class ELoginState : uint8_t
 {
-    LoginThirdPartyProviderDetailsRequested,
     LoginRequested,
     LoggedIn,
     LogoutRequested,
@@ -222,13 +221,13 @@ enum class StereoVideoType
 namespace csp::systems
 {
 
-/// @brief Indicates special handling for any thirdparty platform
-/// @note We may remove this soon, as it's deceptive implying these are the only platforms we support.
+/// @brief Indicates the thirdparty platform
 enum class EThirdPartyPlatform
 {
-    NONE,
-    UNREAL,
-    UNITY
+    None,
+    Unreal,
+    Unity,
+    Web
 };
 
 /// @brief Code to indicate the result of a request.

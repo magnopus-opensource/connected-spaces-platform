@@ -6,27 +6,41 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🍰 🙌 New Features
 
-- [OB-5310] feat: Added Volume and AudioType properties to `VideoPlayerSpaceComponent`. By @MAG-ME.
+- [OF-1830] feat: Inital integration of new build system by MAG-mv
+  This adds the start of our new build system that uses conan and cmake.
+  At this point, only support for local Windows and Mac builds has been added, and had only been tested on 1 machine.
+  This should currently not replace our current build system, feel free to use for testing.
 
-- [OB-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
+- [OF-5310] feat: Added Volume and AudioType properties to `VideoPlayerSpaceComponent`. By @MAG-ME.
+
+- [OF-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
   This isn't currently a public-facing change. However, it includes internal changes to the internal usage of tinyspline. This should not have any effect on behaviour.
 
-## [6.33.0]
+### 🐛 🔨 Bug Fixes
+
+- [OB-4980] fix!: Address issues with third party authorization flow. By @MAG-AdamThorn
+  The third party authorization flow is divided into three parts, with two of those handled via calls to CSP. This change addresses an issue whereby a call to the first CSP method would leave you in an invalid login state if you did not complete the authorization flow. In addition, the backend services are constructing the authorization URL that users require directly, rather than CSP constructing it from data returned. This will allow the services to account for changes required to the URL depending on client type and provider. This change introduces the following breaking changes:
+  1. Spelling of method `UserSystem::GetThirdPartyProviderAuthoriseURL()` Americanised to `UserSystem::GetThirdPartyProviderAuthorizeURL()`.
+  2. Method `UserSystem::GetThirdPartyProviderAuthorizeURL()` now takes an additional optional ClientType argument.
+  3. The values of enum `EThirdPartyPlatform` are now capitalized rather than upper case and the value `Web` has been added.
+
+## [6.34.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
+  This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
 
 ### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] test: Address issue with flackey ValidExpiryLengthInTokenOptionsTest by MAG-AdamThorn
   The test ValidExpiryLengthInTokenOptionsTest was failing when run against live services on our CI due to network latency. Adressed the flackiness and also removed calls to `NotifyRefreshTokenHasChanged()` from the UserSystem as this is already being done within the `LoginStateResult::OnResponse()`, resulting in the `UserSystem NewLoginTokenReceivedCallback` callback being fired twice.
 
-
-## [6.32.0]
+## [6.33.0]
 
 ### 🍰 🙌 New Features
 
 - [OF-1625] feat: Add enabled property to `CollisionSpaceComponent`. By @mag-lt.
-
-- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
-  This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
 
 ###💫 💥 Code Refactors
 
@@ -37,20 +51,18 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to ensure compatibility with SignalR wire representation. By @mag-lt
   This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
   the existing constaints into the type system.
-  
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: Fix tasks dropping in signalR scheduler by @MAG-ElliotMorris
   Address issue where signalR scheduler can drop tasks in rare instances where scheduler threads are almost completely busy.
+- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
+  The SignalR threading library by default, constructs several instances of the scheduler,
+  (and thus several sets of threads) during initialization. These are never cleared on WASM,
+  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
+  generally under a similar motivation, as we don't need 5 threads.
 
 ## [6.31.0]
-
-### 🍰 🙌 New Features
-
-- [OF-1830] feat: Inital integration of new build system by MAG-mv
-  This adds the start of our new build system that uses conan and cmake.
-  At this point, only support for local Windows and Mac builds has been added, and had only been tested on 1 machine.
-  This should currently not replace our current build system, feel free to use for testing.
 
 ###🔥 ❗Breaking Changes
 
@@ -71,12 +83,6 @@ All notable changes to this project will be documented in this file. For compile
   (instead of default initialised values), exposed that CSP was naively assuming
   that various optional fields are always set, resulting in `bad_optional_access`
   exceptions being thrown.
-  
-- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
-  The SignalR threading library by default, constructs several instances of the scheduler,
-  (and thus several sets of threads) during initialization. These are never cleared on WASM,
-  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
-  generally under a similar motivation, as we don't need 5 threads.
 
 ## [6.30.0]
 

@@ -49,7 +49,17 @@ void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, 
 
     if (Dto.HasAuthorizeEndpoint())
     {
-        ProviderDetails.AuthoriseURL = Dto.GetAuthorizeEndpoint();
+        ProviderDetails.ProviderAuthURL = Dto.GetAuthorizeEndpoint();
+    }
+
+    if (Dto.HasThirdPartyAuthStateId())
+    {
+        ProviderDetails.ThirdPartyAuthStateId = Dto.GetThirdPartyAuthStateId();
+    }
+
+    if (Dto.HasRedirectUri())
+    {
+        ProviderDetails.ProviderRedirectURL = Dto.GetRedirectUri();
     }
 }
 }; // namespace

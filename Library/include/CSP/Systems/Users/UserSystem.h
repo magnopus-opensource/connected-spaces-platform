@@ -145,37 +145,45 @@ public:
     CSP_ASYNC_RESULT void LoginAsGuestWithDeferredProfileCreation(
         const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
-    /// @ingroup Third Party Authentication
-    /// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
-    /// GetThirdPartyProviderAuthoriseURL followed by LoginToThirdPartyAuthenticationProvider You can see a Sequence Diagram with all the parties
-    /// involved including what a Client should be calling and when here https://miro.com/app/board/uXjVPflpu98=/.
-
     /// @brief API to retrieve the Connected Spaces Platform supported 3rd party authentication providers
     /// @return Array of Connected Spaces Platform supported 3rd party authentication providers
     [[nodiscard]] csp::common::Array<EThirdPartyAuthenticationProviders> GetSupportedThirdPartyAuthenticationProviders() const;
 
-    /// @brief First step of the 3rd party authentication flow
-    /// If you call this API but for some reason you'd like to call this again, this is supported, the params you pass second time will replace the
-    /// ones you've passed initially
-    /// @param AuthProvider EThirdPartyAuthenticationProviders : one of the supported Authentication Providers
-    /// @param RedirectURL csp::common::String : the RedirectURL you want to be used for this authentication flow
-    /// @param Callback StringResultCallback : callback that contains the Authorise URL that the Client should be navigating next before moving to the
-    /// second Connected Spaces Platform Authentication step
-    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthoriseURL(
-        EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL, StringResultCallback Callback);
+    /// @brief Part one of the 3rd party authentication flow
+    /// Note: The steps are as follows:
+    /// 1. This step. Call this method to retrieve the Authorization URL which is required for step 2.
+    /// 2. The caller should navigate to the Authorize URL retrieved in step 1, where they will authenticate with the 3rd party provider and retrieve
+    /// an auth token and state Id.
+    /// 3. Call @ref UserSystem::LoginToThirdPartyAuthenticationProvider() with the auth token and state Id retrieved in step 2.
+    ///
+    /// Calling this method will not impact your current login state.
+    /// @param AuthProvider : The Authentication Provider you want to be authenticated with (e.g. Google, Apple,
+    /// Discord).
+    /// @param RedirectURL : the RedirectURL you want to be used for this authentication flow.
+    /// @param ClientType : An optional parameter that allows the client to specify their platform for the
+    /// third party authentication flow. This is used for some providers to determine the format of the Authorize URL.
+    /// @param Callback : callback that contains the Authorize URL that the Client should be navigating to for step 2.
+    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL,
+        const csp::common::Optional<EThirdPartyPlatform>& ClientType, StringResultCallback Callback);
 
-    /// @brief Second step of the 3rd party authentication flow
-    /// Note: The Authentication Provider and the Redirect URL you've passed in the first step will be used now
-    /// @param ThirdPartyToken csp::common::String : The authentication token returned by the Provider
-    /// @param ThirdPartyStateId csp::common::String : The state Id returned by the Provider
-    /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// @brief Part two of the 3rd party authentication flow
+    /// Note: The steps are as follows:
+    /// 1. Call @ref UserSystem::GetThirdPartyProviderAuthorizeURL() to retrieve the Authorize URL required for step 2.
+    /// 2. The caller should navigate to the Authorize URL retrieved in step 1, where they will authenticate with the 3rd party provider and retrieve
+    /// an auth token and state Id.
+    /// 3. This step. Call this method with the auth token and state Id retrieved in step 2.
+    ///
+    /// @param ThirdPartyToken : The authentication token returned by the Provider in step 2.
+    /// @param ThirdPartyStateId : The state Id returned by the Provider in step 2.
+    /// @param CreateMultiplayerConnection : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
     /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
-    /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
-    /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
-    /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
+    /// @param UserHasVerifiedAge : An optional bool to specify whether or not the user has verified that they are
+    /// over 18.
+    /// @param TokenOptions : Optional override for default token options.
+    /// The default token expiry length is configured by MCS and defaults to 30 minutes. The value must be less than the default expiry length, or it will
     /// be ignored.
-    /// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Cloud Services Authentication operation
+    /// @param Callback : callback that contains the result of the 3rd party authentication operation.
     CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
         const csp::common::String& ThirdPartyStateId, bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
         const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
@@ -308,7 +316,6 @@ private:
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
-    void ResetAuthenticationState();
 
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;

@@ -63,6 +63,22 @@ void LogHttpResponseIfLoglevelVeryVerbose(
     }
 }
 
+/// @brief Copies headers from a Poco HTTPResponse to requests response payload.
+void CopyResponseHeaders(const Poco::Net::HTTPResponse& PocoResponse, csp::web::HttpPayload& Payload)
+{
+    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    {
+        std::string Key = Iter->first;
+        std::string Val = Iter->second;
+
+        // Make Key and Val lower-case
+        std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(Val.begin(), Val.end(), Val.begin(), [](unsigned char c) { return std::tolower(c); });
+
+        Payload.AddHeader(Key.c_str(), Val.c_str());
+    }
+}
+
 } // namespace
 
 namespace csp::web
@@ -73,8 +89,69 @@ const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
 EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh) 
-: WebClient(InPort, Tp, LogSystem, AutoRefresh)
+/// @brief Prepares a Poco HTTPRequest by copying headers and cookies from the provided HttpRequest.
+/// If specified it will send a request body either streamed or inline.
+bool POCOWebClient::PrepareAndSendRequest(
+    HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode)
+{
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
+        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
+    }
+
+    AddCookie(PocoRequest);
+
+    switch (SendBodyMode)
+    {
+    case ERequestBodyMode::None:
+    {
+        // No body is being sent with the request
+        ClientSession->sendRequest(PocoRequest);
+        break;
+    }
+    case ERequestBodyMode::Streamed:
+    {
+        // The request body is being sent as a stream, which allows for progress tracking and cancellation support
+        size_t ContentLength = Request.GetPayload().GetContent().Length();
+        PocoRequest.setContentLength(ContentLength);
+        std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
+        ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
+
+        if (Request.Cancelled())
+        {
+            return false;
+        }
+        break;
+    }
+    case ERequestBodyMode::Inline:
+    {
+        // The request body is being sent inline in a single operation
+        const std::string Body(Request.GetPayload().GetContent().c_str());
+        PocoRequest.setContentLength(Body.length());
+        ClientSession->sendRequest(PocoRequest) << Body;
+        break;
+    }
+    }
+
+    return true;
+}
+
+/// @brief Receives a response to a sent request, and copies cookies to the provided HttpRequest.
+std::istream& POCOWebClient::ReceiveResponse(Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request)
+{
+    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
+    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
+
+    {
+        std::scoped_lock Lock(CookiesMutex);
+        PocoResponse.getCookies(*Cookies);
+    }
+
+    return ResponseStream;
+}
+
+POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 
@@ -125,6 +202,9 @@ void POCOWebClient::Send(HttpRequest& Request)
         case ERequestVerb::Head:
             Head(Request);
             break;
+        case ERequestVerb::Patch:
+            Patch(Request);
+            break;
         default:
             break;
         }
@@ -133,43 +213,6 @@ void POCOWebClient::Send(HttpRequest& Request)
     {
         throw WebClientException(Ex.displayText());
     }
-}
-
-void POCOWebClient::Get(HttpRequest& Request)
-{
-    CSP_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
-
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
-
-    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
-
-    for (auto Header : Request.GetPayload().GetHeaders())
-    {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
-    }
-
-    AddCookie(PocoRequest);
-
-    ClientSession->sendRequest(PocoRequest);
-
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
-
-    {
-        std::scoped_lock Lock(CookiesMutex);
-
-        PocoResponse.getCookies(*Cookies);
-    }
-
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
-    {
-        ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
-    }
-
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
 }
 
 void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
@@ -200,6 +243,29 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
     PocoRequest.setCookies(CookieCollection);
 }
 
+void POCOWebClient::Get(HttpRequest& Request)
+{
+    CSP_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
+
+    Poco::URI Uri(Request.GetUri().GetAsStdString());
+
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
+    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+
+    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::None);
+
+    Poco::Net::HTTPResponse PocoResponse;
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+
+    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    {
+        ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
+    }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
+}
+
 void POCOWebClient::Post(HttpRequest& Request)
 {
     CSP_PROFILE_SCOPED_FORMAT("POST %s", Request.GetUri().GetAsStdString().c_str());
@@ -210,32 +276,13 @@ void POCOWebClient::Post(HttpRequest& Request)
     std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_POST, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders())
-    {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
-    }
-
-    AddCookie(PocoRequest);
-
-    size_t ContentLength = Request.GetPayload().GetContent().Length();
-    PocoRequest.setContentLength(ContentLength);
-    std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
-    ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
-
-    if (Request.Cancelled())
+    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
     {
         return;
     }
 
     Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
-
-    {
-        std::scoped_lock Lock(CookiesMutex);
-
-        PocoResponse.getCookies(*Cookies);
-    }
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
 
     std::string ResponseString;
     Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
@@ -243,17 +290,7 @@ void POCOWebClient::Post(HttpRequest& Request)
     auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
 
     // Get all response headers
-    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
-    {
-        std::string Key = Iter->first;
-        std::string Val = Iter->second;
-
-        // Make Key and Val lower-case
-        std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
-        std::transform(Val.begin(), Val.end(), Val.begin(), [](unsigned char c) { return std::tolower(c); });
-
-        Payload.AddHeader(Key.c_str(), Val.c_str());
-    }
+    CopyResponseHeaders(PocoResponse, Payload);
 
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
 }
@@ -268,32 +305,13 @@ void POCOWebClient::Put(HttpRequest& Request)
     std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders())
-    {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
-    }
-
-    AddCookie(PocoRequest);
-
-    size_t ContentLength = Request.GetPayload().GetContent().Length();
-    PocoRequest.setContentLength(ContentLength);
-    std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
-    ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
-
-    if (Request.Cancelled())
+    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
     {
         return;
     }
 
     Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
-
-    {
-        std::scoped_lock Lock(CookiesMutex);
-
-        PocoResponse.getCookies(*Cookies);
-    }
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
 
     if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
@@ -315,26 +333,10 @@ void POCOWebClient::Delete(HttpRequest& Request)
     std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders())
-    {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
-    }
-
-    AddCookie(PocoRequest);
-
-    const std::string Body(Request.GetPayload().GetContent().c_str());
-    PocoRequest.setContentLength(Body.length());
-    ClientSession->sendRequest(PocoRequest) << Body;
+    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Inline);
 
     Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
-
-    {
-        std::scoped_lock Lock(CookiesMutex);
-
-        PocoResponse.getCookies(*Cookies);
-    }
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
 
     if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
@@ -356,24 +358,10 @@ void POCOWebClient::Head(HttpRequest& Request)
     std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders())
-    {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
-    }
-
-    AddCookie(PocoRequest);
-
-    ClientSession->sendRequest(PocoRequest);
+    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::None);
 
     Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
-
-    {
-        std::scoped_lock Lock(CookiesMutex);
-
-        PocoResponse.getCookies(*Cookies);
-    }
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
 
     if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
@@ -381,6 +369,35 @@ void POCOWebClient::Head(HttpRequest& Request)
     }
 
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
+}
+
+void POCOWebClient::Patch(HttpRequest& Request)
+{
+    CSP_PROFILE_SCOPED_FORMAT("PATCH %s", Request.GetUri().GetAsStdString().c_str());
+
+    Poco::URI Uri(Request.GetUri().GetAsStdString());
+
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
+    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PATCH, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+
+    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
+    {
+        return;
+    }
+
+    Poco::Net::HTTPResponse PocoResponse;
+    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+
+    std::string ResponseString;
+    Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
+    Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
+    auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
+
+    // Get all response headers
+    CopyResponseHeaders(PocoResponse, Payload);
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PATCH", Request, PocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(

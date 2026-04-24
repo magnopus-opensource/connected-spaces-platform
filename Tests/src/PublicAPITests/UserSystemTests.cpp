@@ -146,7 +146,7 @@ csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSyste
     return GetProfileResult.GetProfile();
 }
 
-void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL)
+void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL)
 {
     EXPECT_FALSE(AuthoriseURL.IsEmpty());
     EXPECT_NE(AuthoriseURL, "error");
@@ -206,6 +206,7 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     EXPECT_GT(StateId.length(), 0);
     EXPECT_GT(ClientId.length(), 0);
     EXPECT_GE(Scope.length(), 0);
+
     EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
@@ -936,52 +937,70 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
     EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Google
+    // Retrieve Authorize URL for Google
     auto [ResGoogle] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
     EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = ResGoogle.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTestWithClient)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Discord
-    auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    csp::systems::EThirdPartyPlatform Client = csp::systems::EThirdPartyPlatform::Unity;
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    // Retrieve Authorize URL for Google
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, Client);
+    EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Apple
+    // Retrieve Authorize URL for Discord
     auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL);
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthorizeURL = Result.GetValue();
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForAppleTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+
+    // Retrieve Authorize URL for Apple
+    auto [Result] = AWAIT_PRE(
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL, nullptr);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = Result.GetValue();
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
 }
 
 // As the following three tests require manual actions explained inside, they are currently disabled
