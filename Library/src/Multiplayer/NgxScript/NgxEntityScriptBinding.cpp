@@ -202,9 +202,9 @@ globalThis.__cspPlayerController.moveCharacter = (x, y, z, jump = false, isFlyin
 globalThis.__cspPlayerController.teleportCharacter = (x, y, z) => {
   const component = __ngxFindPlayerControllerHostComponent();
   if (!component) {
+    console.warn("NgxScript: Teleportation requested but no entity with \"player-controller-config\" found.");
     return false;
   }
-
   component.invokeAction("teleportCharacter", JSON.stringify({ x: Number(x), y: Number(y), z: Number(z) }));
   return true;
 };
