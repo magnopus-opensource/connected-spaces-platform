@@ -95,7 +95,7 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 
 inline std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ClientType)
 {
-    if (!ClientType.HasValue())
+    if (!ClientType.HasValue() || *ClientType == csp::systems::EThirdPartyPlatform::None)
     {
         return std::nullopt;
     }
