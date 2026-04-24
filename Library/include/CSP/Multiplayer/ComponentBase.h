@@ -36,17 +36,11 @@ namespace csp::common
 class LogSystem;
 }
 
-CSP_START_IGNORE
-namespace csp::multiplayer::component
-{
-template <typename ComponentTypeId, typename PropertyId> struct Schema;
-}
-CSP_END_IGNORE
-
 namespace csp::multiplayer
 {
 
 class SpaceEntity;
+class ComponentSchema;
 class ComponentScriptInterface;
 
 /// @brief Represents the type of component.
@@ -113,11 +107,7 @@ public:
     // The LogSystem input may be null, components do not _have_ to log.
     ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    CSP_START_IGNORE
-    using PropertyKey = uint16_t;
-    using ComponentSchema = csp::multiplayer::component::Schema<ComponentType, PropertyKey>;
     CSP_NO_EXPORT ComponentBase(const ComponentSchema&, csp::common::LogSystem*, SpaceEntity* Parent);
-    CSP_END_IGNORE
 
     /// @brief Virtual destructor for the component.
     virtual ~ComponentBase();

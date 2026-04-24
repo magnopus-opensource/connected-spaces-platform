@@ -15,53 +15,53 @@
  */
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::ExternalLink,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::ExternalLink),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Name_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::LinkUrl),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::LinkUrl),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Scale),
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::DisplayText),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::DisplayText),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsEnabled),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVirtualVisible),
             true,
         },
     },

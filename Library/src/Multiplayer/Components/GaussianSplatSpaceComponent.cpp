@@ -16,53 +16,53 @@
 
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::GaussianSplat,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::GaussianSplat),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Rotation),
             csp::common::Vector4::Identity(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Scale),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsShadowCaster),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Tint),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Tint),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVirtualVisible),
             true,
         },
     },

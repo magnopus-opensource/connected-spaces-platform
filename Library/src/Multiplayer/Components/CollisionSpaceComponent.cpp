@@ -16,7 +16,7 @@
 
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -31,43 +31,43 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Collision,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionShape),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
             static_cast<int64_t>(CollisionShape::Box),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionMode),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
             static_cast<int64_t>(CollisionMode::Collision),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionAssetId),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::ThirdPartyComponentRef),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::IsEnabled),
             true,
         },
     },

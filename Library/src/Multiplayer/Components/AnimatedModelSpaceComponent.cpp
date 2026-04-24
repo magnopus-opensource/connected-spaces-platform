@@ -16,7 +16,7 @@
 
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
 #include <memory>
@@ -24,71 +24,71 @@
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::AnimatedModel,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::AnimatedModel),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::ExternalResourceAssetId),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::MaterialOverrides),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
             csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Scale),
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsLoopPlayback),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsLoopPlayback),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsPlaying),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsPlaying),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::AnimationIndex),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::AnimationIndex),
             static_cast<int64_t>(-1),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ThirdPartyComponentRef),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsShadowCaster),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsShadowCaster),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVirtualVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual),
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual),
             false,
         },
     },

@@ -16,41 +16,41 @@
 
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Reflection,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Reflection),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Name_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ReflectionAssetId),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::AssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Scale),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ReflectionShape),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionShape),
             static_cast<int64_t>(ReflectionShape::UnitBox),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ThirdPartyComponentRef),
             "",
         },
     },

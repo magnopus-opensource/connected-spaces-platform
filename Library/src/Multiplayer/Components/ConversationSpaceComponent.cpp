@@ -16,7 +16,7 @@
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
@@ -50,43 +50,43 @@ namespace
     }
 }
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Conversation,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Conversation),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationId),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::IsActive),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsActive),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Title),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Title),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Resolved),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Resolved),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationCameraPosition),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationCameraPosition),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationCameraRotation),
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationCameraRotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
     },

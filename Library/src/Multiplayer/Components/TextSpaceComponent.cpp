@@ -15,65 +15,65 @@
  */
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Text,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Text),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Scale),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Text),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Text),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::TextColor),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::TextColor),
             csp::common::Vector3(1.0f, 1.0f, 1.0f),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BackgroundColor),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BackgroundColor),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsBackgroundVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsBackgroundVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Width),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Width),
             1.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Height),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Height),
             1.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BillboardMode),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BillboardMode),
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVirtualVisible),
             true,
         },
     },
