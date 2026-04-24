@@ -44,6 +44,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& AIChatbotSpaceComponent::GetSchema() { return Schema; }
+
 csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

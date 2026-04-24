@@ -67,6 +67,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ExternalLinkSpaceComponent::GetSchema() { return Schema; }
+
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

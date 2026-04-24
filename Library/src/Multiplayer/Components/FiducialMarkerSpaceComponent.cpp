@@ -64,6 +64,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& FiducialMarkerSpaceComponent::GetSchema() { return Schema; }
+
 FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

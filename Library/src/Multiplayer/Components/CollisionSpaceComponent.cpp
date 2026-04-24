@@ -73,6 +73,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }
+
 CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

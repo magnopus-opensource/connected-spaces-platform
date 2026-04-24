@@ -35,6 +35,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& CustomSpaceComponent::GetSchema() { return Schema; }
+
 CustomSpaceComponent::CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent) //, NumProperties(2)
 {

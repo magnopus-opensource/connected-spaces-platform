@@ -67,6 +67,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ButtonSpaceComponent::GetSchema() { return Schema; }
+
 ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

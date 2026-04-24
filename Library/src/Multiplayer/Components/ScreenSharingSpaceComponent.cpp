@@ -77,6 +77,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema; }
+
 ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

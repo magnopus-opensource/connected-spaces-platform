@@ -80,6 +80,8 @@ class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
                                             public IRenderBehaviourComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

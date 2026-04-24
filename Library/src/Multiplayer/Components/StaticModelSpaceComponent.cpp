@@ -82,6 +82,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& StaticModelSpaceComponent::GetSchema() { return Schema; }
+
 StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

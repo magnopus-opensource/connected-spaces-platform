@@ -49,6 +49,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& SplineSpaceComponent::GetSchema() { return Schema; }
+
 SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

@@ -83,6 +83,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& AudioSpaceComponent::GetSchema() { return Schema; }
+
 AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

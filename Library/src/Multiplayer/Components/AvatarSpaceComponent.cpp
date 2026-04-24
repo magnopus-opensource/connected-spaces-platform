@@ -103,6 +103,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& AvatarSpaceComponent::GetSchema() { return Schema; }
+
 AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

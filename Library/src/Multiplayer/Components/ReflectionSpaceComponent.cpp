@@ -56,6 +56,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ReflectionSpaceComponent::GetSchema() { return Schema; }
+
 ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

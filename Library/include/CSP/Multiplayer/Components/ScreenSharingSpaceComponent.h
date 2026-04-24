@@ -57,6 +57,8 @@ enum class ScreenSharingPropertyKeys : uint16_t
 class CSP_API ScreenSharingSpaceComponent : public ComponentBase, public IShadowCasterComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the screen sharing component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
