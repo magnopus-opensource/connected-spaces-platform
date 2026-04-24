@@ -15,30 +15,26 @@
  */
 #pragma once
 
-#include "Property.h"
+#include "ComponentProperty.h"
 
-#include "Multiplayer/MCS/MCSTypes.h"
+#include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 
 #include <cstdint>
-#include <vector>
 
-namespace csp::multiplayer::component
+namespace csp::multiplayer
 {
 
 /// @brief A structural description of a component that can be interrogated at runtime
 /// (i.e. to iterate over the properties) to facilitate registration and hydration (i.e. where a
 /// serialised representation is reconstructed into this structure).
-///
-/// @tparam ComponentTypeId: The type of the stable ID value used to uniquely identify the specific component type this schema describes.
-/// @tparam PropertyKey: The type of the stable ID values used to key individual properties within this schema.
-template <typename ComponentTypeId, typename PropertyKey> struct Schema final
+class CSP_API ComponentSchema
 {
-    static_assert(mcs::IsPackableIdV<ComponentTypeId, uint64_t>);
+public:
+    using TypeIdType = uint64_t;
 
-    using Property = Property<PropertyKey>;
-
-    ComponentTypeId TypeId;
-    std::vector<Property> Properties;
+    TypeIdType TypeId;
+    csp::common::Array<ComponentProperty> Properties;
 };
 
-} // namespace csp::multiplayer::component
+} // namespace csp::multiplayer

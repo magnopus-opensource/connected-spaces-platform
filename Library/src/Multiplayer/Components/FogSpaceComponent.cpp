@@ -15,73 +15,73 @@
  */
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Fog,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Fog),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::FogMode),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::FogMode),
             static_cast<int64_t>(FogMode::Exponential),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Scale),
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::StartDistance),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::StartDistance),
             0.f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::EndDistance),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::EndDistance),
             0.f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Color),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Color),
             csp::common::Vector3 { 0.8f, 0.9f, 1.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Density),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Density),
             0.4f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::HeightFalloff),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::HeightFalloff),
             0.2f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::MaxOpacity),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::MaxOpacity),
             1.f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVolumetric),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVolumetric),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::ThirdPartyComponentRef),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVirtualVisible),
             true,
         },
     },

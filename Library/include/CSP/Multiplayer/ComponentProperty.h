@@ -15,24 +15,23 @@
  */
 #pragma once
 
+#include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/ReplicatedValue.h"
 
-#include "Multiplayer/MCS/MCSTypes.h"
-
-namespace csp::multiplayer::component
+namespace csp::multiplayer
 {
 
 /// @brief Represents an individual data field, or "property", within a component schema,
 /// consisting of a stable ID/key, a type kind and default value (via ReplicatedValue),
 /// and other metadata.
-///
-/// @tparam KeyType: The type of the stable ID value used for this property's unique key.
-template <typename KeyType> struct Property final
+class CSP_API ComponentProperty
 {
-    static_assert(mcs::IsPackableIdV<KeyType, mcs::PropertyKeyType>);
+public:
+    using KeyType = uint16_t;
 
     KeyType Key;
     csp::common::ReplicatedValue DefaultValue;
 };
 
-} // namespace csp::multiplayer::component
+} // namespace csp::multiplayer

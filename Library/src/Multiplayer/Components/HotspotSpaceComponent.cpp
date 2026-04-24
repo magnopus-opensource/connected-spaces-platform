@@ -15,46 +15,46 @@
  */
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Hotspot,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Hotspot),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Name_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsTeleportPoint),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsTeleportPoint),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsSpawnPoint),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsSpawnPoint),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVirtualVisible),
             true,
         },
     },

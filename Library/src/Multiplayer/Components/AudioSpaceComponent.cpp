@@ -17,7 +17,7 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
 #include <fmt/format.h>
@@ -33,51 +33,51 @@ constexpr const float DefaultVolume = 1.f;
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Audio,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Audio),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::PlaybackState),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
             static_cast<int64_t>(AudioPlaybackState::Reset),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AudioType),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
             static_cast<int64_t>(AudioType::Global),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AudioAssetId),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AttenuationRadius),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
             DefaultAttenuationRadius,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::IsLoopPlayback),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::TimeSincePlay),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
             0.f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::Volume),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
             DefaultVolume,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
             "",
         },
     },

@@ -16,49 +16,49 @@
 
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::FiducialMarker,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::FiducialMarker),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::MarkerAssetId),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::MarkerAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::AssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Scale),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVirtualVisible),
             true,
         },
     },

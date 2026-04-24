@@ -17,7 +17,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 
 #include "tinyspline.h"
@@ -39,11 +39,11 @@ namespace
     };
 }
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Spline,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Spline),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(SplinePropertyKeys::Waypoints),
+            static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
             0.f,
         },
     },

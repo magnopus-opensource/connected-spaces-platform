@@ -15,61 +15,61 @@
  */
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Image,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Image),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Name_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::ImageAssetId),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::ImageAssetId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Rotation),
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Scale),
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::BillboardMode),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::DisplayMode),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
             static_cast<int64_t>(DisplayMode::DoubleSided),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsEmissive),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsEmissive),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVirtualVisible),
             true,
         },
     },

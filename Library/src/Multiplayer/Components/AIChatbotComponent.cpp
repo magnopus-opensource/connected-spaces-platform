@@ -16,29 +16,29 @@
 
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::AIChatbot,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::AIChatbot),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Voice),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Voice),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::VisualState),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::VisualState),
             static_cast<int64_t>(0),
         },
     },

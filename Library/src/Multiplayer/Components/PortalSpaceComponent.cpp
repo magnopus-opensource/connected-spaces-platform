@@ -15,41 +15,41 @@
  */
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Portal,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Portal),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsActive),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::SpaceId),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsEnabled),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Position),
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Radius),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Radius),
             1.5f,
         },
     },

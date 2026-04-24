@@ -16,67 +16,67 @@
 
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::CinematicCamera,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::CinematicCamera),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Position),
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Rotation),
             csp::common::Vector4::Identity(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsEnabled),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::FocalLength),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocalLength),
             0.035f,
         },
         // 16:9
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::AspectRatio),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::AspectRatio),
             1.778f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::SensorSize),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::SensorSize),
             csp::common::Vector2 { 0.036f, 0.024f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::NearClip),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::NearClip),
             0.1f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::FarClip),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FarClip),
             20000.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::Iso),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Iso),
             400.0f,
         },
         // 60 FPS
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::ShutterSpeed),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ShutterSpeed),
             0.0167f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::Aperture),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Aperture),
             4.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::IsViewerCamera),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsViewerCamera),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
             "",
         },
     },

@@ -15,14 +15,14 @@
  */
 #include "CSP/Multiplayer/ComponentBase.h"
 
-#include "Multiplayer/Component/Schema.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/RealtimeEngineUtils.h"
 #include "ComponentBaseKeys.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <fmt/format.h>
@@ -53,7 +53,7 @@ ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSyst
 }
 
 ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema.TypeId, LogSystem, Parent)
+    : ComponentBase(static_cast<ComponentType>(Schema.TypeId), LogSystem, Parent)
 {
     for (const auto& Property : Schema.Properties)
     {

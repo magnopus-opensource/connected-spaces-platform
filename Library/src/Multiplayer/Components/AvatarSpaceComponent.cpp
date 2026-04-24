@@ -15,89 +15,89 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::AvatarData,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::AvatarData),
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::UserId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::UserId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::State),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::State),
             static_cast<int64_t>(AvatarState::Idle),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
             static_cast<int64_t>(-1),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AgoraUserId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AgoraUserId),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsHandIKEnabled),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsHandIKEnabled),
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
             csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HandRotation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HandRotation),
             csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HeadRotation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HeadRotation),
             csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarPlayMode),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarPlayMode),
             static_cast<int64_t>(AvatarPlayMode::Default),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::MovementDirection),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
             csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::LocomotionModel),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::LocomotionModel),
             static_cast<int64_t>(LocomotionModel::Grounded),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsARVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVirtualVisible),
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarUrl),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarUrl),
             "",
         },
     },
