@@ -67,6 +67,8 @@ class CSP_API StaticModelSpaceComponent : public ComponentBase,
 
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

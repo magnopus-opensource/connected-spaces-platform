@@ -68,6 +68,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& GaussianSplatSpaceComponent::GetSchema() { return Schema; }
+
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

@@ -91,6 +91,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& LightSpaceComponent::GetSchema() { return Schema; }
+
 LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

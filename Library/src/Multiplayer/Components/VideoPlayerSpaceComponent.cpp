@@ -138,6 +138,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& VideoPlayerSpaceComponent::GetSchema() { return Schema; }
+
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

@@ -87,6 +87,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& FogSpaceComponent::GetSchema() { return Schema; }
+
 FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

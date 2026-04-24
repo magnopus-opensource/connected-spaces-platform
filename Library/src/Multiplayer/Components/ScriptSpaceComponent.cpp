@@ -41,6 +41,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }
+
 ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

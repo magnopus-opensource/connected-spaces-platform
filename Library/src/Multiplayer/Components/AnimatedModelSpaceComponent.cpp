@@ -94,6 +94,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& AnimatedModelSpaceComponent::GetSchema() { return Schema; }
+
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

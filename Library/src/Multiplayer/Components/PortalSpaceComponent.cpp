@@ -55,6 +55,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& PortalSpaceComponent::GetSchema() { return Schema; }
+
 PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

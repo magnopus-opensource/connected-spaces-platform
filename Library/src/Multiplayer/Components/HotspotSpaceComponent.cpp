@@ -60,6 +60,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& HotspotSpaceComponent::GetSchema() { return Schema; }
+
 HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

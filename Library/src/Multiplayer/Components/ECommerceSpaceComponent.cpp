@@ -36,6 +36,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
+
 ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

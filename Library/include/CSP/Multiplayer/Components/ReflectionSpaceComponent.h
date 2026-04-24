@@ -55,6 +55,8 @@ enum class ReflectionShape
 class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionComponent, public IScaleComponent, public IThirdPartyComponentRef
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

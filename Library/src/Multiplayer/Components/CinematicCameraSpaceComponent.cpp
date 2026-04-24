@@ -82,6 +82,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& CinematicCameraSpaceComponent::GetSchema() { return Schema; }
+
 CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {

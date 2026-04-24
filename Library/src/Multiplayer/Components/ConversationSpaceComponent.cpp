@@ -92,6 +92,8 @@ const auto Schema = ComponentSchema {
     },
 };
 
+const ComponentSchema& ConversationSpaceComponent::GetSchema() { return Schema; }
+
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
