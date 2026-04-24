@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#ifndef CSP_WASM
+
 #include "Common/Web/WebClient.h"
 
 #include <Poco/Net/HTTPCookie.h>
@@ -83,3 +85,4 @@ protected:
 };
 
 } // namespace csp::web
+#endif
