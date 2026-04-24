@@ -19,6 +19,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Map.h"
 
 #include <cstdint>
 
@@ -36,5 +37,7 @@ public:
     TypeIdType TypeId;
     csp::common::Array<ComponentProperty> Properties;
 };
+
+using ComponentSchemaRegistry = csp::common::Map<csp::multiplayer::ComponentSchema::TypeIdType, csp::multiplayer::ComponentSchema>;
 
 } // namespace csp::multiplayer

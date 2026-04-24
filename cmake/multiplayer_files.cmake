@@ -64,6 +64,7 @@ set(CSP_MULTIPLAYER_PUBLIC_INCLUDES
 
 set(CSP_MULTIPLAYER_SOURCES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentBase.cpp
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchemaRegistry.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/CSPSceneDescription.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCSComponentPacker.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MultiplayerConnection.cpp

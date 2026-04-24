@@ -18,6 +18,7 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/SharedEnums.h"
@@ -68,6 +69,9 @@ public:
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
     OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
     /// @brief OfflineRealtimeEngine destructor
     /// Removes entity script bindings and deregisters tick event listeners
@@ -229,6 +233,10 @@ public:
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
+    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
+    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
+    CSP_NO_EXPORT const csp::multiplayer::ComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
@@ -260,5 +268,7 @@ private:
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;
+
+    csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
 };
 }
