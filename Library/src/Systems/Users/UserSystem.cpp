@@ -93,9 +93,9 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
     return false;
 }
 
-inline std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ClientType)
+std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ClientType)
 {
-    if (!ClientType.HasValue() || *ClientType == csp::systems::EThirdPartyPlatform::None)
+    if (!ClientType.HasValue())
     {
         return std::nullopt;
     }
@@ -113,6 +113,10 @@ inline std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::
     case csp::systems::EThirdPartyPlatform::Web:
     {
         return "Web";
+    }
+    case csp::systems::EThirdPartyPlatform::None:
+    {
+        return std::nullopt;
     }
     }
 
