@@ -24,6 +24,7 @@
 #include "Common/UUIDGenerator.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 
@@ -106,8 +107,15 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
 }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, {})
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+    const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
+    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
 {
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
 
@@ -319,6 +327,8 @@ ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
         return ModifiableStatus::Modifiable;
     }
 }
+
+const csp::multiplayer::ComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

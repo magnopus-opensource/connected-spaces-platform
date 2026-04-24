@@ -30,6 +30,7 @@
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "MCS/MCSTypes.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/Election/ScopeLeadershipManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
@@ -182,6 +183,13 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
 
 OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
+    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, {})
+{
+}
+
+OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner,
+    const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(&InMultiplayerConnection)
     , LogSystem(&LogSystem)
@@ -197,6 +205,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EntityPatchRate(90)
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
+    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
 {
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
 
@@ -826,6 +835,8 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
 
     return ModifiableStatus::Modifiable;
 }
+
+const csp::multiplayer::ComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {

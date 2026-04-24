@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -639,4 +640,34 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
 
     RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
+}
+
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithComponentSchema) 
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    const auto ExampleSchemaId = ComponentSchema::TypeIdType{666};
+
+    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+        {
+            ExampleSchemaId,
+            csp::common::Array<ComponentProperty> {
+                {
+                    ComponentProperty::KeyType { 42 },
+                    "DefaultValue",
+                },
+            },
+        },
+    };
+
+    const auto Engine = OnlineRealtimeEngine {
+        *SystemsManager.GetMultiplayerConnection(),
+        *SystemsManager.GetLogSystem(),
+        *SystemsManager.GetEventBus(),
+        *SystemsManager.GetScriptSystem(),
+        Components,
+    };
+
+    EXPECT_TRUE(Engine.GetComponentSchemaRegistry()->HasKey(ExampleSchemaId));
 }
