@@ -81,6 +81,7 @@ async function copyTypeScriptArtifacts(): Promise<void> {
   const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
   const tsDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web"),
+    join("..", "codecomponent", "npm_override", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web"),
     join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web"),
     join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform")
   ];
@@ -163,6 +164,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
   const binaryDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
+    join("..", "codecomponent", "npm_override", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
     join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
     join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform", buildTypeCapitalized)
   ];
@@ -190,6 +192,7 @@ async function copyFilesOnly(buildType: string) {
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
   const binaryDestPaths = [
     join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
+    join("..", "codecomponent", "npm_override", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
     join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized),
     join("..", "connected-spaces-platform-web-api", "npm_override", "connected-spaces-platform", buildTypeCapitalized)
   ];

@@ -126,6 +126,11 @@ public:
     // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
     csp::common::String DrainPendingUIUpdates();
 
+    // Drain pending immediate-mode debug-draw commands (e.g. csp.drawLine) as a JSON array.
+    // Each entry has shape: { "op": "line", "start": [x,y,z], "end": [x,y,z], "color": [r,g,b,a], "width": number }.
+    // Commands are cleared on drain; callers must poll once per frame to keep pace with the script's redraws.
+    csp::common::String DrainPendingDebugDraws();
+
     // Unmount any UI whose entity id is not in the supplied active-id set.
     // Safety net for screen/world UIs left mounted when a code component
     // deactivates without its JS teardown reaching csp.__uiUnmount.
@@ -247,6 +252,23 @@ private:
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;
+
+    struct DebugDrawLineCommand
+    {
+        double StartX;
+        double StartY;
+        double StartZ;
+        double EndX;
+        double EndY;
+        double EndZ;
+        double R;
+        double G;
+        double B;
+        double A;
+        double Width;
+    };
+    std::vector<DebugDrawLineCommand> DebugDrawCommands;
+    mutable std::mutex DebugDrawMutex;
     CSP_END_IGNORE
 };
 

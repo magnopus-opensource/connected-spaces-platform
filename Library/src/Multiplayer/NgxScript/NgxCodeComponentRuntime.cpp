@@ -139,6 +139,31 @@ export const TheAssetSystem = new Proxy({}, {
         return true;
     },
 });
+
+// Immediate-mode world-space debug line. Call every tick while the line should
+// be visible; stop calling to hide it. Matches Unity Debug.DrawLine /
+// PlayCanvas app.drawLine. Colour defaults to opaque white; width defaults to
+// 0.02 world units (PlayCanvas backend currently renders at 1px regardless).
+export const drawLine = (start, end, color, options) => {
+    const raw = globalThis.csp && globalThis.csp.__drawLine;
+    if (typeof raw !== 'function') return;
+    if (!Array.isArray(start) || !Array.isArray(end)) return;
+    const c = Array.isArray(color) ? color : [1, 1, 1, 1];
+    const width = options && options.width != null ? Number(options.width) : 0.02;
+    raw(
+        Number(start[0]) || 0,
+        Number(start[1]) || 0,
+        Number(start[2]) || 0,
+        Number(end[0]) || 0,
+        Number(end[1]) || 0,
+        Number(end[2]) || 0,
+        Number(c[0] != null ? c[0] : 1),
+        Number(c[1] != null ? c[1] : 1),
+        Number(c[2] != null ? c[2] : 1),
+        Number(c[3] != null ? c[3] : 1),
+        width,
+    );
+};
 )INPUT";
 constexpr const char* CODECOMPONENT_UI_SOURCE = R"UI(
 function normalizeProps(value) {

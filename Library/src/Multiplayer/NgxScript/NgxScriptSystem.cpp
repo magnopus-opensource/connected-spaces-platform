@@ -791,6 +791,49 @@ csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
     return UIRuntime->DrainPendingUpdatesJson().c_str();
 }
 
+csp::common::String NgxScriptSystem::DrainPendingDebugDraws()
+{
+    std::vector<DebugDrawLineCommand> Drained;
+    {
+        std::scoped_lock Lock(DebugDrawMutex);
+        Drained.swap(DebugDrawCommands);
+    }
+
+    rapidjson::StringBuffer Buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+    Writer.StartArray();
+    for (const auto& Cmd : Drained)
+    {
+        Writer.StartObject();
+        Writer.Key("op");
+        Writer.String("line");
+        Writer.Key("start");
+        Writer.StartArray();
+        Writer.Double(Cmd.StartX);
+        Writer.Double(Cmd.StartY);
+        Writer.Double(Cmd.StartZ);
+        Writer.EndArray();
+        Writer.Key("end");
+        Writer.StartArray();
+        Writer.Double(Cmd.EndX);
+        Writer.Double(Cmd.EndY);
+        Writer.Double(Cmd.EndZ);
+        Writer.EndArray();
+        Writer.Key("color");
+        Writer.StartArray();
+        Writer.Double(Cmd.R);
+        Writer.Double(Cmd.G);
+        Writer.Double(Cmd.B);
+        Writer.Double(Cmd.A);
+        Writer.EndArray();
+        Writer.Key("width");
+        Writer.Double(Cmd.Width);
+        Writer.EndObject();
+    }
+    Writer.EndArray();
+    return Buffer.GetString();
+}
+
 void NgxScriptSystem::UnmountUIForInactiveEntities(const std::unordered_set<std::string>& ActiveEntityIds)
 {
     std::scoped_lock UILock(UIMutex);
@@ -1372,6 +1415,13 @@ void NgxScriptSystem::InstallHostBindings()
         {
             std::scoped_lock UILock(UIMutex);
             return UIRuntime ? UIRuntime->Unmount(EntityIdText) : false;
+        });
+    CSPModule.function("__drawLine",
+        [this](double StartX, double StartY, double StartZ, double EndX, double EndY, double EndZ, double R, double G, double B, double A,
+            double Width)
+        {
+            std::scoped_lock Lock(DebugDrawMutex);
+            DebugDrawCommands.push_back({ StartX, StartY, StartZ, EndX, EndY, EndZ, R, G, B, A, Width });
         });
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
