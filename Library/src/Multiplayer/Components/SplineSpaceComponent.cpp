@@ -41,9 +41,11 @@ namespace
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Spline),
+    "Spline",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
+            {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
             0.f,
         },
     },

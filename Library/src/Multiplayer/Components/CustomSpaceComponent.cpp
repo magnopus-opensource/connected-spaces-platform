@@ -27,9 +27,11 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Custom),
+    "Custom",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CustomComponentPropertyKeys::ApplicationOrigin),
+            "applicationOrigin",
             "",
         },
     },

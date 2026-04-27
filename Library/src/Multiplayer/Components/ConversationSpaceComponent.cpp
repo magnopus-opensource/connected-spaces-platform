@@ -52,41 +52,51 @@ namespace
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Conversation),
+    "Conversation",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsActive),
+            "isActive",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Title),
+            "title",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::Resolved),
+            "resolved",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationCameraPosition),
+            "conversationCameraPosition",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationCameraRotation),
+            "conversationCameraRotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
     },

@@ -24,21 +24,26 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::AIChatbot),
+    "AIChatbot",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Voice),
+            "voice",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
+            "guardrailAssetCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::VisualState),
+            "visualState",
             static_cast<int64_t>(0),
         },
     },

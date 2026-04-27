@@ -23,57 +23,71 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Text),
+    "Text",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Text),
+            "text",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::TextColor),
+            "textColor",
             csp::common::Vector3(1.0f, 1.0f, 1.0f),
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BackgroundColor),
+            "backgroundColor",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsBackgroundVisible),
+            "isBackgroundVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Width),
+            "width",
             1.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Height),
+            "height",
             1.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BillboardMode),
+            "billboardMode",
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

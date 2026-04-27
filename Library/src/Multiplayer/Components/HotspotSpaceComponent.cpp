@@ -24,37 +24,46 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Hotspot),
+    "Hotspot",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Name_DEPRECATED),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsTeleportPoint),
+            "isTeleportPoint",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsSpawnPoint),
+            "isSpawnPoint",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

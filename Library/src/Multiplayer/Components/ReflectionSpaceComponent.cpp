@@ -24,33 +24,41 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Reflection),
+    {}, // not exposed to scripting
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Name_DEPRECATED),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionAssetId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::AssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Position),
+            {}, // not exposed to scripting
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Scale),
+            {}, // not exposed to scripting
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionShape),
+            {}, // not exposed to scripting
             static_cast<int64_t>(ReflectionShape::UnitBox),
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
     },

@@ -26,69 +26,86 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::AnimatedModel),
+    "AnimatedModel",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetId),
+            "externalResourceAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId),
+            "externalResourceAssetCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
+            {}, // not exposed to scripting
             csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsLoopPlayback),
+            "isLoopPlayback",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsPlaying),
+            "isPlaying",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::AnimationIndex),
+            "animationIndex",
             static_cast<int64_t>(-1),
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsShadowCaster),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR),
+            "showAsHoldoutInAR",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual),
+            "showAsHoldoutInVirtual",
             false,
         },
     },

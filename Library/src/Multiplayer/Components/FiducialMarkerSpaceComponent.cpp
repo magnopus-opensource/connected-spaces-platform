@@ -24,41 +24,51 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::FiducialMarker),
+    "FiducialMarker",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::MarkerAssetId),
+            "markerAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::AssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

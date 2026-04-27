@@ -24,59 +24,73 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::CinematicCamera),
+    "CinematicCamera",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocalLength),
+            "focalLength",
             0.035f,
         },
         // 16:9
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::AspectRatio),
+            "aspectRatio",
             1.778f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::SensorSize),
+            "sensorSize",
             csp::common::Vector2 { 0.036f, 0.024f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::NearClip),
+            "nearClip",
             0.1f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FarClip),
+            "farClip",
             20000.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Iso),
+            "iso",
             400.0f,
         },
         // 60 FPS
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ShutterSpeed),
+            "shutterSpeed",
             0.0167f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Aperture),
+            "aperture",
             4.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsViewerCamera),
+            "isViewerCamera",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting,
             "",
         },
     },
