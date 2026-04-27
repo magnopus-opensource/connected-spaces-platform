@@ -30,7 +30,15 @@ class CSP_API ComponentProperty
 public:
     using KeyType = uint16_t;
 
+    /// @brief An Id/Key for identifying this property within a component. Need only be unique
+    /// within the scope of the component (which is historically the case), but could also be
+    /// globally unique. Will ultimately be serialized and used in messages sent over the
+    /// multiplayer connection.
     KeyType Key;
+
+    /// @brief The default value of this property. This also jointly declares the type of the
+    /// property, which is considered static i.e. if the value is a `float`, it can't be later
+    /// changed to hold a `String`.
     csp::common::ReplicatedValue DefaultValue;
 };
 
