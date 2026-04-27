@@ -207,11 +207,12 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.75;
     )xx";
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
     RealtimeEngine->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
-    AudioScriptText = R"xx(M
+    AudioScriptText = R"xx(
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = -2.75;
     )xx";
