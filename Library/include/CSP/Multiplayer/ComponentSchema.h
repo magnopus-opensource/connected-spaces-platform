@@ -34,7 +34,11 @@ class CSP_API ComponentSchema
 public:
     using TypeIdType = uint64_t;
 
+    /// @brief A globally unique ID for identifiying this component type. Will ultimately be
+    /// serialized and used in messages sent over the multiplayer connection.
     TypeIdType TypeId;
+
+    /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
 };
 
