@@ -33,41 +33,51 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
+    {}, // not exposed to scripting
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
+            {}, // not exposed to scripting
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
+            {}, // not exposed to scripting
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
+            {}, // not exposed to scripting
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
+            {}, // not exposed to scripting
             static_cast<int64_t>(CollisionShape::Box),
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
+            {}, // not exposed to scripting
             static_cast<int64_t>(CollisionMode::Collision),
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::IsEnabled),
+            {}, // not exposed to scripting
             true,
         },
     },

@@ -35,49 +35,61 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Audio),
+    "Audio",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
+            "playbackState",
             static_cast<int64_t>(AudioPlaybackState::Reset),
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
+            "audioType",
             static_cast<int64_t>(AudioType::Global),
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
+            "audioAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
+            "isLoopPlayback",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
+            "timeSincePlay",
             0.f,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
+            "volume",
             DefaultVolume,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
     },

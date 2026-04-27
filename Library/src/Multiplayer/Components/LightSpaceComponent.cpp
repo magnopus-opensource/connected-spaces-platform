@@ -23,69 +23,86 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Light),
+    "Light",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightType),
+            "lightType",
             static_cast<int64_t>(LightType::Point),
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Color),
+            "color",
             csp::common::Vector3 { 255, 255, 255 },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Intensity),
+            "Intensity", // Note: exposed as PascalCase for backwards compatibility (casing was wrong when this property was originally exposed)
             5000.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Range),
+            "range",
             1000.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::InnerConeAngle),
+            "innerConeAngle",
             0.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::OuterConeAngle),
+            "outerConeAngle",
             0.78539816339f, // Pi / 4
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetId),
+            "cookieAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieType),
+            "lightCookieType",
             static_cast<int64_t>(LightCookieType::NoCookie),
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightShadowType),
+            {}, // not exposed to scripting
             static_cast<int64_t>(LightShadowType::None),
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

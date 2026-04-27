@@ -23,33 +23,41 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Portal),
+    "Portal",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
+            "spaceId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Radius),
+            "radius",
             1.5f,
         },
     },

@@ -29,49 +29,61 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ScreenSharing),
+    "ScreenSharing",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsShadowCaster),
+            "isShadowCaster",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::UserId),
+            "userId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
+            "defaultImageCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageAssetId),
+            "defaultImageAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

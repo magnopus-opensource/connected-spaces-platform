@@ -23,65 +23,81 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Fog),
+    "Fog",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::FogMode),
+            "fogMode",
             static_cast<int64_t>(FogMode::Exponential),
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::StartDistance),
+            "startDistance",
             0.f,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::EndDistance),
+            "endDistance",
             0.f,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Color),
+            "color",
             csp::common::Vector3 { 0.8f, 0.9f, 1.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Density),
+            "density",
             0.4f,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::HeightFalloff),
+            "heightFalloff",
             0.2f,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::MaxOpacity),
+            "maxOpacity",
             1.f,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVolumetric),
+            "isVolumetric",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

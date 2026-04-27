@@ -24,45 +24,56 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::GaussianSplat),
+    "GaussianSplat",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
+            "externalResourceAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
+            "externalResourceAssetCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster),
+            {}, // not exposed to scripting
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Tint),
+            "tint",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

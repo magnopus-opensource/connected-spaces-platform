@@ -959,9 +959,11 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
     const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
         {
             ExampleSchemaId,
+            "Example",
             csp::common::Array<ComponentProperty> {
                 {
                     ComponentProperty::KeyType { 42 },
+                    "value",
                     "DefaultValue",
                 },
             },

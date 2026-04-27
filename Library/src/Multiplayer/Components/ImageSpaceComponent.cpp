@@ -16,60 +16,72 @@
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Image),
+    "Image",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::ImageAssetId),
+            "imageAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
+            "billboardMode",
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
+            "displayMode",
             static_cast<int64_t>(DisplayMode::DoubleSided),
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsEmissive),
+            "isEmissive",
             false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
@@ -80,7 +92,6 @@ const ComponentSchema& ImageSpaceComponent::GetSchema() { return Schema; }
 ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ImageSpaceComponent::GetImageAssetId() const

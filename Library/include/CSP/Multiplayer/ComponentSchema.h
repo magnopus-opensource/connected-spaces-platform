@@ -20,6 +20,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/String.h"
 
 #include <cstdint>
 
@@ -37,6 +38,12 @@ public:
     /// @brief A globally unique ID for identifiying this component type. Will ultimately be
     /// serialized and used in messages sent over the multiplayer connection.
     TypeIdType TypeId;
+
+    /// @brief A human-readable name describing this component (in `PascalCase`).
+    /// Must be unique across components registered with the engine. This name will be used for
+    /// generating script bindings i.e. when named `Audio`, a function with the name
+    /// `getAudioComponents` is available on the entity in scripts.
+    csp::common::String Name;
 
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;

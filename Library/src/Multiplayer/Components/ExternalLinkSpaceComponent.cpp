@@ -23,45 +23,56 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ExternalLink),
+    "ExternalLink",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::LinkUrl),
+            "linkUrl",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::DisplayText),
+            "displayText",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },

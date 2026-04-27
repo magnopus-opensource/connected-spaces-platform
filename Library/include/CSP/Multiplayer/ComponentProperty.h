@@ -18,6 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Common/String.h"
 
 namespace csp::multiplayer
 {
@@ -35,6 +36,12 @@ public:
     /// globally unique. Will ultimately be serialized and used in messages sent over the
     /// multiplayer connection.
     KeyType Key;
+
+    /// @brief A human-readable name describing this propery (in `camelCase`).
+    /// Must be unique within the component (two properties should not have the same name).
+    /// This name will be used for generating script bindings i.e. a property with this name will
+    /// be exposed on the component in scripts.
+    csp::common::String Name;
 
     /// @brief The default value of this property. This also jointly declares the type of the
     /// property, which is considered static i.e. if the value is a `float`, it can't be later
