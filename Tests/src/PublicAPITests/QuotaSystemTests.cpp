@@ -523,3 +523,30 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
 }
+
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, FailWhenNotLoggedInTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, {});
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
+}

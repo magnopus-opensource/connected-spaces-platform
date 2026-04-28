@@ -135,6 +135,9 @@ public:
     /// @return csp::common::Array<FeatureProgress> : const array of feature progress class
     const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
+    CSP_NO_EXPORT FeaturesLimitResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+
 private:
     FeaturesLimitResult(void*) {};
 
@@ -158,6 +161,9 @@ public:
     /// @returnFeatureProgress : const ref to feature progress class
     const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
+     CSP_NO_EXPORT FeatureLimitResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+
 private:
     FeatureLimitResult(void*) {};
 
@@ -180,6 +186,9 @@ public:
     /// @brief Retrieves the user tier result.
     /// @returnFeatureProgress : const ref to user tier information class
     const UserTierInfo& GetUserTierInfo() const;
+
+     CSP_NO_EXPORT UserTierResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
     UserTierResult(void*) {};
