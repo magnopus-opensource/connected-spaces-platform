@@ -327,6 +327,7 @@ private:
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 
     csp::common::String ThirdPartyAuthStateId;
+    csp::common::String ThirdPartyClientId;
     csp::common::String ThirdPartyAuthRedirectURL;
     EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
 

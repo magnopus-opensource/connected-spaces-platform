@@ -592,6 +592,7 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         {
             const auto ProviderRedirectUrl = ProviderDetailsRes.GetDetails().ProviderRedirectURL;
             ThirdPartyAuthStateId = ProviderDetailsRes.GetDetails().ThirdPartyAuthStateId;
+            ThirdPartyClientId = ProviderDetailsRes.GetDetails().ProviderClientId;
 
             ThirdPartyRequestedAuthProvider = AuthProvider;
             ThirdPartyAuthRedirectURL = RedirectURL;
@@ -690,6 +691,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
     Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
     Request->SetOAuthRedirectUri(ThirdPartyAuthRedirectURL);
     Request->SetProvider(ConvertExternalAuthProvidersToString(ThirdPartyRequestedAuthProvider));
+    Request->SetClient(ThirdPartyClientId);
     Request->SetToken(ThirdPartyToken);
     Request->SetTenant(csp::CSPFoundation::GetTenant());
 

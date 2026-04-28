@@ -146,7 +146,15 @@ csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSyste
     return GetProfileResult.GetProfile();
 }
 
-void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL)
+struct AuthorizeURLTokens
+{
+    std::string StateId;
+    std::string ClientId;
+    std::string Scope;
+    std::string RetrievedRedirectURL;
+};
+
+void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL, AuthorizeURLTokens& OutTokens)
 {
     EXPECT_FALSE(AuthoriseURL.IsEmpty());
     EXPECT_NE(AuthoriseURL, "error");
@@ -157,10 +165,10 @@ void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, con
     const char* REDIRECT_URL_PARAM = "redirect_uri=";
     const char* INVALID_URL_PARAM_VALUE = "N/A";
 
-    std::string StateId = INVALID_URL_PARAM_VALUE;
-    std::string ClientId = INVALID_URL_PARAM_VALUE;
-    std::string Scope = INVALID_URL_PARAM_VALUE;
-    std::string RetrievedRedirectURL = INVALID_URL_PARAM_VALUE;
+    OutTokens.StateId = INVALID_URL_PARAM_VALUE;
+    OutTokens.ClientId = INVALID_URL_PARAM_VALUE;
+    OutTokens.Scope = INVALID_URL_PARAM_VALUE;
+    OutTokens.RetrievedRedirectURL = INVALID_URL_PARAM_VALUE;
 
     const auto& Tokens = AuthoriseURL.Split('&');
     for (size_t idx = 0; idx < Tokens.Size(); ++idx)
@@ -168,22 +176,22 @@ void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, con
         std::string URLElement(Tokens[idx].c_str());
         if (URLElement.find(STATE_ID_URL_PARAM, 0) == 0)
         {
-            StateId = URLElement.substr(strlen(STATE_ID_URL_PARAM));
+            OutTokens.StateId = URLElement.substr(strlen(STATE_ID_URL_PARAM));
             continue;
         }
         else if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
         {
-            ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
+            OutTokens.ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
             continue;
         }
         else if (URLElement.find(SCOPE_URL_PARAM, 0) == 0)
         {
-            Scope = URLElement.substr(strlen(SCOPE_URL_PARAM));
+            OutTokens.Scope = URLElement.substr(strlen(SCOPE_URL_PARAM));
             continue;
         }
         else if (URLElement.find(REDIRECT_URL_PARAM, 0) == 0)
         {
-            RetrievedRedirectURL = URLElement.substr(strlen(REDIRECT_URL_PARAM));
+            OutTokens.RetrievedRedirectURL = URLElement.substr(strlen(REDIRECT_URL_PARAM));
             continue;
         }
     }
@@ -194,20 +202,20 @@ void ValidateThirdPartyAuthorizeURL(const csp::common::String& AuthoriseURL, con
     std::string URLElement(NewTokens[1].c_str());
     if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
     {
-        ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
+        OutTokens.ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
     }
 
     // validate that the following contain something that potentially makes sense
-    EXPECT_NE(StateId, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(ClientId, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(Scope, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(OutTokens.StateId, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(OutTokens.ClientId, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(OutTokens.Scope, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(OutTokens.RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
 
-    EXPECT_GT(StateId.length(), 0);
-    EXPECT_GT(ClientId.length(), 0);
-    EXPECT_GE(Scope.length(), 0);
+    EXPECT_GT(OutTokens.StateId.length(), 0);
+    EXPECT_GT(OutTokens.ClientId.length(), 0);
+    EXPECT_GE(OutTokens.Scope.length(), 0);
 
-    EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
+    EXPECT_EQ(OutTokens.RetrievedRedirectURL, RedirectURL.c_str());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
@@ -945,12 +953,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
     // Retrieve Authorize URL for Google
-    auto [ResGoogle] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
     EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = ResGoogle.GetValue();
-    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+    AuthorizeURLTokens Tokens;
+
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL, Tokens);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTestWithClient)
@@ -968,7 +978,39 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTestWithClie
     EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = ResGoogle.GetValue();
-    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+    AuthorizeURLTokens Tokens;
+
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL, Tokens);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginThirdPartyFailValidateStateTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const auto Token = "DummyToken";
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+
+    // Retrieve Authorize URL for Google
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
+    EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+    AuthorizeURLTokens URLTokens;
+
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL, URLTokens);
+
+    EXPECT_EQ(UserSystem->GetLoginState().State, csp::common::ELoginState::LoggedOut);
+
+    // Attempt to login which we expect to fail
+    auto [ResLogin]
+        = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProvider, RequestPredicate, Token, URLTokens.StateId.c_str(), false, true, {});
+    EXPECT_EQ(ResLogin.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    // If ELoginState == Error that means it passed the check comparing the state Id passed in to the one cached from the call to
+    // GetThirdPartyProviderAuthorizeURL() and attempted to log in, which will fail.
+    EXPECT_EQ(UserSystem->GetLoginState().State, csp::common::ELoginState::Error);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
@@ -979,12 +1021,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
     // Retrieve Authorize URL for Discord
-    auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, nullptr);
+    auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = Result.GetValue();
-    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+    AuthorizeURLTokens Tokens;
+
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL, Tokens);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForAppleTest)
@@ -995,12 +1039,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForAppleTest)
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
     // Retrieve Authorize URL for Apple
-    auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL, nullptr);
+    auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = Result.GetValue();
-    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL);
+    AuthorizeURLTokens Tokens;
+
+    ValidateThirdPartyAuthorizeURL(AuthorizeURL, RedirectURL, Tokens);
 }
 
 // As the following three tests require manual actions explained inside, they are currently disabled
