@@ -95,6 +95,13 @@ export function ready(args: boolean | CspOptions = false) {
   
       importPromise.then((loadedModule: any) => {
         loadedModule.default(Module).then((mod: any) => {
+          // Emscripten 5.0+ MODULARIZE factories return a fresh object holding
+          // the exports rather than mutating the passed-in `Module` in place.
+          // Copy them back so every `Module._malloc(...)` site in this wrapper
+          // sees them.
+          if (mod && mod !== Module) {
+            Object.assign(Module, mod);
+          }
           console.log("CSP binary ready!");
           resolve(Module);
         });
@@ -121,6 +128,13 @@ export function ready(args: boolean | CspOptions = false) {
   
       importPromise.then((loadedModule: any) => {
         loadedModule.default(Module).then((mod: any) => {
+          // Emscripten 5.0+ MODULARIZE factories return a fresh object holding
+          // the exports rather than mutating the passed-in `Module` in place.
+          // Copy them back so every `Module._malloc(...)` site in this wrapper
+          // sees them.
+          if (mod && mod !== Module) {
+            Object.assign(Module, mod);
+          }
           console.log("CSP binary ready!");
           resolve(Module);
         });

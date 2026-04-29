@@ -229,6 +229,64 @@ export function button(label, props = {}) {
     return createNode('button', nextProps, []);
 }
 
+// Horizontal slider/scrubber. Composed from a row (track) + column (fill) so
+// it doesn't need a new runtime drawable type. Click and drag both call
+// onChange with the new value; drag is press-gated by the runtime so it only
+// fires while the pointer is held.
+//
+// `width` must be a number — proportional fill rendering needs a known pixel
+// width. Visual style is configurable via trackColor / fillColor / cornerRadius.
+export function slider(props = {}) {
+    const opts = normalizeProps(props);
+    const value = Number(opts.value != null ? opts.value : 0);
+    const min = Number(opts.min != null ? opts.min : 0);
+    const max = Number(opts.max != null ? opts.max : 1);
+    const width = Number(opts.width != null ? opts.width : 200);
+    const height = Number(opts.height != null ? opts.height : 16);
+    const trackColor = opts.trackColor != null ? opts.trackColor : '#1B2945';
+    const fillColor = opts.fillColor != null ? opts.fillColor : '#5FD9FF';
+    const cornerRadius = opts.cornerRadius != null ? Number(opts.cornerRadius) : Math.floor(height / 2);
+    const onChange = typeof opts.onChange === 'function' ? opts.onChange : null;
+    const range = max - min;
+    const ratio = range > 0 ? Math.max(0, Math.min(1, (value - min) / range)) : 0;
+    const fillWidth = Math.max(0, Math.round(ratio * width));
+
+    const handle = onChange
+        ? (event) => {
+              const x = event && event.x != null ? Number(event.x) : 0;
+              const targetX = event && event.targetX != null ? Number(event.targetX) : 0;
+              const w = event && event.targetWidth ? Number(event.targetWidth) : width;
+              const t = w > 0 ? Math.max(0, Math.min(1, (x - targetX) / w)) : 0;
+              onChange(min + t * range);
+          }
+        : undefined;
+
+    const trackProps = {
+        width,
+        height,
+        cornerRadius,
+        backgroundColor: trackColor,
+    };
+    if (opts.key != null) trackProps.key = opts.key;
+    if (handle) {
+        trackProps.onPointerDown = handle;
+        trackProps.onDrag = handle;
+    }
+
+    return createNode('row', trackProps, [
+        createNode(
+            'column',
+            {
+                width: fillWidth,
+                height: 'grow',
+                cornerRadius,
+                backgroundColor: fillColor,
+            },
+            [],
+        ),
+    ]);
+}
+
 export function setDebugMode(enabled) {
     if (typeof __setUIDebugMode === 'function') {
         __setUIDebugMode(!!enabled);
