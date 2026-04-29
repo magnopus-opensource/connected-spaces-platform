@@ -46,7 +46,20 @@ public:
     void Initialise();
     /// @brief Shuts down and deletes the JavaScript runtime context.
     void Shutdown();
-    
+
+    /// @brief A factory function to construct and initialise in a single step.
+    ///
+    /// At the CSP library level, all access to our `System` classes is through
+    /// the `SystemsManager` singleton, which creates and ultimately owns them.
+    /// As a general rule, there is only a single instance of each `System` in
+    /// the library, all centralised via that manager. As such, currently there
+    /// is a pattern to enforce that only the `SystemsManager` can instantiate
+    /// each `System` class via private constructors and friendship.
+    ///
+    /// However, this isn't strictly necessary, and makes testing in isolation difficult.
+    /// So, expose a public factory function which at the moment is mainly for
+    /// use in tests, but could just as well be used to instantiate the instance
+    /// in the `SystemsManager`.
     CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised();
 
     /// @brief Attempts to execute a script in a given context.
