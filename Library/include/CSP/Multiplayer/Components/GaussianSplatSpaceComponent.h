@@ -41,7 +41,7 @@ enum class GaussianSplatPropertyKeys : uint16_t
     Scale,
     IsVisible,
     IsARVisible,
-    IsShadowCaster,
+    IsShadowCaster_DEPRECATED,
     Tint,
     IsVirtualVisible,
     Num
