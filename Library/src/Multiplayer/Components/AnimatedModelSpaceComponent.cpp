@@ -89,7 +89,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsShadowCaster),
-            {}, // not exposed to scripting
+            "isShadowCaster",
             true,
         },
         {

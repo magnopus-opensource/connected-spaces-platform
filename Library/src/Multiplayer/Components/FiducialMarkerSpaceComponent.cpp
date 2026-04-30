@@ -37,7 +37,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
+            "assetCollectionId",
             "",
         },
         {
