@@ -61,8 +61,8 @@ const auto Schema = ComponentSchema {
             true,
         },
         {
-            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster),
-            {}, // not exposed to scripting
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED),
+            {}, // not exposed to scripting: this is a deprecated property that was never exposed to scripting, so no need to start now.
             true,
         },
         {
@@ -181,12 +181,12 @@ void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool InValue)
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
 {
-    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
+    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED));
 }
 
 void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED), Value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const
