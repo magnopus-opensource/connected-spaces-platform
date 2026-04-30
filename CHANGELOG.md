@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [6.35.0]
+## [6.36.0]
 
 ### 🍰 🙌 New Features
 
@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file. For compile
   scripting system automatically where possible. This moves a large portion of CSP's own components
   over to this pattern, with only a handful still being registered manually due to some remaining
   edge cases.
+
+## [6.35.0]
+
+### 🍰 🙌 New Features
 
 - [OF-1830] feat: Inital integration of new build system by MAG-mv
   This adds the start of our new build system that uses conan and cmake.
