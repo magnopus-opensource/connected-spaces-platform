@@ -196,6 +196,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
+    ASSERT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
+
     // Setup script
     const std::string StaticModelScriptText = R"xx(
 		var model = ThisEntity.getStaticModelComponents()[0];
@@ -209,6 +211,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
         model.isVirtualVisible = false;
         model.showAsHoldoutInAR = true;
         model.showAsHoldoutInVirtual = true;
+        model.isShadowCaster = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
@@ -227,6 +230,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), true);
     EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), true);
+    EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

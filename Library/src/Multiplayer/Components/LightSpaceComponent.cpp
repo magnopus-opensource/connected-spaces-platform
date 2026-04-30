@@ -76,7 +76,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetCollectionId),
-            {}, // not exposed to scripting
+            "cookieAssetCollectionId",
             "",
         },
         {

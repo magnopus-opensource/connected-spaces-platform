@@ -74,7 +74,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsShadowCaster),
-            {}, // not exposed to scripting
+            "isShadowCaster",
             true,
         },
         {

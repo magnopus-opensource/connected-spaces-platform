@@ -91,7 +91,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
-            {}, // not exposed to scripting
+            "movementDirection",
             csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
         },
         {

@@ -36,7 +36,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
+            "assetCollectionId",
             "",
         },
         {
