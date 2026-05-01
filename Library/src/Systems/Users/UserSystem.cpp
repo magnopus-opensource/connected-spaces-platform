@@ -562,6 +562,14 @@ csp::common::Array<EThirdPartyAuthenticationProviders> UserSystem::GetSupportedT
     return Providers;
 }
 
+void UserSystem::ResetThirdPartyAuthState()
+{
+    ThirdPartyAuthStateId = "";
+    ThirdPartyClientType = "";
+    ThirdPartyAuthRedirectURL = "";
+    ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+}
+
 void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL,
     const csp::common::Optional<EThirdPartyPlatform>& ClientType, StringResultCallback Callback)
 {
@@ -592,7 +600,6 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         {
             const auto ProviderRedirectUrl = ProviderDetailsRes.GetDetails().ProviderRedirectURL;
             ThirdPartyAuthStateId = ProviderDetailsRes.GetDetails().ThirdPartyAuthStateId;
-            ThirdPartyClientId = ProviderDetailsRes.GetDetails().ProviderClientId;
 
             ThirdPartyRequestedAuthProvider = AuthProvider;
             ThirdPartyAuthRedirectURL = RedirectURL;
@@ -612,14 +619,23 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         }
     };
 
+    // Reset the state related to third party authentication. This ensures that if the client calls GetThirdPartyProviderAuthorizeURL and the calls
+    // fails they will not be able to call LoginToThirdPartyAuthenticationProvider() with invalid state.
+    ResetThirdPartyAuthState();
+
     std::optional<csp::common::String> Client = ThirdPartyPlatformToString(ClientType);
+    if (Client.has_value())
+    {
+        ThirdPartyClientType = Client.value();
+    }
 
     const csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<ProviderDetailsResultCallback, ProviderDetailsResult, void, chs_user::SocialProviderInfo>(
             ThirdPartyAuthenticationDetailsCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
-        ->social_providersProviderGet({ ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), Client }, ResponseHandler);
+        ->social_providersProviderGet(
+            { ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), Client }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,
@@ -691,7 +707,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
     Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
     Request->SetOAuthRedirectUri(ThirdPartyAuthRedirectURL);
     Request->SetProvider(ConvertExternalAuthProvidersToString(ThirdPartyRequestedAuthProvider));
-    Request->SetClient(ThirdPartyClientId);
+    Request->SetClient(ThirdPartyClientType);
     Request->SetToken(ThirdPartyToken);
     Request->SetTenant(csp::CSPFoundation::GetTenant());
 

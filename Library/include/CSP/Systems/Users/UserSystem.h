@@ -316,6 +316,7 @@ private:
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
+    void ResetThirdPartyAuthState();
 
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;
@@ -327,7 +328,7 @@ private:
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 
     csp::common::String ThirdPartyAuthStateId;
-    csp::common::String ThirdPartyClientId;
+    csp::common::String ThirdPartyClientType;
     csp::common::String ThirdPartyAuthRedirectURL;
     EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
 
