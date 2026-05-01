@@ -114,4 +114,48 @@ void CollisionSpaceComponentScriptInterface::ResetKinematicPose()
     InvokeAction("resetKinematicPose", "{}");
 }
 
+void CollisionSpaceComponentScriptInterface::ApplyImpulse(Vector3 Impulse)
+{
+    const std::string ImpulseJson = BuildVec3Json(Impulse);
+    if ((Component == nullptr) || ImpulseJson.empty())
+    {
+        return;
+    }
+
+    InvokeAction("applyImpulse", fmt::format(R"({{"impulse":{}}})", ImpulseJson));
+}
+
+void CollisionSpaceComponentScriptInterface::ApplyTorqueImpulse(Vector3 Torque)
+{
+    const std::string TorqueJson = BuildVec3Json(Torque);
+    if ((Component == nullptr) || TorqueJson.empty())
+    {
+        return;
+    }
+
+    InvokeAction("applyTorqueImpulse", fmt::format(R"({{"torque":{}}})", TorqueJson));
+}
+
+void CollisionSpaceComponentScriptInterface::SetLinearVelocity(Vector3 Velocity)
+{
+    const std::string VelocityJson = BuildVec3Json(Velocity);
+    if ((Component == nullptr) || VelocityJson.empty())
+    {
+        return;
+    }
+
+    InvokeAction("setLinearVelocity", fmt::format(R"({{"velocity":{}}})", VelocityJson));
+}
+
+void CollisionSpaceComponentScriptInterface::SetAngularVelocity(Vector3 Velocity)
+{
+    const std::string VelocityJson = BuildVec3Json(Velocity);
+    if ((Component == nullptr) || VelocityJson.empty())
+    {
+        return;
+    }
+
+    InvokeAction("setAngularVelocity", fmt::format(R"({{"velocity":{}}})", VelocityJson));
+}
+
 } // namespace csp::multiplayer

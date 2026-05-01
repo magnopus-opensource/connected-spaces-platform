@@ -20,6 +20,9 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
@@ -170,6 +173,44 @@ public:
         }
 
         return Avatars;
+    }
+
+    EntityScriptInterface* GetLocalAvatar()
+    {
+        if (EntitySystem == nullptr)
+        {
+            return nullptr;
+        }
+
+        const uint64_t LocalClientId = ResolveLocalClientId(EntitySystem);
+
+        for (size_t i = 0; i < EntitySystem->GetNumAvatars(); ++i)
+        {
+            SpaceEntity* Entity = EntitySystem->GetAvatarByIndex(i);
+            if ((Entity != nullptr) && (Entity->GetOwnerId() == LocalClientId))
+            {
+                return WrapEntity(Entity);
+            }
+        }
+
+        return nullptr;
+    }
+
+    static uint64_t ResolveLocalClientId(csp::common::IRealtimeEngine* Engine)
+    {
+        if ((Engine != nullptr) && (Engine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online))
+        {
+            const auto* OnlineEngine = static_cast<const csp::multiplayer::OnlineRealtimeEngine*>(Engine);
+            if (OnlineEngine != nullptr)
+            {
+                if (auto* Connection = OnlineEngine->GetMultiplayerConnectionInstance(); Connection != nullptr)
+                {
+                    return Connection->GetClientId();
+                }
+            }
+        }
+
+        return csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
     }
 
     int32_t GetIndexOfEntity(int64_t EntityId)
@@ -587,7 +628,11 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPose>("setKinematicPose")
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPosition>("setKinematicPosition")
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicRotation>("setKinematicRotation")
-        .fun<&CollisionSpaceComponentScriptInterface::ResetKinematicPose>("resetKinematicPose");
+        .fun<&CollisionSpaceComponentScriptInterface::ResetKinematicPose>("resetKinematicPose")
+        .fun<&CollisionSpaceComponentScriptInterface::ApplyImpulse>("applyImpulse")
+        .fun<&CollisionSpaceComponentScriptInterface::ApplyTorqueImpulse>("applyTorqueImpulse")
+        .fun<&CollisionSpaceComponentScriptInterface::SetLinearVelocity>("setLinearVelocity")
+        .fun<&CollisionSpaceComponentScriptInterface::SetAngularVelocity>("setAngularVelocity");
 
     Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
         .constructor<>()
@@ -862,6 +907,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntitySystemScriptInterface::GetEntities>("getEntities")
         .fun<&EntitySystemScriptInterface::GetObjects>("getObjects")
         .fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
+        .fun<&EntitySystemScriptInterface::GetLocalAvatar>("getLocalAvatar")
         .fun<&EntitySystemScriptInterface::GetEntityById>("getEntityById")
         .fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
         .fun<&EntitySystemScriptInterface::GetEntitiesByQuery>("getEntitiesByQuery")

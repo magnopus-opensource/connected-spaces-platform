@@ -179,6 +179,21 @@ template <typename ScriptInterface, ComponentType Type> ScriptInterface* EntityS
 
     auto* Iface = static_cast<ScriptInterface*>(Component->GetScriptInterface());
     Iface->SetLocalScope(LocalScope || Entity->IsLocal());
+
+    // Flush the dirty add-component patch so EntityUpdateCallback fires on the
+    // next tick and downstream JS wrappers (cspwa OlySpaceEntity, Electra's
+    // ToRenderingCommon component factories) actually learn about the new
+    // component. Without this, AddComponent sits as a dirty entry on the
+    // StatePatcher and the renderer-side never builds a body for it.
+    if (LocalScope || Entity->IsLocal())
+    {
+        Entity->ApplyLocalPropertyPatch();
+    }
+    else
+    {
+        Entity->QueueUpdate();
+    }
+
     return Iface;
 }
 

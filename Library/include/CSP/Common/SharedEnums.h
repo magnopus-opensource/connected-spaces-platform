@@ -146,8 +146,14 @@ enum class LocomotionModel
 {
     Grounded = 0,
     FreeCamera,
-    /// Reserved for creator-authored player controllers driven by NGX/code components.
+    /// Creator-authored player controllers driven by NGX/code components.
+    /// Stock translation systems are suppressed; the local character-controller
+    /// capsule remains so scripts can drive it via `ThePlayerController.moveCharacter`.
     Scripted,
+    /// Like `Scripted`, but the local character-controller body is also removed.
+    /// The script is expected to provide its own physics body (e.g. a dynamic
+    /// `CollisionSpaceComponent`) which drives the avatar transform directly.
+    ScriptedRigidbody,
     Num
 };
 

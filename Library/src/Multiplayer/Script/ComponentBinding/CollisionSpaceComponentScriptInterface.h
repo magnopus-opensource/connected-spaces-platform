@@ -45,6 +45,14 @@ public:
     void SetKinematicPosition(Vector3 Position, float Dt);
     void SetKinematicRotation(Vector4 Rotation, float Dt);
     void ResetKinematicPose();
+
+    // Dynamic-rigidbody helpers. These invoke named actions on the collision
+    // component; the renderer is expected to handle them only when the
+    // collision mode is CollisionDynamic.
+    void ApplyImpulse(Vector3 Impulse);
+    void ApplyTorqueImpulse(Vector3 Torque);
+    void SetLinearVelocity(Vector3 Velocity);
+    void SetAngularVelocity(Vector3 Velocity);
 };
 
 } // namespace csp::multiplayer

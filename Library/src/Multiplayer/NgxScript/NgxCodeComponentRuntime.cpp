@@ -126,6 +126,27 @@ export const EAssetType = Object.freeze({
     TEXT: 13,
 });
 
+export const CollisionMode = Object.freeze({
+    CollisionStatic: 0,
+    Trigger: 1,
+    CollisionDynamic: 2,
+    CollisionKinematic: 3,
+});
+
+export const CollisionShape = Object.freeze({
+    Box: 0,
+    Mesh: 1,
+    Capsule: 2,
+    Sphere: 3,
+});
+
+export const LocomotionModel = Object.freeze({
+    Grounded: 0,
+    FreeCamera: 1,
+    Scripted: 2,
+    ScriptedRigidbody: 3,
+});
+
 export const TheAssetSystem = new Proxy({}, {
     get(_, prop) {
         const sys = globalThis.__cspAssetSystem;
