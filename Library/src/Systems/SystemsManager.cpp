@@ -212,7 +212,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, *LogSystem);
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, *LogSystem);
     ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, *LogSystem);
-    QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem);
+    QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem, UserSystem->GetAuthContext());
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
