@@ -182,7 +182,11 @@ target_compile_definitions(csp-lib
 
 # Warnings as errors flag
 # Sets WX/Werror
-set_target_properties(csp-lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+set_target_properties(csp-lib PROPERTIES
+  COMPILE_WARNING_AS_ERROR ON
+  OUTPUT_NAME ConnectedSpacesPlatform
+  DEBUG_POSTFIX _D
+)
 
 target_compile_options(csp-lib
   PRIVATE
@@ -193,6 +197,7 @@ target_compile_options(csp-lib
 
     # Set warning level and exceptions for msvc
     $<$<CXX_COMPILER_ID:MSVC>:
+      /EHsc     # C++ exception handling (not added by default with Ninja generator)
       /W4       # Sets warning level 4 (high)
       /utf-8    # fmt asked us for this, seems like we need to explicitly opt into unicode on windows
       /wd4251   # Allow stl members to be exported
@@ -257,6 +262,7 @@ configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
   INSTALL_DESTINATION ${CSP_CONFIG_INSTALL_DIR}
+  PATH_VARS CMAKE_INSTALL_INCLUDEDIR
 )
 
 write_basic_package_version_file(
