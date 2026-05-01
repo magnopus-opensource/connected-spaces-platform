@@ -3,8 +3,6 @@ arch=x86_64
 compiler=msvc
 compiler.cppstd=17
 compiler.runtime=dynamic
-# MSVC toolset version
-# We may need to update this if the toolset changes for our recommended version of Visual Studio
 compiler.version=194
 os=Windows
 
@@ -12,3 +10,8 @@ os=Windows
 # We have to set poco to build as static here
 poco/*:shared=False
 
+[tool_requires]
+ninja/1.11.1
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja
