@@ -36,6 +36,7 @@ jobs:
     uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@CSP-Backwards-Integration
     with:
       unity_ext_matrix: '[false]'
+      platform_matrix: '["windows-latest"]'
       csp_branch: ${{ github.head_ref || github.ref_name }} # These two branch names will be identical, albeit in different repos
       binding_repo_branch: ${{ needs.ensure-unity-branch.outputs.branch }}
 
