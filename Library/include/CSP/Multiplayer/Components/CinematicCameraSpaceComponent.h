@@ -56,6 +56,8 @@ class CSP_API CinematicCameraSpaceComponent : public ComponentBase,
                                               public IEnableableComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

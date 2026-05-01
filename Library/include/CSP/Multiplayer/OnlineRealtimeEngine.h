@@ -19,6 +19,7 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/NetworkEventData.h"
@@ -108,6 +109,10 @@ public:
     /// election system
     OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
     /// @brief OnlineRealtimeEngine destructor
     CSP_NO_EXPORT ~OnlineRealtimeEngine();
@@ -268,6 +273,10 @@ public:
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
+
+    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
+    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
+    CSP_NO_EXPORT const csp::multiplayer::ComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
@@ -466,7 +475,7 @@ private:
         LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
-    class EntityScriptBinding* ScriptBinding;
+    std::unique_ptr<class EntityScriptBinding> ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
 
     // Leader election ---------------------------------------------------------
@@ -507,6 +516,8 @@ private:
     csp::common::IJSScriptRunner* ScriptRunner;
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
+
+    csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

@@ -15,10 +15,7 @@
  */
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-
-using namespace csp::systems;
 
 namespace csp::multiplayer
 {
@@ -87,6 +84,122 @@ void ComponentScriptInterface::SendPropertyUpdate()
     if (Component)
     {
         Component->GetParent()->QueueUpdate();
+    }
+}
+
+std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProperty(uint16_t Key) const
+{
+    if (!Component)
+    {
+        return {};
+    }
+
+    const auto& MaybeValue = Component->GetProperty(Key);
+    if (MaybeValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::InvalidType)
+    {
+        return std::nullopt;
+    }
+
+    struct Visitor final
+    {
+        std::optional<Value> operator()(bool Value) const
+        {
+            return Value;
+        }
+
+        std::optional<Value> operator()(float Value) const
+        {
+            return Value;
+        }
+
+        std::optional<Value> operator()(int64_t Value) const
+        {
+            return Value;
+        }
+
+        std::optional<Value> operator()(const csp::common::String& Value) const
+        {
+            return std::string(Value.c_str());
+        }
+
+        std::optional<Value> operator()(const csp::common::Vector2& Value) const
+        {
+            return std::vector<float>{Value.X, Value.Y};
+        }
+
+        std::optional<Value> operator()(const csp::common::Vector3& Value) const
+        {
+            return std::vector<float>{Value.X, Value.Y, Value.Z};
+        }
+
+        std::optional<Value> operator()(const csp::common::Vector4& Value) const
+        {
+            return std::vector<float>{Value.X, Value.Y, Value.Z, Value.W};
+        }
+        
+        std::optional<Value> operator()(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>&) const
+        {
+            return {};
+        }
+    };
+
+    return std::visit(Visitor{}, MaybeValue.GetValue());
+}
+
+void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
+{
+    if (!Component)
+    {
+        return;
+    }
+
+    struct Visitor final
+    {
+        std::optional<csp::common::ReplicatedValue> operator()(bool Value) const
+        {
+            return Value;
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(float Value) const
+        {
+            return Value;
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(int64_t Value) const
+        {
+            return Value;
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(const std::string& Value) const
+        {
+            return csp::common::String(Value.c_str());
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(const std::vector<float>& Value) const
+        {
+            if (Value.size() == 2)
+            {
+                return csp::common::Vector2{Value[0], Value[1]};
+            }
+
+            if (Value.size() == 3)
+            {
+                return csp::common::Vector3{Value[0], Value[1], Value[2]};
+            }
+
+            if (Value.size() == 4)
+            {
+                return csp::common::Vector4{Value[0], Value[1], Value[2], Value[3]};
+            }
+ 
+            return {};
+        }
+    };
+
+    if (auto MaybeMappedValue = std::visit(Visitor{}, std::move(DesiredValue)))
+    {
+        Component->SetProperty(Key, std::move(*MaybeMappedValue));
+        SendPropertyUpdate();
     }
 }
 

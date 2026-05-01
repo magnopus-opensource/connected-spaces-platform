@@ -15,74 +15,88 @@
  */
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Text,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Text),
+    "Text",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Text),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Text),
+            "text",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::TextColor),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::TextColor),
+            "textColor",
             csp::common::Vector3(1.0f, 1.0f, 1.0f),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BackgroundColor),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BackgroundColor),
+            "backgroundColor",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsBackgroundVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsBackgroundVisible),
+            "isBackgroundVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Width),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Width),
+            "width",
             1.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Height),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Height),
+            "height",
             1.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BillboardMode),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BillboardMode),
+            "billboardMode",
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& TextSpaceComponent::GetSchema() { return Schema; }
+
 TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
 
 /* ITransformComponent */

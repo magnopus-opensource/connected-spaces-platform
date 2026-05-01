@@ -90,6 +90,8 @@ class CSP_API LightSpaceComponent : public ComponentBase,
                                     public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the light space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

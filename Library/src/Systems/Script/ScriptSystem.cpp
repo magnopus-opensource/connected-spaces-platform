@@ -68,6 +68,17 @@ template <> struct qjs::js_traits<csp::common::String>
 namespace csp::systems
 {
 
+std::shared_ptr<ScriptSystem> ScriptSystem::MakeInitialised()
+{
+    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* Ptr) {
+        delete Ptr;
+    });
+
+    Instance->Initialise();
+
+    return Instance;
+}
+
 ScriptSystem::ScriptSystem()
     : csp::common::IJSScriptRunner()
     , TheScriptRuntime(nullptr)

@@ -41,6 +41,8 @@ enum class CustomComponentPropertyKeys : uint16_t
 class CSP_API CustomSpaceComponent : public ComponentBase
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the custom space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

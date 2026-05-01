@@ -67,6 +67,8 @@ enum class CollisionMode
 class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IEnableableComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

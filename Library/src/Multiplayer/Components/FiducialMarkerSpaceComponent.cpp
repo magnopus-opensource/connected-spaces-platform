@@ -16,58 +16,68 @@
 
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::FiducialMarker,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::FiducialMarker),
+    "FiducialMarker",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::MarkerAssetId),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::MarkerAssetId),
+            "markerAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(FiducialMarkerPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& FiducialMarkerSpaceComponent::GetSchema() { return Schema; }
+
 FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new FiducialMarkerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetMarkerAssetId() const

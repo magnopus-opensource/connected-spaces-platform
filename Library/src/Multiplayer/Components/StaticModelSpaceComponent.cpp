@@ -16,76 +16,90 @@
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 #include <memory>
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::StaticModel,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::StaticModel),
+    "StaticModel",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ExternalResourceAssetId),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetId),
+            "externalResourceAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId),
+            "externalResourceAssetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::MaterialOverrides),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::MaterialOverrides),
+            {}, // not exposed to scripting
             csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsShadowCaster),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsShadowCaster),
+            "isShadowCaster",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ShowAsHoldoutInAR),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInAR),
+            "showAsHoldoutInAR",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual),
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual),
+            "showAsHoldoutInVirtual",
             false,
         },
     },
 };
 
+const ComponentSchema& StaticModelSpaceComponent::GetSchema() { return Schema; }
+
 StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */

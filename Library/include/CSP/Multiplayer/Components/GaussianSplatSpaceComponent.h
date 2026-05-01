@@ -41,7 +41,7 @@ enum class GaussianSplatPropertyKeys : uint16_t
     Scale,
     IsVisible,
     IsARVisible,
-    IsShadowCaster,
+    IsShadowCaster_DEPRECATED,
     Tint,
     IsVirtualVisible,
     Num
@@ -61,6 +61,8 @@ class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
 
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

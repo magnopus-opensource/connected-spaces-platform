@@ -15,98 +15,118 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::AvatarData,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::AvatarData),
+    "Avatar",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarId),
+            "avatarId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::UserId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::UserId),
+            "userId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::State),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::State),
+            "state",
             static_cast<int64_t>(AvatarState::Idle),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
+            {}, // not exposed to scripting
             static_cast<int64_t>(-1),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AgoraUserId),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AgoraUserId),
+            "agoraUserId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsHandIKEnabled),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsHandIKEnabled),
+            "isHandIKEnabled",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
+            "targetHandIKTargetLocation",
             csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HandRotation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HandRotation),
+            "handRotation",
             csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HeadRotation),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HeadRotation),
+            "headRotation",
             csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
+            "walkRunBlendPercentage",
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
+            "torsoTwistAlpha",
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarPlayMode),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarPlayMode),
+            "avatarPlayMode",
             static_cast<int64_t>(AvatarPlayMode::Default),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::MovementDirection),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
+            "movementDirection",
             csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::LocomotionModel),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::LocomotionModel),
+            "locomotionModel",
             static_cast<int64_t>(LocomotionModel::Grounded),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarUrl),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarUrl),
+            "avatarUrl",
             "",
         },
     },
 };
 
+const ComponentSchema& AvatarSpaceComponent::GetSchema() { return Schema; }
+
 AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAvatarId() const

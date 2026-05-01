@@ -15,62 +15,73 @@
  */
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Button,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Button),
+    "Button",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::LabelText),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::LabelText),
+            "labelText",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::IconAssetId),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IconAssetId),
+            "iconAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ButtonPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& ButtonSpaceComponent::GetSchema() { return Schema; }
+
 ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ButtonSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ButtonSpaceComponent::GetLabelText() const

@@ -62,6 +62,8 @@ enum class FogMode
 class CSP_API FogSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the fog space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

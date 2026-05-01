@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
 #include <algorithm>
@@ -25,15 +25,19 @@
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Custom,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Custom),
+    "Custom",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(CustomComponentPropertyKeys::ApplicationOrigin),
+            static_cast<ComponentProperty::KeyType>(CustomComponentPropertyKeys::ApplicationOrigin),
+            "applicationOrigin",
             "",
         },
     },
 };
+
+const ComponentSchema& CustomSpaceComponent::GetSchema() { return Schema; }
 
 CustomSpaceComponent::CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent) //, NumProperties(2)

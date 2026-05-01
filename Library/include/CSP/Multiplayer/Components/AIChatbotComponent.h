@@ -50,6 +50,8 @@ enum class AIChatbotVisualState
 class CSP_API AIChatbotSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the voice name of the TTS model associated with this AI chatbot.

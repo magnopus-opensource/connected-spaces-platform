@@ -282,6 +282,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetIsARVisible(), true);
     EXPECT_EQ(LightComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "");
+    EXPECT_EQ(LightComponent->GetLightCookieAssetCollectionId(), "");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::NoCookie);
 
     // Setup script
@@ -301,6 +302,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
         light.isARVisible = false;
         light.isVirtualVisible = false;
         light.cookieAssetId = "TestLightCookieAssetId";
+        light.cookieAssetCollectionId = "TestLightCookieAssetCollectionId";
         light.lightCookieType = 0;
 
     )xx";
@@ -325,6 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetIsARVisible(), false);
     EXPECT_EQ(LightComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "TestLightCookieAssetId");
+    EXPECT_EQ(LightComponent->GetLightCookieAssetCollectionId(), "TestLightCookieAssetCollectionId");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::ImageCookie);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

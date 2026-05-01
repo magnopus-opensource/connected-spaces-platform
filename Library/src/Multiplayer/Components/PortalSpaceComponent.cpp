@@ -15,50 +15,58 @@
  */
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Portal,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Portal),
+    "Portal",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
+            {}, // not exposed to scripting
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsActive),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
+            {}, // not exposed to scripting
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::SpaceId),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
+            "spaceId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
+            {}, // not exposed to scripting
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Radius),
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Radius),
+            "radius",
             1.5f,
         },
     },
 };
 
+const ComponentSchema& PortalSpaceComponent::GetSchema() { return Schema; }
+
 PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new PortalSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& PortalSpaceComponent::GetSpaceId() const { return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId)); }

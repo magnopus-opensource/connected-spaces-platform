@@ -18,28 +18,34 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::ScriptData,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::ScriptData),
+    {}, // not exposed to scripting
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::ScriptSource),
+            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptSource),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::OwnerId),
+            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::OwnerId),
+            {}, // not exposed to scripting
             static_cast<int64_t>(0),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScriptComponentPropertyKeys::ScriptScope),
+            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
+            {}, // not exposed to scripting
             static_cast<int64_t>(ScriptScope::Owner),
         },
     },
 };
+
+const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }
 
 ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)

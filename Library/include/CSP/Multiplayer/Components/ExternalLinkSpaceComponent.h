@@ -57,6 +57,8 @@ enum class ExternalLinkPropertyKeys : uint16_t
 class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Creates an external link component that can be added to an existing space entity.
     /// @param Parent - The space entity to which this new component will belong to.
     ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

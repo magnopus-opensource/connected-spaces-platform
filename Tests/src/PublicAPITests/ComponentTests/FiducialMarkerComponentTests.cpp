@@ -190,6 +190,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     RealtimeEngine->ProcessPendingEntityOperations();
 
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), true);
+    EXPECT_EQ(FiducialMarkerComponent->GetMarkerAssetId(), "");
+    EXPECT_EQ(FiducialMarkerComponent->GetAssetCollectionId(), "");
 
     // Setup script
     const std::string FiducialMarkerScriptText = R"xx(
@@ -201,6 +203,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 		marker.isVisible = false;
         marker.isARVisible = false;
         marker.isVirtualVisible = false;
+        marker.markerAssetId = "TestAssetId";
+        marker.assetCollectionId = "TestAssetCollectionId";
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
@@ -218,6 +222,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
     EXPECT_EQ(FiducialMarkerComponent->GetIsARVisible(), false);
     EXPECT_EQ(FiducialMarkerComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(FiducialMarkerComponent->GetMarkerAssetId(), "TestAssetId");
+    EXPECT_EQ(FiducialMarkerComponent->GetAssetCollectionId(), "TestAssetCollectionId");
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
