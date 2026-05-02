@@ -1,55 +1,21 @@
 name: .NET Interop Binding Integration
 
-# Makes a branch on the .NET bindings repo, (same name as the branch this is being run from), if it doesn't already exist
-# On that branch, checks out the CSP changeset, builds it, and runs integrations against it
-# If changes are needed, you can make updates to the branch.
-# This job wont auto rerun when pushes to that branch are made, (not impossible, just more effort than you'd expect) but you can retrigger it manually in the GUI.
+# Run a fully integrated build of the unity bindings, based on the CSP build from the current branch.
+# If breaking changes are made, update the v.next branch in the connected-spaces-platform-unity repo, which represents the breaking changeset of the next release.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 jobs:
 
   # the github head_ref||ref_name thing is dealing with a difference between a PR head and a regular branch head, since they're not just branch names when coming from PR's
-  ensure-unity-branch:
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
-    runs-on: ubuntu-latest
-    outputs:
-      branch: ${{ steps.resolve.outputs.branch }}
-    env:
-      REPO: magnopus-opensource/connected-spaces-platform-unity
-      BRANCH_TO_MAKE: ${{ github.head_ref || github.ref_name }}
-      BRANCH_FROM: "CSP-Backwards-Integration"
-      GH_TOKEN: ${{ secrets.DOTNET_REPO_ACCESS_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: resolve
-        run: echo "branch=$BRANCH_TO_MAKE" >> "$GITHUB_OUTPUT"
-      - name: Create Branch
-        run: .github/scripts/ensure_unity_branch.sh
-
   run-unity-interop-layer-integration:
-    needs: ensure-unity-branch
     if: github.event_name != 'pull_request' || github.event.action != 'closed'
-    #Branch tag is temp, will be main once all is merged
+    # Branch tag is temp, will be main once all is merged
     uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@CSP-Backwards-Integration
     with:
       unity_ext_matrix: '[false]'
       platform_matrix: '["windows-latest"]'
-      csp_branch: ${{ github.head_ref || github.ref_name }} # These two branch names will be identical, albeit in different repos
-      binding_repo_branch: ${{ needs.ensure-unity-branch.outputs.branch }}
+      csp_branch: ${{ github.head_ref || github.ref_name }}
+      binding_repo_branch: v.next
 
-  # On PR merge: if the unity branch has commits ahead of CSP-Backwards-Integration, open a PR to bring them in.
-  raise-unity-pr-on-merge:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    env:
-      BRANCH: ${{ github.head_ref || github.ref_name }}
-      BASE: "CSP-Backwards-Integration"
-      REPO: magnopus-opensource/connected-spaces-platform-unity
-      SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
-      GH_TOKEN: ${{ secrets.DOTNET_REPO_ACCESS_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: .github/scripts/raise_unity_pr_on_merge.sh
