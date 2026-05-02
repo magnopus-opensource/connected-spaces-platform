@@ -1,0 +1,21 @@
+name: .NET Interop Binding Integration
+
+# Run a fully integrated build of the unity bindings, based on the CSP build from the current branch.
+# If breaking changes are made, update the v.next branch in the connected-spaces-platform-unity repo, which represents the breaking changeset of the next release.
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  # the github head_ref||ref_name thing is dealing with a difference between a PR head and a regular branch head, since they're not just branch names when coming from PR's
+  run-unity-interop-layer-integration:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+    # Branch tag is temp, will be main once all is merged
+    uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@CSP-Backwards-Integration
+    with:
+      unity_ext_matrix: '[false]'
+      platform_matrix: '["windows-latest"]'
+      csp_branch: ${{ github.head_ref || github.ref_name }}
+      binding_repo_branch: v.next
+

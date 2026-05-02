@@ -1,16 +1,37 @@
 @PACKAGE_INIT@
 
+set_and_check(CSP_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+
+# Captured at the time CSP was configured. configure_package_config_file()
+# substitutes @CSP_BUILD_SHARED@ with the literal ON/OFF value, so the
+# installed CSPConfig.cmake records how this CSP was built and consumers
+# don't have to know.
+set(CSP_BUILT_SHARED @CSP_BUILD_SHARED@)
+
 include(CMakeFindDependencyMacro)
 
+# Public-API dependencies: appear in installed headers
+# (CSPAsyncScheduler.h, fmt_Formatters.h, ReplicatedValueException.h).
+# Required regardless of whether CSP was built shared or static.
+# We should endevour to remove these as neccesary dependencies.
 find_dependency(fmt)
 find_dependency(RapidJSON)
 find_dependency(Async++)
-find_dependency(tinyspline)
-find_dependency(glm)
-find_dependency(msgpack-cxx)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-  find_dependency(Poco)
+# Private link-only dependencies. Currently, for a STATIC CSP, 
+# CMake promotes PRIVATE target_link_libraries() onto INTERFACE_LINK_LIBRARIES 
+# of the exported target, so consumers must be able to resolve these to link successfully.
+# For a SHARED CSP, these deps are baked into the DLL and do NOT appear on
+# the exported target's link interface, so consumers never reference them.
+# We should endevour to bake these into static libs so we can remove these from here.
+if(NOT CSP_BUILT_SHARED)
+  find_dependency(tinyspline)
+  find_dependency(glm)
+  find_dependency(msgpack-cxx)
+
+  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    find_dependency(Poco)
+  endif()
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/CSPTargets.cmake")
