@@ -10,7 +10,7 @@ target_sources(MultiplayerTestRunner
         src/CLIArgs.h
         src/LoginRAII.cpp
         src/LoginRAII.h
-        src/main.cpp
+        src/Main.cpp
         src/SpaceRAII.cpp
         src/SpaceRAII.h
         src/Utils.cpp

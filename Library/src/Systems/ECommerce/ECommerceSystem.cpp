@@ -20,7 +20,7 @@
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "ECommerceSystemHelpers.h"
-#include "Services/aggregationservice/Api.h"
+#include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
 #include <array>
