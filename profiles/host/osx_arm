@@ -6,5 +6,3 @@ compiler.libcxx=libc++
 compiler.version=17
 os=Macos
 
-[tool_requires]
-*: cmake/3.31.6

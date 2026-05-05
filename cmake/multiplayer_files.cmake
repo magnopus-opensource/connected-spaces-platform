@@ -45,6 +45,7 @@ set(CSP_MULTIPLAYER_PUBLIC_INCLUDES
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/TextSpaceComponent.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/VideoPlayerSpaceComponent.h
 
+    ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/Interfaces/IAudioControlComponent.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/Interfaces/IEnableableComponent.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/Interfaces/IExternalResourceComponent.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/Components/Interfaces/IPositionComponent.h
