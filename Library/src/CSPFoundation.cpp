@@ -54,24 +54,23 @@
 
 #define LOAD_OWN_MODULE() (void*)GetModuleHandleA(LIB_NAME)
 #define GET_FUNCTION_ADDRESS(mod, name) (void*)GetProcAddress((HMODULE)(mod), name)
-#elif defined(CSP_ANDROID)
-// For dlopen and dlsym
-#include <dlfcn.h>
-// For fstat and mkdir
-#include <sys/stat.h>
-
-#define LOAD_OWN_MODULE() dlopen(LIB_NAME, RTLD_LAZY)
-#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
-#elif defined(CSP_MACOSX) || defined(CSP_IOS)
+#elif defined(CSP_POSIX)
 // For dlopen and dlsym
 #include <dlfcn.h>
 // For stat and mkdir
 #include <sys/stat.h>
+#include <sys/types.h>
 // For PATH_MAX
-#include <sys/syslimits.h>
+#include <limits.h>
 
-#define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
+#if defined(CSP_ANDROID)
+    #define LOAD_OWN_MODULE() dlopen(LIB_NAME, RTLD_LAZY)
+#else
+    #define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
+#endif
+
 #define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
+
 #elif defined(CSP_WASM)
 #include <emscripten.h>
 #endif
@@ -146,8 +145,8 @@ EM_JS(void, set_device_id, (const char* cDeviceId), {
 #if !defined(CSP_WASM)
 std::string DeviceIdPath()
 {
-// For all platforms, we want to guarantee the current user has read/write access and to reduce public visibility of the file that holds the
-// device ID
+    // For all platforms, we want to guarantee the current user has read/write access
+    // and to reduce public visibility of the file that holds the device ID
 #if defined(CSP_WINDOWS)
     // On Windows, we store the device ID in %localappdata%
     PWSTR Path;
@@ -157,6 +156,8 @@ std::string DeviceIdPath()
     auto CSPDataRoot = Conv.to_bytes(std::wstring(Path)) + "\\MagnopusCSP\\";
 
     CoTaskMemFree(Path);
+    return CSPDataRoot;
+
 #elif defined(CSP_ANDROID)
     // On Android, we store the device ID in the app's local storage directory
     FILE* CmdlineFile = fopen("/proc/self/cmdline", "r");
@@ -164,14 +165,28 @@ std::string DeviceIdPath()
     char Path[256];
     fgets(Path, sizeof(Path), CmdlineFile);
 
-    auto CSPDataRoot = "/data/data/" + std::string(Path) + "/";
+    if (CmdlineFile != nullptr)
+    {
+        fclose(CmdlineFile);
+    }
+
+    return "/data/data/" + std::string(Path) + "/";
+
 #elif defined(CSP_MACOSX) || defined(CSP_IOS)
     // On macOS and iOS, we store the device ID in the app's user library path
-    char CSPDataRoot[PATH_MAX];
-    sprintf(CSPDataRoot, "%s/Library/MagnopusCSP/", getenv("HOME"));
-#endif
+    const char* Home = getenv("HOME");
+    return std::string(Home ? Home : "") + "/Library/MagnopusCSP/";
 
-    return CSPDataRoot;
+#elif defined(CSP_LINUX)
+
+    const char* Home = getenv("HOME");
+    return std::string(Home ? Home : "") + "/.local/share/MagnopusCSP/";
+
+#else
+
+#error "DeviceIdPath is not implemented"
+
+#endif
 }
 #endif
 
