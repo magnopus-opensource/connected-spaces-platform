@@ -409,7 +409,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntitySen
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
@@ -473,7 +473,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
@@ -616,7 +616,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
