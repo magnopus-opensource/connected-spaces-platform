@@ -16,7 +16,7 @@
 #include "CSP/Systems/ExternalServices/ExternalServiceInvocation.h"
 #include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
-#include "Services/aggregationservice/Dto.h"
+#include "Services/AggregationService/Dto.h"
 #include "Json/JsonParseHelper.h"
 
 #include <regex>
