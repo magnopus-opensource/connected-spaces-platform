@@ -1,0 +1,15 @@
+[settings]
+os=Linux
+arch=x86_64
+
+compiler=gcc
+compiler.version=13
+compiler.cppstd=17
+compiler.libcxx=libstdc++11
+
+[tool_requires]
+cmake/3.31.6
+ninja/1.11.1
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja
