@@ -181,6 +181,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		audio.isLoopPlayback = true;
 		audio.timeSincePlay = 1;
 		audio.volume = 0.75;
+		audio.isEnabled = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
@@ -201,6 +202,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), true);
     EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 1.f);
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
+    EXPECT_EQ(AudioComponent->GetIsEnabled(), false);
 
     // Test invalid volume values
     AudioScriptText = R"xx(

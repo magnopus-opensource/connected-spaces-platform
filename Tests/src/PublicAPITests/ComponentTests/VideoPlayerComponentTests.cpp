@@ -215,6 +215,9 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetIsStereoFlipped(), false);
     EXPECT_EQ(VideoPlayerComponent->GetAudioType(), AudioType::Spatial);
     EXPECT_EQ(VideoPlayerComponent->GetVolume(), 1.f);
+    EXPECT_EQ(VideoPlayerComponent->GetVolume(), 1.f);
+    EXPECT_EQ(VideoPlayerComponent->GetIsAutoPlay(), false);
+    EXPECT_EQ(VideoPlayerComponent->GetAttenuationRadius(), 10.f);
 
     // Setup script
     const std::string VideoPlayerScriptText = R"xx(
@@ -242,7 +245,8 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.isEnabled = false;
         video.audioType = 0;
         video.volume = 0.5;
-
+        video.isAutoPlay = true;
+        video.attenuationRadius = 22.0;
     )xx";
 
     ScriptComponent->SetScriptSource(VideoPlayerScriptText.c_str());
@@ -274,6 +278,32 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), false);
     EXPECT_EQ(VideoPlayerComponent->GetAudioType(), AudioType::Global);
     EXPECT_EQ(VideoPlayerComponent->GetVolume(), 0.5f);
+    EXPECT_EQ(VideoPlayerComponent->GetIsAutoPlay(), true);
+    EXPECT_EQ(VideoPlayerComponent->GetAttenuationRadius(), 22.f);
+
+    // volume input range validation
+    {
+        const auto ExpectedVolume = VideoPlayerComponent->GetVolume();
+        CreatedObject->GetScript().SetScriptSource(R"(
+            const video = ThisEntity.getVideoPlayerComponents()[0];
+            video.volume = 1.75;
+        )");
+
+        CreatedObject->GetScript().Invoke();
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        EXPECT_EQ(VideoPlayerComponent->GetVolume(), ExpectedVolume);
+    
+        CreatedObject->GetScript().SetScriptSource(R"(
+            const video = ThisEntity.getVideoPlayerComponents()[0];
+            video.volume = -2.75;
+        )");
+
+        CreatedObject->GetScript().Invoke();
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        EXPECT_EQ(VideoPlayerComponent->GetVolume(), ExpectedVolume);
+    }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

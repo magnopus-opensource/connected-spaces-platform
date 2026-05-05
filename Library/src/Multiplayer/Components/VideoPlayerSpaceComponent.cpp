@@ -78,7 +78,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsAutoPlay),
-            {}, // not exposed to scripting
+            "isAutoPlay",
             false,
         },
         {
@@ -108,7 +108,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AttenuationRadius),
-            {}, // not exposed to scripting
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
@@ -153,7 +153,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Volume),
-            "volume",
+            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
             DefaultVolume,
         },
         {

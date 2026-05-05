@@ -79,12 +79,12 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
-            "volume",
+            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
             DefaultVolume,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
-            {}, // not exposed to scripting
+            "isEnabled",
             true,
         },
         {
