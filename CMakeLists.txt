@@ -218,10 +218,19 @@ target_compile_options(csp-lib
 	    -Wno-ignored-qualifiers
     >
 
+    $<$<CXX_COMPILER_ID:GNU>:
+      -Werror
+      -Wextra
+      # Don't error when naming members the same as class
+      -Wno-error=changes-meaning
+      -Wno-error=deprecated-declarations
+      -Wno-missing-field-initializers
+      -Wno-ignored-qualifiers
+      -fpermissive
+    >
+
     $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
 )
-
-
 
 target_link_options(csp-lib PRIVATE
   $<$<PLATFORM_ID:Emscripten>:
@@ -372,6 +381,16 @@ if(BUILD_TESTING)
 
   target_compile_options(csp-tests PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+
+    $<$<CXX_COMPILER_ID:GNU>:
+      -Werror
+      -Wextra
+      -Wno-error=changes-meaning
+      -Wno-error=deprecated-declarations
+      -Wno-missing-field-initializers
+      -Wno-ignored-qualifiers
+      -fpermissive
+    >
   )
 
   # Ensure csp and MultiplayerTestRunner are built first
