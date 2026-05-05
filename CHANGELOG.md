@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.37.0]
+
+### 🍰 🙌 New Features
+
+- [OW-2449] feat: Add height parameter to the fog space component
+
 ## [6.35.0]
 
 ### 🍰 🙌 New Features
