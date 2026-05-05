@@ -7,6 +7,8 @@
 #include "websocket_transport.h"
 #include "signalrclient/websocket_client.h"
 
+#include <stdexcept>
+
 namespace signalr
 {
     transport_factory::transport_factory(std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,

@@ -24,6 +24,7 @@
 #include <CSP/Systems/Users/UserSystem.h>
 
 #include <future>
+#include <thread>
 #include <iostream>
 
 namespace LeaderElection

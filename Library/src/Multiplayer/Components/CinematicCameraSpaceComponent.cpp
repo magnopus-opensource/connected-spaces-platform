@@ -19,6 +19,8 @@
 #include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
+#include <cmath>
+
 namespace csp::multiplayer
 {
 

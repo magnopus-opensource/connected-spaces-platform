@@ -18,6 +18,7 @@
 
 #include "TestIdentifiers.h"
 
+#include <vector>
 #include <future>
 #include <memory>
 #include <optional>
