@@ -40,6 +40,7 @@ DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, float, float, EndDistance);
 DEFINE_SCRIPT_PROPERTY_VEC3(FogSpaceComponent, Color);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, float, float, Density);
+DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, float, float, Height);
 DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, float, float, HeightFalloff);
 DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, float, float, MaxOpacity);
 

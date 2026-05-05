@@ -39,6 +39,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Color);
 
     DECLARE_SCRIPT_PROPERTY(float, Density);
+    DECLARE_SCRIPT_PROPERTY(float, Height);
     DECLARE_SCRIPT_PROPERTY(float, HeightFalloff);
     DECLARE_SCRIPT_PROPERTY(float, MaxOpacity);
 
