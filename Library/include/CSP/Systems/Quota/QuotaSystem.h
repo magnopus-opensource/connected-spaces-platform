@@ -19,6 +19,11 @@
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 
+namespace csp::common
+{
+class IAuthContext;
+}
+
 namespace csp::services
 {
 
@@ -38,6 +43,7 @@ namespace csp::systems
 /// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' Quota Server.
 /// Offers methods for receiving Quota Queries.
+/// All functions in the quota system require the user to be logged in.
 class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 {
     CSP_START_IGNORE
@@ -98,11 +104,13 @@ public:
 
 private:
     QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context);
     ~QuotaSystem();
 
     csp::services::ApiBase* QuotaTierAssignmentAPI;
     csp::services::ApiBase* QuotaManagementAPI;
     csp::services::ApiBase* QuotaActivityAPI;
+
+    const csp::common::IAuthContext* Context;
 };
 } // namespace csp::systems
