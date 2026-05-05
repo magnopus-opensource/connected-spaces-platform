@@ -64,6 +64,11 @@ endif()
 
 target_compile_options(MultiplayerTestRunner PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+
+    $<$<CXX_COMPILER_ID:GNU>:
+      -Wno-error=changes-meaning
+      -fpermissive
+    >
 )
 
 set_target_properties(MultiplayerTestRunner PROPERTIES
