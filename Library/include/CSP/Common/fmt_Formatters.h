@@ -40,7 +40,7 @@ namespace fmt
 
 // Formatter for csp::common::String.
 
-template <> struct fmt::formatter<csp::common::String> : formatter<std::string_view>
+template <> struct formatter<csp::common::String> : formatter<std::string_view>
 {
     // parse is inherited from formatter<string_view>.
 
@@ -51,7 +51,7 @@ template <> struct fmt::formatter<csp::common::String> : formatter<std::string_v
     }
 };
 
-template <> struct fmt::formatter<csp::web::HttpRequest> : formatter<std::string_view>
+template <> struct formatter<csp::web::HttpRequest> : formatter<std::string_view>
 {
     auto format(const csp::web::HttpRequest& Request, format_context& ctx) const -> format_context::iterator
     {
