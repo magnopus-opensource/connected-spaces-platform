@@ -696,7 +696,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 
     // Attempt Update - bad display name
     {
-        UniqueTestDisplayName = csp::common::String("??//-\"#~*") + GetUniqueString().c_str();
+        // Using \? to prevent a trigraph error on gcc.
+        UniqueTestDisplayName = csp::common::String("?\?//-\"#~*") + GetUniqueString().c_str();
 
         auto [Result] = AWAIT_PRE(UserSystem, UpdateUserDisplayName, RequestPredicate, UserId, UniqueTestDisplayName);
 
