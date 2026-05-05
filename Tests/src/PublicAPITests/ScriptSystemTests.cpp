@@ -1117,6 +1117,7 @@ TEST_P(CustomComponentScriptInterfaceSubscription, CustomComponentScriptInterfac
     // Setup script
     std::string ScriptText = R"xx(
 		var custom = ThisEntity.getCustomComponents()[0];
+		custom.applicationOrigin = "TestApplicationOrigin";
 		custom.setCustomProperty("testFloat", 1.234);
 		custom.setCustomProperty("testInt", 1234);
 		globalThis.onValueChanged = () => {
@@ -1147,6 +1148,7 @@ TEST_P(CustomComponentScriptInterfaceSubscription, CustomComponentScriptInterfac
     ASSERT_EQ(CustomComponent->GetCustomProperty("testInt").GetInt(), 1234);
     ASSERT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 0);
     ASSERT_FALSE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
+    EXPECT_EQ(CustomComponent->GetApplicationOrigin(), "TestApplicationOrigin");
 
     CustomComponent->SetCustomProperty("Number", csp::common::ReplicatedValue(int64_t(100)));
 

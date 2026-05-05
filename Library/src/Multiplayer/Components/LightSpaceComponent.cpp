@@ -15,86 +15,103 @@
  */
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Light,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Light),
+    "Light",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightType),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightType),
+            "lightType",
             static_cast<int64_t>(LightType::Point),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Color),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Color),
+            "color",
             csp::common::Vector3 { 255, 255, 255 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Intensity),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Intensity),
+            "Intensity", // Note: exposed as PascalCase for backwards compatibility (casing was wrong when this property was originally exposed)
             5000.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Range),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Range),
+            "range",
             1000.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::InnerConeAngle),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::InnerConeAngle),
+            "innerConeAngle",
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::OuterConeAngle),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::OuterConeAngle),
+            "outerConeAngle",
             0.78539816339f, // Pi / 4
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieAssetId),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetId),
+            "cookieAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetCollectionId),
+            "cookieAssetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightCookieType),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieType),
+            "lightCookieType",
             static_cast<int64_t>(LightCookieType::NoCookie),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::LightShadowType),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightShadowType),
+            {}, // not exposed to scripting
             static_cast<int64_t>(LightShadowType::None),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(LightPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& LightSpaceComponent::GetSchema() { return Schema; }
+
 LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new LightSpaceComponentScriptInterface(this));
 }
 
 LightType LightSpaceComponent::GetLightType() const

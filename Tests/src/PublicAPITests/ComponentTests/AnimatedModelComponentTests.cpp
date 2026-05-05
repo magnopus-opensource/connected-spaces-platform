@@ -206,6 +206,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     // Create animated model component
     auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
 
+    ASSERT_EQ(AnimatedModelComponent->GetIsShadowCaster(), true);
+
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
@@ -225,6 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
         model.showAsHoldoutInAR = true;
         model.showAsHoldoutInVirtual = true;
 		model.animationIndex = 1;
+        model.isShadowCaster = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(AnimatedModelScriptText.c_str());
@@ -246,6 +249,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInAR(), true);
     EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInVirtual(), true);
     EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), 1);
+    EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

@@ -24,14 +24,6 @@ csp::multiplayer::AudioSpaceComponentScriptInterface::AudioSpaceComponentScriptI
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_VEC3(AudioSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, AudioPlaybackState, int32_t, PlaybackState);
-DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, AudioType, int32_t, AudioType);
-DEFINE_SCRIPT_PROPERTY_STRING(AudioSpaceComponent, AudioAssetId);
-DEFINE_SCRIPT_PROPERTY_STRING(AudioSpaceComponent, AssetCollectionId);
-DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, float, float, AttenuationRadius);
-DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, bool, bool, IsLoopPlayback);
-DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, float, float, TimeSincePlay);
 DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, float, float, Volume);
 
 } // namespace csp::multiplayer

@@ -38,6 +38,8 @@ enum class SplinePropertyKeys : uint16_t
 class CSP_API SplineSpaceComponent : public ComponentBase
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the spline space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

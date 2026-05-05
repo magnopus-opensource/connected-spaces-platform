@@ -28,37 +28,6 @@ VideoPlayerSpaceComponentScriptInterface::VideoPlayerSpaceComponentScriptInterfa
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING_ADAPTNAME(VideoPlayerSpaceComponent, Name, ComponentName);
-
-DEFINE_SCRIPT_PROPERTY_VEC3(VideoPlayerSpaceComponent, Scale);
-DEFINE_SCRIPT_PROPERTY_VEC3(VideoPlayerSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_VEC4(VideoPlayerSpaceComponent, Rotation);
-
-DEFINE_SCRIPT_PROPERTY_STRING(VideoPlayerSpaceComponent, VideoAssetId);
-DEFINE_SCRIPT_PROPERTY_STRING(VideoPlayerSpaceComponent, VideoAssetURL);
-DEFINE_SCRIPT_PROPERTY_STRING(VideoPlayerSpaceComponent, AssetCollectionId);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsStateShared);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsAutoPlay);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsLoopPlayback);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsAutoResize);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, AttenuationRadius);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerPlaybackState, int32_t, PlaybackState);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, CurrentPlayheadPosition);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, TimeSincePlay);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerSourceType, int32_t, VideoPlayerSourceType);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, StereoVideoType, int32_t, StereoVideoType);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsStereoFlipped);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVirtualVisible);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsEnabled);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::AudioType, int32_t, AudioType);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, Volume);
 
 

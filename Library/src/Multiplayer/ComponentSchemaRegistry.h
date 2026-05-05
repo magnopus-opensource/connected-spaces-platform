@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2026 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
-#include "Multiplayer/Script/ComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
-class ECommerceSpaceComponent;
 
-class ECommerceSpaceComponentScriptInterface : public ComponentScriptInterface
-{
-public:
-    ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent = nullptr);
-
-    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(std::string, ProductId);
-};
+ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
 } // namespace csp::multiplayer

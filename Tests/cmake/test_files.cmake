@@ -11,6 +11,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/TestHelpers.cpp
     ${CSP_TESTS_SOURCE_DIR}/TestHelpers.h
 
+    ${CSP_TESTS_SOURCE_DIR}/InternalTests/ComponentSchemaScriptBindingTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/EncodeTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/EntityPropertyTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/EventTests.cpp

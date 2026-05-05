@@ -16,7 +16,7 @@
 
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -31,47 +31,59 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Collision,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
+    {}, // not exposed to scripting
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
+            {}, // not exposed to scripting
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
+            {}, // not exposed to scripting
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
+            {}, // not exposed to scripting
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionShape),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
+            {}, // not exposed to scripting
             static_cast<int64_t>(CollisionShape::Box),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionMode),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
+            {}, // not exposed to scripting
             static_cast<int64_t>(CollisionMode::Collision),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::CollisionAssetId),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::IsEnabled),
+            {}, // not exposed to scripting
             true,
         },
     },
 };
+
+const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }
 
 CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)

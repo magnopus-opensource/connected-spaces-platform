@@ -15,62 +15,73 @@
  */
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::ExternalLink,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::ExternalLink),
+    "ExternalLink",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::LinkUrl),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::LinkUrl),
+            "linkUrl",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::DisplayText),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::DisplayText),
+            "displayText",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ExternalLinkPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& ExternalLinkSpaceComponent::GetSchema() { return Schema; }
+
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ExternalLinkSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetName() const

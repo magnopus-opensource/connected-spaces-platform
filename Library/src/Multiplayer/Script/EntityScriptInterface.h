@@ -71,13 +71,14 @@ public:
 
     std::vector<ComponentScriptInterface*> GetComponents();
 
+    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType Type);
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
 private:
     SpaceEntity* Entity;
 };
 
-template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)
 {
     std::vector<ScriptInterface*> Components;
 
@@ -102,6 +103,11 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
     }
 
     return Components;
+}
+
+template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
+{
+    return GetComponentsOfType<ScriptInterface>(Type);
 }
 
 } // namespace csp::multiplayer
