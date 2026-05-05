@@ -57,6 +57,10 @@ const auto Schema = ComponentBase::ComponentSchema {
             0.4f,
         },
         {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Height),
+            0.0f,
+        },
+        {
             static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::HeightFalloff),
             0.2f,
         },
@@ -143,6 +147,10 @@ void FogSpaceComponent::SetColor(const csp::common::Vector3& Value) { SetPropert
 float FogSpaceComponent::GetDensity() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::Density)); }
 
 void FogSpaceComponent::SetDensity(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Density), Value); }
+
+float FogSpaceComponent::GetHeight() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::Height)); }
+
+void FogSpaceComponent::SetHeight(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Height), Value); }
 
 float FogSpaceComponent::GetHeightFalloff() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)); }
 

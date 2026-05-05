@@ -46,6 +46,7 @@ enum class FogPropertyKeys : uint16_t
     IsARVisible,
     ThirdPartyComponentRef,
     IsVirtualVisible,
+    Height,
     Num
 };
 
@@ -129,6 +130,16 @@ public:
     /// @brief Sets global density factor.
     /// @param Value float : Global density factor.
     void SetDensity(float Value);
+
+    /// @brief Gets Fog Height.
+    /// @note Controls the height above which the fog density starts to diminish.
+    /// @return Current fog height.
+    float GetHeight() const;
+
+    /// @brief Sets Fog Height.
+    /// @note Controls the height above which the fog density starts to diminish.
+    /// @param Value float : Fog height.
+    void SetHeight(float Value);
 
     /// @brief Gets Height density factor.
     /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
