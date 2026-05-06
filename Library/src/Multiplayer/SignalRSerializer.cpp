@@ -195,7 +195,7 @@ const signalr::value& SignalRDeserializer::ReadNextValue() const
     {
         return *std::get<std::vector<signalr::value>::const_iterator>(ObjectStack.top());
     }
-    else if (std::holds_alternative<nullptr_t>(ObjectStack.top()))
+    else if (std::holds_alternative<std::nullptr_t>(ObjectStack.top()))
     {
         return Root;
     }
@@ -295,7 +295,7 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
     OutVal = Object.as_string();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::nullptr_t)
 {
     if (Object.is_null() == false)
     {

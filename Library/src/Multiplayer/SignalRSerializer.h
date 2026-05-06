@@ -239,7 +239,7 @@ private:
     void ReadValueFromObjectInternal(const signalr::value& Object, float& OutVal);
     void ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal);
     void ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal);
-    void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t);
+    void ReadValueFromObjectInternal(const signalr::value& Object, std::nullptr_t);
 
     // Case for other container values.
     template <typename T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal);
@@ -249,7 +249,7 @@ private:
 
     void IncrementIterator();
 
-    using Iterator = std::variant<nullptr_t, std::vector<signalr::value>::const_iterator, std::map<uint64_t, signalr::value>::const_iterator,
+    using Iterator = std::variant<std::nullptr_t, std::vector<signalr::value>::const_iterator, std::map<uint64_t, signalr::value>::const_iterator,
         std::map<std::string, signalr::value>::const_iterator>;
 
     signalr::value Root;
@@ -392,7 +392,7 @@ template <typename T> inline void SignalRSerializer::WriteValueInternal(const st
     }
     else
     {
-        WriteValueInternal<nullptr_t>(nullptr);
+        WriteValueInternal<std::nullptr_t>(nullptr);
     }
 }
 
