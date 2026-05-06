@@ -15,9 +15,8 @@
  */
 #include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 
 namespace
 {
@@ -27,60 +26,73 @@ constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::ScreenSharing,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::ScreenSharing),
+    "ScreenSharing",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsShadowCaster),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsShadowCaster),
+            "isShadowCaster",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::UserId),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::UserId),
+            "userId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
+            "defaultImageCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::DefaultImageAssetId),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageAssetId),
+            "defaultImageAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::AttenuationRadius),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema; }
+
 ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ScreenSharingSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ScreenSharingSpaceComponent::GetUserId() const

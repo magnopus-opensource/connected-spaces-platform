@@ -15,70 +15,83 @@
  */
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Image,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Image),
+    "Image",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::ImageAssetId),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::ImageAssetId),
+            "imageAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::BillboardMode),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
+            "billboardMode",
             static_cast<int64_t>(BillboardMode::Off),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::DisplayMode),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
+            "displayMode",
             static_cast<int64_t>(DisplayMode::DoubleSided),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsEmissive),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsEmissive),
+            "isEmissive",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& ImageSpaceComponent::GetSchema() { return Schema; }
+
 ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ImageSpaceComponent::GetImageAssetId() const

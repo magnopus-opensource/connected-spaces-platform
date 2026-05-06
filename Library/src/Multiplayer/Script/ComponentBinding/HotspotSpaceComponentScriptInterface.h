@@ -17,9 +17,6 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-#include <string>
-#include <vector>
-
 namespace csp::multiplayer
 {
 
@@ -31,15 +28,6 @@ public:
     HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent = nullptr);
 
     std::string GetUniqueComponentId();
-
-    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-    DECLARE_SCRIPT_PROPERTY(std::string, Name);
-    DECLARE_SCRIPT_PROPERTY(bool, IsTeleportPoint);
-    DECLARE_SCRIPT_PROPERTY(bool, IsSpawnPoint);
-    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
-    DECLARE_SCRIPT_PROPERTY(bool, IsVirtualVisible);
 };
 
 } // namespace csp::multiplayer

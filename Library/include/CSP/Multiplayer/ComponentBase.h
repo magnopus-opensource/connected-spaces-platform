@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 
 #include <functional>
+#include <memory>
 
 CSP_START_IGNORE
 #ifdef CSP_TESTS
@@ -36,17 +37,11 @@ namespace csp::common
 class LogSystem;
 }
 
-CSP_START_IGNORE
-namespace csp::multiplayer::component
-{
-template <typename ComponentTypeId, typename PropertyId> struct Schema;
-}
-CSP_END_IGNORE
-
 namespace csp::multiplayer
 {
 
 class SpaceEntity;
+class ComponentSchema;
 class ComponentScriptInterface;
 
 /// @brief Represents the type of component.
@@ -95,6 +90,7 @@ class CSP_API ComponentBase
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;
     friend class OnlineRealtimeEngine;
+    friend class ComponentScriptInterface;
     friend class EntityScriptInterface;
 #ifdef CSP_TESTS
     friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
@@ -113,11 +109,7 @@ public:
     // The LogSystem input may be null, components do not _have_ to log.
     ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    CSP_START_IGNORE
-    using PropertyKey = uint16_t;
-    using ComponentSchema = csp::multiplayer::component::Schema<ComponentType, PropertyKey>;
     CSP_NO_EXPORT ComponentBase(const ComponentSchema&, csp::common::LogSystem*, SpaceEntity* Parent);
-    CSP_END_IGNORE
 
     /// @brief Virtual destructor for the component.
     virtual ~ComponentBase();
@@ -218,7 +210,7 @@ protected:
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> Properties;
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyProperties;
 
-    ComponentScriptInterface* ScriptInterface;
+    std::unique_ptr<ComponentScriptInterface> ScriptInterface;
 
     // May be null, should check before use.
     csp::common::LogSystem* LogSystem = nullptr;

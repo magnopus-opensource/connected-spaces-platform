@@ -16,6 +16,7 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
@@ -947,4 +948,29 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, IsModifiableTest)
 
     // Entity should be modifiable again.
     EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchema) 
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    const auto ExampleSchemaId = ComponentSchema::TypeIdType{666};
+
+    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+        {
+            ExampleSchemaId,
+            "Example",
+            csp::common::Array<ComponentProperty> {
+                {
+                    ComponentProperty::KeyType { 42 },
+                    "value",
+                    "DefaultValue",
+                },
+            },
+        },
+    };
+
+    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
+
+    EXPECT_TRUE(Engine.GetComponentSchemaRegistry()->HasKey(ExampleSchemaId));
 }

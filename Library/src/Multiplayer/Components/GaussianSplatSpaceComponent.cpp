@@ -16,62 +16,73 @@
 
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::GaussianSplat,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::GaussianSplat),
+    "GaussianSplat",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
+            "externalResourceAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
+            "externalResourceAssetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4::Identity(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsShadowCaster),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED),
+            {}, // not exposed to scripting: this is a deprecated property that was never exposed to scripting, so no need to start now.
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::Tint),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Tint),
+            "tint",
             csp::common::Vector3::One(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(GaussianSplatPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
         },
     },
 };
 
+const ComponentSchema& GaussianSplatSpaceComponent::GetSchema() { return Schema; }
+
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */
@@ -170,12 +181,12 @@ void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool InValue)
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
 {
-    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
+    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED));
 }
 
 void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED), Value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const

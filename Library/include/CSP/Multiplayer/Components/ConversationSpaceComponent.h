@@ -85,6 +85,8 @@ class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositio
     CSP_END_IGNORE
 
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
     /// This constructor should not be called directly. Instead, use the SpaceEntity::AddComponent function.
     /// @param Parent csp::multiplayer::SpaceEntity* : The Space entity that owns this component. This will also register the component to the entity.

@@ -41,6 +41,8 @@ enum class ECommercePropertyKeys : uint16_t
 class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

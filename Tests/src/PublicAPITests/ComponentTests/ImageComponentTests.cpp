@@ -197,6 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 
     EXPECT_EQ(ImageComponent->GetName(), "");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "");
+    EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::Identity());
@@ -212,6 +213,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 		var image = ThisEntity.getImageComponents()[0];
         image.name = "TestName";
         image.imageAssetId = "TestImageAssetId";
+        image.assetCollectionId = "TestAssetCollectionId";
         image.position = [1, 1, 1];
         image.scale = [2, 2, 2];
 		image.rotation = [1, 1, 1, 1];
@@ -233,6 +235,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 
     EXPECT_EQ(ImageComponent->GetName(), "TestName");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "TestImageAssetId");
+    EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "TestAssetCollectionId");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::One());
     EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3(2, 2, 2));
     EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::One());

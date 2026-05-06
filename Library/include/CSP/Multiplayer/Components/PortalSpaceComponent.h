@@ -54,6 +54,8 @@ enum class PortalPropertyKeys : uint16_t
 class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);

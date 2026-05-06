@@ -15,14 +15,15 @@
  */
 #include "CSP/Multiplayer/ComponentBase.h"
 
-#include "Multiplayer/Component/Schema.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/RealtimeEngineUtils.h"
 #include "ComponentBaseKeys.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
+#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <fmt/format.h>
@@ -53,21 +54,20 @@ ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSyst
 }
 
 ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema.TypeId, LogSystem, Parent)
+    : ComponentBase(static_cast<ComponentType>(Schema.TypeId), LogSystem, Parent)
 {
     for (const auto& Property : Schema.Properties)
     {
         Properties[Property.Key] = Property.DefaultValue;
     }
-}
 
-ComponentBase::~ComponentBase()
-{
-    if (ScriptInterface)
+    if (IsScriptable(Schema))
     {
-        delete (ScriptInterface);
+        ScriptInterface = std::make_unique<ComponentScriptInterface>(this);
     }
 }
+
+ComponentBase::~ComponentBase() { }
 
 uint16_t ComponentBase::GetId() const { return Id; }
 
@@ -293,9 +293,9 @@ SpaceEntity* ComponentBase::GetParent() { return Parent; }
 
 void ComponentBase::OnLocalDelete() { }
 
-void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface) { ScriptInterface = InScriptInterface; }
+void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface) { ScriptInterface.reset(InScriptInterface); }
 
-ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInterface; }
+ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInterface.get(); }
 
 void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message)
 {
