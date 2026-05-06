@@ -6,6 +6,8 @@ set(CSP_MULTIPLAYER_SOURCE_DIR  ${CSP_SOURCE_DIR}/Multiplayer)
 
 set(CSP_MULTIPLAYER_PUBLIC_INCLUDES 
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentBase.h
+    ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentProperty.h
+    ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentSchema.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/CSPSceneDescription.h
@@ -161,6 +163,7 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCS/MCSTypes.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptInterface.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptHelpers.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptMacros.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.h
