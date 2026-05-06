@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
   This isn't currently a public-facing change. However, it includes internal changes to the internal usage of tinyspline. This should not have any effect on behaviour.
 
+- [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
+  At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4980] fix!: Address issues with third party authorization flow. By @MAG-AdamThorn
