@@ -13,7 +13,7 @@ jobs:
     uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@csp-development
     with:
       unity_ext_matrix: '[false]'
-      platform_matrix: '["windows-latest"]'
+      platform_matrix: '["windows-2022"]'
       csp_branch: ${{ github.head_ref || github.ref_name }}
       binding_repo_branch: csp-development
 
