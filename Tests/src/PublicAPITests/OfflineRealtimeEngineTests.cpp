@@ -950,11 +950,11 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, IsModifiableTest)
     EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchema) 
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchema)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    const auto ExampleSchemaId = ComponentSchema::TypeIdType{666};
+    const auto ExampleSchemaId = ComponentSchema::TypeIdType { 666 };
 
     const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
         {
@@ -972,5 +972,5 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
 
     const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
 
-    EXPECT_TRUE(Engine.GetComponentSchemaRegistry()->HasKey(ExampleSchemaId));
+    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
 }

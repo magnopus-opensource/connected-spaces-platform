@@ -642,12 +642,11 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
-
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithComponentSchema) 
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithComponentSchema)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    const auto ExampleSchemaId = ComponentSchema::TypeIdType{666};
+    const auto ExampleSchemaId = ComponentSchema::TypeIdType { 666 };
 
     const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
         {
@@ -671,5 +670,5 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithCo
         Components,
     };
 
-    EXPECT_TRUE(Engine.GetComponentSchemaRegistry()->HasKey(ExampleSchemaId));
+    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
 }

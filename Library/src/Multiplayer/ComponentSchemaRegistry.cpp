@@ -16,6 +16,8 @@
 
 #include "ComponentSchemaRegistry.h"
 
+#include "CSP/Multiplayer/ComponentBase.h"
+
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
@@ -45,46 +47,59 @@
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& AdditionalComponents)
+ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
-    const auto ToPair = [](const ComponentSchema& Schema) {
-        return std::make_pair(Schema.TypeId, Schema);
-    };
-
-    auto Registry = ComponentSchemaRegistry {
-        ToPair(StaticModelSpaceComponent::GetSchema()),
-        ToPair(AnimatedModelSpaceComponent::GetSchema()),
-        ToPair(VideoPlayerSpaceComponent::GetSchema()),
-        ToPair(ImageSpaceComponent::GetSchema()),
-        ToPair(ExternalLinkSpaceComponent::GetSchema()),
-        ToPair(AvatarSpaceComponent::GetSchema()),
-        ToPair(LightSpaceComponent::GetSchema()),
-        ToPair(ScriptSpaceComponent::GetSchema()),
-        ToPair(ButtonSpaceComponent::GetSchema()),
-        ToPair(CustomSpaceComponent::GetSchema()),
-        ToPair(PortalSpaceComponent::GetSchema()),
-        ToPair(ConversationSpaceComponent::GetSchema()),
-        ToPair(AudioSpaceComponent::GetSchema()),
-        ToPair(SplineSpaceComponent::GetSchema()),
-        ToPair(CollisionSpaceComponent::GetSchema()),
-        ToPair(ReflectionSpaceComponent::GetSchema()),
-        ToPair(FogSpaceComponent::GetSchema()),
-        ToPair(ECommerceSpaceComponent::GetSchema()),
-        ToPair(CinematicCameraSpaceComponent::GetSchema()),
-        ToPair(FiducialMarkerSpaceComponent::GetSchema()),
-        ToPair(GaussianSplatSpaceComponent::GetSchema()),
-        ToPair(TextSpaceComponent::GetSchema()),
-        ToPair(HotspotSpaceComponent::GetSchema()),
-        ToPair(ScreenSharingSpaceComponent::GetSchema()),
-        ToPair(AIChatbotSpaceComponent::GetSchema()), 
-    };
-
     for (const auto& Schema : AdditionalComponents)
     {
-        Registry[Schema.TypeId] = Schema;
+        SchemaMap[Schema.TypeId] = Schema;
     }
 
-    return Registry;
+    const auto AddSchema = [this](const ComponentSchema& Schema) { SchemaMap[Schema.TypeId] = Schema; };
+
+    AddSchema(StaticModelSpaceComponent::GetSchema());
+    AddSchema(AnimatedModelSpaceComponent::GetSchema());
+    AddSchema(VideoPlayerSpaceComponent::GetSchema());
+    AddSchema(ImageSpaceComponent::GetSchema());
+    AddSchema(ExternalLinkSpaceComponent::GetSchema());
+    AddSchema(AvatarSpaceComponent::GetSchema());
+    AddSchema(LightSpaceComponent::GetSchema());
+    AddSchema(ScriptSpaceComponent::GetSchema());
+    AddSchema(ButtonSpaceComponent::GetSchema());
+    AddSchema(CustomSpaceComponent::GetSchema());
+    AddSchema(PortalSpaceComponent::GetSchema());
+    AddSchema(ConversationSpaceComponent::GetSchema());
+    AddSchema(AudioSpaceComponent::GetSchema());
+    AddSchema(SplineSpaceComponent::GetSchema());
+    AddSchema(CollisionSpaceComponent::GetSchema());
+    AddSchema(ReflectionSpaceComponent::GetSchema());
+    AddSchema(FogSpaceComponent::GetSchema());
+    AddSchema(ECommerceSpaceComponent::GetSchema());
+    AddSchema(CinematicCameraSpaceComponent::GetSchema());
+    AddSchema(FiducialMarkerSpaceComponent::GetSchema());
+    AddSchema(GaussianSplatSpaceComponent::GetSchema());
+    AddSchema(TextSpaceComponent::GetSchema());
+    AddSchema(HotspotSpaceComponent::GetSchema());
+    AddSchema(ScreenSharingSpaceComponent::GetSchema());
+    AddSchema(AIChatbotSpaceComponent::GetSchema());
+}
+
+csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
+{
+    csp::common::Array<ComponentSchema> Result(SchemaMap.size());
+    size_t Index = 0;
+
+    for (const auto& [TypeId, Schema] : SchemaMap)
+    {
+        Result[Index++] = Schema;
+    }
+
+    return Result;
+}
+
+const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
+{
+    const auto It = SchemaMap.find(TypeId);
+    return It != SchemaMap.end() ? &It->second : nullptr;
 }
 
 } // namespace csp::multiplayer
