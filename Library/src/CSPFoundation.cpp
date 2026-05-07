@@ -64,6 +64,9 @@
 #include <limits.h>
 
 #if defined(CSP_ANDROID)
+    // The normal behaviour is for a null pointer to return the symbol table for the currently loaded process,
+    // but android diverges from that and passes the specific library name.
+    // https://pubs.opengroup.org/onlinepubs/9699919799/functions/dlopen.html
     #define LOAD_OWN_MODULE() dlopen(LIB_NAME, RTLD_LAZY)
 #else
     #define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
