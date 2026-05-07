@@ -47,6 +47,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/PatchUtils.h"
@@ -336,7 +337,9 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
+ComponentBase* SpaceEntity::AddComponent(ComponentType AddType) { return AddComponentByTypeId(static_cast<uint64_t>(AddType)); }
+
+ComponentBase* SpaceEntity::AddComponentByTypeId(uint64_t TypeId)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
     ModifiableStatus Modifiable = IsModifiable();
@@ -356,7 +359,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     std::scoped_lock ScopedComponentsLock { ComponentsLock };
 
     // Only allow one script component
-    if (AddType == ComponentType::ScriptData)
+    if (static_cast<ComponentType>(TypeId) == ComponentType::ScriptData)
     {
         ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData);
 
@@ -373,7 +376,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     }
 
     auto ComponentId = GenerateComponentId();
-    auto* Component = InstantiateComponent(ComponentId, AddType);
+    auto* Component = InstantiateComponent(ComponentId, TypeId);
 
     // If Component is null, component has not been instantiated, so is skipped. (Can this ever be null... seems a bit of a footgun not to just
     // assert)
@@ -501,9 +504,30 @@ uint16_t SpaceEntity::GenerateComponentId()
     }
 }
 
-ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, ComponentType InstantiateType)
+ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, uint64_t TypeId)
 {
+    if (!IsLegacyComponentTypeId(TypeId))
+    {
+        const auto* Registry = EntitySystem != nullptr ? EntitySystem->GetComponentSchemaRegistry() : nullptr;
+
+        const auto* Schema = Registry != nullptr ? Registry->Find(TypeId) : nullptr;
+
+        if (Schema == nullptr)
+        {
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, fmt::format("Unknown Component TypeId: {}", TypeId).c_str());
+            }
+            return nullptr;
+        }
+
+        auto* Component = new ComponentBase(*Schema, LogSystem, this);
+        Component->Id = InstantiateId;
+        return Component;
+    }
+
     ComponentBase* Component;
+    const auto InstantiateType = static_cast<ComponentType>(TypeId);
 
     switch (InstantiateType)
     {
@@ -907,11 +931,12 @@ std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() { retur
 void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType MessageComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    const auto TypeId = std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue());
+    const auto MessageComponentType = static_cast<ComponentType>(TypeId);
 
     if (MessageComponentType != ComponentType::Invalid)
     {
-        auto* Component = InstantiateComponent(ComponentId, MessageComponentType);
+        auto* Component = InstantiateComponent(ComponentId, TypeId);
 
         // if Component == nullptr component has not been instantiated, so is skipped.
         if (Component != nullptr)
@@ -938,7 +963,7 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
 ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType PatchComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    const auto PatchComponentType = std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue());
 
     auto UpdateType = ComponentUpdateType::Update;
 
@@ -946,7 +971,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
     {
         UpdateType = ComponentUpdateType::Add;
     }
-    else if (Components[ComponentId]->GetComponentType() != PatchComponentType)
+    else if (Components[ComponentId]->GetTypeId() != PatchComponentType)
     {
         UpdateType = ComponentUpdateType::Delete;
     }

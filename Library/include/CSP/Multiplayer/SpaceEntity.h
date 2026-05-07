@@ -277,6 +277,15 @@ public:
     /// @return The newly created component.
     ComponentBase* AddComponent(ComponentType Type);
 
+    /// @brief Add a component by TypeId.
+    /// For a TypeId that maps to a built-in, statically defined component, this creates the same concrete type as AddComponent(ComponentType) for
+    /// backwards compatibility (i.e. it is still safe to cast it to the specific concrete type). However, the intention of this method is to use the
+    /// returned component via the base interface only.
+    /// For a TypeId that maps to a schema-defined component, this creates a ComponentBase backed by the registered schema.
+    /// @param TypeId The TypeId to look up.
+    /// @return The newly created component, or nullptr if TypeId is not registered.
+    ComponentBase* AddComponentByTypeId(uint64_t TypeId);
+
     /// @brief Mark that a component has just been updated, ie, that a property on it has been modified.
     /// @param Component ComponentBase : The component that has just updated
     /// @warning This is a pattern divergence, as updates to component data happen immediately, rather than being deferred via the regular patch flow.
@@ -450,7 +459,7 @@ public:
 
 private:
     uint16_t GenerateComponentId();
-    ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
+    ComponentBase* InstantiateComponent(uint16_t Id, uint64_t TypeId);
 
     void AddChildEntity(SpaceEntity* ChildEntity);
 

@@ -102,4 +102,45 @@ const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
     return It != SchemaMap.end() ? &It->second : nullptr;
 }
 
+bool IsLegacyComponentTypeId(uint64_t TypeId)
+{
+    switch (static_cast<ComponentType>(TypeId))
+    {
+    case ComponentType::Invalid:
+    case ComponentType::Core:
+    case ComponentType::UIController_DEPRECATED:
+    case ComponentType::StaticModel:
+    case ComponentType::AnimatedModel:
+    case ComponentType::MediaSurface_DEPRECATED:
+    case ComponentType::VideoPlayer:
+    case ComponentType::ImageSequencer_DEPRECATED:
+    case ComponentType::ExternalLink:
+    case ComponentType::AvatarData:
+    case ComponentType::Light:
+    case ComponentType::Button:
+    case ComponentType::Image:
+    case ComponentType::ScriptData:
+    case ComponentType::Custom:
+    case ComponentType::Conversation:
+    case ComponentType::Portal:
+    case ComponentType::Audio:
+    case ComponentType::Spline:
+    case ComponentType::Collision:
+    case ComponentType::Reflection:
+    case ComponentType::Fog:
+    case ComponentType::ECommerce:
+    case ComponentType::FiducialMarker:
+    case ComponentType::GaussianSplat:
+    case ComponentType::Text:
+    case ComponentType::Hotspot:
+    case ComponentType::CinematicCamera:
+    case ComponentType::ScreenSharing:
+    case ComponentType::AIChatbot:
+    case ComponentType::Delete:
+        return true;
+    }
+
+    return false;
+}
+
 } // namespace csp::multiplayer

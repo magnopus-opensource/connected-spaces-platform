@@ -23,6 +23,8 @@
 namespace csp::multiplayer
 {
 
+bool IsLegacyComponentTypeId(uint64_t TypeId);
+
 class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
 {
 public:
