@@ -304,3 +304,253 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
 
     EXPECT_NE(dynamic_cast<const csp::multiplayer::AudioSpaceComponent*>(Component), nullptr);
 }
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponentDataSetsPropertyValues)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "DefaultValue" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto ComponentData = std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> {
+        { csp::multiplayer::COMPONENT_KEY_COMPONENTTYPE, csp::multiplayer::mcs::ItemComponentData { uint64_t { 123 } } },
+        { 0, csp::multiplayer::mcs::ItemComponentData { std::string { "OverriddenValue" } } },
+    };
+
+    Entity->AddComponentFromItemComponentData(0, csp::multiplayer::mcs::ItemComponentData { ComponentData });
+
+    const auto* Component = Entity->GetComponent(0);
+    ASSERT_NE(Component, nullptr);
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(Value->GetString(), csp::common::String { "OverriddenValue" });
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponentDataPatchSetsPropertyValues)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "DefaultValue" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto ComponentData = std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> {
+        { csp::multiplayer::COMPONENT_KEY_COMPONENTTYPE, csp::multiplayer::mcs::ItemComponentData { uint64_t { 123 } } },
+        { 0, csp::multiplayer::mcs::ItemComponentData { std::string { "OverriddenValue" } } },
+    };
+
+    Entity->AddComponentFromItemComponentDataPatch(0, csp::multiplayer::mcs::ItemComponentData { ComponentData });
+
+    const auto* Component = Entity->GetComponent(0);
+    ASSERT_NE(Component, nullptr);
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(Value->GetString(), csp::common::String { "OverriddenValue" });
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsDefaultValue)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(*Value, "Value");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsNullptrForUnknownKey)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    EXPECT_EQ(Component->GetSchemaProperty(999), nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMatchingTypeSucceeds)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    Component->SetSchemaProperty(0, "NewValue");
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(*Value, "NewValue");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMismatchedTypeLeavesValueUnchanged)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    Component->SetSchemaProperty(0, int64_t { 42 });
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(*Value, "Value");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithUnknownKeyHasNoEffect)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    Component->SetSchemaProperty(999, "SomeValue");
+
+    EXPECT_EQ(Component->GetSchemaProperty(999), nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWhenParentIsLockedHasNoEffect)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    Entity->Lock();
+    Component->SetSchemaProperty(0, "NewValue");
+
+    const auto* Value = Component->GetSchemaProperty(0);
+    ASSERT_NE(Value, nullptr);
+
+    EXPECT_EQ(*Value, "Value");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyReflectsInTypedGetter)
+{
+    auto Fixture = TestFixture({});
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(static_cast<uint64_t>(csp::multiplayer::ComponentType::Audio));
+    ASSERT_NE(Component, nullptr);
+
+    const auto* AudioComponent = dynamic_cast<const csp::multiplayer::AudioSpaceComponent*>(Component);
+    ASSERT_NE(AudioComponent, nullptr);
+
+    const auto NewPosition = csp::common::Vector3 { 1.0f, 2.0f, 3.0f };
+    Component->SetSchemaProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position), NewPosition);
+
+    EXPECT_EQ(AudioComponent->GetPosition(), NewPosition);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetSchemaProperty)
+{
+    auto Fixture = TestFixture({});
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(static_cast<uint64_t>(csp::multiplayer::ComponentType::Audio));
+    ASSERT_NE(Component, nullptr);
+
+    auto* AudioComponent = dynamic_cast<csp::multiplayer::AudioSpaceComponent*>(Component);
+    ASSERT_NE(AudioComponent, nullptr);
+
+    const auto NewPosition = csp::common::Vector3 { 4.0f, 5.0f, 6.0f };
+    AudioComponent->SetPosition(NewPosition);
+
+    const auto* SchemaValue = Component->GetSchemaProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position));
+    ASSERT_NE(SchemaValue, nullptr);
+
+    EXPECT_EQ(SchemaValue->GetVector3(), NewPosition);
+}

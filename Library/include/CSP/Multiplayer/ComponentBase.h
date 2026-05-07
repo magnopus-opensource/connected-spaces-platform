@@ -183,6 +183,14 @@ public:
     // Used for handling behavior when a client first deletes the component.
     CSP_NO_EXPORT virtual void OnLocalDelete();
 
+    /// @brief Get a property value by schema key.
+    /// @return A pointer to the value, or nullptr if the key is not in this component's schema.
+    const csp::common::ReplicatedValue* GetSchemaProperty(uint16_t Key) const;
+
+    /// @brief Set a property value by schema key.
+    /// Silently ignored if the key is absent from this component's schema or the value type does not match the schema definition.
+    void SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value);
+
 protected:
     ComponentBase();
     ComponentBase(uint64_t TypeId, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
@@ -228,6 +236,8 @@ protected:
     csp::common::LogSystem* LogSystem = nullptr;
 
     csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
+
+    std::unique_ptr<ComponentSchema> CachedSchema;
 
 private:
     void InitialiseProperties();
