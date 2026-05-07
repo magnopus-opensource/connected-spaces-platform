@@ -70,16 +70,7 @@ public:
             auto* Entity
                 = std::get<0>(AWAIT(&Fixture.Engine, CreateEntity, Name, csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {}));
 
-            const auto FindSchema = [&](auto TypeId) -> const Schema*
-            {
-                const auto& Registry = Fixture.Engine.GetComponentSchemaRegistry()->GetUnderlying();
-                if (const auto It = Registry.find(TypeId); It != Registry.end())
-                {
-                    return &It->second;
-                }
-
-                return nullptr;
-            };
+            const auto FindSchema = [&](auto TypeId) -> const Schema* { return Fixture.Engine.GetComponentSchemaRegistry()->Find(TypeId); };
 
             auto SchemaComponents = std::vector<Component*>();
 
@@ -718,7 +709,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
                 TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
             },
         });
-    
+
     const auto& EntityTwoComponent = *EntityTwo.SchemaComponents.front();
 
     ASSERT_EQ(EntityTwoComponent.GetProperty(0), "");

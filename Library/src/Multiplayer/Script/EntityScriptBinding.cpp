@@ -489,7 +489,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     const auto RegisterDynamicComponentGetters = [this, Context, ContextId](auto&& ClassRegistrar) -> decltype(auto)
     {
-        for (const auto& [TypeId, Schema] : EntitySystem->GetComponentSchemaRegistry()->GetUnderlying())
+        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
         {
             if (IsScriptable(Schema))
             {
