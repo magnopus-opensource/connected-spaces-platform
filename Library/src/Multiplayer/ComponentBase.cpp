@@ -36,25 +36,30 @@ static const csp::common::ReplicatedValue InvalidValue = csp::common::Replicated
 ComponentBase::ComponentBase()
     : Parent(nullptr)
     , Id(0)
-    , Type(ComponentType::Invalid)
+    , Type(static_cast<uint64_t>(ComponentType::Invalid))
     , ScriptInterface(nullptr)
     , LogSystem(nullptr)
 {
     InitialiseProperties();
 }
 
-ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+ComponentBase::ComponentBase(uint64_t TypeId, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : Parent(Parent)
     , Id(0)
-    , Type(Type)
+    , Type(TypeId)
     , ScriptInterface(nullptr)
     , LogSystem(LogSystem)
 {
     InitialiseProperties();
 }
 
+ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(static_cast<uint64_t>(Type), LogSystem, Parent)
+{
+}
+
 ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(static_cast<ComponentType>(Schema.TypeId), LogSystem, Parent)
+    : ComponentBase(Schema.TypeId, LogSystem, Parent)
 {
     for (const auto& Property : Schema.Properties)
     {
@@ -73,7 +78,9 @@ uint16_t ComponentBase::GetId() const { return Id; }
 
 void ComponentBase::SetId(uint16_t NewId) { this->Id = NewId; }
 
-ComponentType ComponentBase::GetComponentType() const { return Type; }
+ComponentType ComponentBase::GetComponentType() const { return static_cast<ComponentType>(Type); }
+
+uint64_t ComponentBase::GetTypeId() const { return Type; }
 
 const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
