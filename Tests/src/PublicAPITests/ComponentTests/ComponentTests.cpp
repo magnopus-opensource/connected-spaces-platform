@@ -17,6 +17,7 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
@@ -29,12 +30,16 @@
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
+
+#include <limits>
 
 using namespace csp::multiplayer;
 
@@ -302,5 +307,101 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
     DeleteSpace(SpaceSystem, Space.Id);
 
     // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    constexpr auto SchemaTypeId = std::numeric_limits<uint64_t>::max();
+
+    const auto ComponentSchemas = csp::common::Array<csp::multiplayer::ComponentSchema> {
+        csp::multiplayer::ComponentSchema {
+            csp::multiplayer::ComponentSchema::TypeIdType { SchemaTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "DefaultValue" },
+            },
+        },
+    };
+
+    auto UserId = csp::common::String {};
+    const auto TestUser = CreateTestUser();
+    ASSERT_FALSE(TestUser.Email.IsEmpty());
+
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+    ASSERT_FALSE(UserId.IsEmpty());
+
+    auto Space = csp::systems::Space {};
+    CreateDefaultTestSpace(SpaceSystem, Space);
+    ASSERT_FALSE(Space.Id.IsEmpty());
+
+    {
+        auto Engine = csp::multiplayer::OnlineRealtimeEngine {
+            *SystemsManager.GetMultiplayerConnection(),
+            *SystemsManager.GetLogSystem(),
+            *SystemsManager.GetEventBus(),
+            *SystemsManager.GetScriptSystem(),
+            ComponentSchemas,
+        };
+        Engine.SetEntityFetchCompleteCallback([](auto) { });
+
+        const auto [EnterResult] = AWAIT(SpaceSystem, EnterSpace, Space.Id, &Engine);
+        ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+        ASSERT_NE(Entity, nullptr);
+
+        auto* Component = Entity->AddComponentByTypeId(uint64_t { SchemaTypeId });
+        ASSERT_NE(Component, nullptr);
+
+        Component->SetSchemaProperty(0, csp::common::String { "RoundtripValue" });
+
+        Entity->QueueUpdate();
+        Engine.ProcessPendingEntityOperations();
+
+        AWAIT(SpaceSystem, ExitSpace);
+    }
+
+    {
+        auto Engine = csp::multiplayer::OnlineRealtimeEngine {
+            *SystemsManager.GetMultiplayerConnection(),
+            *SystemsManager.GetLogSystem(),
+            *SystemsManager.GetEventBus(),
+            *SystemsManager.GetScriptSystem(),
+            ComponentSchemas,
+        };
+
+        auto EntitiesFetched = std::promise<void> {};
+        auto EntitiesFetchedFuture = EntitiesFetched.get_future();
+        Engine.SetEntityFetchCompleteCallback([&EntitiesFetched](auto) { EntitiesFetched.set_value(); });
+
+        const auto [EnterResult] = AWAIT(SpaceSystem, EnterSpace, Space.Id, &Engine);
+        ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        ASSERT_TRUE(WaitForFuture(EntitiesFetchedFuture));
+
+        auto* Entity = Engine.FindSpaceObject("SchemaEntity");
+        ASSERT_NE(Entity, nullptr);
+
+        const auto* Components = Entity->GetComponents();
+        ASSERT_EQ(Components->Size(), 1);
+
+        const auto* SchemaComponent = Components->begin()->second;
+        ASSERT_EQ(SchemaComponent->GetTypeId(), SchemaTypeId);
+
+        const auto* Value = SchemaComponent->GetSchemaProperty(0);
+        ASSERT_NE(Value, nullptr);
+        EXPECT_EQ(Value->GetString(), csp::common::String { "RoundtripValue" });
+
+        AWAIT(SpaceSystem, ExitSpace);
+    }
+
+    DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
