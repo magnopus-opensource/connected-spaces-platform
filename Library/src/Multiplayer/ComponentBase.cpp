@@ -26,6 +26,7 @@
 #include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
+#include <algorithm>
 #include <fmt/format.h>
 
 namespace csp::multiplayer
@@ -61,6 +62,8 @@ ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSyst
 ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema.TypeId, LogSystem, Parent)
 {
+    this->CachedSchema = std::make_unique<ComponentSchema>(Schema);
+
     for (const auto& Property : Schema.Properties)
     {
         Properties[Property.Key] = Property.DefaultValue;
@@ -81,6 +84,46 @@ void ComponentBase::SetId(uint16_t NewId) { this->Id = NewId; }
 ComponentType ComponentBase::GetComponentType() const { return static_cast<ComponentType>(Type); }
 
 uint64_t ComponentBase::GetTypeId() const { return Type; }
+
+namespace
+{
+    const ComponentProperty* FindSchemaProperty(const ComponentSchema& Schema, uint16_t Key)
+    {
+        const auto It
+            = std::find_if(Schema.Properties.begin(), Schema.Properties.end(), [Key](const ComponentProperty& Prop) { return Prop.Key == Key; });
+        return It != Schema.Properties.end() ? &*It : nullptr;
+    }
+} // namespace
+
+const csp::common::ReplicatedValue* ComponentBase::GetSchemaProperty(uint16_t Key) const
+{
+    if (!CachedSchema)
+    {
+        return nullptr;
+    }
+
+    if (!FindSchemaProperty(*CachedSchema, Key))
+    {
+        return nullptr;
+    }
+
+    const auto& Value = GetProperty(Key);
+    return Value != InvalidValue ? &Value : nullptr;
+}
+
+void ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)
+{
+    if (!CachedSchema)
+    {
+        return;
+    }
+
+    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key);
+        Property && Value.GetReplicatedValueType() == Property->DefaultValue.GetReplicatedValueType())
+    {
+        SetProperty(Key, Value);
+    }
+}
 
 const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
