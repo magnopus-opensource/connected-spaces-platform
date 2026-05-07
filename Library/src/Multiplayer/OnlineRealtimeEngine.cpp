@@ -169,6 +169,8 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EntityFetchCancellationToken(std::make_shared<std::atomic<bool>>(false))
+    , EntityFetchBodyGuard(std::make_shared<std::mutex>())
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
     , PendingOutgoingUpdateUniqueSet(nullptr)
@@ -196,6 +198,8 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EntityFetchCancellationToken(std::make_shared<std::atomic<bool>>(false))
+    , EntityFetchBodyGuard(std::make_shared<std::mutex>())
     , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
@@ -214,6 +218,14 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
+    EntityFetchCancellationToken->store(true);
+    {
+        // This attempts to acquire the guard mutex. If the CreateRetrieveAllEntitiesCallback callback body is currently executing (the cancellation
+        // token was valid), it holds this mutex. If so the destructor blocks here until that callback finishes and then releases it. Once the
+        // destructor acquires the lock, it immediately releases it and continues.
+        std::scoped_lock lock(*EntityFetchBodyGuard);
+    }
+
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
@@ -716,9 +728,24 @@ void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::func
 std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
     int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, FetchCompleteCallback, Cancelled = EntityFetchCancellationToken, Guard = EntityFetchBodyGuard](
+                                       const signalr::value& Result, std::exception_ptr Except)
     {
+        // Check if the OnlineRealtimeEngine has been destroyed while we were waiting for the paged entities to come back. This can happen for example
+        // if the user has entered a large Space with many entities and exits the Space (destroying the OnlineRealtimeEngine) before processing is
+        // completed. The guard is used to stop a race condition whereby the OnlineRealtimeEngine dtor is called after the SignalR thread executing
+        // this callback has checked the cancellation token, but BEFORE it has finished executing the callback.
+        std::scoped_lock lock(*Guard);
+        if (Cancelled->load())
+        {
+            return;
+        }
+
         HandleException(Except, "Failed to retrieve paged entities.");
+        if (Except)
+        {
+            return;
+        }
 
         const auto& Results = Result.as_array();
         const auto& Items = Results[0].as_array();
@@ -798,6 +825,9 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
     const csp::common::String&, csp::common::EntityFetchStartedCallback FetchStartedCallback)
 {
+    // Reset the cancellation token in case this function is called multiple times during the lifespan of the OnlineRealtimeEngine (eg multiple Space
+    // entries)
+    EntityFetchCancellationToken->store(false);
     this->RetrieveAllEntities(EntityFetchCompleteCallback);
     FetchStartedCallback();
 }
