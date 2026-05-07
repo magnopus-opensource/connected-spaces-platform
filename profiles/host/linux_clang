@@ -11,5 +11,5 @@ cmake/3.31.6
 ninja/1.11.1
 
 [conf]
-tools.build:compiler_executables={"c":"/usr/bin/clang-18","cpp":"/usr/bin/clang++-18"}
+tools.build:compiler_executables={"c":"/usr/bin/clang","cpp":"/usr/bin/clang++"}
 tools.cmake.cmaketoolchain:generator=Ninja
