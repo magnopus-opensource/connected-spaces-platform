@@ -16,7 +16,7 @@
 #include "CSP/Systems/ECommerce/ECommerce.h"
 
 #include "Services/ApiBase/ApiBase.h"
-#include "Services/aggregationservice/Dto.h"
+#include "Services/AggregationService/Dto.h"
 
 #include <regex>
 

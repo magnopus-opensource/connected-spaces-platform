@@ -30,14 +30,14 @@
 namespace Utils
 {
 
-std::string Utils::GetUniqueString()
+std::string GetUniqueString()
 {
     const auto uuid = sole::uuid4();
     return uuid.str();
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
+csp::systems::Profile CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
     csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ /* = None */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();

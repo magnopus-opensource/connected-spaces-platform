@@ -42,6 +42,9 @@ target_include_directories(csp-quickjs
 target_compile_definitions(csp-quickjs
   PRIVATE
     _HAS_EXCEPTIONS=0
+    # Needed for glibc to expose sighandler_t in <signal.h>
+    $<$<COMPILE_LANG_AND_ID:C,GNU>:_GNU_SOURCE>
+    $<$<COMPILE_LANG_AND_ID:C,Clang>:_GNU_SOURCE>
   PUBLIC
     JS_STRICT_NAN_BOXING
 )

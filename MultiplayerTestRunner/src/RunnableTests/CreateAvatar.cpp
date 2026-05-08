@@ -24,6 +24,7 @@
 #include <CSP/Systems/SystemsManager.h>
 #include <CSP/Systems/Users/UserSystem.h>
 #include <future>
+#include <thread>
 
 namespace CreateAvatar
 {

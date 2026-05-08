@@ -10,7 +10,7 @@ target_sources(MultiplayerTestRunner
         src/CLIArgs.h
         src/LoginRAII.cpp
         src/LoginRAII.h
-        src/main.cpp
+        src/Main.cpp
         src/SpaceRAII.cpp
         src/SpaceRAII.h
         src/Utils.cpp
@@ -64,6 +64,11 @@ endif()
 
 target_compile_options(MultiplayerTestRunner PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+
+    $<$<CXX_COMPILER_ID:GNU>:
+      -Wno-error=changes-meaning
+      -fpermissive
+    >
 )
 
 set_target_properties(MultiplayerTestRunner PROPERTIES
