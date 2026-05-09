@@ -216,8 +216,6 @@ target_compile_options(csp-lib
 	    -Wno-missing-field-initializers
 	    # Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
 	    -Wno-ignored-qualifiers
-        # Real big deal, REAL BUG in our custom list types, memcopying virtual objects :(
-        -Wno-nontrivial-memcall
     >
 
     $<$<CXX_COMPILER_ID:GNU>:
