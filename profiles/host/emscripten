@@ -22,11 +22,3 @@ tools.build:cxxflags=["-pthread","-fwasm-exceptions"]
 tools.build:cflags=["-pthread","-fwasm-exceptions"]
 tools.build:exelinkflags=["-pthread"]
 tools.build:compiler_executables={'c':'{{ emsdk }}/upstream/emscripten/emcc{{ ext }}', 'cpp':'{{ emsdk }}/upstream/emscripten/em++{{ ext }}'}
-
-[buildenv]
-CC=emcc
-CXX=em++
-AR=emar
-NM=emnm
-RANLIB=emranlib
-STRIP=emstrip
