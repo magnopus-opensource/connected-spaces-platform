@@ -1,18 +1,24 @@
+# Use templating to get the EMSDK location and use it for compiler_executables.
+# We need to run a .bat on windows, but there should be no extension needed on unix (shebangs)
+# The EMSDK environment variable is set when you activate an emscripten install, or source the emsdk_env scripts.
+{% set emsdk = os.getenv("EMSDK") %}
+{% set ext = ".bat" if platform.system() == "Windows" else "" %}
+
 [settings]
 arch=wasm
 build_type=Release
 compiler=emcc
 compiler.cppstd=17
 compiler.libcxx=libc++
-compiler.version=3.1.50
+compiler.version=5.0.2
 os=Emscripten
 
 [tool_requires]
 ninja/1.11.1
-emsdk/3.1.50
 
 [conf]
 tools.cmake.cmaketoolchain:generator=Ninja
 tools.build:cxxflags=["-pthread","-fwasm-exceptions"]
 tools.build:cflags=["-pthread","-fwasm-exceptions"]
 tools.build:exelinkflags=["-pthread"]
+tools.build:compiler_executables={'c':'{{ emsdk }}/upstream/emscripten/emcc{{ ext }}', 'cpp':'{{ emsdk }}/upstream/emscripten/em++{{ ext }}'}

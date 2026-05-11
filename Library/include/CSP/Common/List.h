@@ -276,7 +276,16 @@ public:
         }
 
         auto After = CurrentSize - Index;
+// This is a real problem, don't ignore this, it needs fixed. (Or this entire type needs deleted)
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma clang diagnostic ignored "-Wnontrivial-memcall"
+#endif
         std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
         ++CurrentSize;
 
         T* ObjectPtr = &ObjectArray[Index];
