@@ -256,6 +256,7 @@ size_t Variant::GetSizeOfInternalValue() { return sizeof(InternalValue); }
 // This is a real problem, don't ignore this, it needs fixed. (Or this entire type needs deleted)
 #if defined(__clang__)
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
 #endif
 Variant::InternalValue::InternalValue() { memset(this, 0x0, sizeof(InternalValue)); }
