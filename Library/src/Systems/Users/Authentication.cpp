@@ -41,11 +41,14 @@ namespace csp::systems
 
 LoginStateResult::LoginStateResult()
     : State(nullptr)
+    , StateMutex(nullptr)
 {
 }
 
-LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
-    : State(InStatePtr)
+// TODO: Have this take the CurrentLoginState and Mutex as separate parameters.
+LoginStateResult::LoginStateResult(std::shared_ptr<csp::common::LoginState> LoginState, std::shared_ptr<std::mutex> Mutex)
+    : State(LoginState)
+    , StateMutex(Mutex)
 {
 }
 
@@ -88,11 +91,21 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
         if (State)
         {
-            State->State = ELoginState::LoggedIn;
-            State->AccessToken = AuthResponse->GetAccessToken();
-            State->RefreshToken = AuthResponse->GetRefreshToken();
-            State->UserId = AuthResponse->GetUserId();
-            State->DeviceId = AuthResponse->GetDeviceId();
+            //std::scoped_lock lock(*StateMutex);
+
+            csp::common::LoginState NewState(*State);
+
+            //State->State = ELoginState::LoggedIn;
+            //State->AccessToken = AuthResponse->GetAccessToken();
+            //State->RefreshToken = AuthResponse->GetRefreshToken();
+            //State->UserId = AuthResponse->GetUserId();
+            //State->DeviceId = AuthResponse->GetDeviceId();
+
+            NewState.State = ELoginState::LoggedIn;
+            NewState.AccessToken = AuthResponse->GetAccessToken();
+            NewState.RefreshToken = AuthResponse->GetRefreshToken();
+            NewState.UserId = AuthResponse->GetUserId();
+            NewState.DeviceId = AuthResponse->GetDeviceId();
 
             if (AuthResponse->HasDefaultSettings())
             {
@@ -102,7 +115,8 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                     const auto& UserSettingsDto = DefaultSettings->GetDefaultUserSettings();
                     for (const auto& SettingDto : UserSettingsDto)
                     {
-                        State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
+                        //State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
+                        NewState.DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
                     }
                 }
                 if (DefaultSettings->HasDefaultApplicationSettings())
@@ -110,7 +124,8 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                     const auto& ApplicationSettingsDto = DefaultSettings->GetDefaultApplicationSettings();
                     for (const auto& SettingDto : ApplicationSettingsDto)
                     {
-                        State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
+                        //State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
+                        NewState.DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
                     }
                 }
             }
@@ -141,20 +156,24 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                 return;
             }
 
-            State->SetAccessTokenRefreshTime(RefreshTime);
+            //State->SetAccessTokenRefreshTime(RefreshTime);
+            NewState.SetAccessTokenRefreshTime(RefreshTime);
+
+            *State = NewState;
 
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
             LoginEvent->AddString("UserId", AuthResponse->GetUserId());
             events::EventSystem::Get().EnqueueEvent(LoginEvent);
-
-            SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
         }
+
+        SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
     }
     else
     {
         if (State)
         {
+            std::scoped_lock lock(*StateMutex);
             web::HttpAuth::SetAccessToken("", "", "", "");
 
             State->State = ELoginState::Error;
@@ -168,12 +187,14 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
 LogoutResult::LogoutResult()
     : State(nullptr)
+    , StateMutex(nullptr)
 {
 }
 
-LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
-    : NullResult(InStatePtr)
-    , State(InStatePtr)
+LogoutResult::LogoutResult(std::shared_ptr<csp::common::LoginState> LoginState, std::shared_ptr<std::mutex> Mutex)
+    : NullResult()
+    , State(LoginState)
+    , StateMutex(Mutex)
 {
 }
 
@@ -185,11 +206,17 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::LoggedOut;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            //std::scoped_lock lock(*StateMutex);
+
+            csp::common::LoginState NewState(*State);
+
+.           NewState.State = ELoginState::LoggedOut;
+            NewState.AccessToken = "InvalidAccessToken";
+            NewState.RefreshToken = "InvalidRefreshToken";
+            NewState.UserId = "InvalidUserId";
+            NewState.DeviceId = "InvalidDeviceId";
+
+            *State = NewState;
 
             web::HttpAuth::SetAccessToken("", "", "", "");
 
@@ -202,11 +229,17 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            //std::scoped_lock lock(*StateMutex);
+
+            csp::common::LoginState NewState(*State);
+
+            NewState.State = ELoginState::Error;
+            NewState.AccessToken = "InvalidAccessToken";
+            NewState.RefreshToken = "InvalidRefreshToken";
+            NewState.UserId = "InvalidUserId";
+            NewState.DeviceId = "InvalidDeviceId";
+
+            *State = NewState;
 
             web::HttpAuth::SetAccessToken("", "", "", "");
         }

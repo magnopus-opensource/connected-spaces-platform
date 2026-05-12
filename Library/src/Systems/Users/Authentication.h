@@ -19,8 +19,17 @@
 #include "CSP/Common/LoginState.h"
 #include "CSP/Systems/Users/Authentication.h"
 
+#include <memory>
+#include <mutex>
+
 namespace csp::systems
 {
+
+//struct LoginStateLockable
+//{
+//    std::shared_ptr<csp::common::LoginState> State;
+//    std::shared_ptr<std::mutex> Mutex;
+//};
 
 /// @brief Result structure for a logout state request.
 class CSP_API LogoutResult : public NullResult
@@ -34,11 +43,12 @@ class CSP_API LogoutResult : public NullResult
 
 private:
     LogoutResult();
-    LogoutResult(csp::common::LoginState* InStatePtr);
+    LogoutResult(std::shared_ptr<csp::common::LoginState> LoginState, std::shared_ptr<std::mutex> Mutex);
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::LoginState* State;
+    std::shared_ptr<csp::common::LoginState> State;
+    std::shared_ptr<std::mutex> StateMutex;
 };
 
 /// @brief Result url for a tier checkout session request

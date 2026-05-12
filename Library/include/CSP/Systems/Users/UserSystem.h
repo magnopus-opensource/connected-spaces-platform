@@ -29,6 +29,10 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
+CSP_START_IGNORE
+#include <memory>
+CSP_END_IGNORE
+
 namespace csp::web
 {
 
@@ -49,7 +53,7 @@ CSP_START_IGNORE
 class AuthContext : public csp::common::IAuthContext
 {
 public:
-    AuthContext(csp::services::ApiBase* AuthenticationAPI, csp::common::LoginState& LoginState);
+    AuthContext(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> LoginState, std::shared_ptr<std::mutex> Mutex);
 
     const csp::common::LoginState& GetLoginState() const override;
 
@@ -59,7 +63,8 @@ public:
 
 private:
     csp::services::ApiBase* AuthenticationAPI;
-    csp::common::LoginState* LoginState;
+    std::shared_ptr<csp::common::LoginState> LoginState;
+    std::shared_ptr<std::mutex> LoginStateMutex;
 };
 CSP_END_IGNORE
 
@@ -323,7 +328,12 @@ private:
     csp::services::ApiBase* PingAPI;
     csp::services::ApiBase* StripeAPI;
 
-    csp::common::LoginState CurrentLoginState;
+    // Both LoginStateResult and LogoutResult OnResponse methods write directly to CurrentLoginState, while AuthContext::RefreshToken() reads from it.
+    // A mutex is required to ensure synchronisation between these operations and avoid race conditions.
+    // All writes to the LoginState happen under LoginStateMutex lock.
+    // shared_ptr ownership ensures the LoginState and mutex outlive any in-flight response handlers that hold copies.
+    std::shared_ptr<std::mutex> LoginStateMutex;
+    std::shared_ptr<csp::common::LoginState> CurrentLoginState;
 
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 

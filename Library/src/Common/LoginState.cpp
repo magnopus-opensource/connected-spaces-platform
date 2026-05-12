@@ -21,9 +21,10 @@
 namespace csp::common
 {
 
-LoginState::LoginState()
+LoginState::LoginState(std::shared_ptr<std::mutex> Mutex)
     : State(ELoginState::LoggedOut)
     , AccessTokenRefreshTime(new DateTime())
+    , LoginStateMutex { std::move(Mutex) }
 {
 }
 
@@ -44,6 +45,8 @@ void LoginState::SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateT
 
 void LoginState::CopyStateFrom(const LoginState& OtherState)
 {
+    std::scoped_lock lock(*LoginStateMutex);
+
     State = OtherState.State;
     AccessToken = OtherState.AccessToken;
     AccessTokenExpiryLength = OtherState.AccessTokenExpiryLength;

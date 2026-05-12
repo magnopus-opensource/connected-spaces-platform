@@ -21,16 +21,21 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
+#include <memory>
+#include <mutex>
+
 namespace csp::common
 {
 
 class DateTime;
 
 /// @brief Data structure representing the user login state, including detection of access token expiry
+/// @inv All writes to the LoginState happen under a mutex lock. Both LoginState and the mutex are owned by the UserSystem, and any access
+/// to the LoginState object happens while the lock on the mutex is in place.
 class CSP_API LoginState
 {
 public:
-    LoginState();
+    LoginState(std::shared_ptr<std::mutex> Mutex);
     ~LoginState();
 
     LoginState(const LoginState& OtherState);
@@ -58,8 +63,9 @@ public:
     CSP_NO_EXPORT void SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateTime);
 
 private:
-    void CopyStateFrom(const LoginState& OtherState);
+    CSP_NO_EXPORT void CopyStateFrom(const LoginState& OtherState);
 
     csp::common::DateTime* AccessTokenRefreshTime;
+    std::shared_ptr<std::mutex> LoginStateMutex;
 };
 } // namespace csp::common
