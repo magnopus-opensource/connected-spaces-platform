@@ -17,6 +17,8 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
@@ -68,7 +70,7 @@ std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOp
 {
     auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
     Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().UserId);
+    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().GetUserId());
     Request->SetNewUniqueName(NewName);
     Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
     Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
@@ -134,7 +136,7 @@ async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsPost({ GroupInfo }, ResponseHandler);
 
@@ -312,8 +314,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes.Size() < 1)
                     {
-                        this->LogSystem->LogMsg(
-                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope.");
+                        this->LogSystem->LogMsg(csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
@@ -321,8 +322,9 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes.Size() > 1)
                     {
-                        this->LogSystem->LogMsg(
-                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Multiple scopes found. This version of CSP only supports spaces that have only a single global scope.");
+                        this->LogSystem->LogMsg(csp::common::LogLevel::Error,
+                            "SpaceSystem::RegisterScopesInSpace: Multiple scopes found. This version of CSP only supports spaces that have only a "
+                            "single global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space has multiple scopes", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
@@ -330,8 +332,8 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes[0].PubSubType != PubSubModelType::Global)
                     {
-                        this->LogSystem->LogMsg(csp::common::LogLevel::Error,
-                            "SpaceSystem::RegisterScopesInSpace: Space doesn't contain a global scope.");
+                        this->LogSystem->LogMsg(
+                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't contain a global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space doesn't contain a global scope.", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
@@ -339,8 +341,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     // No need to check validity as the above conditions guarantee a valid iterator.
                     auto DefaultScopeIt
-                        = std::find_if(Scopes.begin(), Scopes.end(),
-                        [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
+                        = std::find_if(Scopes.begin(), Scopes.end(), [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
 
                     const bool ManagedLeaderElection = DefaultScopeIt->ManagedLeaderElection;
 
@@ -367,7 +368,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                                 return;
                             }
 
-                             const ScopeLeader& Leader = LeaderResult.GetScopeLeader();
+                            const ScopeLeader& Leader = LeaderResult.GetScopeLeader();
 
                             std::optional<uint64_t> LeaderUserId
                                 = (Leader.ScopeClientId != 0) ? std::make_optional<uint64_t>(Leader.ScopeClientId) : std::nullopt;
@@ -392,7 +393,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
         /* Once we have permissions to discover a space, attempt to enter it */
         const auto& SpaceToJoin = GetSpaceResult.GetSpace();
 
-        const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+        const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
         const bool JoiningSpaceRequiresInvite = HasFlag(SpaceToJoin.Attributes, SpaceAttributes::RequiresInvite);
 
         // The user is known to the space if they are a user, moderator or creator. This is important if the space requires an invite.
@@ -419,8 +420,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
             SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
-                .then(async::inline_scheduler(),
-                    [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
+                .then(async::inline_scheduler(), [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
                     { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
         }
         else
@@ -540,34 +540,35 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
               .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
               .then(async::inline_scheduler(), this->RegisterScopesInSpace(RealtimeEngine))
         : async::spawn(async::inline_scheduler(),
-            [SpaceId]()
-            {
-                // Offline, build a local space result
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
+              [SpaceId]()
+              {
+                  // Offline, build a local space result
+                  CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
 
-                Space LocalSpace {};
+                  Space LocalSpace {};
 
-                /* Depending on how you think about this, you might think this is a bit of a bug.
-                   Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
-                   One might think we should be using that. The reason we don't is simply because we don't
-                   store that ID in the system currently, and it dosen't really matter currently.
-                   However this may be an improvement we want to make, although consider that it would get in the way
-                   of any fully-offline flows we might to add. */
-                csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
+                  /* Depending on how you think about this, you might think this is a bit of a bug.
+                     Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
+                     One might think we should be using that. The reason we don't is simply because we don't
+                     store that ID in the system currently, and it dosen't really matter currently.
+                     However this may be an improvement we want to make, although consider that it would get in the way
+                     of any fully-offline flows we might to add. */
+                  csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
 
-                LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
-                LocalSpace.Name = "Offline Space";
-                LocalSpace.Id = SpaceId;
-                LocalSpace.CreatedBy = LocalUser;
-                LocalSpace.OwnerId = LocalUser;
-                LocalSpace.UserIds = { LocalUser };
-                LocalSpace.ModeratorIds = { LocalUser };
+                  LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
+                  LocalSpace.Name = "Offline Space";
+                  LocalSpace.Id = SpaceId;
+                  LocalSpace.CreatedBy = LocalUser;
+                  LocalSpace.OwnerId = LocalUser;
+                  LocalSpace.UserIds = { LocalUser };
+                  LocalSpace.ModeratorIds = { LocalUser };
 
-                SpaceResult LocalSpaceResult {};
-                LocalSpaceResult.SetSpace(LocalSpace);
-                LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-                return LocalSpaceResult;
-            }).then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace));
+                  SpaceResult LocalSpaceResult {};
+                  LocalSpaceResult.SetSpace(LocalSpace);
+                  LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                  return LocalSpaceResult;
+              })
+              .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace));
 
     // Whether we've done an upstream online connection or just a local one, finish entering the space
     UpstreamConnectionTask
@@ -842,12 +843,10 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 {
-    const String InUserId = UserSystem->GetLoginState().UserId;
-
     csp::services::ResponseHandlerPtr ResponseHandler
         = GroupAPI->CreateHandler<SpacesResultCallback, SpacesResult, void, csp::services::DtoArray<chs::GroupDto>>(Callback, nullptr);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->usersUserIdGroupsGet({ InUserId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->usersUserIdGroupsGet({ UserSystem->GetLoginState().GetUserId() }, ResponseHandler);
 }
 
 void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, const Optional<bool>& InIsArchived,
@@ -963,7 +962,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdGet({ SpaceId }, ResponseHandler);
 
@@ -1018,7 +1017,7 @@ async::task<NullResult> SpaceSystem::BulkInviteToSpace(const csp::common::String
     auto SignupUrlParam = !InviteUsers.SignupUrl.IsEmpty() ? (InviteUsers.SignupUrl) : std::optional<String>(std::nullopt);
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        [](const NullResult&) {}, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+        [](const NullResult&) { }, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesBulkPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites }, ResponseHandler);
@@ -1084,7 +1083,7 @@ async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, 
     const csp::common::String& SpaceCode = Result.GetSpaceCode();
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->group_codesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
 
@@ -1877,8 +1876,9 @@ void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceG
             return;
         }
 
+        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
+
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
-        const auto& UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
         // First check if the user is the owner
         bool UserCanAccessSpaceDetails = !(bool)(RefreshedSpace.Attributes & SpaceAttributes::RequiresInvite) || RefreshedSpace.OwnerId == UserId;
@@ -1959,7 +1959,8 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, con
         }
 
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
-        const auto& UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+
+        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
 
         // First check if the user is the owner
         bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
@@ -2023,7 +2024,8 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
         }
 
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
-        const auto& UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+
+        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
 
         // First check if the user is the owner
         bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;

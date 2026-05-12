@@ -16,6 +16,8 @@
 
 #include "CSP/Systems/Users/Authentication.h"
 
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "CSP/Common/Settings.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -44,8 +46,8 @@ LoginStateResult::LoginStateResult()
 {
 }
 
-LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
-    : State(InStatePtr)
+LoginStateResult::LoginStateResult(csp::common::LoginState* LoginState)
+    : State(LoginState)
 {
 }
 
@@ -72,7 +74,7 @@ namespace
         SettingsCollection.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(SettingsCollection.Settings) {};
         return SettingsCollection;
     }
-}
+} // namespace
 
 void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
@@ -88,11 +90,13 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
         if (State)
         {
-            State->State = ELoginState::LoggedIn;
-            State->AccessToken = AuthResponse->GetAccessToken();
-            State->RefreshToken = AuthResponse->GetRefreshToken();
-            State->UserId = AuthResponse->GetUserId();
-            State->DeviceId = AuthResponse->GetDeviceId();
+            auto Data = LoginStateData();
+
+            Data.State = ELoginState::LoggedIn;
+            Data.AccessToken = AuthResponse->GetAccessToken();
+            Data.RefreshToken = AuthResponse->GetRefreshToken();
+            Data.UserId = AuthResponse->GetUserId();
+            Data.DeviceId = AuthResponse->GetDeviceId();
 
             if (AuthResponse->HasDefaultSettings())
             {
@@ -102,7 +106,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                     const auto& UserSettingsDto = DefaultSettings->GetDefaultUserSettings();
                     for (const auto& SettingDto : UserSettingsDto)
                     {
-                        State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
+                        Data.DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
                     }
                 }
                 if (DefaultSettings->HasDefaultApplicationSettings())
@@ -110,7 +114,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                     const auto& ApplicationSettingsDto = DefaultSettings->GetDefaultApplicationSettings();
                     for (const auto& SettingDto : ApplicationSettingsDto)
                     {
-                        State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
+                        Data.DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
                     }
                 }
             }
@@ -141,15 +145,17 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                 return;
             }
 
-            State->SetAccessTokenRefreshTime(RefreshTime);
+            Data.SetAccessTokenRefreshTime(RefreshTime);
+
+            State->SetLoginStateData(Data);
 
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
             LoginEvent->AddString("UserId", AuthResponse->GetUserId());
             events::EventSystem::Get().EnqueueEvent(LoginEvent);
-
-            SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
         }
+
+        SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
     }
     else
     {
@@ -157,11 +163,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
         {
             web::HttpAuth::SetAccessToken("", "", "", "");
 
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ResetResponseLoginState(ELoginState::Error);
         }
     }
 }
@@ -171,9 +173,9 @@ LogoutResult::LogoutResult()
 {
 }
 
-LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
-    : NullResult(InStatePtr)
-    , State(InStatePtr)
+LogoutResult::LogoutResult(csp::common::LoginState* LoginState)
+    : NullResult()
+    , State(LoginState)
 {
 }
 
@@ -185,11 +187,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::LoggedOut;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ResetResponseLoginState(ELoginState::LoggedOut);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
 
@@ -202,11 +200,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ResetResponseLoginState(ELoginState::Error);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
         }

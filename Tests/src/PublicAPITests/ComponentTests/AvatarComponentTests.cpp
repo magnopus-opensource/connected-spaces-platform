@@ -81,7 +81,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
@@ -218,7 +219,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 

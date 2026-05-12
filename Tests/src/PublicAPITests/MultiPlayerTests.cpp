@@ -131,7 +131,7 @@ void OnConnect(OnlineRealtimeEngine* RealtimeEngine)
 
     const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
+    RealtimeEngine->CreateAvatar(UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
         LocomotionModel::Grounded,
         [RealtimeEngine](SpaceEntity* NewAvatar)
         {
@@ -624,7 +624,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.UserId, UserTransform, IsVisible,
+    auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.GetUserId(), UserTransform, IsVisible,
         UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
 
@@ -1682,7 +1682,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptedTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.UserId, UserTransform, IsVisible,
+    auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.GetUserId(), UserTransform, IsVisible,
         UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
 

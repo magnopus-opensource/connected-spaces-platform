@@ -16,6 +16,8 @@
 
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -125,7 +127,7 @@ namespace SpaceSystemHelpers
         DefaultGroupInfo->SetGroupType("Space");
         DefaultGroupInfo->SetAutoModerator(false);
         const auto* UserSystem = SystemsManager::Get().GetUserSystem();
-        DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
+        DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().GetUserId());
 
         return DefaultGroupInfo;
     }

@@ -15,61 +15,162 @@
  */
 
 #include "CSP/Common/LoginState.h"
-
-#include "Common/DateTime.h"
+#include "Common/LoginStateData.h"
 
 namespace csp::common
 {
 
 LoginState::LoginState()
-    : State(ELoginState::LoggedOut)
-    , AccessTokenRefreshTime(new DateTime())
+    : Data(std::make_unique<LoginStateData>())
 {
 }
+
+LoginState::~LoginState() { }
 
 LoginState::LoginState(const LoginState& OtherState) { CopyStateFrom(OtherState); }
 
 LoginState& LoginState::operator=(const LoginState& OtherState)
 {
-    CopyStateFrom(OtherState);
+    if (this != &OtherState)
+    {
+        CopyStateFrom(OtherState);
+    }
 
     return *this;
 }
 
-void LoginState::SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateTime)
+LoginStateData LoginState::GetSnapshot() const
 {
-    // Why this data member is a pointer is beyond me, but it's too bedded in to change right this second ... invoke the copy assignment operator.
-    *AccessTokenRefreshTime = NewDateTime;
+    std::scoped_lock lock(LoginStateMutex);
+
+    return *Data;
 }
 
-void LoginState::CopyStateFrom(const LoginState& OtherState)
+void LoginState::SetLoginStateData(LoginStateData NewData)
 {
-    State = OtherState.State;
-    AccessToken = OtherState.AccessToken;
-    AccessTokenExpiryLength = OtherState.AccessTokenExpiryLength;
-    RefreshToken = OtherState.RefreshToken;
-    RefreshTokenExpiryLength = OtherState.RefreshTokenExpiryLength;
-    UserId = OtherState.UserId;
-    DeviceId = OtherState.DeviceId;
-    DefaultApplicationSettings = OtherState.DefaultApplicationSettings;
-    DefaultSettings = OtherState.DefaultSettings;
+    std::scoped_lock lock(LoginStateMutex);
 
-    // Must reallocate the access token when copying otherwise destructor of
-    // copied state will delete the original memory pointer potentially causing corruption
-    AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
+    *Data = std::move(NewData);
 }
 
-LoginState::~LoginState() { delete (AccessTokenRefreshTime); }
+bool LoginState::TrySetLoginRequested()
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    if (Data->State == csp::common::ELoginState::LoggedOut || Data->State == csp::common::ELoginState::Error)
+    {
+        Data->State = csp::common::ELoginState::LoginRequested;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool LoginState::TrySetLogoutRequested()
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    if (Data->State == csp::common::ELoginState::LoggedIn)
+    {
+        Data->State = csp::common::ELoginState::LogoutRequested;
+
+        return true;
+    }
+
+    return false;
+}
+
+void LoginState::ResetResponseLoginState(ELoginState LoginState)
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    Data = std::make_unique<LoginStateData>();
+    Data->State = LoginState;
+}
+
+void LoginState::UpdateAccessTokenExpiry(csp::common::String AccessTokenExpiryLength)
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    Data->AccessTokenExpiryLength = AccessTokenExpiryLength;
+}
+
+void LoginState::UpdateRefreshTokenExpiry(csp::common::String RefreshTokenExpiryLength)
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    Data->RefreshTokenExpiryLength = RefreshTokenExpiryLength;
+}
 
 bool LoginState::RefreshNeeded() const
 {
-    if (AccessTokenRefreshTime->IsEpoch())
+    std::scoped_lock lock(LoginStateMutex);
+
+    if (Data->GetAccessTokenRefreshTime().IsEpoch())
     {
         return false;
     }
 
     const auto CurrentTime = DateTime::UtcTimeNow();
 
-    return CurrentTime >= (*AccessTokenRefreshTime);
+    return CurrentTime >= (Data->GetAccessTokenRefreshTime());
 }
+
+csp::common::String LoginState::GetUserId() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->UserId;
+}
+
+csp::common::String LoginState::GetDeviceId() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->DeviceId;
+}
+
+csp::common::String LoginState::GetAccessToken() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->AccessToken;
+}
+
+csp::common::String LoginState::GetRefreshToken() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->RefreshToken;
+}
+
+csp::common::ELoginState LoginState::GetLoginStateValue() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->State;
+}
+
+csp::common::List<csp::common::ApplicationSettings> LoginState::GetDefaultApplicationSettings() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->DefaultApplicationSettings;
+}
+
+csp::common::List<csp::common::SettingsCollection> LoginState::GetDefaultSettings() const
+{
+    std::scoped_lock lock(LoginStateMutex);
+
+    return Data->DefaultSettings;
+}
+
+void LoginState::CopyStateFrom(const LoginState& OtherState)
+{
+    std::scoped_lock lock(LoginStateMutex, OtherState.LoginStateMutex);
+
+    Data = std::make_unique<LoginStateData>(*OtherState.Data);
+}
+
 } // namespace csp::common

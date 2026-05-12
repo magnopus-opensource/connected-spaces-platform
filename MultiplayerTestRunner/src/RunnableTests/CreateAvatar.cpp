@@ -53,9 +53,8 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
 
-    const auto LoginState = UserSystem.GetLoginState();
-
-    RealtimeEngine.CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
+    RealtimeEngine.CreateAvatar(UserName, UserSystem.GetLoginState().GetUserId(), UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode,
         LocomotionModel::Grounded, [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
     csp::multiplayer::SpaceEntity* CreatedAvatar = ResultFuture.get();

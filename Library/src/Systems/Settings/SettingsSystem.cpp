@@ -18,10 +18,12 @@
 
 #include "CSP/Common/Array.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/LoginState.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
+#include "Common/LoginStateData.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -29,8 +31,8 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include <iostream>
-#include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
+#include <rapidjson/rapidjson.h>
 #include <sstream>
 
 constexpr int MAX_RECENT_SPACES = 50;
@@ -63,8 +65,6 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
     auto& SystemsManager = SystemsManager::Get();
     const auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const auto& UserId = UserSystem->GetLoginState().UserId;
-
     auto InSettings = std::make_shared<chs::SettingsDto>();
     std::map<String, String> NewSettings;
     NewSettings.clear();
@@ -86,7 +86,8 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextPut({ UserId, InContext, InSettings }, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)
+        ->usersUserIdSettingsContextPut({ UserSystem->GetLoginState().GetUserId(), InContext, InSettings }, SettingsResponseHandler);
 }
 
 void SettingsSystem::GetSettingValue(const String& InContext, const String& InKey, StringResultCallback Callback) const
@@ -94,8 +95,6 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
     auto& SystemsManager = SystemsManager::Get();
     const auto* UserSystem = SystemsManager.GetUserSystem();
     std::vector<String> MyKey = { InKey };
-
-    const auto& UserId = UserSystem->GetLoginState().UserId;
 
     SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result)
     {
@@ -134,7 +133,8 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextGet({ UserId, InContext, MyKey }, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)
+        ->usersUserIdSettingsContextGet({ UserSystem->GetLoginState().GetUserId(), InContext, MyKey }, SettingsResponseHandler);
 }
 
 void SettingsSystem::SetNDAStatus(bool InValue, NullResultCallback Callback)
@@ -418,8 +418,8 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
     };
 
     auto* UserSystem = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
-    GetAvatarPortraitAssetCollection(UserId, AvatarPortraitAssetCollCallback);
+
+    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), AvatarPortraitAssetCollCallback);
 }
 
 void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback)
@@ -539,8 +539,8 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
     };
 
     auto* UserSystem = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
-    GetAvatarPortraitAssetCollection(UserId, ThumbnailAssetCollCallback);
+
+    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), ThumbnailAssetCollCallback);
 }
 
 void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSource, NullResultCallback Callback)
@@ -548,8 +548,6 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
     auto& SystemsManager = SystemsManager::Get();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* UserSystem = SystemsManager.GetUserSystem();
-
-    const auto& UserId = UserSystem->GetLoginState().UserId;
 
     AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
     {
@@ -595,7 +593,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
                 }
             };
 
-            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserId;
+            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId();
             AssetSystem->CreateAsset(PortraitAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
         }
         else
@@ -608,7 +606,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
         }
     };
 
-    const auto AvatarPortraitAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId;
+    const auto AvatarPortraitAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserSystem->GetLoginState().GetUserId();
 
     AssetSystem->CreateAssetCollection(
         nullptr, nullptr, AvatarPortraitAssetCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollCallback);
@@ -619,8 +617,6 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
     auto& SystemsManager = SystemsManager::Get();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* UserSystem = SystemsManager.GetUserSystem();
-
-    const auto& UserId = UserSystem->GetLoginState().UserId;
 
     AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
     {
@@ -656,8 +652,8 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 
                     Asset AvatarPortraitAsset = CreateAssetResult.GetAsset();
 
-                    AvatarPortraitAsset.FileName
-                        = AVATAR_PORTRAIT_ASSET_NAME + UserId + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
+                    AvatarPortraitAsset.FileName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId()
+                        + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
                     AvatarPortraitAsset.MimeType = ImageDataSource.GetMimeType();
                     AssetSystem->UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
                 }
@@ -671,7 +667,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
                 }
             };
 
-            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserId;
+            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId();
             AssetSystem->CreateAsset(PortraitAvatarAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
         }
         else
@@ -684,7 +680,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
         }
     };
 
-    const String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId;
+    const String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserSystem->GetLoginState().GetUserId();
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this space
     AssetSystem->CreateAssetCollection(
@@ -821,8 +817,8 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
     };
 
     auto* UserSystem = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
-    GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
+
+    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), PortraitAvatarAssetCollCallback);
 }
 
 void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, bool InAvatarVisible, NullResultCallback Callback)
@@ -874,7 +870,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         rapidjson::ParseResult ok = Json.Parse(Value.c_str());
         if (!ok)
         {
-            CSP_LOG_ERROR_FORMAT("Failed to parse avatar info JSON data. Error: %s, Offset: %zu", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            CSP_LOG_ERROR_FORMAT(
+                "Failed to parse avatar info JSON data. Error: %s, Offset: %zu", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
             Callback(InternalResult);
             return;
         }

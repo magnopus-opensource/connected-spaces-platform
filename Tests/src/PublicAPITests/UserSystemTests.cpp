@@ -15,6 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/LoginState.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -22,6 +23,7 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
+#include "Common/LoginStateData.h"
 #include "Common/Web/HttpPayload.h"
 #include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
@@ -81,7 +83,7 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -95,7 +97,7 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -108,7 +110,7 @@ void LogInAsGuestWithDeferredProfileCreation(
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -157,7 +159,7 @@ struct AuthorizeURLTokens
 AuthorizeURLTokens ExtractTokensFromAuthorizeURL(const csp::common::String& AuthorizeURL)
 {
     AuthorizeURLTokens URLTokens;
-    
+
     const char* STATE_ID_URL_PARAM = "state=";
     const char* CLIENT_ID_URL_PARAM = "client_id=";
     const char* SCOPE_URL_PARAM = "scope=";
@@ -551,10 +553,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
     std::future<csp::systems::LoginTokenInfoResult> TokenFuture = TokenPromise.get_future();
 
     UserSystem->SetNewLoginTokenReceivedCallback(
-        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result)
-        {
-            TokenPromise.set_value(Result);
-        });
+        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result) { TokenPromise.set_value(Result); });
 
     // Log in
     csp::common::String UserId;
@@ -1358,10 +1357,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     csp::common::LoginState LoginState = SettingsFuture.get();
 
     // OKO_TESTS Tenant has a default applications settings setup. All these values are arbitrary just for tests
-    ASSERT_EQ(LoginState.DefaultApplicationSettings.Size(), 1);
-    ASSERT_EQ(LoginState.DefaultSettings.Size(), 0);
+    ASSERT_EQ(LoginState.GetDefaultApplicationSettings().Size(), 1);
+    ASSERT_EQ(LoginState.GetDefaultSettings().Size(), 0);
 
-    csp::common::ApplicationSettings ApplicationSetting = LoginState.DefaultApplicationSettings[0];
+    csp::common::ApplicationSettings ApplicationSetting = LoginState.GetDefaultApplicationSettings()[0];
     ASSERT_EQ(ApplicationSetting.AllowAnonymous, false);
     ASSERT_EQ(ApplicationSetting.Context, "checkpoint");
     // application name not listed because it uses a project codename which is secret ... it's six characters long though :P Ooooh what could it be?
@@ -1370,4 +1369,105 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     ASSERT_EQ(ApplicationSetting.Settings.Size(), 1);
     ASSERT_TRUE(ApplicationSetting.Settings.HasKey("URL"));
     ASSERT_EQ(ApplicationSetting.Settings["URL"], "https://www.google.com/search?q=why+google");
+}
+
+// Regression test for the LoginStateMutex guard in UserSystem.
+//
+// The crash was occurring under the following conditions:
+//   1. A user calls Logout().
+//   2. Before the logout response is received, Login() is called again.
+//   3. Both OnResponse handlers execute concurrently on different threads and write to
+//      CurrentLoginState without synchronization, causing a data race.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+    csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Call Logout without blocking, then immediately call Login for the same user.
+    // Without the LoginStateMutex, the concurrent OnResponse callbacks would produce a data
+    // race on CurrentLoginState � potentially crashing or corrupting the login state.
+    std::promise<bool> LogoutPromise;
+    std::future<bool> LogoutFuture = LogoutPromise.get_future();
+    std::promise<bool> LoginPromise;
+    std::future<bool> LoginFuture = LoginPromise.get_future();
+
+    csp::systems::EResultCode LogoutResultCode { csp::systems::EResultCode::InProgress };
+    csp::systems::EResultCode LoginResultCode { csp::systems::EResultCode::InProgress };
+
+    UserSystem->Logout(
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LogoutResultCode = Result.GetResultCode();
+                LogoutPromise.set_value(true);
+            }
+        });
+
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        [&](const csp::systems::LoginStateResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LoginResultCode = Result.GetResultCode();
+                LoginPromise.set_value(true);
+            }
+        });
+
+    std::future_status LogoutStatus = LogoutFuture.wait_for(30s);
+    std::future_status LoginStatus = LoginFuture.wait_for(30s);
+
+    if (LogoutStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LogoutFuture.get());
+    }
+    else
+    {
+        FAIL() << "Logout did not complete successfully.";
+    }
+
+    if (LoginStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LoginFuture.get());
+    }
+    else
+    {
+        FAIL() << "Login did not complete successfully.";
+    }
+
+    // Ensure the call to Logout was successful and that we were correctly logged in when it was dispatched.
+    EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
+
+    // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
+    auto Data = UserSystem->GetLoginState().GetSnapshot();
+
+    const csp::common::ELoginState FinalState = Data.State;
+
+    if (FinalState == csp::common::ELoginState::LoggedIn)
+    {
+        EXPECT_NE(Data.AccessToken, "");
+        EXPECT_NE(Data.RefreshToken, "");
+        EXPECT_NE(Data.UserId, "");
+        EXPECT_NE(Data.DeviceId, "");
+    }
+    else if (FinalState == csp::common::ELoginState::LoggedOut || FinalState == csp::common::ELoginState::Error)
+    {
+        EXPECT_EQ(Data.AccessToken, "");
+        EXPECT_EQ(Data.RefreshToken, "");
+        EXPECT_EQ(Data.UserId, "");
+        EXPECT_EQ(Data.DeviceId, "");
+    }
+    else
+    {
+        FAIL() << "Final LoginState is incorrect.";
+    }
+
+    if (LoginResultCode == csp::systems::EResultCode::Success)
+    {
+        LogOut(UserSystem);
+    }
 }

@@ -16,6 +16,8 @@
 #include "Web/RemoteFileManager.h"
 
 #include "CSP/Common/Interfaces/IAuthContext.h"
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
@@ -26,11 +28,13 @@ namespace
 {
 csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
 {
+    auto Data = InAuthContext.GetLoginState().GetSnapshot();
+
     csp::common::Optional<csp::common::String> BearerToken;
 
-    if (InAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    if (Data.State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = InAuthContext.GetLoginState().AccessToken;
+        csp::common::String AccessToken = Data.AccessToken;
         BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
     }
 

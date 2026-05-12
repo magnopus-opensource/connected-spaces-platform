@@ -38,7 +38,7 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     auto& MultiplayerSystem = *SystemsManager.GetMultiplayerSystem();
 
     csp::common::String SpaceId = SpaceSystem.GetCurrentSpace().Id;
-    csp::common::String UserId = UserSystem.GetLoginState().UserId;
+    csp::common::String UserId = UserSystem.GetLoginState().GetUserId();
 
     std::cout << "Client listening: " << UserId << std::endl;
 
