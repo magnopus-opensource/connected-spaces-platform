@@ -387,6 +387,10 @@ public:
     // We should remove this in OF-1785
     CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
 
+    // Mutex will be used in the MultiplayerConnection to guard against a use-after-free race condition that can occur in the ON_ELECTED_SCOPE_LEADER
+    // or ON_VACATED_AS_SCOPE_LEADER SignalR callbacks if the MultiplayerRealtimeEngine is freed by another thread while the callback is in-flight.
+    CSP_NO_EXPORT std::shared_ptr<std::mutex> GetLeaderElectionGuard() const { return LeaderElectionGuard; }
+
     /*
      * Called when MultiplayerConnection recieved signalR events.
      */
@@ -505,6 +509,10 @@ private:
     // Guards against a race condition whereby the OnlineRealtimeEngine dtor is called after the SignalR thread executing the
     // CreateRetrieveAllEntitiesCallback callback has checked the cancellation token, but BEFORE it has finished executing the callback.
     std::shared_ptr<std::mutex> EntityFetchBodyGuard;
+    // Mutex guards against use-after-free race condition that can occur in the ON_ELECTED_SCOPE_LEADER / ON_VACATED_AS_SCOPE_LEADER SignalR callbacks
+    // in the MultiplayerConnection. The SignalR thread may read MultiplayerRealtimeEngine as non-null only for the engine to be freed by another
+    // thread. The destructor waits to acquire this mutex (blocking until any in-flight callbacks finish) before proceeding with teardown.
+    std::shared_ptr<std::mutex> LeaderElectionGuard;
 
     std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
     std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;

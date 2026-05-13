@@ -176,6 +176,13 @@ MultiplayerConnection::~MultiplayerConnection()
 void MultiplayerConnection::SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine)
 {
     MultiplayerRealtimeEngine = OnlineRealtimeEngine;
+
+    // Mutex guards against use-after-free race condition that can occur if the MultiplayerRealtimeEngine is destroyed while either
+    // OnElectedScopeLeader or OnVacatedScopeLeader callbacks are in-flight.
+    if (OnlineRealtimeEngine)
+        LeaderElectionGuardWeak = OnlineRealtimeEngine->GetLeaderElectionGuard();
+    else
+        LeaderElectionGuardWeak.reset();
 }
 
 csp::multiplayer::OnlineRealtimeEngine* MultiplayerConnection::GetOnlineRealtimeEngine() const { return MultiplayerRealtimeEngine; }
@@ -632,6 +639,17 @@ void MultiplayerConnection::BindOnElectedScopeLeaderCallback()
         GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_ELECTED_SCOPE_LEADER),
         [this](signalr::value Params)
         {
+            // Mutex guards against use-after-free race condition that can occur if the MultiplayerRealtimeEngine is destroyed while this callback is
+            // in-flight. Locking the weak_ptr atomically confirms the engine is still alive, and holding the mutex ensures it cannot be destroyed
+            // while we're inside the callback body.
+            auto Guard = LeaderElectionGuardWeak.lock();
+            if (!Guard)
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Verbose, "Received OnElectedScopeLeader without an alive EntitySystem. This is expected if leaving a space.");
+                return;
+            }
+            std::scoped_lock BodyLock(*Guard);
             if (MultiplayerRealtimeEngine != nullptr)
             {
                 MultiplayerRealtimeEngine->OnElectedScopeLeader(Params);
@@ -651,6 +669,17 @@ void MultiplayerConnection::BindOnVacatedScopeLeaderCallback()
         GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_VACATED_AS_SCOPE_LEADER),
         [this](signalr::value Params)
         {
+            // Mutex guards against use-after-free race condition that can occur if the MultiplayerRealtimeEngine is destroyed while this callback is
+            // in-flight. Locking the weak_ptr atomically confirms the engine is still alive, and holding the mutex ensures it cannot be destroyed
+            // while we're inside the callback body.
+            auto Guard = LeaderElectionGuardWeak.lock();
+            if (!Guard)
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Verbose, "Received OnVacatedScopeLeader without an alive EntitySystem. This is expected if leaving a space.");
+                return;
+            }
+            std::scoped_lock BodyLock(*Guard);
             if (MultiplayerRealtimeEngine != nullptr)
             {
                 MultiplayerRealtimeEngine->OnVacatedAsScopeLeader(Params);
