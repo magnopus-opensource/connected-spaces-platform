@@ -1394,3 +1394,85 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EnterSpaceTeardownDuringEntityFetchT
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
+
+// Regression test for the LoginStateMutex guard in UserSystem.
+//
+// The crash was occurring under the following conditions:
+//   1. A user calls Logout().
+//   2. Before the logout response is received, Login() is called again.
+//   3. Both OnResponse handlers execute concurrently on different threads and write to
+//      CurrentLoginState without synchronization, causing a data race.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+    csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Call Logout without blocking, then immediately call Login for the same user.
+    // Without the LoginStateMutex, the concurrent OnResponse callbacks would produce a data
+    // race on CurrentLoginState — potentially crashing or corrupting the login state.
+    std::promise<bool> LogoutPromise;
+    std::future<bool> LogoutFuture = LogoutPromise.get_future();
+    std::promise<bool> LoginPromise;
+    std::future<bool> LoginFuture = LoginPromise.get_future();
+
+    csp::systems::EResultCode LogoutResultCode { csp::systems::EResultCode::InProgress };
+    csp::systems::EResultCode LoginResultCode { csp::systems::EResultCode::InProgress };
+
+    UserSystem->Logout(
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LogoutResultCode = Result.GetResultCode();
+                LogoutPromise.set_value(true);
+            }
+        });
+
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        [&](const csp::systems::LoginStateResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LoginResultCode = Result.GetResultCode();
+                LoginPromise.set_value(true);
+            }
+        });
+
+    std::future_status LogoutStatus = LogoutFuture.wait_for(30s);
+    std::future_status LoginStatus = LoginFuture.wait_for(30s);
+
+    if (LogoutStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LogoutFuture.get());
+    }
+    else
+    {
+        FAIL() << "Logout did not complete successfully.";
+    }
+
+    if (LoginStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LoginFuture.get());
+    }
+    else
+    {
+        FAIL() << "Login did not complete successfully.";
+    }
+
+    // Ensure the call to Logout was successful — we were validly logged in when it was dispatched.
+    EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
+
+    // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
+    const csp::common::ELoginState FinalState = UserSystem->GetLoginState().State;
+    EXPECT_TRUE(FinalState == csp::common::ELoginState::LoggedIn || FinalState == csp::common::ELoginState::LoggedOut
+        || FinalState == csp::common::ELoginState::Error);
+
+    if (LoginResultCode == csp::systems::EResultCode::Success)
+    {
+        LogOut(UserSystem);
+    }
+}
