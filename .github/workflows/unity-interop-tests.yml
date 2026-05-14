@@ -8,12 +8,19 @@ on:
 
 jobs:
 
-  # The github head_ref||ref_name thing is dealing with a difference between a PR head and a regular branch head, since they're not just branch names when coming from PR's
+  # Leveraging the fact that github makes a "pull/number/head" ref for PRs.
+  # Doing it this way means that PRs from both branches and forks will work.
+  # As we're just "pull_request", even if an untrusted fork did manage to run this,
+  # it will still be in untrusted mode, and only have read only capabilities.
+  # Workflow_dispatch triggers should fall through to use github.ref_name.
   run-unity-interop-layer-integration:
     uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@csp-development
     with:
       unity_ext_matrix: '[false]'
       platform_matrix: '["windows-2022"]'
-      csp_branch: ${{ github.head_ref || github.ref_name }}
+      csp_branch: >-
+        ${{ github.event_name == 'pull_request'
+            && format('refs/pull/{0}/head', github.event.pull_request.number)
+            || github.ref_name }}
       binding_repo_branch: csp-development
 
