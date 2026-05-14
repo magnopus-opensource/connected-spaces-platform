@@ -11,6 +11,11 @@ All notable changes to this project will be documented in this file. For compile
   scripting system automatically where possible. This moves a large portion of CSP's own components
   over to this pattern, with only a handful still being registered manually due to some remaining
   edge cases.
+  
+### 🐛 🔨 Bug Fixes
+
+- [OB-5368] fix: Resolve login crash caused by race conditions by @MAG-AdamThorn
+  One of the client teams was hitting an exception when trying to logout of a complex Space before it had finished loading before immediately logging back in. This resulted in a number of issues initially related to race conditions caused by multiple threads trying to access the LoginState object being passed to the Login, Logout and Refresh ResponseHandlers. This issue has been resolved as well as a use-after-free race condition that could occur if the MultiplayerRealtimeEngine was destroyed while either OnElectedScopeLeader or OnVacatedScopeLeader callbacks were in-flight. 
 
 - [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
   At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
