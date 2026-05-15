@@ -1,0 +1,1722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NGX Scripting — Mergeable Roadmap</title>
+<style>
+  :root {
+    --bg: #0b0d13;
+    --bg-2: #0f1218;
+    --panel: #161a24;
+    --panel-2: #1a1f2c;
+    --panel-hover: #1d2230;
+    --text: #e8ecf3;
+    --muted: #8c95a8;
+    --muted-2: #6a7385;
+    --accent: #7aa2ff;
+    --accent-2: #5ae0c1;
+    --accent-3: #b388ff;
+    --warn: #ffb866;
+    --danger: #ff7a7a;
+    --border: #232938;
+    --border-soft: #1c2230;
+    --chip: #1f2535;
+
+    --p1: #5ae0c1;
+    --p2: #7aa2ff;
+    --p3: #b388ff;
+    --p4: #ffb866;
+    --p5: #ff8fbf;
+    --p6: #9aa3b2;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(122,162,255,0.08), transparent 60%),
+      radial-gradient(900px 600px at -10% 10%, rgba(179,136,255,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+  }
+  body {
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0; padding: 40px 32px 96px;
+    max-width: 1180px; margin-left: auto; margin-right: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: rgba(122,162,255,0.35); color: #fff; }
+
+  h1 {
+    font-size: 30px; font-weight: 700; margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #fff 0%, #cbd6f0 60%, #7aa2ff 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  h2 {
+    font-size: 13px; font-weight: 600;
+    margin: 44px 0 14px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h2::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+  }
+  h3 { font-size: 15px; margin: 0 0 6px; color: var(--accent); }
+  p { color: var(--muted); margin: 6px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: #a8c0ff; }
+
+  code, pre { font-family: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+  code {
+    background: rgba(122,162,255,0.08);
+    padding: 1px 6px; border-radius: 4px;
+    border: 1px solid rgba(122,162,255,0.15);
+    color: #cfd9ee;
+  }
+  pre {
+    background: var(--bg-2); padding: 14px 16px; border-radius: 8px;
+    border: 1px solid var(--border); overflow: auto;
+    line-height: 1.6; color: #cbd6f0;
+  }
+
+  /* Subtitle row under H1 */
+  .subtitle { color: var(--muted); margin: 0 0 18px; font-size: 13.5px; }
+  .subtitle code { background: rgba(255,255,255,0.04); border-color: var(--border-soft); }
+
+  /* Stats strip */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 18px 0 22px;
+  }
+  .stat {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .stat .num {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .stat .lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted-2); margin-top: 2px;
+  }
+
+  /* Lead card */
+  .lead {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset, 0 12px 32px -16px rgba(0,0,0,0.5);
+  }
+  .lead p { color: #c4ccdc; }
+  .lead p strong { color: #fff; }
+
+  /* Chips */
+  .chip {
+    background: var(--chip);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: var(--text); font-size: 11.5px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .chip::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.7;
+  }
+  .chip.size-S { color: var(--accent-2); border-color: rgba(90,224,193,0.3); background: rgba(90,224,193,0.08); }
+  .chip.size-M { color: var(--accent);   border-color: rgba(122,162,255,0.3); background: rgba(122,162,255,0.08); }
+  .chip.size-L { color: var(--warn);     border-color: rgba(255,184,102,0.3); background: rgba(255,184,102,0.08); }
+  .chip.size-XL { color: var(--danger);  border-color: rgba(255,122,122,0.3); background: rgba(255,122,122,0.08); }
+  .chip.dep    { color: var(--muted); border-style: dashed; background: transparent; }
+  .chip.dep::before { display: none; }
+
+  /* TOC */
+  .toc {
+    columns: 2; column-gap: 28px;
+    background: var(--panel);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 22px; margin: 4px 0 8px;
+  }
+  .toc ol { margin: 0; padding-left: 22px; }
+  .toc li { break-inside: avoid; padding: 3px 0; color: var(--muted); }
+  .toc li a { color: #cbd6f0; }
+  .toc li a:hover { color: #fff; }
+
+  /* Phase header */
+  .phase {
+    margin-top: 36px; padding: 14px 16px;
+    background: linear-gradient(90deg, var(--panel-2) 0%, transparent 100%);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .phase .num {
+    flex: 0 0 auto;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    background: rgba(122,162,255,0.12); color: var(--accent);
+    border: 1px solid rgba(122,162,255,0.25);
+  }
+  .phase .body strong { color: #fff; font-size: 14.5px; }
+  .phase .body span { color: var(--muted); font-size: 13px; }
+
+  .phase[data-phase="1"] { border-left-color: var(--p1); }
+  .phase[data-phase="1"] .num { background: rgba(90,224,193,0.12); color: var(--p1); border-color: rgba(90,224,193,0.25); }
+  .phase[data-phase="2"] { border-left-color: var(--p2); }
+  .phase[data-phase="2"] .num { background: rgba(122,162,255,0.12); color: var(--p2); border-color: rgba(122,162,255,0.25); }
+  .phase[data-phase="3"] { border-left-color: var(--p3); }
+  .phase[data-phase="3"] .num { background: rgba(179,136,255,0.12); color: var(--p3); border-color: rgba(179,136,255,0.25); }
+  .phase[data-phase="4"] { border-left-color: var(--p4); }
+  .phase[data-phase="4"] .num { background: rgba(255,184,102,0.12); color: var(--p4); border-color: rgba(255,184,102,0.25); }
+  .phase[data-phase="5"] { border-left-color: var(--p5); }
+  .phase[data-phase="5"] .num { background: rgba(255,143,191,0.12); color: var(--p5); border-color: rgba(255,143,191,0.25); }
+  .phase[data-phase="6"] { border-left-color: var(--p6); }
+  .phase[data-phase="6"] .num { background: rgba(154,163,178,0.12); color: var(--p6); border-color: rgba(154,163,178,0.25); }
+
+  /* Ticket card */
+  .ticket {
+    position: relative;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 12px 0;
+    padding: 18px 20px 16px 22px;
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  }
+  .ticket::before {
+    content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+    width: 3px; border-radius: 3px;
+    background: var(--accent);
+    opacity: 0.85;
+  }
+  .ticket[data-phase="1"]::before { background: var(--p1); }
+  .ticket[data-phase="2"]::before { background: var(--p2); }
+  .ticket[data-phase="3"]::before { background: var(--p3); }
+  .ticket[data-phase="4"]::before { background: var(--p4); }
+  .ticket[data-phase="5"]::before { background: var(--p5); }
+  .ticket[data-phase="6"]::before { background: var(--p6); }
+  .ticket {
+    cursor: pointer;
+  }
+  .ticket:hover {
+    border-color: rgba(122,162,255,0.45);
+    background: linear-gradient(180deg, rgba(122,162,255,0.04) 0%, var(--panel-2) 100%);
+    box-shadow:
+      0 0 0 1px rgba(122,162,255,0.25),
+      0 0 24px -6px rgba(122,162,255,0.25),
+      0 18px 40px -22px rgba(0,0,0,0.7);
+    transform: translateY(-1px);
+  }
+  .ticket[data-phase="1"]:hover { border-color: rgba(90,224,193,0.5);  background: linear-gradient(180deg, rgba(90,224,193,0.05) 0%, var(--panel-2) 100%);  box-shadow: 0 0 0 1px rgba(90,224,193,0.3), 0 0 24px -6px rgba(90,224,193,0.3), 0 18px 40px -22px rgba(0,0,0,0.7); }
+  .ticket[data-phase="3"]:hover { border-color: rgba(179,136,255,0.5); background: linear-gradient(180deg, rgba(179,136,255,0.05) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 1px rgba(179,136,255,0.3), 0 0 24px -6px rgba(179,136,255,0.3), 0 18px 40px -22px rgba(0,0,0,0.7); }
+  .ticket[data-phase="4"]:hover { border-color: rgba(255,184,102,0.5); background: linear-gradient(180deg, rgba(255,184,102,0.05) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 1px rgba(255,184,102,0.3), 0 0 24px -6px rgba(255,184,102,0.3), 0 18px 40px -22px rgba(0,0,0,0.7); }
+  .ticket[data-phase="5"]:hover { border-color: rgba(255,143,191,0.5); background: linear-gradient(180deg, rgba(255,143,191,0.05) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 1px rgba(255,143,191,0.3), 0 0 24px -6px rgba(255,143,191,0.3), 0 18px 40px -22px rgba(0,0,0,0.7); }
+  .ticket[data-phase="6"]:hover { border-color: rgba(154,163,178,0.5); background: linear-gradient(180deg, rgba(154,163,178,0.05) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 1px rgba(154,163,178,0.3), 0 0 24px -6px rgba(154,163,178,0.3), 0 18px 40px -22px rgba(0,0,0,0.7); }
+  /* When pinned, ignore hover restyle so the pin glow stays dominant */
+  .ticket.is-pinned:hover { transform: none; }
+  /* Inline children that shouldn't inherit the pointer cursor */
+  .ticket a, .ticket code, .ticket li { cursor: auto; }
+  .ticket a, .ticket button { cursor: pointer; }
+
+  .ticket .head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+  .ticket .id {
+    font-family: ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 3px 8px;
+    background: rgba(122,162,255,0.1);
+    border: 1px solid rgba(122,162,255,0.25);
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+  .ticket[data-phase="1"] .id { color: var(--p1); background: rgba(90,224,193,0.1); border-color: rgba(90,224,193,0.25); }
+  .ticket[data-phase="2"] .id { color: var(--p2); background: rgba(122,162,255,0.1); border-color: rgba(122,162,255,0.25); }
+  .ticket[data-phase="3"] .id { color: var(--p3); background: rgba(179,136,255,0.1); border-color: rgba(179,136,255,0.25); }
+  .ticket[data-phase="4"] .id { color: var(--p4); background: rgba(255,184,102,0.1); border-color: rgba(255,184,102,0.25); }
+  .ticket[data-phase="5"] .id { color: var(--p5); background: rgba(255,143,191,0.1); border-color: rgba(255,143,191,0.25); }
+  .ticket[data-phase="6"] .id { color: var(--p6); background: rgba(154,163,178,0.1); border-color: rgba(154,163,178,0.25); }
+
+  .ticket .title { font-weight: 600; font-size: 15.5px; color: #fff; letter-spacing: -0.01em; }
+  .ticket .meta { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+
+  .ticket > p { color: #c4ccdc; margin: 8px 0 4px; }
+
+  .grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px 28px; margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-soft);
+  }
+  .grid h4 {
+    font-size: 10.5px; letter-spacing: 0.12em;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    margin: 2px 0 6px;
+    font-weight: 600;
+  }
+  ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 3px 0; color: #c4ccdc; }
+  li::marker { color: var(--muted-2); }
+
+  .deps { color: var(--muted); font-size: 12.5px; }
+  .col-files li {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px; color: #b8c4dd;
+    list-style: none;
+    padding: 3px 8px;
+    margin: 2px 0;
+    border-left: 2px solid var(--border);
+    background: rgba(255,255,255,0.015);
+    border-radius: 0 4px 4px 0;
+  }
+  .col-files { padding-left: 0; }
+
+  .note {
+    color: var(--warn); font-size: 12.5px;
+    background: rgba(255,184,102,0.06);
+    border-left: 2px solid var(--warn);
+    padding: 8px 12px; border-radius: 0 6px 6px 0;
+    margin-top: 8px;
+  }
+
+  /* Suggested merge order block */
+  .merge-order {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .merge-order pre {
+    border: none; background: transparent; margin: 0;
+    padding: 18px 20px; font-size: 12px;
+  }
+
+  /* Risks list polish */
+  .risks li { padding: 4px 0; }
+  .risks li strong { color: #fff; }
+
+  /* Details button on each ticket */
+  .ticket .details-btn {
+    margin-left: 8px;
+    background: rgba(122,162,255,0.08);
+    border: 1px solid rgba(122,162,255,0.25);
+    color: var(--accent);
+    font: 600 11.5px/1 ui-monospace, Menlo, monospace;
+    padding: 5px 10px; border-radius: 6px;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .ticket .details-btn:hover { background: rgba(122,162,255,0.18); border-color: rgba(122,162,255,0.4); }
+  .ticket[data-phase="1"] .details-btn { color: var(--p1); background: rgba(90,224,193,0.08); border-color: rgba(90,224,193,0.25); }
+  .ticket[data-phase="3"] .details-btn { color: var(--p3); background: rgba(179,136,255,0.08); border-color: rgba(179,136,255,0.25); }
+  .ticket[data-phase="4"] .details-btn { color: var(--p4); background: rgba(255,184,102,0.08); border-color: rgba(255,184,102,0.25); }
+  .ticket[data-phase="5"] .details-btn { color: var(--p5); background: rgba(255,143,191,0.08); border-color: rgba(255,143,191,0.25); }
+  .ticket[data-phase="6"] .details-btn { color: var(--p6); background: rgba(154,163,178,0.08); border-color: rgba(154,163,178,0.25); }
+
+  /* Drawer — docked right-hand panel; shifts max-width when open to avoid overlap */
+  :root { --drawer-w: 440px; }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100vh;
+    width: var(--drawer-w);
+    background: linear-gradient(180deg, #141823 0%, #10131c 100%);
+    border-left: 1px solid var(--border);
+    box-shadow: -24px 0 60px -28px rgba(0,0,0,0.55);
+    transform: translateX(100%);
+    transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    z-index: 40;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+
+  /* When drawer is open, shift centering left so content sits in the
+     remaining viewport instead of being overlapped. We add right padding
+     equal to the drawer width; max-width stays the same so wide screens
+     keep their roomy layout. Internal grids collapse to one column
+     so the still-comfortable text never overflows. */
+  body { transition: padding-right 220ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  body.drawer-open { padding-right: calc(var(--drawer-w) + 32px); }
+  body.drawer-open .grid { grid-template-columns: 1fr; }
+  body.drawer-open .stats { grid-template-columns: repeat(2, 1fr); }
+  body.drawer-open .toc { columns: 1; }
+  body.drawer-open .col-files li { word-break: break-all; }
+  .drawer-head {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .drawer-head .id {
+    font: 700 12px/1 ui-monospace, Menlo, monospace;
+    padding: 4px 9px; border-radius: 6px;
+    background: rgba(122,162,255,0.1);
+    border: 1px solid rgba(122,162,255,0.25);
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .drawer-head .title { font-size: 14.5px; font-weight: 600; color: #fff; flex: 1; line-height: 1.35; }
+  .drawer-close {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); width: 28px; height: 28px;
+    border-radius: 6px; cursor: pointer;
+    font-size: 16px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .drawer-close:hover { color: #fff; border-color: var(--accent); }
+  .drawer-body { overflow-y: auto; padding: 18px 22px 32px; flex: 1; }
+  .drawer-body h5 {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    color: var(--muted-2); text-transform: uppercase;
+    margin: 14px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .drawer-body h5:first-child { margin-top: 0; }
+  .drawer-body h5::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+  }
+
+  /* Highlight currently opened ticket card — strong visual link to drawer */
+  .ticket.is-pinned {
+    border-color: rgba(122,162,255,0.55);
+    background: linear-gradient(180deg, rgba(122,162,255,0.06) 0%, var(--panel-2) 100%);
+    box-shadow:
+      0 0 0 2px rgba(122,162,255,0.35),
+      0 0 32px -8px rgba(122,162,255,0.35),
+      0 14px 36px -22px rgba(0,0,0,0.7);
+  }
+  .ticket.is-pinned::before {
+    width: 5px;
+    box-shadow: 0 0 16px 0 currentColor;
+    opacity: 1;
+    animation: pinPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pinPulse {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.55; }
+  }
+  /* Right-edge arrow pointing at the drawer */
+  .ticket.is-pinned::after {
+    content: ""; position: absolute;
+    right: -14px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 12px solid var(--accent);
+    filter: drop-shadow(0 0 6px rgba(122,162,255,0.6));
+    pointer-events: none;
+  }
+  .ticket.is-pinned[data-phase="1"]::after { border-left-color: var(--p1); filter: drop-shadow(0 0 6px rgba(90,224,193,0.7)); }
+  .ticket.is-pinned[data-phase="3"]::after { border-left-color: var(--p3); filter: drop-shadow(0 0 6px rgba(179,136,255,0.7)); }
+  .ticket.is-pinned[data-phase="4"]::after { border-left-color: var(--p4); filter: drop-shadow(0 0 6px rgba(255,184,102,0.7)); }
+  .ticket.is-pinned[data-phase="5"]::after { border-left-color: var(--p5); filter: drop-shadow(0 0 6px rgba(255,143,191,0.7)); }
+  .ticket.is-pinned[data-phase="6"]::after { border-left-color: var(--p6); filter: drop-shadow(0 0 6px rgba(154,163,178,0.7)); }
+  .ticket.is-pinned[data-phase="1"] { border-color: rgba(90,224,193,0.55); background: linear-gradient(180deg, rgba(90,224,193,0.06) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 2px rgba(90,224,193,0.35), 0 0 32px -8px rgba(90,224,193,0.35), 0 14px 36px -22px rgba(0,0,0,0.7); }
+  .ticket.is-pinned[data-phase="3"] { border-color: rgba(179,136,255,0.55); background: linear-gradient(180deg, rgba(179,136,255,0.06) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 2px rgba(179,136,255,0.35), 0 0 32px -8px rgba(179,136,255,0.35), 0 14px 36px -22px rgba(0,0,0,0.7); }
+  .ticket.is-pinned[data-phase="4"] { border-color: rgba(255,184,102,0.55); background: linear-gradient(180deg, rgba(255,184,102,0.06) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 2px rgba(255,184,102,0.35), 0 0 32px -8px rgba(255,184,102,0.35), 0 14px 36px -22px rgba(0,0,0,0.7); }
+  .ticket.is-pinned[data-phase="5"] { border-color: rgba(255,143,191,0.55); background: linear-gradient(180deg, rgba(255,143,191,0.06) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 2px rgba(255,143,191,0.35), 0 0 32px -8px rgba(255,143,191,0.35), 0 14px 36px -22px rgba(0,0,0,0.7); }
+  .ticket.is-pinned[data-phase="6"] { border-color: rgba(154,163,178,0.55); background: linear-gradient(180deg, rgba(154,163,178,0.06) 0%, var(--panel-2) 100%); box-shadow: 0 0 0 2px rgba(154,163,178,0.35), 0 0 32px -8px rgba(154,163,178,0.35), 0 14px 36px -22px rgba(0,0,0,0.7); }
+  .ticket.is-pinned .details-btn::after { content: " ✓"; }
+  @media (max-width: 760px) {
+    .ticket.is-pinned::after { display: none; }
+  }
+  .test-row {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 10px 12px; margin: 6px 0;
+  }
+  .test-row .tname {
+    font: 600 12px/1.4 ui-monospace, Menlo, monospace;
+    color: #d8e1f4; word-break: break-word;
+  }
+  .test-row .texpect {
+    color: #aab5cc; font-size: 12.5px; margin-top: 4px; line-height: 1.5;
+  }
+  .ref-row {
+    display: block;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 10px 12px; margin: 6px 0;
+    text-decoration: none;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .ref-row:hover { border-color: rgba(122,162,255,0.4); background: rgba(122,162,255,0.06); }
+  .ref-row .rlabel { font-size: 12.5px; color: #e8ecf3; font-weight: 600; display: block; }
+  .ref-row .rpath {
+    font: 11.5px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--accent); margin-top: 3px; word-break: break-all;
+  }
+  .ref-row .rline { color: var(--accent-2); font-weight: 600; }
+
+  @media (max-width: 1100px) {
+    :root { --drawer-w: 400px; }
+  }
+  @media (max-width: 760px) {
+    body { padding: 24px 18px 64px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .toc { columns: 1; }
+    .grid { grid-template-columns: 1fr; }
+    .ticket .meta { margin-left: 0; }
+    /* Narrow screens: dock at the bottom; push content up instead of right */
+    .drawer {
+      top: auto; bottom: 0; right: 0; left: 0;
+      width: 100vw; height: 60vh;
+      border-left: none; border-top: 1px solid var(--border);
+      transform: translateY(100%);
+    }
+    .drawer.open { transform: translateY(0); }
+    body.drawer-open { padding-right: 18px; padding-bottom: calc(60vh + 24px); }
+  }
+</style>
+</head>
+<body>
+
+<h1>NGX Scripting — Mergeable Roadmap</h1>
+<p class="subtitle">Branch <code>spike/ngx-ui-spike</code> · 52 commits ahead of <code>main</code> · ~10.7k new LoC in <code>Library/src/Multiplayer/NgxScript/</code> alone</p>
+
+<div class="stats">
+  <div class="stat"><div class="num">23</div><div class="lbl">Tickets</div></div>
+  <div class="stat"><div class="num">6</div><div class="lbl">Phases</div></div>
+  <div class="stat"><div class="num">70</div><div class="lbl">Existing tests to port</div></div>
+  <div class="stat"><div class="num">52</div><div class="lbl">Commits to unwind</div></div>
+</div>
+
+<div class="lead">
+  <p><strong>Why this exists.</strong> Current spike branch too big to land in one PR. Plan: rewrite from scratch as small, independently mergeable slices behind unused-by-default surface. Each ticket below should be one PR. Order honors dependencies; ticket sizes hint relative effort, not absolute days.</p>
+  <p><strong>Ground rule.</strong> No ticket past <strong>NGX-02</strong> needs runtime-mode plumbing, <code>CodeSpaceComponent</code>, or UI. Tickets land dark — feature gated or unreferenced — until <strong>NGX-08</strong> wires <code>CodeSpaceComponent</code> in.</p>
+  <p><strong>Conventions.</strong> Each ticket states: <em>Goal</em>, <em>Scope</em> (in/out), <em>Deps</em>, <em>Acceptance</em>, <em>Test plan</em>, <em>Size</em>. Size: <span class="chip size-S">S</span> ≤ 1 day, <span class="chip size-M">M</span> 2–4 days, <span class="chip size-L">L</span> 1 week, <span class="chip size-XL">XL</span> &gt; 1 week.</p>
+</div>
+
+<h2>Table of contents</h2>
+<div class="toc">
+  <ol>
+    <li><a href="#ngx-01">NGX-01 — NgxScriptSystem skeleton (eval arbitrary JS)</a></li>
+    <li><a href="#ngx-02">NGX-02 — Script assets &amp; module resolution pipeline</a></li>
+    <li><a href="#ngx-03">NGX-03 — Static module registration + built-in <code>signals</code> module</a></li>
+    <li><a href="#ngx-04">NGX-04 — <code>ESpaceRuntimeMode</code> on SpaceSystem</a></li>
+    <li><a href="#ngx-05">NGX-05 — <code>CodeAttribute</code> + <code>NgxScriptAttribute</code> data types</a></li>
+    <li><a href="#ngx-06">NGX-06 — <code>CodeSpaceComponent</code> (replicated, dormant)</a></li>
+    <li><a href="#ngx-07">NGX-07 — <code>NgxEntityScriptBinding</code> wrapper</a></li>
+    <li><a href="#ngx-08">NGX-08 — <code>NgxCodeComponentRuntime</code> (Local scope)</a></li>
+    <li><a href="#ngx-09">NGX-09 — Local entities + <code>ApplyLocalPropertyPatch</code></a></li>
+    <li><a href="#ngx-10">NGX-10 — Entity tags + <code>EntityQueryUtils</code></a></li>
+    <li><a href="#ngx-11">NGX-11 — Entity script interface extensions (events, add-component, child query)</a></li>
+    <li><a href="#ngx-12">NGX-12 — Editor + Server code-component scopes</a></li>
+    <li><a href="#ngx-13">NGX-13 — <code>NgxAssetScriptBinding</code> (<code>__ngxAssetQuery</code> Promise)</a></li>
+    <li><a href="#ngx-14">NGX-14 — Input dispatch (keyboard, mouse) + camera state cache</a></li>
+    <li><a href="#ngx-15">NGX-15 — <code>RuntimeMaterialSystem</code> + script interfaces</a></li>
+    <li><a href="#ngx-16">NGX-16 — New component bindings (Attachment, Collision, expanded Audio/Avatar)</a></li>
+    <li><a href="#ngx-17">NGX-17 — <code>NgxUIRuntime</code> Clay layout core (screen-space)</a></li>
+    <li><a href="#ngx-18">NGX-18 — UI text measurement (sync + async)</a></li>
+    <li><a href="#ngx-19">NGX-19 — UI action dispatch + debug overlay</a></li>
+    <li><a href="#ngx-20">NGX-20 — World-mounted UI + clip-escape</a></li>
+    <li><a href="#ngx-21">NGX-21 — Debug draw bindings (<code>csp.drawLine</code>)</a></li>
+    <li><a href="#ngx-22">NGX-22 — WrapperGenerator: TS structs + method-shape fixes</a></li>
+    <li><a href="#ngx-23">NGX-23 — Third-party deps (Clay, rapidjson, uuid-v4, quickjs build)</a></li>
+  </ol>
+</div>
+
+<div class="phase" data-phase="1">
+  <div class="num">01</div>
+  <div class="body"><strong>Engine plumbing.</strong> <span>NGX-01 → NGX-04. JS runtime that can eval scripts but does nothing user-visible.</span></div>
+</div>
+
+<!-- NGX-01 -->
+<section id="ngx-01" class="ticket" data-phase="1">
+  <div class="head">
+    <span class="id">NGX-01</span>
+    <span class="title">NgxScriptSystem skeleton — eval arbitrary JS, console, requestAnimationFrame</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">no deps</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-01" type="button">Details →</button>
+  </div>
+  <p>Stand up <code>csp::systems::NgxScriptSystem</code> with a single QuickJS context. Public API exposes only <code>EvaluateSnippet</code> / <code>ExecuteModule</code> on arbitrary text. No asset loading, no components, no UI. Wire host primitives: <code>console.log/warn/error</code>, <code>requestAnimationFrame/cancelAnimationFrame</code>, async/await + Promise microtask pump, periodic GC.</p>
+  <div class="grid">
+    <div>
+      <h4>Goal</h4>
+      <ul>
+        <li>Run untrusted JS strings safely inside foundation.</li>
+        <li>Async/await + native Promises (microtask drain on every tick).</li>
+        <li><code>console.*</code> routed through <code>LogSystem</code>; <code>Error.stack</code> preserved on uncaught.</li>
+        <li><code>requestAnimationFrame</code> driven by a display-rate tick separate from foundation tick.</li>
+      </ul>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>EvaluateSnippet("1+1")</code> succeeds; failing snippet logs stack and does not crash.</li>
+        <li><code>await</code> resolves across a tick boundary (Promise microtask pump runs in <code>PumpPendingJobs</code>).</li>
+        <li>rAF callback fires once per <code>TickAnimationFrame()</code>.</li>
+        <li>Context rebuild (<code>OnEnterSpace</code> → <code>OnExitSpace</code>) leaks no JSValues; ASAN clean.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Systems/Script/NgxScriptSystem.h (minimal surface only)</li>
+        <li>Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp (host bindings only)</li>
+        <li>Tests/src/InternalTests/NgxScriptSystemTests.cpp (subset: bootstrap, rAF, async/await, console capture)</li>
+      </ul>
+      <h4>Scope (out)</h4>
+      <ul>
+        <li>Asset loading, module resolution, code components, UI, materials, entity bindings, input events.</li>
+      </ul>
+      <h4>Test plan</h4>
+      <ul>
+        <li>Port <code>OfflineEnterExitBootstrapsAndTearsDown</code>, <code>TickEventDrainsPendingJobs</code>, <code>RequestAnimationFrameUsesAnimationFrameTickNotFoundationTick</code>.</li>
+        <li>Add: console capture, uncaught rejection logs stack, GC cadence runs every ~180 ticks.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-02 -->
+<section id="ngx-02" class="ticket" data-phase="1">
+  <div class="head">
+    <span class="id">NGX-02</span>
+    <span class="title">Script assets &amp; module resolution pipeline</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-01</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-02" type="button">Details →</button>
+  </div>
+  <p>Add the module loader. On <code>OnEnterSpace</code>, fetch the space's asset collections, identify script assets, and populate the in-memory <code>LoadedModuleSources</code> map. Install a QuickJS module loader that resolves bare/relative imports against that map. Listen to <code>AssetDetailBlobChanged</code> and refresh affected modules. Add <code>ReloadScriptModule</code> manual path.</p>
+  <div class="grid">
+    <div>
+      <h4>Goal</h4>
+      <ul>
+        <li>Stable canonical module-path mapping (collection + asset name → key).</li>
+        <li><code>ExecuteModule(path)</code> compiles &amp; runs once; re-imports reuse cache.</li>
+        <li>Asset change events invalidate &amp; recompile.</li>
+        <li>Tracked-asset-collection set prevents reloading unrelated assets.</li>
+      </ul>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>ModuleImportResolvesFromInMemoryMap</code> passes online and offline.</li>
+        <li><code>ReloadUsesUpdatedSourceAndRerunsEntrypoint</code> passes.</li>
+        <li><code>MissingModuleLogsExplicitError</code> passes (no silent failures).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxScriptSystem: LoadScriptModules, RegisterAssetDetailBlobChangedListener, OnAssetDetailBlobChanged, FetchAssetCollectionMapForSpace, IsTrackedScriptAssetCollection, ReloadScriptModule, InstallModuleLoader.</li>
+        <li>SpaceSystem: call OnEnterSpace/OnExitSpace on NgxScriptSystem.</li>
+      </ul>
+      <h4>Test plan</h4>
+      <ul>
+        <li>Port <code>CanonicalPathMappingIsStable</code>, <code>ExecuteModuleRunsLoadedModuleSource</code>, <code>MissingModuleLogsExplicitError</code>, <code>ReloadUsesUpdatedSourceAndRerunsEntrypoint</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-03 -->
+<section id="ngx-03" class="ticket" data-phase="1">
+  <div class="head">
+    <span class="id">NGX-03</span>
+    <span class="title">Static module registration + built-in <code>signals</code> module</span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: NGX-02</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-03" type="button">Details →</button>
+  </div>
+  <p>Add <code>RegisterStaticModuleSource</code>/<code>UnregisterStaticModuleSource</code> for runtime-owned modules baked into C++ (not asset-driven). Ship the built-in <code>signals</code> (preact-signals subset) module so downstream tickets can <code>import { signal } from 'signals'</code>.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>BuiltInSignalsModuleImportResolvesAndExecutes</code> passes.</li>
+        <li><code>ExecuteModuleRunsStaticModuleSource</code> passes.</li>
+        <li>Static modules survive context rebuild.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/src/Multiplayer/NgxScript/signals.h</li>
+        <li>NgxScriptSystem: StaticModuleSources, resolver fallback order (asset → static → error).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-04 -->
+<section id="ngx-04" class="ticket" data-phase="1">
+  <div class="head">
+    <span class="id">NGX-04</span>
+    <span class="title"><code>ESpaceRuntimeMode</code> on SpaceSystem (Unset/Edit/Play/Server)</span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: none (but logically pairs with NGX-08)</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-04" type="button">Details →</button>
+  </div>
+  <p>Introduce the runtime-mode enum and the SpaceSystem setter/getter + change event. No consumer yet — wires in <code>NGX-08</code>. Default <code>Unset</code> so existing clients are unaffected.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Mode defaults to <code>Unset</code>; getter/setter logged on transition.</li>
+        <li>No regressions in existing SpaceSystem tests.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Common/SharedEnums.h (ESpaceRuntimeMode enum)</li>
+        <li>Library/include/CSP/Systems/Spaces/SpaceSystem.h + cpp (getter/setter, callback).</li>
+      </ul>
+      <p class="note">Heads-up: existing diff also renames <code>EThirdPartyPlatform::None|Unreal|Unity|Web</code> to <code>NONE|UNREAL|UNITY</code> and drops <code>Web</code>. That is unrelated — keep it out of this PR or split into its own breaking-change ticket.</p>
+    </div>
+  </div>
+</section>
+
+<div class="phase" data-phase="2">
+  <div class="num">02</div>
+  <div class="body"><strong>Replicated data shape.</strong> <span>NGX-05 → NGX-06. Component on the wire; no runtime behavior yet.</span></div>
+</div>
+
+<!-- NGX-05 -->
+<section id="ngx-05" class="ticket" data-phase="2">
+  <div class="head">
+    <span class="id">NGX-05</span>
+    <span class="title"><code>CodeAttribute</code> + <code>NgxScriptAttribute</code> data types</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: none</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-05" type="button">Details →</button>
+  </div>
+  <p>Replicated-value carriers for typed script attributes (Boolean … Color, plus EntityQuery / ModelAsset / ImageAsset map-shapes). Includes ReplicatedValue round-trip and schema parsing.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Roundtrip tests pass for every type (port the 4 <code>CodeAttribute*Roundtrip*</code> / <code>*Reject*</code> tests).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Multiplayer/Components/CodeAttribute.h + cpp</li>
+        <li>Library/include/CSP/Multiplayer/Components/NgxScriptAttribute.h + cpp</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-06 -->
+<section id="ngx-06" class="ticket" data-phase="2">
+  <div class="head">
+    <span class="id">NGX-06</span>
+    <span class="title"><code>CodeSpaceComponent</code> — replicated, dormant</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-05</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-06" type="button">Details →</button>
+  </div>
+  <p>Component holding <code>ScriptAssetPath</code>, <code>CodeScopeType</code>, <code>Attributes</code>, <code>Schema</code>. Replicates over the wire. <strong>No runtime behavior.</strong> Component-script interface returns a stub so it shows up in editors.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Attribute add/get/remove/clear/keys roundtrip survives serialization.</li>
+        <li><code>GetScriptAttributes()</code> merges schema metadata with live values.</li>
+        <li>Existing space load / save is byte-identical when no <code>CodeSpaceComponent</code> exists.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Multiplayer/Components/CodeSpaceComponent.h + cpp</li>
+        <li>ComponentType registration entry.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="phase" data-phase="3">
+  <div class="num">03</div>
+  <div class="body"><strong>Make code components run.</strong> <span>NGX-07 → NGX-12. First user-visible behavior.</span></div>
+</div>
+
+<!-- NGX-07 -->
+<section id="ngx-07" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-07</span>
+    <span class="title"><code>NgxEntityScriptBinding</code> wrapper</span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: NGX-01</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-07" type="button">Details →</button>
+  </div>
+  <p>Wraps the legacy <code>EntityScriptBinding</code> so NGX customizations are isolated. Adds <code>GetLocalAvatar()</code> resolver via <code>OnlineRealtimeEngine::GetMultiplayerConnectionInstance()-&gt;GetClientId()</code>. Keeps existing legacy paths untouched.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Legacy entity-script tests still pass.</li>
+        <li>NGX binding exposes <code>EntitySystem</code> globals to QuickJS context.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/src/Multiplayer/NgxScript/NgxEntityScriptBinding.h + cpp</li>
+        <li>Library/src/Multiplayer/Script/EntityScriptBinding.* (minimal hook for WrapEntity/GetLocalAvatar)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-08 -->
+<section id="ngx-08" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-08</span>
+    <span class="title"><code>NgxCodeComponentRuntime</code> — <code>Local</code> scope only</span>
+    <span class="meta">
+      <span class="chip size-L">L</span>
+      <span class="chip dep">deps: NGX-02, NGX-04, NGX-06, NGX-07</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-08" type="button">Details →</button>
+  </div>
+  <p>The opinionated lifecycle layer that ticks entities, diffs snapshots, and drives <code>scriptRegistry.{addCodeComponent,syncCodeComponentSchema,syncCodeComponentAttributes,removeCodeComponent}</code> on the JS side. Implements <strong>only</strong> <code>CodeScopeType::Local</code>: runs in <code>Play</code> mode on every client, and in <code>Edit</code> mode when the entity (or an ancestor) is selected.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal</code> passes.</li>
+        <li><code>CodeComponentRuntimeSupportsDirectScriptAndRunsTeardownOnRemoval</code> passes.</li>
+        <li><code>LocalCodeComponentOnlyRunsWhenSelectedInEditMode</code> passes.</li>
+        <li><code>LocalCodeComponentRecreatesWhenRuntimeModeChangesWhileActive</code> passes.</li>
+        <li>Schema/attribute sync survives async module load (pending-schema drain works).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/src/Multiplayer/NgxScript/NgxCodeComponentRuntime.h + cpp</li>
+        <li>NgxScriptSystem bridge methods (SyncCodeComponentSchema/Attributes, AddCodeComponent, RemoveCodeComponent, DrainPendingSchemaSyncs).</li>
+        <li>Inline JS bootstrap (scriptRegistry helper) — keep small; defer big @csp/code surface to a follow-up.</li>
+      </ul>
+      <h4>Out of scope</h4>
+      <ul><li>Editor &amp; Server scopes (NGX-12). UI (NGX-17+). Materials (NGX-15).</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-09 -->
+<section id="ngx-09" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-09</span>
+    <span class="title">Local entities + <code>ApplyLocalPropertyPatch</code></span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-06</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-09" type="button">Details →</button>
+  </div>
+  <p>Adds non-replicating <code>SpaceEntity</code>s: <code>CreateLocalChildEntity</code>, <code>IsLocal</code>/<code>SetLocal</code>, plus <code>ApplyLocalPropertyPatch</code> that flushes view-layer dirties without consuming dirty-component structure changes. Required by script-driven helper entities.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Local entity never appears in serialization / replication paths.</li>
+        <li><code>ApplyLocalPropertyPatch</code> emits an EntityUpdate without clearing component dirties.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Multiplayer/SpaceEntity.h + Library/src/Multiplayer/SpaceEntity.cpp</li>
+        <li>OfflineRealtimeEngine/OnlineRealtimeEngine glue.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-10 -->
+<section id="ngx-10" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-10</span>
+    <span class="title">Entity tags + <code>EntityQueryUtils</code></span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-06</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-10" type="button">Details →</button>
+  </div>
+  <p>SpaceEntity gains a tag set (replicated map). <code>EntityQueryUtils</code> exposes <code>ResolveEntityIdsFromQueryJson</code> / <code>ResolveEntityIdFromQueryJson</code> supporting tag matching and boolean composition, used by <code>CodeAttribute::EntityQuery</code> resolution.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>SpaceEntityTagsNormalizeAndDeduplicate</code> passes.</li>
+        <li><code>EntityQueryResolutionSupportsTagsAndBooleanComposition</code> passes.</li>
+        <li><code>SingleEntityQueryResolutionContractRemainsUnchangedForTags</code> passes (back-compat).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>SpaceEntity.{h,cpp} — Tags map, get/set/has/add/remove.</li>
+        <li>Library/src/Multiplayer/EntityQueryUtils.{h,cpp}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-11 -->
+<section id="ngx-11" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-11</span>
+    <span class="title">Entity script interface extensions — events, add-component, child query</span>
+    <span class="meta">
+      <span class="chip size-L">L</span>
+      <span class="chip dep">deps: NGX-07, NGX-09, NGX-10</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-11" type="button">Details →</button>
+  </div>
+  <p>Adds the JS-facing surface scripts actually use: <code>entity.on/off/fire</code>, <code>GetParentEntity</code> returning a script interface (not raw entity), <code>GetChildEntitiesByQuery</code>, tag get/set/add/remove/has, and <code>AddXxxComponent</code> for every component type. Local-scope detection routes through <code>ApplyLocalPropertyPatch</code>; replicated-scope routes through <code>QueueUpdate</code>.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Script can register listeners across context rebuilds without stale-callback crash (covered by <code>ClearEventListeners</code>).</li>
+        <li><code>AddCollisionComponent</code> roundtrips through StatePatcher and downstream JS wrappers see the new component on the next tick.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>EntityScriptInterface.{h,cpp}</li>
+        <li>EntityScriptBinding.{h,cpp} (qjs::class_ registrations)</li>
+        <li>ComponentScriptInterface base (SetLocalScope, Destroy)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-12 -->
+<section id="ngx-12" class="ticket" data-phase="3">
+  <div class="head">
+    <span class="id">NGX-12</span>
+    <span class="title"><code>Editor</code> + <code>Server</code> code-component scopes</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-08</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-12" type="button">Details →</button>
+  </div>
+  <p>Extends <code>NgxCodeComponentRuntime</code> activation policy: <code>Editor</code> components only run in <code>Edit</code> mode; <code>Server</code> components only run when the realtime engine reports server-runtime mode.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>EditorCodeComponentOnlyRunsInEditAndLocalRunsInPlay</code> passes.</li>
+        <li><code>ServerCodeComponentRunsOnlyInServerRuntimeMode</code> passes.</li>
+        <li><code>CodeComponentsRemainDormantUntilRuntimeModeIsExplicitlySet</code> passes.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxCodeComponentRuntime.cpp — <code>ShouldActivateCodeComponent</code> branches.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="phase" data-phase="4">
+  <div class="num">04</div>
+  <div class="body"><strong>Engine integrations.</strong> <span>NGX-13 → NGX-16. Things scripts can now talk to.</span></div>
+</div>
+
+<!-- NGX-13 -->
+<section id="ngx-13" class="ticket" data-phase="4">
+  <div class="head">
+    <span class="id">NGX-13</span>
+    <span class="title"><code>NgxAssetScriptBinding</code> — <code>__ngxAssetQuery</code> Promise</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-07</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-13" type="button">Details →</button>
+  </div>
+  <p>One JS-side function: <code>__ngxAssetQuery(queryJson)</code> returns a native Promise resolving to an array of asset objects. Pending-promise table drained &amp; rejected on context teardown.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Resolved Promise delivers results on the QuickJS pump.</li>
+        <li>Context rebuild rejects in-flight Promises cleanly; no JS finalizer leak.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxAssetScriptBinding.h + cpp</li>
+        <li>NgxScriptSystem hookup (BindToContext on rebuild).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-14 -->
+<section id="ngx-14" class="ticket" data-phase="4">
+  <div class="head">
+    <span class="id">NGX-14</span>
+    <span class="title">Input dispatch (keyboard, mouse) + camera state cache</span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: NGX-01</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-14" type="button">Details →</button>
+  </div>
+  <p>Host-side <code>FireKeyboardEvent</code>/<code>FireMouseEvent</code> dispatch to active Local/Editor scripts. <code>SetLocalPlayerCameraState</code> and <code>SetLocalPlayerXrActive</code> caches read by JS via <code>csp.*</code> getters.</p>
+  <div class="grid">
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxScriptSystem.cpp — DispatchKeyboard/MouseEvent helpers, camera-state mutex.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Keyboard event roundtrip from C++ to JS handler observable in test harness.</li>
+        <li>Camera vectors read inside script match last <code>SetLocalPlayerCameraState</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-15 -->
+<section id="ngx-15" class="ticket" data-phase="4">
+  <div class="head">
+    <span class="id">NGX-15</span>
+    <span class="title"><code>RuntimeMaterialSystem</code> + script interfaces</span>
+    <span class="meta">
+      <span class="chip size-L">L</span>
+      <span class="chip dep">deps: NGX-11</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-15" type="button">Details →</button>
+  </div>
+  <p>Runtime material management (lazy load, binding handles, patch/reset/save) plus the JS surface for material edits and texture-slot overrides. Independently useful for non-script clients too.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>RuntimeMaterialSystem tests pass (texture-patch slot coverage, changed-callback ordering).</li>
+        <li><code>RuntimeMaterialTextureScriptInterface*</code> tests pass.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Library/include/CSP/Systems/Assets/RuntimeMaterialSystem.h + cpp</li>
+        <li>Library/src/Multiplayer/Script/RuntimeMaterialScriptInterface.{h,cpp}</li>
+        <li>Library/src/Multiplayer/Script/RuntimeMaterialTextureScriptInterface.{h,cpp}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-16 -->
+<section id="ngx-16" class="ticket" data-phase="4">
+  <div class="head">
+    <span class="id">NGX-16</span>
+    <span class="title">New component bindings — Attachment, Collision, expanded Audio/Avatar</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-11</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-16" type="button">Details →</button>
+  </div>
+  <p>Land the new component types and script interfaces in batches: <strong>(a)</strong> <code>AttachmentSpaceComponent</code> (XR anchor); <strong>(b)</strong> <code>CollisionSpaceComponent</code> kinematic / dynamic-rigidbody / collision-mode props; <strong>(c)</strong> <code>AvatarSpaceComponent</code> + <code>CameraType</code>, <code>LocomotionModel::Scripted</code>/<code>ScriptedRigidbody</code>; <strong>(d)</strong> <code>AudioSpaceComponent::PlaySound</code> with callback. Each sub-letter can ship as its own PR if (a)…(d) feel chunky together.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li>Replicated round-trip for every new property.</li>
+        <li>Avatar with <code>LocomotionModel::Scripted</code> suppresses stock locomotion (validated in <code>magnopus-web-renderer</code> downstream).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>AttachmentSpaceComponent.{h,cpp} + ScriptInterface.{h,cpp}</li>
+        <li>CollisionSpaceComponent.{h,cpp} + ScriptInterface delta</li>
+        <li>AvatarSpaceComponent.{h,cpp} (CameraType, Scripted-locomotion props)</li>
+        <li>AudioSpaceComponent — PlaySound + callback</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="phase" data-phase="5">
+  <div class="num">05</div>
+  <div class="body"><strong>Scripted UI.</strong> <span>NGX-17 → NGX-21. Bring up Clay-based UI. None of this affects existing clients.</span></div>
+</div>
+
+<!-- NGX-17 -->
+<section id="ngx-17" class="ticket" data-phase="5">
+  <div class="head">
+    <span class="id">NGX-17</span>
+    <span class="title"><code>NgxUIRuntime</code> Clay layout core — screen-space only</span>
+    <span class="meta">
+      <span class="chip size-L">L</span>
+      <span class="chip dep">deps: NGX-08, NGX-23 (Clay dep)</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-17" type="button">Details →</button>
+  </div>
+  <p>JS <code>ui()</code> returns a raw tree; runtime walks it without JSON round-trip, captures handler <code>JSValue</code>s into a C++ table, runs Clay layout, and emits a <code>UIDrawable</code> diff (add/update/remove) the client drains via <code>DrainPendingUIUpdates</code>. <strong>Screen mounts only</strong> — world/billboard mounts deferred.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>CodeComponentRuntimeMountsUIScreenAndUnmountsOnRemoval</code> passes.</li>
+        <li><code>CodeComponentRuntimeReactsToUIAttributeChanges</code> passes.</li>
+        <li>UnmountUIForInactiveEntities safety net works.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxUIRuntime.{h,cpp}</li>
+        <li>NgxScriptSystem UI bridge (DrainPendingUIUpdates, SetUIViewportSize)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-18 -->
+<section id="ngx-18" class="ticket" data-phase="5">
+  <div class="head">
+    <span class="id">NGX-18</span>
+    <span class="title">UI text measurement — sync (native) + async (web)</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-17</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-18" type="button">Details →</button>
+  </div>
+  <p>Two paths into Clay's measure callback: native clients register a synchronous <code>SetUITextMeasureCallback</code>; web clients drain pending requests and submit results asynchronously. Per-line wrap drawables emitted with text alignment.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>CodeComponentRuntimeSplitsWrappedTextIntoPerLineDrawablesAndAppliesTextAlignment</code> passes.</li>
+        <li>Async request/result roundtrip stable across reloads.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>NgxScriptSystem: DrainPendingUITextMeasureRequests, SubmitUITextMeasureResults, SetUITextMeasureCallback.</li>
+        <li>NgxUIRuntime: text-measure adapter, line splitting.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-19 -->
+<section id="ngx-19" class="ticket" data-phase="5">
+  <div class="head">
+    <span class="id">NGX-19</span>
+    <span class="title">UI action dispatch + Clay debug overlay</span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: NGX-17</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-19" type="button">Details →</button>
+  </div>
+  <p><code>DispatchUIAction(entity, handlerId, eventJson)</code> routes click/hover events back into the captured handler table. <code>SetUIDebugModeEnabled</code> toggles Clay's bounding-box overlay across all active surfaces.</p>
+</section>
+
+<!-- NGX-20 -->
+<section id="ngx-20" class="ticket" data-phase="5">
+  <div class="head">
+    <span class="id">NGX-20</span>
+    <span class="title">World-mounted UI + clip-escape</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: NGX-17, NGX-18</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-20" type="button">Details →</button>
+  </div>
+  <p>Mount UI surfaces in the 3D world via <code>placementKey</code>, billboard support, clip-escape for non-clipped floating drawables. Client-side bridge in cspwa (<code>NgxUIClientBridge</code>) consumes the placementKey serial-async chain — that ships in <code>codecomponent</code>; this PR is just the C++ side.</p>
+</section>
+
+<!-- NGX-21 -->
+<section id="ngx-21" class="ticket" data-phase="5">
+  <div class="head">
+    <span class="id">NGX-21</span>
+    <span class="title">Debug draw bindings — <code>csp.drawLine</code></span>
+    <span class="meta">
+      <span class="chip size-S">S</span>
+      <span class="chip dep">deps: NGX-01</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-21" type="button">Details →</button>
+  </div>
+  <p>Immediate-mode debug primitives. JS queues a command per frame; client drains via <code>DrainPendingDebugDraws</code>. Cleared on drain so scripts must redraw each frame.</p>
+</section>
+
+<div class="phase" data-phase="6">
+  <div class="num">06</div>
+  <div class="body"><strong>Tooling &amp; deps.</strong> <span>NGX-22, NGX-23. Can land before everything else if convenient.</span></div>
+</div>
+
+<!-- NGX-22 -->
+<section id="ngx-22" class="ticket" data-phase="6">
+  <div class="head">
+    <span class="id">NGX-22</span>
+    <span class="title">WrapperGenerator — TS structs + method-shape fixes</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: none</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-22" type="button">Details →</button>
+  </div>
+  <p>Generator changes used by downstream <code>connected-spaces-platform-web-api</code>: TS struct support, <code>package.json</code> emission, fixes to <code>ClassMethod</code>/<code>EventMethod</code>/<code>TaskMethod</code> templates, additions to <code>Parser.py</code>/<code>MetadataTypes.py</code>. Can ship independently of any C++ change.</p>
+  <div class="grid">
+    <div>
+      <h4>Acceptance</h4>
+      <ul>
+        <li><code>tests/test_parser.py</code> additions pass.</li>
+        <li>Generated TS for <code>main</code>'s public API is unchanged byte-for-byte before opting into new templates.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Scope (in)</h4>
+      <ul class="col-files">
+        <li>Tools/WrapperGenerator/* (Parser, TypeScriptWrapperGenerator, Templates/TypeScript/*).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NGX-23 -->
+<section id="ngx-23" class="ticket" data-phase="6">
+  <div class="head">
+    <span class="id">NGX-23</span>
+    <span class="title">Third-party deps — Clay, rapidjson, uuid-v4, quickjs build</span>
+    <span class="meta">
+      <span class="chip size-M">M</span>
+      <span class="chip dep">deps: none</span>
+    </span>
+    <button class="details-btn" data-ticket="ngx-23" type="button">Details →</button>
+  </div>
+  <p>Drop in Clay (<code>ThirdParty/clay/clay.h</code>), uuid-v4, the rapidjson update, premake5 entry for QuickJS, and the small <code>quickjspp.hpp</code> tweaks. Drop unused CMake remnants (<code>cmake/*</code>, conan profiles) <strong>only if</strong> nothing internal references them.</p>
+  <p class="note">Risk: rapidjson update has a wide blast radius — diff is ~1.5k lines. Treat as its own PR with the existing JSON-using tests as gate. Drop file deletions (CMake, conan, sole) should be a separate cleanup ticket.</p>
+</section>
+
+<h2>Notes &amp; risks</h2>
+<ul class="risks">
+  <li><strong>Test ordering.</strong> <code>NgxScriptSystemTests.cpp</code> has 70 cases — port them with their owning ticket, not en masse. Acceptance criteria above name the minimum subset per ticket.</li>
+  <li><strong>Hidden coupling.</strong> The current branch quietly renames <code>EThirdPartyPlatform</code> values and removes <code>::Web</code>. That is a breaking enum change; do not bury it inside <strong>NGX-04</strong>. Split into its own ticket and coordinate with downstream renderer / cspwa.</li>
+  <li><strong>Deletions to defer.</strong> The branch removes <code>cmake/</code>, <code>conanfile.py</code>, <code>profiles/host/*</code>, <code>ThirdParty/sole/</code>, and <code>ThirdParty/signalrclient/CMakeLists.txt</code>. None of those are about scripting — leave them out of this roadmap entirely or batch into a "build-system cleanup" PR.</li>
+  <li><strong>Inline JS surface.</strong> <code>NgxCodeComponentRuntime.cpp</code> ships a big inline JS string (the <code>scriptRegistry</code> / <code>@csp/code</code> shim). Memory note <code>feedback_csp_code_dual_source</code> tracks the dual-source obligation (C++ inline + <code>ngx-scripts/csp-library</code>). Keep <strong>NGX-08</strong> minimal and grow the shim ticket-by-ticket alongside features that need it, rather than landing the full shim up front.</li>
+  <li><strong>Generated-wrapper coupling.</strong> Downstream <code>connected-spaces-platform-web-api</code> consumes generated TS. <strong>NGX-22</strong> can land first to de-risk every later ticket that adds public API surface.</li>
+</ul>
+
+<h2>Suggested merge order</h2>
+<div class="merge-order">
+<pre>NGX-23  →  NGX-22  →  NGX-01  →  NGX-02  →  NGX-03  →  NGX-04
+                                                       ↓
+        NGX-05  →  NGX-06  →  NGX-07  →  NGX-08  →  NGX-12
+                                ↓           ↓
+                              NGX-09 ─────┐ NGX-13
+                              NGX-10      │ NGX-14
+                              NGX-11 ─────┤ NGX-15
+                                          │ NGX-16
+                                          ↓
+                                        NGX-17 → 18 → 19 → 20
+                                                            → 21</pre>
+</div>
+
+<!-- Drawer (docked side panel, no overlay) -->
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="id" id="drawer-id">NGX-00</span>
+    <span class="title" id="drawer-title"></span>
+    <button class="drawer-close" id="drawer-close" aria-label="Close" type="button">×</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<script>
+const REPO = "https://github.com/magnopus-opensource/connected-spaces-platform";
+const BRANCH = "spike/ngx-ui-spike";
+const blob = (path, line) => `${REPO}/blob/${BRANCH}/${path}${line ? `#L${line}` : ""}`;
+
+const TICKETS = {
+  "ngx-01": {
+    title: "NgxScriptSystem skeleton — eval arbitrary JS, console, requestAnimationFrame",
+    tests: [
+      { name: "OfflineEnterExitBootstrapsAndTearsDown", expect: "Entering/exiting an offline space builds and tears down the QuickJS context; no leaked JSValues; ASAN clean." },
+      { name: "OnlineEnterExitBootstrapsAndTearsDown", expect: "Same as offline but exercising the OnlineRealtimeEngine path." },
+      { name: "TickEventDrainsPendingJobs", expect: "The foundation tick handler pumps QuickJS pending jobs so awaited promises resolve across ticks." },
+      { name: "RequestAnimationFrameUsesAnimationFrameTickNotFoundationTick", expect: "rAF callbacks fire on TickAnimationFrame() only — never on the foundation tick. Cancelled rAFs do not fire." },
+      { name: "EnterSpaceDoesNotExecuteUserScriptsByDefault", expect: "Just entering a space without any registered code components is a no-op — proves the runtime is dormant by default." }
+    ],
+    refs: [
+      { label: "NgxScriptSystem public header", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h" },
+      { label: "Host bindings (console, rAF)", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp", line: 1483 },
+      { label: "requestAnimationFrame implementation", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp", line: 1498 },
+      { label: "GC cadence + foundation tick handler", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp", line: 782 }
+    ]
+  },
+  "ngx-02": {
+    title: "Script assets & module resolution pipeline",
+    tests: [
+      { name: "CanonicalPathMappingIsStable", expect: "Asset-collection name + asset name produce the same canonical module key across runs and across reloads." },
+      { name: "ModuleImportResolvesFromInMemoryMap", expect: "import 'foo' resolves to a string in LoadedModuleSources without filesystem access." },
+      { name: "ExecuteModuleRunsLoadedModuleSource", expect: "Executing a module loaded from a CSP asset evaluates once; re-executing reuses the cached module." },
+      { name: "MissingModuleLogsExplicitError", expect: "Unknown module path produces a clear error log — never a silent JS exception swallow." },
+      { name: "ReloadUsesUpdatedSourceAndRerunsEntrypoint", expect: "AssetDetailBlobChanged triggers source refresh; ReloadScriptModule recompiles and re-runs the entrypoint." }
+    ],
+    refs: [
+      { label: "LoadScriptModules + asset-change listener", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp" },
+      { label: "OnEnterSpace / OnExitSpace wiring", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 198 },
+      { label: "SpaceSystem hooks (call into NgxScriptSystem)", path: "Library/src/Systems/Spaces/SpaceSystem.cpp" }
+    ]
+  },
+  "ngx-03": {
+    title: "Static module registration + built-in signals module",
+    tests: [
+      { name: "BuiltInSignalsModuleImportResolvesAndExecutes", expect: "import { signal } from 'signals' returns a working preact-signals subset; .value reads/writes flow through." },
+      { name: "ExecuteModuleRunsStaticModuleSource", expect: "Static modules registered via RegisterStaticModuleSource execute the same as asset-loaded modules and survive context rebuild." }
+    ],
+    refs: [
+      { label: "signals built-in module source", path: "Library/src/Multiplayer/NgxScript/signals.h" },
+      { label: "RegisterStaticModuleSource API", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 130 }
+    ]
+  },
+  "ngx-04": {
+    title: "ESpaceRuntimeMode on SpaceSystem (Unset / Edit / Play / Server)",
+    tests: [
+      { name: "CodeComponentsRemainDormantUntilRuntimeModeIsExplicitlySet", expect: "While ESpaceRuntimeMode is Unset no scripts activate, even when CodeSpaceComponents exist. (Note: this test verifies NGX-04 + NGX-08 together — the enum is exercised through the runtime in NGX-12.)" }
+    ],
+    refs: [
+      { label: "ESpaceRuntimeMode enum", path: "Library/include/CSP/Common/SharedEnums.h", line: 247 },
+      { label: "SpaceSystem getter/setter", path: "Library/include/CSP/Systems/Spaces/SpaceSystem.h" },
+      { label: "Mode-change logging + wire-up", path: "Library/src/Systems/Spaces/SpaceSystem.cpp" }
+    ]
+  },
+  "ngx-05": {
+    title: "CodeAttribute + NgxScriptAttribute data types",
+    tests: [
+      { name: "CodeSpaceComponentAttributeRoundtrip", expect: "Setting and reading every CodePropertyType (Boolean, Integer, Float, String, Vector2/3/4, Quaternion, Color) round-trips byte-identically through ReplicatedValue." },
+      { name: "CodeAttributeEntityQueryRoundtripSerializesAndDeserializes", expect: "EntityQuery attribute serialises into the map shape, recovers identical predicate ids and operators." },
+      { name: "CodeAttributeEntityQueryRejectsInvalidPayload", expect: "Invalid EntityQuery shape (missing fields, wrong types) is rejected without crashing." },
+      { name: "CodeAttributeImageAssetRoundtripSerializesAndDeserializes", expect: "ImageAsset attribute (asset collection id + asset id + uri) round-trips and recovers original ids." },
+      { name: "CodeAttributeImageAssetRejectsInvalidPayload", expect: "Invalid ImageAsset shapes are rejected; existing attribute remains untouched." }
+    ],
+    refs: [
+      { label: "CodeAttribute header (typed value carrier)", path: "Library/include/CSP/Multiplayer/Components/CodeAttribute.h" },
+      { label: "CodeAttribute implementation", path: "Library/src/Multiplayer/Components/CodeAttribute.cpp" },
+      { label: "NgxScriptAttribute (schema + value pair)", path: "Library/include/CSP/Multiplayer/Components/NgxScriptAttribute.h" }
+    ]
+  },
+  "ngx-06": {
+    title: "CodeSpaceComponent — replicated, dormant",
+    tests: [
+      { name: "CodeSpaceComponentScriptAttributesExposeImageAssetDefaults", expect: "After SetSchema with image-asset default, GetScriptAttributes returns the default ImageAsset bound into the live attribute set." },
+      { name: "CodeSpaceComponentAttributeRoundtrip (component-level)", expect: "Add / Get / Has / Remove / Clear / GetAttributeKeys all round-trip through the replicated value map." }
+    ],
+    refs: [
+      { label: "CodeSpaceComponent header", path: "Library/include/CSP/Multiplayer/Components/CodeSpaceComponent.h" },
+      { label: "CodeSpaceComponent implementation", path: "Library/src/Multiplayer/Components/CodeSpaceComponent.cpp" }
+    ]
+  },
+  "ngx-07": {
+    title: "NgxEntityScriptBinding wrapper",
+    tests: [
+      { name: "(legacy regression) EntityScriptBinding tests still pass", expect: "Existing entity-script suite is unchanged when the NGX wrapper is enabled — proves legacy code paths are not perturbed." },
+      { name: "GetLocalAvatar returns the local-client avatar entity", expect: "Online engine: resolves via MultiplayerConnection::GetClientId(); offline: returns nullptr." }
+    ],
+    refs: [
+      { label: "NgxEntityScriptBinding header", path: "Library/src/Multiplayer/NgxScript/NgxEntityScriptBinding.h" },
+      { label: "NgxEntityScriptBinding implementation", path: "Library/src/Multiplayer/NgxScript/NgxEntityScriptBinding.cpp" },
+      { label: "EntityScriptBinding diff (WrapEntity, ResolveLocalClientId)", path: "Library/src/Multiplayer/Script/EntityScriptBinding.cpp" }
+    ]
+  },
+  "ngx-08": {
+    title: "NgxCodeComponentRuntime — Local scope only",
+    tests: [
+      { name: "CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal", expect: "scriptRegistry global is created on first code-component activation and removed when the last component leaves; survives context rebuild." },
+      { name: "CodeComponentRuntimeSupportsDirectScriptAndRunsTeardownOnRemoval", expect: "A direct script (no module) activates, runs its setup, and runs the registered teardown when the component is removed." },
+      { name: "CodeComponentRuntimeRunsDirectScriptTeardownOnExitSpace", expect: "OnExitSpace tears down all active code components, calling each script's teardown exactly once." },
+      { name: "LocalCodeComponentOnlyRunsWhenSelectedInEditMode", expect: "In Edit mode a Local-scope component only runs while its entity is selected by the local client. Deselection tears it down; reselection re-creates it." },
+      { name: "LocalCodeComponentRunsWhenAncestorIsSelectedInEditMode", expect: "Selection bubbles through the ancestor chain — selecting a parent activates Local components on descendants." },
+      { name: "LocalCodeComponentRecreatesWhenRuntimeModeChangesWhileActive", expect: "Switching Edit ↔ Play with an active component tears it down and re-creates a fresh instance — no stale state survives." },
+      { name: "CodeComponentRuntimeAutoSyncWorks{Online,Offline}", expect: "Adding / removing / mutating a CodeSpaceComponent in either realtime engine automatically syncs into scriptRegistry." },
+      { name: "CodeComponentFallbackSchemaSyncAppliesDefaultsAndRejectsInvalidTypes", expect: "Without a $schema export from the script, the fallback registry derives defaults from CodeAttribute types and rejects type mismatches." },
+      { name: "CodeComponentEntityReferenceResolvesWritesAndHandlesDeletion", expect: "Entity-ref attribute reads return the referenced entity; writes update the ref; deletion of the target nulls the ref without crashing the script." }
+    ],
+    refs: [
+      { label: "NgxCodeComponentRuntime header", path: "Library/src/Multiplayer/NgxScript/NgxCodeComponentRuntime.h" },
+      { label: "Snapshot diff + activation policy", path: "Library/src/Multiplayer/NgxScript/NgxCodeComponentRuntime.cpp" },
+      { label: "Bridge methods (Add/Sync/Remove)", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 60 },
+      { label: "scriptRegistry bootstrap snippet", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp", line: 2290 }
+    ]
+  },
+  "ngx-09": {
+    title: "Local entities + ApplyLocalPropertyPatch",
+    tests: [
+      { name: "(SpaceEntity) Local entity does not replicate", expect: "Entities created via CreateLocalChildEntity are absent from outbound state patches and from entity sync." },
+      { name: "ApplyLocalPropertyPatch flushes view-layer dirties only", expect: "Component-structure dirties remain pending after a local patch flush — proves it does not consume the dirty-component queue." }
+    ],
+    refs: [
+      { label: "SpaceEntity additions (IsLocal, CreateLocalChildEntity)", path: "Library/include/CSP/Multiplayer/SpaceEntity.h" },
+      { label: "ApplyLocalPropertyPatch implementation", path: "Library/src/Multiplayer/SpaceEntity.cpp" },
+      { label: "OnlineRealtimeEngine local-entity branches", path: "Library/src/Multiplayer/OnlineRealtimeEngine.cpp" }
+    ]
+  },
+  "ngx-10": {
+    title: "Entity tags + EntityQueryUtils",
+    tests: [
+      { name: "SpaceEntityTagsNormalizeAndDeduplicate", expect: "Tags are lower-cased and deduplicated on add; SetTags(['A','a','B']) yields ['a','b']." },
+      { name: "EntityQueryResolutionSupportsTagsAndBooleanComposition", expect: "Queries using {has:'tag'}, {and:[…]}, {or:[…]}, {not:…} compose correctly and return the expected entity id set." },
+      { name: "SingleEntityQueryResolutionContractRemainsUnchangedForTags", expect: "Existing single-entity query callers receive the same result shape — no regressions for legacy consumers." }
+    ],
+    refs: [
+      { label: "SpaceEntity tag API", path: "Library/include/CSP/Multiplayer/SpaceEntity.h" },
+      { label: "EntityQueryUtils header", path: "Library/src/Multiplayer/EntityQueryUtils.h" },
+      { label: "Query resolution implementation", path: "Library/src/Multiplayer/EntityQueryUtils.cpp" }
+    ]
+  },
+  "ngx-11": {
+    title: "Entity script interface — events, add-component, child query, tags",
+    tests: [
+      { name: "entity.on/off/fire round-trip in JS", expect: "Listener registered via entity.on('event', cb) fires on entity.fire('event', payload); off removes only the named callback." },
+      { name: "ClearEventListeners on context rebuild", expect: "After a context rebuild no stale JSValue callbacks remain — confirmed by triggering an event and observing zero invocations." },
+      { name: "AddCollisionComponent propagates through StatePatcher", expect: "AddXxxComponent() flushes the dirty add-component patch on the next tick so cspwa / renderer wrappers learn about the new component." },
+      { name: "GetChildEntitiesByQuery recursion flag", expect: "Recursive=true walks descendants; Recursive=false returns only direct children." }
+    ],
+    refs: [
+      { label: "EntityScriptInterface header", path: "Library/src/Multiplayer/Script/EntityScriptInterface.h" },
+      { label: "EntityScriptInterface implementation", path: "Library/src/Multiplayer/Script/EntityScriptInterface.cpp" },
+      { label: "ComponentScriptInterface (SetLocalScope, Destroy)", path: "Library/src/Multiplayer/Script/ComponentScriptInterface.h" }
+    ]
+  },
+  "ngx-12": {
+    title: "Editor + Server code-component scopes",
+    tests: [
+      { name: "EditorCodeComponentOnlyRunsInEditAndLocalRunsInPlay", expect: "Editor-scope component runs only when ESpaceRuntimeMode == Edit; Local-scope runs in Play. Switching modes activates/deactivates each correctly." },
+      { name: "ServerCodeComponentRunsOnlyInServerRuntimeMode", expect: "Server-scope only activates when the runtime mode is Server; non-server clients ignore it." },
+      { name: "CodeComponentsRemainDormantUntilRuntimeModeIsExplicitlySet", expect: "Mode==Unset keeps every scope dormant — proves we don't activate by default on space entry." }
+    ],
+    refs: [
+      { label: "ShouldActivateCodeComponent (scope policy)", path: "Library/src/Multiplayer/NgxScript/NgxCodeComponentRuntime.cpp" },
+      { label: "CodeScopeType enum", path: "Library/include/CSP/Multiplayer/Components/CodeSpaceComponent.h", line: 30 }
+    ]
+  },
+  "ngx-13": {
+    title: "NgxAssetScriptBinding — __ngxAssetQuery Promise",
+    tests: [
+      { name: "Resolved Promise delivers asset list to JS handler", expect: "await csp.__ngxAssetQuery({…}) resolves to the array of asset shapes the AssetSystem returned." },
+      { name: "Context rebuild rejects in-flight Promises", expect: "Pending Promises are rejected with a clear error before context teardown — no JS finaliser leaks." }
+    ],
+    refs: [
+      { label: "NgxAssetScriptBinding header", path: "Library/src/Multiplayer/NgxScript/NgxAssetScriptBinding.h" },
+      { label: "Promise plumbing + cleanup", path: "Library/src/Multiplayer/NgxScript/NgxAssetScriptBinding.cpp" }
+    ]
+  },
+  "ngx-14": {
+    title: "Input dispatch + camera state cache",
+    tests: [
+      { name: "Keyboard event reaches script-side __cspDispatchKeyboardEvent", expect: "FireKeyboardEvent from C++ surfaces in JS with matching type/key/code/modifiers." },
+      { name: "Mouse event reaches script-side __cspDispatchMouseEvent", expect: "FireMouseEvent surfaces with matching button/buttons/pointerId/pointerType/modifiers." },
+      { name: "camera vectors read inside script match SetLocalPlayerCameraState", expect: "Script-side getters return the last cached camera position/rotation/forward/right/up — mutex-safe across writer/reader threads." }
+    ],
+    refs: [
+      { label: "FireKeyboardEvent / FireMouseEvent declarations", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 80 },
+      { label: "Camera-state cache implementation", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp" },
+      { label: "JS dispatcher (__cspDispatchKeyboardEvent / Mouse)", path: "Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp", line: 1661 }
+    ]
+  },
+  "ngx-15": {
+    title: "RuntimeMaterialSystem + script interfaces",
+    tests: [
+      { name: "RuntimeMaterialSystemTexturePatchSupportsAllSlotsAndChangedCallback", expect: "Every texture slot can be patched and the changed-callback fires with the updated slot index." },
+      { name: "RuntimeMaterialTextureScriptInterfacePatchesBindingTexturesAndResets", expect: "JS-side material edits patch binding textures and Reset() restores original values." },
+      { name: "RuntimeMaterialTextureScriptInterfaceExposesAlphaVideoColorTextureOnly", expect: "Only the alpha-video colour texture is exposed to script — other slots are filtered out." },
+      { name: "RuntimeMaterialTextureScriptInterfaceCachesPerSlotOnRuntimeMaterial", expect: "Texture interfaces are cached per (material, slot) — repeated access returns the same JS wrapper." }
+    ],
+    refs: [
+      { label: "RuntimeMaterialSystem header", path: "Library/include/CSP/Systems/Assets/RuntimeMaterialSystem.h" },
+      { label: "RuntimeMaterialSystem implementation", path: "Library/src/Systems/Assets/RuntimeMaterialSystem.cpp" },
+      { label: "RuntimeMaterialScriptInterface", path: "Library/src/Multiplayer/Script/RuntimeMaterialScriptInterface.h" },
+      { label: "RuntimeMaterialTextureScriptInterface", path: "Library/src/Multiplayer/Script/RuntimeMaterialTextureScriptInterface.h" }
+    ]
+  },
+  "ngx-16": {
+    title: "New component bindings (Attachment, Collision, Audio, Avatar)",
+    tests: [
+      { name: "AttachmentSpaceComponent replicated round-trip", expect: "AnchorPath, AttachedPosition/Rotation/Scale replicate identically across clients." },
+      { name: "CollisionSpaceComponent kinematic / dynamic / mode props", expect: "New kinematic and collision-mode properties round-trip; switching to dynamic rigidbody activates physics on the renderer side." },
+      { name: "AvatarSpaceComponent CameraType + Scripted locomotion", expect: "CameraType (FirstAndThirdPerson / FirstPerson / ThirdPerson / Scripted) and LocomotionModel (Scripted / ScriptedRigidbody) replicate and gate stock locomotion." },
+      { name: "AudioSpaceComponent.PlaySound callback", expect: "PlaySound fires the supplied callback when playback completes; cancelling mid-playback fires with a cancelled status." }
+    ],
+    refs: [
+      { label: "AttachmentSpaceComponent header", path: "Library/include/CSP/Multiplayer/Components/AttachmentSpaceComponent.h" },
+      { label: "CollisionSpaceComponent additions", path: "Library/include/CSP/Multiplayer/Components/CollisionSpaceComponent.h" },
+      { label: "AvatarSpaceComponent additions (CameraType, locomotion)", path: "Library/include/CSP/Multiplayer/Components/AvatarSpaceComponent.h" },
+      { label: "AudioSpaceComponent PlaySound", path: "Library/include/CSP/Multiplayer/Components/AudioSpaceComponent.h" }
+    ]
+  },
+  "ngx-17": {
+    title: "NgxUIRuntime Clay layout core — screen-space only",
+    tests: [
+      { name: "CodeComponentRuntimeMountsUIScreenAndUnmountsOnRemoval", expect: "A code component that returns a tree from ui() produces a UIDrawable add-set; component removal produces the matching remove-set." },
+      { name: "CodeComponentRuntimeReactsToUIAttributeChanges", expect: "Changing a CodeSpaceComponent attribute re-runs ui() and emits an update diff — added/removed/modified drawables only, no full re-mount." },
+      { name: "UnmountUIForInactiveEntities safety net", expect: "If a script deactivates without calling __uiUnmount, the safety pass still tears down UI for inactive entity ids." }
+    ],
+    refs: [
+      { label: "NgxUIRuntime header", path: "Library/src/Multiplayer/NgxScript/NgxUIRuntime.h" },
+      { label: "Clay layout integration + diff emission", path: "Library/src/Multiplayer/NgxScript/NgxUIRuntime.cpp" },
+      { label: "DrainPendingUIUpdates / SetUIViewportSize", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 95 },
+      { label: "Clay library (vendored)", path: "ThirdParty/clay/clay.h" }
+    ]
+  },
+  "ngx-18": {
+    title: "UI text measurement — sync (native) + async (web)",
+    tests: [
+      { name: "ClientTextMeasurementCallbackUsedDuringLayout", expect: "When SetUITextMeasureCallback is registered, Clay measure callback delegates to it; widths/heights propagate into layout." },
+      { name: "AsyncTextMeasureRequest/Result round-trip", expect: "DrainPendingUITextMeasureRequests returns pending entries; SubmitUITextMeasureResults fills them; layout completes on the next pump." },
+      { name: "CodeComponentRuntimeSplitsWrappedTextIntoPerLineDrawablesAndAppliesTextAlignment", expect: "Wrapped text emits one drawable per line with correct left/center/right alignment offsets." }
+    ],
+    refs: [
+      { label: "UITextMeasureCallback typedef", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 108 },
+      { label: "DrainPendingUITextMeasureRequests / Submit", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 92 },
+      { label: "Per-line drawable splitting", path: "Library/src/Multiplayer/NgxScript/NgxUIRuntime.cpp" }
+    ]
+  },
+  "ngx-19": {
+    title: "UI action dispatch + Clay debug overlay",
+    tests: [
+      { name: "DispatchUIAction routes to captured handler", expect: "DispatchUIAction(entityId, handlerId, payload) invokes the captured JSValue handler from the handler table." },
+      { name: "SetUIDebugModeEnabled toggles overlay across surfaces", expect: "Setting debug mode true emits the Clay overlay layer for every active surface; false removes it." }
+    ],
+    refs: [
+      { label: "DispatchUIAction declaration", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 100 },
+      { label: "SetUIDebugModeEnabled / IsUIDebugModeEnabled", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 103 }
+    ]
+  },
+  "ngx-20": {
+    title: "World-mounted UI + clip-escape",
+    tests: [
+      { name: "World mount via placementKey serial-async chain", expect: "Mounting a UI surface with placementKey resolves through the async chain in order; out-of-order responses are dropped." },
+      { name: "Clip-escape for non-clipped floating drawables", expect: "Floating drawables marked non-clipped render past their parent bounds without breaking the diff." },
+      { name: "Billboard surfaces face the camera", expect: "Billboard-flagged surfaces re-orient each frame to face the camera position cached by NGX-14." }
+    ],
+    refs: [
+      { label: "Placement / billboard branches", path: "Library/src/Multiplayer/NgxScript/NgxUIRuntime.cpp" }
+    ]
+  },
+  "ngx-21": {
+    title: "Debug draw bindings — csp.drawLine",
+    tests: [
+      { name: "DrawLine queues a DebugDrawLineCommand", expect: "csp.drawLine(start, end, color, width) appends one entry into the pending debug-draw queue per call." },
+      { name: "DrainPendingDebugDraws clears on read", expect: "Drain returns the queued commands as JSON and empties the queue — scripts must redraw each frame." }
+    ],
+    refs: [
+      { label: "DebugDrawLineCommand struct", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 264 },
+      { label: "DrainPendingDebugDraws declaration", path: "Library/include/CSP/Systems/Script/NgxScriptSystem.h", line: 89 }
+    ]
+  },
+  "ngx-22": {
+    title: "WrapperGenerator — TS structs + method-shape fixes",
+    tests: [
+      { name: "tests/test_parser.py struct additions", expect: "New struct-parsing branches in Parser.py are covered by unit tests; round-trips struct field metadata into the generator." },
+      { name: "Generated TS for main public API is byte-identical pre-opt-in", expect: "Running the generator against main produces unchanged output until new template features are explicitly enabled." }
+    ],
+    refs: [
+      { label: "Parser.py changes", path: "Tools/WrapperGenerator/Parser.py" },
+      { label: "TypeScriptWrapperGenerator.py changes", path: "Tools/WrapperGenerator/TypeScriptWrapperGenerator.py" },
+      { label: "Struct template", path: "Tools/WrapperGenerator/Templates/TypeScript/Partials/Struct.mustache" },
+      { label: "Parser unit tests", path: "Tools/WrapperGenerator/tests/test_parser.py" }
+    ]
+  },
+  "ngx-23": {
+    title: "Third-party deps — Clay, rapidjson, uuid-v4, quickjs build",
+    tests: [
+      { name: "Existing JSON-using tests still pass", expect: "rapidjson update does not regress any consumer — full internal test pass on the unchanged config." },
+      { name: "QuickJS premake build still produces the existing artefact", expect: "Switching from CMakeLists.txt to premake5.lua emits the same static lib on every supported platform." }
+    ],
+    refs: [
+      { label: "Clay (vendored single-header)", path: "ThirdParty/clay/clay.h" },
+      { label: "uuid-v4 (vendored)", path: "ThirdParty/uuid-v4/uuid_v4.h" },
+      { label: "QuickJS premake5", path: "ThirdParty/quickjs/premake5.lua" },
+      { label: "rapidjson update (deep diff — own PR)", path: "ThirdParty/rapidjson/include/rapidjson/schema.h" }
+    ]
+  }
+};
+
+(function () {
+  const drawer = document.getElementById("drawer");
+  const titleEl = document.getElementById("drawer-title");
+  const idEl = document.getElementById("drawer-id");
+  const bodyEl = document.getElementById("drawer-body");
+  const closeBtn = document.getElementById("drawer-close");
+  let currentId = null;
+
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  const colorMap = {
+    "1": ["#5ae0c1", "rgba(90,224,193,0.1)", "rgba(90,224,193,0.25)"],
+    "2": ["#7aa2ff", "rgba(122,162,255,0.1)", "rgba(122,162,255,0.25)"],
+    "3": ["#b388ff", "rgba(179,136,255,0.1)", "rgba(179,136,255,0.25)"],
+    "4": ["#ffb866", "rgba(255,184,102,0.1)", "rgba(255,184,102,0.25)"],
+    "5": ["#ff8fbf", "rgba(255,143,191,0.1)", "rgba(255,143,191,0.25)"],
+    "6": ["#9aa3b2", "rgba(154,163,178,0.1)", "rgba(154,163,178,0.25)"]
+  };
+
+  function pin(id) {
+    document.querySelectorAll(".ticket.is-pinned").forEach(el => el.classList.remove("is-pinned"));
+    if (id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("is-pinned");
+    }
+  }
+
+  function renderTicket(id) {
+    const data = TICKETS[id];
+    if (!data) return false;
+    idEl.textContent = id.toUpperCase();
+    titleEl.textContent = data.title;
+    const ticketEl = document.getElementById(id);
+    const phase = ticketEl ? ticketEl.getAttribute("data-phase") : null;
+    const c = colorMap[phase] || colorMap["2"];
+    idEl.style.color = c[0]; idEl.style.background = c[1]; idEl.style.borderColor = c[2];
+
+    const testHtml = (data.tests || []).map(t =>
+      `<div class="test-row"><div class="tname">${esc(t.name)}</div><div class="texpect">${esc(t.expect)}</div></div>`
+    ).join("");
+    const refHtml = (data.refs || []).map(r => {
+      const url = blob(r.path, r.line);
+      const lineFrag = r.line ? `<span class="rline">:${r.line}</span>` : "";
+      return `<a class="ref-row" href="${url}" target="_blank" rel="noopener noreferrer"><span class="rlabel">${esc(r.label)}</span><div class="rpath">${esc(r.path)}${lineFrag}</div></a>`;
+    }).join("");
+
+    bodyEl.innerHTML =
+      `<h5>Tests &amp; expected results</h5>${testHtml || '<p>No tests captured yet.</p>'}` +
+      `<h5>Code references — spike/ngx-ui-spike</h5>${refHtml || '<p>No refs captured yet.</p>'}`;
+    bodyEl.scrollTop = 0;
+    currentId = id;
+    pin(id);
+    return true;
+  }
+
+  let suppressUntil = 0;
+  function open(id, opts) {
+    if (currentId === id && drawer.classList.contains("open")) {
+      if (opts && opts.fromScroll) return;
+      close();
+      return;
+    }
+    if (!renderTicket(id)) return;
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("drawer-open");
+    if (!opts || !opts.fromScroll) {
+      // Anchor clicked ticket to the marker line so the scroll monitor
+      // doesn't immediately swap to a different one. Wait one frame so the
+      // drawer-open class has applied its column-collapse before measuring.
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          const targetTop = window.scrollY + el.getBoundingClientRect().top - 80;
+          window.scrollTo({ top: targetTop, behavior: "smooth" });
+        }
+        suppressUntil = performance.now() + 700;
+      });
+    }
+  }
+
+  function close() {
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("drawer-open");
+    currentId = null;
+    pin(null);
+  }
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".details-btn");
+    if (btn) {
+      e.preventDefault();
+      open(btn.dataset.ticket);
+      return;
+    }
+    // Clicking anywhere on a ticket also opens its drawer — except when the
+    // user is selecting text or clicking an inner link/button.
+    if (e.target.closest("a, button")) return;
+    const sel = window.getSelection && window.getSelection();
+    if (sel && sel.toString().length > 0) return;
+    const ticket = e.target.closest(".ticket[id^='ngx-']");
+    if (ticket) {
+      open(ticket.id);
+    }
+  });
+  closeBtn.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+
+  /* Scroll-driven ticket switching.
+     When the drawer is open and the user scrolls past the currently-pinned
+     ticket, swap the drawer to the next ticket whose card is in view.
+     Picks the ticket whose top has just crossed the marker line (~140px from
+     the top of the viewport) — i.e. the bottom-most ticket that has entered
+     the upper region of the page. */
+  const MARKER_Y = 140;
+  let scrollRaf = null;
+  function pickActiveTicket() {
+    const tickets = document.querySelectorAll(".ticket[id^='ngx-']");
+    let best = null;
+    let bestTop = -Infinity;
+    for (const t of tickets) {
+      const r = t.getBoundingClientRect();
+      if (r.top <= MARKER_Y && r.bottom > 0 && r.top > bestTop) {
+        bestTop = r.top;
+        best = t;
+      }
+    }
+    return best;
+  }
+  function onScroll() {
+    if (!drawer.classList.contains("open")) return;
+    if (performance.now() < suppressUntil) return;
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = null;
+      const active = pickActiveTicket();
+      if (active && active.id !== currentId && TICKETS[active.id]) {
+        renderTicket(active.id);
+      }
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+})();
+</script>
+
+</body>
+</html>
