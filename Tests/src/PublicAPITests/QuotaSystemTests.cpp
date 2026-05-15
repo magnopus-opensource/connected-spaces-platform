@@ -482,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     auto& InitialAssetId = Asset.Id;
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/testkb.json");
+    auto FilePath = std::filesystem::absolute("assets/Testkb.json");
     uintmax_t UpdateFileSize = std::filesystem::file_size(FilePath);
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();

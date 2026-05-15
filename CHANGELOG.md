@@ -35,6 +35,10 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
   At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
 
+- [OF-1850] feat: CSP tests now run on Linux platforms by @MAG-mv.
+  This includes code changes used by the new buld system to run tests on Linux.
+  This still isn't officially public, but noting here due to changes to List::Append.
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4980] fix!: Address issues with third party authorization flow. By @MAG-AdamThorn
