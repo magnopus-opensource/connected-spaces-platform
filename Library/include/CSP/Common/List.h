@@ -56,6 +56,11 @@ inline size_t next_pow2(size_t val)
 /// @tparam T : Object type to store in the list. T is required to be move-assignable.
 template <typename T> class CSP_API List
 {
+    CSP_START_IGNORE
+    // Ensure the type is move assignable due to List::Insert using std::move_backward
+    static_assert(std::is_move_assignable_v<T>);
+    CSP_END_IGNORE
+    
 public:
     using iterator = T*;
     using const_iterator = const T*;
