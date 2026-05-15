@@ -28,7 +28,7 @@ class ReflectionSpaceComponent;
 class ReflectionSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent = nullptr);
+    ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* inComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(std::string, Name);
     DECLARE_SCRIPT_PROPERTY(std::string, ReflectionAssetId);

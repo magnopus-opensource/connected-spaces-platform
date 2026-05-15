@@ -25,7 +25,7 @@ class HotspotSpaceComponent;
 class HotspotSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent = nullptr);
+    HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* inComponent = nullptr);
 
     std::string GetUniqueComponentId();
 };

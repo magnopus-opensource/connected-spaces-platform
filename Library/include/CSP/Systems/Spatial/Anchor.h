@@ -51,20 +51,20 @@ class CSP_API OlyAnchorPosition
 {
 public:
     OlyAnchorPosition();
-    OlyAnchorPosition(double InX, double InY, double InZ)
-        : X(InX)
-        , Y(InY)
-        , Z(InZ) {};
+    OlyAnchorPosition(double inX, double inY, double inZ)
+        : X(inX)
+        , Y(inY)
+        , Z(inZ) {};
 
     double X;
     double Y;
     double Z;
 
-    bool operator==(const OlyAnchorPosition& Other) const;
-    bool operator!=(const OlyAnchorPosition& Other) const;
+    bool operator==(const OlyAnchorPosition& other) const;
+    bool operator!=(const OlyAnchorPosition& other) const;
 };
 
-void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::AnchorDto& Dto, csp::systems::Anchor& Anchor);
+void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::AnchorDto& dto, csp::systems::Anchor& anchor);
 
 /// @ingroup Anchor System
 /// @brief Data representation of an Anchor
@@ -91,8 +91,8 @@ public:
     csp::common::Array<csp::common::String> Tags;
     csp::common::Map<csp::common::String, csp::common::String> SpatialKeyValue;
 
-    bool operator==(const Anchor& Other) const;
-    bool operator!=(const Anchor& Other) const;
+    bool operator==(const Anchor& other) const;
+    bool operator!=(const Anchor& other) const;
     /** @} */
 };
 
@@ -113,9 +113,9 @@ public:
 private:
     AnchorResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Anchor Anchor;
+    Anchor m_anchor;
 };
 
 /// @ingroup Anchor System
@@ -140,18 +140,18 @@ public:
 private:
     AnchorCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Anchor> Anchors;
+    csp::common::Array<Anchor> m_anchors;
 };
 
 /// @brief Callback containing an Anchor and enum result used when creating or retrieving an Anchor.
 /// @param Result POIResult : data class containing information on task result/progress
-typedef std::function<void(const AnchorResult& Result)> AnchorResultCallback;
+typedef std::function<void(const AnchorResult& result)> AnchorResultCallback;
 
 /// @brief Callback containing an array of Anchors and enum result used when retrieving an Anchors collection.
 /// @param Result AnchorCollectionResult : data class containing information on task result/progress
-typedef std::function<void(const AnchorCollectionResult& Result)> AnchorCollectionResultCallback;
+typedef std::function<void(const AnchorCollectionResult& result)> AnchorCollectionResultCallback;
 
 /// @ingroup Anchor System
 /// @brief Data representation of an AnchorResolution
@@ -165,8 +165,8 @@ public:
     double ResolveTime;
     csp::common::Array<csp::common::String> Tags;
 
-    bool operator==(const AnchorResolution& Other) const;
-    bool operator!=(const AnchorResolution& Other) const;
+    bool operator==(const AnchorResolution& other) const;
+    bool operator!=(const AnchorResolution& other) const;
 };
 
 /// @ingroup Anchor System
@@ -191,9 +191,9 @@ public:
 private:
     AnchorResolutionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    AnchorResolution AnchorResolution;
+    AnchorResolution m_anchorResolution;
 };
 
 /// @ingroup Anchor System
@@ -218,17 +218,17 @@ public:
 private:
     AnchorResolutionCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<AnchorResolution> AnchorResolutions;
+    csp::common::Array<AnchorResolution> m_anchorResolutions;
 };
 
 /// @brief Callback containing an AnchorResolution result used when creating or retrieving an AnchorResolution.
 /// @param Result POIResult : data class containing information on task result/progress
-typedef std::function<void(const AnchorResolutionResult& Result)> AnchorResolutionResultCallback;
+typedef std::function<void(const AnchorResolutionResult& result)> AnchorResolutionResultCallback;
 
 /// @brief Callback containing an array of AnchorResolutions result used when retrieving an AnchorResolutions collection.
 /// @param Result AnchorResolutionCollectionResult : data class containing information on task result/progress
-typedef std::function<void(const AnchorResolutionCollectionResult& Result)> AnchorResolutionCollectionResultCallback;
+typedef std::function<void(const AnchorResolutionCollectionResult& result)> AnchorResolutionCollectionResultCallback;
 
 } // namespace csp::systems

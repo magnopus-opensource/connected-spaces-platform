@@ -48,18 +48,18 @@ public:
 
     virtual ~ISignalRConnection() = default;
 
-    virtual void Start(std::function<void(std::exception_ptr)> Callback) = 0;
-    virtual void Stop(std::function<void(std::exception_ptr)> Callback) = 0;
+    virtual void Start(std::function<void(std::exception_ptr)> callback) = 0;
+    virtual void Stop(std::function<void(std::exception_ptr)> callback) = 0;
     virtual ISignalRConnection::ConnectionState GetConnectionState() const = 0;
     virtual std::string GetConnectionId() const = 0;
-    virtual void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback) = 0;
-    virtual bool On(const std::string& EventName, const MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem) = 0;
+    virtual void SetDisconnected(const std::function<void(std::exception_ptr)>& disconnectedCallback) = 0;
+    virtual bool On(const std::string& eventName, const MethodInvokedHandler& handler, csp::common::LogSystem& logSystem) = 0;
     virtual async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
-        const std::string& MethodName, const signalr::value& Arguments,
-        std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {})
+        const std::string& methodName, const signalr::value& arguments,
+        std::function<void(const signalr::value&, std::exception_ptr)> callback = [](const signalr::value&, std::exception_ptr) {})
         = 0;
     virtual void Send(
-        const std::string& MethodName, const signalr::value& Arguments, std::function<void(std::exception_ptr)> Callback = [](std::exception_ptr) {})
+        const std::string& methodName, const signalr::value& arguments, std::function<void(std::exception_ptr)> callback = [](std::exception_ptr) {})
         = 0;
     virtual const std::map<std::string, std::string>& HTTPHeaders() const = 0;
 };

@@ -37,7 +37,7 @@ public:
 
     /// @brief Sets the third party component reference.
     /// @param InValue The third party component reference.
-    virtual void SetThirdPartyComponentRef(const csp::common::String& InValue) = 0;
+    virtual void SetThirdPartyComponentRef(const csp::common::String& inValue) = 0;
 
 protected:
     virtual ~IThirdPartyComponentRef() = default;

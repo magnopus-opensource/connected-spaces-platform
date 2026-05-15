@@ -41,27 +41,27 @@ namespace SpaceSystemHelpers
 
     constexpr const char* AVATAR_THUMBNAIL_ASSET_NAME_PREFIX = "AVATAR_THUMBNAIL";
 
-    csp::common::String GetSpaceMetadataAssetCollectionName(const csp::common::String& SpaceId);
-    csp::common::Map<csp::common::String, csp::common::String> ConvertSpaceMetadataToAssetCollectionMetadata(const csp::common::String& Metadata);
-    csp::common::String GetSpaceIdFromMetadataAssetCollectionName(const csp::common::String& MetadataAssetCollectionName);
+    csp::common::String GetSpaceMetadataAssetCollectionName(const csp::common::String& spaceId);
+    csp::common::Map<csp::common::String, csp::common::String> ConvertSpaceMetadataToAssetCollectionMetadata(const csp::common::String& metadata);
+    csp::common::String GetSpaceIdFromMetadataAssetCollectionName(const csp::common::String& metadataAssetCollectionName);
 
-    csp::common::String GetSpaceThumbnailAssetCollectionName(const csp::common::String& SpaceId);
-    csp::common::String GetUniqueSpaceThumbnailAssetName(const csp::common::String& SpaceId);
-    csp::common::String GetUniqueAvatarThumbnailAssetName(const csp::common::String& Extension);
+    csp::common::String GetSpaceThumbnailAssetCollectionName(const csp::common::String& spaceId);
+    csp::common::String GetUniqueSpaceThumbnailAssetName(const csp::common::String& spaceId);
+    csp::common::String GetUniqueAvatarThumbnailAssetName(const csp::common::String& extension);
 
-    csp::common::String GetAssetFileExtension(const csp::common::String& MimeType);
+    csp::common::String GetAssetFileExtension(const csp::common::String& mimeType);
 
-    bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids);
+    bool IdCheck(const common::String& userId, const common::Array<common::String>& ids);
 
     std::shared_ptr<csp::services::generated::userservice::GroupDto> DefaultGroupInfo();
 
-    csp::common::Map<csp::common::String, csp::common::String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection);
+    csp::common::Map<csp::common::String, csp::common::String> LegacyAssetConversion(const systems::AssetCollection& assetCollection);
 
     std::vector<std::shared_ptr<csp::services::generated::userservice::GroupInviteDto>> GenerateGroupInvites(
-        const common::Array<systems::InviteUserRoleInfo> InviteUsers);
+        const common::Array<systems::InviteUserRoleInfo> inviteUsers);
 
     void ConvertJsonMetadataToMapMetadata(
-        const csp::common::String& JsonMetadata, csp::common::Map<csp::common::String, csp::common::String>& OutMapMetadata);
+        const csp::common::String& jsonMetadata, csp::common::Map<csp::common::String, csp::common::String>& outMapMetadata);
 
 } // namespace SpaceSystemHelpers
 

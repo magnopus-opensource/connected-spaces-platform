@@ -37,7 +37,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -45,161 +45,161 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create custom component
-        auto* StaticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
+        auto* staticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
 
-        constexpr const char* TestExternalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
-        constexpr const char* TestExternalResourceAssetId = "TestExternalResourceAssetId";
-        constexpr const char* TestMaterialPath = "TestMaterialPath";
-        constexpr const char* TestMaterialAssetId = "TestMaterialAssetId";
-        const csp::common::Vector3 TestPosition(1.f, 1.f, 1.f);
-        const csp::common::Vector4 TestRotation(1.f, 1.f, 1.f, 1.f);
-        const csp::common::Vector3 TestScale(2.f, 2.f, 2.f);
-        const SpaceTransform TestTransform(TestPosition, TestRotation, TestScale);
-        constexpr const bool TestIsVisible = false;
-        constexpr const bool TestIsARVisible = false;
-        constexpr const bool TestIsVirtualVisible = false;
-        constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
-        constexpr const bool TestIsShadowCaster = false;
-        constexpr const bool TestShowAsHoldoutInAR = true;
-        constexpr const bool TestShowAsHoldoutInVirtual = true;
+        constexpr const char* testExternalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
+        constexpr const char* testExternalResourceAssetId = "TestExternalResourceAssetId";
+        constexpr const char* testMaterialPath = "TestMaterialPath";
+        constexpr const char* testMaterialAssetId = "TestMaterialAssetId";
+        const csp::common::Vector3 testPosition(1.f, 1.f, 1.f);
+        const csp::common::Vector4 testRotation(1.f, 1.f, 1.f, 1.f);
+        const csp::common::Vector3 testScale(2.f, 2.f, 2.f);
+        const SpaceTransform testTransform(testPosition, testRotation, testScale);
+        constexpr const bool testIsVisible = false;
+        constexpr const bool testIsArVisible = false;
+        constexpr const bool testIsVirtualVisible = false;
+        constexpr const char* testThirdPartyComponentRef = "TestThirdPartyComponentRef";
+        constexpr const bool testIsShadowCaster = false;
+        constexpr const bool testShowAsHoldoutInAr = true;
+        constexpr const bool testShowAsHoldoutInVirtual = true;
 
         // Test defaults
-        EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "");
-        EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetId(), "");
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 0);
-        EXPECT_EQ(StaticModelComponent->GetPosition(), csp::common::Vector3::Zero());
-        EXPECT_EQ(StaticModelComponent->GetRotation(), csp::common::Vector4::Identity());
-        EXPECT_EQ(StaticModelComponent->GetScale(), csp::common::Vector3::One());
-        EXPECT_EQ(StaticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
-        EXPECT_EQ(StaticModelComponent->GetIsVisible(), true);
-        EXPECT_EQ(StaticModelComponent->GetIsARVisible(), true);
-        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), true);
-        EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), "");
-        EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), false);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), false);
+        EXPECT_EQ(staticModelComponent->GetExternalResourceAssetCollectionId(), "");
+        EXPECT_EQ(staticModelComponent->GetExternalResourceAssetId(), "");
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(staticModelComponent->GetPosition(), csp::common::Vector3::Zero());
+        EXPECT_EQ(staticModelComponent->GetRotation(), csp::common::Vector4::Identity());
+        EXPECT_EQ(staticModelComponent->GetScale(), csp::common::Vector3::One());
+        EXPECT_EQ(staticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
+        EXPECT_EQ(staticModelComponent->GetIsVisible(), true);
+        EXPECT_EQ(staticModelComponent->GetIsARVisible(), true);
+        EXPECT_EQ(staticModelComponent->GetIsVirtualVisible(), true);
+        EXPECT_EQ(staticModelComponent->GetThirdPartyComponentRef(), "");
+        EXPECT_EQ(staticModelComponent->GetIsShadowCaster(), true);
+        EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInAR(), false);
+        EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInVirtual(), false);
 
-        StaticModelComponent->SetExternalResourceAssetCollectionId(TestExternalResourceAssetCollectionId);
-        StaticModelComponent->SetExternalResourceAssetId(TestExternalResourceAssetId);
-        StaticModelComponent->AddMaterialOverride(TestMaterialPath, TestMaterialAssetId);
-        StaticModelComponent->SetPosition(TestPosition);
-        StaticModelComponent->SetRotation(TestRotation);
-        StaticModelComponent->SetScale(TestScale);
-        StaticModelComponent->SetIsVisible(TestIsVisible);
-        StaticModelComponent->SetIsARVisible(TestIsARVisible);
-        StaticModelComponent->SetIsVirtualVisible(TestIsVirtualVisible);
-        StaticModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
-        StaticModelComponent->SetIsShadowCaster(TestIsShadowCaster);
-        StaticModelComponent->SetShowAsHoldoutInAR(TestShowAsHoldoutInAR);
-        StaticModelComponent->SetShowAsHoldoutInVirtual(TestShowAsHoldoutInVirtual);
+        staticModelComponent->SetExternalResourceAssetCollectionId(testExternalResourceAssetCollectionId);
+        staticModelComponent->SetExternalResourceAssetId(testExternalResourceAssetId);
+        staticModelComponent->AddMaterialOverride(testMaterialPath, testMaterialAssetId);
+        staticModelComponent->SetPosition(testPosition);
+        staticModelComponent->SetRotation(testRotation);
+        staticModelComponent->SetScale(testScale);
+        staticModelComponent->SetIsVisible(testIsVisible);
+        staticModelComponent->SetIsARVisible(testIsArVisible);
+        staticModelComponent->SetIsVirtualVisible(testIsVirtualVisible);
+        staticModelComponent->SetThirdPartyComponentRef(testThirdPartyComponentRef);
+        staticModelComponent->SetIsShadowCaster(testIsShadowCaster);
+        staticModelComponent->SetShowAsHoldoutInAR(testShowAsHoldoutInAr);
+        staticModelComponent->SetShowAsHoldoutInVirtual(testShowAsHoldoutInVirtual);
 
         // Test new values
-        EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), TestExternalResourceAssetCollectionId);
-        EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetId(), TestExternalResourceAssetId);
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 1);
-        EXPECT_TRUE(StaticModelComponent->GetMaterialOverrides().HasKey(TestMaterialPath));
-        EXPECT_EQ(StaticModelComponent->GetPosition(), TestPosition);
-        EXPECT_EQ(StaticModelComponent->GetRotation(), TestRotation);
-        EXPECT_EQ(StaticModelComponent->GetScale(), TestScale);
-        EXPECT_EQ(StaticModelComponent->GetIsVisible(), TestIsVisible);
-        EXPECT_EQ(StaticModelComponent->GetIsARVisible(), TestIsARVisible);
-        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), TestIsVirtualVisible);
-        EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
-        EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), TestShowAsHoldoutInAR);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), TestShowAsHoldoutInVirtual);
+        EXPECT_EQ(staticModelComponent->GetExternalResourceAssetCollectionId(), testExternalResourceAssetCollectionId);
+        EXPECT_EQ(staticModelComponent->GetExternalResourceAssetId(), testExternalResourceAssetId);
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides().Size(), 1);
+        EXPECT_TRUE(staticModelComponent->GetMaterialOverrides().HasKey(testMaterialPath));
+        EXPECT_EQ(staticModelComponent->GetPosition(), testPosition);
+        EXPECT_EQ(staticModelComponent->GetRotation(), testRotation);
+        EXPECT_EQ(staticModelComponent->GetScale(), testScale);
+        EXPECT_EQ(staticModelComponent->GetIsVisible(), testIsVisible);
+        EXPECT_EQ(staticModelComponent->GetIsARVisible(), testIsArVisible);
+        EXPECT_EQ(staticModelComponent->GetIsVirtualVisible(), testIsVirtualVisible);
+        EXPECT_EQ(staticModelComponent->GetThirdPartyComponentRef(), testThirdPartyComponentRef);
+        EXPECT_EQ(staticModelComponent->GetIsShadowCaster(), testIsShadowCaster);
+        EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInAR(), testShowAsHoldoutInAr);
+        EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInVirtual(), testShowAsHoldoutInVirtual);
 
         // Test transform separately, as this just sets position, rotation, scale
-        StaticModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
+        staticModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
 
-        EXPECT_EQ(StaticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
+        EXPECT_EQ(staticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
 
-        StaticModelComponent->SetTransform(TestTransform);
+        staticModelComponent->SetTransform(testTransform);
 
-        EXPECT_EQ(StaticModelComponent->GetTransform(), TestTransform);
+        EXPECT_EQ(staticModelComponent->GetTransform(), testTransform);
 
         // Also test we can remove a material override
-        StaticModelComponent->RemoveMaterialOverride(TestMaterialPath);
+        staticModelComponent->RemoveMaterialOverride(testMaterialPath);
 
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides().Size(), 0);
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create static model component
-    auto* StaticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
+    auto* staticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    ASSERT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
+    ASSERT_EQ(staticModelComponent->GetIsShadowCaster(), true);
 
     // Setup script
-    const std::string StaticModelScriptText = R"xx(
+    const std::string staticModelScriptText = R"xx(
 		var model = ThisEntity.getStaticModelComponents()[0];
 		model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
 		model.externalResourceAssetId = "TestExternalResourceAssetId";
@@ -214,108 +214,108 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
         model.isShadowCaster = false;
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(staticModelScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Test new values
-    EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
-    EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
-    EXPECT_EQ(StaticModelComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(StaticModelComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-    EXPECT_EQ(StaticModelComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(StaticModelComponent->GetIsVisible(), false);
-    EXPECT_EQ(StaticModelComponent->GetIsARVisible(), false);
-    EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), true);
-    EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), true);
-    EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), false);
+    EXPECT_EQ(staticModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
+    EXPECT_EQ(staticModelComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
+    EXPECT_EQ(staticModelComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(staticModelComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(staticModelComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(staticModelComponent->GetIsVisible(), false);
+    EXPECT_EQ(staticModelComponent->GetIsARVisible(), false);
+    EXPECT_EQ(staticModelComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInAR(), true);
+    EXPECT_EQ(staticModelComponent->GetShowAsHoldoutInVirtual(), true);
+    EXPECT_EQ(staticModelComponent->GetIsShadowCaster(), false);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    csp::common::String ObjectName = "Object 1";
+    csp::common::String objectName = "Object 1";
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create static model component
-        auto* StaticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
-        StaticModelComponent->AddMaterialOverride("TestKey", "TestValue");
+        auto* staticModelComponent = (StaticModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::StaticModel);
+        staticModelComponent->AddMaterialOverride("TestKey", "TestValue");
 
         CreatedObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        realtimeEngine->ProcessPendingEntityOperations();
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(7));
 
     {
         // Re-enter space
-        bool EntitiesCreated = false;
+        bool entitiesCreated = false;
 
-        auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
+        auto entitiesReadyCallback = [&entitiesCreated](int /*NumEntitiesFetched*/) { entitiesCreated = true; };
 
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback(entitiesReadyCallback);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult2] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
-        EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(entitiesCreated, realtimeEngine.get());
+        EXPECT_TRUE(entitiesCreated);
 
-        SpaceEntity* FoundEntity = RealtimeEngine->FindSpaceObject(ObjectName);
-        EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* foundEntity = realtimeEngine->FindSpaceObject(objectName);
+        EXPECT_TRUE(foundEntity != nullptr);
 
-        auto* StaticModelComponent = (StaticModelSpaceComponent*)FoundEntity->GetComponent(0);
-        EXPECT_TRUE(StaticModelComponent != nullptr);
+        auto* staticModelComponent = (StaticModelSpaceComponent*)foundEntity->GetComponent(0);
+        EXPECT_TRUE(staticModelComponent != nullptr);
 
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 1);
-        EXPECT_TRUE(StaticModelComponent->GetMaterialOverrides().HasKey("TestKey"));
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides().Size(), 1);
+        EXPECT_TRUE(staticModelComponent->GetMaterialOverrides().HasKey("TestKey"));
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
 
         // Delete material override
-        StaticModelComponent->RemoveMaterialOverride("TestKey");
+        staticModelComponent->RemoveMaterialOverride("TestKey");
 
-        FoundEntity->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        foundEntity->QueueUpdate();
+        realtimeEngine->ProcessPendingEntityOperations();
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
         // Ensure component data has been written to database by chs before entering the space again
         // This is due to an enforced 2 second chs database write delay
@@ -324,33 +324,33 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 
     {
         // Re-enter space
-        bool EntitiesCreated = false;
+        bool entitiesCreated = false;
 
-        auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
+        auto entitiesReadyCallback = [&entitiesCreated](int /*NumEntitiesFetched*/) { entitiesCreated = true; };
 
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback(entitiesReadyCallback);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult2] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
-        EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(entitiesCreated, realtimeEngine.get());
+        EXPECT_TRUE(entitiesCreated);
 
-        SpaceEntity* FoundEntity = RealtimeEngine->FindSpaceObject(ObjectName);
-        EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* foundEntity = realtimeEngine->FindSpaceObject(objectName);
+        EXPECT_TRUE(foundEntity != nullptr);
 
-        auto* StaticModelComponent = (StaticModelSpaceComponent*)FoundEntity->GetComponent(0);
-        EXPECT_TRUE(StaticModelComponent != nullptr);
+        auto* staticModelComponent = (StaticModelSpaceComponent*)foundEntity->GetComponent(0);
+        EXPECT_TRUE(staticModelComponent != nullptr);
 
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(staticModelComponent->GetMaterialOverrides().Size(), 0);
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

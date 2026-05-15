@@ -20,21 +20,21 @@
 namespace csp::systems
 {
 systems::ResultBase::ResultBase()
-    : FailureReason(ERequestFailureReason::None)
+    : m_failureReason(ERequestFailureReason::None)
 {
 }
 
-ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-    : Result(ResCode)
-    , HttpResponseCode(HttpResCode)
-    , FailureReason(ERequestFailureReason::None)
+ResultBase::ResultBase(csp::systems::EResultCode resCode, uint16_t httpResCode)
+    : m_result(resCode)
+    , m_httpResponseCode(httpResCode)
+    , m_failureReason(ERequestFailureReason::None)
 {
 }
 
-ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-    : Result(ResCode)
-    , HttpResponseCode(HttpResCode)
-    , FailureReason(Reason)
+ResultBase::ResultBase(csp::systems::EResultCode resCode, uint16_t httpResCode, csp::systems::ERequestFailureReason reason)
+    : m_result(resCode)
+    , m_httpResponseCode(httpResCode)
+    , m_failureReason(reason)
 {
 }
 
@@ -47,67 +47,67 @@ bool ResultBase::operator==(const ResultBase& other) const
 
 bool ResultBase::operator!=(const ResultBase& other) const { return !(*this == other); }
 
-void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
+void ResultBase::OnProgress(const services::ApiResponseBase* apiResponse)
 {
-    if (ApiResponse)
+    if (apiResponse)
     {
-        const csp::web::HttpRequest* Request = ApiResponse->GetResponse()->GetRequest();
+        const csp::web::HttpRequest* request = apiResponse->GetResponse()->GetRequest();
 
-        Result = EResultCode::InProgress;
+        m_result = EResultCode::InProgress;
 
-        RequestProgress = Request->GetRequestProgressPercentage();
-        ResponseProgress = Request->GetResponseProgressPercentage();
+        m_requestProgress = request->GetRequestProgressPercentage();
+        m_responseProgress = request->GetResponseProgressPercentage();
     }
 }
 
 /// @brief Standard response handler
 /// @param ApiResponse
-void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
+void ResultBase::OnResponse(const services::ApiResponseBase* apiResponse)
 {
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        Result = EResultCode::Success;
+        m_result = EResultCode::Success;
     }
     else
     {
-        Result = EResultCode::Failed;
+        m_result = EResultCode::Failed;
     }
 
-    HttpResponseCode = (uint16_t)ApiResponse->GetResponse()->GetResponseCode();
+    m_httpResponseCode = (uint16_t)apiResponse->GetResponse()->GetResponseCode();
 
-    const auto* HttpResponse = ApiResponse->GetResponse();
-    const auto& ResponsePayload = HttpResponse->GetPayload();
-    ResponseBody = ResponsePayload.GetContent();
+    const auto* httpResponse = apiResponse->GetResponse();
+    const auto& responsePayload = httpResponse->GetPayload();
+    m_responseBody = responsePayload.GetContent();
 
-    const auto& Headers = ResponsePayload.GetHeaders();
+    const auto& headers = responsePayload.GetHeaders();
 
-    if (Result == EResultCode::Failed && Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+    if (m_result == EResultCode::Failed && headers.count("x-errorcode") > 0 && !headers.at("x-errorcode").empty())
     {
-        FailureReason = ParseErrorCode(Headers.at("x-errorcode").c_str());
+        m_failureReason = ParseErrorCode(headers.at("x-errorcode").c_str());
     }
 }
 
-EResultCode ResultBase::GetResultCode() const { return Result; }
+EResultCode ResultBase::GetResultCode() const { return m_result; }
 
-uint16_t ResultBase::GetHttpResultCode() const { return HttpResponseCode; }
+uint16_t ResultBase::GetHttpResultCode() const { return m_httpResponseCode; }
 
-const csp::common::String& ResultBase::GetResponseBody() const { return ResponseBody; }
+const csp::common::String& ResultBase::GetResponseBody() const { return m_responseBody; }
 
-float ResultBase::GetRequestProgress() const { return RequestProgress; }
+float ResultBase::GetRequestProgress() const { return m_requestProgress; }
 
-float ResultBase::GetResponseProgress() const { return ResponseProgress; }
+float ResultBase::GetResponseProgress() const { return m_responseProgress; }
 
-ERequestFailureReason ResultBase::GetFailureReason() const { return FailureReason; }
+ERequestFailureReason ResultBase::GetFailureReason() const { return m_failureReason; }
 
-void ResultBase::SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+void ResultBase::SetResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
 {
-    Result = ResCode;
-    HttpResponseCode = HttpResCode;
+    m_result = resCode;
+    m_httpResponseCode = httpResCode;
 }
 
-ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
+ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& value)
 {
-    static const std::map<csp::common::String, csp::systems::ERequestFailureReason> XErrorCodeToFailureReason = {
+    static const std::map<csp::common::String, csp::systems::ERequestFailureReason> xErrorCodeToFailureReason = {
         { "join_onbehalfnotallowed", csp::systems::ERequestFailureReason::AddUserToSpaceDenied },
         { "join_guestnotallowed", csp::systems::ERequestFailureReason::UserSpaceAccessDenied },
         { "join_userbanned", csp::systems::ERequestFailureReason::UserSpaceBannedAccessDenied },
@@ -144,15 +144,15 @@ ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Valu
         { "scopes_concurrentusersquota", csp::systems::ERequestFailureReason::UserSpaceConcurrentUsersLimitReached },
     };
 
-    const auto Reason = XErrorCodeToFailureReason.find(Value);
-    if (Reason != XErrorCodeToFailureReason.end())
+    const auto reason = xErrorCodeToFailureReason.find(value);
+    if (reason != xErrorCodeToFailureReason.end())
     {
-        return Reason->second;
+        return reason->second;
     }
 
     CSP_LOG_ERROR_FORMAT(
         "Unknown XErrorCode string encountered whilst converting the string to ERequestFailureReason enum value. Value passed in was %s.",
-        Value.c_str());
+        value.c_str());
     return ERequestFailureReason::Unknown;
 }
 

@@ -24,61 +24,61 @@ using namespace csp::multiplayer;
 // Ensures constructor arguments are set correctly.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyConstructorTest)
 {
-    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
-    SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
-    std::function<csp::common::ReplicatedValue()> TestToReplicatedValue;
-    std::function<void(const csp::common::ReplicatedValue&)> TestFromReplicatedValue;
+    SpaceEntityComponentKey testKey = SpaceEntityComponentKey::Name;
+    SpaceEntityUpdateFlags testUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
+    std::function<csp::common::ReplicatedValue()> testToReplicatedValue;
+    std::function<void(const csp::common::ReplicatedValue&)> testFromReplicatedValue;
 
-    EntityProperty Property { TestKey, TestUpdateFlag, TestToReplicatedValue, TestFromReplicatedValue };
+    EntityProperty property { testKey, testUpdateFlag, testToReplicatedValue, testFromReplicatedValue };
 
-    EXPECT_EQ(TestKey, Property.GetKey());
-    EXPECT_EQ(TestUpdateFlag, Property.GetUpdateFlag());
+    EXPECT_EQ(testKey, property.GetKey());
+    EXPECT_EQ(testUpdateFlag, property.GetUpdateFlag());
 }
 
 // Ensures callbacks are called from Get/Set functions.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyCallbackTest)
 {
-    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
-    SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
+    SpaceEntityComponentKey testKey = SpaceEntityComponentKey::Name;
+    SpaceEntityUpdateFlags testUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
 
-    ::testing::MockFunction<csp::common::ReplicatedValue()> MockToReplicatedValue;
-    std::function<csp::common::ReplicatedValue()> TestToReplicatedValue = MockToReplicatedValue.AsStdFunction();
+    ::testing::MockFunction<csp::common::ReplicatedValue()> mockToReplicatedValue;
+    std::function<csp::common::ReplicatedValue()> testToReplicatedValue = mockToReplicatedValue.AsStdFunction();
 
-    ::testing::MockFunction<void(const csp::common::ReplicatedValue&)> MockFromReplicatedValue;
-    std::function<void(const csp::common::ReplicatedValue&)> TestFromReplicatedValue = MockFromReplicatedValue.AsStdFunction();
+    ::testing::MockFunction<void(const csp::common::ReplicatedValue&)> mockFromReplicatedValue;
+    std::function<void(const csp::common::ReplicatedValue&)> testFromReplicatedValue = mockFromReplicatedValue.AsStdFunction();
 
-    EntityProperty Property { TestKey, TestUpdateFlag, TestToReplicatedValue, TestFromReplicatedValue };
+    EntityProperty property { testKey, testUpdateFlag, testToReplicatedValue, testFromReplicatedValue };
 
-    EXPECT_CALL(MockToReplicatedValue, Call()).Times(1);
-    EXPECT_CALL(MockFromReplicatedValue, Call(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) })).Times(1);
+    EXPECT_CALL(mockToReplicatedValue, Call()).Times(1);
+    EXPECT_CALL(mockFromReplicatedValue, Call(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) })).Times(1);
 
-    Property.Get();
-    Property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) });
+    property.Get();
+    property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) });
 }
 
 // Ensures the Set function correctly sets the value via the callback and Get returns the updated value.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertySetGetTest)
 {
-    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
-    SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
+    SpaceEntityComponentKey testKey = SpaceEntityComponentKey::Name;
+    SpaceEntityUpdateFlags testUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
 
-    int64_t TestValue = 0;
+    int64_t testValue = 0;
 
-    auto TestToReplicatedValue = [&TestValue]() { return csp::common::ReplicatedValue { TestValue }; };
-    auto TestFromReplicatedValue = [&TestValue](const csp::common::ReplicatedValue& Value) { TestValue = Value.GetInt(); };
+    auto testToReplicatedValue = [&testValue]() { return csp::common::ReplicatedValue { testValue }; };
+    auto testFromReplicatedValue = [&testValue](const csp::common::ReplicatedValue& value) { testValue = value.GetInt(); };
 
-    EntityProperty Property { TestKey, TestUpdateFlag, TestToReplicatedValue, TestFromReplicatedValue };
+    EntityProperty property { testKey, testUpdateFlag, testToReplicatedValue, testFromReplicatedValue };
 
-    if (Property.Get().GetReplicatedValueType() != csp::common::ReplicatedValueType::Integer)
+    if (property.Get().GetReplicatedValueType() != csp::common::ReplicatedValueType::Integer)
     {
         FAIL();
     }
 
-    EXPECT_EQ(TestValue, 0);
-    EXPECT_EQ(Property.Get().GetInt(), TestValue);
+    EXPECT_EQ(testValue, 0);
+    EXPECT_EQ(property.Get().GetInt(), testValue);
 
-    Property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(100ll) });
+    property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(100ll) });
 
-    EXPECT_EQ(TestValue, 100);
-    EXPECT_EQ(Property.Get().GetInt(), TestValue);
+    EXPECT_EQ(testValue, 100);
+    EXPECT_EQ(property.Get().GetInt(), testValue);
 }

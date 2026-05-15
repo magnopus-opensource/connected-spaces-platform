@@ -22,6 +22,6 @@
 namespace csp::json
 {
 
-rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& document, const csp::common::String& JsonString, const char* LogPrefix);
+rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& document, const csp::common::String& jsonString, const char* logPrefix);
 
 } // namespace csp::json

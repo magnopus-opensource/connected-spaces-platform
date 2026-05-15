@@ -24,20 +24,20 @@ using namespace std::chrono_literals;
 
 CSP_INTERNAL_TEST(CSPEngine, SchedulerTests, SchedulerTest)
 {
-    int WaitForTestTimeoutCountMs = 0;
-    int KeepAliveInterval = 10000;
-    bool ScheduleCallback = false;
+    int waitForTestTimeoutCountMs = 0;
+    int keepAliveInterval = 10000;
+    bool scheduleCallback = false;
 
     std::chrono::system_clock::time_point test = std::chrono::system_clock::now() + std::chrono::system_clock::duration(5s);
-    csp::common::DateTime RefreshTime(test);
+    csp::common::DateTime refreshTime(test);
 
-    csp::GetScheduler()->ScheduleAt(RefreshTime, [this, &ScheduleCallback]() { ScheduleCallback = true; });
+    csp::GetScheduler()->ScheduleAt(refreshTime, [this, &scheduleCallback]() { scheduleCallback = true; });
 
-    while (WaitForTestTimeoutCountMs < KeepAliveInterval)
+    while (waitForTestTimeoutCountMs < keepAliveInterval)
     {
         std::this_thread::sleep_for(20ms);
-        WaitForTestTimeoutCountMs += 20;
+        waitForTestTimeoutCountMs += 20;
     }
 
-    EXPECT_TRUE(ScheduleCallback);
+    EXPECT_TRUE(scheduleCallback);
 }

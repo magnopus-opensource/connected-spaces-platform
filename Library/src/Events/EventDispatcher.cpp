@@ -18,26 +18,26 @@
 namespace csp::events
 {
 
-EventDispatcher::EventDispatcher(const EventId& InId)
-    : Id(InId)
+EventDispatcher::EventDispatcher(const EventId& inId)
+    : m_id(inId)
 {
 }
 
-void EventDispatcher::RegisterListener(EventListener* InListener)
+void EventDispatcher::RegisterListener(EventListener* inListener)
 {
     // Check it's not there already
-    CallbackList.remove(InListener);
+    m_callbackList.remove(inListener);
 
-    CallbackList.push_back(InListener);
+    m_callbackList.push_back(inListener);
 }
 
-void EventDispatcher::UnRegisterListener(EventListener* InListener) { CallbackList.remove(InListener); }
+void EventDispatcher::UnRegisterListener(EventListener* inListener) { m_callbackList.remove(inListener); }
 
-void EventDispatcher::Dispatch(const Event& InEvent)
+void EventDispatcher::Dispatch(const Event& inEvent)
 {
-    for (auto Callback : CallbackList)
+    for (auto callback : m_callbackList)
     {
-        Callback->OnEvent(InEvent);
+        callback->OnEvent(inEvent);
     }
 }
 

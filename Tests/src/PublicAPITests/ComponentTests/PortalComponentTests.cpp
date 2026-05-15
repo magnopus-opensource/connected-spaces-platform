@@ -38,7 +38,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -46,58 +46,58 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create space 2
-    csp::systems::Space Space2;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space2;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    csp::common::String PortalSpaceID;
+    csp::common::String portalSpaceId;
 
-    const csp::common::String UserName = "Player 1";
-    const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    const bool IsVisible = true;
-    const AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String UserAvatarId = "MyCoolAvatar";
-    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+    const csp::common::String userName = "Player 1";
+    const SpaceTransform userTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const bool isVisible = true;
+    const AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String userAvatarId = "MyCoolAvatar";
+    const AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Default;
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        const auto LoginState = UserSystem->GetLoginState();
+        const auto loginState = userSystem->GetLoginState();
 
-        auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState,
-            UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded);
+        auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState,
+            userAvatarId, userAvatarPlayMode, LocomotionModel::Grounded);
 
         // Create object to represent the portal
-        csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create portal component
-        auto* PortalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
-        PortalComponent->SetSpaceId(Space2.Id);
+        auto* portalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
+        portalComponent->SetSpaceId(space2.Id);
 
-        PortalSpaceID = PortalComponent->GetSpaceId();
+        portalSpaceId = portalComponent->GetSpaceId();
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     /*
@@ -105,155 +105,155 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
     */
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        const auto LoginState = UserSystem->GetLoginState();
+        const auto loginState = userSystem->GetLoginState();
 
-        auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState,
-            UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded);
+        auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState,
+            userAvatarId, userAvatarPlayMode, LocomotionModel::Grounded);
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-    DeleteSpace(SpaceSystem, Space2.Id);
+    DeleteSpace(spaceSystem, space.Id);
+    DeleteSpace(spaceSystem, space2.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto FilePath = std::filesystem::absolute("assets/OKO.png");
+    auto filePath = std::filesystem::absolute("assets/OKO.png");
 
-    csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.string().c_str();
+    csp::systems::FileAssetDataSource source;
+    source.FilePath = filePath.string().c_str();
 
     // Create space
-    csp::systems::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, Source, nullptr, Space);
+    csp::systems::Space space;
+    CreateSpace(spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, source, nullptr, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the portal
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create portal component
-    auto* PortalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
+    auto* portalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
 
     // Get Thumbnail
-    bool HasThumbailResult = false;
+    bool hasThumbailResult = false;
 
-    csp::systems::UriResultCallback Callback = [&HasThumbailResult](const csp::systems::UriResult& Result)
+    csp::systems::UriResultCallback callback = [&hasThumbailResult](const csp::systems::UriResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        if (result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            HasThumbailResult = true;
-            EXPECT_TRUE(Result.GetUri() != "");
+            hasThumbailResult = true;
+            EXPECT_TRUE(result.GetUri() != "");
         }
     };
 
-    PortalComponent->SetSpaceId(Space.Id);
+    portalComponent->SetSpaceId(space.Id);
 
     // Get thumbnail using the space id.
-    SpaceSystem->GetSpaceThumbnail(PortalComponent->GetSpaceId(), Callback);
+    spaceSystem->GetSpaceThumbnail(portalComponent->GetSpaceId(), callback);
 
-    WaitForCallback(HasThumbailResult);
-    EXPECT_TRUE(HasThumbailResult);
+    WaitForCallback(hasThumbailResult);
+    EXPECT_TRUE(hasThumbailResult);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the portal
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create portal component
-    auto* PortalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
+    auto* portalComponent = (PortalSpaceComponent*)CreatedObject->AddComponent(ComponentType::Portal);
 
-    auto InitialPosition = csp::common::Vector3 { 1.1f, 2.2f, 3.3f };
-    PortalComponent->SetSpaceId("initialTestSpaceId");
-    PortalComponent->SetIsEnabled(false);
-    PortalComponent->SetPosition(InitialPosition);
-    PortalComponent->SetRadius(123.123f);
+    auto initialPosition = csp::common::Vector3 { 1.1f, 2.2f, 3.3f };
+    portalComponent->SetSpaceId("initialTestSpaceId");
+    portalComponent->SetIsEnabled(false);
+    portalComponent->SetPosition(initialPosition);
+    portalComponent->SetRadius(123.123f);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(PortalComponent->GetSpaceId(), "initialTestSpaceId");
-    EXPECT_EQ(PortalComponent->GetIsEnabled(), false);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().X, InitialPosition.X);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Y, InitialPosition.Y);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, InitialPosition.Z);
-    EXPECT_EQ(PortalComponent->GetRadius(), 123.123f);
+    EXPECT_EQ(portalComponent->GetSpaceId(), "initialTestSpaceId");
+    EXPECT_EQ(portalComponent->GetIsEnabled(), false);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().X, initialPosition.X);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().Y, initialPosition.Y);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().Z, initialPosition.Z);
+    EXPECT_EQ(portalComponent->GetRadius(), 123.123f);
 
     // Setup script
-    std::string PortalScriptText = R"xx(
+    std::string portalScriptText = R"xx(
 		var portal = ThisEntity.getPortalComponents()[0];
 		portal.spaceId = "secondTestSpaceId";
 		portal.isEnabled = true;
@@ -261,23 +261,23 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 		portal.radius = 456.456;
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(PortalScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(portalScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(PortalComponent->GetSpaceId(), "secondTestSpaceId");
-    EXPECT_EQ(PortalComponent->GetIsEnabled(), true);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().X, 4.4f);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Y, 5.5f);
-    EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, 6.6f);
-    EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
+    EXPECT_EQ(portalComponent->GetSpaceId(), "secondTestSpaceId");
+    EXPECT_EQ(portalComponent->GetIsEnabled(), true);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().X, 4.4f);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().Y, 5.5f);
+    EXPECT_FLOAT_EQ(portalComponent->GetPosition().Z, 6.6f);
+    EXPECT_FLOAT_EQ(portalComponent->GetRadius(), 456.456f);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

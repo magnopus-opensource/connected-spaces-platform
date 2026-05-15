@@ -45,8 +45,8 @@ public:
     /// The keys and values are both strings and represent additional configurable options.
     csp::common::Map<csp::common::String, csp::common::String> Settings;
 
-    bool operator==(const csp::common::ApplicationSettings& Other) const;
-    bool operator!=(const csp::common::ApplicationSettings& Other) const;
+    bool operator==(const csp::common::ApplicationSettings& other) const;
+    bool operator!=(const csp::common::ApplicationSettings& other) const;
 };
 
 /// @brief Represents configuration settings related to a user in a specific context
@@ -65,8 +65,8 @@ public:
     /// @brief A key-value store of arbitrary user settings.
     csp::common::Map<csp::common::String, csp::common::String> Settings;
 
-    bool operator==(const csp::common::SettingsCollection& Other) const;
-    bool operator!=(const csp::common::SettingsCollection& Other) const;
+    bool operator==(const csp::common::SettingsCollection& other) const;
+    bool operator!=(const csp::common::SettingsCollection& other) const;
 };
 } // namespace csp::systems
 
@@ -75,4 +75,4 @@ namespace csp::json
 class JsonSerializer;
 }
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::ApplicationSettings& Obj);
+void ToJson(csp::json::JsonSerializer& serializer, const csp::common::ApplicationSettings& obj);

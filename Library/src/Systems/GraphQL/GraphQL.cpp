@@ -22,14 +22,14 @@ using namespace csp::systems::graphqlservice;
 
 namespace csp::systems
 {
-const csp::common::String& GraphQLResult::GetResponse() { return GraphQLResponse; }
-void GraphQLResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+const csp::common::String& GraphQLResult::GetResponse() { return m_graphQlResponse; }
+void GraphQLResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        GraphQLResponse = ApiResponse->GetResponse()->GetPayload().GetContent();
+        m_graphQlResponse = apiResponse->GetResponse()->GetPayload().GetContent();
     }
 };
 } // namespace csp::systems

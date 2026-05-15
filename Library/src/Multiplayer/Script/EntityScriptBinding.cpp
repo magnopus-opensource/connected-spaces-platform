@@ -55,14 +55,14 @@ namespace
         using LockFuncValueT = std::decay_t<LockFunc>;
         using UnlockFuncValueT = std::decay_t<UnlockFunc>;
 
-        RAIILock(LockFunc&& Lock, UnlockFunc&& Unlock)
-            : _LockFunc(std::forward<LockFunc>(Lock))
-            , _UnlockFunc(std::forward<UnlockFunc>(Unlock))
+        RAIILock(LockFunc&& lock, UnlockFunc&& unlock)
+            : m_lockFunc(std::forward<LockFunc>(lock))
+            , m_unlockFunc(std::forward<UnlockFunc>(unlock))
         {
-            std::invoke(_LockFunc);
+            std::invoke(m_lockFunc);
         }
 
-        ~RAIILock() noexcept { std::invoke(_UnlockFunc); }
+        ~RAIILock() noexcept { std::invoke(m_unlockFunc); }
 
         RAIILock(const RAIILock&) = delete;
         RAIILock& operator=(const RAIILock&) = delete;
@@ -70,75 +70,75 @@ namespace
         RAIILock& operator=(RAIILock&&) = delete;
 
     private:
-        LockFuncValueT _LockFunc;
-        UnlockFuncValueT _UnlockFunc;
+        LockFuncValueT m_lockFunc;
+        UnlockFuncValueT m_unlockFunc;
     };
 
     // Creates a JS prototype for a specific component type, baking in specialized accessors
     // that map directly to the correctly typed proxy property.
     template <typename ScriptInterfaceType = ComponentScriptInterface>
-    qjs::Value MakeComponentPrototype(qjs::Context& Context, const ComponentSchema& Schema)
+    qjs::Value MakeComponentPrototype(qjs::Context& context, const ComponentSchema& schema)
     {
         static_assert(std::is_base_of_v<ComponentScriptInterface, ScriptInterfaceType>);
 
-        const auto ClassId = qjs::js_traits<std::shared_ptr<ScriptInterfaceType>>::QJSClassId;
-        const auto BasePrototype = qjs::Value { Context.ctx, JS_GetClassProto(Context.ctx, ClassId) };
-        const auto SchemaDerivedPrototype = qjs::Value { Context.ctx, JS_NewObjectProto(Context.ctx, BasePrototype.v) };
+        const auto classId = qjs::js_traits<std::shared_ptr<ScriptInterfaceType>>::QJSClassId;
+        const auto basePrototype = qjs::Value { context.ctx, JS_GetClassProto(context.ctx, classId) };
+        const auto schemaDerivedPrototype = qjs::Value { context.ctx, JS_NewObjectProto(context.ctx, basePrototype.v) };
 
-        auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
+        auto createAccessors = [](const auto& v) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
         {
-            using T = std::decay_t<decltype(V)>;
+            using T = std::decay_t<decltype(v)>;
 
             if constexpr (IsScriptableV<T>)
             {
-                const auto Getter = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int Magic) -> JSValue
+                const auto getter = [](JSContext* context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int magic) -> JSValue
                 {
-                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
-                    if (!Self)
+                    const auto self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(context, This);
+                    if (!self)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    auto Result = (*Self)->GetProperty(static_cast<ComponentProperty::KeyType>(Magic));
-                    if (!Result)
+                    auto result = (*self)->GetProperty(static_cast<ComponentProperty::KeyType>(magic));
+                    if (!result)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    auto* CheckedResult = std::get_if<ScriptTypeT<T>>(&*Result);
-                    if (CheckedResult == nullptr)
+                    auto* checkedResult = std::get_if<ScriptTypeT<T>>(&*result);
+                    if (checkedResult == nullptr)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    return qjs::js_traits<ScriptTypeT<T>>::wrap(Context, std::move(*CheckedResult));
+                    return qjs::js_traits<ScriptTypeT<T>>::wrap(context, std::move(*checkedResult));
                 };
 
-                const auto Setter = [](JSContext* Context, JSValueConst This, int ArgC, JSValueConst* ArgV, int Magic) -> JSValue
+                const auto setter = [](JSContext* context, JSValueConst This, int argC, JSValueConst* argV, int magic) -> JSValue
                 {
-                    if (ArgC <= 0)
+                    if (argC <= 0)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
-                    if (!Self)
+                    const auto self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(context, This);
+                    if (!self)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    auto Result = qjs::js_traits<std::optional<ScriptTypeT<T>>>::unwrap(Context, ArgV[0]);
-                    if (!Result)
+                    auto result = qjs::js_traits<std::optional<ScriptTypeT<T>>>::unwrap(context, argV[0]);
+                    if (!result)
                     {
                         return JS_EXCEPTION;
                     }
 
-                    (*Self)->SetProperty(static_cast<ComponentProperty::KeyType>(Magic), std::move(*Result));
+                    (*self)->SetProperty(static_cast<ComponentProperty::KeyType>(magic), std::move(*result));
 
                     return JS_UNDEFINED;
                 };
 
-                return std::make_pair(Getter, Setter);
+                return std::make_pair(getter, setter);
             }
             else
             {
@@ -146,40 +146,40 @@ namespace
             }
         };
 
-        for (const auto& Property : Schema.Properties)
+        for (const auto& property : schema.Properties)
         {
-            if (!IsScriptable(Property))
+            if (!IsScriptable(property))
             {
                 continue;
             }
 
-            auto MaybeAccessors = std::visit(CreateAccessors, Property.DefaultValue.GetValue());
-            if (!MaybeAccessors)
+            auto maybeAccessors = std::visit(createAccessors, property.DefaultValue.GetValue());
+            if (!maybeAccessors)
             {
                 continue;
             }
 
-            const auto [Getter, Setter] = *MaybeAccessors;
+            const auto [Getter, Setter] = *maybeAccessors;
 
-            const auto Magic = static_cast<int>(Property.Key);
-            const auto PropertyName = JS_NewAtom(Context.ctx, Property.Name.c_str());
+            const auto magic = static_cast<int>(property.Key);
+            const auto propertyName = JS_NewAtom(context.ctx, property.Name.c_str());
 
-            JS_DefinePropertyGetSet(Context.ctx, SchemaDerivedPrototype.v, PropertyName,
-                JS_NewCFunctionMagic(Context.ctx, Getter, "get", 0, JS_CFUNC_generic_magic, Magic),
-                JS_NewCFunctionMagic(Context.ctx, Setter, "set", 1, JS_CFUNC_generic_magic, Magic), JS_PROP_C_W_E);
+            JS_DefinePropertyGetSet(context.ctx, schemaDerivedPrototype.v, propertyName,
+                JS_NewCFunctionMagic(context.ctx, Getter, "get", 0, JS_CFUNC_generic_magic, magic),
+                JS_NewCFunctionMagic(context.ctx, Setter, "set", 1, JS_CFUNC_generic_magic, magic), JS_PROP_C_W_E);
 
-            JS_FreeAtom(Context.ctx, PropertyName);
+            JS_FreeAtom(context.ctx, propertyName);
         }
 
-        return SchemaDerivedPrototype;
+        return schemaDerivedPrototype;
     }
 }
 
 class EntitySystemScriptInterface
 {
 public:
-    EntitySystemScriptInterface(csp::common::IRealtimeEngine* InEntitySystem = nullptr)
-        : EntitySystem(InEntitySystem)
+    EntitySystemScriptInterface(csp::common::IRealtimeEngine* inEntitySystem = nullptr)
+        : m_entitySystem(inEntitySystem)
     {
     }
 
@@ -187,272 +187,272 @@ public:
 
     std::vector<uint64_t> GetEntityIds()
     {
-        std::vector<uint64_t> EntityIds;
+        std::vector<uint64_t> entityIds;
 
-        if (EntitySystem)
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
+            for (size_t i = 0; i < m_entitySystem->GetNumEntities(); ++i)
             {
-                const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
+                const SpaceEntity* entity = m_entitySystem->GetEntityByIndex(i);
 
-                uint64_t Id = Entity->GetId();
-                EntityIds.push_back(Id);
+                uint64_t id = entity->GetId();
+                entityIds.push_back(id);
             }
         }
 
-        return EntityIds;
+        return entityIds;
     }
 
     std::vector<EntityScriptInterface*> GetEntities()
     {
-        std::vector<EntityScriptInterface*> Entities;
+        std::vector<EntityScriptInterface*> entities;
 
-        if (EntitySystem)
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
+            for (size_t i = 0; i < m_entitySystem->GetNumEntities(); ++i)
             {
-                SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                Entities.push_back(Entity->GetScriptInterface());
+                SpaceEntity* entity = m_entitySystem->GetEntityByIndex(i);
+                entities.push_back(entity->GetScriptInterface());
             }
         }
 
-        return Entities;
+        return entities;
     }
 
     std::vector<EntityScriptInterface*> GetObjects()
     {
-        std::vector<EntityScriptInterface*> Objects;
+        std::vector<EntityScriptInterface*> objects;
 
-        if (EntitySystem)
+        if (m_entitySystem)
         {
-            for (size_t i = 0; i < EntitySystem->GetNumObjects(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetNumObjects(); ++i)
             {
-                SpaceEntity* Entity = EntitySystem->GetObjectByIndex(i);
-                Objects.push_back(Entity->GetScriptInterface());
+                SpaceEntity* entity = m_entitySystem->GetObjectByIndex(i);
+                objects.push_back(entity->GetScriptInterface());
             }
         }
 
-        return Objects;
+        return objects;
     }
 
     std::vector<EntityScriptInterface*> GetAvatars()
     {
-        std::vector<EntityScriptInterface*> Avatars;
+        std::vector<EntityScriptInterface*> avatars;
 
-        if (EntitySystem)
+        if (m_entitySystem)
         {
-            for (size_t i = 0; i < EntitySystem->GetNumAvatars(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetNumAvatars(); ++i)
             {
-                SpaceEntity* Entity = EntitySystem->GetAvatarByIndex(i);
-                Avatars.push_back(Entity->GetScriptInterface());
+                SpaceEntity* entity = m_entitySystem->GetAvatarByIndex(i);
+                avatars.push_back(entity->GetScriptInterface());
             }
         }
 
-        return Avatars;
+        return avatars;
     }
 
-    int32_t GetIndexOfEntity(int64_t EntityId)
+    int32_t GetIndexOfEntity(int64_t entityId)
     {
-        int32_t IndexOfEntity = -1;
+        int32_t indexOfEntity = -1;
 
-        if (EntitySystem)
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetNumEntities(); ++i)
             {
-                const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
+                const SpaceEntity* entity = m_entitySystem->GetEntityByIndex(i);
 
-                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
+                if (entity->GetId() == static_cast<uint64_t>(entityId))
                 {
-                    IndexOfEntity = static_cast<int32_t>(i);
+                    indexOfEntity = static_cast<int32_t>(i);
                     break;
                 }
             }
         }
 
-        return IndexOfEntity;
+        return indexOfEntity;
     }
 
-    EntityScriptInterface* GetEntityById(int64_t EntityId)
+    EntityScriptInterface* GetEntityById(int64_t entityId)
     {
-        EntityScriptInterface* ScriptInterface = nullptr;
-        if (EntitySystem)
+        EntityScriptInterface* scriptInterface = nullptr;
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetNumEntities(); ++i)
             {
-                SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
+                SpaceEntity* entity = m_entitySystem->GetEntityByIndex(i);
+                if (entity->GetId() == static_cast<uint64_t>(entityId))
                 {
-                    ScriptInterface = Entity->GetScriptInterface();
+                    scriptInterface = entity->GetScriptInterface();
                     break;
                 }
             }
         }
 
-        return ScriptInterface;
+        return scriptInterface;
     }
 
-    EntityScriptInterface* GetEntityByName(std::string EntityName)
+    EntityScriptInterface* GetEntityByName(std::string entityName)
     {
-        EntityScriptInterface* ScriptInterface = nullptr;
-        if (EntitySystem)
+        EntityScriptInterface* scriptInterface = nullptr;
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetNumEntities(); ++i)
             {
-                SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetName() == EntityName.c_str())
+                SpaceEntity* entity = m_entitySystem->GetEntityByIndex(i);
+                if (entity->GetName() == entityName.c_str())
                 {
-                    ScriptInterface = Entity->GetScriptInterface();
+                    scriptInterface = entity->GetScriptInterface();
                     break;
                 }
             }
         }
 
-        return ScriptInterface;
+        return scriptInterface;
     }
 
     std::vector<EntityScriptInterface*> GetRootHierarchyEntities()
     {
-        std::vector<EntityScriptInterface*> RootHierarchyEntities;
-        if (EntitySystem)
+        std::vector<EntityScriptInterface*> rootHierarchyEntities;
+        if (m_entitySystem)
         {
-            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
+            RAIILock entityLock([&]() { m_entitySystem->LockEntityUpdate(); }, [&]() { m_entitySystem->UnlockEntityUpdate(); });
 
-            for (size_t i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+            for (size_t i = 0; i < m_entitySystem->GetRootHierarchyEntities()->Size(); ++i)
             {
-                SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
-                RootHierarchyEntities.push_back(Entity->GetScriptInterface());
+                SpaceEntity* entity = (*m_entitySystem->GetRootHierarchyEntities())[i];
+                rootHierarchyEntities.push_back(entity->GetScriptInterface());
             }
         }
 
-        return RootHierarchyEntities;
+        return rootHierarchyEntities;
     }
 
     std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
 
 private:
-    csp::common::IRealtimeEngine* EntitySystem;
+    csp::common::IRealtimeEngine* m_entitySystem;
 };
 
-void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSystem)
+void EntityScriptLog(qjs::rest<std::string> args, csp::common::LogSystem& logSystem)
 {
-    std::stringstream Str;
+    std::stringstream str;
 
-    for (auto const& Arg : Args)
+    for (auto const& arg : args)
     {
-        Str << Arg << " ";
+        str << arg << " ";
     }
 
-    LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
+    logSystem.LogMsg(csp::common::LogLevel::Log, str.str().c_str());
 }
 
 class EntityScriptBinding::SchemaCacheImpl
 {
 public:
-    std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    std::vector<qjs::Value> GetComponents(qjs::Context& context, EntityScriptInterface& entity, const ComponentSchema& schema)
     {
-        switch (static_cast<ComponentType>(Schema.TypeId))
+        switch (static_cast<ComponentType>(schema.TypeId))
         {
         case ComponentType::VideoPlayer:
-            return GetComponents<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
+            return GetComponents<VideoPlayerSpaceComponentScriptInterface>(context, entity, schema);
         case ComponentType::Custom:
-            return GetComponents<CustomSpaceComponentScriptInterface>(Context, Entity, Schema);
+            return GetComponents<CustomSpaceComponentScriptInterface>(context, entity, schema);
         case ComponentType::Audio:
-            return GetComponents<AudioSpaceComponentScriptInterface>(Context, Entity, Schema);
+            return GetComponents<AudioSpaceComponentScriptInterface>(context, entity, schema);
         case ComponentType::Hotspot:
-            return GetComponents<HotspotSpaceComponentScriptInterface>(Context, Entity, Schema);
+            return GetComponents<HotspotSpaceComponentScriptInterface>(context, entity, schema);
         case ComponentType::CinematicCamera:
-            return GetComponents<CinematicCameraSpaceComponentScriptInterface>(Context, Entity, Schema);
+            return GetComponents<CinematicCameraSpaceComponentScriptInterface>(context, entity, schema);
         default:
             break;
         };
 
-        return GetComponents<ComponentScriptInterface>(Context, Entity, Schema);
+        return GetComponents<ComponentScriptInterface>(context, entity, schema);
     }
 
 private:
     template <typename ScriptInterface>
-    std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    std::vector<qjs::Value> GetComponents(qjs::Context& context, EntityScriptInterface& entity, const ComponentSchema& schema)
     {
-        const auto Proto = GetOrCreate(Schema.TypeId, [&] { return MakeComponentPrototype<ScriptInterface>(Context, Schema); });
+        const auto proto = GetOrCreate(schema.TypeId, [&] { return MakeComponentPrototype<ScriptInterface>(context, schema); });
 
-        const auto ComponentType = static_cast<csp::multiplayer::ComponentType>(Schema.TypeId);
+        const auto componentType = static_cast<csp::multiplayer::ComponentType>(schema.TypeId);
 
-        auto Wrapped = std::vector<qjs::Value>();
+        auto wrapped = std::vector<qjs::Value>();
 
-        for (auto* Component : Entity.GetComponentsOfType<ScriptInterface>(ComponentType))
+        for (auto* component : entity.GetComponentsOfType<ScriptInterface>(componentType))
         {
-            auto Instance = qjs::js_traits<ScriptInterface*>::wrap(Proto.ctx, Component);
-            JS_SetPrototype(Proto.ctx, Instance, Proto.v); // Overwrite the prototype
+            auto instance = qjs::js_traits<ScriptInterface*>::wrap(proto.ctx, component);
+            JS_SetPrototype(proto.ctx, instance, proto.v); // Overwrite the prototype
 
-            Wrapped.push_back({ Proto.ctx, std::move(Instance) });
+            wrapped.push_back({ proto.ctx, std::move(instance) });
         }
 
-        return Wrapped;
+        return wrapped;
     }
 
-    template <typename FactoryFn> const qjs::Value& GetOrCreate(ComponentSchema::TypeIdType TypeId, FactoryFn&& Create)
+    template <typename FactoryFn> const qjs::Value& GetOrCreate(ComponentSchema::TypeIdType typeId, FactoryFn&& create)
     {
-        const auto It = Cache.find(TypeId);
-        if (It != Cache.end())
+        const auto it = m_cache.find(typeId);
+        if (it != m_cache.end())
         {
-            return It->second;
+            return it->second;
         }
 
-        return Cache.emplace(TypeId, Create()).first->second;
+        return m_cache.emplace(typeId, create()).first->second;
     }
 
-    std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> Cache;
+    std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> m_cache;
 };
 
-EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
-    : SchemaCache(std::make_unique<SchemaCacheImpl>())
-    , EntitySystem(InEntitySystem)
-    , LogSystem(LogSystem)
+EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* inEntitySystem, csp::common::LogSystem& logSystem)
+    : m_schemaCache(std::make_unique<SchemaCacheImpl>())
+    , m_entitySystem(inEntitySystem)
+    , m_logSystem(logSystem)
 {
 }
 
 EntityScriptBinding::~EntityScriptBinding() = default;
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+    csp::common::IRealtimeEngine* inEntitySystem, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& scriptRunner)
 {
-    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
-    ScriptRunner.RegisterScriptBinding(ScriptBinding);
-    return ScriptBinding;
+    EntityScriptBinding* scriptBinding = new EntityScriptBinding(inEntitySystem, logSystem);
+    scriptRunner.RegisterScriptBinding(scriptBinding);
+    return scriptBinding;
 }
 
-void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner)
+void EntityScriptBinding::RemoveBinding(EntityScriptBinding* inEntityBinding, csp::common::IJSScriptRunner& scriptRunner)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
-        ScriptRunner.UnregisterScriptBinding(InEntityBinding);
+        scriptRunner.UnregisterScriptBinding(inEntityBinding);
     }
 }
 
 #define PROPERTY_GET_SET(COMP, METHOD, PROP) property<&COMP##ScriptInterface::Get##METHOD, &COMP##ScriptInterface::Set##METHOD>(PROP)
 #define PROPERTY_GET(COMP, METHOD, PROP) property<&COMP##ScriptInterface::Get##METHOD>(PROP)
 
-void BindComponents(qjs::Context::Module* Module)
+void BindComponents(qjs::Context::Module* module)
 {
-    Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
+    module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
-    Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
+    module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .fun<&CinematicCameraSpaceComponentScriptInterface::GetFov>("getFov");
 
-    Module->class_<CustomSpaceComponentScriptInterface>("CustomSpaceComponent")
+    module->class_<CustomSpaceComponentScriptInterface>("CustomSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .fun<&CustomSpaceComponentScriptInterface::GetCustomPropertySubscriptionKey>("getCustomPropertySubscriptionKey")
@@ -462,46 +462,46 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&CustomSpaceComponentScriptInterface::GetCustomPropertyKeys>("getCustomPropertyKeys")
         .fun<&CustomSpaceComponentScriptInterface::SetCustomProperty>("setCustomProperty");
 
-    Module->class_<SplineSpaceComponentScriptInterface>("SplineSpaceComponent")
+    module->class_<SplineSpaceComponentScriptInterface>("SplineSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .fun<&SplineSpaceComponentScriptInterface::SetWaypoints>("setWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
 
-    Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
+    module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
-    Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
+    module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
         .fun<&HotspotSpaceComponentScriptInterface::GetUniqueComponentId>("getUniqueComponentId");
 }
 
-void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
+void EntityScriptBinding::Bind(int64_t contextId, csp::common::IJSScriptRunner& scriptRunner)
 {
-    qjs::Context* Context = (qjs::Context*)ScriptRunner.GetContext(ContextId);
-    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptRunner.GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
+    qjs::Context* context = (qjs::Context*)scriptRunner.GetContext(contextId);
+    qjs::Context::Module* module = (qjs::Context::Module*)scriptRunner.GetModule(contextId, csp::systems::SCRIPT_NAMESPACE);
 
-    Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
+    module->function("Log", [&logSystem = this->m_logSystem](qjs::rest<std::string> args) { EntityScriptLog(std::move(args), logSystem); });
 
-    const auto RegisterDynamicComponentGetters = [this, Context, ContextId](auto&& ClassRegistrar) -> decltype(auto)
+    const auto registerDynamicComponentGetters = [this, context, contextId](auto&& classRegistrar) -> decltype(auto)
     {
-        for (const auto& [TypeId, Schema] : EntitySystem->GetComponentSchemaRegistry()->GetUnderlying())
+        for (const auto& [TypeId, Schema] : m_entitySystem->GetComponentSchemaRegistry()->GetUnderlying())
         {
             if (IsScriptable(Schema))
             {
-                const auto& ComponentScriptName = Schema.Name;
-                const auto GetterName = fmt::format("get{}Components", ComponentScriptName.c_str());
+                const auto& componentScriptName = Schema.Name;
+                const auto getterName = fmt::format("get{}Components", componentScriptName.c_str());
 
-                ClassRegistrar.fun(GetterName.c_str(),
-                    [this, Schema = Schema, Context, ContextId]() -> std::vector<qjs::Value>
+                classRegistrar.fun(getterName.c_str(),
+                    [this, schema = Schema, context, contextId]() -> std::vector<qjs::Value>
                     {
-                        if (auto* Entity = EntitySystem->FindSpaceEntityById(ContextId))
+                        if (auto* entity = m_entitySystem->FindSpaceEntityById(contextId))
                         {
-                            return SchemaCache->GetComponents(*Context, *Entity->GetScriptInterface(), Schema);
+                            return m_schemaCache->GetComponents(*context, *entity->GetScriptInterface(), schema);
                         }
 
                         return {};
@@ -509,10 +509,10 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
             }
         }
 
-        return std::forward<decltype(ClassRegistrar)>(ClassRegistrar);
+        return std::forward<decltype(classRegistrar)>(classRegistrar);
     };
 
-    RegisterDynamicComponentGetters(Module->class_<EntityScriptInterface>("Entity"))
+    registerDynamicComponentGetters(module->class_<EntityScriptInterface>("Entity"))
         .constructor<>()
         .fun<&EntityScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&EntityScriptInterface::SubscribeToMessage>("subscribeToMessage")
@@ -532,7 +532,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&EntityScriptInterface::GetName>("name")
         .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
 
-    Module->class_<ComponentScriptInterface>("Component")
+    module->class_<ComponentScriptInterface>("Component")
         .constructor<>()
         .property<&ComponentScriptInterface::GetComponentId>("id")
         .property<&ComponentScriptInterface::GetComponentType>("type")
@@ -540,9 +540,9 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&ComponentScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&ComponentScriptInterface::InvokeAction>("invokeAction");
 
-    BindComponents(Module);
+    BindComponents(module);
 
-    Module->class_<EntitySystemScriptInterface>("EntitySystem")
+    module->class_<EntitySystemScriptInterface>("EntitySystem")
         .constructor<>()
         .fun<&EntitySystemScriptInterface::GetFoundationVersion>("getFoundationVersion")
         .fun<&EntitySystemScriptInterface::GetEntities>("getEntities")
@@ -553,19 +553,19 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
-    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+    context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(m_entitySystem);
+    context->global()["ThisEntity"] = new EntityScriptInterface(m_entitySystem->FindSpaceEntityById(contextId));
 
     // Always import OKO module into scripts
     std::stringstream ss;
     ss << "import * as " << csp::systems::SCRIPT_NAMESPACE << " from \"" << csp::systems::SCRIPT_NAMESPACE << "\"; globalThis."
        << csp::systems::SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE << ";";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
 
     // For script backwards compatibility
     ss.clear();
     ss << "globalThis." << csp::systems::OLD_SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE;
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
 }
 
 } // namespace csp::multiplayer

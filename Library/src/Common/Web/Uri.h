@@ -29,21 +29,21 @@ class Uri
 {
 public:
     Uri();
-    explicit Uri(const char* InUri);
-    Uri(csp::common::String& InUri);
+    explicit Uri(const char* inUri);
+    Uri(csp::common::String& inUri);
 
     const char* GetAsString() const;
     const std::string GetAsStdString() const;
 
-    void SetWithParams(const char* InUri, std::initializer_list<csp::common::String> Params);
+    void SetWithParams(const char* inUri, std::initializer_list<csp::common::String> params);
 
-    template <class T> void AddQueryParams(const char* ParamName, T Param);
+    template <class T> void AddQueryParams(const char* paramName, T param);
 
-    static csp::common::String Encode(const csp::common::String& InUri);
+    static csp::common::String Encode(const csp::common::String& inUri);
 
 private:
-    csp::common::String UriPath;
-    uint32_t NumParams;
+    csp::common::String m_uriPath;
+    uint32_t m_numParams;
 };
 
 template <class T>
@@ -52,70 +52,70 @@ template <class T>
     assert(false && "Unknown param type in Api binding");
 }
 
-template <> inline void Uri::AddQueryParams(const char* ParamName, csp::common::String Param)
+template <> inline void Uri::AddQueryParams(const char* paramName, csp::common::String param)
 {
-    if (Param.Length() > 0)
+    if (param.Length() > 0)
     {
-        std::string Path = UriPath.c_str();
+        std::string path = m_uriPath.c_str();
 
-        const std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
-        Path = Path + Separator + std::string(ParamName) + std::string("=") + std::string(Encode(Param));
-        ++NumParams;
+        const std::string separator = (m_numParams == 0) ? std::string("?") : std::string("&");
+        path = path + separator + std::string(paramName) + std::string("=") + std::string(Encode(param));
+        ++m_numParams;
 
-        UriPath = csp::common::String(Path.c_str());
+        m_uriPath = csp::common::String(path.c_str());
     }
 }
 
-template <> inline void Uri::AddQueryParams(const char* ParamName, std::vector<csp::common::String> Param)
+template <> inline void Uri::AddQueryParams(const char* paramName, std::vector<csp::common::String> param)
 {
-    if (Param.size() == 0)
+    if (param.size() == 0)
     {
         return;
     }
 
-    std::string Path = UriPath.c_str();
+    std::string path = m_uriPath.c_str();
 
-    for (size_t i = 0; i < Param.size(); ++i)
+    for (size_t i = 0; i < param.size(); ++i)
     {
-        std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
-        Path = Path + Separator + std::string(ParamName) + std::string("=") + std::string(Encode(Param[i]));
-        ++NumParams;
+        std::string separator = (m_numParams == 0) ? std::string("?") : std::string("&");
+        path = path + separator + std::string(paramName) + std::string("=") + std::string(Encode(param[i]));
+        ++m_numParams;
     }
 
-    UriPath = csp::common::String(Path.c_str());
+    m_uriPath = csp::common::String(path.c_str());
 }
 
-template <> inline void Uri::AddQueryParams(const char* ParamName, double Param)
+template <> inline void Uri::AddQueryParams(const char* paramName, double param)
 {
-    std::string Path = UriPath.c_str();
+    std::string path = m_uriPath.c_str();
 
-    std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
-    Path = Path + Separator + std::string(ParamName) + std::string("=") + std::to_string(Param);
-    ++NumParams;
+    std::string separator = (m_numParams == 0) ? std::string("?") : std::string("&");
+    path = path + separator + std::string(paramName) + std::string("=") + std::to_string(param);
+    ++m_numParams;
 
-    UriPath = csp::common::String(Path.c_str());
+    m_uriPath = csp::common::String(path.c_str());
 }
 
-template <> inline void Uri::AddQueryParams(const char* ParamName, int32_t Param)
+template <> inline void Uri::AddQueryParams(const char* paramName, int32_t param)
 {
-    std::string Path = UriPath.c_str();
+    std::string path = m_uriPath.c_str();
 
-    std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
-    Path = Path + Separator + std::string(ParamName) + std::string("=") + std::to_string(Param);
-    ++NumParams;
+    std::string separator = (m_numParams == 0) ? std::string("?") : std::string("&");
+    path = path + separator + std::string(paramName) + std::string("=") + std::to_string(param);
+    ++m_numParams;
 
-    UriPath = csp::common::String(Path.c_str());
+    m_uriPath = csp::common::String(path.c_str());
 }
 
-template <> inline void Uri::AddQueryParams(const char* ParamName, bool Param)
+template <> inline void Uri::AddQueryParams(const char* paramName, bool param)
 {
-    std::string Path = UriPath.c_str();
+    std::string path = m_uriPath.c_str();
 
-    std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
-    Path = Path + Separator + std::string(ParamName) + std::string("=") + (Param ? "true" : "false");
-    ++NumParams;
+    std::string separator = (m_numParams == 0) ? std::string("?") : std::string("&");
+    path = path + separator + std::string(paramName) + std::string("=") + (param ? "true" : "false");
+    ++m_numParams;
 
-    UriPath = csp::common::String(Path.c_str());
+    m_uriPath = csp::common::String(path.c_str());
 }
 
 } // namespace csp::web

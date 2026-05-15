@@ -124,17 +124,17 @@ class ItemComponentData : public ISignalRSerializable, public ISignalRDeserializ
 {
 public:
     ItemComponentData() = default;
-    ItemComponentData(const ItemComponentDataVariant& Value);
+    ItemComponentData(const ItemComponentDataVariant& value);
 
-    void Serialize(SignalRSerializer& Serializer) const override;
-    void Deserialize(SignalRDeserializer& Deserializer) override;
+    void Serialize(SignalRSerializer& serializer) const override;
+    void Deserialize(SignalRDeserializer& deserializer) override;
 
     const ItemComponentDataVariant& GetValue() const;
 
-    bool operator==(const ItemComponentData& Other) const;
+    bool operator==(const ItemComponentData& other) const;
 
 private:
-    ItemComponentDataVariant Value;
+    ItemComponentDataVariant m_value;
 };
 
 /// @brief Represents an MCS object message.
@@ -145,13 +145,13 @@ class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
     ObjectMessage() = default;
-    ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-        const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components);
+    ObjectMessage(uint64_t id, uint64_t type, bool isTransferable, bool isPersistent, uint64_t ownerId, std::optional<uint64_t> parentId,
+        const std::optional<std::map<PropertyKeyType, ItemComponentData>>& components);
 
-    void Serialize(SignalRSerializer& Serializer) const override;
-    void Deserialize(SignalRDeserializer& Deserializer) override;
+    void Serialize(SignalRSerializer& serializer) const override;
+    void Deserialize(SignalRDeserializer& deserializer) override;
 
-    bool operator==(const ObjectMessage& Other) const;
+    bool operator==(const ObjectMessage& other) const;
 
     uint64_t GetId() const;
     uint64_t GetType() const;
@@ -162,13 +162,13 @@ public:
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
-    uint64_t Id = 0;
-    uint64_t Type = 0;
-    bool IsTransferable = false;
-    bool IsPersistent = false;
-    uint64_t OwnerId = 0;
-    std::optional<uint64_t> ParentId;
-    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
+    uint64_t m_id = 0;
+    uint64_t m_type = 0;
+    bool m_isTransferable = false;
+    bool m_isPersistent = false;
+    uint64_t m_ownerId = 0;
+    std::optional<uint64_t> m_parentId;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> m_components;
 };
 
 /// @brief Represents an MCS object patch.
@@ -178,13 +178,13 @@ class ObjectPatch : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
     ObjectPatch() = default;
-    ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-        const std::map<PropertyKeyType, ItemComponentData>& Components);
+    ObjectPatch(uint64_t id, uint64_t ownerId, bool destroy, bool shouldUpdateParent, std::optional<uint64_t> parentId,
+        const std::map<PropertyKeyType, ItemComponentData>& components);
 
-    void Serialize(SignalRSerializer& Serializer) const override;
-    void Deserialize(SignalRDeserializer& Deserializer) override;
+    void Serialize(SignalRSerializer& serializer) const override;
+    void Deserialize(SignalRDeserializer& deserializer) override;
 
-    bool operator==(const ObjectPatch& Other) const;
+    bool operator==(const ObjectPatch& other) const;
 
     uint64_t GetId() const;
     uint64_t GetOwnerId() const;
@@ -194,17 +194,17 @@ public:
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
-    uint64_t Id = 0;
-    uint64_t OwnerId = 0;
-    bool Destroy = false;
-    bool ShouldUpdateParent = false;
-    std::optional<uint64_t> ParentId;
-    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
+    uint64_t m_id = 0;
+    uint64_t m_ownerId = 0;
+    bool m_destroy = false;
+    bool m_shouldUpdateParent = false;
+    std::optional<uint64_t> m_parentId;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> m_components;
 };
 
 } // namespace csp::multiplayer::mcs
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);
+void ToJson(csp::json::JsonSerializer& serializer, const csp::multiplayer::mcs::ItemComponentData& obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::ItemComponentData& obj);
+void ToJson(csp::json::JsonSerializer& serializer, const csp::multiplayer::mcs::ObjectMessage& obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::ObjectMessage& obj);

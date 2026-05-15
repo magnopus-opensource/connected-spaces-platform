@@ -94,7 +94,7 @@ public:
 
     /// @brief Constructs the light space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    LightSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the type of light of this light component.
     /// @return The type of light of this light component.
@@ -102,7 +102,7 @@ public:
 
     /// @brief Sets the type of light of this light component.
     /// @param Value The type of light of this light component.
-    void SetLightType(LightType Value);
+    void SetLightType(LightType value);
 
     /// @brief Gets the type of light shadow of this light component.
     /// @return The type of light shadow of this light component.
@@ -110,7 +110,7 @@ public:
 
     /// @brief Sets the type of light shadow of this light component.
     /// @param Value The type of light shadow of this light component.
-    void SetLightShadowType(LightShadowType Value);
+    void SetLightShadowType(LightShadowType value);
 
     /// @brief Gets the color of the light of this component.
     /// @return The color of the light of this component.
@@ -118,7 +118,7 @@ public:
 
     /// @brief Sets the color of the light of this component.
     /// @param Value The color of the light of this component.
-    void SetColor(const csp::common::Vector3& Value);
+    void SetColor(const csp::common::Vector3& value);
 
     /// @brief Gets the intensity of the light of this component.
     /// @return The intensity of the light of this component.
@@ -126,7 +126,7 @@ public:
 
     /// @brief Sets the intensity of the light of this component.
     /// @param Value The intensity of the light of this component.
-    void SetIntensity(float Value);
+    void SetIntensity(float value);
 
     /// @brief Gets the range within which the light of this component affects the surrounding 3D scene.
     /// @return The range within which the light of this component affects the surrounding 3D scene.
@@ -134,7 +134,7 @@ public:
 
     /// @brief Sets the range within which the light of this component affects the surrounding 3D scene.
     /// @param Value The range within which the light of this component affects the surrounding 3D scene.
-    void SetRange(float Value);
+    void SetRange(float value);
 
     /// @brief Gets the angle of the inner cone in a spotlight.
     /// @return The angle of the inner cone in a spotlight.
@@ -142,7 +142,7 @@ public:
 
     /// @brief Sets the angle of the inner cone in a spotlight.
     /// @param Value The angle of the inner cone in a spotlight.
-    void SetInnerConeAngle(float Value);
+    void SetInnerConeAngle(float value);
 
     /// @brief Gets the angle of the outer cone in a spotlight.
     /// @return The angle of the outer cone in a spotlight.
@@ -150,14 +150,14 @@ public:
 
     /// @brief Sets the angle of the outer cone in a spotlight.
     /// @param Value The angle of the outer cone in a spotlight.
-    void SetOuterConeAngle(float Value);
+    void SetOuterConeAngle(float value);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// \addtogroup IRotationComponent
@@ -165,7 +165,7 @@ public:
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @}
 
     /// @brief Gets the ID of the asset used for the light cookie of this light component.
@@ -174,7 +174,7 @@ public:
 
     /// @brief Sets the ID of the asset used for the light cookie of this light component.
     /// @param Value The ID of the asset used for the light cookie of this light component.
-    void SetLightCookieAssetId(const csp::common::String& Value);
+    void SetLightCookieAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection used for the light cookie of this light component.
     /// @return The ID of the asset collection used for the light cookie of this light component.
@@ -182,7 +182,7 @@ public:
 
     /// @brief Sets the ID of the asset collection used for the light cookie of this light component.
     /// @param Value The ID of the asset collection used for the light cookie of this light component.
-    void SetLightCookieAssetCollectionId(const csp::common::String& Value);
+    void SetLightCookieAssetCollectionId(const csp::common::String& value);
 
     /// @brief Gets the type of the light cookie used by this light component.
     /// @return The type of the light cookie used by this light component.
@@ -190,22 +190,22 @@ public:
 
     /// @brief Sets the type of the light cookie used by this light component.
     /// @param Value The type of the light cookie used by this light component.
-    void SetLightCookieType(LightCookieType Value);
+    void SetLightCookieType(LightCookieType value);
 
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -213,7 +213,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 };
 

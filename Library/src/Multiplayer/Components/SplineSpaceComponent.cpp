@@ -53,69 +53,69 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& SplineSpaceComponent::GetSchema() { return Schema; }
 
-SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
     SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
 
-csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)
+csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float normalisedDistance)
 {
-    csp::common::List<csp::common::Vector3> ListPoints = GetWaypoints();
-    if (ListPoints.Size() != 0)
+    csp::common::List<csp::common::Vector3> listPoints = GetWaypoints();
+    if (listPoints.Size() != 0)
     {
-        std::vector<tsReal> InternalPoints;
-        InternalPoints.reserve(ListPoints.Size() * 3);
+        std::vector<tsReal> internalPoints;
+        internalPoints.reserve(listPoints.Size() * 3);
 
-        for (size_t i = 0; i < ListPoints.Size(); ++i)
+        for (size_t i = 0; i < listPoints.Size(); ++i)
         {
-            InternalPoints.push_back(static_cast<double>(ListPoints[i].X));
-            InternalPoints.push_back(static_cast<double>(ListPoints[i].Y));
-            InternalPoints.push_back(static_cast<double>(ListPoints[i].Z));
+            internalPoints.push_back(static_cast<double>(listPoints[i].X));
+            internalPoints.push_back(static_cast<double>(listPoints[i].Y));
+            internalPoints.push_back(static_cast<double>(listPoints[i].Z));
         }
 
-        constexpr size_t Dimension = 3;
+        constexpr size_t dimension = 3;
 
-        tsStatus Status {};
-        TsSpline Spline;
+        tsStatus status {};
+        TsSpline spline;
 
-        tsError Err = ts_bspline_interpolate_cubic_natural(InternalPoints.data(), InternalPoints.size() / Dimension, Dimension, &Spline.s, &Status);
+        tsError err = ts_bspline_interpolate_cubic_natural(internalPoints.data(), internalPoints.size() / dimension, dimension, &spline.s, &status);
 
-        if (Err != TS_SUCCESS)
+        if (err != TS_SUCCESS)
         {
-            if (LogSystem != nullptr)
+            if (m_logSystem != nullptr)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error,
-                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", Status.message).c_str());
+                m_logSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", status.message).c_str());
             }
 
             return {};
         }
 
-        TsNet Net;
-        Err = ts_bspline_eval(&Spline.s, NormalisedDistance, &Net.n, &Status);
+        TsNet net;
+        err = ts_bspline_eval(&spline.s, normalisedDistance, &net.n, &status);
 
-        if (Err != TS_SUCCESS)
+        if (err != TS_SUCCESS)
         {
-            if (LogSystem != nullptr)
+            if (m_logSystem != nullptr)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error,
-                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", Status.message).c_str());
+                m_logSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", status.message).c_str());
             }
 
             return {};
         }
 
-        const tsReal* ptr = ts_deboornet_result_ptr(&Net.n);
+        const tsReal* ptr = ts_deboornet_result_ptr(&net.n);
 
-        std::vector<tsReal> SplineResult(ptr, ptr + ts_deboornet_dimension(&Net.n));
-        return { static_cast<float>(SplineResult[0]), static_cast<float>(SplineResult[1]), static_cast<float>(SplineResult[2]) };
+        std::vector<tsReal> splineResult(ptr, ptr + ts_deboornet_dimension(&net.n));
+        return { static_cast<float>(splineResult[0]), static_cast<float>(splineResult[1]), static_cast<float>(splineResult[2]) };
     }
     else
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Waypoints not Set.");
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, "Waypoints not Set.");
         }
 
         return {};
@@ -126,9 +126,9 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
 {
     csp::common::List<csp::common::Vector3> returnList;
 
-    const auto& RepVal = GetIntegerProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
+    const auto& repVal = GetIntegerProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
 
-    for (int i = 0; i < RepVal; ++i)
+    for (int i = 0; i < repVal; ++i)
     {
         returnList.Append(GetVector3Property(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i)));
     }
@@ -136,13 +136,13 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
     return returnList;
 }
 
-void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vector3>& Waypoints)
+void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vector3>& waypoints)
 {
-    SetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)Waypoints.Size());
+    SetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)waypoints.Size());
 
-    for (size_t i = 0; i < Waypoints.Size(); ++i)
+    for (size_t i = 0; i < waypoints.Size(); ++i)
     {
-        SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
+        SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), waypoints[i]);
     }
 }
 } // namespace csp::multiplayer

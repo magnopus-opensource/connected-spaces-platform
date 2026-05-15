@@ -31,15 +31,15 @@ public:
     using CallbackHandler = std::function<void(bool)>;
     using ReceiveHandler = std::function<void(const std::string&, bool)>;
 
-    virtual void Start(const std::string& Url, CallbackHandler Callback) = 0;
-    virtual void Stop(CallbackHandler Callback) = 0;
-    virtual void Send(const std::string& Message, CallbackHandler Callback) = 0;
-    virtual void Receive(ReceiveHandler Callback) = 0;
+    virtual void Start(const std::string& url, CallbackHandler callback) = 0;
+    virtual void Stop(CallbackHandler callback) = 0;
+    virtual void Send(const std::string& message, CallbackHandler callback) = 0;
+    virtual void Receive(ReceiveHandler callback) = 0;
 
     // This function is used for testing unexpected connection terminations by causing the internal signalr connection to close.
     virtual void __CauseFailure() = 0;
 };
 
-void SetWebSocketClient(IWebSocketClient* CSPWebSocketClientPtr);
+void SetWebSocketClient(IWebSocketClient* cspWebSocketClientPtr);
 
 } // namespace csp::multiplayer

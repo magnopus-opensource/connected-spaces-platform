@@ -28,9 +28,9 @@ namespace csp
 template <typename T> struct Queue
 {
     /* Create Queue object. Set maximum size of the queue to max_size. */
-    inline Queue(size_t max_size = -2147483647 - 1)
-        : MaxSize(max_size)
-        , End(false) {};
+    inline Queue(size_t maxSize = -2147483647 - 1)
+        : m_maxSize(maxSize)
+        , m_end(false) {};
 
     /* Enqueue T to the queue. Many threads can push at the same time.
      * If the queue is full, calling thread will be suspended until
@@ -50,68 +50,68 @@ template <typename T> struct Queue
 
     bool IsEmpty();
 
-    size_t GetSize() { return InternalQueue.size(); }
+    size_t GetSize() { return m_internalQueue.size(); }
 
 private:
-    std::queue<T> InternalQueue;
-    std::mutex Mutex;
-    std::condition_variable Empty;
-    std::condition_variable Full;
-    const size_t MaxSize;
-    std::atomic<bool> End;
+    std::queue<T> m_internalQueue;
+    std::mutex m_mutex;
+    std::condition_variable m_empty;
+    std::condition_variable m_full;
+    const size_t m_maxSize;
+    std::atomic<bool> m_end;
 };
 
 template <typename T> void Queue<T>::Enqueue(T&& t)
 {
-    std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.size() == MaxSize && !End)
+    std::unique_lock<std::mutex> lock(m_mutex);
+    while (m_internalQueue.size() == m_maxSize && !m_end)
     {
-        Full.wait(Lock);
+        m_full.wait(lock);
     }
-    assert(!End);
-    InternalQueue.push(std::move(t));
-    Empty.notify_one();
+    assert(!m_end);
+    m_internalQueue.push(std::move(t));
+    m_empty.notify_one();
 }
 
 template <typename T> void Queue<T>::Enqueue(const T& t)
 {
-    std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.size() == MaxSize && !End)
+    std::unique_lock<std::mutex> lock(m_mutex);
+    while (m_internalQueue.size() == m_maxSize && !m_end)
     {
-        Full.wait(Lock);
+        m_full.wait(lock);
     }
-    assert(!End);
-    InternalQueue.push(std::move(t));
-    Empty.notify_one();
+    assert(!m_end);
+    m_internalQueue.push(std::move(t));
+    m_empty.notify_one();
 }
 
 template <typename T> std::optional<T> Queue<T>::Dequeue()
 {
-    std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.empty() && !End)
+    std::unique_lock<std::mutex> lock(m_mutex);
+    while (m_internalQueue.empty() && !m_end)
     {
-        Empty.wait(Lock);
+        m_empty.wait(lock);
     }
 
-    if (InternalQueue.empty())
+    if (m_internalQueue.empty())
     {
         return {};
     }
-    T Out = std::move(InternalQueue.front());
-    InternalQueue.pop();
-    Full.notify_one();
-    return Out;
+    T out = std::move(m_internalQueue.front());
+    m_internalQueue.pop();
+    m_full.notify_one();
+    return out;
 }
 
 template <typename T> void Queue<T>::Close()
 {
-    End = true;
-    std::lock_guard<std::mutex> Lock(Mutex);
-    Empty.notify_one();
-    Full.notify_one();
+    m_end = true;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_empty.notify_one();
+    m_full.notify_one();
 }
 
-template <typename T> bool Queue<T>::IsEmpty() { return InternalQueue.empty(); }
+template <typename T> bool Queue<T>::IsEmpty() { return m_internalQueue.empty(); }
 } // namespace csp
 
 /* Usage sample:

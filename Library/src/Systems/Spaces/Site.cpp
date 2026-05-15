@@ -25,37 +25,37 @@ namespace
 
 const char* ENGLISH_LANGUAGE_CODE = "EN";
 
-void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& Dto, csp::systems::Site& Site)
+void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& dto, csp::systems::Site& site)
 {
-    Site.Id = Dto.GetId();
-    Site.SpaceId = Dto.GetGroupId();
+    site.Id = dto.GetId();
+    site.SpaceId = dto.GetGroupId();
 
-    const auto& LocalisedTitle = Dto.GetTitle();
-    for (auto& CurrentTitle : LocalisedTitle)
+    const auto& localisedTitle = dto.GetTitle();
+    for (auto& currentTitle : localisedTitle)
     {
-        if (CurrentTitle->GetLanguageCode() == ENGLISH_LANGUAGE_CODE)
+        if (currentTitle->GetLanguageCode() == ENGLISH_LANGUAGE_CODE)
         {
-            Site.Name = CurrentTitle->GetValue();
+            site.Name = currentTitle->GetValue();
         }
     }
 
-    if (Dto.HasLocation())
+    if (dto.HasLocation())
     {
-        const auto& Location = Dto.GetLocation();
-        Site.Location.Longitude = Location->GetLongitude();
-        Site.Location.Latitude = Location->GetLatitude();
+        const auto& location = dto.GetLocation();
+        site.Location.Longitude = location->GetLongitude();
+        site.Location.Latitude = location->GetLatitude();
     }
 
-    if (Dto.HasPrototypeTransform())
+    if (dto.HasPrototypeTransform())
     {
-        const auto& Transform = Dto.GetPrototypeTransform();
-        if (Transform->HasRotation())
+        const auto& transform = dto.GetPrototypeTransform();
+        if (transform->HasRotation())
         {
-            const auto& Rotation = Transform->GetRotation();
-            Site.Rotation.X = Rotation->GetX();
-            Site.Rotation.Y = Rotation->GetY();
-            Site.Rotation.Z = Rotation->GetZ();
-            Site.Rotation.W = Rotation->GetW();
+            const auto& rotation = transform->GetRotation();
+            site.Rotation.X = rotation->GetX();
+            site.Rotation.Y = rotation->GetY();
+            site.Rotation.Z = rotation->GetZ();
+            site.Rotation.W = rotation->GetW();
         }
     }
 }
@@ -65,55 +65,55 @@ void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& Dto, csp::syste
 namespace csp::systems
 {
 
-bool Site::operator==(const Site& Other) const
+bool Site::operator==(const Site& other) const
 {
-    return Id == Other.Id && Name == Other.Name && SpaceId == Other.SpaceId && Location == Other.Location && Rotation == Other.Rotation;
+    return Id == other.Id && Name == other.Name && SpaceId == other.SpaceId && Location == other.Location && Rotation == other.Rotation;
 }
 
-bool Site::operator!=(const Site& Other) const { return !(*this == Other); }
+bool Site::operator!=(const Site& other) const { return !(*this == other); }
 
-Site& SiteResult::GetSite() { return Site; }
+Site& SiteResult::GetSite() { return m_site; }
 
-const Site& SiteResult::GetSite() const { return Site; }
+const Site& SiteResult::GetSite() const { return m_site; }
 
-void SiteResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SiteResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* POIResponse = static_cast<chs::PointOfInterestDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* poiResponse = static_cast<chs::PointOfInterestDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        POIResponse->FromJson(Response->GetPayload().GetContent());
+        poiResponse->FromJson(response->GetPayload().GetContent());
 
-        PointOfInterestDtoToSiteInfo(*POIResponse, Site);
+        PointOfInterestDtoToSiteInfo(*poiResponse, m_site);
     }
 }
 
-csp::common::Array<csp::systems::Site>& SitesCollectionResult::GetSites() { return Sites; }
+csp::common::Array<csp::systems::Site>& SitesCollectionResult::GetSites() { return m_sites; }
 
-const csp::common::Array<csp::systems::Site>& SitesCollectionResult::GetSites() const { return Sites; }
+const csp::common::Array<csp::systems::Site>& SitesCollectionResult::GetSites() const { return m_sites; }
 
-void SitesCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SitesCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* POICollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* poiCollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        POICollectionResponse->FromJson(Response->GetPayload().GetContent());
+        poiCollectionResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from response in our Sites array
-        std::vector<chs::PointOfInterestDto>& POIArray = POICollectionResponse->GetArray();
-        Sites = csp::common::Array<csp::systems::Site>(POIArray.size());
+        std::vector<chs::PointOfInterestDto>& poiArray = poiCollectionResponse->GetArray();
+        m_sites = csp::common::Array<csp::systems::Site>(poiArray.size());
 
-        for (size_t idx = 0; idx < POIArray.size(); ++idx)
+        for (size_t idx = 0; idx < poiArray.size(); ++idx)
         {
-            PointOfInterestDtoToSiteInfo(POIArray[idx], Sites[idx]);
+            PointOfInterestDtoToSiteInfo(poiArray[idx], m_sites[idx]);
         }
     }
 }

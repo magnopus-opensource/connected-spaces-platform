@@ -30,47 +30,47 @@ namespace csp::systems
 
 MaintenanceSystem::MaintenanceSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , MaintenanceAPI(nullptr)
+    , m_maintenanceApi(nullptr)
 {
-    AllowMaintenanceInfoRequests = true;
+    m_allowMaintenanceInfoRequests = true;
 }
 
-MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
 {
-    MaintenanceAPI = new chs::MaintenanceApi(InWebClient);
-    AllowMaintenanceInfoRequests = true;
+    m_maintenanceApi = new chs::MaintenanceApi(inWebClient);
+    m_allowMaintenanceInfoRequests = true;
 }
 
-MaintenanceSystem::~MaintenanceSystem() { delete (MaintenanceAPI); }
+MaintenanceSystem::~MaintenanceSystem() { delete (m_maintenanceApi); }
 
-void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback)
+void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& maintenanceUrl, MaintenanceInfoCallback callback)
 {
-    if (AllowMaintenanceInfoRequests == true)
+    if (m_allowMaintenanceInfoRequests == true)
     {
-        const MaintenanceInfoCallback GetMaintenanceInfoCallback = [this, Callback](const MaintenanceInfoResult& Result)
+        const MaintenanceInfoCallback getMaintenanceInfoCallback = [this, callback](const MaintenanceInfoResult& result)
         {
-            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+            if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
             {
                 return;
             }
 
-            if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            if (result.GetResultCode() == csp::systems::EResultCode::Failed)
             {
-                MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
-                AllowMaintenanceInfoRequests = false;
+                MaintenanceInfoResult res(csp::systems::EResultCode::Failed, result.GetHttpResultCode());
+                m_allowMaintenanceInfoRequests = false;
                 CSP_LOG_ERROR_MSG("Failed to Get Maintenance Information: Maintenance system disabled. Check Maintenance URL, and restart");
-                INVOKE_IF_NOT_NULL(Callback, res);
+                INVOKE_IF_NOT_NULL(callback, res);
 
                 return;
             }
 
-            INVOKE_IF_NOT_NULL(Callback, Result);
+            INVOKE_IF_NOT_NULL(callback, result);
         };
-        csp::services::ResponseHandlerPtr MaintenanceResponseHandler
-            = MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
-                GetMaintenanceInfoCallback, nullptr);
-        static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(MaintenanceURL, MaintenanceResponseHandler);
+        csp::services::ResponseHandlerPtr maintenanceResponseHandler
+            = m_maintenanceApi->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
+                getMaintenanceInfoCallback, nullptr);
+        static_cast<chs::MaintenanceApi*>(m_maintenanceApi)->Query(maintenanceUrl, maintenanceResponseHandler);
     }
 }
 

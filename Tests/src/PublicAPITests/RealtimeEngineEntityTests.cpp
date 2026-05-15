@@ -65,7 +65,7 @@ csp::common::ReplicatedValue ObjectBoolProperty;
 csp::common::ReplicatedValue ObjectIntProperty;
 csp::common::ReplicatedValue ObjectStringProperty;
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 void InitialiseTestingConnection()
 {
@@ -152,641 +152,641 @@ TEST_P(CreateAvatar, CreateAvatarTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String& UserName = "Player 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Player 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = true;
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::FreeCamera;
+    bool isVisible = true;
+    AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "MyCoolAvatar";
+    AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Default;
+    LocomotionModel userAvatarLocomotionModel = LocomotionModel::FreeCamera;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, UserAvatarLocomotionModel);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, userAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-    EXPECT_EQ(Avatar->GetName(), UserName);
-    EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
-    EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);
+    EXPECT_EQ(Avatar->GetName(), userName);
+    EXPECT_EQ(Avatar->GetPosition(), userTransform.Position);
+    EXPECT_EQ(Avatar->GetRotation(), userTransform.Rotation);
 
-    auto& Components = *Avatar->GetComponents();
+    auto& components = *Avatar->GetComponents();
 
-    EXPECT_EQ(Components.Size(), 1);
+    EXPECT_EQ(components.Size(), 1);
 
-    auto* Component = Components[0];
+    auto* component = components[0];
 
-    EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+    EXPECT_EQ(component->GetComponentType(), ComponentType::AvatarData);
 
     // Verify the values of UserAvatarState and UserAvatarPlayMode
-    auto* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
+    auto* avatarComponent = dynamic_cast<AvatarSpaceComponent*>(component);
 
-    EXPECT_NE(AvatarComponent, nullptr);
-    EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
+    EXPECT_NE(avatarComponent, nullptr);
+    EXPECT_EQ(avatarComponent->GetState(), userAvatarState);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), userAvatarPlayMode);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), userAvatarLocomotionModel);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), isVisible);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String& UserName = "Creator 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Creator 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = true;
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolCreatorAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    bool isVisible = true;
+    AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "MyCoolCreatorAvatar";
+    AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Creator;
+    LocomotionModel userAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, UserAvatarLocomotionModel);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, userAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-    EXPECT_EQ(Avatar->GetName(), UserName);
-    EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
-    EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);
+    EXPECT_EQ(Avatar->GetName(), userName);
+    EXPECT_EQ(Avatar->GetPosition(), userTransform.Position);
+    EXPECT_EQ(Avatar->GetRotation(), userTransform.Rotation);
 
-    auto& Components = *Avatar->GetComponents();
+    auto& components = *Avatar->GetComponents();
 
-    EXPECT_EQ(Components.Size(), 1);
+    EXPECT_EQ(components.Size(), 1);
 
-    auto* Component = Components[0];
+    auto* component = components[0];
 
-    EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+    EXPECT_EQ(component->GetComponentType(), ComponentType::AvatarData);
 
     // Verify the values of UserAvatarState and UserAvatarPlayMode
-    AvatarSpaceComponent* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
-    EXPECT_NE(AvatarComponent, nullptr);
-    EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
+    AvatarSpaceComponent* avatarComponent = dynamic_cast<AvatarSpaceComponent*>(component);
+    EXPECT_NE(avatarComponent, nullptr);
+    EXPECT_EQ(avatarComponent->GetState(), userAvatarState);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), userAvatarPlayMode);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), userAvatarLocomotionModel);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), isVisible);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String& UserName = "Player 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Player 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = true;
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+    bool isVisible = true;
+    AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "MyCoolAvatar";
+    AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Default;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, LocomotionModel::Grounded);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
-    auto& Components = *Avatar->GetComponents();
-    EXPECT_EQ(Components.Size(), 1);
+    auto& components = *Avatar->GetComponents();
+    EXPECT_EQ(components.Size(), 1);
 
-    auto* Component = Components[0];
-    EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+    auto* component = components[0];
+    EXPECT_EQ(component->GetComponentType(), ComponentType::AvatarData);
 
-    AvatarSpaceComponent* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
-    EXPECT_NE(AvatarComponent, nullptr);
+    AvatarSpaceComponent* avatarComponent = dynamic_cast<AvatarSpaceComponent*>(component);
+    EXPECT_NE(avatarComponent, nullptr);
 
     // test setting and getting movement direction
-    AvatarComponent->SetMovementDirection(csp::common::Vector3::One());
+    avatarComponent->SetMovementDirection(csp::common::Vector3::One());
 
     Avatar->QueueUpdate();
 
-    EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::One());
+    EXPECT_EQ(avatarComponent->GetMovementDirection(), csp::common::Vector3::One());
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ObjectCreate, ObjectCreateTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     InitialiseTestingConnection();
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    EXPECT_EQ(CreatedObject->GetName(), ObjectName);
-    EXPECT_EQ(CreatedObject->GetPosition(), ObjectTransform.Position);
-    EXPECT_EQ(CreatedObject->GetRotation(), ObjectTransform.Rotation);
-    EXPECT_EQ(CreatedObject->GetScale(), ObjectTransform.Scale);
+    EXPECT_EQ(CreatedObject->GetName(), objectName);
+    EXPECT_EQ(CreatedObject->GetPosition(), objectTransform.Position);
+    EXPECT_EQ(CreatedObject->GetRotation(), objectTransform.Rotation);
+    EXPECT_EQ(CreatedObject->GetScale(), objectTransform.Scale);
     EXPECT_EQ(CreatedObject->GetThirdPartyRef(), "");
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ObjectAddComponent, ObjectAddComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    bool PatchPending = true;
-    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
+    bool patchPending = true;
+    Object->SetPatchSentCallback([&patchPending](bool /*ok*/) { patchPending = false; });
 
-    const csp::common::String ModelAssetId = "NotARealId";
+    const csp::common::String modelAssetId = "NotARealId";
 
-    auto* StaticModelComponent = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
-    auto StaticModelComponentKey = StaticModelComponent->GetId();
-    StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
+    auto* staticModelComponent = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
+    auto staticModelComponentKey = staticModelComponent->GetId();
+    staticModelComponent->SetExternalResourceAssetId(modelAssetId);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         Object->QueueUpdate();
-        while (PatchPending)
+        while (patchPending)
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
             std::this_thread::sleep_for(10ms);
         }
     }
 
-    PatchPending = true;
+    patchPending = true;
 
-    auto& Components = *Object->GetComponents();
+    auto& components = *Object->GetComponents();
 
-    EXPECT_EQ(Components.Size(), 1);
-    EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
+    EXPECT_EQ(components.Size(), 1);
+    EXPECT_TRUE(components.HasKey(staticModelComponentKey));
 
-    auto* FetchedStaticModelComponent = Object->GetComponent(StaticModelComponentKey);
+    auto* fetchedStaticModelComponent = Object->GetComponent(staticModelComponentKey);
 
-    EXPECT_EQ(FetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
-    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)FetchedStaticModelComponent;
+    EXPECT_EQ(fetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
+    auto* realStaticModelComponent = (StaticModelSpaceComponent*)fetchedStaticModelComponent;
 
-    EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
+    EXPECT_EQ(realStaticModelComponent->GetExternalResourceAssetId(), modelAssetId);
 
-    const csp::common::String ImageAssetId = "AlsoNotARealId";
+    const csp::common::String imageAssetId = "AlsoNotARealId";
 
-    auto* ImageComponent = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
-    auto ImageModelComponentKey = ImageComponent->GetId();
-    ImageComponent->SetImageAssetId(ImageAssetId);
+    auto* imageComponent = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
+    auto imageModelComponentKey = imageComponent->GetId();
+    imageComponent->SetImageAssetId(imageAssetId);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         Object->QueueUpdate();
 
-        while (PatchPending)
+        while (patchPending)
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
             std::this_thread::sleep_for(10ms);
         }
     }
 
     EXPECT_EQ(Object->GetComponents()->Size(), 2);
-    EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
-    EXPECT_TRUE(Components.HasKey(ImageModelComponentKey));
+    EXPECT_TRUE(components.HasKey(staticModelComponentKey));
+    EXPECT_TRUE(components.HasKey(imageModelComponentKey));
 
-    auto* FetchedImageComponent = Object->GetComponent(ImageModelComponentKey);
+    auto* fetchedImageComponent = Object->GetComponent(imageModelComponentKey);
 
-    EXPECT_EQ(FetchedImageComponent->GetComponentType(), ComponentType::Image);
-    auto* RealImageComponent = (ImageSpaceComponent*)FetchedImageComponent;
+    EXPECT_EQ(fetchedImageComponent->GetComponentType(), ComponentType::Image);
+    auto* realImageComponent = (ImageSpaceComponent*)fetchedImageComponent;
 
-    EXPECT_EQ(RealImageComponent->GetImageAssetId(), ImageAssetId);
+    EXPECT_EQ(realImageComponent->GetImageAssetId(), imageAssetId);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    bool PatchPending = true;
-    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
+    bool patchPending = true;
+    Object->SetPatchSentCallback([&patchPending](bool /*ok*/) { patchPending = false; });
 
-    const csp::common::String ModelAssetId = "NotARealId";
+    const csp::common::String modelAssetId = "NotARealId";
 
-    auto* StaticModelComponent = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
-    auto StaticModelComponentKey = StaticModelComponent->GetId();
-    StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
-    auto* ImageComponent = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
-    auto ImageComponentKey = ImageComponent->GetId();
-    ImageComponent->SetImageAssetId("TestID");
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    auto* staticModelComponent = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
+    auto staticModelComponentKey = staticModelComponent->GetId();
+    staticModelComponent->SetExternalResourceAssetId(modelAssetId);
+    auto* imageComponent = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
+    auto imageComponentKey = imageComponent->GetId();
+    imageComponent->SetImageAssetId("TestID");
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         Object->QueueUpdate();
 
-        while (PatchPending)
+        while (patchPending)
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
             std::this_thread::sleep_for(10ms);
         }
     }
 
-    PatchPending = true;
+    patchPending = true;
 
-    auto& Components = *Object->GetComponents();
+    auto& components = *Object->GetComponents();
 
-    EXPECT_EQ(Components.Size(), 2);
-    EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
-    EXPECT_TRUE(Components.HasKey(ImageComponentKey));
+    EXPECT_EQ(components.Size(), 2);
+    EXPECT_TRUE(components.HasKey(staticModelComponentKey));
+    EXPECT_TRUE(components.HasKey(imageComponentKey));
 
-    auto* FetchedStaticModelComponent = Object->GetComponent(StaticModelComponentKey);
+    auto* fetchedStaticModelComponent = Object->GetComponent(staticModelComponentKey);
 
-    EXPECT_EQ(FetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
-    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)FetchedStaticModelComponent;
+    EXPECT_EQ(fetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
+    auto* realStaticModelComponent = (StaticModelSpaceComponent*)fetchedStaticModelComponent;
 
-    EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
+    EXPECT_EQ(realStaticModelComponent->GetExternalResourceAssetId(), modelAssetId);
 
-    Object->RemoveComponent(StaticModelComponentKey);
-    Object->RemoveComponent(ImageComponentKey);
+    Object->RemoveComponent(staticModelComponentKey);
+    Object->RemoveComponent(imageComponentKey);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         Object->QueueUpdate();
 
-        while (PatchPending)
+        while (patchPending)
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
             std::this_thread::sleep_for(10ms);
         }
     }
 
-    auto& RealComponents = *Object->GetComponents();
+    auto& realComponents = *Object->GetComponents();
 
-    EXPECT_EQ(RealComponents.Size(), 0);
-    EXPECT_FALSE(RealComponents.HasKey(StaticModelComponentKey));
-    EXPECT_FALSE(RealComponents.HasKey(ImageComponentKey));
+    EXPECT_EQ(realComponents.Size(), 0);
+    EXPECT_FALSE(realComponents.HasKey(staticModelComponentKey));
+    EXPECT_FALSE(realComponents.HasKey(imageComponentKey));
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ObjectRemoveComponentTestReenterSpace, ObjectRemoveComponentTestReenterSpace)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    bool EntitiesCreated = false;
-    auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
+    bool entitiesCreated = false;
+    auto entitiesReadyCallback = [&entitiesCreated](int /*NumEntitiesFetched*/) { entitiesCreated = true; };
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback(entitiesReadyCallback);
 
-    const csp::common::String ObjectName = "Object 1";
+    const csp::common::String objectName = "Object 1";
 
-    uint16_t KeepKey = 0;
-    uint16_t DeleteKey = 0;
+    uint16_t keepKey = 0;
+    uint16_t deleteKey = 0;
 
     {
         // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
+        WaitForCallbackWithUpdate(entitiesCreated, realtimeEngine.get());
 
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        bool PatchPending = true;
-        Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
+        bool patchPending = true;
+        Object->SetPatchSentCallback([&patchPending](bool /*ok*/) { patchPending = false; });
 
-        auto* ComponentToKeep = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
-        ComponentToKeep->SetComponentName("ComponentNameKeep");
-        KeepKey = ComponentToKeep->GetId();
-        auto* ComponentToDelete = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
-        ComponentToDelete->SetComponentName("ComponentNameDelete");
-        DeleteKey = ComponentToDelete->GetId();
+        auto* componentToKeep = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
+        componentToKeep->SetComponentName("ComponentNameKeep");
+        keepKey = componentToKeep->GetId();
+        auto* componentToDelete = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
+        componentToDelete->SetComponentName("ComponentNameDelete");
+        deleteKey = componentToDelete->GetId();
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
             Object->QueueUpdate();
 
-            while (PatchPending)
+            while (patchPending)
             {
-                ProcessPendingIfOnline(*RealtimeEngine);
+                ProcessPendingIfOnline(*realtimeEngine);
                 std::this_thread::sleep_for(10ms);
             }
         }
 
-        PatchPending = true;
+        patchPending = true;
 
         // Ensure values are set correctly
-        EXPECT_EQ(ComponentToKeep->GetComponentName(), "ComponentNameKeep");
-        EXPECT_EQ(ComponentToDelete->GetComponentName(), "ComponentNameDelete");
+        EXPECT_EQ(componentToKeep->GetComponentName(), "ComponentNameKeep");
+        EXPECT_EQ(componentToDelete->GetComponentName(), "ComponentNameDelete");
 
-        auto& Components = *Object->GetComponents();
+        auto& components = *Object->GetComponents();
 
-        EXPECT_EQ(Components.Size(), 2);
-        EXPECT_TRUE(Components.HasKey(KeepKey));
-        EXPECT_TRUE(Components.HasKey(DeleteKey));
+        EXPECT_EQ(components.Size(), 2);
+        EXPECT_TRUE(components.HasKey(keepKey));
+        EXPECT_TRUE(components.HasKey(deleteKey));
 
         // Delete component
-        Object->RemoveComponent(ComponentToDelete->GetId());
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        Object->RemoveComponent(componentToDelete->GetId());
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
             Object->QueueUpdate();
-            while (PatchPending)
+            while (patchPending)
             {
-                ProcessPendingIfOnline(*RealtimeEngine);
+                ProcessPendingIfOnline(*realtimeEngine);
                 std::this_thread::sleep_for(10ms);
             }
-            EXPECT_FALSE(PatchPending);
+            EXPECT_FALSE(patchPending);
         }
 
         // Check deletion has happened
-        auto& RealComponents = *Object->GetComponents();
+        auto& realComponents = *Object->GetComponents();
 
-        EXPECT_EQ(RealComponents.Size(), 1);
-        EXPECT_TRUE(RealComponents.HasKey(KeepKey));
-        EXPECT_FALSE(RealComponents.HasKey(DeleteKey));
+        EXPECT_EQ(realComponents.Size(), 1);
+        EXPECT_TRUE(realComponents.HasKey(keepKey));
+        EXPECT_FALSE(realComponents.HasKey(deleteKey));
 
         // Exit space and enter again, making sure the entities have been created
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
         // Wait a few seconds for the CHS database to update
         std::this_thread::sleep_for(std::chrono::seconds(8));
     }
     {
-        EntitiesCreated = false;
+        entitiesCreated = false;
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult2] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
-        EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(entitiesCreated, realtimeEngine.get());
+        EXPECT_TRUE(entitiesCreated);
 
         // Retrieve components in space
-        SpaceEntity* FoundEntity = RealtimeEngine->FindSpaceObject(ObjectName);
-        EXPECT_TRUE(FoundEntity != nullptr);
-        auto& FoundComponents = *FoundEntity->GetComponents();
+        SpaceEntity* foundEntity = realtimeEngine->FindSpaceObject(objectName);
+        EXPECT_TRUE(foundEntity != nullptr);
+        auto& foundComponents = *foundEntity->GetComponents();
 
         // Check the right component has been deleted
-        EXPECT_EQ(FoundComponents.Size(), 1);
-        EXPECT_TRUE(FoundComponents.HasKey(KeepKey));
-        EXPECT_FALSE(FoundComponents.HasKey(DeleteKey));
-        EXPECT_EQ(FoundEntity->GetComponent(0)->GetComponentName(), "ComponentNameKeep");
+        EXPECT_EQ(foundComponents.Size(), 1);
+        EXPECT_TRUE(foundComponents.HasKey(keepKey));
+        EXPECT_FALSE(foundComponents.HasKey(deleteKey));
+        EXPECT_EQ(foundEntity->GetComponent(0)->GetComponentName(), "ComponentNameKeep");
 
         // Exit space
-        auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-        RealtimeEngine.reset();
+        auto [ExitSpaceResult2] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+        realtimeEngine.reset();
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
@@ -796,122 +796,122 @@ TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create 3 seperate objects to ensure there is too many updates for the rate limiter to process in one tick
 
     // Create object
-    const csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
     CreatedObject->AddComponent(ComponentType::Image);
     CreatedObject->QueueUpdate();
 
     // Create object 2
-    auto [CreatedObject2] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject2] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
     CreatedObject2->AddComponent(ComponentType::Image);
     CreatedObject2->QueueUpdate();
 
     // Create object 3
-    auto [CreatedObject3] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject3] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
     CreatedObject3->AddComponent(ComponentType::Image);
     CreatedObject3->QueueUpdate();
 
     // Destroy Entites
-    RealtimeEngine->DestroyEntity(CreatedObject, [](bool) { });
-    RealtimeEngine->DestroyEntity(CreatedObject2, [](bool) { });
-    RealtimeEngine->DestroyEntity(CreatedObject3, [](bool) { });
+    realtimeEngine->DestroyEntity(CreatedObject, [](bool) { });
+    realtimeEngine->DestroyEntity(CreatedObject2, [](bool) { });
+    realtimeEngine->DestroyEntity(CreatedObject3, [](bool) { });
 
     csp::CSPFoundation::Tick();
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntitySelection, EntitySelectionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::String& UserName = "Player 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Player 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = true;
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+    bool isVisible = true;
+    AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "MyCoolAvatar";
+    AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Default;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, LocomotionModel::Grounded);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     CreatedObject->Select();
 
@@ -921,71 +921,71 @@ TEST_P(EntitySelection, EntitySelectionTest)
 
     EXPECT_FALSE(CreatedObject->IsSelected());
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(InvalidComponentFields, InvalidComponentFieldsTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String CallbackAssetId;
+    csp::common::String callbackAssetId;
 
-    const csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    const csp::common::String ModelAssetId = "NotARealId";
+    const csp::common::String modelAssetId = "NotARealId";
 
     Object->AddComponent(ComponentType::Invalid);
 
     // Process component creation
     Object->QueueUpdate();
-    ProcessPendingIfOnline(*RealtimeEngine);
+    ProcessPendingIfOnline(*realtimeEngine);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
@@ -994,56 +994,56 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     // for ParentId and ChildEntities
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create Entities for testing heirarchy transforms
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName = "ChildEntity";
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName = "ChildEntity";
     // create a parent child entity, where the parent is positioned at the position [1,1,1], and the child is position [1,0,0] relative to the parent
-    SpaceTransform ObjectTransformParent
+    SpaceTransform objectTransformParent
         = { csp::common::Vector3 { 1, 1, 1 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
-    SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
-    SpaceTransform ObjectTransformExpected
+    SpaceTransform objectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
+    SpaceTransform objectTransformExpected
         = { csp::common::Vector3 { 2, 1, 1 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
     auto [CreatedParentEntity]
-        = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName, ObjectTransformChild, csp::common::Optional<uint64_t> {});
+        = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransformParent, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName, objectTransformChild, csp::common::Optional<uint64_t> {});
 
-    bool ChildEntityUpdated = false;
+    bool childEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](
-            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+        [&childEntityUpdated, childEntityName](
+            SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
-            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            if (entity->GetName() == childEntityName && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
-                ChildEntityUpdated = true;
+                childEntityUpdated = true;
             }
         });
 
@@ -1053,35 +1053,35 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    while (!childEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
     {
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
 
-    EXPECT_TRUE(ChildEntityUpdated);
+    EXPECT_TRUE(childEntityUpdated);
 
     // The expected outcome is that rotation and scale are unaffected, but the child is translated to position [2,1,1]
-    csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
-    csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
-    csp::common::Vector3 GlobalScale = CreatedChildEntity->GetGlobalScale();
+    csp::common::Vector3 globalPosition = CreatedChildEntity->GetGlobalPosition();
+    csp::common::Vector4 globalRotation = CreatedChildEntity->GetGlobalRotation();
+    csp::common::Vector3 globalScale = CreatedChildEntity->GetGlobalScale();
 
-    EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
+    EXPECT_EQ(objectTransformExpected.Position == globalPosition, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.X == globalRotation.X, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Y == globalRotation.Y, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Z == globalRotation.Z, true);
     // When performing quaternion operations, W can be negative, so no point checking
-    EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+    EXPECT_EQ(objectTransformExpected.Scale == globalScale, true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
@@ -1090,56 +1090,56 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     // for ParentId and ChildEntities
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create Entities for testing heirarchy transforms
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName = "ChildEntity";
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName = "ChildEntity";
     // Parent has a position [0,0,0], and 1.507 radian (90 degree) rotation around the y axis
-    SpaceTransform ObjectTransformParent
+    SpaceTransform objectTransformParent
         = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
-    SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
-    SpaceTransform ObjectTransformExpected
+    SpaceTransform objectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
+    SpaceTransform objectTransformExpected
         = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
 
     auto [CreatedParentEntity]
-        = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName, ObjectTransformChild, csp::common::Optional<uint64_t> {});
+        = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransformParent, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName, objectTransformChild, csp::common::Optional<uint64_t> {});
 
-    bool ChildEntityUpdated = false;
+    bool childEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](
-            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+        [&childEntityUpdated, childEntityName](
+            SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
-            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            if (entity->GetName() == childEntityName && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
-                ChildEntityUpdated = true;
+                childEntityUpdated = true;
             }
         });
 
@@ -1149,35 +1149,35 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    while (!childEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
     {
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
 
-    EXPECT_TRUE(ChildEntityUpdated);
+    EXPECT_TRUE(childEntityUpdated);
 
     // expectation is that scale is unaffected, rotation is passed on from parent,
     // and child is displaced to position [0, 0, 1], within floating point accuracy limits
-    csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
-    csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
-    csp::common::Vector3 GlobalScale = CreatedChildEntity->GetGlobalScale();
+    csp::common::Vector3 globalPosition = CreatedChildEntity->GetGlobalPosition();
+    csp::common::Vector4 globalRotation = CreatedChildEntity->GetGlobalRotation();
+    csp::common::Vector3 globalScale = CreatedChildEntity->GetGlobalScale();
 
-    EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
-    EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+    EXPECT_EQ(objectTransformExpected.Position == globalPosition, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.X == globalRotation.X, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Y == globalRotation.Y, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Z == globalRotation.Z, true);
+    EXPECT_EQ(objectTransformExpected.Scale == globalScale, true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
@@ -1186,59 +1186,59 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     // for ParentId and ChildEntities
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create Entities for testing heirarchy transforms
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName = "ChildEntity";
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName = "ChildEntity";
 
     // Create a parent, positioned at the origin, rotated 90 degrees, with a scale of -0.5 on x axis and 0.5 on Y/Z axes
     // child created at a position of [1,0,0], no rotation, and scale of 1
-    SpaceTransform ObjectTransformParent
+    SpaceTransform objectTransformParent
         = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
-    SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
+    SpaceTransform objectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
-    SpaceTransform ObjectTransformExpected = { csp::common::Vector3 { 0, 0, -0.5f }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f },
+    SpaceTransform objectTransformExpected = { csp::common::Vector3 { 0, 0, -0.5f }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f },
         csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
 
     auto [CreatedParentEntity]
-        = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName, ObjectTransformChild, csp::common::Optional<uint64_t> {});
+        = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransformParent, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName, objectTransformChild, csp::common::Optional<uint64_t> {});
 
-    bool ChildEntityUpdated = false;
+    bool childEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](
-            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+        [&childEntityUpdated, childEntityName](
+            SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
-            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            if (entity->GetName() == childEntityName && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
-                ChildEntityUpdated = true;
+                childEntityUpdated = true;
             }
         });
 
@@ -1248,35 +1248,35 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    while (!childEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
     {
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
 
-    EXPECT_TRUE(ChildEntityUpdated);
+    EXPECT_TRUE(childEntityUpdated);
     // expectation is that the global data will have position [0,0,-0.5] (scaled by -0.5, then rotated 90 degrees from [1,0,0] around Y axis)
     // rotation will be same as parent
     // scale will now be [-0.5,0.5,0.5], same as parent
-    csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
-    csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
-    csp::common::Vector3 GlobalScale = CreatedChildEntity->GetGlobalScale();
+    csp::common::Vector3 globalPosition = CreatedChildEntity->GetGlobalPosition();
+    csp::common::Vector4 globalRotation = CreatedChildEntity->GetGlobalRotation();
+    csp::common::Vector3 globalScale = CreatedChildEntity->GetGlobalScale();
 
-    EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
-    EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+    EXPECT_EQ(objectTransformExpected.Position == globalPosition, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.X == globalRotation.X, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Y == globalRotation.Y, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Z == globalRotation.Z, true);
+    EXPECT_EQ(objectTransformExpected.Scale == globalScale, true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
@@ -1285,56 +1285,56 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     // for ParentId and ChildEntities
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create Entities for testing heirarchy transforms
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName = "ChildEntity";
-    SpaceTransform ObjectTransformParent
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName = "ChildEntity";
+    SpaceTransform objectTransformParent
         = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
-    SpaceTransform ObjectTransformChild
+    SpaceTransform objectTransformChild
         = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
-    SpaceTransform ObjectTransformExpected
+    SpaceTransform objectTransformExpected
         = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
 
     auto [CreatedParentEntity]
-        = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName, ObjectTransformChild, csp::common::Optional<uint64_t> {});
+        = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransformParent, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName, objectTransformChild, csp::common::Optional<uint64_t> {});
 
-    bool ChildEntityUpdated = false;
+    bool childEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](
-            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+        [&childEntityUpdated, childEntityName](
+            SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
-            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            if (entity->GetName() == childEntityName && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
-                ChildEntityUpdated = true;
+                childEntityUpdated = true;
             }
         });
 
@@ -1344,300 +1344,300 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    while (!childEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
     {
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
 
-    EXPECT_TRUE(ChildEntityUpdated);
-    SpaceTransform ObjectTransformActual = CreatedChildEntity->GetGlobalTransform();
+    EXPECT_TRUE(childEntityUpdated);
+    SpaceTransform objectTransformActual = CreatedChildEntity->GetGlobalTransform();
 
-    EXPECT_EQ(ObjectTransformExpected.Position == ObjectTransformActual.Position, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.X == ObjectTransformActual.Rotation.X, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Y == ObjectTransformActual.Rotation.Y, true);
-    EXPECT_EQ(ObjectTransformExpected.Rotation.Z == ObjectTransformActual.Rotation.Z, true);
-    EXPECT_EQ(ObjectTransformExpected.Scale == ObjectTransformActual.Scale, true);
+    EXPECT_EQ(objectTransformExpected.Position == objectTransformActual.Position, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.X == objectTransformActual.Rotation.X, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Y == objectTransformActual.Rotation.Y, true);
+    EXPECT_EQ(objectTransformExpected.Rotation.Z == objectTransformActual.Rotation.Z, true);
+    EXPECT_EQ(objectTransformExpected.Scale == objectTransformActual.Scale, true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(CreateObjectParent, CreateObjectParentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create Entities
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName = "ChildEntity";
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName = "ChildEntity";
 
-    SpaceTransform ObjectTransform
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity] = AWAIT(CreatedParentEntity, CreateChildEntity, ChildEntityName, ObjectTransform);
+    auto [CreatedParentEntity] = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity] = AWAIT(CreatedParentEntity, CreateChildEntity, childEntityName, objectTransform);
 
     EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
     EXPECT_EQ(CreatedChildEntity->GetParentEntity(), CreatedParentEntity);
 
-    EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 1);
+    EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 1);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
+    csp::common::String userId;
+    const csp::systems::Profile testUser = CreateTestUser();
+    LogIn(userSystem, userId, testUser.Email, GeneratedTestAccountPassword, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Enter a space and lock an entity
     {
-        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+        std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
         // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Create Entity
-        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(RealtimeEngine.get());
+        csp::multiplayer::SpaceEntity* createdEntity = CreateTestObject(realtimeEngine.get());
 
         // Lock Entity
-        CreatedEntity->Lock();
+        createdEntity->Lock();
 
         // Apply patch
-        CreatedEntity->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        createdEntity->QueueUpdate();
+        ProcessPendingIfOnline(*realtimeEngine);
 
         // Entity should be locked now
-        EXPECT_TRUE(CreatedEntity->IsLocked());
+        EXPECT_TRUE(createdEntity->IsLocked());
 
         {
             // Ensure the add component error message is logged when we try to add a component to a locked entity.
-            static const csp::common::String AddComponentErrorMsg
+            static const csp::common::String addComponentErrorMsg
                 = "Failed to add component: Entity is locked, skipping update. Entity name: Object";
 
-            RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, AddComponentErrorMsg)).Times(1);
+            RAIIMockLogger mockLogger {};
+            EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, addComponentErrorMsg)).Times(1);
 
             // Attempt to add a component to a locked entity
-            auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+            auto newComponent = createdEntity->AddComponent(ComponentType::StaticModel);
 
-            EXPECT_EQ(NewComponent, nullptr);
+            EXPECT_EQ(newComponent, nullptr);
         }
 
         // Exit Space
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-        RealtimeEngine.reset();
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+        realtimeEngine.reset();
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
+    csp::common::String userId;
+    const csp::systems::Profile testUser = CreateTestUser();
+    LogIn(userSystem, userId, testUser.Email, GeneratedTestAccountPassword, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Enter a space and lock an entity
     {
-        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+        std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
         // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Create Entity
-        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(RealtimeEngine.get());
+        csp::multiplayer::SpaceEntity* createdEntity = CreateTestObject(realtimeEngine.get());
 
         // Add a component to the entity
-        auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
-        EXPECT_NE(NewComponent, nullptr);
+        auto newComponent = createdEntity->AddComponent(ComponentType::StaticModel);
+        EXPECT_NE(newComponent, nullptr);
 
         // Lock Entity
-        CreatedEntity->Lock();
+        createdEntity->Lock();
 
         // Apply patch
-        CreatedEntity->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        createdEntity->QueueUpdate();
+        ProcessPendingIfOnline(*realtimeEngine);
 
         // Entity should be locked now
-        EXPECT_TRUE(CreatedEntity->IsLocked());
+        EXPECT_TRUE(createdEntity->IsLocked());
 
         {
             // Ensure the remove component error message is logged when we try to remove a component from a locked entity.
-            static const csp::common::String RemoveComponentErrorMsg
+            static const csp::common::String removeComponentErrorMsg
                 = "Failed to remove component: Entity is locked, skipping update. Entity name: Object";
 
-            RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, RemoveComponentErrorMsg)).Times(1);
+            RAIIMockLogger mockLogger {};
+            EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, removeComponentErrorMsg)).Times(1);
 
             // Attempt to remove a component from a locked entity
-            CreatedEntity->RemoveComponent(NewComponent->GetId());
+            createdEntity->RemoveComponent(newComponent->GetId());
         }
 
         // Exit Space
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-        RealtimeEngine.reset();
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+        realtimeEngine.reset();
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(EntityUpdateCallback, EntityUpdateCallbackTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+    csp::common::RealtimeEngineType realtimeEngineType = GetParam();
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    bool CallbackCalled = false;
+    bool callbackCalled = false;
 
     CreatedObject->SetUpdateCallback(
-        [&CallbackCalled](SpaceEntity*, SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>&) { CallbackCalled = true; });
+        [&callbackCalled](SpaceEntity*, SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>&) { callbackCalled = true; });
 
     // Set the entity name to the same value as it currently is.
-    CreatedObject->SetName(ObjectName);
+    CreatedObject->SetName(objectName);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         CreatedObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
     }
 
     // Ensure the callback wasn't called.
-    EXPECT_FALSE(CallbackCalled);
+    EXPECT_FALSE(callbackCalled);
 
     // Cleanup
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1694,67 +1694,67 @@ TEST_P(EntityLock, EntityLockTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* connection = systemsManager.GetMultiplayerConnection();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = std::get<0>(GetParam());
-    const bool Local = std::get<1>(GetParam());
+    csp::common::RealtimeEngineType realtimeEngineType = std::get<0>(GetParam());
+    const bool local = std::get<1>(GetParam());
 
     // Log in
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         // Ensure patch rate limiting is off, as we're sending patches in quick succession.
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetEntityPatchRateLimitEnabled(false);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetEntityPatchRateLimitEnabled(false);
 
         // If local is false, test DeserialiseFromPatch functionality
-        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        auto [FlagSetResult] = AWAIT(connection, SetAllowSelfMessagingFlag, !local);
         EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
     }
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     {
         // Create Entity
-        const csp::common::String EntityName = "Entity";
-        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+        const csp::common::String entityName = "Entity";
+        const SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
 
-        auto [CreatedEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        auto [CreatedEntity] = AWAIT(realtimeEngine.get(), CreateEntity, entityName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // New entity should default to unlocked
         EXPECT_FALSE(CreatedEntity->IsLocked());
 
         // Test entity locks correctly
         {
-            bool EntityUpdated = false;
+            bool entityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&entityUpdated, CreatedEntity](
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 });
 
@@ -1762,7 +1762,7 @@ TEST_P(EntityLock, EntityLockTest)
             CreatedEntity->Lock();
 
             // Entity shouldn't be locked until we apply our patch
-            if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+            if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
             {
                 // Entity shouldn't be locked until we apply our patch
                 EXPECT_FALSE(CreatedEntity->IsLocked());
@@ -1775,10 +1775,10 @@ TEST_P(EntityLock, EntityLockTest)
 
             // Apply patch
             CreatedEntity->QueueUpdate();
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
-            WaitForCallbackWithUpdate(EntityUpdated, RealtimeEngine.get());
-            EXPECT_TRUE(EntityUpdated);
+            WaitForCallbackWithUpdate(entityUpdated, realtimeEngine.get());
+            EXPECT_TRUE(entityUpdated);
 
             // Entity should be locked now
             EXPECT_TRUE(CreatedEntity->IsLocked());
@@ -1786,22 +1786,22 @@ TEST_P(EntityLock, EntityLockTest)
 
         // Test entity unlocks correctly
         {
-            bool EntityUpdated = false;
+            bool entityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&entityUpdated, CreatedEntity](
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 });
 
             // Unlock Entity
             CreatedEntity->Unlock();
 
-            if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+            if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
             {
                 // Entity should still be locked until we apply our patch
                 EXPECT_TRUE(CreatedEntity->IsLocked());
@@ -1814,10 +1814,10 @@ TEST_P(EntityLock, EntityLockTest)
 
             // Apply patch
             CreatedEntity->QueueUpdate();
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
-            WaitForCallbackWithUpdate(EntityUpdated, RealtimeEngine.get());
-            EXPECT_TRUE(EntityUpdated);
+            WaitForCallbackWithUpdate(entityUpdated, realtimeEngine.get());
+            EXPECT_TRUE(entityUpdated);
 
             // Entity shouldn't be locked now
             EXPECT_FALSE(CreatedEntity->IsLocked());
@@ -1825,100 +1825,100 @@ TEST_P(EntityLock, EntityLockTest)
     }
 
     // Exit space
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ParentDeletion, ParentDeletionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* connection = systemsManager.GetMultiplayerConnection();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = std::get<0>(GetParam());
-    const bool Local = std::get<1>(GetParam());
+    csp::common::RealtimeEngineType realtimeEngineType = std::get<0>(GetParam());
+    const bool local = std::get<1>(GetParam());
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
+    csp::common::String userId;
+    const csp::systems::Profile testUser = CreateTestUser();
+    LogIn(userSystem, userId, testUser.Email, GeneratedTestAccountPassword, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
 
-    bool EntitiesCreated = false;
+    bool entitiesCreated = false;
 
-    auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
+    auto entitiesReadyCallback = [&entitiesCreated](int /*NumEntitiesFetched*/) { entitiesCreated = true; };
 
-    RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+    realtimeEngine->SetEntityFetchCompleteCallback(entitiesReadyCallback);
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         // If local is false, test DeserialiseFromPatch functionality
-        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        auto [FlagSetResult] = AWAIT(connection, SetAllowSelfMessagingFlag, !local);
     }
 
     // Create Entities
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName1 = "ChildEntity1";
-    csp::common::String ChildEntityName2 = "ChildEntity2";
-    SpaceTransform ObjectTransform
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName1 = "ChildEntity1";
+    csp::common::String childEntityName2 = "ChildEntity2";
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity1] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName1, ObjectTransform, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity2] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName2, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedParentEntity] = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity1] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName1, objectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity2] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName2, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Test setting the parent for the first child
     {
-        bool ChildEntityUpdated = false;
+        bool childEntityUpdated = false;
 
         CreatedChildEntity1->SetUpdateCallback(
-            [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated, childEntityName1](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
+                if (entity->GetName() == childEntityName1 && (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
                 {
-                    ChildEntityUpdated = true;
+                    childEntityUpdated = true;
                 }
             });
 
         CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
 
             // Parents shouldn't be set until after replication
             EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
             EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
             EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
-            EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 3);
+            EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 3);
 
             CreatedChildEntity1->QueueUpdate();
-            WaitForCallbackWithUpdate(ChildEntityUpdated, RealtimeEngine.get());
-            EXPECT_TRUE(ChildEntityUpdated);
+            WaitForCallbackWithUpdate(childEntityUpdated, realtimeEngine.get());
+            EXPECT_TRUE(childEntityUpdated);
         }
         else
         {
@@ -1926,239 +1926,239 @@ TEST_P(ParentDeletion, ParentDeletionTest)
             EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
             EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
             EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
-            EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 2);
+            EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 2);
         }
     }
 
     // Test setting the parent for the second child
     {
-        bool ChildEntityUpdated = false;
+        bool childEntityUpdated = false;
 
         CreatedChildEntity2->SetUpdateCallback(
-            [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated, childEntityName2](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                if (entity->GetName() == childEntityName2 && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
-                    ChildEntityUpdated = true;
+                    childEntityUpdated = true;
                 }
             });
 
         CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
             CreatedChildEntity2->QueueUpdate();
-            WaitForCallbackWithUpdate(ChildEntityUpdated, RealtimeEngine.get());
-            EXPECT_TRUE(ChildEntityUpdated);
+            WaitForCallbackWithUpdate(childEntityUpdated, realtimeEngine.get());
+            EXPECT_TRUE(childEntityUpdated);
         }
     }
 
     // Delete the parent
     {
-        bool LocalDestroyCalled = false;
-        bool EntityDestroyCalled = false;
-        bool ChildEntityUpdated = false;
-        bool ChildEntityUpdated2 = false;
+        bool localDestroyCalled = false;
+        bool entityDestroyCalled = false;
+        bool childEntityUpdated = false;
+        bool childEntityUpdated2 = false;
 
         CreatedChildEntity1->SetUpdateCallback(
-            [&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated, &localDestroyCalled, &entityDestroyCalled, childEntityName1](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (ChildEntityUpdated)
+                if (childEntityUpdated)
                 {
                     // Prevent from being called twice when AllowSelfMessaging is on
                     return;
                 }
 
-                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                if (entity->GetName() == childEntityName1 && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
-                    ChildEntityUpdated = true;
+                    childEntityUpdated = true;
                     // Ensure this is called before both destroy callbacks
-                    EXPECT_FALSE(LocalDestroyCalled);
-                    EXPECT_FALSE(EntityDestroyCalled);
+                    EXPECT_FALSE(localDestroyCalled);
+                    EXPECT_FALSE(entityDestroyCalled);
                 }
             });
 
         CreatedChildEntity2->SetUpdateCallback(
-            [&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated2, &localDestroyCalled, &entityDestroyCalled, childEntityName2](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (ChildEntityUpdated2)
+                if (childEntityUpdated2)
                 {
                     // Prevent from being called twice when AllowSelfMessaging is on
                     return;
                 }
 
-                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                if (entity->GetName() == childEntityName2 && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
-                    ChildEntityUpdated2 = true;
+                    childEntityUpdated2 = true;
                     // Ensure this is called before both destroy callbacks
-                    EXPECT_FALSE(LocalDestroyCalled);
-                    EXPECT_FALSE(EntityDestroyCalled);
+                    EXPECT_FALSE(localDestroyCalled);
+                    EXPECT_FALSE(entityDestroyCalled);
                 }
             });
 
         CreatedParentEntity->SetDestroyCallback(
-            [&EntityDestroyCalled](bool Success)
+            [&entityDestroyCalled](bool success)
             {
-                EntityDestroyCalled = true;
-                EXPECT_TRUE(Success);
+                entityDestroyCalled = true;
+                EXPECT_TRUE(success);
             });
 
-        RealtimeEngine->DestroyEntity(CreatedParentEntity,
-            [&LocalDestroyCalled](bool Success)
+        realtimeEngine->DestroyEntity(CreatedParentEntity,
+            [&localDestroyCalled](bool success)
             {
-                LocalDestroyCalled = true;
-                EXPECT_TRUE(Success);
+                localDestroyCalled = true;
+                EXPECT_TRUE(success);
             });
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
-            WaitForCallbackWithUpdate(LocalDestroyCalled, RealtimeEngine.get());
-            WaitForCallbackWithUpdate(EntityDestroyCalled, RealtimeEngine.get());
-            WaitForCallbackWithUpdate(ChildEntityUpdated, RealtimeEngine.get());
-            WaitForCallbackWithUpdate(ChildEntityUpdated2, RealtimeEngine.get());
+            WaitForCallbackWithUpdate(localDestroyCalled, realtimeEngine.get());
+            WaitForCallbackWithUpdate(entityDestroyCalled, realtimeEngine.get());
+            WaitForCallbackWithUpdate(childEntityUpdated, realtimeEngine.get());
+            WaitForCallbackWithUpdate(childEntityUpdated2, realtimeEngine.get());
         }
 
-        EXPECT_TRUE(LocalDestroyCalled);
-        EXPECT_TRUE(EntityDestroyCalled);
-        EXPECT_TRUE(ChildEntityUpdated);
-        EXPECT_TRUE(ChildEntityUpdated2);
+        EXPECT_TRUE(localDestroyCalled);
+        EXPECT_TRUE(entityDestroyCalled);
+        EXPECT_TRUE(childEntityUpdated);
+        EXPECT_TRUE(childEntityUpdated2);
 
         // Check children are unparented correctly
         EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
         EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 2);
-        EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 2);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 2);
+        EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 2);
     }
 
     // Re-enter space to ensure updates were made to the server
     {
         // Exit Space
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
 
         // Log in again
-        LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+        LogIn(userSystem, userId, testUser.Email, GeneratedTestAccountPassword);
 
         // Enter space
-        EntitiesCreated = false;
+        entitiesCreated = false;
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult2] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
-            WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
+            WaitForCallbackWithUpdate(entitiesCreated, realtimeEngine.get());
         }
 
-        EXPECT_TRUE(EntitiesCreated);
+        EXPECT_TRUE(entitiesCreated);
     }
 
     // Ensure children have been unparented and are now root entities
     {
-        auto RetrievedChildEntity1 = RealtimeEngine->FindSpaceEntity(ChildEntityName1);
-        auto RetrievedChildEntity2 = RealtimeEngine->FindSpaceEntity(ChildEntityName2);
+        auto retrievedChildEntity1 = realtimeEngine->FindSpaceEntity(childEntityName1);
+        auto retrievedChildEntity2 = realtimeEngine->FindSpaceEntity(childEntityName2);
 
-        EXPECT_EQ(RetrievedChildEntity1->GetParentEntity(), nullptr);
-        EXPECT_EQ(RetrievedChildEntity2->GetParentEntity(), nullptr);
+        EXPECT_EQ(retrievedChildEntity1->GetParentEntity(), nullptr);
+        EXPECT_EQ(retrievedChildEntity2->GetParentEntity(), nullptr);
 
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 2);
-        EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 2);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 2);
+        EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 2);
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    RealtimeEngine.reset();
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    realtimeEngine.reset();
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(ParentChildDeletion, ParentChildDeletionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* connection = systemsManager.GetMultiplayerConnection();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = std::get<0>(GetParam());
-    const bool Local = std::get<1>(GetParam());
+    csp::common::RealtimeEngineType realtimeEngineType = std::get<0>(GetParam());
+    const bool local = std::get<1>(GetParam());
 
     // Log in
-    bool UseMultiplayerConnection = false;
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    bool useMultiplayerConnection = false;
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
-        UseMultiplayerConnection = true;
+        useMultiplayerConnection = true;
     }
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, useMultiplayerConnection);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(realtimeEngineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         // If local is false, test DeserialiseFromPatch functionality
-        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        auto [FlagSetResult] = AWAIT(connection, SetAllowSelfMessagingFlag, !local);
     }
 
     // Create Entities
-    csp::common::String ParentEntityName = "ParentEntity";
-    csp::common::String ChildEntityName1 = "ChildEntity1";
-    csp::common::String ChildEntityName2 = "ChildEntity2";
-    SpaceTransform ObjectTransform
+    csp::common::String parentEntityName = "ParentEntity";
+    csp::common::String childEntityName1 = "ChildEntity1";
+    csp::common::String childEntityName2 = "ChildEntity2";
+    SpaceTransform objectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity1] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName1, ObjectTransform, csp::common::Optional<uint64_t> {});
-    auto [CreatedChildEntity2] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName2, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedParentEntity] = AWAIT(realtimeEngine.get(), CreateEntity, parentEntityName, objectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity1] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName1, objectTransform, csp::common::Optional<uint64_t> {});
+    auto [CreatedChildEntity2] = AWAIT(realtimeEngine.get(), CreateEntity, childEntityName2, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Test setting the parent for the first child
     {
-        bool ChildEntityUpdated = false;
+        bool childEntityUpdated = false;
 
         CreatedChildEntity1->SetUpdateCallback(
-            [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated, childEntityName1](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                if (entity->GetName() == childEntityName1 && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
-                    ChildEntityUpdated = true;
+                    childEntityUpdated = true;
                 }
             });
 
         CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
             // Parents shouldn't be set until after replication
             EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
             EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
             EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
-            EXPECT_EQ(RealtimeEngine->GetNumEntities(), 3);
-            EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 3);
+            EXPECT_EQ(realtimeEngine->GetNumEntities(), 3);
+            EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 3);
 
             CreatedChildEntity1->QueueUpdate();
-            WaitForCallbackWithUpdate(ChildEntityUpdated, RealtimeEngine.get());
-            EXPECT_TRUE(ChildEntityUpdated);
+            WaitForCallbackWithUpdate(childEntityUpdated, realtimeEngine.get());
+            EXPECT_TRUE(childEntityUpdated);
         }
         else
         {
@@ -2168,51 +2168,51 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
             EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
         }
 
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 3);
-        EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 2);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 3);
+        EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 2);
     }
 
     // Test setting the parent for the second child
     {
-        bool ChildEntityUpdated = false;
+        bool childEntityUpdated = false;
 
         CreatedChildEntity2->SetUpdateCallback(
-            [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+            [&childEntityUpdated, childEntityName2](
+                SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
-                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                if (entity->GetName() == childEntityName2 && flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
-                    ChildEntityUpdated = true;
+                    childEntityUpdated = true;
                 }
             });
 
         CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
         CreatedChildEntity2->QueueUpdate();
 
-        WaitForCallbackWithUpdate(ChildEntityUpdated, RealtimeEngine.get());
-        EXPECT_TRUE(ChildEntityUpdated);
+        WaitForCallbackWithUpdate(childEntityUpdated, realtimeEngine.get());
+        EXPECT_TRUE(childEntityUpdated);
 
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 3);
-        EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 1);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 3);
+        EXPECT_EQ(realtimeEngine->GetRootHierarchyEntities()->Size(), 1);
     }
 
     // Delete the first child
     {
-        bool DestroyCalled = false;
+        bool destroyCalled = false;
 
-        auto DestroyCb = [&DestroyCalled](bool Success)
+        auto destroyCb = [&destroyCalled](bool success)
         {
-            DestroyCalled = true;
-            EXPECT_TRUE(Success);
+            destroyCalled = true;
+            EXPECT_TRUE(success);
         };
 
-        RealtimeEngine->DestroyEntity(CreatedChildEntity1, DestroyCb);
+        realtimeEngine->DestroyEntity(CreatedChildEntity1, destroyCb);
 
-        WaitForCallbackWithUpdate(DestroyCalled, RealtimeEngine.get());
-        EXPECT_TRUE(DestroyCalled);
+        WaitForCallbackWithUpdate(destroyCalled, realtimeEngine.get());
+        EXPECT_TRUE(destroyCalled);
 
         // Check entity is  unparented correctly
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 2);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 2);
 
         EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
         EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
@@ -2225,39 +2225,39 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
 
     // Delete the parent
     {
-        bool DestroyCalled = false;
+        bool destroyCalled = false;
 
-        auto DestroyCb = [&DestroyCalled](bool Success)
+        auto destroyCb = [&destroyCalled](bool success)
         {
-            DestroyCalled = true;
-            EXPECT_TRUE(Success);
+            destroyCalled = true;
+            EXPECT_TRUE(success);
         };
 
-        RealtimeEngine->DestroyEntity(CreatedParentEntity, DestroyCb);
+        realtimeEngine->DestroyEntity(CreatedParentEntity, destroyCb);
 
-        WaitForCallbackWithUpdate(DestroyCalled, RealtimeEngine.get());
-        EXPECT_TRUE(DestroyCalled);
+        WaitForCallbackWithUpdate(destroyCalled, realtimeEngine.get());
+        EXPECT_TRUE(destroyCalled);
 
         // Ensure parent is deleted and child is re-parented
-        EXPECT_EQ(RealtimeEngine->GetNumEntities(), 1);
+        EXPECT_EQ(realtimeEngine->GetNumEntities(), 1);
         EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
-            if (!Local)
+            if (!local)
             {
-                auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+                auto [FlagSetResult2] = AWAIT(connection, SetAllowSelfMessagingFlag, false);
             }
         }
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-        RealtimeEngine.reset();
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+        realtimeEngine.reset();
 
         // Delete space
-        DeleteSpace(SpaceSystem, Space.Id);
+        DeleteSpace(spaceSystem, space.Id);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
     }
 }
 

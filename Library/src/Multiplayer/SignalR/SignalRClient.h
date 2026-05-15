@@ -40,19 +40,19 @@ public:
     void receive(std::function<void(const std::string&, std::exception_ptr)> callback) override;
 
 private:
-    std::atomic_bool RefreshInitialised;
+    std::atomic_bool m_refreshInitialised;
 };
 
 class CSPHttpClient : public signalr::http_client
 {
 public:
-    CSPHttpClient(csp::common::IAuthContext& AuthContext);
+    CSPHttpClient(csp::common::IAuthContext& authContext);
 
     void send(const std::string& url, const signalr::http_request& request,
         std::function<void(const signalr::http_response&, std::exception_ptr)> callback) override;
 
 private:
-    csp::web::WebClient* WebClientHttps;
+    csp::web::WebClient* m_webClientHttps;
 };
 
 } // namespace csp::multiplayer

@@ -41,7 +41,7 @@ using RapidJsonAlloc = rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>;
 
 // Functions for converting to Json types from C++ types
 
-template <class T> inline csp::common::String TypeToJsonString(const std::shared_ptr<T>& Value) { return Value->ToJson(); }
+template <class T> inline csp::common::String TypeToJsonString(const std::shared_ptr<T>& value) { return value->ToJson(); }
 
 template <class T>
 [[deprecated("Unsupported type for JSON (string) serialisation! You should probably add support for it :)")]] inline csp::common::String
@@ -51,77 +51,77 @@ TypeToJsonString(const T& /*Value*/)
 }
 
 // Forward declarations for clang to not be stupid
-template <typename U> rapidjson::Value TypeToJsonValue(const std::optional<U>& Value, RapidJsonAlloc& Allocator);
+template <typename U> rapidjson::Value TypeToJsonValue(const std::optional<U>& value, RapidJsonAlloc& allocator);
 
-template <typename U> rapidjson::Value TypeToJsonValue(const std::shared_ptr<U>& Value, RapidJsonAlloc& Allocator);
+template <typename U> rapidjson::Value TypeToJsonValue(const std::shared_ptr<U>& value, RapidJsonAlloc& allocator);
 
-template <typename U> rapidjson::Value TypeToJsonValue(const std::vector<U>& Value, RapidJsonAlloc& Allocator);
+template <typename U> rapidjson::Value TypeToJsonValue(const std::vector<U>& value, RapidJsonAlloc& allocator);
 
-template <typename U, typename V> rapidjson::Value TypeToJsonValue(const std::map<U, V>& Value, RapidJsonAlloc& Allocator);
+template <typename U, typename V> rapidjson::Value TypeToJsonValue(const std::map<U, V>& value, RapidJsonAlloc& allocator);
 
 template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>* = nullptr>
-rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
+rapidjson::Value TypeToJsonValue(const T& value, RapidJsonAlloc& allocator);
 
 template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
+rapidjson::Value TypeToJsonValue(const T& value, RapidJsonAlloc& allocator);
 
 template <class T,
     typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
+rapidjson::Value TypeToJsonValue(const T& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const bool& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const int32_t& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const uint32_t& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const int64_t& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const uint64_t& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const float& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const double& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const csp::common::String& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const csp::common::String& value, RapidJsonAlloc& allocator);
 
-template <> rapidjson::Value TypeToJsonValue(const rapidjson::Document& Value, RapidJsonAlloc& Allocator);
+template <> rapidjson::Value TypeToJsonValue(const rapidjson::Document& value, RapidJsonAlloc& allocator);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::optional<U>& type);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::shared_ptr<U>& type);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::vector<U>& type);
 
-template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type);
+template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& value, std::map<U, V>& type);
 
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& value, T& type);
 
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& value, T& type);
 
 template <class T,
     typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& value, T& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, bool& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, int32_t& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, uint32_t& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, int64_t& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, uint64_t& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, float& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, double& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, csp::common::String& type);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& value, rapidjson::Document& type);
 
 // Catch-all template for notifying the user if no specialisation exists for serialising the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
@@ -133,128 +133,128 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
 
 // Serialisation function for types that derive from DtoBase
 template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>*>
-inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator)
+inline rapidjson::Value TypeToJsonValue(const T& value, RapidJsonAlloc& allocator)
 {
-    csp::common::String Json = Value.ToJson();
-    rapidjson::Document JsonDocument(rapidjson::Type::kObjectType, &Allocator);
-    JsonDocument.Parse<0>(Json.c_str());
+    csp::common::String json = value.ToJson();
+    rapidjson::Document jsonDocument(rapidjson::Type::kObjectType, &allocator);
+    jsonDocument.Parse<0>(json.c_str());
     
-    return rapidjson::Value { JsonDocument.GetObj() };
+    return rapidjson::Value { jsonDocument.GetObj() };
 }
 
 // Serialisation function for types that derive from EnumDtoBase
 template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>*>
-inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator)
+inline rapidjson::Value TypeToJsonValue(const T& value, RapidJsonAlloc& allocator)
 {
-    csp::common::String Json = Value.ToJson();
+    csp::common::String json = value.ToJson();
 
-    return rapidjson::Value(Json.c_str(), Allocator);
+    return rapidjson::Value(json.c_str(), allocator);
 }
 
 // Partial template specialisations for TypeToJsonValue
 
-template <typename U> inline rapidjson::Value TypeToJsonValue(const std::optional<U>& Value, RapidJsonAlloc& Allocator)
+template <typename U> inline rapidjson::Value TypeToJsonValue(const std::optional<U>& value, RapidJsonAlloc& allocator)
 {
-    return TypeToJsonValue(Value.value(), Allocator);
+    return TypeToJsonValue(value.value(), allocator);
 }
 
-template <typename U> inline rapidjson::Value TypeToJsonValue(const std::shared_ptr<U>& Value, RapidJsonAlloc& Allocator)
+template <typename U> inline rapidjson::Value TypeToJsonValue(const std::shared_ptr<U>& value, RapidJsonAlloc& allocator)
 {
-    return TypeToJsonValue(*Value, Allocator);
+    return TypeToJsonValue(*value, allocator);
 }
 
-template <typename U> inline rapidjson::Value TypeToJsonValue(const std::vector<U>& Value, RapidJsonAlloc& Allocator)
+template <typename U> inline rapidjson::Value TypeToJsonValue(const std::vector<U>& value, RapidJsonAlloc& allocator)
 {
-    rapidjson::Value JsonValue(rapidjson::kArrayType);
-    JsonValue.Reserve((rapidjson::SizeType)Value.size(), Allocator);
+    rapidjson::Value jsonValue(rapidjson::kArrayType);
+    jsonValue.Reserve((rapidjson::SizeType)value.size(), allocator);
 
-    for (size_t i = 0; i < Value.size(); ++i)
+    for (size_t i = 0; i < value.size(); ++i)
     {
-        JsonValue.PushBack(TypeToJsonValue(Value[i], Allocator), Allocator);
+        jsonValue.PushBack(TypeToJsonValue(value[i], allocator), allocator);
     }
 
-    return JsonValue;
+    return jsonValue;
 }
 
-template <typename U, typename V> inline rapidjson::Value TypeToJsonValue(const std::map<U, V>& Value, RapidJsonAlloc& Allocator)
+template <typename U, typename V> inline rapidjson::Value TypeToJsonValue(const std::map<U, V>& value, RapidJsonAlloc& allocator)
 {
-    rapidjson::Value JsonValue(rapidjson::kObjectType);
-    JsonValue.MemberReserve((rapidjson::SizeType)Value.size(), Allocator);
+    rapidjson::Value jsonValue(rapidjson::kObjectType);
+    jsonValue.MemberReserve((rapidjson::SizeType)value.size(), allocator);
 
-    for (auto& Item : Value)
+    for (auto& item : value)
     {
-        JsonValue.AddMember(TypeToJsonValue(Item.first, Allocator), TypeToJsonValue(Item.second, Allocator), Allocator);
+        jsonValue.AddMember(TypeToJsonValue(item.first, allocator), TypeToJsonValue(item.second, allocator), allocator);
     }
 
-    return JsonValue;
+    return jsonValue;
 }
 
 // Full template specialisations for TypeToJsonValue
 
-template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& /*Allocator*/)
+template <> inline rapidjson::Value TypeToJsonValue(const bool& value, RapidJsonAlloc& /*Allocator*/)
 {
-    rapidjson::Value JsonValue;
-    JsonValue.SetBool(Value);
+    rapidjson::Value jsonValue;
+    jsonValue.SetBool(value);
 
-    return JsonValue;
+    return jsonValue;
 }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int32_t& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int64_t& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const float& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const double& value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const csp::common::String& Value, RapidJsonAlloc& Allocator)
+template <> inline rapidjson::Value TypeToJsonValue(const csp::common::String& value, RapidJsonAlloc& allocator)
 {
-    return rapidjson::Value(Value.c_str(), Allocator);
+    return rapidjson::Value(value.c_str(), allocator);
 }
 
-template <> inline rapidjson::Value TypeToJsonValue(const rapidjson::Document& Value, RapidJsonAlloc& Allocator)
+template <> inline rapidjson::Value TypeToJsonValue(const rapidjson::Document& value, RapidJsonAlloc& allocator)
 {
-    rapidjson::Value Object(rapidjson::kObjectType);
-    Object.CopyFrom(*Value.Begin(), Allocator);
+    rapidjson::Value object(rapidjson::kObjectType);
+    object.CopyFrom(*value.Begin(), allocator);
 
-    return Object;
+    return object;
 }
 
 // Functions for converting to C++ types from Json types
 
-inline csp::common::String JsonDocToString(const rapidjson::Document& JsonDoc)
+inline csp::common::String JsonDocToString(const rapidjson::Document& jsonDoc)
 {
-    rapidjson::StringBuffer Buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
-    JsonDoc.Accept(Writer);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    jsonDoc.Accept(writer);
 
-    return csp::common::String(Buffer.GetString());
+    return csp::common::String(buffer.GetString());
 }
 
-inline csp::common::String JsonObjectToString(const rapidjson::Value& JsonObject)
+inline csp::common::String JsonObjectToString(const rapidjson::Value& jsonObject)
 {
-    rapidjson::StringBuffer Buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
-    JsonObject.Accept(Writer);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    jsonObject.Accept(writer);
 
-    return csp::common::String(Buffer.GetString());
+    return csp::common::String(buffer.GetString());
 }
 
-template <class T> inline csp::common::String TypeToJsonString(const std::vector<std::shared_ptr<T>>& Value)
+template <class T> inline csp::common::String TypeToJsonString(const std::vector<std::shared_ptr<T>>& value)
 {
-    RapidJsonAlloc Allocator;
-    return JsonObjectToString(TypeToJsonValue(Value, Allocator));
+    RapidJsonAlloc allocator;
+    return JsonObjectToString(TypeToJsonValue(value, allocator));
 }
 
 // Deserialisation function for types that derive from EnumBase
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>*>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
+inline void JsonValueToType(const rapidjson::Value& value, T& type)
 {
-    Type.FromJson(CSP_TEXT(Value.GetString()));
+    type.FromJson(CSP_TEXT(value.GetString()));
 }
 
 // Catch-all template for notifying the user if no specialisation exists for deserialising to the specified type
@@ -267,70 +267,70 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
 
 // Deserialisation function for types that derive from DtoBase
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>*>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
+inline void JsonValueToType(const rapidjson::Value& value, T& type)
 {
-    Type.FromJson(Value.IsString() ? CSP_TEXT(Value.GetString()) : JsonObjectToString(Value));
+    type.FromJson(value.IsString() ? CSP_TEXT(value.GetString()) : JsonObjectToString(value));
 }
 
 // Partial template specialisations for JsonValueToType
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::optional<U>& type)
 {
-    U Inner;
-    JsonValueToType(Value, Inner);
-    Type = std::make_optional(Inner);
+    U inner;
+    JsonValueToType(value, inner);
+    type = std::make_optional(inner);
 }
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::shared_ptr<U>& type)
 {
-    Type = std::make_shared<U>();
-    JsonValueToType(Value, *Type);
+    type = std::make_shared<U>();
+    JsonValueToType(value, *type);
 }
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& value, std::vector<U>& type)
 {
-    assert(Value.IsArray());
+    assert(value.IsArray());
 
-    for (auto i = 0U; i < Value.Size(); ++i)
+    for (auto i = 0U; i < value.Size(); ++i)
     {
-        U Element;
-        JsonValueToType(Value[i], Element);
-        Type.push_back(Element);
+        U element;
+        JsonValueToType(value[i], element);
+        type.push_back(element);
     }
 }
 
-template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type)
+template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& value, std::map<U, V>& type)
 {
-    assert(Value.IsObject());
+    assert(value.IsObject());
 
-    for (auto& Member : Value.GetObj())
+    for (auto& member : value.GetObj())
     {
-        U ElementKey;
-        V ElementValue;
-        JsonValueToType(Member.name, ElementKey);
-        JsonValueToType(Member.value, ElementValue);
-        Type.emplace(std::make_pair(ElementKey, ElementValue));
+        U elementKey;
+        V elementValue;
+        JsonValueToType(member.name, elementKey);
+        JsonValueToType(member.value, elementValue);
+        type.emplace(std::make_pair(elementKey, elementValue));
     }
 }
 
 // Full template specialisations for JsonValueToType
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type) { Type = Value.GetBool(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, bool& type) { type = value.GetBool(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type) { Type = Value.GetInt(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, int32_t& type) { type = value.GetInt(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type) { Type = Value.GetUint(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, uint32_t& type) { type = value.GetUint(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type) { Type = Value.GetInt64(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, int64_t& type) { type = value.GetInt64(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type) { Type = Value.GetUint64(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, uint64_t& type) { type = value.GetUint64(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type) { Type = Value.GetFloat(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, float& type) { type = value.GetFloat(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type) { Type = Value.GetDouble(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, double& type) { type = value.GetDouble(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type) { Type = Value.GetString(); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, csp::common::String& type) { type = value.GetString(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type) { Type.CopyFrom(Value, Type.GetAllocator()); }
+template <> inline void JsonValueToType(const rapidjson::Value& value, rapidjson::Document& type) { type.CopyFrom(value, type.GetAllocator()); }
 
 } // namespace csp::web

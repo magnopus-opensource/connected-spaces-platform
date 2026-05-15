@@ -20,32 +20,32 @@
 namespace csp::multiplayer
 {
 
-ComponentScriptInterface::ComponentScriptInterface(ComponentBase* InComponenty)
-    : Component(InComponenty)
+ComponentScriptInterface::ComponentScriptInterface(ComponentBase* inComponenty)
+    : m_component(inComponenty)
 {
 }
 
-void ComponentScriptInterface::SubscribeToPropertyChange(int32_t PropertyKey, std::string Message)
+void ComponentScriptInterface::SubscribeToPropertyChange(int32_t propertyKey, std::string message)
 {
-    if (Component)
+    if (m_component)
     {
-        Component->SubscribeToPropertyChange(PropertyKey, Message.c_str());
+        m_component->SubscribeToPropertyChange(propertyKey, message.c_str());
     }
 }
 
-void ComponentScriptInterface::InvokeAction(std::string ActionId, std::string ActionParams)
+void ComponentScriptInterface::InvokeAction(std::string actionId, std::string actionParams)
 {
-    if (Component)
+    if (m_component)
     {
-        Component->InvokeAction(ActionId.c_str(), ActionParams.c_str());
+        m_component->InvokeAction(actionId.c_str(), actionParams.c_str());
     }
 }
 
 int64_t ComponentScriptInterface::GetComponentId() const
 {
-    if (Component)
+    if (m_component)
     {
-        return Component->GetId();
+        return m_component->GetId();
     }
 
     return INVALID_COMPONENT_ID;
@@ -53,9 +53,9 @@ int64_t ComponentScriptInterface::GetComponentId() const
 
 int64_t ComponentScriptInterface::GetComponentType() const
 {
-    if (Component)
+    if (m_component)
     {
-        return (int64_t)Component->GetComponentType();
+        return (int64_t)m_component->GetComponentType();
     }
 
     return (int64_t)ComponentType::Invalid;
@@ -63,17 +63,17 @@ int64_t ComponentScriptInterface::GetComponentType() const
 
 void ComponentScriptInterface::SetComponentName(std::string name)
 {
-    if (Component)
+    if (m_component)
     {
-        Component->SetComponentName(name.c_str());
+        m_component->SetComponentName(name.c_str());
     }
 }
 
 std::string ComponentScriptInterface::GetComponentName() const
 {
-    if (Component)
+    if (m_component)
     {
-        return Component->GetComponentName().c_str();
+        return m_component->GetComponentName().c_str();
     }
 
     return "";
@@ -81,60 +81,60 @@ std::string ComponentScriptInterface::GetComponentName() const
 
 void ComponentScriptInterface::SendPropertyUpdate()
 {
-    if (Component)
+    if (m_component)
     {
-        Component->GetParent()->QueueUpdate();
+        m_component->GetParent()->QueueUpdate();
     }
 }
 
-std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProperty(uint16_t Key) const
+std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProperty(uint16_t key) const
 {
-    if (!Component)
+    if (!m_component)
     {
         return {};
     }
 
-    const auto& MaybeValue = Component->GetProperty(Key);
-    if (MaybeValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::InvalidType)
+    const auto& maybeValue = m_component->GetProperty(key);
+    if (maybeValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::InvalidType)
     {
         return std::nullopt;
     }
 
     struct Visitor final
     {
-        std::optional<Value> operator()(bool Value) const
+        std::optional<Value> operator()(bool value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<Value> operator()(float Value) const
+        std::optional<Value> operator()(float value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<Value> operator()(int64_t Value) const
+        std::optional<Value> operator()(int64_t value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<Value> operator()(const csp::common::String& Value) const
+        std::optional<Value> operator()(const csp::common::String& value) const
         {
-            return std::string(Value.c_str());
+            return std::string(value.c_str());
         }
 
-        std::optional<Value> operator()(const csp::common::Vector2& Value) const
+        std::optional<Value> operator()(const csp::common::Vector2& value) const
         {
-            return std::vector<float>{Value.X, Value.Y};
+            return std::vector<float>{value.X, value.Y};
         }
 
-        std::optional<Value> operator()(const csp::common::Vector3& Value) const
+        std::optional<Value> operator()(const csp::common::Vector3& value) const
         {
-            return std::vector<float>{Value.X, Value.Y, Value.Z};
+            return std::vector<float>{value.X, value.Y, value.Z};
         }
 
-        std::optional<Value> operator()(const csp::common::Vector4& Value) const
+        std::optional<Value> operator()(const csp::common::Vector4& value) const
         {
-            return std::vector<float>{Value.X, Value.Y, Value.Z, Value.W};
+            return std::vector<float>{value.X, value.Y, value.Z, value.W};
         }
         
         std::optional<Value> operator()(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>&) const
@@ -143,62 +143,62 @@ std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProp
         }
     };
 
-    return std::visit(Visitor{}, MaybeValue.GetValue());
+    return std::visit(Visitor{}, maybeValue.GetValue());
 }
 
-void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
+void ComponentScriptInterface::SetProperty(uint16_t key, Value desiredValue)
 {
-    if (!Component)
+    if (!m_component)
     {
         return;
     }
 
     struct Visitor final
     {
-        std::optional<csp::common::ReplicatedValue> operator()(bool Value) const
+        std::optional<csp::common::ReplicatedValue> operator()(bool value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<csp::common::ReplicatedValue> operator()(float Value) const
+        std::optional<csp::common::ReplicatedValue> operator()(float value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<csp::common::ReplicatedValue> operator()(int64_t Value) const
+        std::optional<csp::common::ReplicatedValue> operator()(int64_t value) const
         {
-            return Value;
+            return value;
         }
 
-        std::optional<csp::common::ReplicatedValue> operator()(const std::string& Value) const
+        std::optional<csp::common::ReplicatedValue> operator()(const std::string& value) const
         {
-            return csp::common::String(Value.c_str());
+            return csp::common::String(value.c_str());
         }
 
-        std::optional<csp::common::ReplicatedValue> operator()(const std::vector<float>& Value) const
+        std::optional<csp::common::ReplicatedValue> operator()(const std::vector<float>& value) const
         {
-            if (Value.size() == 2)
+            if (value.size() == 2)
             {
-                return csp::common::Vector2{Value[0], Value[1]};
+                return csp::common::Vector2{value[0], value[1]};
             }
 
-            if (Value.size() == 3)
+            if (value.size() == 3)
             {
-                return csp::common::Vector3{Value[0], Value[1], Value[2]};
+                return csp::common::Vector3{value[0], value[1], value[2]};
             }
 
-            if (Value.size() == 4)
+            if (value.size() == 4)
             {
-                return csp::common::Vector4{Value[0], Value[1], Value[2], Value[3]};
+                return csp::common::Vector4{value[0], value[1], value[2], value[3]};
             }
  
             return {};
         }
     };
 
-    if (auto MaybeMappedValue = std::visit(Visitor{}, std::move(DesiredValue)))
+    if (auto maybeMappedValue = std::visit(Visitor{}, std::move(desiredValue)))
     {
-        Component->SetProperty(Key, std::move(*MaybeMappedValue));
+        m_component->SetProperty(key, std::move(*maybeMappedValue));
         SendPropertyUpdate();
     }
 }

@@ -79,15 +79,15 @@ enum class EAssetPlatform
 /// @brief Converts a received DTO type into a Connected Spaces Platform enum EAssetType.
 /// @param DTOAssetDetailType : The string defining the asset type given via the DTO.
 /// @returns the converted EAssetType value.
-EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType);
+EAssetType ConvertDTOAssetDetailType(const csp::common::String& dtoAssetDetailType);
 
 /// @brief Converts a string platform definition to an EAssetPlatform value.
-EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform);
+EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& platform);
 
 /// @brief Converts the EAssetPlatform enum into a string value.
-csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
+csp::common::String ConvertAssetPlatformToString(EAssetPlatform platform);
 
-void AssetDetailDtoToAsset(const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset);
+void AssetDetailDtoToAsset(const csp::services::generated::prototypeservice::AssetDetailDto& dto, csp::systems::Asset& asset);
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset which maps to a PrototypeService::AssetDetail.
@@ -95,7 +95,7 @@ class CSP_API Asset
 {
 public:
     Asset();
-    Asset(const Asset& Other) = default;
+    Asset(const Asset& other) = default;
     Asset& operator=(const Asset& other) = default;
     csp::common::String AssetCollectionId;
     csp::common::String Id;
@@ -115,8 +115,8 @@ public:
     csp::common::String ThirdPartyPackagedAssetIdentifier;
     EThirdPartyPlatform ThirdPartyPlatformType;
 
-    bool operator==(const Asset& Other) const;
-    bool operator!=(const Asset& Other) const;
+    bool operator==(const Asset& other) const;
+    bool operator!=(const Asset& other) const;
 };
 
 /// @brief Defines a base data source for an Asset, attributing a mime type and providing functionality for uploading the data.
@@ -129,10 +129,10 @@ public:
 
     /// @brief Sets the mime type for this data source
     /// @param InMimeType The mime type to set.
-    virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
+    virtual void SetMimeType(const csp::common::String& inMimeType) = 0;
 
     CSP_NO_EXPORT virtual void SetUploadContent(
-        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
+        csp::web::WebClient* inWebClient, csp::web::HttpPayload* inPayload, const csp::systems::Asset& inAsset) const
         = 0;
 
 protected:
@@ -156,13 +156,13 @@ public:
 
     /// @brief Sets the mime type for this data source
     /// @param InMimeType The mime type to set.
-    void SetMimeType(const csp::common::String& InMimeType) override;
+    void SetMimeType(const csp::common::String& inMimeType) override;
 
 private:
     CSP_NO_EXPORT void SetUploadContent(
-        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
+        csp::web::WebClient* inWebClient, csp::web::HttpPayload* inPayload, const csp::systems::Asset& inAsset) const override;
 
-    csp::common::String MimeType = "application/octet-stream";
+    csp::common::String m_mimeType = "application/octet-stream";
 };
 
 /// @ingroup Asset System
@@ -185,12 +185,12 @@ public:
 
     /// @brief Sets the mime type for this data source
     /// @param InMimeType The mime type to set.
-    void SetMimeType(const csp::common::String& InMimeType) override;
+    void SetMimeType(const csp::common::String& inMimeType) override;
 
 private:
     CSP_NO_EXPORT void SetUploadContent(
-        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
-    csp::common::String MimeType = "application/octet-stream";
+        csp::web::WebClient* inWebClient, csp::web::HttpPayload* inPayload, const csp::systems::Asset& inAsset) const override;
+    csp::common::String m_mimeType = "application/octet-stream";
 };
 
 /// @ingroup Asset System
@@ -214,25 +214,25 @@ public:
     /// @return Asset : const ref of asset class.
     const Asset& GetAsset() const;
 
-    CSP_NO_EXPORT void SetAsset(const csp::systems::Asset& Asset);
+    CSP_NO_EXPORT void SetAsset(const csp::systems::Asset& asset);
 
-    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 protected:
     AssetResult() = delete;
     AssetResult(void*) {};
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& inResult)
+        : csp::systems::ResultBase(inResult.GetResultCode(), inResult.GetHttpResultCode()) {};
 
-    Asset Asset;
+    Asset m_asset;
 };
 
 /// @ingroup Asset System
@@ -254,20 +254,20 @@ public:
     /// @return csp::common::Array<Asset> : pointer to asset array being stored.
     const csp::common::Array<Asset>& GetAssets() const;
 
-    CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+    CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 protected:
     AssetsResult() = delete;
     AssetsResult(void*) {};
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Asset> Assets;
+    csp::common::Array<Asset> m_assets;
 };
 
 /// @ingroup Asset System
@@ -287,25 +287,25 @@ public:
     /// @return csp::common::String : uri of the uploaded asset.
     const csp::common::String& GetUri() const;
 
-    void SetUri(const csp::common::String& Value);
+    void SetUri(const csp::common::String& value);
 
-    CSP_NO_EXPORT UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT UriResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    CSP_NO_EXPORT UriResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+    CSP_NO_EXPORT UriResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 protected:
     UriResult() = delete;
     UriResult(void*) {};
 
 private:
-    UriResult(const csp::common::String Uri);
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    UriResult(const csp::common::String uri);
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    void SetResponseBody(const csp::common::String& Contents);
+    void SetResponseBody(const csp::common::String& contents);
 
-    csp::common::String Uri;
+    csp::common::String m_uri;
 };
 
 /// @ingroup Asset System
@@ -319,7 +319,7 @@ class CSP_API AssetDataResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    AssetDataResult(const AssetDataResult& Other);
+    AssetDataResult(const AssetDataResult& other);
     ~AssetDataResult();
 
     /// @brief Retrieves the data from the result.
@@ -333,23 +333,23 @@ protected:
     AssetDataResult(void*);
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 };
 
 /// @brief Callback containing asset.
 /// @param Result CreateAssetResult : result class
-typedef std::function<void(const AssetResult& Result)> AssetResultCallback;
+typedef std::function<void(const AssetResult& result)> AssetResultCallback;
 
 /// @brief Callback containing array of assets.
 /// @param Result DeleteAssetResult : result class
-typedef std::function<void(const AssetsResult& Result)> AssetsResultCallback;
+typedef std::function<void(const AssetsResult& result)> AssetsResultCallback;
 
 /// @brief Callback containing asset data uri.
 /// @param Result GetAssetsResult : result class
-typedef std::function<void(const UriResult& Result)> UriResultCallback;
+typedef std::function<void(const UriResult& result)> UriResultCallback;
 
 /// @brief Callback containing asset data.
 /// @param Result GetAssetsResult : result class
-typedef std::function<void(const AssetDataResult& Result)> AssetDataResultCallback;
+typedef std::function<void(const AssetDataResult& result)> AssetDataResultCallback;
 
 } // namespace csp::systems

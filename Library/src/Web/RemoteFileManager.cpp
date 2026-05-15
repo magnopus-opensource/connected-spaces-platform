@@ -24,62 +24,62 @@
 
 namespace
 {
-csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
+csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& inAuthContext)
 {
-    csp::common::Optional<csp::common::String> BearerToken;
+    csp::common::Optional<csp::common::String> bearerToken;
 
-    if (InAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    if (inAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = InAuthContext.GetLoginState().AccessToken;
-        BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
+        csp::common::String accessToken = inAuthContext.GetLoginState().AccessToken;
+        bearerToken = csp::common::String(fmt::format("Bearer {}", accessToken.c_str()).c_str());
     }
 
-    return BearerToken;
+    return bearerToken;
 }
 } // namespace
 
 namespace csp::web
 {
 
-RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient, const csp::common::IAuthContext& InAuthContext)
-    : WebClient(InWebClient)
-    , AuthContext(InAuthContext)
+RemoteFileManager::RemoteFileManager(csp::web::WebClient* inWebClient, const csp::common::IAuthContext& inAuthContext)
+    : m_webClient(inWebClient)
+    , m_authContext(inAuthContext)
 {
 }
 
 RemoteFileManager::~RemoteFileManager() { }
 
 void RemoteFileManager::GetFile(
-    const csp::common::String& FileUrl, csp::services::ResponseHandlerPtr ResponseHandler, csp::common::CancellationToken& CancellationToken)
+    const csp::common::String& fileUrl, csp::services::ResponseHandlerPtr responseHandler, csp::common::CancellationToken& cancellationToken)
 {
-    csp::web::Uri GetUri(FileUrl);
+    csp::web::Uri getUri(fileUrl);
 
-    csp::web::HttpPayload Payload;
-    Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("text/json"));
+    csp::web::HttpPayload payload;
+    payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("text/json"));
 
-    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
+    auto bearerToken = ConstructAuthorizationHeader(m_authContext);
 
-    if (BearerToken.HasValue())
+    if (bearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        payload.AddHeader(CSP_TEXT("Authorization"), *bearerToken);
     }
 
-    WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
+    m_webClient->SendRequest(csp::web::ERequestVerb::GET, getUri, payload, responseHandler, cancellationToken);
 }
 
-void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler)
+void RemoteFileManager::GetResponseHeaders(const csp::common::String& url, csp::services::ResponseHandlerPtr responseHandler)
 {
-    csp::web::Uri GetUri(Url);
-    csp::web::HttpPayload Payload;
+    csp::web::Uri getUri(url);
+    csp::web::HttpPayload payload;
 
-    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
+    auto bearerToken = ConstructAuthorizationHeader(m_authContext);
 
-    if (BearerToken.HasValue())
+    if (bearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        payload.AddHeader(CSP_TEXT("Authorization"), *bearerToken);
     }
 
-    WebClient->SendRequest(csp::web::ERequestVerb::HEAD, GetUri, Payload, ResponseHandler, csp::common::CancellationToken::Dummy());
+    m_webClient->SendRequest(csp::web::ERequestVerb::HEAD, getUri, payload, responseHandler, csp::common::CancellationToken::Dummy());
 }
 
 } // namespace csp::web

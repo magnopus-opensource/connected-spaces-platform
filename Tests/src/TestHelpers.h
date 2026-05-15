@@ -85,43 +85,43 @@ public:
     /// @param TimeOutInSeconds Maximum time to wait in Seconds
     /// @param SleepTimeMs (Optional) Millseconds to sleep for while waiting (default 100 ms)
     /// @return True if event occured or False if timeout period expired
-    static bool WaitFor(std::function<bool(void)> IsDone, const std::chrono::seconds& TimeOutInSeconds,
-        const std::chrono::milliseconds SleepTimeMs = std::chrono::milliseconds(100))
+    static bool WaitFor(std::function<bool(void)> isDone, const std::chrono::seconds& timeOutInSeconds,
+        const std::chrono::milliseconds sleepTimeMs = std::chrono::milliseconds(100))
     {
         using clock = std::chrono::system_clock;
 
-        auto Start = clock::now();
-        clock::duration Elapsed = clock::now() - Start;
+        auto start = clock::now();
+        clock::duration elapsed = clock::now() - start;
 
-        const std::chrono::duration TimeOut = TimeOutInSeconds;
+        const std::chrono::duration timeOut = timeOutInSeconds;
 
-        while (!IsDone() && (Elapsed < TimeOut))
+        while (!isDone() && (elapsed < timeOut))
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(SleepTimeMs));
-            Elapsed = clock::now() - Start;
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleepTimeMs));
+            elapsed = clock::now() - start;
         }
 
         // Returns True if done event occured or False if we timeout
-        return IsDone();
+        return isDone();
     }
 };
 
 template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
 {
 public:
-    ServiceResponseReceiver(csp::systems::EResultCode InExpectedResult = csp::systems::EResultCode::Success)
-        : ExpectedResult(InExpectedResult)
-        , ResponseReceived(false)
+    ServiceResponseReceiver(csp::systems::EResultCode inExpectedResult = csp::systems::EResultCode::Success)
+        : m_expectedResult(inExpectedResult)
+        , m_responseReceived(false)
     {
     }
 
-    void OnResult(const ResultType& InResult)
+    void OnResult(const ResultType& inResult)
     {
-        if (InResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (inResult.GetResultCode() == csp::systems::EResultCode::InProgress)
             return;
 
-        EXPECT_TRUE(InResult.GetResultCode() == ExpectedResult);
-        ResponseReceived = true;
+        EXPECT_TRUE(inResult.GetResultCode() == m_expectedResult);
+        m_responseReceived = true;
     }
 
     bool WaitForResult()
@@ -129,21 +129,21 @@ public:
         return WaitFor([this] { return IsResponseReceived(); }, std::chrono::seconds(20));
     }
 
-    bool IsResponseReceived() const { return ResponseReceived; }
+    bool IsResponseReceived() const { return m_responseReceived; }
 
 private:
-    csp::systems::EResultCode ExpectedResult;
-    std::atomic<bool> ResponseReceived;
+    csp::systems::EResultCode m_expectedResult;
+    std::atomic<bool> m_responseReceived;
 };
 
 class TestAuthContext : public csp::common::IAuthContext
 {
 public:
-    const csp::common::LoginState& GetLoginState() const override { return State; }
-    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+    const csp::common::LoginState& GetLoginState() const override { return m_state; }
+    void RefreshToken(std::function<void(bool)> success) override { success(true); }
 
 private:
-    csp::common::LoginState State;
+    csp::common::LoginState m_state;
 };
 
 #if defined CSP_WINDOWS
@@ -152,170 +152,170 @@ private:
 #define SPRINTF sprintf
 #endif
 
-inline void PrintProgress(float Progress)
+inline void PrintProgress(float progress)
 {
-    unsigned int ProgressPercent = (unsigned int)(Progress + 0.5f);
+    unsigned int progressPercent = (unsigned int)(progress + 0.5f);
 
-    char ProgressString[256];
-    SPRINTF(ProgressString, "Progress=%d%%\n", ProgressPercent);
+    char progressString[256];
+    SPRINTF(progressString, "Progress=%d%%\n", progressPercent);
 
-    for (size_t i = 0; i < strlen(ProgressString); ++i)
+    for (size_t i = 0; i < strlen(progressString); ++i)
         std::cerr << "\b";
 
-    std::cerr << ProgressString;
+    std::cerr << progressString;
 }
 
 inline void SetRandSeed() { std::srand(static_cast<unsigned int>(std::time(nullptr))); }
 
 inline double RandomUniformDouble()
 {
-    std::uniform_real_distribution<double> UniformDouble;
+    std::uniform_real_distribution<double> uniformDouble;
 
     // Seed using the current time.
-    std::mt19937_64 Rand;
-    auto CurrentTime = std::chrono::high_resolution_clock::now();
-    auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
-    Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-    return UniformDouble(Rand);
+    std::mt19937_64 rand;
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto currentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(currentTime);
+    rand.seed(currentNanoseconds.time_since_epoch().count());
+    return uniformDouble(rand);
 }
 
-inline double RandomRangeDouble(double Min, double Max)
+inline double RandomRangeDouble(double min, double max)
 {
-    const double RandomUniform = RandomUniformDouble();
-    const double Range = Max - Min;
+    const double randomUniform = RandomUniformDouble();
+    const double range = max - min;
 
-    return (RandomUniform * Range) + Min;
+    return (randomUniform * range) + min;
 }
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 std::string GetUniqueString();
 
-inline void LogFatal(std::string Message)
+inline void LogFatal(std::string message)
 {
-    std::cerr << "[ ERROR    ] " << Message << std::endl;
+    std::cerr << "[ ERROR    ] " << message << std::endl;
     exit(1);
 }
 
 inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
 {
-    static csp::ClientUserAgent ClientHeaderInfo;
-    ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
-    ClientHeaderInfo.ClientOS = "CPPTestsOS";
-    ClientHeaderInfo.ClientSKU = TESTS_CLIENT_SKU;
-    ClientHeaderInfo.ClientVersion = csp::CSPFoundation::GetVersion();
-    ClientHeaderInfo.ClientEnvironment = "ODev";
-    ClientHeaderInfo.CHSEnvironment = "oDev";
-    return ClientHeaderInfo;
+    static csp::ClientUserAgent clientHeaderInfo;
+    clientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
+    clientHeaderInfo.ClientOS = "CPPTestsOS";
+    clientHeaderInfo.ClientSKU = TESTS_CLIENT_SKU;
+    clientHeaderInfo.ClientVersion = csp::CSPFoundation::GetVersion();
+    clientHeaderInfo.ClientEnvironment = "ODev";
+    clientHeaderInfo.CHSEnvironment = "oDev";
+    return clientHeaderInfo;
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
+inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& endpointRootUri, SignalRConnectionMock* signalRMock = nullptr, csp::web::WebClient* webClient = nullptr)
 {
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, nullptr);
+    csp::CSPFoundation::InitialiseWithInject(endpointRootUri, "OKO_TESTS", GetDefaultClientUserAgentInfo(), signalRMock, webClient, nullptr);
 }
 
-inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& EndpointRootURI,
-    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
+inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& endpointRootUri,
+    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& featureFlags, SignalRConnectionMock* signalRMock = nullptr, csp::web::WebClient* webClient = nullptr)
 {
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, FeatureFlags);
+    csp::CSPFoundation::InitialiseWithInject(endpointRootUri, "OKO_TESTS", GetDefaultClientUserAgentInfo(), signalRMock, webClient, featureFlags);
 }
 
-inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
+inline void WaitForCallback(bool& callbackCalled, int maxTextTimeSeconds = 20)
 {
     // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
+    auto start = std::chrono::steady_clock::now();
+    auto current = std::chrono::steady_clock::now();
+    int64_t testTime = 0;
 
-    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+    while (callbackCalled == false && testTime < maxTextTimeSeconds)
     {
         std::this_thread::sleep_for(50ms);
 
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+        current = std::chrono::steady_clock::now();
+        testTime = std::chrono::duration_cast<std::chrono::seconds>(current - start).count();
     }
 
-    if (CallbackCalled == false)
+    if (callbackCalled == false)
     {
         printf("Test timed out - Callback wasn't called\n");
     }
 }
 
-template <typename T> inline bool WaitForFuture(const std::future<T>& Future, int MaxWaitTimeSeconds = 20)
+template <typename T> inline bool WaitForFuture(const std::future<T>& future, int maxWaitTimeSeconds = 20)
 {
-    auto Status = Future.wait_for(std::chrono::seconds(MaxWaitTimeSeconds));
-    return Status == std::future_status::ready;
+    auto status = future.wait_for(std::chrono::seconds(maxWaitTimeSeconds));
+    return status == std::future_status::ready;
 }
 
 
-inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& RealtimeEngine)
+inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& realtimeEngine)
 {
-    if (RealtimeEngine.GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    if (realtimeEngine.GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine&>(RealtimeEngine).ProcessPendingEntityOperations();
+        static_cast<csp::multiplayer::OnlineRealtimeEngine&>(realtimeEngine).ProcessPendingEntityOperations();
     }
 }
 
-inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::common::IRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
+inline void WaitForCallbackWithUpdate(bool& callbackCalled, csp::common::IRealtimeEngine* entitySystem, int maxTextTimeSeconds = 20)
 {
     // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
+    auto start = std::chrono::steady_clock::now();
+    auto current = std::chrono::steady_clock::now();
+    int64_t testTime = 0;
 
     // Call at least once
-    ProcessPendingIfOnline(*EntitySystem);
+    ProcessPendingIfOnline(*entitySystem);
 
-    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+    while (callbackCalled == false && testTime < maxTextTimeSeconds)
     {
-        ProcessPendingIfOnline(*EntitySystem);
+        ProcessPendingIfOnline(*entitySystem);
 
         std::this_thread::sleep_for(50ms);
 
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+        current = std::chrono::steady_clock::now();
+        testTime = std::chrono::duration_cast<std::chrono::seconds>(current - start).count();
     }
 
-    if (CallbackCalled == false)
+    if (callbackCalled == false)
     {
         printf("Test timed out - Callback wasn't called\n");
     }
 }
 
-inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEngine* EntitySystem, csp::common::String Name = "Object")
+inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEngine* entitySystem, csp::common::String name = "Object")
 {
-    csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::multiplayer::SpaceTransform objectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(entitySystem, CreateEntity, name, objectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
 }
 
-inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
+inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& filePath)
 {
-    auto AbsoluteFilePath = std::filesystem::absolute(FilePath);
-    if (!std::filesystem::exists(AbsoluteFilePath))
+    auto absoluteFilePath = std::filesystem::absolute(filePath);
+    if (!std::filesystem::exists(absoluteFilePath))
     {
         return std::nullopt;
     }
 
-    const auto FileSize = std::filesystem::file_size(AbsoluteFilePath);
+    const auto fileSize = std::filesystem::file_size(absoluteFilePath);
 
-    std::ifstream File(AbsoluteFilePath, std::ios::binary);
-    if (!File)
+    std::ifstream file(absoluteFilePath, std::ios::binary);
+    if (!file)
     {
         return std::nullopt;
     }
 
-    if (!std::filesystem::is_regular_file(AbsoluteFilePath))
+    if (!std::filesystem::is_regular_file(absoluteFilePath))
     {
         return std::nullopt;
     }
 
-    std::vector<unsigned char> FileData(static_cast<size_t>(FileSize));
+    std::vector<unsigned char> fileData(static_cast<size_t>(fileSize));
 
-    if (!File.read(reinterpret_cast<char*>(FileData.data()), static_cast<std::streamsize>(FileData.size())))
+    if (!file.read(reinterpret_cast<char*>(fileData.data()), static_cast<std::streamsize>(fileData.size())))
     {
         return std::nullopt;
     }
     
-    return FileData;
+    return fileData;
 }

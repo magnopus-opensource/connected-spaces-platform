@@ -30,4 +30,4 @@ public:
 
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::SceneDescription& obj);

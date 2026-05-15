@@ -60,7 +60,7 @@ public:
 
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CinematicCameraSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gived the sensor size and focal length, return the horizonal fov
     /// @return FOV in radians
@@ -71,7 +71,7 @@ public:
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// \addtogroup IRotationComponent
@@ -79,7 +79,7 @@ public:
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @}
 
     /// @brief Get focal length
@@ -89,7 +89,7 @@ public:
     /// @brief Set focalLength
     /// Note: Effects the result of GetFov()
     /// @param Value float : focalLength
-    void SetFocalLength(float Value);
+    void SetFocalLength(float value);
 
     /// @brief Get Current aspect ratio
     /// @return Current aspect ratio
@@ -97,7 +97,7 @@ public:
 
     /// @brief Set Current aspect ratio
     /// @param Value float : Current aspect ratio
-    void SetAspectRatio(float Value);
+    void SetAspectRatio(float value);
 
     /// @brief Get sensor size
     /// @return Current sensor size
@@ -105,7 +105,7 @@ public:
 
     /// @brief Set Current SensorSize
     /// @param Value Vector2 : Current SensorSize
-    void SetSensorSize(const csp::common::Vector2& Value);
+    void SetSensorSize(const csp::common::Vector2& value);
 
     /// @brief Get near clip
     /// Note: On platforms that don't support reversedZ, near clip should be used to control the clipping distance
@@ -114,7 +114,7 @@ public:
 
     /// @brief Set near clip
     /// @param Value float : near clip
-    void SetNearClip(float Value);
+    void SetNearClip(float value);
 
     /// @brief Get far clip
     /// Note: On platforms that don't support reversedZ, far clip should be used to control the clipping distance
@@ -124,7 +124,7 @@ public:
     /// @brief Set far clip
     /// Note: far clip, controls how the density increases and height decreases. Smaller values make the visible transition larger.
     /// @param Value float : far clip
-    void SetFarClip(float Value);
+    void SetFarClip(float value);
 
     /// @brief Get ISO sensitivity for controlling exposure.
     /// Note: reserved for future use, do not implement on clients
@@ -134,7 +134,7 @@ public:
     /// @brief Set ISO sensitivity for controlling exposure.
     /// Note: reserved for future use, do not implement on clients
     /// @param Value float : ISO sensitivity for controlling exposure.
-    void SetIso(float Value);
+    void SetIso(float value);
 
     /// @brief Get shutter speed.
     /// Note: reserved for future use, do not implement on clients
@@ -144,7 +144,7 @@ public:
     /// @brief Set shutter speed
     /// Note: reserved for future use, do not implement on clients
     /// @param Value float : shutter speed
-    void SetShutterSpeed(float Value);
+    void SetShutterSpeed(float value);
 
     /// @brief Get aperture.
     /// Note: reserved for future use, do not implement on clients
@@ -154,7 +154,7 @@ public:
     /// @brief Set aperture
     /// Note: reserved for future use, do not implement on clients
     /// @param Value float : aperture Flag
-    void SetAperture(float Value);
+    void SetAperture(float value);
 
     /// @brief Get IsViewerCamera.
     /// Note: reserved for future use, do not implement on clients
@@ -164,14 +164,14 @@ public:
     /// @brief Set IsViewerCamera
     /// Note: reserved for future use, do not implement on clients
     /// @param Value boolean : IsViewerCamera Flag
-    void SetIsViewerCamera(bool Value);
+    void SetIsViewerCamera(bool value);
 
     /// \addtogroup IEnableableComponent
     /// @{
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -179,7 +179,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 };
 

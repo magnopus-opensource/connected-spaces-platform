@@ -26,19 +26,19 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& Dto, csp::common::ApplicationSettings& ApplicationSettings)
+void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& dto, csp::common::ApplicationSettings& applicationSettings)
 {
-    if (Dto.HasApplicationName())
-        ApplicationSettings.ApplicationName = Dto.GetApplicationName();
+    if (dto.HasApplicationName())
+        applicationSettings.ApplicationName = dto.GetApplicationName();
 
-    if (Dto.HasContext())
-        ApplicationSettings.Context = Dto.GetContext();
+    if (dto.HasContext())
+        applicationSettings.Context = dto.GetContext();
 
-    if (Dto.HasAllowAnonymous())
-        ApplicationSettings.AllowAnonymous = Dto.GetAllowAnonymous();
+    if (dto.HasAllowAnonymous())
+        applicationSettings.AllowAnonymous = dto.GetAllowAnonymous();
 
-    if (Dto.HasSettings())
-        ApplicationSettings.Settings = Convert(Dto.GetSettings());
+    if (dto.HasSettings())
+        applicationSettings.Settings = Convert(dto.GetSettings());
 }
 
 } // namespace
@@ -46,23 +46,23 @@ void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsD
 namespace csp::systems
 {
 
-const csp::common::ApplicationSettings& ApplicationSettingsResult::GetApplicationSettings() const { return ApplicationSettings; }
+const csp::common::ApplicationSettings& ApplicationSettingsResult::GetApplicationSettings() const { return m_applicationSettings; }
 
-void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* ApplicationSettingsResponse = static_cast<chs::ApplicationSettingsDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* applicationSettingsResponse = static_cast<chs::ApplicationSettingsDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        if (Response->GetPayload().GetContent().Length() > 0)
+        if (response->GetPayload().GetContent().Length() > 0)
         {
             // Build the Dto from the response Json
-            ApplicationSettingsResponse->FromJson(Response->GetPayload().GetContent());
+            applicationSettingsResponse->FromJson(response->GetPayload().GetContent());
 
-            ApplicationSettingsDtoToApplicationSettings(*ApplicationSettingsResponse, ApplicationSettings);
+            ApplicationSettingsDtoToApplicationSettings(*applicationSettingsResponse, m_applicationSettings);
         }
     }
 }

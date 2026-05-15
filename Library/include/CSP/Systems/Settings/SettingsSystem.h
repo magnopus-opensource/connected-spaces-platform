@@ -64,75 +64,75 @@ public:
     /// NullResultCallback. Returns status of the update task, no payload expected.
     /// @param InValue bool : boolean reflecting desired state to store in Magnopus Connected Services.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void SetNDAStatus(bool InValue, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void SetNDAStatus(bool inValue, NullResultCallback callback);
 
     /// @brief Get a boolean indicating whether the current user has completed a non-disclosure agreement.
     /// @param Callback SettingsBoolCallback : callback to call when a response is received.
-    CSP_ASYNC_RESULT void GetNDAStatus(BooleanResultCallback Callback);
+    CSP_ASYNC_RESULT void GetNDAStatus(BooleanResultCallback callback);
 
     /// @brief Opt in or out to receiving a newsletter for the current user.
     /// NullResultCallback. Returns status of the update task, no payload expected.
     /// @param InValue bool : boolean reflecting desired state to store in Magnopus Connected Services
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void SetNewsletterStatus(bool InValue, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void SetNewsletterStatus(bool inValue, NullResultCallback callback);
 
     /// @brief Get a boolean indicating whether the current user has opted into receiving a newsletter.
     /// @param Callback SettingsBoolCallback : callback to call when a response is received.
-    CSP_ASYNC_RESULT void GetNewsletterStatus(BooleanResultCallback Callback);
+    CSP_ASYNC_RESULT void GetNewsletterStatus(BooleanResultCallback callback);
 
     /// @brief Add a Space to the current user's list of recently visited Spaces
     /// Supplying a SpaceID will store as the most recent space, manages the list order and storing to Magnopus Connected Services.
     /// NullResultCallback. Returns status of the update task, no payload expected.
     /// @param InSpaceID csp::common::String : SpaceID of most recent space entered
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddRecentlyVisitedSpace(const csp::common::String InSpaceID, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void AddRecentlyVisitedSpace(const csp::common::String inSpaceId, NullResultCallback callback);
 
     /// @brief Get an array of the most recently visited Spaces for the current user.
     /// Returns an csp::common::Array of csp::common::Strings ordered from most to least recent spaces up to a maximum of 10 entries.
     /// @param Callback SettingsArrayCallback : callback to call when a response is received.
-    CSP_ASYNC_RESULT void GetRecentlyVisitedSpaces(StringArrayResultCallback Callback);
+    CSP_ASYNC_RESULT void GetRecentlyVisitedSpaces(StringArrayResultCallback callback);
 
     /// @brief Clear the list of recently-visited spaces for the current user.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void ClearRecentlyVisitedSpaces(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void ClearRecentlyVisitedSpaces(NullResultCallback callback);
 
     /// @brief Block a space for the current user.
     /// The client is expected to implement the actual space filtering functionality as this function only adds the provided space to a list and will
     /// not affect the spaces you get back from `SpaceSystem::GetSpaces()`.
     /// @param InSpaceID csp::common::String : SpaceID of most space to block
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddBlockedSpace(const csp::common::String InSpaceID, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void AddBlockedSpace(const csp::common::String inSpaceId, NullResultCallback callback);
 
     /// @brief Unblock a space for the current user.
     /// @param InSpaceID csp::common::String : SpaceID of most space to block
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void RemoveBlockedSpace(const csp::common::String InSpaceID, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveBlockedSpace(const csp::common::String inSpaceId, NullResultCallback callback);
 
     /// @brief Get a list of Spaces that were blocked by the current user.
     /// Returns an csp::common::Array of csp::common::Strings ordered from most to least recent blocked spaces.
     /// @param Callback SettingsArrayCallback : callback to call when a response is received.
-    CSP_ASYNC_RESULT void GetBlockedSpaces(StringArrayResultCallback Callback);
+    CSP_ASYNC_RESULT void GetBlockedSpaces(StringArrayResultCallback callback);
 
     /// @brief Clear the list of blocked Spaces for the current user.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void ClearBlockedSpaces(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void ClearBlockedSpaces(NullResultCallback callback);
 
     /// @brief Updates the Portrait Avatar image or adds one if it didn't have it previously using FileAssetDataSource
     /// @param NewAvatarPortrait csp::systems::FileAssetDataSource : New Portrait Avatar information
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateAvatarPortrait(const csp::systems::FileAssetDataSource& NewAvatarPortrait, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateAvatarPortrait(const csp::systems::FileAssetDataSource& newAvatarPortrait, NullResultCallback callback);
 
     /// @brief Retrieves the Avatar Portrait information associated with the space
     /// If the user of the Avatar portrait associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
     /// and the Uri field inside the UriResult will be empty
     /// @param InUserID const csp::common::String : The id of the user we are seeking to retrieve the portrait for
     /// @param Callback UriResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAvatarPortrait(const csp::common::String inUserId, UriResultCallback callback);
 
     /// @brief Updates the Avatar Portrait image or adds one if it didn't have it previously using BufferAssetDataSource
     /// @param NewAvatarPortrait csp::systems::BufferAssetDataSource : New Avatar Portrait information
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateAvatarPortraitWithBuffer(const csp::systems::BufferAssetDataSource& NewAvatarPortrait, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateAvatarPortraitWithBuffer(const csp::systems::BufferAssetDataSource& newAvatarPortrait, NullResultCallback callback);
 
     /// @brief Sets the avatar type and identifier for a user.
     /// @param InType csp::systems::AvatarType : The type of avatar (predefined, Ready Player Me, or custom).
@@ -140,28 +140,28 @@ public:
     /// @param InAvatarVisible bool : A bool used to identify whether the user's avatar should be visible or not.
     /// @param Callback NullResultCallback : Callback to call when task finishes.
     CSP_ASYNC_RESULT void SetAvatarInfo(
-        AvatarType InType, const csp::common::String& InIdentifier, bool InAvatarVisible, NullResultCallback Callback);
+        AvatarType inType, const csp::common::String& inIdentifier, bool inAvatarVisible, NullResultCallback callback);
 
     /// @brief Retrieves the avatar type and identifier for a user.
     /// @param Callback NullResultCallback : Callback to call when task finishes.
-    CSP_ASYNC_RESULT void GetAvatarInfo(AvatarInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAvatarInfo(AvatarInfoResultCallback callback);
 
 private:
     SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT SettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT SettingsSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~SettingsSystem();
 
-    void SetSettingValue(const csp::common::String& InContext, const csp::common::String& InKey, const csp::common::String& InValue,
-        NullResultCallback Callback) const;
-    void GetSettingValue(const csp::common::String& InContext, const csp::common::String& InKey, StringResultCallback Callback) const;
+    void SetSettingValue(const csp::common::String& inContext, const csp::common::String& inKey, const csp::common::String& inValue,
+        NullResultCallback callback) const;
+    void GetSettingValue(const csp::common::String& inContext, const csp::common::String& inKey, StringResultCallback callback) const;
 
-    csp::services::ApiBase* SettingsAPI;
+    csp::services::ApiBase* m_settingsApi;
 
-    void AddAvatarPortrait(const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
-    void AddAvatarPortraitWithBuffer(const csp::systems::BufferAssetDataSource& ImageDataSource, NullResultCallback Callback);
-    void GetAvatarPortraitAssetCollection(const csp::common::String InUserID, AssetCollectionsResultCallback Callback);
-    void GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback);
-    void RemoveAvatarPortrait(NullResultCallback Callback);
+    void AddAvatarPortrait(const csp::systems::FileAssetDataSource& imageDataSource, NullResultCallback callback);
+    void AddAvatarPortraitWithBuffer(const csp::systems::BufferAssetDataSource& imageDataSource, NullResultCallback callback);
+    void GetAvatarPortraitAssetCollection(const csp::common::String inUserId, AssetCollectionsResultCallback callback);
+    void GetAvatarPortraitAsset(const AssetCollection& avatarPortraitAssetCollection, AssetsResultCallback callback);
+    void RemoveAvatarPortrait(NullResultCallback callback);
 };
 
 } // namespace csp::systems

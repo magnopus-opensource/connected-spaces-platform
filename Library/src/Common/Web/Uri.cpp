@@ -24,70 +24,70 @@ namespace csp::web
 {
 
 Uri::Uri()
-    : NumParams(0)
+    : m_numParams(0)
 {
 }
 
-Uri::Uri(const char* InUri)
-    : UriPath(csp::common::String(InUri))
-    , NumParams(0)
+Uri::Uri(const char* inUri)
+    : m_uriPath(csp::common::String(inUri))
+    , m_numParams(0)
 {
 }
 
-Uri::Uri(csp::common::String& InUri)
-    : UriPath(InUri)
-    , NumParams(0)
+Uri::Uri(csp::common::String& inUri)
+    : m_uriPath(inUri)
+    , m_numParams(0)
 {
 }
 
-const char* Uri::GetAsString() const { return UriPath.c_str(); }
+const char* Uri::GetAsString() const { return m_uriPath.c_str(); }
 
-const std::string Uri::GetAsStdString() const { return std::string(UriPath.c_str()); }
+const std::string Uri::GetAsStdString() const { return std::string(m_uriPath.c_str()); }
 
-void Uri::SetWithParams(const char* InUri, std::initializer_list<csp::common::String> Params)
+void Uri::SetWithParams(const char* inUri, std::initializer_list<csp::common::String> params)
 {
-    std::string Uri(InUri);
-    constexpr size_t SearchStartIndex = 0;
+    std::string uri(inUri);
+    constexpr size_t searchStartIndex = 0;
 
-    for (auto Param : Params)
+    for (auto param : params)
     {
-        const char* ParamStr = Param.c_str();
+        const char* paramStr = param.c_str();
 
-        size_t StartIndex = Uri.find('{', SearchStartIndex);
-        size_t EndIndex = Uri.find('}', StartIndex) + 1;
-        size_t Len = EndIndex - StartIndex;
+        size_t startIndex = uri.find('{', searchStartIndex);
+        size_t endIndex = uri.find('}', startIndex) + 1;
+        size_t len = endIndex - startIndex;
 
-        Uri = Uri.replace(StartIndex, Len, ParamStr);
+        uri = uri.replace(startIndex, len, paramStr);
     }
 
-    UriPath = csp::common::String(Uri.c_str());
+    m_uriPath = csp::common::String(uri.c_str());
 }
 
-csp::common::String Uri::Encode(const csp::common::String& InUri)
+csp::common::String Uri::Encode(const csp::common::String& inUri)
 {
-    std::string EncodedString;
+    std::string encodedString;
 
-    const std::string InString(InUri.c_str());
-    const std::string Reserved("<>{}|\\\"^`!*'()$,[]&$@~#%");
+    const std::string inString(inUri.c_str());
+    const std::string reserved("<>{}|\\\"^`!*'()$,[]&$@~#%");
 
-    for (auto c : InString)
+    for (auto c : inString)
     {
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~')
         {
-            EncodedString += c;
+            encodedString += c;
         }
         // if its a non-alphanumeric ASCII character (below 0x20 or above 0x7f) OR its one of our reserved characters
         // within the range 0x20-0x7f that isn't alphanumeric
-        else if (c <= 0x20 || c >= 0x7F || Reserved.find(c) != std::string::npos)
+        else if (c <= 0x20 || c >= 0x7F || reserved.find(c) != std::string::npos)
         {
-            EncodedString += '%';
-            EncodedString += csp::NumberFormatter::FormatHex(static_cast<unsigned>(static_cast<unsigned char>(c)), 2);
+            encodedString += '%';
+            encodedString += csp::NumberFormatter::FormatHex(static_cast<unsigned>(static_cast<unsigned char>(c)), 2);
         }
         else
-            EncodedString += c;
+            encodedString += c;
     }
 
-    return csp::common::String(EncodedString.c_str());
+    return csp::common::String(encodedString.c_str());
 }
 
 } // namespace csp::web

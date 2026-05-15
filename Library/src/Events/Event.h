@@ -32,24 +32,24 @@ public:
     ~Event();
 
     // Add Payload params
-    void AddInt(const char* Key, const int Value);
-    void AddString(const char* Key, const char* Value);
-    void AddFloat(const char* Key, const float Value);
-    void AddBool(const char* Key, const bool Value);
+    void AddInt(const char* key, const int value);
+    void AddString(const char* key, const char* value);
+    void AddFloat(const char* key, const float value);
+    void AddBool(const char* key, const bool value);
 
     // Get Payload params
-    int GetInt(const char* Key) const;
-    const char* GetString(const char* Key) const;
-    float GetFloat(const char* Key) const;
-    bool GetBool(const char* Key) const;
+    int GetInt(const char* key) const;
+    const char* GetString(const char* key) const;
+    float GetFloat(const char* key) const;
+    bool GetBool(const char* key) const;
 
     const EventId& GetId() const;
 
 private:
-    Event(const EventId& InId);
+    Event(const EventId& inId);
 
-    EventId Id;
-    class EventPayloadImpl* Impl;
+    EventId m_id;
+    class EventPayloadImpl* m_impl;
 };
 
 } // namespace csp::events

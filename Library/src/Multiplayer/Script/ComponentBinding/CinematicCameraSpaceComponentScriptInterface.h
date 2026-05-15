@@ -25,7 +25,7 @@ class CinematicCameraSpaceComponent;
 class CinematicCameraSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent = nullptr);
+    CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* inComponent = nullptr);
 
     float GetFov();
 };

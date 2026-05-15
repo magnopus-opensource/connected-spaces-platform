@@ -62,7 +62,7 @@ public:
 
     /// @brief Constructs the avatar space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AvatarSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.
@@ -72,7 +72,7 @@ public:
     /// @brief Sets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.
     /// @param Value The ID of the currently active avatar of this avatar component.
-    void SetAvatarId(const csp::common::String& Value);
+    void SetAvatarId(const csp::common::String& value);
 
     /// @brief Gets the ID of the user that controls this avatar.
     /// @return The ID of the user controlling this avatar.
@@ -80,7 +80,7 @@ public:
 
     /// @brief Sets the ID of the user that controls this avatar.
     /// @param Value The ID of the user controlling this avatar.
-    void SetUserId(const csp::common::String& Value);
+    void SetUserId(const csp::common::String& value);
 
     /// @brief Gets the state of the current avatar.
     /// @return The state of the current avatar.
@@ -88,7 +88,7 @@ public:
 
     /// @brief Sets the state of the current avatar.
     /// @param Value The state of the current avatar.
-    void SetState(AvatarState Value);
+    void SetState(AvatarState value);
 
     /// @brief Gets the play mode used by this avatar.
     /// @return The play mode used by this avatar.
@@ -96,7 +96,7 @@ public:
 
     /// @brief Sets the play mode used by this avatar.
     /// @param Value The play mode used by this avatar.
-    void SetAvatarPlayMode(AvatarPlayMode Value);
+    void SetAvatarPlayMode(AvatarPlayMode value);
 
     /// @brief Gets the ID of the Agora user bounded to this avatar.
     /// @note When using voice chat, an Agora user is associated with a specific avatar component, so that
@@ -108,7 +108,7 @@ public:
     /// @note When using voice chat, an Agora user is associated with a specific avatar component, so that
     ///       it is possible to associate the person speaking via the Agora voice chat through the relative avatar.
     /// @param Value The ID of the Agora user associated with this avatar component.
-    void SetAgoraUserId(const csp::common::String& Value);
+    void SetAgoraUserId(const csp::common::String& value);
 
     /// @brief Checks if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
@@ -118,7 +118,7 @@ public:
     /// @brief Sets if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
     /// @param Value True if the avatar uses IK, false otherwise.
-    void SetIsHandIKEnabled(bool Value);
+    void SetIsHandIKEnabled(bool value);
 
     /// @brief Gets the location of the target used for the hands IK.
     /// @note Used in combination with hand IK if enabled.
@@ -128,7 +128,7 @@ public:
     /// @brief Sets the location of the target used for the hands IK.
     /// @note Used in combination with hand IK if enabled.
     /// @param Value The tartget location to use for the hands IK.
-    void SetTargetHandIKTargetLocation(const csp::common::Vector3& Value);
+    void SetTargetHandIKTargetLocation(const csp::common::Vector3& value);
 
     /// @brief Gets the rotation of the avatar hand.
     /// @note The coordinate system respects the following conventions:
@@ -152,7 +152,7 @@ public:
     ///       - South: -Z
     ///       - West: +X
     /// @param Value The tartget location to use for the hands IK.
-    void SetHandRotation(const csp::common::Vector4& Value);
+    void SetHandRotation(const csp::common::Vector4& value);
 
     /// @brief Gets the rotation of the avatar head.
     /// @note The coordinate system respects the following conventions:
@@ -176,7 +176,7 @@ public:
     ///       - South: -Z
     ///       - West: +X
     /// @param Value The rotation of the avatar head.
-    void SetHeadRotation(const csp::common::Vector4& Value);
+    void SetHeadRotation(const csp::common::Vector4& value);
 
     /// @brief Gets blending between walk and run states expressed in percentage.
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
@@ -188,7 +188,7 @@ public:
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
     ///       When 0 the avatar is fully walking, when 100 the avatar is fully running.
     /// @param Value The percentage of the blending between walk and run states.
-    void SetWalkRunBlendPercentage(float Value);
+    void SetWalkRunBlendPercentage(float value);
 
     /// @brief Gets the angle to use to twist the avatar's torso.
     /// @note To calculate the twist of the avatar torso, it is convention to evaluate the
@@ -204,7 +204,7 @@ public:
     ///       The greater the difference, the further the torso should be twisted.
     ///       Positive value if the torso is turning right, negative if avatar is turning left.
     /// @param Value The angle to use to twist the avatar's torso.
-    void SetTorsoTwistAlpha(float Value);
+    void SetTorsoTwistAlpha(float value);
 
     /// @brief Gets a vector that represents the movement direction of the avatar.
     /// @return The vector representing the movement direction of the avatar.
@@ -212,7 +212,7 @@ public:
 
     /// @brief Sets a vector that represents the movement direction of the avatar.
     /// @param Value The vector representing the movement direction of the avatar.
-    void SetMovementDirection(const csp::common::Vector3& Value);
+    void SetMovementDirection(const csp::common::Vector3& value);
 
     /// @brief Specifies which locomotion model this avatar component is using.
     /// @return The locomotion model used by this avatar component.
@@ -220,22 +220,22 @@ public:
 
     /// @brief Sets which locomotion model this avatar component is using.
     /// @param Value The locomotion model used by this avatar component.
-    void SetLocomotionModel(LocomotionModel Value);
+    void SetLocomotionModel(LocomotionModel value);
 
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// @brief Gets the URL of a mesh for this avatar.
@@ -246,7 +246,7 @@ public:
     /// @brief Sets the URL of a mesh for this avatar.
     /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
     /// @param Value The URL of the mesh this avatar component uses for its avatar.
-    void SetAvatarUrl(const csp::common::String& Value);
+    void SetAvatarUrl(const csp::common::String& value);
 };
 
 } // namespace csp::multiplayer

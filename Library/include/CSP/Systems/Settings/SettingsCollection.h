@@ -59,9 +59,9 @@ public:
 private:
     SettingsCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::SettingsCollection SettingsCollection;
+    csp::common::SettingsCollection m_settingsCollection;
 };
 
 /// @brief Used to specify the type of the user's avatar
@@ -88,37 +88,37 @@ public:
     /// @brief Returns whether or not the user's avatar is intended to be visible or not.
     [[nodiscard]] bool GetAvatarVisible() const;
 
-    CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode)
-        , Type(AvatarType::None)
-        , AvatarVisible(true) {};
+    CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode)
+        , m_type(AvatarType::None)
+        , m_avatarVisible(true) {};
 
 private:
     AvatarInfoResult()
-        : Type(AvatarType::None)
-        , AvatarVisible(true) {};
+        : m_type(AvatarType::None)
+        , m_avatarVisible(true) {};
     AvatarInfoResult(void*)
-        : Type(AvatarType::None)
-        , AvatarVisible(true) {};
+        : m_type(AvatarType::None)
+        , m_avatarVisible(true) {};
 
-    void SetAvatarType(AvatarType InValue);
-    void SetAvatarIdentifier(const csp::common::String& InValue);
-    void SetAvatarVisible(bool InValue);
+    void SetAvatarType(AvatarType inValue);
+    void SetAvatarIdentifier(const csp::common::String& inValue);
+    void SetAvatarVisible(bool inValue);
 
     /// @brief The type of avatar (predefined, Ready Player Me, or custom).
-    AvatarType Type;
+    AvatarType m_type;
     /// @brief A string used to identify or locate the avatar.
-    csp::common::String Identifier;
+    csp::common::String m_identifier;
     /// @brief Represents whether the user's avatar is intended to be visible.
-    bool AvatarVisible;
+    bool m_avatarVisible;
 };
 
 /// @brief Callback containing Settings collection.
 /// @param Result SettingsCollectionResult : result class
-typedef std::function<void(const SettingsCollectionResult& Result)> SettingsResultCallback;
+typedef std::function<void(const SettingsCollectionResult& result)> SettingsResultCallback;
 
 /// @brief Callback containing Avatar info.
 /// @param Result AvatarInfoResult : result class
-typedef std::function<void(const AvatarInfoResult& Result)> AvatarInfoResultCallback;
+typedef std::function<void(const AvatarInfoResult& result)> AvatarInfoResultCallback;
 
 } // namespace csp::systems

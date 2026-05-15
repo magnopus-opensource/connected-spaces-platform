@@ -80,8 +80,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& GaussianSplatSpaceComponent::GetSchema() { return Schema; }
 
-GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -92,9 +92,9 @@ const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAsset
     return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId));
 }
 
-void GaussianSplatSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
+void GaussianSplatSpaceComponent::SetExternalResourceAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId), value);
 }
 
 const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAssetCollectionId() const
@@ -102,9 +102,9 @@ const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAsset
     return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId));
 }
 
-void GaussianSplatSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
+void GaussianSplatSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId), value);
 }
 
 /* ITransformComponent */
@@ -114,9 +114,9 @@ const csp::common::Vector3& GaussianSplatSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position));
 }
 
-void GaussianSplatSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void GaussianSplatSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& GaussianSplatSpaceComponent::GetRotation() const
@@ -124,9 +124,9 @@ const csp::common::Vector4& GaussianSplatSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation));
 }
 
-void GaussianSplatSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void GaussianSplatSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetScale() const
@@ -134,39 +134,39 @@ const csp::common::Vector3& GaussianSplatSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale));
 }
 
-void GaussianSplatSpaceComponent::SetScale(const csp::common::Vector3& Value)
+void GaussianSplatSpaceComponent::SetScale(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale), value);
 }
 
 SpaceTransform GaussianSplatSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void GaussianSplatSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void GaussianSplatSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 /* IVisibleComponent */
 
 bool GaussianSplatSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)); }
 
-void GaussianSplatSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible), InValue); }
+void GaussianSplatSpaceComponent::SetIsVisible(bool inValue) { SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible), inValue); }
 
 bool GaussianSplatSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)); }
 
-void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
+void GaussianSplatSpaceComponent::SetIsARVisible(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), inValue);
 }
 
 bool GaussianSplatSpaceComponent::GetIsVirtualVisible() const
@@ -174,9 +174,9 @@ bool GaussianSplatSpaceComponent::GetIsVirtualVisible() const
     return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible));
 }
 
-void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool InValue)
+void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible), InValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible), inValue);
 }
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
@@ -184,9 +184,9 @@ bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
     return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED));
 }
 
-void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
+void GaussianSplatSpaceComponent::SetIsShadowCaster(bool value)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED), value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const
@@ -194,9 +194,9 @@ const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const
     return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint));
 }
 
-void GaussianSplatSpaceComponent::SetTint(const csp::common::Vector3& TintValue)
+void GaussianSplatSpaceComponent::SetTint(const csp::common::Vector3& tintValue)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint), TintValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint), tintValue);
 }
 
 } // namespace csp::multiplayer

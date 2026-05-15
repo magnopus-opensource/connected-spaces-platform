@@ -18,18 +18,18 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
-void CreateSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& Name, const csp::common::String& Description,
-    csp::systems::SpaceAttributes SpaceAttributes,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
-    const csp::common::Optional<csp::systems::FileAssetDataSource>& Thumbnail,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, csp::systems::Space& OutSpace);
-void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& Name, const csp::common::String& Description,
-    csp::systems::SpaceAttributes SpaceAttributes,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers, csp::systems::BufferAssetDataSource& Thumbnail,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, csp::systems::Space& OutSpace);
-void DeleteSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId);
-void GetSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId, csp::systems::Space& OutSpace);
-void CreateDefaultTestSpace(csp::systems::SpaceSystem* SpaceSystem, csp::systems::Space& OutSpace,
-    csp::systems::SpaceAttributes Attributes = csp::systems::SpaceAttributes::Private);
+void CreateSpace(csp::systems::SpaceSystem* spaceSystem, const csp::common::String& name, const csp::common::String& description,
+    csp::systems::SpaceAttributes spaceAttributes,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spaceMetadata,
+    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& inviteUsers,
+    const csp::common::Optional<csp::systems::FileAssetDataSource>& thumbnail,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, csp::systems::Space& outSpace);
+void CreateSpaceWithBuffer(csp::systems::SpaceSystem* spaceSystem, const csp::common::String& name, const csp::common::String& description,
+    csp::systems::SpaceAttributes spaceAttributes,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spaceMetadata,
+    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& inviteUsers, csp::systems::BufferAssetDataSource& thumbnail,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, csp::systems::Space& outSpace);
+void DeleteSpace(csp::systems::SpaceSystem* spaceSystem, const csp::common::String& spaceId);
+void GetSpace(csp::systems::SpaceSystem* spaceSystem, const csp::common::String& spaceId, csp::systems::Space& outSpace);
+void CreateDefaultTestSpace(csp::systems::SpaceSystem* spaceSystem, csp::systems::Space& outSpace,
+    csp::systems::SpaceAttributes attributes = csp::systems::SpaceAttributes::Private);

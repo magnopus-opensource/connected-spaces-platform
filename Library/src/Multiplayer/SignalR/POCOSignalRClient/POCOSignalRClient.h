@@ -38,13 +38,13 @@ class CSPWebSocketClientPOCO : public IWebSocketClient
 {
 public:
     CSPWebSocketClientPOCO(
-        const std::string& MultiplayerUri, const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept;
+        const std::string& multiplayerUri, const std::string& accessToken, const std::string& deviceId, csp::common::LogSystem& logSystem) noexcept;
     ~CSPWebSocketClientPOCO();
 
-    void Start(const std::string& Url, CallbackHandler Callback) override;
-    void Stop(CallbackHandler Callback) override;
-    void Send(const std::string& Message, CallbackHandler Callback) override;
-    void Receive(ReceiveHandler Callback) override;
+    void Start(const std::string& url, CallbackHandler callback) override;
+    void Stop(CallbackHandler callback) override;
+    void Send(const std::string& message, CallbackHandler callback) override;
+    void Receive(ReceiveHandler callback) override;
 
     void __CauseFailure() override;
 
@@ -57,24 +57,24 @@ public:
         unsigned short Port;
     };
 
-    static ParsedURIInfo ParseMultiplayerServiceUriEndPoint(const std::string& MultiplayerServiceUriEndpoint);
+    static ParsedURIInfo ParseMultiplayerServiceUriEndPoint(const std::string& multiplayerServiceUriEndpoint);
 
 private:
     void ReceiveThreadFunc();
-    void HandleReceiveError(const std::string& Message);
+    void HandleReceiveError(const std::string& message);
 
-    Poco::Net::WebSocket* PocoWebSocket;
+    Poco::Net::WebSocket* m_pocoWebSocket;
 
-    std::thread ReceiveThread;
-    std::mutex Mutex;
-    std::atomic_bool ReceiveReady;
-    ReceiveHandler ReceiveCallback;
-    std::atomic_bool StopFlag;
+    std::thread m_receiveThread;
+    std::mutex m_mutex;
+    std::atomic_bool m_receiveReady;
+    ReceiveHandler m_receiveCallback;
+    std::atomic_bool m_stopFlag;
 
-    std::string MultiplayerUri;
-    std::string AccessToken;
-    std::string DeviceId;
-    csp::common::LogSystem& LogSystem;
+    std::string m_multiplayerUri;
+    std::string m_accessToken;
+    std::string m_deviceId;
+    csp::common::LogSystem& m_logSystem;
 };
 
 } // namespace csp::multiplayer

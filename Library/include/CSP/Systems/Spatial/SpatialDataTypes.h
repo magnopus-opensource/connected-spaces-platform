@@ -26,9 +26,9 @@ public:
     GeoLocation()
         : Longitude(0.0)
         , Latitude(0.0) {};
-    GeoLocation(double InLongitude, double InLatitude)
-        : Longitude(InLongitude)
-        , Latitude(InLatitude) {};
+    GeoLocation(double inLongitude, double inLatitude)
+        : Longitude(inLongitude)
+        , Latitude(inLatitude) {};
 
     double Longitude;
     double Latitude;
@@ -37,8 +37,8 @@ public:
     /// @return a boolean represnting validity of the location.
     bool IsValid() const;
 
-    bool operator==(const GeoLocation& Other) const;
-    bool operator!=(const GeoLocation& Other) const;
+    bool operator==(const GeoLocation& other) const;
+    bool operator!=(const GeoLocation& other) const;
 };
 
 /// @brief Data structure representing rotation as defined by Connected Spaces Platform, in the format (X,Y,Z,W) as a quaternion with double values.
@@ -50,19 +50,19 @@ public:
         , Y(0.0)
         , Z(0.0)
         , W(0.0) {};
-    OlyRotation(double InX, double InY, double InZ, double InW)
-        : X(InX)
-        , Y(InY)
-        , Z(InZ)
-        , W(InW) {};
+    OlyRotation(double inX, double inY, double inZ, double inW)
+        : X(inX)
+        , Y(inY)
+        , Z(inZ)
+        , W(inW) {};
 
     double X;
     double Y;
     double Z;
     double W;
 
-    bool operator==(const OlyRotation& Other) const;
-    bool operator!=(const OlyRotation& Other) const;
+    bool operator==(const OlyRotation& other) const;
+    bool operator!=(const OlyRotation& other) const;
 };
 
 } // namespace csp::systems

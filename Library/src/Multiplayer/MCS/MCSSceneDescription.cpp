@@ -46,104 +46,104 @@ namespace
     std::string GetComponentString(const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>&) { return UInt16DictionaryType; }
     std::string GetComponentString(const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>&) { return StringDictionaryType; }
 
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, bool Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, int64_t Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, uint64_t Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, float Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::vector<float>& Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, double Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::string& Value)
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, bool value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, int64_t value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, uint64_t value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, float value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, const std::vector<float>& value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, double value) { serializer.SerializeMember("item", value); }
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, const std::string& value)
     {
-        Serializer.SerializeMember("item", csp::common::String { Value.c_str() });
+        serializer.SerializeMember("item", csp::common::String { value.c_str() });
     }
 
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& value)
     {
-        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
+        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> stringMap;
 
-        for (const auto& Pair : Value)
+        for (const auto& pair : value)
         {
-            StringMap[std::to_string(Pair.first)] = Pair.second;
+            stringMap[std::to_string(pair.first)] = pair.second;
         }
 
-        Serializer.SerializeMember("item", StringMap);
+        serializer.SerializeMember("item", stringMap);
     }
 
-    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>& Value)
+    void SerializeComponentData(csp::json::JsonSerializer& serializer, const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>& value)
     {
-        Serializer.SerializeMember("item", Value);
+        serializer.SerializeMember("item", value);
     }
 
-    void SerializeComponents(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
+    void SerializeComponents(csp::json::JsonSerializer& serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& value)
     {
-        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
+        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> stringMap;
 
-        for (const auto& Pair : Value)
+        for (const auto& pair : value)
         {
-            StringMap[std::to_string(Pair.first)] = Pair.second;
+            stringMap[std::to_string(pair.first)] = pair.second;
         }
 
-        Serializer.SerializeMember("components", StringMap);
+        serializer.SerializeMember("components", stringMap);
     }
 
     template <class T>
     void DeserializeComponentDataFromTypeStringInternal(
-        const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
+        const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::ItemComponentDataVariant& outVal)
     {
-        T Val;
-        Deserializer.SafeDeserializeMember("item", Val);
-        OutVal = Val;
+        T val;
+        deserializer.SafeDeserializeMember("item", val);
+        outVal = val;
     }
 
     void DeserializeComponentDataFromTypeString(
-        const csp::json::JsonDeserializer& Deserializer, const std::string& Type, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
+        const csp::json::JsonDeserializer& deserializer, const std::string& type, csp::multiplayer::mcs::ItemComponentDataVariant& outVal)
     {
-        if (Type == BooleanType)
+        if (type == BooleanType)
         {
-            DeserializeComponentDataFromTypeStringInternal<bool>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<bool>(deserializer, outVal);
         }
-        else if (Type == Int64Type)
+        else if (type == Int64Type)
         {
-            DeserializeComponentDataFromTypeStringInternal<int64_t>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<int64_t>(deserializer, outVal);
         }
-        else if (Type == UInt64Type)
+        else if (type == UInt64Type)
         {
-            DeserializeComponentDataFromTypeStringInternal<uint64_t>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<uint64_t>(deserializer, outVal);
         }
-        else if (Type == SinglePrecisionType)
+        else if (type == SinglePrecisionType)
         {
-            DeserializeComponentDataFromTypeStringInternal<float>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<float>(deserializer, outVal);
         }
-        else if (Type == SinglePrecisionArrayType)
+        else if (type == SinglePrecisionArrayType)
         {
-            DeserializeComponentDataFromTypeStringInternal<std::vector<float>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::vector<float>>(deserializer, outVal);
         }
-        else if (Type == DoubleType)
+        else if (type == DoubleType)
         {
-            DeserializeComponentDataFromTypeStringInternal<double>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<double>(deserializer, outVal);
         }
-        else if (Type == StringType)
+        else if (type == StringType)
         {
-            DeserializeComponentDataFromTypeStringInternal<std::string>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::string>(deserializer, outVal);
         }
-        else if (Type == UInt16DictionaryType)
+        else if (type == UInt16DictionaryType)
         {
-            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(deserializer, outVal);
 
             // We can only deserialize string maps, so we need to convert to int afterwards.
-            const auto& StringMap = std::get<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(OutVal);
-            std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> UIntMap;
+            const auto& stringMap = std::get<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(outVal);
+            std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> uIntMap;
 
-            for (const auto& Val : StringMap)
+            for (const auto& val : stringMap)
             {
-                UIntMap[static_cast<uint16_t>(std::stoi(Val.first))] = Val.second;
+                uIntMap[static_cast<uint16_t>(std::stoi(val.first))] = val.second;
             }
 
-            OutVal = UIntMap;
+            outVal = uIntMap;
         }
-        else if (Type == StringDictionaryType)
+        else if (type == StringDictionaryType)
         {
-            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(deserializer, outVal);
         }
         else
         {
@@ -152,102 +152,102 @@ namespace
     }
 }
 
-void DeserializeComponents(const csp::json::JsonDeserializer& Deserializer, std::optional<std::map<uint16_t, ItemComponentData>>& OutComponents)
+void DeserializeComponents(const csp::json::JsonDeserializer& deserializer, std::optional<std::map<uint16_t, ItemComponentData>>& outComponents)
 {
-    std::map<std::string, ItemComponentData> Components;
-    Deserializer.SafeDeserializeMember("components", Components);
+    std::map<std::string, ItemComponentData> components;
+    deserializer.SafeDeserializeMember("components", components);
 
-    if (Components.size() > 0)
+    if (components.size() > 0)
     {
-        std::map<uint16_t, ItemComponentData> UIntComponents;
+        std::map<uint16_t, ItemComponentData> uIntComponents;
 
-        for (const auto& ComponentPair : Components)
+        for (const auto& componentPair : components)
         {
-            UIntComponents[static_cast<uint16_t>(stoi(ComponentPair.first))] = ComponentPair.second;
+            uIntComponents[static_cast<uint16_t>(stoi(componentPair.first))] = componentPair.second;
         }
 
-        OutComponents = UIntComponents;
+        outComponents = uIntComponents;
     }
 }
 
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj)
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::SceneDescription& obj)
 {
-    Deserializer.EnterMember("data");
-    Deserializer.SafeDeserializeMember("objectMessages", Obj.Objects);
-    Deserializer.ExitMember();
+    deserializer.EnterMember("data");
+    deserializer.SafeDeserializeMember("objectMessages", obj.Objects);
+    deserializer.ExitMember();
 }
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj)
+void ToJson(csp::json::JsonSerializer& serializer, const csp::multiplayer::mcs::ItemComponentData& obj)
 {
     std::visit(
-        [&Serializer](const auto& ValueType)
+        [&serializer](const auto& valueType)
         {
-            std::string TypeString = csp::multiplayer::mcs::GetComponentString(ValueType);
-            Serializer.SerializeMember("$type", TypeString.c_str());
+            std::string typeString = csp::multiplayer::mcs::GetComponentString(valueType);
+            serializer.SerializeMember("$type", typeString.c_str());
 
-            csp::multiplayer::mcs::SerializeComponentData(Serializer, ValueType);
+            csp::multiplayer::mcs::SerializeComponentData(serializer, valueType);
         },
-        Obj.GetValue());
+        obj.GetValue());
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj)
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::ItemComponentData& obj)
 {
-    csp::common::String TypeString;
-    Deserializer.SafeDeserializeMember("$type", TypeString);
+    csp::common::String typeString;
+    deserializer.SafeDeserializeMember("$type", typeString);
 
-    std::string TypeStdString = TypeString.c_str();
+    std::string typeStdString = typeString.c_str();
 
-    csp::multiplayer::mcs::ItemComponentDataVariant Variant;
-    csp::multiplayer::mcs::DeserializeComponentDataFromTypeString(Deserializer, TypeStdString, Variant);
-    Obj = csp::multiplayer::mcs::ItemComponentData { Variant };
+    csp::multiplayer::mcs::ItemComponentDataVariant variant;
+    csp::multiplayer::mcs::DeserializeComponentDataFromTypeString(deserializer, typeStdString, variant);
+    obj = csp::multiplayer::mcs::ItemComponentData { variant };
 }
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ObjectMessage& Obj)
+void ToJson(csp::json::JsonSerializer& serializer, const csp::multiplayer::mcs::ObjectMessage& obj)
 {
-    Serializer.SerializeMember("id", Obj.GetId());
-    Serializer.SerializeMember("prefabId", Obj.GetType());
-    Serializer.SerializeMember("isTransferable", Obj.GetIsTransferable());
-    Serializer.SerializeMember("isPersistent", Obj.GetIsPersistent());
-    Serializer.SerializeMember("ownerUserId", Obj.GetOwnerId());
+    serializer.SerializeMember("id", obj.GetId());
+    serializer.SerializeMember("prefabId", obj.GetType());
+    serializer.SerializeMember("isTransferable", obj.GetIsTransferable());
+    serializer.SerializeMember("isPersistent", obj.GetIsPersistent());
+    serializer.SerializeMember("ownerUserId", obj.GetOwnerId());
 
-    if (Obj.GetParentId())
+    if (obj.GetParentId())
     {
-        Serializer.SerializeMember("parentId", *Obj.GetParentId());
+        serializer.SerializeMember("parentId", *obj.GetParentId());
     }
 
-    if (Obj.GetComponents())
+    if (obj.GetComponents())
     {
-        csp::multiplayer::mcs::SerializeComponents(Serializer, *Obj.GetComponents());
+        csp::multiplayer::mcs::SerializeComponents(serializer, *obj.GetComponents());
     }
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj)
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::multiplayer::mcs::ObjectMessage& obj)
 {
-    uint64_t Id = 0;
-    uint64_t Type = 0;
-    bool IsTransferable = false;
-    bool IsPersistent = false;
-    uint64_t OwnerId = 0;
-    std::optional<uint64_t> ParentId;
-    std::optional<std::map<csp::multiplayer::mcs::PropertyKeyType, csp::multiplayer::mcs::ItemComponentData>> Components;
+    uint64_t id = 0;
+    uint64_t type = 0;
+    bool isTransferable = false;
+    bool isPersistent = false;
+    uint64_t ownerId = 0;
+    std::optional<uint64_t> parentId;
+    std::optional<std::map<csp::multiplayer::mcs::PropertyKeyType, csp::multiplayer::mcs::ItemComponentData>> components;
 
-    Deserializer.SafeDeserializeMember("id", Id);
-    Deserializer.SafeDeserializeMember("prefabId", Type);
-    Deserializer.SafeDeserializeMember("isTransferable", IsTransferable);
-    Deserializer.SafeDeserializeMember("isPersistent", IsPersistent);
+    deserializer.SafeDeserializeMember("id", id);
+    deserializer.SafeDeserializeMember("prefabId", type);
+    deserializer.SafeDeserializeMember("isTransferable", isTransferable);
+    deserializer.SafeDeserializeMember("isPersistent", isPersistent);
     // Deserializer.SafeDeserializeMember("ownerUserId", Obj.OwnerId);
 
-    uint64_t DeserializedParentId = 0;
-    Deserializer.SafeDeserializeMember("parentId", DeserializedParentId);
+    uint64_t deserializedParentId = 0;
+    deserializer.SafeDeserializeMember("parentId", deserializedParentId);
 
-    if (DeserializedParentId != 0)
+    if (deserializedParentId != 0)
     {
-        ParentId = DeserializedParentId;
+        parentId = deserializedParentId;
     }
 
-    csp::multiplayer::mcs::DeserializeComponents(Deserializer, Components);
+    csp::multiplayer::mcs::DeserializeComponents(deserializer, components);
 
-    Obj = csp::multiplayer::mcs::ObjectMessage { Id, Type, IsTransferable, IsPersistent, OwnerId, ParentId, Components };
+    obj = csp::multiplayer::mcs::ObjectMessage { id, type, isTransferable, isPersistent, ownerId, parentId, components };
 }

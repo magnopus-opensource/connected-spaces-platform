@@ -29,27 +29,27 @@
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void GetLODChain(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, csp::systems::LODChain& OutLODChain)
+void GetLODChain(csp::systems::AssetSystem* assetSystem, const csp::systems::AssetCollection& assetCollection, csp::systems::LODChain& outLodChain)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, GetLODChain, RequestPredicate, AssetCollection);
+    auto [Result] = AWAIT_PRE(assetSystem, GetLODChain, RequestPredicate, assetCollection);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    OutLODChain = Result.GetLODChain();
+    outLodChain = Result.GetLODChain();
 
-    EXPECT_EQ(OutLODChain.AssetCollectionId, AssetCollection.Id);
+    EXPECT_EQ(outLodChain.AssetCollectionId, assetCollection.Id);
 }
 
 void RegisterAssetToLODChain(
-    csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset, int LODLevel)
+    csp::systems::AssetSystem* assetSystem, const csp::systems::AssetCollection& assetCollection, csp::systems::Asset& asset, int lodLevel)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, RegisterAssetToLODChain, RequestPredicate, AssetCollection, Asset, LODLevel);
+    auto [Result] = AWAIT_PRE(assetSystem, RegisterAssetToLODChain, RequestPredicate, assetCollection, asset, lodLevel);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    Asset = Result.GetAsset();
+    asset = Result.GetAsset();
 }
 
 } // namespace
@@ -58,114 +58,114 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
     // Create collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+    csp::systems::AssetCollection assetCollection;
+    CreateAssetCollection(assetSystem, space.Id, nullptr, uniqueAssetCollectionName, nullptr, nullptr, assetCollection);
 
     // Get LOD chain
-    csp::systems::LODChain Chain;
-    GetLODChain(AssetSystem, AssetCollection, Chain);
+    csp::systems::LODChain chain;
+    GetLODChain(assetSystem, assetCollection, chain);
 
-    EXPECT_TRUE(Chain.LODAssets.IsEmpty());
+    EXPECT_TRUE(chain.LODAssets.IsEmpty());
 
     // Cleanup
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteAssetCollection(assetSystem, assetCollection);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    const char* TestAssetName1 = "CSP-UNITTEST-ASSET1-MAG";
-    const char* TestAssetName2 = "CSP-UNITTEST-ASSET2-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    const char* testAssetName1 = "CSP-UNITTEST-ASSET1-MAG";
+    const char* testAssetName2 = "CSP-UNITTEST-ASSET2-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    char UniqueAssetName1[256];
-    SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueString().c_str());
+    char uniqueAssetName1[256];
+    SPRINTF(uniqueAssetName1, "%s-%s", testAssetName1, GetUniqueString().c_str());
 
-    char UniqueAssetName2[256];
-    SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueString().c_str());
+    char uniqueAssetName2[256];
+    SPRINTF(uniqueAssetName2, "%s-%s", testAssetName2, GetUniqueString().c_str());
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
     // Create collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+    csp::systems::AssetCollection assetCollection;
+    CreateAssetCollection(assetSystem, space.Id, nullptr, uniqueAssetCollectionName, nullptr, nullptr, assetCollection);
 
     // Create assets
-    csp::systems::Asset Asset1;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName1, nullptr, nullptr, Asset1);
+    csp::systems::Asset asset1;
+    CreateAsset(assetSystem, assetCollection, uniqueAssetName1, nullptr, nullptr, asset1);
 
-    csp::systems::Asset Asset2;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName2, nullptr, nullptr, Asset2);
+    csp::systems::Asset asset2;
+    CreateAsset(assetSystem, assetCollection, uniqueAssetName2, nullptr, nullptr, asset2);
 
     // Register to LOD chain
-    RegisterAssetToLODChain(AssetSystem, AssetCollection, Asset1, 0);
-    RegisterAssetToLODChain(AssetSystem, AssetCollection, Asset2, 1);
+    RegisterAssetToLODChain(assetSystem, assetCollection, asset1, 0);
+    RegisterAssetToLODChain(assetSystem, assetCollection, asset2, 1);
 
     // Get LOD chain
-    csp::systems::LODChain Chain;
-    GetLODChain(AssetSystem, AssetCollection, Chain);
+    csp::systems::LODChain chain;
+    GetLODChain(assetSystem, assetCollection, chain);
 
-    EXPECT_EQ(Chain.LODAssets.Size(), 2);
+    EXPECT_EQ(chain.LODAssets.Size(), 2);
 
-    EXPECT_EQ(Chain.LODAssets[0].Level, 0);
-    EXPECT_EQ(Chain.LODAssets[0].Asset.Id, Asset1.Id);
+    EXPECT_EQ(chain.LODAssets[0].Level, 0);
+    EXPECT_EQ(chain.LODAssets[0].Asset.Id, asset1.Id);
 
-    EXPECT_EQ(Chain.LODAssets[1].Level, 1);
-    EXPECT_EQ(Chain.LODAssets[1].Asset.Id, Asset2.Id);
+    EXPECT_EQ(chain.LODAssets[1].Level, 1);
+    EXPECT_EQ(chain.LODAssets[1].Asset.Id, asset2.Id);
 
     // Cleanup
-    DeleteAsset(AssetSystem, AssetCollection, Asset1);
-    DeleteAsset(AssetSystem, AssetCollection, Asset2);
+    DeleteAsset(assetSystem, assetCollection, asset1);
+    DeleteAsset(assetSystem, assetCollection, asset2);
 
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteAssetCollection(assetSystem, assetCollection);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }

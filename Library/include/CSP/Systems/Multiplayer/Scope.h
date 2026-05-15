@@ -80,11 +80,11 @@ public:
     /// If this is true, MCS will automatically determine the leader for this scope.
     bool ManagedLeaderElection = false;
 
-    bool operator==(const Scope& Other) const;
-    bool operator!=(const Scope& Other) const;
+    bool operator==(const Scope& other) const;
+    bool operator!=(const Scope& other) const;
 };
 
-void DtoToScope(const csp::services::generated::multiplayerservice::ScopeDto& Dto, csp::systems::Scope& ScopeLeader);
+void DtoToScope(const csp::services::generated::multiplayerservice::ScopeDto& dto, csp::systems::Scope& scopeLeader);
 
 /// @ingroup Multiplayer System
 /// @brief Contains details about an async operation which returns a scope.
@@ -102,17 +102,17 @@ public:
     /// @return const Scope& : The scope retrieved by this result.
     const Scope& GetScope() const;
 
-    CSP_NO_EXPORT ScopeResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+    CSP_NO_EXPORT ScopeResult(csp::systems::EResultCode resCode, uint16_t httpResCode);
 
 private:
     ScopeResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Scope Scope;
+    Scope m_scope;
 };
 
-typedef std::function<void(const ScopeResult& Result)> ScopeResultCallback;
+typedef std::function<void(const ScopeResult& result)> ScopeResultCallback;
 
 /// @ingroup Multiplayer System
 /// @brief Contains details about an async operation which returns an array of scopes.
@@ -130,16 +130,16 @@ public:
     /// @return const csp::common::Array<Scope>& : The array of scopes retrieved by this result.
     const csp::common::Array<Scope>& GetScopes() const;
 
-    CSP_NO_EXPORT ScopesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+    CSP_NO_EXPORT ScopesResult(csp::systems::EResultCode resCode, uint16_t httpResCode);
 
 private:
     ScopesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Scope> Scopes;
+    csp::common::Array<Scope> m_scopes;
 };
 
-typedef std::function<void(const ScopesResult& Result)> ScopesResultCallback;
+typedef std::function<void(const ScopesResult& result)> ScopesResultCallback;
 
 }

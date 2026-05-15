@@ -67,15 +67,15 @@ public:
     csp::common::String MessageId;
 
     MessageInfo();
-    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message);
+    MessageInfo(const csp::common::String& conversationId, bool isConversation, const csp::common::String& message);
     MessageInfo(
-        const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId);
+        const csp::common::String& conversationId, bool isConversation, const csp::common::String& message, const csp::common::String& messageId);
 
-    MessageInfo(const MessageInfo& MessageData);
-    MessageInfo& operator=(const MessageInfo& MessageData);
+    MessageInfo(const MessageInfo& messageData);
+    MessageInfo& operator=(const MessageInfo& messageData);
 
-    bool operator==(const MessageInfo& Other) const;
-    bool operator!=(const MessageInfo& Other) const;
+    bool operator==(const MessageInfo& other) const;
+    bool operator!=(const MessageInfo& other) const;
 };
 
 /// @ingroup Conversation
@@ -106,10 +106,10 @@ class CSP_API AnnotationData
 {
 public:
     AnnotationData();
-    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, double InVerticalFov,
-        const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
-    AnnotationData(const AnnotationData& InAnnotationData);
-    AnnotationData& operator=(const AnnotationData& InAnnotationData);
+    AnnotationData(const csp::common::String& annotationId, const csp::common::String& annotationThumbnailId, double inVerticalFov,
+        const csp::common::Vector3& inAuthorCameraPosition, const csp::common::Vector4& inAuthorCameraRotation);
+    AnnotationData(const AnnotationData& inAnnotationData);
+    AnnotationData& operator=(const AnnotationData& inAnnotationData);
 
     csp::common::String AnnotationId;
     csp::common::String AnnotationThumbnailId;
@@ -155,16 +155,16 @@ public:
     /// @return The message info.
     [[nodiscard]] const MessageInfo& GetMessageInfo() const;
 
-    CSP_NO_EXPORT MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT MessageResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     explicit MessageResult(void*) {};
     MessageResult() = default;
 
-    void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
+    void FillMessageInfo(const csp::systems::AssetCollection& messageAssetCollection);
 
-    MessageInfo MsgInfo;
+    MessageInfo m_msgInfo;
 };
 
 /// @ingroup Conversation
@@ -198,20 +198,20 @@ public:
     [[nodiscard]] uint64_t GetTotalCount() const;
 
     /// @brief Sets the value returned by `GetTotalCount()`
-    CSP_NO_EXPORT void SetTotalCount(uint64_t Value);
+    CSP_NO_EXPORT void SetTotalCount(uint64_t value);
 
-    CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     explicit MessageCollectionResult(void*) {};
-    explicit MessageCollectionResult(uint64_t ResultTotalCount)
-        : ResultTotalCount(ResultTotalCount) {};
+    explicit MessageCollectionResult(uint64_t resultTotalCount)
+        : m_resultTotalCount(resultTotalCount) {};
 
-    void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
+    void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& messagesAssetCollections);
 
-    csp::common::Array<MessageInfo> ConversationMessages;
-    uint64_t ResultTotalCount = 0;
+    csp::common::Array<MessageInfo> m_conversationMessages;
+    uint64_t m_resultTotalCount = 0;
 };
 
 /// @ingroup Conversation
@@ -235,16 +235,16 @@ public:
     /// @return The MessageInfo object representing conversation info.
     [[nodiscard]] const MessageInfo& GetConversationInfo() const;
 
-    CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     explicit ConversationResult(void*) {};
     ConversationResult() = default;
 
-    void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
+    void FillConversationInfo(const csp::systems::AssetCollection& conversationAssetCollection);
 
-    MessageInfo ConvoInfo;
+    MessageInfo m_convoInfo;
 };
 
 /// @ingroup Conversation
@@ -264,19 +264,19 @@ public:
     /// @return : The number of replies
     uint64_t GetCount() const;
 
-    CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     explicit NumberOfRepliesResult(void*) {};
     NumberOfRepliesResult() = default;
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& inResult)
+        : csp::systems::ResultBase(inResult.GetResultCode(), inResult.GetHttpResultCode()) {};
 
-    uint64_t Count;
+    uint64_t m_count;
 };
 
 class CSP_API AnnotationResult : public csp::systems::ResultBase
@@ -290,16 +290,16 @@ class CSP_API AnnotationResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    CSP_NO_EXPORT AnnotationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AnnotationResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
     CSP_NO_EXPORT AnnotationResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
-    CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& AssetCollection);
-    CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
-    CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
+    CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& assetCollection);
+    CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& asset) { m_annotationAsset = asset; }
+    CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& asset) { m_annotationThumbnailAsset = asset; }
 
     /// @brief Gets the information about the annotation.
     /// @return const AnnotationData&
@@ -317,14 +317,14 @@ private:
     explicit AnnotationResult(void*) {};
     AnnotationResult() = default;
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& inResult)
+        : csp::systems::ResultBase(inResult.GetResultCode(), inResult.GetHttpResultCode()) {};
 
-    AnnotationData Data;
-    systems::Asset AnnotationAsset;
-    systems::Asset AnnotationThumbnailAsset;
+    AnnotationData m_data;
+    systems::Asset m_annotationAsset;
+    systems::Asset m_annotationThumbnailAsset;
 };
 
 class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultBase
@@ -338,12 +338,12 @@ class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultB
     /** @endcond */
 
 public:
-    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
     CSP_NO_EXPORT AnnotationThumbnailCollectionResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
     /// @brief gets the annotation thumbnails that exist within the conversation.
     /// @return const csp::common::Map<csp::common::String, csp::systems::Asset>&
@@ -353,33 +353,33 @@ public:
     /// @return uint64_t
     uint64_t GetTotalCount() const;
 
-    CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
+    CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& result);
 
 private:
     explicit AnnotationThumbnailCollectionResult(void*) {};
     AnnotationThumbnailCollectionResult() = default;
 
-    csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
+    csp::common::Map<csp::common::String, csp::systems::Asset> m_annotationThumbnailAssetsMap;
 };
 
 /// @brief Callback containing number of replies.
 /// @param Result NumberOfRepliesResult : result class
-typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
+typedef std::function<void(const NumberOfRepliesResult& result)> NumberOfRepliesResultCallback;
 
 // callback signatures
 // Callback providing a result object with one message info object.
-typedef std::function<void(const MessageResult& Result)> MessageResultCallback;
+typedef std::function<void(const MessageResult& result)> MessageResultCallback;
 
 // Callback providing a result object with a collection of message info objects.
-typedef std::function<void(const MessageCollectionResult& Result)> MessageCollectionResultCallback;
+typedef std::function<void(const MessageCollectionResult& result)> MessageCollectionResultCallback;
 
 // Callback providing a result object with a message info object representing the conversation.
-typedef std::function<void(const ConversationResult& Result)> ConversationResultCallback;
+typedef std::function<void(const ConversationResult& result)> ConversationResultCallback;
 
 // Callback providing a result object with a annotations result object representing the conversation.
-typedef std::function<void(const AnnotationResult& Result)> AnnotationResultCallback;
+typedef std::function<void(const AnnotationResult& result)> AnnotationResultCallback;
 
 // Callback providing a result object with a annotations thumbnail collection result object .
-typedef std::function<void(const AnnotationThumbnailCollectionResult& Result)> AnnotationThumbnailCollectionResultCallback;
+typedef std::function<void(const AnnotationThumbnailCollectionResult& result)> AnnotationThumbnailCollectionResultCallback;
 
 } // namespace csp::multiplayer

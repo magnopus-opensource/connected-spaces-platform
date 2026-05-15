@@ -41,7 +41,7 @@ public:
 
     /// @brief Sets the type of the audio of this audio component.
     /// @param Value Type of the audio of this audio component.
-    virtual void SetAudioType(AudioType Value) = 0;
+    virtual void SetAudioType(AudioType value) = 0;
 
     /// @brief Gets the attenuation for the audio when a spatial audio type.
     ///        The radius is the minimum distance between the origin of this audio component and
@@ -57,7 +57,7 @@ public:
     ///        the spatial audio in range.
     ///        The radius is expressed in meters.
     /// @param Value The minimum radius in meters from the origin of the audio component to hear the spatial audio.
-    virtual void SetAttenuationRadius(float Value) = 0;
+    virtual void SetAttenuationRadius(float value) = 0;
 
     /// @brief Gets the volume of the audio in a ratio between 0 and 1.
     ///        Volume 1 represents the full volume of the audio clip of this component.
@@ -67,7 +67,7 @@ public:
     /// @brief Sets the volume of the audio in a ratio between 0 and 1.
     ///        Volume 1 represents the full volume of the audio clip of this component.
     /// @param Value The volume of the audio, in a ratio between 0 and 1.
-    virtual void SetVolume(float Value) = 0;
+    virtual void SetVolume(float value) = 0;
 
 protected:
     virtual ~IAudioControlComponent() = default;

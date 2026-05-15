@@ -25,49 +25,49 @@
 namespace csp::multiplayer
 {
 
-SpaceEntityStatePatcher::SpaceEntityStatePatcher(csp::common::LogSystem* LogSystem, csp::multiplayer::SpaceEntity& SpaceEntity)
-    : TimeOfLastPatch(0)
-    , LogSystem(LogSystem)
-    , SpaceEntity(SpaceEntity)
+SpaceEntityStatePatcher::SpaceEntityStatePatcher(csp::common::LogSystem* logSystem, csp::multiplayer::SpaceEntity& spaceEntity)
+    : m_timeOfLastPatch(0)
+    , m_logSystem(logSystem)
+    , m_spaceEntity(spaceEntity)
 {
 }
 
-bool SpaceEntityStatePatcher::SetDirtyComponent(uint16_t ComponentKey, DirtyComponent DirtyComponent)
+bool SpaceEntityStatePatcher::SetDirtyComponent(uint16_t componentKey, DirtyComponent dirtyComponent)
 {
-    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+    std::scoped_lock componentsLocker(m_dirtyComponentsLock);
 
-    if (DirtyComponents.count(ComponentKey) > 0)
+    if (m_dirtyComponents.count(componentKey) > 0)
     {
-        if (LogSystem)
+        if (m_logSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
                 fmt::format(
-                    "SpaceEntityStatePatcher::SetDirtyComponent. Dirty components map already contains key : {}. Performing no action", ComponentKey)
+                    "SpaceEntityStatePatcher::SetDirtyComponent. Dirty components map already contains key : {}. Performing no action", componentKey)
                     .c_str());
         }
         return false;
     }
 
-    DirtyComponents[ComponentKey] = DirtyComponent;
+    m_dirtyComponents[componentKey] = dirtyComponent;
     return true;
 }
 
-bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const csp::common::Map<uint16_t, ComponentBase*>& CurrentComponents)
+bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t componentKey, const csp::common::Map<uint16_t, ComponentBase*>& currentComponents)
 {
-    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+    std::scoped_lock componentsLocker(m_dirtyComponentsLock);
 
-    if (!TransientDeletionComponentIds.Contains(ComponentKey) || CurrentComponents.HasKey(ComponentKey))
+    if (!m_transientDeletionComponentIds.Contains(componentKey) || currentComponents.HasKey(componentKey))
     {
 
-        DirtyComponents.erase(ComponentKey);
-        TransientDeletionComponentIds.Append(ComponentKey);
+        m_dirtyComponents.erase(componentKey);
+        m_transientDeletionComponentIds.Append(componentKey);
         return true;
     }
     else
     {
-        if (LogSystem)
+        if (m_logSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "RemoveComponent: No Component with the specified key found!");
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, "RemoveComponent: No Component with the specified key found!");
         }
         return false;
     }
@@ -75,68 +75,68 @@ bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const 
 
 std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> SpaceEntityStatePatcher::ApplyLocalPatch()
 {
-    std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
-    std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
+    std::scoped_lock<std::mutex> propertiesLocker(m_dirtyPropertiesLock);
+    std::scoped_lock<std::mutex> componentsLocker(m_dirtyComponentsLock);
 
-    auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
+    auto updateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
-    for (const auto& DirtyProperty : DirtyProperties)
+    for (const auto& dirtyProperty : m_dirtyProperties)
     {
         // Find our entity property using the dirty property id.
-        const SpaceEntityComponentKey PropertyKey = DirtyProperty.first;
-        auto PropertyIt = RegisteredProperties.find(PropertyKey);
+        const SpaceEntityComponentKey propertyKey = dirtyProperty.first;
+        auto propertyIt = m_registeredProperties.find(propertyKey);
 
-        if (PropertyIt != RegisteredProperties.end())
+        if (propertyIt != m_registeredProperties.end())
         {
             // Set our entity property using the dirty property value.
-            EntityProperty& Property = PropertyIt->second;
-            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Property.GetUpdateFlag());
-            Property.Set(DirtyProperty.second);
+            EntityProperty& property = propertyIt->second;
+            updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | property.GetUpdateFlag());
+            property.Set(dirtyProperty.second);
         }
         else
         {
-            if (LogSystem)
+            if (m_logSystem)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, "ApplyLocalPatch: No Property with the specified key found!");
+                m_logSystem->LogMsg(csp::common::LogLevel::Error, "ApplyLocalPatch: No Property with the specified key found!");
             }
         }
     }
 
-    DirtyProperties.clear();
+    m_dirtyProperties.clear();
 
     // Allocate a ComponentUpdates array (to pass update info to the client), with
     // sufficient size for all dirty components and scheduled deletions.
-    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(DirtyComponents.size() + TransientDeletionComponentIds.Size());
+    csp::common::Array<ComponentUpdateInfo> componentUpdates(m_dirtyComponents.size() + m_transientDeletionComponentIds.Size());
 
-    if (DirtyComponents.size() > 0)
+    if (m_dirtyComponents.size() > 0)
     {
-        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+        updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | UPDATE_FLAGS_COMPONENTS);
 
-        size_t Index = 0;
-        for (const auto& DirtyComponent : DirtyComponents)
+        size_t index = 0;
+        for (const auto& dirtyComponent : m_dirtyComponents)
         {
-            uint16_t ComponentKey = DirtyComponent.first;
+            uint16_t componentKey = dirtyComponent.first;
 
-            switch (DirtyComponents[ComponentKey].UpdateType)
+            switch (m_dirtyComponents[componentKey].UpdateType)
             {
             case ComponentUpdateType::Add:
-                SpaceEntity.AddComponentDirect(ComponentKey, DirtyComponents[ComponentKey].Component, false);
+                m_spaceEntity.AddComponentDirect(componentKey, m_dirtyComponents[componentKey].Component, false);
                 // Components[ComponentKey] = DirtyComponents[ComponentKey].Component;
-                ComponentUpdates[Index].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
-                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Add;
+                componentUpdates[index].ComponentId = m_dirtyComponents[componentKey].Component->GetId();
+                componentUpdates[index].UpdateType = ComponentUpdateType::Add;
                 break;
             case ComponentUpdateType::Delete:
-                SpaceEntity.RemoveComponentDirect(ComponentKey, false);
-                ComponentUpdates[Index].ComponentId = ComponentKey;
-                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Delete;
+                m_spaceEntity.RemoveComponentDirect(componentKey, false);
+                componentUpdates[index].ComponentId = componentKey;
+                componentUpdates[index].UpdateType = ComponentUpdateType::Delete;
                 break;
             case ComponentUpdateType::Update:
             {
                 // You may expect a `SpaceEntity.UpdateComponentDirect`, but component property updates
                 // are still out-of-pattern and set immediately rather than looping back. Should change.
 
-                ComponentUpdates[Index].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
-                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Update;
+                componentUpdates[index].ComponentId = m_dirtyComponents[componentKey].Component->GetId();
+                componentUpdates[index].UpdateType = ComponentUpdateType::Update;
 
                 // TODO: For the moment, we update all properties on a dirty component, in future we need to change this to per property
                 // replication. Components[DirtyComponents[i].Component->GetId()]->Properties = DirtyComponents[i].Component->DirtyProperties;
@@ -161,83 +161,83 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
                 break;
             }
 
-            Index++;
+            index++;
         }
 
-        DirtyComponents.clear();
+        m_dirtyComponents.clear();
     }
 
     // Parent ID, (this would be a dirty property as above, but the wrapper generator stops us expressing optional values. Very not nice.)
-    if (NewParentId.HasValue()) // If the outer optional is set, then we want to change the parent
+    if (m_newParentId.HasValue()) // If the outer optional is set, then we want to change the parent
     {
-        SpaceEntity.SetParentIdDirect(*NewParentId, false);
-        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
-        NewParentId = csp::common::Optional<csp::common::Optional<uint64_t>> {}; // Reset, as we've just set it
+        m_spaceEntity.SetParentIdDirect(*m_newParentId, false);
+        updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | UPDATE_FLAGS_PARENT);
+        m_newParentId = csp::common::Optional<csp::common::Optional<uint64_t>> {}; // Reset, as we've just set it
     }
 
     // Component Deletes
-    if (TransientDeletionComponentIds.Size() > 0)
+    if (m_transientDeletionComponentIds.Size() > 0)
     {
-        for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+        for (size_t i = 0; i < m_transientDeletionComponentIds.Size(); ++i)
         {
-            if (SpaceEntity.GetComponents()->HasKey(TransientDeletionComponentIds[i]))
+            if (m_spaceEntity.GetComponents()->HasKey(m_transientDeletionComponentIds[i]))
             {
-                ComponentBase* Component = SpaceEntity.GetComponent(TransientDeletionComponentIds[i]);
-                Component->OnLocalDelete();
+                ComponentBase* component = m_spaceEntity.GetComponent(m_transientDeletionComponentIds[i]);
+                component->OnLocalDelete();
 
-                SpaceEntity.RemoveComponentDirect(TransientDeletionComponentIds[i]);
+                m_spaceEntity.RemoveComponentDirect(m_transientDeletionComponentIds[i]);
 
                 // Start indexing from the end of the section reserved for DirtyComponents.
                 // We start adding DirtyComponents to ComponentUpdates first, so here we need to respect that
                 // and start at an offset to add our deletion updates.
-                ComponentUpdates[DirtyComponents.size() + i].ComponentId = TransientDeletionComponentIds[i];
-                ComponentUpdates[DirtyComponents.size() + i].UpdateType = ComponentUpdateType::Delete;
+                componentUpdates[m_dirtyComponents.size() + i].ComponentId = m_transientDeletionComponentIds[i];
+                componentUpdates[m_dirtyComponents.size() + i].UpdateType = ComponentUpdateType::Delete;
 
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+                updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | UPDATE_FLAGS_COMPONENTS);
             }
         }
 
-        TransientDeletionComponentIds.Clear();
+        m_transientDeletionComponentIds.Clear();
     }
 
-    return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(UpdateFlags, ComponentUpdates);
+    return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(updateFlags, componentUpdates);
 }
 
 std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const
 {
-    return DirtyProperties;
+    return m_dirtyProperties;
 }
 
-std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return DirtyComponents; }
+std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return m_dirtyComponents; }
 
-std::chrono::milliseconds SpaceEntityStatePatcher::GetTimeOfLastPatch() const { return TimeOfLastPatch; }
+std::chrono::milliseconds SpaceEntityStatePatcher::GetTimeOfLastPatch() const { return m_timeOfLastPatch; }
 
-void SpaceEntityStatePatcher::SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch) { this->TimeOfLastPatch = NewTimeOfLastPatch; }
+void SpaceEntityStatePatcher::SetTimeOfLastPatch(std::chrono::milliseconds newTimeOfLastPatch) { this->m_timeOfLastPatch = newTimeOfLastPatch; }
 
-csp::common::Optional<csp::common::Optional<uint64_t>> SpaceEntityStatePatcher::GetNewParentId() const { return NewParentId; }
+csp::common::Optional<csp::common::Optional<uint64_t>> SpaceEntityStatePatcher::GetNewParentId() const { return m_newParentId; }
 
-void SpaceEntityStatePatcher::SetNewParentId(csp::common::Optional<uint64_t> Value) { NewParentId = Value; }
+void SpaceEntityStatePatcher::SetNewParentId(csp::common::Optional<uint64_t> value) { m_newParentId = value; }
 
 bool SpaceEntityStatePatcher::HasPendingPatch() const
 {
-    return !(DirtyComponents.size() == 0 && DirtyProperties.size() == 0 && TransientDeletionComponentIds.Size() == 0
+    return !(m_dirtyComponents.size() == 0 && m_dirtyProperties.size() == 0 && m_transientDeletionComponentIds.Size() == 0
         && GetNewParentId().HasValue() == false);
 }
 
 csp::multiplayer::ComponentBase* SpaceEntityStatePatcher::GetFirstPendingComponentOfType(
-    ComponentType Type, std::set<ComponentUpdateType> InterestingUpdateTypes) const
+    ComponentType type, std::set<ComponentUpdateType> interestingUpdateTypes) const
 {
-    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+    std::scoped_lock componentsLocker(m_dirtyComponentsLock);
 
-    for (const std::pair<const uint16_t, DirtyComponent>& DirtyComp : DirtyComponents)
+    for (const std::pair<const uint16_t, DirtyComponent>& dirtyComp : m_dirtyComponents)
     {
         // If any of our dirty components are :
         //  - Of the type requested AND
         //  - Of update types of interest
-        const auto UpdateType = DirtyComp.second.UpdateType;
-        if ((DirtyComp.second.Component->GetComponentType() == Type) && (InterestingUpdateTypes.find(UpdateType) != InterestingUpdateTypes.end()))
+        const auto updateType = dirtyComp.second.UpdateType;
+        if ((dirtyComp.second.Component->GetComponentType() == type) && (interestingUpdateTypes.find(updateType) != interestingUpdateTypes.end()))
         {
-            return DirtyComp.second.Component;
+            return dirtyComp.second.Component;
         }
     }
     return nullptr;
@@ -246,233 +246,233 @@ csp::multiplayer::ComponentBase* SpaceEntityStatePatcher::GetFirstPendingCompone
 mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
 {
     // 1. Convert all of our view components to mcs compatible types.
-    MCSComponentPacker ComponentPacker;
+    MCSComponentPacker componentPacker;
 
-    for (const auto& Prop : RegisteredProperties)
+    for (const auto& prop : m_registeredProperties)
     {
-        csp::common::ReplicatedValue ReplicatedValue = Prop.second.Get();
-        ComponentPacker.WriteValue(Prop.second.GetKey(), ReplicatedValue);
+        csp::common::ReplicatedValue replicatedValue = prop.second.Get();
+        componentPacker.WriteValue(prop.second.GetKey(), replicatedValue);
     }
 
-    std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
+    std::scoped_lock<std::mutex> componentsLocker(m_dirtyComponentsLock);
 
-    for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
+    for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& component : m_dirtyComponents)
     {
-        assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
+        assert(component.second.Component != nullptr && "DirtyComponent given a null component!");
 
-        if (Component.second.Component != nullptr)
+        if (component.second.Component != nullptr)
         {
-            auto* RealComponent = Component.second.Component;
-            ComponentPacker.WriteValue(Component.first, RealComponent);
+            auto* realComponent = component.second.Component;
+            componentPacker.WriteValue(component.first, realComponent);
         }
     }
 
     // 3. Create the object message using the reqired properties and our created components.
-    return mcs::ObjectMessage { SpaceEntity.GetId(), static_cast<uint64_t>(SpaceEntity.GetEntityType()), SpaceEntity.GetIsTransferable(),
-        SpaceEntity.GetIsPersistent(), SpaceEntity.GetOwnerId(), Convert(SpaceEntity.GetParentId()), ComponentPacker.GetComponents() };
+    return mcs::ObjectMessage { m_spaceEntity.GetId(), static_cast<uint64_t>(m_spaceEntity.GetEntityType()), m_spaceEntity.GetIsTransferable(),
+        m_spaceEntity.GetIsPersistent(), m_spaceEntity.GetOwnerId(), Convert(m_spaceEntity.GetParentId()), componentPacker.GetComponents() };
 }
 
 mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
 {
-    MCSComponentPacker ComponentPacker;
+    MCSComponentPacker componentPacker;
 
     // 1. Convert our modified view components to mcs compatible types.
     {
         // Loop through modfied view components and convert to ItemComponentData.
-        for (const std::pair<const SpaceEntityComponentKey, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
+        for (const std::pair<const SpaceEntityComponentKey, csp::common::ReplicatedValue>& dirtyProp : m_dirtyProperties)
         {
-            ComponentPacker.WriteValue(DirtyProp.first, DirtyProp.second);
+            componentPacker.WriteValue(dirtyProp.first, dirtyProp.second);
         }
     }
 
     // 2. Convert all of our runtime components to mcs compatible types.
     {
-        std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+        std::scoped_lock componentsLocker(m_dirtyComponentsLock);
 
         // Loop through all components and convert to ItemComponentData.
-        for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
+        for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& component : m_dirtyComponents)
         {
-            assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
+            assert(component.second.Component != nullptr && "DirtyComponent given a null component!");
 
-            if (Component.second.Component != nullptr)
+            if (component.second.Component != nullptr)
             {
-                auto* RealComponent = Component.second.Component;
-                ComponentPacker.WriteValue(Component.first, RealComponent);
+                auto* realComponent = component.second.Component;
+                componentPacker.WriteValue(component.first, realComponent);
             }
         }
     }
 
     // 3. Handle any component deletions (The fact this has to take a non-const pointer to SpaceEntity is deceptive, ruins the function signature
     // here.)
-    ComponentBase DeletionComponent(ComponentType::Delete, LogSystem, &SpaceEntity);
+    ComponentBase deletionComponent(ComponentType::Delete, m_logSystem, &m_spaceEntity);
 
-    for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+    for (size_t i = 0; i < m_transientDeletionComponentIds.Size(); ++i)
     {
-        DeletionComponent.SetId(TransientDeletionComponentIds[i]);
-        ComponentPacker.WriteValue(DeletionComponent.GetId(), &DeletionComponent);
+        deletionComponent.SetId(m_transientDeletionComponentIds[i]);
+        componentPacker.WriteValue(deletionComponent.GetId(), &deletionComponent);
     }
 
     // 4. Create the object patch using the required properties and our created components.
     // Seems like a bit of a mixed bag here, Components + Parent updates are disconnected state, but pulling Id's from SpaceEntity feels like it
     // leaves us vulnerable to sequencing bugs. Fine if ID + OwnerID never change, but dubious about that for OwnerId.
-    const bool HasBeenParentUpdate = NewParentId.HasValue();
-    return mcs::ObjectPatch { SpaceEntity.GetId(), SpaceEntity.GetOwnerId(), false, HasBeenParentUpdate,
-        HasBeenParentUpdate ? Convert(*NewParentId) : Convert(SpaceEntity.GetParentId()), ComponentPacker.GetComponents() };
+    const bool hasBeenParentUpdate = m_newParentId.HasValue();
+    return mcs::ObjectPatch { m_spaceEntity.GetId(), m_spaceEntity.GetOwnerId(), false, hasBeenParentUpdate,
+        hasBeenParentUpdate ? Convert(*m_newParentId) : Convert(m_spaceEntity.GetParentId()), componentPacker.GetComponents() };
 }
 
-std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message,
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem)
+std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& message,
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem& logSystem)
 {
-    const auto Id = Message.GetId();
-    const auto Type = static_cast<SpaceEntityType>(Message.GetType());
-    const auto IsTransferable = Message.GetIsTransferable();
-    const auto IsPersistent = Message.GetIsPersistent();
-    const auto OwnerId = Message.GetOwnerId();
-    const auto ParentId = common::Convert(Message.GetParentId());
+    const auto id = message.GetId();
+    const auto type = static_cast<SpaceEntityType>(message.GetType());
+    const auto isTransferable = message.GetIsTransferable();
+    const auto isPersistent = message.GetIsPersistent();
+    const auto ownerId = message.GetOwnerId();
+    const auto parentId = common::Convert(message.GetParentId());
 
-    const std::optional<std::map<uint16_t, mcs::ItemComponentData>>& MessageComponents = Message.GetComponents();
+    const std::optional<std::map<uint16_t, mcs::ItemComponentData>>& messageComponents = message.GetComponents();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntity> Entity(new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
+    std::unique_ptr<csp::multiplayer::SpaceEntity> entity(new csp::multiplayer::SpaceEntity(
+        &realtimeEngine, scriptRunner, &logSystem, type, id, "", SpaceTransform {}, ownerId, parentId, isTransferable, isPersistent));
 
-    if (MessageComponents.has_value())
+    if (messageComponents.has_value())
     {
         // Get view components
-        MCSComponentUnpacker ComponentUnpacker { *MessageComponents };
+        MCSComponentUnpacker componentUnpacker { *messageComponents };
 
         // It's unfortunate we have to break the usual pattern of getting the registered properties from the state patcher here,
         // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
         // with the SceneDescription file.
-        auto Properties = Entity->CreateReplicatedProperties();
+        auto properties = entity->CreateReplicatedProperties();
 
-        for (const auto& ComponentDataPair : *MessageComponents)
+        for (const auto& componentDataPair : *messageComponents)
         {
             // All component keys less than COMPONENT_KEY_END_COMPONENTS are our CSP runtime components
-            if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
+            if (componentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
                 // Convert the mcs component to a csp component
-                Entity->AddComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
+                entity->AddComponentFromItemComponentData(componentDataPair.first, componentDataPair.second);
             }
             else
             {
                 // Anything after COMPONENT_KEY_END_COMPONENTS are our CSP entity properties
 
                 // Find the property using our property key.
-                EntityProperty* Property = std::find_if(Properties.begin(), Properties.end(),
-                    [Key = ComponentDataPair.first](const EntityProperty& Prop) { return static_cast<uint16_t>(Prop.GetKey()) == Key; });
+                EntityProperty* property = std::find_if(properties.begin(), properties.end(),
+                    [key = componentDataPair.first](const EntityProperty& prop) { return static_cast<uint16_t>(prop.GetKey()) == key; });
 
-                if (Property != Properties.end())
+                if (property != properties.end())
                 {
                     // Set our property from the component value.
-                    csp::common::ReplicatedValue Value;
-                    ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
-                    Property->Set(Value);
+                    csp::common::ReplicatedValue value;
+                    componentUnpacker.TryReadValue(componentDataPair.first, value);
+                    property->Set(value);
                 }
                 else
                 {
-                    LogSystem.LogMsg(csp::common::LogLevel::Error, "NewFromObjectMessage: No Property with the specified key found!");
+                    logSystem.LogMsg(csp::common::LogLevel::Error, "NewFromObjectMessage: No Property with the specified key found!");
                 }
             }
         }
     }
 
     // Would much rather return this as a value, requires simplifying SpaceEntity such that it can have copy/move operators.
-    return Entity;
+    return entity;
 }
 
-void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch)
+void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& patch)
 {
-    SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
-    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
+    SpaceEntityUpdateFlags updateFlags = SpaceEntityUpdateFlags(0);
+    csp::common::Array<ComponentUpdateInfo> componentUpdates(0);
 
-    auto PatchComponents = Patch.GetComponents();
+    auto patchComponents = patch.GetComponents();
 
-    if (PatchComponents.has_value())
+    if (patchComponents.has_value())
     {
-        MCSComponentUnpacker ComponentUnpacker { *Patch.GetComponents() };
-        uint64_t ComponentCount = ComponentUnpacker.GetRuntimeComponentsCount();
+        MCSComponentUnpacker componentUnpacker { *patch.GetComponents() };
+        uint64_t componentCount = componentUnpacker.GetRuntimeComponentsCount();
 
-        if (ComponentCount > 0)
+        if (componentCount > 0)
         {
-            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+            updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | UPDATE_FLAGS_COMPONENTS);
         }
 
-        ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
-        size_t ComponentIndex = 0;
+        componentUpdates = csp::common::Array<ComponentUpdateInfo>(componentCount);
+        size_t componentIndex = 0;
 
-        for (const auto& ComponentDataPair : *PatchComponents)
+        for (const auto& componentDataPair : *patchComponents)
         {
             // All component keys less than COMPONENT_KEY_END_COMPONENTS are our CSP runtime components
-            if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
+            if (componentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
                 // Add the component to our entity
-                ComponentUpdateInfo UpdateInfo
-                    = SpaceEntity.AddComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
-                ComponentUpdates[ComponentIndex] = UpdateInfo;
-                ComponentIndex++;
+                ComponentUpdateInfo updateInfo
+                    = m_spaceEntity.AddComponentFromItemComponentDataPatch(componentDataPair.first, componentDataPair.second);
+                componentUpdates[componentIndex] = updateInfo;
+                componentIndex++;
             }
             else
             {
                 // Anything after COMPONENT_KEY_END_COMPONENTS are our CSP entity properties
 
                 // Find the property using our property key.
-                auto PropertyIt = RegisteredProperties.find(static_cast<SpaceEntityComponentKey>(ComponentDataPair.first));
+                auto propertyIt = m_registeredProperties.find(static_cast<SpaceEntityComponentKey>(componentDataPair.first));
 
-                if (PropertyIt != RegisteredProperties.end())
+                if (propertyIt != m_registeredProperties.end())
                 {
 
                     // Set our property from the component value.
-                    EntityProperty& Property = PropertyIt->second;
-                    UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | Property.GetUpdateFlag());
+                    EntityProperty& property = propertyIt->second;
+                    updateFlags = SpaceEntityUpdateFlags(updateFlags | property.GetUpdateFlag());
 
-                    csp::common::ReplicatedValue Value;
-                    ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
-                    Property.Set(Value);
+                    csp::common::ReplicatedValue value;
+                    componentUnpacker.TryReadValue(componentDataPair.first, value);
+                    property.Set(value);
                 }
                 else
                 {
-                    if (LogSystem)
+                    if (m_logSystem)
                     {
-                        LogSystem->LogMsg(csp::common::LogLevel::Error, "ApplyPatchFromObjectPatch: No Property with the specified key found!");
+                        m_logSystem->LogMsg(csp::common::LogLevel::Error, "ApplyPatchFromObjectPatch: No Property with the specified key found!");
                     }
                 }
             }
         }
     }
 
-    SpaceEntity.SetOwnerId(Patch.GetOwnerId());
-    const auto ParentId = common::Convert(Patch.GetParentId());
+    m_spaceEntity.SetOwnerId(patch.GetOwnerId());
+    const auto parentId = common::Convert(patch.GetParentId());
 
-    SpaceEntity.SetParentIdDirect(ParentId, false);
-    if (Patch.GetShouldUpdateParent())
+    m_spaceEntity.SetParentIdDirect(parentId, false);
+    if (patch.GetShouldUpdateParent())
     {
-        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+        updateFlags = static_cast<SpaceEntityUpdateFlags>(updateFlags | UPDATE_FLAGS_PARENT);
     }
 
-    if (UpdateFlags != 0 && SpaceEntity.GetEntityUpdateCallback() != nullptr)
+    if (updateFlags != 0 && m_spaceEntity.GetEntityUpdateCallback() != nullptr)
     {
-        SpaceEntity.GetEntityUpdateCallback()(&SpaceEntity, UpdateFlags, ComponentUpdates);
+        m_spaceEntity.GetEntityUpdateCallback()(&m_spaceEntity, updateFlags, componentUpdates);
     }
 }
 
-void SpaceEntityStatePatcher::SetPatchSentCallback(PatchSentCallback Callback) { EntityPatchSentCallback = Callback; }
+void SpaceEntityStatePatcher::SetPatchSentCallback(PatchSentCallback callback) { m_entityPatchSentCallback = callback; }
 
-SpaceEntityStatePatcher::PatchSentCallback SpaceEntityStatePatcher::GetEntityPatchSentCallback() { return EntityPatchSentCallback; }
+SpaceEntityStatePatcher::PatchSentCallback SpaceEntityStatePatcher::GetEntityPatchSentCallback() { return m_entityPatchSentCallback; }
 
-void SpaceEntityStatePatcher::CallEntityPatchSentCallback(bool Success) { EntityPatchSentCallback(Success); }
+void SpaceEntityStatePatcher::CallEntityPatchSentCallback(bool success) { m_entityPatchSentCallback(success); }
 
-void SpaceEntityStatePatcher::RegisterProperty(const EntityProperty& Property) { RegisteredProperties[Property.GetKey()] = Property; }
+void SpaceEntityStatePatcher::RegisterProperty(const EntityProperty& property) { m_registeredProperties[property.GetKey()] = property; }
 
-void SpaceEntityStatePatcher::RegisterProperties(const csp::common::Array<EntityProperty>& Properties)
+void SpaceEntityStatePatcher::RegisterProperties(const csp::common::Array<EntityProperty>& properties)
 {
-    for (const auto& Prop : Properties)
+    for (const auto& prop : properties)
     {
-        RegisterProperty(Prop);
+        RegisterProperty(prop);
     }
 }
 
-void EntityProperty::Set(const csp::common::ReplicatedValue& RepValue) { FromReplicatedValue(RepValue); }
+void EntityProperty::Set(const csp::common::ReplicatedValue& repValue) { m_fromReplicatedValue(repValue); }
 
-csp::common::ReplicatedValue EntityProperty::Get() const { return ToReplicatedValue(); }
+csp::common::ReplicatedValue EntityProperty::Get() const { return m_toReplicatedValue(); }
 
 } // namespace csp::multiplayer

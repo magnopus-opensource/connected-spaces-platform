@@ -27,14 +27,14 @@ void PublicTestBase::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    logSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    logSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String message) { fprintf(stderr, "%s\n", message.c_str()); });
+    logSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
-    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(connection, SetAllowSelfMessagingFlag, false);
 }
 
 void PublicTestBase::TearDown()
@@ -55,22 +55,22 @@ void PublicTestBase::TearDown()
 
 void PublicTestBaseWithMocks::SetUp()
 {
-    SignalRMock = new SignalRConnectionMock();
-    WebClientMock = new ::WebClientMock(80, csp::web::ETransferProtocol::HTTPS, nullptr, true);
+    m_signalRMock = new SignalRConnectionMock();
+    m_webClientMock = new ::WebClientMock(80, csp::web::ETransferProtocol::HTTPS, nullptr, true);
 
     ::testing::Test::SetUp();
 
     // Yield SignalRMock ownership
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), SignalRMock, WebClientMock);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), m_signalRMock, m_webClientMock);
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    logSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    logSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String message) { fprintf(stderr, "%s\n", message.c_str()); });
+    logSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
-    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(connection, SetAllowSelfMessagingFlag, false);
 }
 
 void PublicTestBaseWithMocks::TearDown()
@@ -95,23 +95,23 @@ template <typename T> void PublicTestBaseWithParam<T>::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    logSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    logSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String message) { fprintf(stderr, "%s\n", message.c_str()); });
+    logSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
-    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(connection, SetAllowSelfMessagingFlag, false);
 }
 
 template <typename T> void PublicTestBaseWithParam<T>::TearDown()
 {
     ::testing::Test::TearDown();
 
-    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(connection, SetAllowSelfMessagingFlag, false);
 
     if (!csp::CSPFoundation::GetIsInitialised())
     {

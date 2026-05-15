@@ -24,85 +24,85 @@ namespace chs = csp::services::generated::spatialdataservice;
 namespace
 {
 
-void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp::systems::PointOfInterest& POI)
+void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& dto, csp::systems::PointOfInterest& poi)
 {
-    if (Dto.HasId())
+    if (dto.HasId())
     {
-        POI.Id = Dto.GetId();
+        poi.Id = dto.GetId();
     }
 
-    if (Dto.HasCreatedBy())
+    if (dto.HasCreatedBy())
     {
-        POI.CreatedBy = Dto.GetCreatedBy();
+        poi.CreatedBy = dto.GetCreatedBy();
     }
 
-    if (Dto.HasCreatedAt())
+    if (dto.HasCreatedAt())
     {
-        POI.CreatedAt = Dto.GetCreatedAt();
+        poi.CreatedAt = dto.GetCreatedAt();
     }
 
-    if (Dto.HasTitle())
+    if (dto.HasTitle())
     {
-        const auto& LocalisedTitle = Dto.GetTitle();
+        const auto& localisedTitle = dto.GetTitle();
 
-        for (auto& CurrentTitle : LocalisedTitle)
+        for (auto& currentTitle : localisedTitle)
         {
-            POI.Title[CurrentTitle->GetLanguageCode()] = CurrentTitle->GetValue();
+            poi.Title[currentTitle->GetLanguageCode()] = currentTitle->GetValue();
         }
     }
 
-    if (Dto.HasDescription())
+    if (dto.HasDescription())
     {
-        const auto& LocalisedDescription = Dto.GetDescription();
+        const auto& localisedDescription = dto.GetDescription();
 
-        for (auto& CurrentDescription : LocalisedDescription)
+        for (auto& currentDescription : localisedDescription)
         {
-            POI.Description[CurrentDescription->GetLanguageCode()] = CurrentDescription->GetValue();
+            poi.Description[currentDescription->GetLanguageCode()] = currentDescription->GetValue();
         }
     }
 
-    if (Dto.HasName())
+    if (dto.HasName())
     {
-        POI.Name = Dto.GetName();
+        poi.Name = dto.GetName();
     }
 
-    if (Dto.HasType())
+    if (dto.HasType())
     {
-        POI.Type = csp::systems::PointOfInterestHelpers::StringToType(Dto.GetType());
+        poi.Type = csp::systems::PointOfInterestHelpers::StringToType(dto.GetType());
     }
 
-    if (Dto.HasTags())
+    if (dto.HasTags())
     {
-        const auto& Tags = Dto.GetTags();
-        POI.Tags = csp::common::Array<csp::common::String>(Tags.size());
+        const auto& tags = dto.GetTags();
+        poi.Tags = csp::common::Array<csp::common::String>(tags.size());
 
-        for (size_t idx = 0; idx < Tags.size(); ++idx)
+        for (size_t idx = 0; idx < tags.size(); ++idx)
         {
-            POI.Tags[idx] = Tags[idx];
+            poi.Tags[idx] = tags[idx];
         }
     }
 
-    if (Dto.HasOwner())
+    if (dto.HasOwner())
     {
-        POI.Owner = Dto.GetOwner();
+        poi.Owner = dto.GetOwner();
     }
 
-    if (Dto.HasLocation())
+    if (dto.HasLocation())
     {
-        const auto& Location = Dto.GetLocation();
-        POI.Location.Longitude = Location->GetLongitude();
-        POI.Location.Latitude = Location->GetLatitude();
+        const auto& location = dto.GetLocation();
+        poi.Location.Longitude = location->GetLongitude();
+        poi.Location.Latitude = location->GetLatitude();
     }
 
-    if (Dto.HasPrototypeName())
+    if (dto.HasPrototypeName())
     {
         // TODO: Find out why we're using name instead of Id here
-        POI.AssetCollectionId = Dto.GetPrototypeName();
+        poi.AssetCollectionId = dto.GetPrototypeName();
     }
 
-    if (Dto.HasGroupId())
+    if (dto.HasGroupId())
     {
-        POI.SpaceId = Dto.GetGroupId();
+        poi.SpaceId = dto.GetGroupId();
     }
 }
 
@@ -116,57 +116,57 @@ PointOfInterest::PointOfInterest()
 {
 }
 
-bool PointOfInterest::operator==(const PointOfInterest& Other) const
+bool PointOfInterest::operator==(const PointOfInterest& other) const
 {
-    return Id == Other.Id && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && Title == Other.Title && Description == Other.Description
-        && Name == Other.Name && Type == Other.Type && Tags == Other.Tags && Owner == Other.Owner && Location == Other.Location
-        && AssetCollectionId == Other.AssetCollectionId && SpaceId == Other.SpaceId;
+    return Id == other.Id && CreatedBy == other.CreatedBy && CreatedAt == other.CreatedAt && Title == other.Title && Description == other.Description
+        && Name == other.Name && Type == other.Type && Tags == other.Tags && Owner == other.Owner && Location == other.Location
+        && AssetCollectionId == other.AssetCollectionId && SpaceId == other.SpaceId;
 }
 
-bool PointOfInterest::operator!=(const PointOfInterest& Other) const { return !(*this == Other); }
+bool PointOfInterest::operator!=(const PointOfInterest& other) const { return !(*this == other); }
 
-PointOfInterest& POIResult::GetPointOfInterest() { return POI; }
+PointOfInterest& POIResult::GetPointOfInterest() { return m_poi; }
 
-const PointOfInterest& POIResult::GetPointOfInterest() const { return POI; }
+const PointOfInterest& POIResult::GetPointOfInterest() const { return m_poi; }
 
-void POIResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void POIResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* POIResponse = static_cast<chs::PointOfInterestDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* poiResponse = static_cast<chs::PointOfInterestDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        POIResponse->FromJson(Response->GetPayload().GetContent());
+        poiResponse->FromJson(response->GetPayload().GetContent());
 
-        PointOfInterestDtoToPointOfInterest(*POIResponse, POI);
+        PointOfInterestDtoToPointOfInterest(*poiResponse, m_poi);
     }
 }
 
-csp::common::Array<csp::systems::PointOfInterest>& POICollectionResult::GetPOIs() { return POIs; }
+csp::common::Array<csp::systems::PointOfInterest>& POICollectionResult::GetPOIs() { return m_poIs; }
 
-const csp::common::Array<csp::systems::PointOfInterest>& POICollectionResult::GetPOIs() const { return POIs; }
+const csp::common::Array<csp::systems::PointOfInterest>& POICollectionResult::GetPOIs() const { return m_poIs; }
 
-void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* POICollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* poiCollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        POICollectionResponse->FromJson(Response->GetPayload().GetContent());
+        poiCollectionResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from response in our POIs array
-        std::vector<chs::PointOfInterestDto>& POIArray = POICollectionResponse->GetArray();
-        POIs = csp::common::Array<csp::systems::PointOfInterest>(POIArray.size());
+        std::vector<chs::PointOfInterestDto>& poiArray = poiCollectionResponse->GetArray();
+        m_poIs = csp::common::Array<csp::systems::PointOfInterest>(poiArray.size());
 
-        for (size_t idx = 0; idx < POIArray.size(); ++idx)
+        for (size_t idx = 0; idx < poiArray.size(); ++idx)
         {
-            PointOfInterestDtoToPointOfInterest(POIArray[idx], POIs[idx]);
+            PointOfInterestDtoToPointOfInterest(poiArray[idx], m_poIs[idx]);
         }
     }
 }

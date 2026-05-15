@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -44,84 +44,84 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create collision component
-    auto* CollisionComponent = static_cast<CollisionSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Collision));
+    auto* collisionComponent = static_cast<CollisionSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Collision));
 
     // Ensure defaults are set
-    EXPECT_EQ(CollisionComponent->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(CollisionComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-    EXPECT_EQ(CollisionComponent->GetScale(), csp::common::Vector3::One());
-    EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-    EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-    EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-    EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Collision);
-    EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Box);
-    EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "");
-    EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "");
-    EXPECT_EQ(CollisionComponent->GetIsEnabled(), true);
+    EXPECT_EQ(collisionComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(collisionComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
+    EXPECT_EQ(collisionComponent->GetScale(), csp::common::Vector3::One());
+    EXPECT_EQ(collisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
+    EXPECT_EQ(collisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
+    EXPECT_EQ(collisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
+    EXPECT_EQ(collisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
+    EXPECT_EQ(collisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Collision);
+    EXPECT_EQ(collisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Box);
+    EXPECT_EQ(collisionComponent->GetCollisionAssetId(), "");
+    EXPECT_EQ(collisionComponent->GetAssetCollectionId(), "");
+    EXPECT_EQ(collisionComponent->GetIsEnabled(), true);
 
     // Set new values
-    CollisionComponent->SetPosition(csp::common::Vector3::One());
-    CollisionComponent->SetScale(csp::common::Vector3(2, 2, 2));
-    CollisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::Trigger);
-    CollisionComponent->SetCollisionShape(csp::multiplayer::CollisionShape::Mesh);
-    CollisionComponent->SetCollisionAssetId("TestAssetID");
-    CollisionComponent->SetAssetCollectionId("TestAssetCollectionID");
-    CollisionComponent->SetIsEnabled(false);
+    collisionComponent->SetPosition(csp::common::Vector3::One());
+    collisionComponent->SetScale(csp::common::Vector3(2, 2, 2));
+    collisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::Trigger);
+    collisionComponent->SetCollisionShape(csp::multiplayer::CollisionShape::Mesh);
+    collisionComponent->SetCollisionAssetId("TestAssetID");
+    collisionComponent->SetAssetCollectionId("TestAssetCollectionID");
+    collisionComponent->SetIsEnabled(false);
 
     // Ensure values are set correctly
-    EXPECT_EQ(CollisionComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(CollisionComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-    EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-    EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-    EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-1, -1, -1));
-    EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(1, 1, 1));
-    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Trigger);
-    EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Mesh);
-    EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "TestAssetID");
-    EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "TestAssetCollectionID");
-    EXPECT_EQ(CollisionComponent->GetIsEnabled(), false);
+    EXPECT_EQ(collisionComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(collisionComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(collisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
+    EXPECT_EQ(collisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
+    EXPECT_EQ(collisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-1, -1, -1));
+    EXPECT_EQ(collisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(1, 1, 1));
+    EXPECT_EQ(collisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Trigger);
+    EXPECT_EQ(collisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Mesh);
+    EXPECT_EQ(collisionComponent->GetCollisionAssetId(), "TestAssetID");
+    EXPECT_EQ(collisionComponent->GetAssetCollectionId(), "TestAssetCollectionID");
+    EXPECT_EQ(collisionComponent->GetIsEnabled(), false);
 
-    const float DefaultSphereRadius = CollisionSpaceComponent::GetDefaultSphereRadius();
-    const float DefaultCapsuleHalfWidth = CollisionSpaceComponent::GetDefaultCapsuleHalfWidth();
-    const float DefaultCapsuleHalfHeight = CollisionSpaceComponent::GetDefaultCapsuleHalfHeight();
+    const float defaultSphereRadius = CollisionSpaceComponent::GetDefaultSphereRadius();
+    const float defaultCapsuleHalfWidth = CollisionSpaceComponent::GetDefaultCapsuleHalfWidth();
+    const float defaultCapsuleHalfHeight = CollisionSpaceComponent::GetDefaultCapsuleHalfHeight();
 
-    EXPECT_EQ(DefaultSphereRadius, 0.5f);
-    EXPECT_EQ(DefaultCapsuleHalfWidth, 0.5f);
-    EXPECT_EQ(DefaultCapsuleHalfHeight, 1.0f);
+    EXPECT_EQ(defaultSphereRadius, 0.5f);
+    EXPECT_EQ(defaultCapsuleHalfWidth, 0.5f);
+    EXPECT_EQ(defaultCapsuleHalfHeight, 1.0f);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

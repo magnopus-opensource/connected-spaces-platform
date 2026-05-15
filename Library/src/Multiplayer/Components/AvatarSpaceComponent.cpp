@@ -124,8 +124,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& AvatarSpaceComponent::GetSchema() { return Schema; }
 
-AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -134,9 +134,9 @@ const csp::common::String& AvatarSpaceComponent::GetAvatarId() const
     return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId));
 }
 
-void AvatarSpaceComponent::SetAvatarId(const csp::common::String& Value)
+void AvatarSpaceComponent::SetAvatarId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId), value);
 }
 
 const csp::common::String& AvatarSpaceComponent::GetUserId() const
@@ -144,9 +144,9 @@ const csp::common::String& AvatarSpaceComponent::GetUserId() const
     return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId));
 }
 
-void AvatarSpaceComponent::SetUserId(const csp::common::String& Value)
+void AvatarSpaceComponent::SetUserId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId), value);
 }
 
 AvatarState AvatarSpaceComponent::GetState() const
@@ -154,9 +154,9 @@ AvatarState AvatarSpaceComponent::GetState() const
     return static_cast<AvatarState>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::State)));
 }
 
-void AvatarSpaceComponent::SetState(AvatarState Value)
+void AvatarSpaceComponent::SetState(AvatarState value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::State), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::State), static_cast<int64_t>(value));
 }
 
 AvatarPlayMode AvatarSpaceComponent::GetAvatarPlayMode() const
@@ -164,9 +164,9 @@ AvatarPlayMode AvatarSpaceComponent::GetAvatarPlayMode() const
     return static_cast<AvatarPlayMode>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode)));
 }
 
-void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
+void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode), static_cast<int64_t>(value));
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
@@ -174,9 +174,9 @@ const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
     return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId));
 }
 
-void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& Value)
+void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId), value);
 }
 
 bool AvatarSpaceComponent::GetIsHandIKEnabled() const
@@ -184,16 +184,16 @@ bool AvatarSpaceComponent::GetIsHandIKEnabled() const
     return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled));
 }
 
-void AvatarSpaceComponent::SetIsHandIKEnabled(bool Value) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled), Value); }
+void AvatarSpaceComponent::SetIsHandIKEnabled(bool value) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled), value); }
 
 const csp::common::Vector3& AvatarSpaceComponent::GetTargetHandIKTargetLocation() const
 {
     return GetVector3Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation));
 }
 
-void AvatarSpaceComponent::SetTargetHandIKTargetLocation(const csp::common::Vector3& Value)
+void AvatarSpaceComponent::SetTargetHandIKTargetLocation(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation), value);
 }
 
 const csp::common::Vector4& AvatarSpaceComponent::GetHandRotation() const
@@ -201,9 +201,9 @@ const csp::common::Vector4& AvatarSpaceComponent::GetHandRotation() const
     return GetVector4Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation));
 }
 
-void AvatarSpaceComponent::SetHandRotation(const csp::common::Vector4& Value)
+void AvatarSpaceComponent::SetHandRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation), value);
 }
 
 const csp::common::Vector4& AvatarSpaceComponent::GetHeadRotation() const
@@ -211,9 +211,9 @@ const csp::common::Vector4& AvatarSpaceComponent::GetHeadRotation() const
     return GetVector4Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation));
 }
 
-void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& Value)
+void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation), value);
 }
 
 float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
@@ -221,9 +221,9 @@ float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage));
 }
 
-void AvatarSpaceComponent::SetWalkRunBlendPercentage(float Value)
+void AvatarSpaceComponent::SetWalkRunBlendPercentage(float value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage), value);
 }
 
 float AvatarSpaceComponent::GetTorsoTwistAlpha() const
@@ -231,9 +231,9 @@ float AvatarSpaceComponent::GetTorsoTwistAlpha() const
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha));
 }
 
-void AvatarSpaceComponent::SetTorsoTwistAlpha(float Value)
+void AvatarSpaceComponent::SetTorsoTwistAlpha(float value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha), value);
 }
 
 const csp::common::Vector3& csp::multiplayer::AvatarSpaceComponent::GetMovementDirection() const
@@ -241,9 +241,9 @@ const csp::common::Vector3& csp::multiplayer::AvatarSpaceComponent::GetMovementD
     return GetVector3Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection));
 }
 
-void csp::multiplayer::AvatarSpaceComponent::SetMovementDirection(const csp::common::Vector3& Value)
+void csp::multiplayer::AvatarSpaceComponent::SetMovementDirection(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection), value);
 }
 
 LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
@@ -251,27 +251,27 @@ LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
     return static_cast<LocomotionModel>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)));
 }
 
-void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)
+void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(value));
 }
 
 bool AvatarSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)); }
 
-void AvatarSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible), InValue); }
+void AvatarSpaceComponent::SetIsVisible(bool inValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible), inValue); }
 
 bool AvatarSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)); }
 
-void AvatarSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible), InValue); }
+void AvatarSpaceComponent::SetIsARVisible(bool inValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible), inValue); }
 
 bool AvatarSpaceComponent::GetIsVirtualVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible));
 }
 
-void AvatarSpaceComponent::SetIsVirtualVisible(bool InValue)
+void AvatarSpaceComponent::SetIsVirtualVisible(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible), InValue);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible), inValue);
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAvatarUrl() const
@@ -279,9 +279,9 @@ const csp::common::String& AvatarSpaceComponent::GetAvatarUrl() const
     return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl));
 }
 
-void AvatarSpaceComponent::SetAvatarUrl(const csp::common::String& Value)
+void AvatarSpaceComponent::SetAvatarUrl(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl), value);
 }
 
 } // namespace csp::multiplayer

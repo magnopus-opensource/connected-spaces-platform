@@ -55,8 +55,8 @@ public:
     uint16_t ComponentId;
     ComponentUpdateType UpdateType;
 
-    bool operator==(const ComponentUpdateInfo& Other) const { return ComponentId == Other.ComponentId && UpdateType == Other.UpdateType; }
-    bool operator!=(const ComponentUpdateInfo& Other) const { return !(*this == Other); }
+    bool operator==(const ComponentUpdateInfo& other) const { return ComponentId == other.ComponentId && UpdateType == other.UpdateType; }
+    bool operator!=(const ComponentUpdateInfo& other) const { return !(*this == other); }
 };
 
 } // namespace csp::multiplayer

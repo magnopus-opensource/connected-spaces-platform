@@ -20,65 +20,65 @@
 
 #include "Json/JsonSerializer.h"
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj)
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::Material& obj)
 {
     // Name
-    Deserializer.DeserializeMember("name", Obj.Name);
+    deserializer.DeserializeMember("name", obj.m_name);
 
     // Shader Type
-    uint32_t ShaderType;
-    Deserializer.DeserializeMember("shaderType", ShaderType);
+    uint32_t shaderType;
+    deserializer.DeserializeMember("shaderType", shaderType);
 
-    Obj.Type = static_cast<csp::systems::EShaderType>(ShaderType);
+    obj.m_type = static_cast<csp::systems::EShaderType>(shaderType);
 
     // Version
-    Deserializer.DeserializeMember("version", Obj.Version);
+    deserializer.DeserializeMember("version", obj.m_version);
 }
 
 namespace csp::systems
 {
 
-Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
-    : Name(Name)
-    , Type(EShaderType::Standard)
-    , CollectionId(InAssetCollectionId)
-    , Id(InAssetId)
+Material::Material(const csp::common::String& name, const csp::common::String& inAssetCollectionId, const csp::common::String& inAssetId)
+    : m_name(name)
+    , m_type(EShaderType::Standard)
+    , m_collectionId(inAssetCollectionId)
+    , m_id(inAssetId)
 {
 }
 
-Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId,
-    EShaderType Type, const int Version)
-    : Name(Name)
-    , Type(Type)
-    , Version(Version)
-    , CollectionId(InAssetCollectionId)
-    , Id(InAssetId)
+Material::Material(const csp::common::String& name, const csp::common::String& inAssetCollectionId, const csp::common::String& inAssetId,
+    EShaderType type, const int version)
+    : m_name(name)
+    , m_type(type)
+    , m_version(version)
+    , m_collectionId(inAssetCollectionId)
+    , m_id(inAssetId)
 {
 }
 
-const csp::common::String& Material::GetName() const { return Name; }
+const csp::common::String& Material::GetName() const { return m_name; }
 
-csp::systems::EShaderType Material::GetShaderType() const { return Type; }
+csp::systems::EShaderType Material::GetShaderType() const { return m_type; }
 
-int Material::GetVersion() const { return Version; }
+int Material::GetVersion() const { return m_version; }
 
-const csp::common::String& Material::GetMaterialCollectionId() const { return CollectionId; }
+const csp::common::String& Material::GetMaterialCollectionId() const { return m_collectionId; }
 
-const csp::common::String& Material::GetMaterialId() const { return Id; }
+const csp::common::String& Material::GetMaterialId() const { return m_id; }
 
-const Material* MaterialResult::GetMaterial() const { return Material; }
+const Material* MaterialResult::GetMaterial() const { return m_material; }
 
-Material* MaterialResult::GetMaterial() { return Material; }
+Material* MaterialResult::GetMaterial() { return m_material; }
 
-void MaterialResult::SetMaterial(csp::systems::Material* InMaterial) { Material = InMaterial; }
+void MaterialResult::SetMaterial(csp::systems::Material* inMaterial) { m_material = inMaterial; }
 
 void MaterialResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
-const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &Materials; }
+const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &m_materials; }
 
-csp::common::Array<Material*>* MaterialsResult::GetMaterials() { return &Materials; }
+csp::common::Array<Material*>* MaterialsResult::GetMaterials() { return &m_materials; }
 
-void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMaterials) { Materials = InMaterials; }
+void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& inMaterials) { m_materials = inMaterials; }
 
 void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 

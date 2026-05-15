@@ -20,26 +20,26 @@
 
 namespace csp::common
 {
-bool ApplicationSettings::operator==(const ApplicationSettings& Other) const
+bool ApplicationSettings::operator==(const ApplicationSettings& other) const
 {
-    return (ApplicationName == Other.ApplicationName) && (Context == Other.Context) && (AllowAnonymous == Other.AllowAnonymous)
-        && (Settings == Other.Settings);
+    return (ApplicationName == other.ApplicationName) && (Context == other.Context) && (AllowAnonymous == other.AllowAnonymous)
+        && (Settings == other.Settings);
 }
 
-bool ApplicationSettings::operator!=(const ApplicationSettings& Other) const { return !(*this == Other); }
+bool ApplicationSettings::operator!=(const ApplicationSettings& other) const { return !(*this == other); }
 
-bool SettingsCollection::operator==(const SettingsCollection& Other) const
+bool SettingsCollection::operator==(const SettingsCollection& other) const
 {
-    return (UserId == Other.UserId) && (Context == Other.Context) && (Settings == Other.Settings);
+    return (UserId == other.UserId) && (Context == other.Context) && (Settings == other.Settings);
 }
 
-bool SettingsCollection::operator!=(const SettingsCollection& Other) const { return !(*this == Other); }
+bool SettingsCollection::operator!=(const SettingsCollection& other) const { return !(*this == other); }
 } // namespace csp::systems
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::ApplicationSettings& Obj)
+void ToJson(csp::json::JsonSerializer& serializer, const csp::common::ApplicationSettings& obj)
 {
-    Serializer.SerializeMember("applicationName", Obj.ApplicationName);
-    Serializer.SerializeMember("context", Obj.Context);
-    Serializer.SerializeMember("allowAnonymous", Obj.AllowAnonymous);
-    Serializer.SerializeMember("settings", Obj.Settings);
+    serializer.SerializeMember("applicationName", obj.ApplicationName);
+    serializer.SerializeMember("context", obj.Context);
+    serializer.SerializeMember("allowAnonymous", obj.AllowAnonymous);
+    serializer.SerializeMember("settings", obj.Settings);
 }

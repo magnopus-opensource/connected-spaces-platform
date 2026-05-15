@@ -41,43 +41,43 @@ public:
     /// @brief Constructs a string from a pointer with a given length.
     /// @param Text const char* : Pointer to a string buffer to copy data from
     /// @param Length size_t : Size of buffer
-    explicit String(char const* const Text, size_t Length);
+    explicit String(char const* const text, size_t length);
 
     /// @brief Constructs a string with a given length.
     /// Buffer is set to 0 for debug builds.
     /// Buffer isn't guaranteed to be set to a particular value for release builds.
     /// @param Length size_t : Size of buffer
-    explicit String(size_t Length);
+    explicit String(size_t length);
 
     /// @brief Constructs a string from a cstring.
     /// In buffer is treated as a cstring and will assume the end of the buffer is the first /0.
     /// @param Text const char* : Pointer to a string buffer to copy data from
-    String(const char* Text);
+    String(const char* text);
 
     /// @brief Copy constructor.
     /// @param Other String const&
-    String(String const& Other);
+    String(String const& other);
 
     /// @brief Move constructor
-    String(String&& Other);
+    String(String&& other);
 
     /// @brief Copy assignment.
     /// @param Rhs const String&
     /// @return String&
-    String& operator=(const String& Rhs);
+    String& operator=(const String& rhs);
 
     /// @brief Move assignment.
     /// @param Rhs const String&
     /// @return String&
-    String& operator=(String&& Rhs);
+    String& operator=(String&& rhs);
 
     /// @brief Assigns a cstring to the string.
     /// @param Text const char* : Pointer to a string buffer to copy data from
-    String& operator=(char const* const Text);
+    String& operator=(char const* const text);
 
     /// @brief Swaps string data with given string.
     /// @param Other String& : String to swap data with
-    String& swap(String& Other);
+    String& swap(String& other);
 
     /// @brief Auto converts to cstring by returning internal buffer.
     operator char const*() const { return c_str(); }
@@ -91,59 +91,59 @@ public:
     /// @brief Splits current string by a given delimiter into individual elements.
     /// @param Delimiter char
     /// @return csp::common::List<csp::common::String>
-    List<String> Split(char Delimiter) const;
+    List<String> Split(char delimiter) const;
 
-    bool operator==(const String& Other) const;
-    bool operator==(const char* Other) const;
-    bool operator!=(const String& Other) const;
-    bool operator!=(const char* Other) const;
-    bool operator<(const String& Other) const;
+    bool operator==(const String& other) const;
+    bool operator==(const char* other) const;
+    bool operator!=(const String& other) const;
+    bool operator!=(const char* other) const;
+    bool operator<(const String& other) const;
 
     /// @brief Appends given string.
     /// This will resize the buffer of the current string.
     /// @param Other const String& : String to append
-    void Append(const String& Other);
+    void Append(const String& other);
 
     /// @brief Appends given cstring.
     /// This will resize the buffer of the current string.
     /// @param Other const char* : Cstring to append
-    void Append(const char* Other);
+    void Append(const char* other);
 
     /// @brief Returns a new string created by appending rhs string to lhs string.
     /// @param Lhs String : String to append to
     /// @param Rhs const String& : String to append
     /// @return String
-    friend String operator+(String Lhs, const String& Rhs)
+    friend String operator+(String lhs, const String& rhs)
     {
-        String Result = Lhs;
-        Result.Append(Rhs);
+        String result = lhs;
+        result.Append(rhs);
 
-        return Result;
+        return result;
     }
 
     /// @brief Returns a new string created by appending rhs cstring to lhs string.
     /// @param Lhs String : String to append to
     /// @param Rhs const char* : Cstring to append
     /// @return String
-    friend String operator+(String Lhs, const char* Rhs)
+    friend String operator+(String lhs, const char* rhs)
     {
-        String Result = Lhs;
-        Result.Append(Rhs);
+        String result = lhs;
+        result.Append(rhs);
 
-        return Result;
+        return result;
     }
 
     /// @brief Appends given string.
     /// This will resize the buffer of the current string.
     /// @param Other const String& : String to append
     /// @return String&
-    String& operator+=(const String& Other);
+    String& operator+=(const String& other);
 
     /// @brief Appends given cstring.
     /// This will resize the buffer of the current string.
     /// @param Other const char* : Cstring to append
     /// @return String&
-    String& operator+=(const char* Other);
+    String& operator+=(const char* other);
 
     /// @brief Returns the length of the string.
     /// @return size_t
@@ -169,35 +169,35 @@ public:
     /// @param Parts const csp::common::List<String>& : List to concatenate
     /// @param Separator csp::common::Optional<char> : An optional separator to add after each concatenated element
     /// @return String
-    static String Join(const List<String>& Parts, Optional<char> Separator = nullptr);
+    static String Join(const List<String>& parts, Optional<char> separator = nullptr);
 
     /// @brief Concatenates all elements in the initializer_list and returns as a string.
     /// @param Parts const std::initializer_list<String>& : initializer_list to concatenate
     /// @param Separator csp::common::Optional<char> : An optional separator to add after each concatenated element
     /// @return String
-    static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
+    static String Join(const std::initializer_list<String>& parts, Optional<char> separator = nullptr);
 
     ///  @brief Checks if the string contains the given substring.
     ///  @param Substring const String& : Substring to search for.
     ///  @return bool : Returns true if the substring is found. Always returns false if the substring is empty.
-    bool Contains(const String& Substring) const;
+    bool Contains(const String& substring) const;
 
     ///  @brief Checks if the string starts with a given substring prefix.
     ///  @param Prefix const String& : Prefix substring to search for.
     ///  @return bool : Returns true if string starts with the specified prefix substring. Always returns false if the substring is empty.
-    bool StartsWith(const String& Prefix) const;
+    bool StartsWith(const String& prefix) const;
 
     ///  @brief Checks if the string ends with a given substring postfix.
     ///  @param Postfix const String& : Postfix substring to search for.
     ///  @return bool : Returns true if string ends with the specified postfix substring. Always returns false if the substring is empty.
-    bool EndsWith(const String& Postfix) const;
+    bool EndsWith(const String& postfix) const;
 
     ///  @brief Returns a substring starting at the specified offset of the given length.
     ///  If no length is specified, the substring will extend to the end of the string.
     ///  @param Offset size_t : Offset that the required substring should start at.
     ///  @param Length size_t : Length of the required substring.
     ///  @return String : The substring.
-    String SubString(size_t Offset, Optional<size_t> Length = nullptr);
+    String SubString(size_t offset, Optional<size_t> length = nullptr);
 
 private:
     /// @brief Returns internal buffer.
@@ -206,7 +206,7 @@ private:
 
 private:
     class Impl;
-    Impl* ImplPtr;
+    Impl* m_implPtr;
 };
 
 } // namespace csp::common

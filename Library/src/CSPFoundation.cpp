@@ -83,12 +83,12 @@ namespace
 
 // We don't need these 3 functions for WASM, as we use localStorage instead of the filesystem to store the device ID
 #if !defined(CSP_WASM)
-bool FolderExists(std::string Path)
+bool FolderExists(std::string path)
 {
 #if defined(CSP_WINDOWS)
-    auto Attr = GetFileAttributesA(Path.c_str());
+    auto attr = GetFileAttributesA(path.c_str());
 
-    return (Attr != INVALID_FILE_ATTRIBUTES && (Attr & FILE_ATTRIBUTE_DIRECTORY));
+    return (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY));
 #else
     // All POSIX platforms should support stat
     struct stat Stat;
@@ -97,12 +97,12 @@ bool FolderExists(std::string Path)
 #endif
 }
 
-bool FileExists(std::string Path)
+bool FileExists(std::string path)
 {
 #if defined(CSP_WINDOWS)
-    auto Attr = GetFileAttributesA(Path.c_str());
+    auto attr = GetFileAttributesA(path.c_str());
 
-    return (Attr != INVALID_FILE_ATTRIBUTES && ((Attr & FILE_ATTRIBUTE_NORMAL) || (Attr & FILE_ATTRIBUTE_ARCHIVE)));
+    return (attr != INVALID_FILE_ATTRIBUTES && ((attr & FILE_ATTRIBUTE_NORMAL) || (attr & FILE_ATTRIBUTE_ARCHIVE)));
 #else
     struct stat Stat;
 
@@ -111,10 +111,10 @@ bool FileExists(std::string Path)
 }
 
 // Named "CreateFolder" to avoid conflicts with Win32's CreateDirectory macro
-void CreateFolder(std::string Path)
+void CreateFolder(std::string path)
 {
 #if defined(CSP_WINDOWS)
-    ::CreateDirectoryA(Path.c_str(), NULL);
+    ::CreateDirectoryA(path.c_str(), NULL);
 #else
     mkdir(Path.c_str(), 0777);
 #endif
@@ -152,14 +152,14 @@ std::string DeviceIdPath()
     // and to reduce public visibility of the file that holds the device ID
 #if defined(CSP_WINDOWS)
     // On Windows, we store the device ID in %localappdata%
-    PWSTR Path;
-    SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, 0, &Path);
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> Conv;
+    PWSTR path;
+    SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, 0, &path);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
 
-    auto CSPDataRoot = Conv.to_bytes(std::wstring(Path)) + "\\MagnopusCSP\\";
+    auto cspDataRoot = conv.to_bytes(std::wstring(path)) + "\\MagnopusCSP\\";
 
-    CoTaskMemFree(Path);
-    return CSPDataRoot;
+    CoTaskMemFree(path);
+    return cspDataRoot;
 
 #elif defined(CSP_ANDROID)
     // On Android, we store the device ID in the app's local storage directory
@@ -212,41 +212,41 @@ std::string LoadDeviceId()
 
     return DeviceIdString;
 #else
-    const std::string CSPDataRoot = DeviceIdPath();
+    const std::string cspDataRoot = DeviceIdPath();
 
-    if (!FolderExists(CSPDataRoot))
+    if (!FolderExists(cspDataRoot))
     {
-        CreateFolder(CSPDataRoot);
+        CreateFolder(cspDataRoot);
     }
 
-    auto DeviceIdFilePath = std::string(CSPDataRoot) + "device.id";
-    std::string DeviceId;
+    auto deviceIdFilePath = std::string(cspDataRoot) + "device.id";
+    std::string deviceId;
 
-    if (!FileExists(DeviceIdFilePath))
+    if (!FileExists(deviceIdFilePath))
     {
-        FILE* File = FOPEN(DeviceIdFilePath.c_str(), "w");
-        assert(File != nullptr);
+        FILE* file = FOPEN(deviceIdFilePath.c_str(), "w");
+        assert(file != nullptr);
 
-        DeviceId = csp::GenerateUUID();
+        deviceId = csp::GenerateUUID();
 
-        fwrite(DeviceId.c_str(), sizeof(char), 32, File);
-        fflush(File);
-        fclose(File);
+        fwrite(deviceId.c_str(), sizeof(char), 32, file);
+        fflush(file);
+        fclose(file);
     }
     else
     {
-        FILE* File = FOPEN(DeviceIdFilePath.c_str(), "r");
-        assert(File != nullptr);
+        FILE* file = FOPEN(deviceIdFilePath.c_str(), "r");
+        assert(file != nullptr);
 
-        char Uuid[33];
-        fread(Uuid, sizeof(char), 32, File);
-        fclose(File);
-        Uuid[32] = '\0';
+        char uuid[33];
+        fread(uuid, sizeof(char), 32, file);
+        fclose(file);
+        uuid[32] = '\0';
 
-        DeviceId = Uuid;
+        deviceId = uuid;
     }
 
-    return DeviceId;
+    return deviceId;
 #endif
 }
 
@@ -272,7 +272,7 @@ csp::common::Array<csp::FeatureFlag> csp::CSPFoundation::FeatureFlags;
 namespace
 {
     // Take the input endpoint to the cloud services, and get the multiplayer URIS
-    std::string TranslateEndpointRootURIToMultiplayerRootUri(const std::string& EndpointRootURI)
+    std::string TranslateEndpointRootURIToMultiplayerRootUri(const std::string& endpointRootUri)
     {
         /* This is not the best, we've hard encoded how the root uri and the multiplayer uri relate, which is no real guarantee.
          * We should probably take the multiplayer too separately
@@ -284,27 +284,27 @@ namespace
          */
 
         // Check if ogs exists, if so insert "-multiplayer" after it.
-        std::string MultiplayerRootURI = EndpointRootURI;
-        const std::string OgsFindTarget = "ogs";
-        const size_t OgsFindPos = MultiplayerRootURI.find(OgsFindTarget, 0);
-        if (OgsFindPos != std::string::npos)
+        std::string multiplayerRootUri = endpointRootUri;
+        const std::string ogsFindTarget = "ogs";
+        const size_t ogsFindPos = multiplayerRootUri.find(ogsFindTarget, 0);
+        if (ogsFindPos != std::string::npos)
         {
-            const std::string MultiplayerServiceInsert = "-multiplayer";
-            MultiplayerRootURI.insert(OgsFindPos + OgsFindTarget.length(), MultiplayerServiceInsert);
+            const std::string multiplayerServiceInsert = "-multiplayer";
+            multiplayerRootUri.insert(ogsFindPos + ogsFindTarget.length(), multiplayerServiceInsert);
         }
 
-        return MultiplayerRootURI;
+        return multiplayerRootUri;
     }
 
     /// @brief Find the Reverse Proxy in service URI from Services Deployment Status.
     /// e.g. 'http://localhost:8081/mag-multiplayer/hubs/v1/multiplayer' -> 'mag-multiplayer'
     /// @return csp::common::String : empty string if not successful, otherwise the remaining stting.
-    csp::common::String FindReverseProxy(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI)
+    csp::common::String FindReverseProxy(const csp::systems::ServicesDeploymentStatus& servicesDeploymentStatus, const csp::common::String& uri)
     {
-        for (auto const& Service : ServicesDeploymentStatus.Services)
+        for (auto const& service : servicesDeploymentStatus.Services)
         {
-            if (URI.Contains(Service.ReverseProxy))
-                return Service.ReverseProxy;
+            if (uri.Contains(service.ReverseProxy))
+                return service.ReverseProxy;
         }
 
         return "";
@@ -315,59 +315,59 @@ namespace
     /// @brief Tries to find the ServiceStatus for a given reverse proxy.
     /// @return csp::systems::ServiceStatus* : nullptr if not found, otherwise a pointer to the ServiceStatus.
     const csp::systems::ServiceStatus* FindServiceStatus(
-        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI)
+        const csp::systems::ServicesDeploymentStatus& servicesDeploymentStatus, const csp::common::String& uri)
     {
         // Finds the reverse proxy in the service's URI.
         // The reverse proxy is a unique identifier used to locate the service's deployment status.
-        const auto ReverseProxy = FindReverseProxy(ServicesDeploymentStatus, URI);
+        const auto reverseProxy = FindReverseProxy(servicesDeploymentStatus, uri);
 
-        const auto ServiceStatusIt = std::find_if(ServicesDeploymentStatus.Services.begin(), ServicesDeploymentStatus.Services.end(),
-            [&ReverseProxy](const csp::systems::ServiceStatus& status) { return status.ReverseProxy == ReverseProxy; });
+        const auto serviceStatusIt = std::find_if(servicesDeploymentStatus.Services.begin(), servicesDeploymentStatus.Services.end(),
+            [&reverseProxy](const csp::systems::ServiceStatus& status) { return status.ReverseProxy == reverseProxy; });
 
-        if (ServiceStatusIt == ServicesDeploymentStatus.Services.end())
+        if (serviceStatusIt == servicesDeploymentStatus.Services.end())
         {
-            const auto Message = fmt::format("Unable to resolve {} in Status Info", URI);
-            CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
+            const auto message = fmt::format("Unable to resolve {} in Status Info", uri);
+            CSP_LOG_MSG(csp::common::LogLevel::Error, message.c_str());
             return nullptr;
         }
-        return &(*ServiceStatusIt);
+        return &(*serviceStatusIt);
     }
 
     /// @brief Tries to find the VersionMetadata for an expected API version within a ServiceStatus.
     /// @return csp::systems::VersionMetadata* : nullptr if not found, otherwise a pointer to the VersionMetadata.
-    const csp::systems::VersionMetadata* FindVersionMetadata(const csp::systems::ServiceStatus& ServiceStatus, uint32_t ExpectedVersion)
+    const csp::systems::VersionMetadata* FindVersionMetadata(const csp::systems::ServiceStatus& serviceStatus, uint32_t expectedVersion)
     {
-        const auto VersionMetadataIt = std::find_if(ServiceStatus.ApiVersions.begin(), ServiceStatus.ApiVersions.end(),
-            [ExpectedVersion](const csp::systems::VersionMetadata& metadata)
-            { return metadata.Version.c_str() == fmt::format("v{}", ExpectedVersion); });
+        const auto versionMetadataIt = std::find_if(serviceStatus.ApiVersions.begin(), serviceStatus.ApiVersions.end(),
+            [expectedVersion](const csp::systems::VersionMetadata& metadata)
+            { return metadata.Version.c_str() == fmt::format("v{}", expectedVersion); });
 
-        if (VersionMetadataIt == ServiceStatus.ApiVersions.end())
+        if (versionMetadataIt == serviceStatus.ApiVersions.end())
         {
             return nullptr;
         }
-        return &(*VersionMetadataIt);
+        return &(*versionMetadataIt);
     }
 
     /// @brief Handles validation for the "retired" state of a service.
     /// @return bool : true if the service is retired (and logs fatal), false otherwise.
-    bool HandleRetiredState(const csp::systems::ServiceStatus& ServiceStatus, uint32_t CurrentVersion)
+    bool HandleRetiredState(const csp::systems::ServiceStatus& serviceStatus, uint32_t currentVersion)
     {
-        const auto Message = fmt::format("{} v{} has been retired, the latest version is {}. For more information please visit: {}",
-            ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
-        CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+        const auto message = fmt::format("{} v{} has been retired, the latest version is {}. For more information please visit: {}",
+            serviceStatus.Name, currentVersion, serviceStatus.CurrentApiVersion, DocumentationUri);
+        CSP_LOG_MSG(csp::common::LogLevel::Fatal, message.c_str());
         return true;
     }
 
     /// @brief Handles validation for the "deprecated" state of a service.
     /// @return bool : true if the service is deprecated (and logs warning), false otherwise.
     bool HandleDeprecatedState(
-        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& versionMetadata, uint32_t CurrentVersion)
+        const csp::systems::ServiceStatus& serviceStatus, const csp::systems::VersionMetadata& versionMetadata, uint32_t currentVersion)
     {
         if (!versionMetadata.DeprecationDatetime.IsEmpty())
         {
-            const auto Message = fmt::format("{} v{} will be deprecated as of {}, the latest version is {}. For more information please visit: {}",
-                ServiceStatus.Name, CurrentVersion, versionMetadata.DeprecationDatetime, ServiceStatus.CurrentApiVersion, DocumentationUri);
-            CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
+            const auto message = fmt::format("{} v{} will be deprecated as of {}, the latest version is {}. For more information please visit: {}",
+                serviceStatus.Name, currentVersion, versionMetadata.DeprecationDatetime, serviceStatus.CurrentApiVersion, DocumentationUri);
+            CSP_LOG_MSG(csp::common::LogLevel::Warning, message.c_str());
             return true;
         }
         return false;
@@ -376,13 +376,13 @@ namespace
     /// @brief Handles validation for the "available (older version)" state of a service.
     /// @return bool : true if a newer version is available (and logs info), false otherwise.
     bool HandleOlderVersionAvailableState(
-        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata, uint32_t CurrentVersion)
+        const csp::systems::ServiceStatus& serviceStatus, const csp::systems::VersionMetadata& versionMetadata, uint32_t currentVersion)
     {
-        if (VersionMetadata.Version != ServiceStatus.CurrentApiVersion)
+        if (versionMetadata.Version != serviceStatus.CurrentApiVersion)
         {
-            const auto Message = fmt::format("{} v{} is not the latest available, the latest version is {}. For more information please visit: {}",
-                ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
-            CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
+            const auto message = fmt::format("{} v{} is not the latest available, the latest version is {}. For more information please visit: {}",
+                serviceStatus.Name, currentVersion, serviceStatus.CurrentApiVersion, DocumentationUri);
+            CSP_LOG_MSG(csp::common::LogLevel::Log, message.c_str());
             return true;
         }
         return false;
@@ -390,9 +390,9 @@ namespace
 
     /// @brief Handles validation for the "latest (older version)" state of a service.
     /// @return bool : true if the latest version, false otherwise.
-    bool HandleLatestVersionState(const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata)
+    bool HandleLatestVersionState(const csp::systems::ServiceStatus& serviceStatus, const csp::systems::VersionMetadata& versionMetadata)
     {
-        if (VersionMetadata.Version == ServiceStatus.CurrentApiVersion)
+        if (versionMetadata.Version == serviceStatus.CurrentApiVersion)
         {
             return true;
         }
@@ -400,92 +400,92 @@ namespace
     }
 
     void ApplyFeatureFlagOverrides(
-        const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides, csp::common::Array<csp::FeatureFlag>& FeatureFlags)
+        const csp::common::Optional<csp::common::Array<FeatureFlag>>& featureFlagOverrides, csp::common::Array<csp::FeatureFlag>& featureFlags)
     {
-        if (!FeatureFlagOverrides.HasValue())
+        if (!featureFlagOverrides.HasValue())
         {
             return;
         }
 
-        for (const auto& OverrideFlag : *FeatureFlagOverrides)
+        for (const auto& overrideFlag : *featureFlagOverrides)
         {
-            bool FeatureFlagFound = false;
-            for (auto& Flag : FeatureFlags)
+            bool featureFlagFound = false;
+            for (auto& flag : featureFlags)
             {
-                if (Flag.Type == OverrideFlag.Type)
+                if (flag.Type == overrideFlag.Type)
                 {
-                    Flag.Enabled = OverrideFlag.Enabled;
-                    FeatureFlagFound = true;
+                    flag.Enabled = overrideFlag.Enabled;
+                    featureFlagFound = true;
                     break;
                 }
             }
-            if (!FeatureFlagFound)
+            if (!featureFlagFound)
             {
                 CSP_LOG_MSG(csp::common::LogLevel::Warning,
-                    fmt::format("Unknown feature flag passed with integer value: {}", static_cast<int>(OverrideFlag.Type)).c_str());
+                    fmt::format("Unknown feature flag passed with integer value: {}", static_cast<int>(overrideFlag.Type)).c_str());
             }
         }
     }
 }
 
-EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI)
+EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& endpointRootUri)
 {
     // remove last char if a slash
-    std::string RootURI(EndpointRootURI.c_str());
-    while (RootURI.rbegin() != RootURI.rend() && (*RootURI.rbegin() == '\\' || *RootURI.rbegin() == '/'))
+    std::string rootUri(endpointRootUri.c_str());
+    while (rootUri.rbegin() != rootUri.rend() && (*rootUri.rbegin() == '\\' || *rootUri.rbegin() == '/'))
     {
-        RootURI.resize(RootURI.length() - 1);
+        rootUri.resize(rootUri.length() - 1);
     }
 
-    const std::string UserServiceURI = RootURI + "/mag-user";
-    const std::string PrototypeServiceURI = RootURI + "/mag-prototype";
-    const std::string SpatialDataServiceURI = RootURI + "/mag-spatialdata";
-    const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
-    const std::string TrackingServiceURI = RootURI + "/mag-tracking";
+    const std::string userServiceUri = rootUri + "/mag-user";
+    const std::string prototypeServiceUri = rootUri + "/mag-prototype";
+    const std::string spatialDataServiceUri = rootUri + "/mag-spatialdata";
+    const std::string aggregationServiceUri = rootUri + "/oly-aggregation";
+    const std::string trackingServiceUri = rootUri + "/mag-tracking";
 
-    const std::string MultiplayerRootURI = TranslateEndpointRootURIToMultiplayerRootUri(RootURI);
+    const std::string multiplayerRootUri = TranslateEndpointRootURIToMultiplayerRootUri(rootUri);
 
-    const std::string MultiplayerConnectionURI = MultiplayerRootURI + "/mag-multiplayer/hubs/v1/multiplayer";
-    const std::string MultiplayerServiceURI = MultiplayerRootURI + "/mag-multiplayer";
+    const std::string multiplayerConnectionUri = multiplayerRootUri + "/mag-multiplayer/hubs/v1/multiplayer";
+    const std::string multiplayerServiceUri = multiplayerRootUri + "/mag-multiplayer";
 
-    EndpointURIs EndpointsURI;
-    EndpointsURI.UserService = ServiceDefinition(CSP_TEXT(UserServiceURI.c_str()), 1U);
-    EndpointsURI.PrototypeService = ServiceDefinition(CSP_TEXT(PrototypeServiceURI.c_str()), 1U);
-    EndpointsURI.SpatialDataService = ServiceDefinition(CSP_TEXT(SpatialDataServiceURI.c_str()), 1U);
-    EndpointsURI.AggregationService = ServiceDefinition(CSP_TEXT(AggregationServiceURI.c_str()), 1U);
-    EndpointsURI.TrackingService = ServiceDefinition(CSP_TEXT(TrackingServiceURI.c_str()), 1U);
-    EndpointsURI.MultiplayerService = ServiceDefinition(CSP_TEXT(MultiplayerServiceURI.c_str()), 1U);
-    EndpointsURI.MultiplayerConnection = ServiceDefinition(CSP_TEXT(MultiplayerConnectionURI.c_str()), 1U);
+    EndpointURIs endpointsUri;
+    endpointsUri.UserService = ServiceDefinition(CSP_TEXT(userServiceUri.c_str()), 1U);
+    endpointsUri.PrototypeService = ServiceDefinition(CSP_TEXT(prototypeServiceUri.c_str()), 1U);
+    endpointsUri.SpatialDataService = ServiceDefinition(CSP_TEXT(spatialDataServiceUri.c_str()), 1U);
+    endpointsUri.AggregationService = ServiceDefinition(CSP_TEXT(aggregationServiceUri.c_str()), 1U);
+    endpointsUri.TrackingService = ServiceDefinition(CSP_TEXT(trackingServiceUri.c_str()), 1U);
+    endpointsUri.MultiplayerService = ServiceDefinition(CSP_TEXT(multiplayerServiceUri.c_str()), 1U);
+    endpointsUri.MultiplayerConnection = ServiceDefinition(CSP_TEXT(multiplayerConnectionUri.c_str()), 1U);
 
-    return EndpointsURI;
+    return endpointsUri;
 }
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
-    const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
+bool CSPFoundation::Initialise(const csp::common::String& endpointRootUri, const csp::common::String& inTenant,
+    const csp::ClientUserAgent& clientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& featureFlagOverrides)
 {
     // Nullptr means the signalRConnection will be internally instantiated
-    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, nullptr, FeatureFlagOverrides);
+    return InitialiseWithInject(endpointRootUri, inTenant, clientUserAgentHeader, nullptr, nullptr, featureFlagOverrides);
 }
 
-bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
-    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject,
-    const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
+bool CSPFoundation::InitialiseWithInject(const csp::common::String& endpointRootUri, const csp::common::String& inTenant,
+    const csp::ClientUserAgent& clientUserAgentHeader, csp::multiplayer::ISignalRConnection* signalRInject, csp::web::WebClient* webClientInject,
+    const csp::common::Optional<csp::common::Array<FeatureFlag>>& featureFlagOverrides)
 {
     assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
 
-    Tenant = new csp::common::String(InTenant);
+    Tenant = new csp::common::String(inTenant);
 
-    Endpoints = new EndpointURIs(CreateEndpointsFromRoot(EndpointRootURI));
+    Endpoints = new EndpointURIs(CreateEndpointsFromRoot(endpointRootUri));
     ClientUserAgentInfo = new ClientUserAgent();
     DeviceId = new csp::common::String("");
     ClientUserAgentString = new csp::common::String("");
 
-    SetClientUserAgentInfo(ClientUserAgentHeader);
+    SetClientUserAgentInfo(clientUserAgentHeader);
 
     // Apply feature flag overrides
-    ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
+    ApplyFeatureFlagOverrides(featureFlagOverrides, FeatureFlags);
 
-    csp::systems::SystemsManager::Instantiate(SignalRInject, WebClientInject);
+    csp::systems::SystemsManager::Instantiate(signalRInject, webClientInject);
 
     *DeviceId = LoadDeviceId().c_str();
     IsInitialised = true;
@@ -525,31 +525,31 @@ void CSPFoundation::Tick()
 
     CSP_PROFILE_SCOPED();
 
-    csp::events::Event* TickEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::FOUNDATION_TICK_EVENT_ID);
-    csp::events::EventSystem::Get().EnqueueEvent(TickEvent);
+    csp::events::Event* tickEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::FOUNDATION_TICK_EVENT_ID);
+    csp::events::EventSystem::Get().EnqueueEvent(tickEvent);
 
     csp::events::EventSystem::Get().ProcessEvents();
 }
 
 const csp::common::String& CSPFoundation::GetVersion()
 {
-    static csp::common::String Version(CSP_FOUNDATION_COMMIT_ID);
+    static csp::common::String version(CSP_FOUNDATION_COMMIT_ID);
 
-    return Version;
+    return version;
 }
 
 const csp::common::String& CSPFoundation::GetBuildType()
 {
-    static csp::common::String BuildType(CSP_FOUNDATION_BUILD_TYPE);
+    static csp::common::String buildType(CSP_FOUNDATION_BUILD_TYPE);
 
-    return BuildType;
+    return buildType;
 }
 
 const csp::common::String& CSPFoundation::GetBuildID()
 {
-    static csp::common::String BuildID(CSP_FOUNDATION_BUILD_ID);
+    static csp::common::String buildId(CSP_FOUNDATION_BUILD_ID);
 
-    return BuildID;
+    return buildId;
 }
 
 const csp::common::String& CSPFoundation::GetDeviceId() { return *DeviceId; }
@@ -564,9 +564,9 @@ const csp::common::String& CSPFoundation::GetClientUserAgentString() { return *C
 
 const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
-bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
+bool CSPFoundation::IsFeatureEnabled(EFeatureFlag flag)
 {
-    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [flag](const FeatureFlag& featureFlag) { return featureFlag.Type == flag; });
 
     if (it != FeatureFlags.end())
     {
@@ -575,7 +575,7 @@ bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
     else
     {
         CSP_LOG_MSG(
-            csp::common::LogLevel::Warning, fmt::format("Unknown feature flag queried with integer value: {}", static_cast<int>(Flag)).c_str());
+            csp::common::LogLevel::Warning, fmt::format("Unknown feature flag queried with integer value: {}", static_cast<int>(flag)).c_str());
 
         return false;
     }
@@ -583,9 +583,9 @@ bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
 
 const csp::common::Array<FeatureFlag>& CSPFoundation::GetFeatureFlags() { return FeatureFlags; }
 
-csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag Flag)
+csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag flag)
 {
-    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [flag](const FeatureFlag& featureFlag) { return featureFlag.Type == flag; });
 
     if (it != FeatureFlags.end())
     {
@@ -594,43 +594,43 @@ csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag Flag)
     else
     {
         CSP_LOG_MSG(csp::common::LogLevel::Warning,
-            fmt::format("Unknown feature flag description requested with integer value: {}", static_cast<int>(Flag)).c_str());
+            fmt::format("Unknown feature flag description requested with integer value: {}", static_cast<int>(flag)).c_str());
 
         return "";
     }
 }
 
-void CSPFoundation::__AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled, const csp::common::String Description)
+void CSPFoundation::__AddFeatureFlagForTesting(EFeatureFlag type, bool isEnabled, const csp::common::String description)
 {
-    csp::common::Array<FeatureFlag> NewFeatureFlags(FeatureFlags.Size() + 1);
+    csp::common::Array<FeatureFlag> newFeatureFlags(FeatureFlags.Size() + 1);
 
     for (size_t i = 0; i < FeatureFlags.Size(); i++)
     {
-        NewFeatureFlags[i] = FeatureFlags[i];
+        newFeatureFlags[i] = FeatureFlags[i];
     }
 
-    NewFeatureFlags[FeatureFlags.Size()] = { Type, IsEnabled, Description };
+    newFeatureFlags[FeatureFlags.Size()] = { type, isEnabled, description };
 
-    FeatureFlags = NewFeatureFlags;
+    FeatureFlags = newFeatureFlags;
 }
 
 void CSPFoundation::__ResetFeatureFlagsForTesting() { CSPFoundation::FeatureFlags = csp::common::Array<csp::FeatureFlag>(); }
 
-bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
+bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& servicesDeploymentStatus) const
 {
     // Evaluate State: Service Not Found (Highest Priority)
     // Attempt to find the overall status of the service within the provided deployment status.
     // If the service's reverse proxy is not found in the deployment status,
     // it implies the service is not deployed or recognized by the system.
     // This is a critical failure, and the prerequisite check immediately returns false.
-    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, this->GetURI());
-    if (!ServiceStatus)
+    const auto serviceStatus = FindServiceStatus(servicesDeploymentStatus, this->GetURI());
+    if (!serviceStatus)
     {
         return false;
     }
 
     // Retrieve the specific version metadata for this service definition's version.
-    const auto VersionMetadata = FindVersionMetadata(*ServiceStatus, this->GetVersion());
+    const auto versionMetadata = FindVersionMetadata(*serviceStatus, this->GetVersion());
 
     // Evaluate State: Retired (Second Highest Priority)
     // A service version is considered 'retired' if the currently expected version
@@ -638,9 +638,9 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // in the live service's API versions. This often means the version has been
     // completely removed from the live environment and is no longer operational.
     // This is a fatal condition, and the prerequisite check immediately returns false.
-    if (!VersionMetadata)
+    if (!versionMetadata)
     {
-        HandleRetiredState(*ServiceStatus, this->GetVersion());
+        HandleRetiredState(*serviceStatus, this->GetVersion());
         return false;
     }
 
@@ -651,7 +651,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // and clients should migrate to a newer version.
     // For prerequisite checks, a deprecated service is generally still considered
     // 'valid enough to run', but a warning is logged to inform the user.
-    if (HandleDeprecatedState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
+    if (HandleDeprecatedState(*serviceStatus, *versionMetadata, this->GetVersion()))
     {
         return true;
     }
@@ -661,7 +661,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // but is not the absolute latest version available on the live system.
     // It implies there's a newer, fully supported version that clients could upgrade to.
     // This is typically an informational message, not a blocking error for prerequisites.
-    if (HandleOlderVersionAvailableState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
+    if (HandleOlderVersionAvailableState(*serviceStatus, *versionMetadata, this->GetVersion()))
     {
         return true;
     }
@@ -670,7 +670,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // If none of the above conditions (service not found, retired, deprecated, or older version)
     // are met, then the service's current version is the latest and fully supported version
     // available on the live system. This is the ideal and expected state.
-    if (HandleLatestVersionState(*ServiceStatus, *VersionMetadata))
+    if (HandleLatestVersionState(*serviceStatus, *versionMetadata))
     {
         return true;
     }
@@ -680,27 +680,27 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     return false;
 }
 
-void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
+void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& clientUserAgentHeader)
 {
-    ClientUserAgentInfo->CSPVersion = CSP_TEXT(ClientUserAgentHeader.CSPVersion);
-    ClientUserAgentInfo->ClientOS = CSP_TEXT(ClientUserAgentHeader.ClientOS);
-    ClientUserAgentInfo->ClientSKU = CSP_TEXT(ClientUserAgentHeader.ClientSKU);
-    ClientUserAgentInfo->ClientVersion = CSP_TEXT(ClientUserAgentHeader.ClientVersion);
-    ClientUserAgentInfo->ClientEnvironment = CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
-    ClientUserAgentInfo->CHSEnvironment = CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
-    const char* ClientUserAgentHeaderFormat = "%s/%s(%s) CSP/%s(%s) CHS(%s) CSP/%s(%s)";
+    ClientUserAgentInfo->CSPVersion = CSP_TEXT(clientUserAgentHeader.CSPVersion);
+    ClientUserAgentInfo->ClientOS = CSP_TEXT(clientUserAgentHeader.ClientOS);
+    ClientUserAgentInfo->ClientSKU = CSP_TEXT(clientUserAgentHeader.ClientSKU);
+    ClientUserAgentInfo->ClientVersion = CSP_TEXT(clientUserAgentHeader.ClientVersion);
+    ClientUserAgentInfo->ClientEnvironment = CSP_TEXT(clientUserAgentHeader.ClientEnvironment);
+    ClientUserAgentInfo->CHSEnvironment = CSP_TEXT(clientUserAgentHeader.CHSEnvironment);
+    const char* clientUserAgentHeaderFormat = "%s/%s(%s) CSP/%s(%s) CHS(%s) CSP/%s(%s)";
 
-    *ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat, GetClientUserAgentInfo().ClientSKU.c_str(),
+    *ClientUserAgentString = csp::common::StringFormat(clientUserAgentHeaderFormat, GetClientUserAgentInfo().ClientSKU.c_str(),
         GetClientUserAgentInfo().ClientVersion.c_str(), GetClientUserAgentInfo().ClientEnvironment.c_str(), GetVersion().c_str(),
         GetBuildType().c_str(), GetClientUserAgentInfo().CHSEnvironment.c_str(), GetClientUserAgentInfo().CSPVersion.c_str(),
         GetClientUserAgentInfo().ClientOS.c_str());
 }
 
-void Free(void* Pointer) { std::free(Pointer); }
+void Free(void* pointer) { std::free(pointer); }
 
 void* ModuleHandle = nullptr;
 
-void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
+void* GetFunctionAddress([[maybe_unused]] const csp::common::String& name)
 {
 #if defined(CSP_WASM)
     return nullptr;
@@ -711,7 +711,7 @@ void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
         assert(ModuleHandle != nullptr);
     }
 
-    return GET_FUNCTION_ADDRESS(ModuleHandle, Name.c_str());
+    return GET_FUNCTION_ADDRESS(ModuleHandle, name.c_str());
 #endif
 }
 

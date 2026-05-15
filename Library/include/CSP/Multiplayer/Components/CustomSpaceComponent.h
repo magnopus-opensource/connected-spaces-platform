@@ -45,7 +45,7 @@ public:
 
     /// @brief Constructs the custom space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CustomSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets a string that identifies the application origin.
     /// @return The application origin for which this component has been generated.
@@ -53,26 +53,26 @@ public:
 
     /// @brief Sets a string that identifies the application origin.
     /// @param Value The application origin for which this component has been generated.
-    void SetApplicationOrigin(const csp::common::String& Value);
+    void SetApplicationOrigin(const csp::common::String& value);
 
     /// @brief Checks if the property with the specified Key exists in the list of replicated properties.
     /// @param Key Uniquely identifies the property for which the check is performed.
     /// @return True if the property with the specified Key exists in the list of replicated properties, false otherwise.
-    bool HasCustomProperty(const csp::common::String& Key) const;
+    bool HasCustomProperty(const csp::common::String& key) const;
 
     /// @brief Retrieves the replicated value of the property identified by the specified Key.
     /// @param Key The ID of the property of which the value will be retrieved.
     /// @return The value of the property identified by the provided Key.
-    const csp::common::ReplicatedValue& GetCustomProperty(const csp::common::String& Key) const;
+    const csp::common::ReplicatedValue& GetCustomProperty(const csp::common::String& key) const;
 
     /// @brief Sets a custom property by specifying a unique Key and its relative property Value.
     /// @param Key Uniquely identifies this new property.
     /// @param Value The value to store for this new property.
-    void SetCustomProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value);
+    void SetCustomProperty(const csp::common::String& key, const csp::common::ReplicatedValue& value);
 
     /// @brief Removes the specified property by Key.
     /// @param Key The ID of the property that will be removed.
-    void RemoveCustomProperty(const csp::common::String& Key);
+    void RemoveCustomProperty(const csp::common::String& key);
 
     /// @brief Retrieves the list of all the keys of the properties available in the list of replicated values.
     /// @return The list of available property keys.
@@ -85,11 +85,11 @@ public:
     /// @brief Returns the hash of the provided Key.
     /// @param Key The key for which an hash will be produced.
     /// @return The resulting hash for the provided Key.
-    uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& Key) const;
+    uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& key) const;
 
 private:
-    void AddKey(const csp::common::String& Key);
-    void RemoveKey(const csp::common::String& Key);
+    void AddKey(const csp::common::String& key);
+    void RemoveKey(const csp::common::String& key);
 };
 
 } // namespace csp::multiplayer

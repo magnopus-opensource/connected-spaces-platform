@@ -25,17 +25,17 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, DefaultFeatureFlagTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    const csp::EFeatureFlag TEST_FLAG_A = static_cast<csp::EFeatureFlag>(9001);
-    const csp::EFeatureFlag TEST_FLAG_B = static_cast<csp::EFeatureFlag>(9002);
-    const csp::EFeatureFlag TEST_FLAG_C = static_cast<csp::EFeatureFlag>(9003);
+    const csp::EFeatureFlag testFlagA = static_cast<csp::EFeatureFlag>(9001);
+    const csp::EFeatureFlag testFlagB = static_cast<csp::EFeatureFlag>(9002);
+    const csp::EFeatureFlag testFlagC = static_cast<csp::EFeatureFlag>(9003);
 
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_A, false, "Description for Test Flag A - initialized: false");
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_B, true, "Description for Test Flag B - initialized: true");
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_C, false, "Description for Test Flag C - initialized: false");
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagA, false, "Description for Test Flag A - initialized: false");
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagB, true, "Description for Test Flag B - initialized: true");
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagC, false, "Description for Test Flag C - initialized: false");
 
-    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_A));
-    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_B));
-    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_C));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(testFlagA));
+    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(testFlagB));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(testFlagC));
 
     csp::CSPFoundation::Shutdown();
 }
@@ -44,24 +44,24 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, CreateFeatureFlagTest)
 {
     csp::CSPFoundation::__ResetFeatureFlagsForTesting();
 
-    const csp::EFeatureFlag TEST_FLAG_A = static_cast<csp::EFeatureFlag>(9001);
-    const csp::EFeatureFlag TEST_FLAG_B = static_cast<csp::EFeatureFlag>(9002);
+    const csp::EFeatureFlag testFlagA = static_cast<csp::EFeatureFlag>(9001);
+    const csp::EFeatureFlag testFlagB = static_cast<csp::EFeatureFlag>(9002);
 
-    const csp::common::String FlagDescriptionA = "Description for Test Flag A - initialized: false";
-    const csp::common::String FlagDescriptionB = "Description for Test Flag B - initialized: false";
+    const csp::common::String flagDescriptionA = "Description for Test Flag A - initialized: false";
+    const csp::common::String flagDescriptionB = "Description for Test Flag B - initialized: false";
 
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_A, false, FlagDescriptionA);
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_B, false, FlagDescriptionB);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagA, false, flagDescriptionA);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagB, false, flagDescriptionB);
 
-    csp::common::Array<csp::FeatureFlag> FeatureFlags = { { TEST_FLAG_A, true }, { TEST_FLAG_B, false } };
+    csp::common::Array<csp::FeatureFlag> featureFlags = { { testFlagA, true }, { testFlagB, false } };
 
-    InitialiseFoundationWithUserAgentInfoAndFeatureFlags(EndpointBaseURI(), FeatureFlags);
+    InitialiseFoundationWithUserAgentInfoAndFeatureFlags(EndpointBaseURI(), featureFlags);
 
-    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_A));
-    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_B));
+    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(testFlagA));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(testFlagB));
 
-    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_A), FlagDescriptionA);
-    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_B), FlagDescriptionB);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(testFlagA), flagDescriptionA);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(testFlagB), flagDescriptionB);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -84,15 +84,15 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagIsEnabledTest)
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
 
         // Ensure the required 'unknown feature flag' error message is logged when we try to check the enabled state of an invlaid flag
-        const csp::common::String IsEnabledErrorMsg = "Unknown feature flag queried with integer value: 9999";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, IsEnabledErrorMsg)).Times(1);
+        const csp::common::String isEnabledErrorMsg = "Unknown feature flag queried with integer value: 9999";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, isEnabledErrorMsg)).Times(1);
 
-        const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
+        const csp::EFeatureFlag unknownTestFlag = static_cast<csp::EFeatureFlag>(9999);
 
-        ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(UNKNOWN_TEST_FLAG));
+        ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(unknownTestFlag));
     }
 
     csp::CSPFoundation::Shutdown();
@@ -104,13 +104,13 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, GetFeatureFlagDescriptionTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    const csp::EFeatureFlag TEST_FLAG_A = static_cast<csp::EFeatureFlag>(9001);
+    const csp::EFeatureFlag testFlagA = static_cast<csp::EFeatureFlag>(9001);
 
-    const csp::common::String FlagDescription = "Description for Test Flag A - initialized: false";
+    const csp::common::String flagDescription = "Description for Test Flag A - initialized: false";
 
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_A, false, FlagDescription);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagA, false, flagDescription);
 
-    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_A), FlagDescription);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(testFlagA), flagDescription);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -122,15 +122,15 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagDescriptionTest)
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
 
         // Ensure the required 'unknown feature flag' error message is logged when we try to get a description for an invlaid flag
-        const csp::common::String IsEnabledErrorMsg = "Unknown feature flag description requested with integer value: 9999";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, IsEnabledErrorMsg)).Times(1);
+        const csp::common::String isEnabledErrorMsg = "Unknown feature flag description requested with integer value: 9999";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, isEnabledErrorMsg)).Times(1);
 
-        const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
+        const csp::EFeatureFlag unknownTestFlag = static_cast<csp::EFeatureFlag>(9999);
 
-        ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(UNKNOWN_TEST_FLAG), "");
+        ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(unknownTestFlag), "");
     }
 
     csp::CSPFoundation::Shutdown();
@@ -142,37 +142,37 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, GetFeatureFlagsTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto CurrentFeatureFlags = csp::CSPFoundation::GetFeatureFlags();
+    auto currentFeatureFlags = csp::CSPFoundation::GetFeatureFlags();
 
-    ASSERT_EQ(CurrentFeatureFlags.Size(), 0);
+    ASSERT_EQ(currentFeatureFlags.Size(), 0);
 
-    const csp::EFeatureFlag TEST_FLAG_A = static_cast<csp::EFeatureFlag>(9001);
-    const csp::EFeatureFlag TEST_FLAG_B = static_cast<csp::EFeatureFlag>(9002);
-    const csp::EFeatureFlag TEST_FLAG_C = static_cast<csp::EFeatureFlag>(9003);
+    const csp::EFeatureFlag testFlagA = static_cast<csp::EFeatureFlag>(9001);
+    const csp::EFeatureFlag testFlagB = static_cast<csp::EFeatureFlag>(9002);
+    const csp::EFeatureFlag testFlagC = static_cast<csp::EFeatureFlag>(9003);
 
-    const csp::common::String FlagDescriptionA = "Description for Test Flag A - initialized: false";
-    const csp::common::String FlagDescriptionB = "Description for Test Flag B - initialized: true";
-    const csp::common::String FlagDescriptionC = "Description for Test Flag C - initialized: false";
+    const csp::common::String flagDescriptionA = "Description for Test Flag A - initialized: false";
+    const csp::common::String flagDescriptionB = "Description for Test Flag B - initialized: true";
+    const csp::common::String flagDescriptionC = "Description for Test Flag C - initialized: false";
 
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_A, false, FlagDescriptionA);
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_B, true, FlagDescriptionB);
-    csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_C, false, FlagDescriptionC);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagA, false, flagDescriptionA);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagB, true, flagDescriptionB);
+    csp::CSPFoundation::__AddFeatureFlagForTesting(testFlagC, false, flagDescriptionC);
 
-    auto UpdatedFeatureFlags = csp::CSPFoundation::GetFeatureFlags();
+    auto updatedFeatureFlags = csp::CSPFoundation::GetFeatureFlags();
 
-    ASSERT_EQ(UpdatedFeatureFlags.Size(), 3);
+    ASSERT_EQ(updatedFeatureFlags.Size(), 3);
 
-    ASSERT_EQ(UpdatedFeatureFlags[0].Type, TEST_FLAG_A);
-    ASSERT_EQ(UpdatedFeatureFlags[0].Enabled, false);
-    ASSERT_EQ(UpdatedFeatureFlags[0].GetDescription(), FlagDescriptionA);
+    ASSERT_EQ(updatedFeatureFlags[0].Type, testFlagA);
+    ASSERT_EQ(updatedFeatureFlags[0].Enabled, false);
+    ASSERT_EQ(updatedFeatureFlags[0].GetDescription(), flagDescriptionA);
 
-    ASSERT_EQ(UpdatedFeatureFlags[1].Type, TEST_FLAG_B);
-    ASSERT_EQ(UpdatedFeatureFlags[1].Enabled, true);
-    ASSERT_EQ(UpdatedFeatureFlags[1].GetDescription(), FlagDescriptionB);
+    ASSERT_EQ(updatedFeatureFlags[1].Type, testFlagB);
+    ASSERT_EQ(updatedFeatureFlags[1].Enabled, true);
+    ASSERT_EQ(updatedFeatureFlags[1].GetDescription(), flagDescriptionB);
 
-    ASSERT_EQ(UpdatedFeatureFlags[2].Type, TEST_FLAG_C);
-    ASSERT_EQ(UpdatedFeatureFlags[2].Enabled, false);
-    ASSERT_EQ(UpdatedFeatureFlags[2].GetDescription(), FlagDescriptionC);
+    ASSERT_EQ(updatedFeatureFlags[2].Type, testFlagC);
+    ASSERT_EQ(updatedFeatureFlags[2].Enabled, false);
+    ASSERT_EQ(updatedFeatureFlags[2].GetDescription(), flagDescriptionC);
 
     csp::CSPFoundation::Shutdown();
 }

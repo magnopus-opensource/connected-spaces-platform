@@ -43,5 +43,5 @@ public:
 
 }
 
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::systems::mcs::SceneData& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::mcs::SceneData& Obj);
+void ToJson(csp::json::JsonSerializer& deserializer, const csp::systems::mcs::SceneData& obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::mcs::SceneData& obj);

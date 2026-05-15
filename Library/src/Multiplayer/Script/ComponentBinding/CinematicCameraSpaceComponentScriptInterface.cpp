@@ -23,11 +23,11 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-CinematicCameraSpaceComponentScriptInterface::CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+CinematicCameraSpaceComponentScriptInterface::CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 
-float CinematicCameraSpaceComponentScriptInterface::GetFov() { return static_cast<CinematicCameraSpaceComponent*>(Component)->GetFov(); }
+float CinematicCameraSpaceComponentScriptInterface::GetFov() { return static_cast<CinematicCameraSpaceComponent*>(m_component)->GetFov(); }
 
 } // namespace csp::multiplayer

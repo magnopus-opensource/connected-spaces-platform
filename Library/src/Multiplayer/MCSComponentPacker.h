@@ -33,13 +33,13 @@ class ComponentBase;
 class MCSComponentPacker
 {
 public:
-    template <class T> void WriteValue(uint16_t Key, const T& Value);
-    template <class T> void WriteValue(SpaceEntityComponentKey Key, const T& Value);
+    template <class T> void WriteValue(uint16_t key, const T& value);
+    template <class T> void WriteValue(SpaceEntityComponentKey key, const T& value);
 
     const std::map<uint16_t, mcs::ItemComponentData>& GetComponents() const;
 
 private:
-    std::map<uint16_t, mcs::ItemComponentData> Components;
+    std::map<uint16_t, mcs::ItemComponentData> m_components;
 };
 
 /// @brief Helper class to convert mcs domain types to csp types.
@@ -47,53 +47,53 @@ private:
 class MCSComponentUnpacker
 {
 public:
-    MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& Components);
+    MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& components);
 
-    bool TryReadValue(uint16_t Key, csp::common::ReplicatedValue& Value) const;
+    bool TryReadValue(uint16_t key, csp::common::ReplicatedValue& value) const;
 
     // Gets the count of all csp runtime components, excluding view components.
     uint64_t GetRuntimeComponentsCount() const;
 
 private:
-    std::map<uint16_t, mcs::ItemComponentData> Components;
+    std::map<uint16_t, mcs::ItemComponentData> m_components;
 };
 
-template <class T> inline void MCSComponentPacker::WriteValue(SpaceEntityComponentKey Key, const T& Value)
+template <class T> inline void MCSComponentPacker::WriteValue(SpaceEntityComponentKey key, const T& value)
 {
-    WriteValue(static_cast<uint16_t>(Key), Value);
+    WriteValue(static_cast<uint16_t>(key), value);
 }
 
-template <typename T> csp::common::ReplicatedValue ToReplicatedValue(const T& Value) { return csp::common::ReplicatedValue { Value }; }
+template <typename T> csp::common::ReplicatedValue ToReplicatedValue(const T& value) { return csp::common::ReplicatedValue { value }; }
 
-template <typename T> std::enable_if_t<std::is_enum_v<T>, csp::common::ReplicatedValue> inline ToReplicatedValue(const T& Value)
+template <typename T> std::enable_if_t<std::is_enum_v<T>, csp::common::ReplicatedValue> inline ToReplicatedValue(const T& value)
 {
-    return csp::common::ReplicatedValue { static_cast<int64_t>(Value) };
+    return csp::common::ReplicatedValue { static_cast<int64_t>(value) };
 }
 
 csp::common::ReplicatedValue ToReplicatedValue(double);
-csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value);
-csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value);
-csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value);
-csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Value);
+csp::common::ReplicatedValue ToReplicatedValue(uint64_t value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::string& value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& value);
+csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& value);
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&);
-csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& value);
 
-mcs::ItemComponentData ToItemComponentData(ComponentBase* Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::ReplicatedValue& Value);
-mcs::ItemComponentData ToItemComponentData(bool Value);
-mcs::ItemComponentData ToItemComponentData(uint64_t Value);
-mcs::ItemComponentData ToItemComponentData(int64_t Value);
-mcs::ItemComponentData ToItemComponentData(float Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& Value);
-mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
+mcs::ItemComponentData ToItemComponentData(ComponentBase* value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::ReplicatedValue& value);
+mcs::ItemComponentData ToItemComponentData(bool value);
+mcs::ItemComponentData ToItemComponentData(uint64_t value);
+mcs::ItemComponentData ToItemComponentData(int64_t value);
+mcs::ItemComponentData ToItemComponentData(float value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::String& value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& value);
 
-template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = ToItemComponentData(Value); }
+template <class T> inline void MCSComponentPacker::WriteValue(uint16_t key, const T& value) { m_components[key] = ToItemComponentData(value); }
 
-template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T Value)
+template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T value)
 {
-    return ToItemComponentData(static_cast<uint64_t>(Value));
+    return ToItemComponentData(static_cast<uint64_t>(value));
 }
 }

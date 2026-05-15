@@ -55,48 +55,48 @@ std::string FormatTimeInMillisAsSeconds(testing::internal::TimeInMillis ms)
 
 std::string FormatEpochTimeInMillisAsIso8601(testing::internal::TimeInMillis ms)
 {
-    struct tm time_struct;
-    if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
+    struct tm timeStruct;
+    if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &timeStruct))
         return "";
     // YYYY-MM-DDThh:mm:ss.sss
-    return testing::internal::StreamableToString(time_struct.tm_year + 1900) + "-"
-        + testing::internal::String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" + testing::internal::String::FormatIntWidth2(time_struct.tm_mday)
-        + "T" + testing::internal::String::FormatIntWidth2(time_struct.tm_hour) + ":" + testing::internal::String::FormatIntWidth2(time_struct.tm_min)
-        + ":" + testing::internal::String::FormatIntWidth2(time_struct.tm_sec) + "."
+    return testing::internal::StreamableToString(timeStruct.tm_year + 1900) + "-"
+        + testing::internal::String::FormatIntWidth2(timeStruct.tm_mon + 1) + "-" + testing::internal::String::FormatIntWidth2(timeStruct.tm_mday)
+        + "T" + testing::internal::String::FormatIntWidth2(timeStruct.tm_hour) + ":" + testing::internal::String::FormatIntWidth2(timeStruct.tm_min)
+        + ":" + testing::internal::String::FormatIntWidth2(timeStruct.tm_sec) + "."
         + testing::internal::String::FormatIntWidthN(static_cast<int>(ms % 1000), 3);
 }
 
-void TestListener::OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*iteration*/)
+void TestListener::OnTestIterationEnd(const testing::UnitTest& unitTest, int /*iteration*/)
 {
     std::stringstream ss;
 
     ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    ss << "<testsuites tests=\"" << UnitTest.reportable_test_count() << "\" failures=\"" << UnitTest.failed_test_count()
-       << "\" disabled=\"0\" errors=\"0\" time=\"" << FormatTimeInMillisAsSeconds(UnitTest.elapsed_time()) << "\" timestamp=\""
-       << FormatEpochTimeInMillisAsIso8601(UnitTest.start_timestamp()) << "\" name =\"AllTests\">\n";
+    ss << "<testsuites tests=\"" << unitTest.reportable_test_count() << "\" failures=\"" << unitTest.failed_test_count()
+       << "\" disabled=\"0\" errors=\"0\" time=\"" << FormatTimeInMillisAsSeconds(unitTest.elapsed_time()) << "\" timestamp=\""
+       << FormatEpochTimeInMillisAsIso8601(unitTest.start_timestamp()) << "\" name =\"AllTests\">\n";
 
-    int SuiteCount = UnitTest.total_test_suite_count();
+    int suiteCount = unitTest.total_test_suite_count();
 
-    for (int i = 0; i < SuiteCount; ++i)
+    for (int i = 0; i < suiteCount; ++i)
     {
-        const testing::TestSuite* Suite = UnitTest.GetTestSuite(i);
+        const testing::TestSuite* suite = unitTest.GetTestSuite(i);
 
-        ss << "  <testsuite name=\"" << Suite->name() << "\" tests=\"" << Suite->total_test_count() << "\" failures=\"" << Suite->failed_test_count()
-           << "\" disabled=\"0\" skipped=\"0\" errors=\"0\" time=\"" << FormatTimeInMillisAsSeconds(Suite->elapsed_time()) << "\" timestamp=\""
-           << FormatEpochTimeInMillisAsIso8601(Suite->start_timestamp()) << "\" classname=\"" << Suite->name() << "\">\n";
+        ss << "  <testsuite name=\"" << suite->name() << "\" tests=\"" << suite->total_test_count() << "\" failures=\"" << suite->failed_test_count()
+           << "\" disabled=\"0\" skipped=\"0\" errors=\"0\" time=\"" << FormatTimeInMillisAsSeconds(suite->elapsed_time()) << "\" timestamp=\""
+           << FormatEpochTimeInMillisAsIso8601(suite->start_timestamp()) << "\" classname=\"" << suite->name() << "\">\n";
 
-        int TestCount = Suite->reportable_test_count();
+        int testCount = suite->reportable_test_count();
 
-        for (int j = 0; j < TestCount; ++j)
+        for (int j = 0; j < testCount; ++j)
         {
-            const testing::TestInfo* Test = Suite->GetTestInfo(j);
-            const testing::TestResult* Result = Test->result();
+            const testing::TestInfo* test = suite->GetTestInfo(j);
+            const testing::TestResult* result = test->result();
 
-            ss << "    <testcase name=\"" << Test->name() << "\" status=\"run\" result=\"completed\" time=\""
-               << FormatTimeInMillisAsSeconds(Result->elapsed_time()) << "\" timestamp=\""
-               << FormatEpochTimeInMillisAsIso8601(Result->start_timestamp()) << "\" classname=\"" << Suite->name() << "\"";
+            ss << "    <testcase name=\"" << test->name() << "\" status=\"run\" result=\"completed\" time=\""
+               << FormatTimeInMillisAsSeconds(result->elapsed_time()) << "\" timestamp=\""
+               << FormatEpochTimeInMillisAsIso8601(result->start_timestamp()) << "\" classname=\"" << suite->name() << "\"";
 
-            if (Result->Passed())
+            if (result->Passed())
             {
                 ss << " />\n";
             }

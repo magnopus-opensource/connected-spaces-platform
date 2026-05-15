@@ -20,103 +20,103 @@
 namespace csp::web
 {
 
-HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload,
-    IHttpResponseHandler* ResponseCallback, csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync)
-    : Client(InClient)
-    , Verb(InVerb)
-    , Uri(InUri)
-    , Payload(InPayload)
-    , Callback(ResponseCallback)
-    , Response(this)
-    , IsCallbackAsync(CallbackIsAsync)
-    , IsAutoRetryEnabled(true)
-    , RetryCount(0)
-    , RefCount(0)
-    , SendDelay(0)
+HttpRequest::HttpRequest(WebClient* inClient, ERequestVerb inVerb, const csp::web::Uri& inUri, HttpPayload& inPayload,
+    IHttpResponseHandler* responseCallback, csp::common::CancellationToken& cancellationToken, bool callbackIsAsync)
+    : m_client(inClient)
+    , m_verb(inVerb)
+    , m_uri(inUri)
+    , m_payload(inPayload)
+    , m_callback(responseCallback)
+    , m_response(this)
+    , m_isCallbackAsync(callbackIsAsync)
+    , m_isAutoRetryEnabled(true)
+    , m_retryCount(0)
+    , m_refCount(0)
+    , m_sendDelay(0)
 {
-    if (&CancellationToken == &csp::common::CancellationToken::Dummy())
+    if (&cancellationToken == &csp::common::CancellationToken::Dummy())
     {
-        this->CancellationToken = new csp::common::CancellationToken();
-        OwnsCancellationToken = true;
+        this->m_cancellationToken = new csp::common::CancellationToken();
+        m_ownsCancellationToken = true;
     }
     else
     {
-        this->CancellationToken = &CancellationToken;
-        OwnsCancellationToken = false;
+        this->m_cancellationToken = &cancellationToken;
+        m_ownsCancellationToken = false;
     }
 }
 
 HttpRequest::~HttpRequest()
 {
-    if (OwnsCancellationToken)
+    if (m_ownsCancellationToken)
     {
-        delete (CancellationToken);
+        delete (m_cancellationToken);
     }
 
-    if ((Callback != nullptr) && Callback->ShouldDelete())
+    if ((m_callback != nullptr) && m_callback->ShouldDelete())
     {
-        delete (Callback);
-    }
-}
-
-ERequestVerb HttpRequest::GetVerb() const { return Verb; }
-
-const csp::web::Uri& HttpRequest::GetUri() const { return Uri; }
-
-HttpPayload& HttpRequest::GetMutablePayload() { return Payload; }
-
-const HttpPayload& HttpRequest::GetPayload() const { return Payload; }
-
-HttpResponse& HttpRequest::GetMutableResponse() { return Response; }
-
-const HttpResponse& HttpRequest::GetResponse() const { return Response; }
-
-IHttpResponseHandler* HttpRequest::GetCallback() const { return Callback; }
-
-bool HttpRequest::GetIsCallbackAsync() const { return IsCallbackAsync; }
-
-void HttpRequest::SetResponseCode(EResponseCodes InReponseCode) { Response.SetResponseCode(InReponseCode); }
-
-void HttpRequest::SetResponseData(const char* Data, size_t DataLength) { Response.GetMutablePayload().SetContent(Data, DataLength); }
-
-void HttpRequest::AllocateResponseData(size_t DataLength) { Response.GetMutablePayload().AllocateContent(DataLength); }
-
-void HttpRequest::WriteResponseData(size_t Offset, const char* Data, size_t DataLength)
-{
-    Response.GetMutablePayload().WriteContent(Offset, Data, DataLength);
-}
-
-void HttpRequest::SetResponseProgress(float ReponseProgress)
-{
-    Response.GetProgress().SetProgressPercentage(ReponseProgress);
-
-    if (Callback)
-    {
-        Callback->OnHttpProgress(*this);
+        delete (m_callback);
     }
 }
 
-float HttpRequest::GetRequestProgressPercentage() const { return Progress.GetProgressPercentage(); }
+ERequestVerb HttpRequest::GetVerb() const { return m_verb; }
 
-float HttpRequest::GetResponseProgressPercentage() const { return Response.GetProgress().GetProgressPercentage(); }
+const csp::web::Uri& HttpRequest::GetUri() const { return m_uri; }
 
-void HttpRequest::SetRequestProgress(float InProgress)
+HttpPayload& HttpRequest::GetMutablePayload() { return m_payload; }
+
+const HttpPayload& HttpRequest::GetPayload() const { return m_payload; }
+
+HttpResponse& HttpRequest::GetMutableResponse() { return m_response; }
+
+const HttpResponse& HttpRequest::GetResponse() const { return m_response; }
+
+IHttpResponseHandler* HttpRequest::GetCallback() const { return m_callback; }
+
+bool HttpRequest::GetIsCallbackAsync() const { return m_isCallbackAsync; }
+
+void HttpRequest::SetResponseCode(EResponseCodes inReponseCode) { m_response.SetResponseCode(inReponseCode); }
+
+void HttpRequest::SetResponseData(const char* data, size_t dataLength) { m_response.GetMutablePayload().SetContent(data, dataLength); }
+
+void HttpRequest::AllocateResponseData(size_t dataLength) { m_response.GetMutablePayload().AllocateContent(dataLength); }
+
+void HttpRequest::WriteResponseData(size_t offset, const char* data, size_t dataLength)
 {
-    Progress.SetProgressPercentage(InProgress);
+    m_response.GetMutablePayload().WriteContent(offset, data, dataLength);
+}
 
-    if (Callback)
+void HttpRequest::SetResponseProgress(float reponseProgress)
+{
+    m_response.GetProgress().SetProgressPercentage(reponseProgress);
+
+    if (m_callback)
     {
-        Callback->OnHttpProgress(*this);
+        m_callback->OnHttpProgress(*this);
     }
 }
 
-HttpProgress& HttpRequest::GetProgress() { return Progress; }
+float HttpRequest::GetRequestProgressPercentage() const { return m_progress.GetProgressPercentage(); }
 
-bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
+float HttpRequest::GetResponseProgressPercentage() const { return m_response.GetProgress().GetProgressPercentage(); }
+
+void HttpRequest::SetRequestProgress(float inProgress)
 {
-    return (Status == csp::web::EResponseCodes::ResponseTooManyRequests // 429
-        || Status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
-        || static_cast<int>(Status) >= 500 // 500
+    m_progress.SetProgressPercentage(inProgress);
+
+    if (m_callback)
+    {
+        m_callback->OnHttpProgress(*this);
+    }
+}
+
+HttpProgress& HttpRequest::GetProgress() { return m_progress; }
+
+bool ResultCodeValidForRetry(csp::web::EResponseCodes status)
+{
+    return (status == csp::web::EResponseCodes::ResponseTooManyRequests // 429
+        || status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
+        || static_cast<int>(status) >= 500 // 500
     );
 }
 
@@ -128,14 +128,14 @@ bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 ///
 /// @param MaxRetries Maximum number of times to retry before giving up
 /// @return true if retry succeeded, false if retry limit was reached
-bool HttpRequest::Retry(const uint32_t MaxRetries)
+bool HttpRequest::Retry(const uint32_t maxRetries)
 {
-    if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries)
+    if (ResultCodeValidForRetry(m_response.GetResponseCode()) && m_retryCount < maxRetries)
     {
-        ++RetryCount;
+        ++m_retryCount;
 
         // Re-issue the request
-        Client->AddRequest(this, std::chrono::milliseconds(DefaultRetriesDelayInMs));
+        m_client->AddRequest(this, std::chrono::milliseconds(DefaultRetriesDelayInMs));
 
         return true;
     }
@@ -151,38 +151,38 @@ bool HttpRequest::Retry(const uint32_t MaxRetries)
 ///
 /// @param MaxRetries Maximum number of times to retry before giving up
 /// @return true if we retied the request or false id not
-bool HttpRequest::CheckForAutoRetry(const uint32_t MaxRetries)
+bool HttpRequest::CheckForAutoRetry(const uint32_t maxRetries)
 {
-    bool RetryIssued = false;
-    EResponseCodes ErrorCodeValue = GetResponse().GetResponseCode();
+    bool retryIssued = false;
+    EResponseCodes errorCodeValue = GetResponse().GetResponseCode();
 
-    if (IsAutoRetryEnabled && (ErrorCodeValue != EResponseCodes::ResponseOK) && (ErrorCodeValue != EResponseCodes::ResponseCreated)
-        && (ErrorCodeValue != EResponseCodes::ResponseNoContent))
+    if (m_isAutoRetryEnabled && (errorCodeValue != EResponseCodes::ResponseOK) && (errorCodeValue != EResponseCodes::ResponseCreated)
+        && (errorCodeValue != EResponseCodes::ResponseNoContent))
     {
-        RetryIssued = Retry(MaxRetries);
+        retryIssued = Retry(maxRetries);
     }
 
-    return RetryIssued;
+    return retryIssued;
 }
 
-void HttpRequest::IncRefCount() { ++RefCount; }
+void HttpRequest::IncRefCount() { ++m_refCount; }
 
-uint32_t HttpRequest::DecRefCount() { return --RefCount; }
+uint32_t HttpRequest::DecRefCount() { return --m_refCount; }
 
-uint32_t HttpRequest::GetRefCount() const { return RefCount; }
+uint32_t HttpRequest::GetRefCount() const { return m_refCount; }
 
-uint32_t HttpRequest::GetRetryCount() const { return RetryCount; }
+uint32_t HttpRequest::GetRetryCount() const { return m_retryCount; }
 
-void HttpRequest::SetSendDelay(const std::chrono::milliseconds InSendDelay) { SendDelay = InSendDelay; }
+void HttpRequest::SetSendDelay(const std::chrono::milliseconds inSendDelay) { m_sendDelay = inSendDelay; }
 
-std::chrono::milliseconds HttpRequest::GetSendDelay() { return SendDelay; }
+std::chrono::milliseconds HttpRequest::GetSendDelay() { return m_sendDelay; }
 
-void HttpRequest::EnableAutoRetry(bool Enable) { IsAutoRetryEnabled = Enable; }
+void HttpRequest::EnableAutoRetry(bool enable) { m_isAutoRetryEnabled = enable; }
 
-void HttpRequest::Cancel() { CancellationToken->Cancel(); }
+void HttpRequest::Cancel() { m_cancellationToken->Cancel(); }
 
-bool HttpRequest::Cancelled() { return CancellationToken->Cancelled(); }
+bool HttpRequest::Cancelled() { return m_cancellationToken->Cancelled(); }
 
-void HttpRequest::RefreshAccessToken() { Payload.RefreshBearerToken(); }
+void HttpRequest::RefreshAccessToken() { m_payload.RefreshBearerToken(); }
 
 } // namespace csp::web

@@ -107,9 +107,9 @@ public:
      * Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region, as well as
      * relevant device specs.
      */
-    void QueueAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
-        const csp::common::String& InteractionType, const csp::common::Optional<csp::common::String>& SubCategory,
-        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata);
+    void QueueAnalyticsEvent(const csp::common::String& productContextSection, const csp::common::String& category,
+        const csp::common::String& interactionType, const csp::common::Optional<csp::common::String>& subCategory,
+        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& metadata);
 
     /**
      * @brief Constructs an Analytics Record which is immediately sent to the backend services.
@@ -131,9 +131,9 @@ public:
      * relevant device specs.
      * @param Callback NullResultCallback : the callback to execute on completion of the send operation.
      */
-    CSP_ASYNC_RESULT void SendAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
-        const csp::common::String& InteractionType, const csp::common::Optional<csp::common::String>& SubCategory,
-        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void SendAnalyticsEvent(const csp::common::String& productContextSection, const csp::common::String& category,
+        const csp::common::String& interactionType, const csp::common::Optional<csp::common::String>& subCategory,
+        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& metadata, NullResultCallback callback);
 
     /**
      * @brief Trigger immediate dispatch of the Analytics Records queue to the backend services.
@@ -142,53 +142,53 @@ public:
      * @param Callback NullResultCallback : the callback to execute on completion of the flush operation.
      * @pre The user must be logged in to send an Analytics Record to the backend services.
      */
-    CSP_ASYNC_RESULT void FlushAnalyticsEventsQueue(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void FlushAnalyticsEventsQueue(NullResultCallback callback);
 
     /**
      * @brief Retrieves the time since the queue was last sent.
      * @return std::chrono::milliseconds : time since epoch in milliseconds.
      */
-    CSP_NO_EXPORT std::chrono::milliseconds GetTimeSinceLastQueueSend() const { return TimeSinceLastQueueSend; }
+    CSP_NO_EXPORT std::chrono::milliseconds GetTimeSinceLastQueueSend() const { return m_timeSinceLastQueueSend; }
 
     /**
      * @brief Retrieves the rate at which the queued Analytics Records are sent.
      * @return std::chrono::milliseconds : send rate in milliseconds.
      */
-    CSP_NO_EXPORT std::chrono::milliseconds GetQueueSendRate() const { return AnalyticsQueueSendRate; }
+    CSP_NO_EXPORT std::chrono::milliseconds GetQueueSendRate() const { return m_analyticsQueueSendRate; }
 
     /**
      * @brief Retrieves the current size of the Analytics Records queue.
      * @return size_t : the queue size.
      */
-    CSP_NO_EXPORT size_t GetCurrentQueueSize() const { return AnalyticsRecordQueue.size(); }
+    CSP_NO_EXPORT size_t GetCurrentQueueSize() const { return m_analyticsRecordQueue.size(); }
 
     /**
      * @brief Retrieves the max permitted size of the Analytics Records queue.
      * If the queue size reaches this value, the queue will be sent as a single batch to the backend services.
      * @return size_t : the queue size at which a batch will be sent.
      */
-    CSP_NO_EXPORT size_t GetMaxQueueSize() const { return MaxQueueSize; }
+    CSP_NO_EXPORT size_t GetMaxQueueSize() const { return m_maxQueueSize; }
 
 private:
     AnalyticsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* inWebClient, const csp::ClientUserAgent* agentInfo, common::LogSystem& logSystem);
     ~AnalyticsSystem();
 
-    void SetTimeSinceLastQueueSend(std::chrono::milliseconds NewTimeSinceLastQueueSend);
+    void SetTimeSinceLastQueueSend(std::chrono::milliseconds newTimeSinceLastQueueSend);
 
     // This is a utility function to allow us to test the queueing functionality in a reasonable time frame.
-    void __SetQueueSendRateAndMaxSize(std::chrono::milliseconds NewSendRate, size_t NewQueueSize);
+    void __SetQueueSendRateAndMaxSize(std::chrono::milliseconds newSendRate, size_t newQueueSize);
 
-    std::unique_ptr<csp::services::ApiBase> AnalyticsApi;
+    std::unique_ptr<csp::services::ApiBase> m_analyticsApi;
 
-    std::unique_ptr<class AnalyticsQueueEventHandler> EventHandler;
-    std::mutex AnalyticsQueueLock;
-    std::vector<std::shared_ptr<csp::services::generated::userservice::AnalyticsRecord>> AnalyticsRecordQueue;
+    std::unique_ptr<class AnalyticsQueueEventHandler> m_eventHandler;
+    std::mutex m_analyticsQueueLock;
+    std::vector<std::shared_ptr<csp::services::generated::userservice::AnalyticsRecord>> m_analyticsRecordQueue;
 
-    const csp::ClientUserAgent* UserAgentInfo;
-    std::chrono::milliseconds AnalyticsQueueSendRate;
-    std::chrono::milliseconds TimeSinceLastQueueSend;
-    size_t MaxQueueSize;
+    const csp::ClientUserAgent* m_userAgentInfo;
+    std::chrono::milliseconds m_analyticsQueueSendRate;
+    std::chrono::milliseconds m_timeSinceLastQueueSend;
+    size_t m_maxQueueSize;
 };
 
 } // namespace csp::systems

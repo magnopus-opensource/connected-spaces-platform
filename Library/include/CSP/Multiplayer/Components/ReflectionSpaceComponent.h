@@ -59,7 +59,7 @@ public:
 
     /// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ReflectionSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Get the name of the Reflection component.
     /// @return csp::common::String specifying the component name.
@@ -67,14 +67,14 @@ public:
 
     /// @brief Set the name for the Reflection component.
     /// @param Value const csp::common::String& : Name for the Reflection component.
-    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& Value);
+    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& value);
 
     /// @brief Get the Asset Id for the Reflection texture asset.
     const csp::common::String& GetReflectionAssetId() const;
 
     /// @brief Set the Asset Id for the Reflection texture asset.
     /// @param Value const csp::common::String& : Id for Reflection texture asset.
-    void SetReflectionAssetId(const csp::common::String& Value);
+    void SetReflectionAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's reflection asset, both the Asset ID and the Asset Collection ID are required.
@@ -84,14 +84,14 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's reflection asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// \addtogroup IScaleComponent
@@ -99,7 +99,7 @@ public:
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// @brief Get the reflection shape enum value.
@@ -112,14 +112,14 @@ public:
     /// ReflectionShape.UnitBox: Projects a texture in a planar fashion from all six directions (like an inward facing cube).
     /// ReflectionShape.UnitSphere: Warps the texture into a spherical shape and projects it onto a surface.
     /// @param Value ReflectionShape : Enum specifying whether the captured reflections are box (UnitCube) or spherical projected (UnitSphere).
-    void SetReflectionShape(ReflectionShape Value);
+    void SetReflectionShape(ReflectionShape value);
 
     /// \addtogroup IThirdPartyComponentRef
     /// @{
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 };
 

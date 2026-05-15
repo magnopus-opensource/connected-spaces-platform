@@ -23,27 +23,27 @@
 namespace csp::systems
 {
 
-bool VersionMetadata::operator==(const VersionMetadata& Other) const
+bool VersionMetadata::operator==(const VersionMetadata& other) const
 {
-    return Version == Other.Version && DeprecationDatetime == Other.DeprecationDatetime;
+    return Version == other.Version && DeprecationDatetime == other.DeprecationDatetime;
 }
 
-bool ServiceStatus::operator==(const ServiceStatus& Other) const
+bool ServiceStatus::operator==(const ServiceStatus& other) const
 {
-    return ReverseProxy == Other.ReverseProxy && Name == Other.Name && ApiVersions == Other.ApiVersions
-        && CurrentApiVersion == Other.CurrentApiVersion;
+    return ReverseProxy == other.ReverseProxy && Name == other.Name && ApiVersions == other.ApiVersions
+        && CurrentApiVersion == other.CurrentApiVersion;
 }
 
-bool ServicesDeploymentStatus::operator==(const ServicesDeploymentStatus& Other) const
+bool ServicesDeploymentStatus::operator==(const ServicesDeploymentStatus& other) const
 {
-    return Version == Other.Version && Services == Other.Services;
+    return Version == other.Version && Services == other.Services;
 }
 
-bool VersionMetadata::operator!=(const VersionMetadata& Other) const { return !(*this == Other); }
-bool ServiceStatus::operator!=(const ServiceStatus& Other) const { return !(*this == Other); }
-bool ServicesDeploymentStatus::operator!=(const ServicesDeploymentStatus& Other) const { return !(*this == Other); }
+bool VersionMetadata::operator!=(const VersionMetadata& other) const { return !(*this == other); }
+bool ServiceStatus::operator!=(const ServiceStatus& other) const { return !(*this == other); }
+bool ServicesDeploymentStatus::operator!=(const ServicesDeploymentStatus& other) const { return !(*this == other); }
 
-const ServicesDeploymentStatus& ServicesDeploymentStatusResult::GetLatestServicesDeploymentStatus() const { return ServicesDeploymentStatusResponse; }
+const ServicesDeploymentStatus& ServicesDeploymentStatusResult::GetLatestServicesDeploymentStatus() const { return m_servicesDeploymentStatusResponse; }
 
 void ServicesDeploymentStatusResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 

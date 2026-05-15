@@ -113,20 +113,20 @@ public:
     /// service. The nature of the operation and what is returned is entirely dependent on the service and operation name provided.
     /// @param Params const TokenInfoParams& : Params to specify service, operation, set help and parameters.
     /// @param Callback StringResultCallback : Callback to call when a response is received.
-    CSP_ASYNC_RESULT void InvokeOperation(const ExternalServicesOperationParams& Params, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void InvokeOperation(const ExternalServicesOperationParams& params, StringResultCallback callback);
 
     /// @brief Specialised utility function which executes a post call to the external services proxy, specifically to retrieve Agora user token
     /// credentials. A good example for how client applications may wish to use PostServiceProxy.
     /// @param Params const AgoraUserTokenParams& : Params to configure the User token.
     /// @param Callback StringResultCallback : callback to call when a response is received.
-    CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& params, StringResultCallback callback);
 
 private:
     ExternalServiceProxySystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT ExternalServiceProxySystem(csp::web::WebClient* InWebClient, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ExternalServiceProxySystem(csp::web::WebClient* inWebClient, common::LogSystem& logSystem);
     ~ExternalServiceProxySystem();
 
-    csp::services::ApiBase* ExternalServiceProxyApi;
+    csp::services::ApiBase* m_externalServiceProxyApi;
 };
 
 } // namespace csp::systems

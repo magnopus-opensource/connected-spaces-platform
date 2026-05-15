@@ -67,26 +67,26 @@ template <> struct ScriptTypeMap<csp::common::Vector4>
     using Type = std::vector<float>;
 };
 
-inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty(); }
+inline bool IsScriptable(const csp::common::String& name) { return !name.IsEmpty(); }
 
-inline bool IsScriptable(const ComponentProperty& Property)
+inline bool IsScriptable(const ComponentProperty& property)
 {
-    return IsScriptable(Property.Name)
+    return IsScriptable(property.Name)
         && std::visit(
-            [](const auto& V)
+            [](const auto& v)
             {
-                using T = std::decay_t<decltype(V)>;
+                using T = std::decay_t<decltype(v)>;
                 return IsScriptableV<T>;
             },
-            Property.DefaultValue.GetValue());
+            property.DefaultValue.GetValue());
 }
 
-inline bool IsScriptable(const ComponentSchema& Schema)
+inline bool IsScriptable(const ComponentSchema& schema)
 {
-    const auto HasScriptableProperties = [&](const auto& Properties)
-    { return std::any_of(Properties.begin(), Properties.end(), [](const auto& Property) { return IsScriptable(Property); }); };
+    const auto hasScriptableProperties = [&](const auto& properties)
+    { return std::any_of(properties.begin(), properties.end(), [](const auto& property) { return IsScriptable(property); }); };
 
-    return IsScriptable(Schema.Name) && HasScriptableProperties(Schema.Properties);
+    return IsScriptable(schema.Name) && hasScriptableProperties(schema.Properties);
 }
 
 } // namespace csp::multiplayer

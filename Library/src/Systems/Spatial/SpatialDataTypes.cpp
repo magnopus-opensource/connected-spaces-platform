@@ -22,15 +22,15 @@ namespace csp::systems
 
 bool GeoLocation::IsValid() const { return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Latitude <= 180.0; }
 
-bool GeoLocation::operator==(const GeoLocation& Other) const
+bool GeoLocation::operator==(const GeoLocation& other) const
 {
-    const auto LatitudeDiff = std::fabs(Latitude - Other.Latitude);
-    const auto LongitudeDiff = std::fabs(Longitude - Other.Longitude);
-    return LatitudeDiff <= 0.0000001 && LongitudeDiff <= 0.0000001;
+    const auto latitudeDiff = std::fabs(Latitude - other.Latitude);
+    const auto longitudeDiff = std::fabs(Longitude - other.Longitude);
+    return latitudeDiff <= 0.0000001 && longitudeDiff <= 0.0000001;
 }
-bool OlyRotation::operator==(const OlyRotation& Other) const { return X == Other.X && Y == Other.Y && Z == Other.Z && W == Other.W; }
+bool OlyRotation::operator==(const OlyRotation& other) const { return X == other.X && Y == other.Y && Z == other.Z && W == other.W; }
 
-bool GeoLocation::operator!=(const GeoLocation& Other) const { return !(*this == Other); }
-bool OlyRotation::operator!=(const OlyRotation& Other) const { return !(*this == Other); }
+bool GeoLocation::operator!=(const GeoLocation& other) const { return !(*this == other); }
+bool OlyRotation::operator!=(const OlyRotation& other) const { return !(*this == other); }
 
 } // namespace csp::systems

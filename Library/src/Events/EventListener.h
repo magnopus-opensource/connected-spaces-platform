@@ -26,7 +26,7 @@ class CSP_API EventListener
 public:
     virtual ~EventListener() = default;
 
-    virtual void OnEvent(const Event& InEvent) = 0;
+    virtual void OnEvent(const Event& inEvent) = 0;
 };
 
 } // namespace csp::events

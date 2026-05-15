@@ -97,8 +97,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& AudioSpaceComponent::GetSchema() { return Schema; }
 
-AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
     SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }
@@ -108,16 +108,16 @@ const csp::common::Vector3& AudioSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(AudioPropertyKeys::Position));
 }
 
-void AudioSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Position), Value); }
+void AudioSpaceComponent::SetPosition(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Position), value); }
 
 AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 {
     return static_cast<AudioPlaybackState>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState)));
 }
 
-void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState Value)
+void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState), static_cast<int64_t>(value));
 }
 
 const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
@@ -125,9 +125,9 @@ const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
     return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId));
 }
 
-void AudioSpaceComponent::SetAudioAssetId(const csp::common::String& Value)
+void AudioSpaceComponent::SetAudioAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId), Value);
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId), value);
 }
 
 const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
@@ -135,62 +135,62 @@ const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
     return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId));
 }
 
-void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId), value);
 }
 
 bool AudioSpaceComponent::GetIsLoopPlayback() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback)); }
 
-void AudioSpaceComponent::SetIsLoopPlayback(bool Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback), Value); }
+void AudioSpaceComponent::SetIsLoopPlayback(bool value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback), value); }
 
 float AudioSpaceComponent::GetTimeSincePlay() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay)); }
 
-void AudioSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay), Value); }
+void AudioSpaceComponent::SetTimeSincePlay(float value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay), value); }
 
 bool AudioSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)); }
 
-void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }
+void AudioSpaceComponent::SetIsEnabled(bool inValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), inValue); }
 
 const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
 {
     return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
 }
 
-void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& inValue)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), inValue);
 }
 
 /* IAudioControlComponent */
 
 float AudioSpaceComponent::GetAttenuationRadius() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)); }
 
-void AudioSpaceComponent::SetAttenuationRadius(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), Value); }
+void AudioSpaceComponent::SetAttenuationRadius(float value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), value); }
 
 AudioType AudioSpaceComponent::GetAudioType() const
 {
     return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType)));
 }
 
-void AudioSpaceComponent::SetAudioType(AudioType Value)
+void AudioSpaceComponent::SetAudioType(AudioType value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(value));
 }
 
 float AudioSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume)); }
 
-void AudioSpaceComponent::SetVolume(float Value)
+void AudioSpaceComponent::SetVolume(float value)
 {
-    if (Value >= 0.f && Value <= 1.f)
+    if (value >= 0.f && value <= 1.f)
     {
-        SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume), Value);
+        SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume), value);
     }
     else
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", Value).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", value).c_str());
         }
     }
 }

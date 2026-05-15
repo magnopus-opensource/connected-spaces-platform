@@ -26,7 +26,7 @@
 
 namespace
 {
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 }
 
 /*
@@ -34,29 +34,29 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+    auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (GetScopesResult.GetScopes().Size() != 1)
@@ -65,16 +65,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
     }
 
     // Ensure default scope has correct default values.
-    const csp::systems::Scope& DefaultScope = GetScopesResult.GetScopes()[0];
-    EXPECT_EQ(DefaultScope.ReferenceId, Space.Id);
-    EXPECT_EQ(DefaultScope.ReferenceType, "GroupId");
-    EXPECT_EQ(DefaultScope.PubSubType, csp::systems::PubSubModelType::Global);
-    EXPECT_EQ(DefaultScope.SolveRadius, 0.0);
+    const csp::systems::Scope& defaultScope = GetScopesResult.GetScopes()[0];
+    EXPECT_EQ(defaultScope.ReferenceId, space.Id);
+    EXPECT_EQ(defaultScope.ReferenceType, "GroupId");
+    EXPECT_EQ(defaultScope.PubSubType, csp::systems::PubSubModelType::Global);
+    EXPECT_EQ(defaultScope.SolveRadius, 0.0);
 
     // Clean up
-    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    auto [ExitResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -82,37 +82,37 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
 
-        const csp::common::String GetScopesBySpaceErrorMsg = "GetScopesBySpace: You must have entered the space you want to get scopes for";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, GetScopesBySpaceErrorMsg));
+        const csp::common::String getScopesBySpaceErrorMsg = "GetScopesBySpace: You must have entered the space you want to get scopes for";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, getScopesBySpaceErrorMsg));
 
         // Get the default scope
-        auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+        auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, space.Id);
         EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Failed);
         EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
     }
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -120,37 +120,37 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeByInvalidSpaceTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, "INVALID_SPACE_ID");
+    auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, "INVALID_SPACE_ID");
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(GetScopesResult.GetHttpResultCode(), 0);
     EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
 
     // Clean up
-    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    auto [ExitResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -158,29 +158,29 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeByInvalidSpaceTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateScopeByIdTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+    auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (GetScopesResult.GetScopes().Size() != 1)
@@ -188,34 +188,34 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateScopeByIdTest)
         FAIL();
     }
 
-    const csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
-    const csp::common::String ScopeId = DefaultScope.Id;
+    const csp::systems::Scope defaultScope = GetScopesResult.GetScopes()[0];
+    const csp::common::String scopeId = defaultScope.Id;
 
     // Update scope properties
-    const csp::common::String NewScopeName = ScopeId + "NewName";
-    const csp::systems::PubSubModelType NewType = csp::systems::PubSubModelType::Object;
-    const double NewRadius = 99.0;
-    const bool NewManagedLeaderElection = false;
+    const csp::common::String newScopeName = scopeId + "NewName";
+    const csp::systems::PubSubModelType newType = csp::systems::PubSubModelType::Object;
+    const double newRadius = 99.0;
+    const bool newManagedLeaderElection = false;
 
-    csp::systems::Scope NewScope = DefaultScope;
-    NewScope.Name = NewScopeName;
-    NewScope.PubSubType = NewType;
-    NewScope.SolveRadius = NewRadius;
-    NewScope.ManagedLeaderElection = NewManagedLeaderElection;
+    csp::systems::Scope newScope = defaultScope;
+    newScope.Name = newScopeName;
+    newScope.PubSubType = newType;
+    newScope.SolveRadius = newRadius;
+    newScope.ManagedLeaderElection = newManagedLeaderElection;
 
-    auto [UpdateScopeResult] = AWAIT_PRE(MultiplayerSystem, UpdateScopeById, RequestPredicate, ScopeId, NewScope);
+    auto [UpdateScopeResult] = AWAIT_PRE(multiplayerSystem, UpdateScopeById, RequestPredicate, scopeId, newScope);
     EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Ensure properties of the new scope match the ones we set.
-    EXPECT_EQ(UpdateScopeResult.GetScope().Name, NewScopeName);
-    EXPECT_EQ(UpdateScopeResult.GetScope().PubSubType, NewType);
-    EXPECT_EQ(UpdateScopeResult.GetScope().SolveRadius, NewRadius);
-    EXPECT_EQ(UpdateScopeResult.GetScope().ManagedLeaderElection, NewManagedLeaderElection);
+    EXPECT_EQ(UpdateScopeResult.GetScope().Name, newScopeName);
+    EXPECT_EQ(UpdateScopeResult.GetScope().PubSubType, newType);
+    EXPECT_EQ(UpdateScopeResult.GetScope().SolveRadius, newRadius);
+    EXPECT_EQ(UpdateScopeResult.GetScope().ManagedLeaderElection, newManagedLeaderElection);
 
     // Clean up
-    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    auto [ExitResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -223,44 +223,44 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateScopeByIdTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateInvalidScopeTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+    auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Update the scope with an invalid id.
-    const csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
+    const csp::systems::Scope defaultScope = GetScopesResult.GetScopes()[0];
 
-    auto [UpdateScopeResult] = AWAIT_PRE(MultiplayerSystem, UpdateScopeById, RequestPredicate, "INVALID_SCOPE_ID", DefaultScope);
+    auto [UpdateScopeResult] = AWAIT_PRE(multiplayerSystem, UpdateScopeById, RequestPredicate, "INVALID_SCOPE_ID", defaultScope);
 
     EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(UpdateScopeResult.GetHttpResultCode(), 400);
     EXPECT_EQ(UpdateScopeResult.GetScope().Id, "");
 
     // Clean up
-    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    auto [ExitResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -268,29 +268,29 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateInvalidScopeTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeLeaderNoManagedElectionTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* multiplayerSystem = systemsManager.GetMultiplayerSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create OnlineRealtimeEngine
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+    auto [GetScopesResult] = AWAIT_PRE(multiplayerSystem, GetScopesBySpace, RequestPredicate, space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (GetScopesResult.GetScopes().Size() != 1)
@@ -298,24 +298,24 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeLeaderNoManagedElecti
         FAIL();
     }
     
-    csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
-    csp::common::String ScopeId = DefaultScope.Id;
+    csp::systems::Scope defaultScope = GetScopesResult.GetScopes()[0];
+    csp::common::String scopeId = defaultScope.Id;
 
     // Ensure managed leader election is turned off first
     {
 
-        DefaultScope.ManagedLeaderElection = false;
-        auto [UpdateScopeResult] = AWAIT_PRE(MultiplayerSystem, UpdateScopeById, RequestPredicate, ScopeId, DefaultScope);
+        defaultScope.ManagedLeaderElection = false;
+        auto [UpdateScopeResult] = AWAIT_PRE(multiplayerSystem, UpdateScopeById, RequestPredicate, scopeId, defaultScope);
         EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Getting the scope leader should fail because the scope doesn't have managed leader election enabled.
-    auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
+    auto [GetScopeLeaderResult] = AWAIT_PRE(multiplayerSystem, GetScopeLeader, RequestPredicate, scopeId);
     EXPECT_EQ(GetScopeLeaderResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(GetScopeLeaderResult.GetHttpResultCode(), 400);
 
     // Clean up
-    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    auto [ExitResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }

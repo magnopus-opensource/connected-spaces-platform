@@ -63,8 +63,8 @@ constexpr uint32_t DefaultRetriesDelayInMs = 100;
 class HttpRequest
 {
 public:
-    HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload, IHttpResponseHandler* ResponseCallback,
-        csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync = true);
+    HttpRequest(WebClient* inClient, ERequestVerb inVerb, const csp::web::Uri& inUri, HttpPayload& inPayload, IHttpResponseHandler* responseCallback,
+        csp::common::CancellationToken& cancellationToken, bool callbackIsAsync = true);
     ~HttpRequest();
 
     ERequestVerb GetVerb() const;
@@ -77,28 +77,28 @@ public:
     IHttpResponseHandler* GetCallback() const;
     bool GetIsCallbackAsync() const;
 
-    void SetResponseCode(EResponseCodes InReponseCode);
-    void SetResponseData(const char* Data, size_t DataLength);
+    void SetResponseCode(EResponseCodes inReponseCode);
+    void SetResponseData(const char* data, size_t dataLength);
 
-    void AllocateResponseData(size_t DataLength);
-    void WriteResponseData(size_t Offset, const char* Data, size_t DataLength);
-    void SetResponseProgress(float Progress);
-    void SetRequestProgress(float Progress);
+    void AllocateResponseData(size_t dataLength);
+    void WriteResponseData(size_t offset, const char* data, size_t dataLength);
+    void SetResponseProgress(float progress);
+    void SetRequestProgress(float progress);
     float GetRequestProgressPercentage() const;
     float GetResponseProgressPercentage() const;
     HttpProgress& GetProgress();
 
-    bool CheckForAutoRetry(const uint32_t MaxRetries = csp::web::DefaultNumRequestRetries);
-    bool Retry(const uint32_t MaxRetries = csp::web::DefaultNumRequestRetries);
+    bool CheckForAutoRetry(const uint32_t maxRetries = csp::web::DefaultNumRequestRetries);
+    bool Retry(const uint32_t maxRetries = csp::web::DefaultNumRequestRetries);
 
-    void EnableAutoRetry(bool Enable);
+    void EnableAutoRetry(bool enable);
 
     void IncRefCount();
     uint32_t DecRefCount();
     uint32_t GetRefCount() const;
     uint32_t GetRetryCount() const;
 
-    void SetSendDelay(const std::chrono::milliseconds InSendDelay);
+    void SetSendDelay(const std::chrono::milliseconds inSendDelay);
     std::chrono::milliseconds GetSendDelay();
 
     void Cancel();
@@ -107,25 +107,25 @@ public:
     void RefreshAccessToken();
 
 private:
-    WebClient* Client;
+    WebClient* m_client;
 
-    ERequestVerb Verb;
-    csp::web::Uri Uri;
-    HttpPayload Payload;
+    ERequestVerb m_verb;
+    csp::web::Uri m_uri;
+    HttpPayload m_payload;
 
-    IHttpResponseHandler* Callback;
-    HttpResponse Response;
+    IHttpResponseHandler* m_callback;
+    HttpResponse m_response;
 
-    bool IsCallbackAsync;
-    bool IsAutoRetryEnabled;
-    uint32_t RetryCount;
-    std::atomic_uint32_t RefCount;
+    bool m_isCallbackAsync;
+    bool m_isAutoRetryEnabled;
+    uint32_t m_retryCount;
+    std::atomic_uint32_t m_refCount;
 
-    std::chrono::milliseconds SendDelay;
+    std::chrono::milliseconds m_sendDelay;
 
-    HttpProgress Progress;
-    csp::common::CancellationToken* CancellationToken;
-    bool OwnsCancellationToken;
+    HttpProgress m_progress;
+    csp::common::CancellationToken* m_cancellationToken;
+    bool m_ownsCancellationToken;
 };
 
 } // namespace csp::web

@@ -51,31 +51,31 @@ namespace
 template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N - 1; }
 
 void LogHttpResponseIfLoglevelVeryVerbose(
-    csp::common::LogSystem* LogSystem, const char* Verb, const csp::web::HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
+    csp::common::LogSystem* logSystem, const char* verb, const csp::web::HttpRequest& request, const Poco::Net::HTTPResponse& pocoResponse)
 {
     // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
-    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    if (logSystem != nullptr && logSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), static_cast<int>(PocoResponse.getStatus()),
-                PocoResponse.getReason())
+        logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", verb, request.GetUri().GetAsString(), static_cast<int>(pocoResponse.getStatus()),
+                pocoResponse.getReason())
                 .c_str());
     }
 }
 
 /// @brief Copies headers from a Poco HTTPResponse to requests response payload.
-void CopyResponseHeaders(const Poco::Net::HTTPResponse& PocoResponse, csp::web::HttpPayload& Payload)
+void CopyResponseHeaders(const Poco::Net::HTTPResponse& pocoResponse, csp::web::HttpPayload& payload)
 {
-    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    for (auto iter = pocoResponse.begin(); iter != pocoResponse.end(); ++iter)
     {
-        std::string Key = Iter->first;
-        std::string Val = Iter->second;
+        std::string key = iter->first;
+        std::string val = iter->second;
 
         // Make Key and Val lower-case
-        std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
-        std::transform(Val.begin(), Val.end(), Val.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(val.begin(), val.end(), val.begin(), [](unsigned char c) { return std::tolower(c); });
 
-        Payload.AddHeader(Key.c_str(), Val.c_str());
+        payload.AddHeader(key.c_str(), val.c_str());
     }
 }
 
@@ -87,37 +87,37 @@ namespace csp::web
 /// @brief Size of stack space used for async streaming upload and download
 const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
-EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
+EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus pocoResponseCode) { return (EResponseCodes)pocoResponseCode; }
 
 /// @brief Prepares a Poco HTTPRequest by copying headers and cookies from the provided HttpRequest.
 /// If specified it will send a request body either streamed or inline.
 bool POCOWebClient::PrepareAndSendRequest(
-    HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode)
+    HttpRequest& request, Poco::Net::HTTPRequest pocoRequest, Poco::Net::HTTPClientSession* clientSession, ERequestBodyMode sendBodyMode)
 {
-    for (auto Header : Request.GetPayload().GetHeaders())
+    for (auto header : request.GetPayload().GetHeaders())
     {
-        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
+        pocoRequest.add(header.first.c_str(), header.second.c_str());
     }
 
-    AddCookie(PocoRequest);
+    AddCookie(pocoRequest);
 
-    switch (SendBodyMode)
+    switch (sendBodyMode)
     {
     case ERequestBodyMode::None:
     {
         // No body is being sent with the request
-        ClientSession->sendRequest(PocoRequest);
+        clientSession->sendRequest(pocoRequest);
         break;
     }
     case ERequestBodyMode::Streamed:
     {
         // The request body is being sent as a stream, which allows for progress tracking and cancellation support
-        size_t ContentLength = Request.GetPayload().GetContent().Length();
-        PocoRequest.setContentLength(ContentLength);
-        std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
-        ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
+        size_t contentLength = request.GetPayload().GetContent().Length();
+        pocoRequest.setContentLength(contentLength);
+        std::ostream& requestStream = clientSession->sendRequest(pocoRequest);
+        ProcessRequestAsync(*clientSession, pocoRequest, requestStream, request);
 
-        if (Request.Cancelled())
+        if (request.Cancelled())
         {
             return false;
         }
@@ -126,9 +126,9 @@ bool POCOWebClient::PrepareAndSendRequest(
     case ERequestBodyMode::Inline:
     {
         // The request body is being sent inline in a single operation
-        const std::string Body(Request.GetPayload().GetContent().c_str());
-        PocoRequest.setContentLength(Body.length());
-        ClientSession->sendRequest(PocoRequest) << Body;
+        const std::string body(request.GetPayload().GetContent().c_str());
+        pocoRequest.setContentLength(body.length());
+        clientSession->sendRequest(pocoRequest) << body;
         break;
     }
     }
@@ -137,462 +137,462 @@ bool POCOWebClient::PrepareAndSendRequest(
 }
 
 /// @brief Receives a response to a sent request, and copies cookies to the provided HttpRequest.
-std::istream& POCOWebClient::ReceiveResponse(Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request)
+std::istream& POCOWebClient::ReceiveResponse(Poco::Net::HTTPClientSession* clientSession, Poco::Net::HTTPResponse& pocoResponse, HttpRequest& request)
 {
-    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
-    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
+    std::istream& responseStream = clientSession->receiveResponse(pocoResponse);
+    request.SetResponseCode(GetOlyResponseCode(pocoResponse.getStatus()));
 
     {
-        std::scoped_lock Lock(CookiesMutex);
-        PocoResponse.getCookies(*Cookies);
+        std::scoped_lock lock(m_cookiesMutex);
+        pocoResponse.getCookies(*m_cookies);
     }
 
-    return ResponseStream;
+    return responseStream;
 }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+POCOWebClient::POCOWebClient(const Port inPort, const ETransferProtocol tp, csp::common::LogSystem* logSystem, bool autoRefresh)
+    : WebClient(inPort, tp, logSystem, autoRefresh)
 {
     Poco::Net::initializeSSL();
 
-    auto CertHandler = Poco::makeShared<Poco::Net::AcceptCertificateHandler>(false);
-    auto PrivateKeyHandler = Poco::makeShared<PocoPrivateKeyHandler>(false);
+    auto certHandler = Poco::makeShared<Poco::Net::AcceptCertificateHandler>(false);
+    auto privateKeyHandler = Poco::makeShared<PocoPrivateKeyHandler>(false);
 
-    PocoContext
+    m_pocoContext
         = Poco::makeAuto<Poco::Net::Context>(Poco::Net::Context::CLIENT_USE, "", Poco::Net::Context::VerificationMode::VERIFY_RELAXED, 9, true);
 
     Poco::Net::HTTPSessionFactory::defaultFactory().registerProtocol("http", new Poco::Net::HTTPSessionInstantiator);
     Poco::Net::HTTPSessionFactory::defaultFactory().registerProtocol("https", new Poco::Net::HTTPSSessionInstantiator);
 
     // TODO: Get rid of singleton usage entirely. Until then, we can't create multiple instances of Connected Spaces Platform.
-    Poco::Net::SSLManager::instance().initializeClient(PrivateKeyHandler, CertHandler, PocoContext);
+    Poco::Net::SSLManager::instance().initializeClient(privateKeyHandler, certHandler, m_pocoContext);
 
-    Cookies = new std::remove_pointer_t<decltype(Cookies)>();
+    m_cookies = new std::remove_pointer_t<decltype(m_cookies)>();
 }
 
 POCOWebClient::POCOWebClient(
-    const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : POCOWebClient(InPort, Tp, LogSystem, AutoRefresh)
+    const Port inPort, const ETransferProtocol tp, csp::common::IAuthContext& authContext, csp::common::LogSystem* logSystem, bool autoRefresh)
+    : POCOWebClient(inPort, tp, logSystem, autoRefresh)
 {
-    SetAuthContext(AuthContext);
+    SetAuthContext(authContext);
 }
 
-POCOWebClient::~POCOWebClient() { delete Cookies; }
+POCOWebClient::~POCOWebClient() { delete m_cookies; }
 
-void POCOWebClient::Send(HttpRequest& Request)
+void POCOWebClient::Send(HttpRequest& request)
 {
     try
     {
-        const ERequestVerb Verb = Request.GetVerb();
+        const ERequestVerb verb = request.GetVerb();
 
-        switch (Verb)
+        switch (verb)
         {
         case ERequestVerb::Get:
-            Get(Request);
+            Get(request);
             break;
         case ERequestVerb::Post:
-            Post(Request);
+            Post(request);
             break;
         case ERequestVerb::Put:
-            Put(Request);
+            Put(request);
             break;
         case ERequestVerb::Delete:
-            Delete(Request);
+            Delete(request);
             break;
         case ERequestVerb::Head:
-            Head(Request);
+            Head(request);
             break;
         case ERequestVerb::Patch:
-            Patch(Request);
+            Patch(request);
             break;
         default:
             break;
         }
     }
-    catch (const Poco::Exception& Ex)
+    catch (const Poco::Exception& ex)
     {
-        throw WebClientException(Ex.displayText());
+        throw WebClientException(ex.displayText());
     }
 }
 
-void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
+void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& pocoRequest)
 {
     {
-        std::scoped_lock Lock(CookiesMutex);
+        std::scoped_lock lock(m_cookiesMutex);
 
-        if (Cookies->size() == 0)
+        if (m_cookies->size() == 0)
         {
             return;
         }
     }
 
     // create a collection to build up with Cookies to attach to the request
-    Poco::Net::NameValueCollection CookieCollection = Poco::Net::NameValueCollection();
+    Poco::Net::NameValueCollection cookieCollection = Poco::Net::NameValueCollection();
 
     // Iterate our stored cookies and convert into a collection entry to attach to the request
     {
-        std::scoped_lock Lock(CookiesMutex);
+        std::scoped_lock lock(m_cookiesMutex);
 
-        for (const Poco::Net::HTTPCookie& Cookie : *Cookies)
+        for (const Poco::Net::HTTPCookie& cookie : *m_cookies)
         {
-            CookieCollection.add(Cookie.getName(), Cookie.getValue());
+            cookieCollection.add(cookie.getName(), cookie.getValue());
         }
     }
 
     // Set the cookies on our request
-    PocoRequest.setCookies(CookieCollection);
+    pocoRequest.setCookies(cookieCollection);
 }
 
-void POCOWebClient::Get(HttpRequest& Request)
+void POCOWebClient::Get(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("GET %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::None);
+    PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::None);
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    if (pocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
-        ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
+        ProcessResponseAsync(*clientSession, pocoResponse, responseStream, request);
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "GET", request, pocoResponse);
 }
 
-void POCOWebClient::Post(HttpRequest& Request)
+void POCOWebClient::Post(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("POST %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("POST %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_POST, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_POST, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
+    if (!PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::Streamed))
     {
         return;
     }
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    std::string ResponseString;
-    Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
-    Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
-    auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
+    std::string responseString;
+    Poco::StreamCopier::copyToString(responseStream, responseString);
+    request.SetResponseData(responseString.c_str(), responseString.length());
+    auto& payload = ((HttpResponse&)request.GetResponse()).GetMutablePayload();
 
     // Get all response headers
-    CopyResponseHeaders(PocoResponse, Payload);
+    CopyResponseHeaders(pocoResponse, payload);
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "POST", request, pocoResponse);
 }
 
-void POCOWebClient::Put(HttpRequest& Request)
+void POCOWebClient::Put(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("PUT %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("PUT %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
+    if (!PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::Streamed))
     {
         return;
     }
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    if (pocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
-        std::string ResponseString;
-        Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
-        Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
+        std::string responseString;
+        Poco::StreamCopier::copyToString(responseStream, responseString);
+        request.SetResponseData(responseString.c_str(), responseString.length());
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PUT", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "PUT", request, pocoResponse);
 }
 
-void POCOWebClient::Delete(HttpRequest& Request)
+void POCOWebClient::Delete(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("DELETE %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("DELETE %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Inline);
+    PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::Inline);
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    if (pocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
-        std::string ResponseString;
-        Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
-        Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
+        std::string responseString;
+        Poco::StreamCopier::copyToString(responseStream, responseString);
+        request.SetResponseData(responseString.c_str(), responseString.length());
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "DELETE", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "DELETE", request, pocoResponse);
 }
 
-void POCOWebClient::Head(HttpRequest& Request)
+void POCOWebClient::Head(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("HEAD %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("HEAD %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::None);
+    PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::None);
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    if (pocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
     {
-        ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
+        ProcessResponseAsync(*clientSession, pocoResponse, responseStream, request);
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "HEAD", request, pocoResponse);
 }
 
-void POCOWebClient::Patch(HttpRequest& Request)
+void POCOWebClient::Patch(HttpRequest& request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("PATCH %s", Request.GetUri().GetAsStdString().c_str());
+    CSP_PROFILE_SCOPED_FORMAT("PATCH %s", request.GetUri().GetAsStdString().c_str());
 
-    Poco::URI Uri(Request.GetUri().GetAsStdString());
+    Poco::URI uri(request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
-    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
-    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PATCH, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+    std::unique_ptr<Poco::Net::HTTPClientSession> clientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri));
+    Poco::Net::HTTPRequest pocoRequest(Poco::Net::HTTPRequest::HTTP_PATCH, uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    if (!PrepareAndSendRequest(Request, PocoRequest, ClientSession.get(), ERequestBodyMode::Streamed))
+    if (!PrepareAndSendRequest(request, pocoRequest, clientSession.get(), ERequestBodyMode::Streamed))
     {
         return;
     }
 
-    Poco::Net::HTTPResponse PocoResponse;
-    std::istream& ResponseStream = ReceiveResponse(ClientSession.get(), PocoResponse, Request);
+    Poco::Net::HTTPResponse pocoResponse;
+    std::istream& responseStream = ReceiveResponse(clientSession.get(), pocoResponse, request);
 
-    std::string ResponseString;
-    Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
-    Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
-    auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
+    std::string responseString;
+    Poco::StreamCopier::copyToString(responseStream, responseString);
+    request.SetResponseData(responseString.c_str(), responseString.length());
+    auto& payload = ((HttpResponse&)request.GetResponse()).GetMutablePayload();
 
     // Get all response headers
-    CopyResponseHeaders(PocoResponse, Payload);
+    CopyResponseHeaders(pocoResponse, payload);
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PATCH", Request, PocoResponse);
+    LogHttpResponseIfLoglevelVeryVerbose(m_logSystem, "PATCH", request, pocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(
-    Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPResponse& PocoResponse, std::istream& ResponseStream, HttpRequest& Request)
+    Poco::Net::HTTPClientSession& clientSession, Poco::Net::HTTPResponse& pocoResponse, std::istream& responseStream, HttpRequest& request)
 {
     CSP_PROFILE_SCOPED();
 
-    std::streamsize ContentLength = PocoResponse.getContentLength();
+    std::streamsize contentLength = pocoResponse.getContentLength();
 
-    if (ContentLength == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH || ContentLength == 0)
+    if (contentLength == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH || contentLength == 0)
     {
         return;
     }
 
-    std::streamsize TotalRead = 0;
+    std::streamsize totalRead = 0;
 
-    Request.AllocateResponseData(ContentLength);
+    request.AllocateResponseData(contentLength);
 
-    char Buffer[kPOCOAsyncBufferSize];
+    char buffer[kPOCOAsyncBufferSize];
 
-    while (ResponseStream.good() && TotalRead < ContentLength)
+    while (responseStream.good() && totalRead < contentLength)
     {
-        if (Request.Cancelled())
+        if (request.Cancelled())
         {
-            ClientSession.abort();
+            clientSession.abort();
             return;
         }
 
-        ResponseStream.read(Buffer, sizeof(Buffer));
-        std::streamsize Read = ResponseStream.gcount();
-        Request.WriteResponseData(TotalRead, Buffer, Read);
+        responseStream.read(buffer, sizeof(buffer));
+        std::streamsize read = responseStream.gcount();
+        request.WriteResponseData(totalRead, buffer, read);
 
-        TotalRead += Read;
-        float Progress = 100.0f * static_cast<float>(TotalRead) / ContentLength;
+        totalRead += read;
+        float progress = 100.0f * static_cast<float>(totalRead) / contentLength;
         // RWD_FORMATTED_LOG("Response Progress %f %d %d\n", Progress, TotalRead, ContentLength);
-        Request.SetResponseProgress(Progress);
+        request.SetResponseProgress(progress);
     }
 
-    auto& Response = Request.GetResponse();
-    auto& Payload = ((HttpResponse&)Response).GetMutablePayload();
+    auto& response = request.GetResponse();
+    auto& payload = ((HttpResponse&)response).GetMutablePayload();
 
     // Get all response headers
-    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    for (auto iter = pocoResponse.begin(); iter != pocoResponse.end(); ++iter)
     {
-        std::string Key = Iter->first;
-        std::string Val = Iter->second;
+        std::string key = iter->first;
+        std::string val = iter->second;
 
         // Make Key and Val lower-case
-        std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
-        std::transform(Val.begin(), Val.end(), Val.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(val.begin(), val.end(), val.begin(), [](unsigned char c) { return std::tolower(c); });
 
-        Payload.AddHeader(Key.c_str(), Val.c_str());
+        payload.AddHeader(key.c_str(), val.c_str());
     }
 }
 
 void POCOWebClient::ProcessRequestAsync(
-    Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPRequest& /*PocoRequest*/, std::ostream& RequestStream, HttpRequest& Request)
+    Poco::Net::HTTPClientSession& clientSession, Poco::Net::HTTPRequest& /*PocoRequest*/, std::ostream& requestStream, HttpRequest& request)
 {
     CSP_PROFILE_SCOPED();
 
-    size_t ContentLength = Request.GetPayload().GetContent().Length();
+    size_t contentLength = request.GetPayload().GetContent().Length();
 
-    if (ContentLength == 0)
+    if (contentLength == 0)
     {
         return;
     }
 
-    size_t TotalWritten = 0;
+    size_t totalWritten = 0;
 
     char buffer[kPOCOAsyncBufferSize];
 
-    while (RequestStream.good() && TotalWritten < ContentLength)
+    while (requestStream.good() && totalWritten < contentLength)
     {
-        if (Request.Cancelled())
+        if (request.Cancelled())
         {
-            ClientSession.abort();
+            clientSession.abort();
             return;
         }
 
-        size_t Length = Request.GetPayload().ReadContent(TotalWritten, buffer, sizeof(buffer));
+        size_t length = request.GetPayload().ReadContent(totalWritten, buffer, sizeof(buffer));
 
-        RequestStream.write(buffer, Length);
-        TotalWritten += Length;
+        requestStream.write(buffer, length);
+        totalWritten += length;
 
-        float Progress = 100.0f * static_cast<float>(TotalWritten) / ContentLength;
+        float progress = 100.0f * static_cast<float>(totalWritten) / contentLength;
         // RWD_FORMATTED_LOG("Request Progress %f %d %d\n", Progress, TotalWritten, ContentLength);
-        Request.SetRequestProgress(Progress);
+        request.SetRequestProgress(progress);
     }
 }
 
-std::string POCOWebClient::MD5Hash(const void* Data, const size_t Size)
+std::string POCOWebClient::MD5Hash(const void* data, const size_t size)
 {
-    Poco::MD5Engine MD5Hasher;
+    Poco::MD5Engine mD5Hasher;
 
-    MD5Hasher.update(Data, Size);
+    mD5Hasher.update(data, size);
 
-    const Poco::DigestEngine::Digest& Digest = MD5Hasher.digest();
+    const Poco::DigestEngine::Digest& digest = mD5Hasher.digest();
 
-    std::string DigestHex = Poco::DigestEngine::digestToHex(Digest);
-    return DigestHex;
+    std::string digestHex = Poco::DigestEngine::digestToHex(digest);
+    return digestHex;
 }
 
 void POCOWebClient::SetFileUploadContentFromFile(
-    HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
+    HttpPayload* payload, const char* filePath, const char* version, const csp::common::String& mediaType)
 {
-    Poco::File* File = new Poco::File(FilePath);
-    if (File->exists())
+    Poco::File* file = new Poco::File(filePath);
+    if (file->exists())
     {
         /// @note this must be newed as it is deleted by the HTMLForm
-        Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
-        SetFileUploadContent(Payload, Source, Version);
+        Poco::Net::FilePartSource* source = new Poco::Net::FilePartSource(filePath, mediaType.c_str());
+        SetFileUploadContent(payload, source, version);
     }
     else
     {
-        CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
+        CSP_LOG_WARN_FORMAT("File not found. Path given: %s", filePath);
     }
 }
 
-void POCOWebClient::SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
-    const char* Version, const csp::common::String& MediaType)
+void POCOWebClient::SetFileUploadContentFromString(HttpPayload* payload, const csp::common::String& stringSource, const csp::common::String& fileName,
+    const char* version, const csp::common::String& mediaType)
 {
-    std::string str(StringSource.c_str(), StringSource.Length());
+    std::string str(stringSource.c_str(), stringSource.Length());
     /// @note this must be newed as it is deleted by the HTMLForm
-    Poco::Net::StringPartSource* Source = new Poco::Net::StringPartSource(str, MediaType.c_str(), FileName.c_str());
-    SetFileUploadContent(Payload, Source, Version);
+    Poco::Net::StringPartSource* source = new Poco::Net::StringPartSource(str, mediaType.c_str(), fileName.c_str());
+    SetFileUploadContent(payload, source, version);
 }
 
 // This function is deliberately written this way to reduce the number of allocations and string copying. Do not change it!
-void POCOWebClient::SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
-    const char* /*Version*/, const csp::common::String& MediaType)
+void POCOWebClient::SetFileUploadContentFromBuffer(HttpPayload* payload, const char* buffer, size_t bufferLength, const csp::common::String& fileName,
+    const char* /*Version*/, const csp::common::String& mediaType)
 {
-    constexpr const char Boundary[] = "MIME_boundary_FileFromBuffer";
-    constexpr size_t BoundaryLen = CStringLength(Boundary);
-    constexpr const char Content_ContentDisposition[] = "\r\nContent-Disposition: form-data; name=\"FormFile\"; filename=\"";
-    constexpr size_t Content_ContentDispositionLen = CStringLength(Content_ContentDisposition);
-    constexpr const char Content_ContentType[] = "\"\r\nContent-Type: ";
-    constexpr size_t Content_ContentTypeLen = CStringLength(Content_ContentType);
+    constexpr const char boundary[] = "MIME_boundary_FileFromBuffer";
+    constexpr size_t boundaryLen = CStringLength(boundary);
+    constexpr const char contentContentDisposition[] = "\r\nContent-Disposition: form-data; name=\"FormFile\"; filename=\"";
+    constexpr size_t contentContentDispositionLen = CStringLength(contentContentDisposition);
+    constexpr const char contentContentType[] = "\"\r\nContent-Type: ";
+    constexpr size_t contentContentTypeLen = CStringLength(contentContentType);
 
-    Payload->SetBoundary(Boundary);
+    payload->SetBoundary(boundary);
 
-    auto ContentLength = 2 + BoundaryLen + Content_ContentDispositionLen + FileName.Length() + Content_ContentTypeLen + MediaType.Length() + 4
-        + BufferLength + 4 + BoundaryLen + 2;
+    auto contentLength = 2 + boundaryLen + contentContentDispositionLen + fileName.Length() + contentContentTypeLen + mediaType.Length() + 4
+        + bufferLength + 4 + boundaryLen + 2;
 
-    Payload->AllocateContent(ContentLength);
+    payload->AllocateContent(contentLength);
 
     size_t i = 0;
 
-    Payload->WriteContent(i, "--", 2);
+    payload->WriteContent(i, "--", 2);
     i += 2;
-    Payload->WriteContent(i, Boundary, BoundaryLen);
-    i += BoundaryLen;
-    Payload->WriteContent(i, Content_ContentDisposition, Content_ContentDispositionLen);
-    i += Content_ContentDispositionLen;
-    Payload->WriteContent(i, FileName.c_str(), FileName.Length());
-    i += FileName.Length();
-    Payload->WriteContent(i, Content_ContentType, Content_ContentTypeLen);
-    i += Content_ContentTypeLen;
-    Payload->WriteContent(i, MediaType.c_str(), MediaType.Length());
-    i += MediaType.Length();
-    Payload->WriteContent(i, "\r\n\r\n", 4);
+    payload->WriteContent(i, boundary, boundaryLen);
+    i += boundaryLen;
+    payload->WriteContent(i, contentContentDisposition, contentContentDispositionLen);
+    i += contentContentDispositionLen;
+    payload->WriteContent(i, fileName.c_str(), fileName.Length());
+    i += fileName.Length();
+    payload->WriteContent(i, contentContentType, contentContentTypeLen);
+    i += contentContentTypeLen;
+    payload->WriteContent(i, mediaType.c_str(), mediaType.Length());
+    i += mediaType.Length();
+    payload->WriteContent(i, "\r\n\r\n", 4);
     i += 4;
-    Payload->WriteContent(i, Buffer, BufferLength);
-    i += BufferLength;
-    Payload->WriteContent(i, "\r\n--", 4);
+    payload->WriteContent(i, buffer, bufferLength);
+    i += bufferLength;
+    payload->WriteContent(i, "\r\n--", 4);
     i += 4;
-    Payload->WriteContent(i, Boundary, BoundaryLen);
-    i += BoundaryLen;
-    Payload->WriteContent(i, "--", 2);
+    payload->WriteContent(i, boundary, boundaryLen);
+    i += boundaryLen;
+    payload->WriteContent(i, "--", 2);
     i += 2;
 }
 
-void POCOWebClient::SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version)
+void POCOWebClient::SetFileUploadContent(HttpPayload* payload, Poco::Net::PartSource* source, const char* version)
 {
-    Poco::Net::HTMLForm Form("multipart/form-data");
-    Poco::MD5Engine MD5Hasher;
+    Poco::Net::HTMLForm form("multipart/form-data");
+    Poco::MD5Engine mD5Hasher;
 
-    Source->stream().seekg(0);
-    std::string FileAsString(std::istreambuf_iterator<char>(Source->stream()), {});
-    MD5Hasher.update(FileAsString);
+    source->stream().seekg(0);
+    std::string fileAsString(std::istreambuf_iterator<char>(source->stream()), {});
+    mD5Hasher.update(fileAsString);
 
-    const Poco::DigestEngine::Digest& Digest = MD5Hasher.digest();
+    const Poco::DigestEngine::Digest& digest = mD5Hasher.digest();
 
-    std::string DigestHex = Poco::DigestEngine::digestToHex(Digest);
+    std::string digestHex = Poco::DigestEngine::digestToHex(digest);
 
-    Form.add("Checksum", DigestHex);
-    Form.add("Version", Version);
+    form.add("Checksum", digestHex);
+    form.add("Version", version);
 
-    Form.addPart("FormFile", Source);
+    form.addPart("FormFile", source);
 
-    Source->stream().seekg(0);
+    source->stream().seekg(0);
     std::stringstream strm;
-    Form.write(strm);
+    form.write(strm);
 
-    Payload->SetContent(strm.str().c_str(), strm.str().size());
-    Payload->SetBoundary(CSP_TEXT(Form.boundary().c_str()));
+    payload->SetContent(strm.str().c_str(), strm.str().size());
+    payload->SetBoundary(CSP_TEXT(form.boundary().c_str()));
 }
 
 } // namespace csp::web

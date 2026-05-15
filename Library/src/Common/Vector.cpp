@@ -23,100 +23,100 @@ namespace csp::common
 
 static constexpr float FloatComparatorThreshold = 0.001f;
 
-bool IsNearlyEqual(const float A, const float B) { return abs(A - B) < FloatComparatorThreshold; }
+bool IsNearlyEqual(const float a, const float b) { return abs(a - b) < FloatComparatorThreshold; }
 
 const Vector2& Vector2::Zero()
 {
-    static Vector2 _Zero = { 0, 0 };
+    static Vector2 zero = { 0, 0 };
 
-    return _Zero;
+    return zero;
 }
 
 const Vector2& Vector2::One()
 {
-    static Vector2 _One = { 1, 1 };
+    static Vector2 one = { 1, 1 };
 
-    return _One;
+    return one;
 }
 
-Vector2 Vector2::operator+(const Vector2& Other) const { return Vector2(X + Other.X, Y + Other.Y); }
+Vector2 Vector2::operator+(const Vector2& other) const { return Vector2(X + other.X, Y + other.Y); }
 
-Vector2 Vector2::operator-(const Vector2& Other) const { return Vector2(X - Other.X, Y - Other.Y); }
+Vector2 Vector2::operator-(const Vector2& other) const { return Vector2(X - other.X, Y - other.Y); }
 
-Vector2 Vector2::operator/(float Divisor) const { return Vector2(X / Divisor, Y / Divisor); }
+Vector2 Vector2::operator/(float divisor) const { return Vector2(X / divisor, Y / divisor); }
 
-Vector2 Vector2::operator*(const Vector2& Other) const { return Vector2(X * Other.X, Y * Other.Y); }
+Vector2 Vector2::operator*(const Vector2& other) const { return Vector2(X * other.X, Y * other.Y); }
 
-Vector2 Vector2::operator*(float Scalar) const { return Vector2(X * Scalar, Y * Scalar); }
+Vector2 Vector2::operator*(float scalar) const { return Vector2(X * scalar, Y * scalar); }
 
-bool Vector2::operator==(const Vector2 Other) const { return IsNearlyEqual(X, Other.X) && IsNearlyEqual(Y, Other.Y); }
+bool Vector2::operator==(const Vector2 other) const { return IsNearlyEqual(X, other.X) && IsNearlyEqual(Y, other.Y); }
 
-bool Vector2::operator!=(const Vector2 Other) const { return !(*this == Other); }
+bool Vector2::operator!=(const Vector2 other) const { return !(*this == other); }
 
 const Vector3& Vector3::Zero()
 {
-    static Vector3 _Zero = { 0, 0, 0 };
+    static Vector3 zero = { 0, 0, 0 };
 
-    return _Zero;
+    return zero;
 }
 
 const Vector3& Vector3::One()
 {
-    static Vector3 _One = { 1, 1, 1 };
+    static Vector3 one = { 1, 1, 1 };
 
-    return _One;
+    return one;
 }
 
-Vector3 Vector3::operator+(const Vector3& Other) const { return Vector3(X + Other.X, Y + Other.Y, Z + Other.Z); }
+Vector3 Vector3::operator+(const Vector3& other) const { return Vector3(X + other.X, Y + other.Y, Z + other.Z); }
 
-Vector3 Vector3::operator-(const Vector3& Other) const { return Vector3(X - Other.X, Y - Other.Y, Z - Other.Z); }
+Vector3 Vector3::operator-(const Vector3& other) const { return Vector3(X - other.X, Y - other.Y, Z - other.Z); }
 
-Vector3 Vector3::operator/(float Divisor) const { return Vector3(X / Divisor, Y / Divisor, Z / Divisor); }
+Vector3 Vector3::operator/(float divisor) const { return Vector3(X / divisor, Y / divisor, Z / divisor); }
 
-Vector3 Vector3::operator*(const Vector3& Other) const { return Vector3(X * Other.X, Y * Other.Y, Z * Other.Z); }
+Vector3 Vector3::operator*(const Vector3& other) const { return Vector3(X * other.X, Y * other.Y, Z * other.Z); }
 
-Vector3 Vector3::operator*(float Scalar) const { return Vector3(X * Scalar, Y * Scalar, Z * Scalar); }
+Vector3 Vector3::operator*(float scalar) const { return Vector3(X * scalar, Y * scalar, Z * scalar); }
 
-bool Vector3::operator==(const Vector3 Other) const { return IsNearlyEqual(X, Other.X) && IsNearlyEqual(Y, Other.Y) && IsNearlyEqual(Z, Other.Z); }
+bool Vector3::operator==(const Vector3 other) const { return IsNearlyEqual(X, other.X) && IsNearlyEqual(Y, other.Y) && IsNearlyEqual(Z, other.Z); }
 
-bool Vector3::operator!=(const Vector3 Other) const { return !(*this == Other); }
+bool Vector3::operator!=(const Vector3 other) const { return !(*this == other); }
 
 const Vector4& Vector4::Zero()
 {
-    static Vector4 _Zero = { 0, 0, 0, 0 };
+    static Vector4 zero = { 0, 0, 0, 0 };
 
-    return _Zero;
+    return zero;
 }
 
 const Vector4& Vector4::One()
 {
-    static Vector4 _One = { 1, 1, 1, 1 };
+    static Vector4 one = { 1, 1, 1, 1 };
 
-    return _One;
+    return one;
 }
 
 const Vector4& Vector4::Identity()
 {
-    static Vector4 _Identity = { 0, 0, 0, 1 };
+    static Vector4 identity = { 0, 0, 0, 1 };
 
-    return _Identity;
+    return identity;
 }
 
-Vector4 Vector4::operator+(const Vector4& Other) const { return Vector4(X + Other.X, Y + Other.Y, Z + Other.Z, W + Other.W); }
+Vector4 Vector4::operator+(const Vector4& other) const { return Vector4(X + other.X, Y + other.Y, Z + other.Z, W + other.W); }
 
-Vector4 Vector4::operator-(const Vector4& Other) const { return Vector4(X - Other.X, Y - Other.Y, Z - Other.Z, W - Other.W); }
+Vector4 Vector4::operator-(const Vector4& other) const { return Vector4(X - other.X, Y - other.Y, Z - other.Z, W - other.W); }
 
-Vector4 Vector4::operator/(float Divisor) const { return Vector4(X / Divisor, Y / Divisor, Z / Divisor, W / Divisor); }
+Vector4 Vector4::operator/(float divisor) const { return Vector4(X / divisor, Y / divisor, Z / divisor, W / divisor); }
 
-Vector4 Vector4::operator*(const Vector4& Other) const { return Vector4(X * Other.X, Y * Other.Y, Z * Other.Z, W * Other.W); }
+Vector4 Vector4::operator*(const Vector4& other) const { return Vector4(X * other.X, Y * other.Y, Z * other.Z, W * other.W); }
 
-Vector4 Vector4::operator*(float Scalar) const { return Vector4(X * Scalar, Y * Scalar, Z * Scalar, W * Scalar); }
+Vector4 Vector4::operator*(float scalar) const { return Vector4(X * scalar, Y * scalar, Z * scalar, W * scalar); }
 
-bool Vector4::operator==(const Vector4 Other) const
+bool Vector4::operator==(const Vector4 other) const
 {
-    return IsNearlyEqual(X, Other.X) && IsNearlyEqual(Y, Other.Y) && IsNearlyEqual(Z, Other.Z) && IsNearlyEqual(W, Other.W);
+    return IsNearlyEqual(X, other.X) && IsNearlyEqual(Y, other.Y) && IsNearlyEqual(Z, other.Z) && IsNearlyEqual(W, other.W);
 }
 
-bool Vector4::operator!=(const Vector4 Other) const { return !(*this == Other); }
+bool Vector4::operator!=(const Vector4 other) const { return !(*this == other); }
 
 } // namespace csp::common

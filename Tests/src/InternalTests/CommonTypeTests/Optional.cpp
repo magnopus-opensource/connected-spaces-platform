@@ -27,8 +27,8 @@ class OptionalExtraTestClass;
 class OtherTestClass
 {
 public:
-    OtherTestClass(const int OtherValue)
-        : OtherField(OtherValue) {};
+    OtherTestClass(const int otherValue)
+        : OtherField(otherValue) {};
 
     int OtherField;
 };
@@ -36,30 +36,30 @@ public:
 class OptionalTestClass
 {
 public:
-    OptionalTestClass(const int SomeFieldValue)
-        : SomeField(SomeFieldValue) {};
+    OptionalTestClass(const int someFieldValue)
+        : SomeField(someFieldValue) {};
 
     int SomeField;
 
-    OptionalTestClass(const OptionalTestClass& Other) { SomeField = Other.SomeField; }
+    OptionalTestClass(const OptionalTestClass& other) { SomeField = other.SomeField; }
 
-    OptionalTestClass(OptionalTestClass&& Other) { SomeField = Other.SomeField; }
+    OptionalTestClass(OptionalTestClass&& other) { SomeField = other.SomeField; }
 
-    OptionalTestClass(OptionalTestClass* Other) { SomeField = Other->SomeField; }
+    OptionalTestClass(OptionalTestClass* other) { SomeField = other->SomeField; }
 
-    OptionalTestClass(const OtherTestClass& OtherInstance) { SomeField = OtherInstance.OtherField; }
+    OptionalTestClass(const OtherTestClass& otherInstance) { SomeField = otherInstance.OtherField; }
 
-    OptionalTestClass(OtherTestClass* OtherInstancePtr) { SomeField = OtherInstancePtr->OtherField; }
+    OptionalTestClass(OtherTestClass* otherInstancePtr) { SomeField = otherInstancePtr->OtherField; }
 };
 
 CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalDefaultInitialisationTest)
 {
     try
     {
-        Optional<OptionalTestClass> OptionalInstance;
+        Optional<OptionalTestClass> optionalInstance;
 
-        EXPECT_FALSE(OptionalInstance.HasValue());
-        EXPECT_EQ(&(*OptionalInstance), nullptr);
+        EXPECT_FALSE(optionalInstance.HasValue());
+        EXPECT_EQ(&(*optionalInstance), nullptr);
     }
     catch (...)
     {
@@ -71,10 +71,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNullptrInitialisationT
 {
     try
     {
-        Optional<OptionalTestClass> OptionalInstance(nullptr);
+        Optional<OptionalTestClass> optionalInstance(nullptr);
 
-        EXPECT_FALSE(OptionalInstance.HasValue());
-        EXPECT_EQ(&(*OptionalInstance), nullptr);
+        EXPECT_FALSE(optionalInstance.HasValue());
+        EXPECT_EQ(&(*optionalInstance), nullptr);
     }
     catch (...)
     {
@@ -86,13 +86,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalPointerInitialisationT
 {
     try
     {
-        auto* TestClassInstancePtr = new OptionalTestClass(2);
-        Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr);
+        auto* testClassInstancePtr = new OptionalTestClass(2);
+        Optional<OptionalTestClass> optionalInstance(testClassInstancePtr);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr);
-        EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstancePtr->SomeField);
-        EXPECT_EQ(OptionalInstance->SomeField, TestClassInstancePtr->SomeField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ(&(*optionalInstance), testClassInstancePtr);
+        EXPECT_EQ((*optionalInstance).SomeField, testClassInstancePtr->SomeField);
+        EXPECT_EQ(optionalInstance->SomeField, testClassInstancePtr->SomeField);
     }
     catch (...)
     {
@@ -104,27 +104,27 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalPointerAndDestructorIn
 {
     try
     {
-        bool DestructorRan = false;
+        bool destructorRan = false;
 
-        std::function<void(OptionalTestClass*)> CustomDestructor = [&](OptionalTestClass* Pointer)
+        std::function<void(OptionalTestClass*)> customDestructor = [&](OptionalTestClass* pointer)
         {
-            Pointer->~OptionalTestClass();
-            delete (Pointer);
-            DestructorRan = true;
+            pointer->~OptionalTestClass();
+            delete (pointer);
+            destructorRan = true;
         };
 
         // Scope block used to force the call on the destructor.
         {
-            auto* TestClassInstancePtr = new OptionalTestClass(3);
-            Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr, CustomDestructor);
+            auto* testClassInstancePtr = new OptionalTestClass(3);
+            Optional<OptionalTestClass> optionalInstance(testClassInstancePtr, customDestructor);
 
-            EXPECT_TRUE(OptionalInstance.HasValue());
-            EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr);
-            EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstancePtr->SomeField);
-            EXPECT_EQ(OptionalInstance->SomeField, TestClassInstancePtr->SomeField);
+            EXPECT_TRUE(optionalInstance.HasValue());
+            EXPECT_EQ(&(*optionalInstance), testClassInstancePtr);
+            EXPECT_EQ((*optionalInstance).SomeField, testClassInstancePtr->SomeField);
+            EXPECT_EQ(optionalInstance->SomeField, testClassInstancePtr->SomeField);
         }
 
-        EXPECT_TRUE(DestructorRan);
+        EXPECT_TRUE(destructorRan);
     }
     catch (...)
     {
@@ -136,14 +136,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOtherClassPointerIniti
 {
     try
     {
-        auto* OtherClassInstancePtr = new OtherTestClass(4);
-        Optional<OptionalTestClass> OptionalInstance = Optional<OptionalTestClass>((OtherTestClass*)OtherClassInstancePtr);
+        auto* otherClassInstancePtr = new OtherTestClass(4);
+        Optional<OptionalTestClass> optionalInstance = Optional<OptionalTestClass>((OtherTestClass*)otherClassInstancePtr);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ((*OptionalInstance).SomeField, OtherClassInstancePtr->OtherField);
-        EXPECT_EQ(OptionalInstance->SomeField, OtherClassInstancePtr->OtherField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ((*optionalInstance).SomeField, otherClassInstancePtr->OtherField);
+        EXPECT_EQ(optionalInstance->SomeField, otherClassInstancePtr->OtherField);
 
-        delete (OtherClassInstancePtr);
+        delete (otherClassInstancePtr);
     }
     catch (...)
     {
@@ -155,11 +155,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNoValueCopyInitialisat
 {
     try
     {
-        Optional<OptionalTestClass> OriginalOptionalInstance = Optional<OptionalTestClass>();
-        Optional<OptionalTestClass> CopyOptionalInstance(OriginalOptionalInstance);
+        Optional<OptionalTestClass> originalOptionalInstance = Optional<OptionalTestClass>();
+        Optional<OptionalTestClass> copyOptionalInstance(originalOptionalInstance);
 
-        EXPECT_FALSE(CopyOptionalInstance.HasValue());
-        EXPECT_EQ(&(*CopyOptionalInstance), nullptr);
+        EXPECT_FALSE(copyOptionalInstance.HasValue());
+        EXPECT_EQ(&(*copyOptionalInstance), nullptr);
     }
     catch (...)
     {
@@ -171,12 +171,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOtherClassInitialisati
 {
     try
     {
-        OtherTestClass OtherClassInstance(5);
-        Optional<OptionalTestClass> OptionalInstance = Optional<OptionalTestClass>(OtherClassInstance);
+        OtherTestClass otherClassInstance(5);
+        Optional<OptionalTestClass> optionalInstance = Optional<OptionalTestClass>(otherClassInstance);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ((*OptionalInstance).SomeField, OtherClassInstance.OtherField);
-        EXPECT_EQ(OptionalInstance->SomeField, OtherClassInstance.OtherField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ((*optionalInstance).SomeField, otherClassInstance.OtherField);
+        EXPECT_EQ(optionalInstance->SomeField, otherClassInstance.OtherField);
     }
     catch (...)
     {
@@ -188,12 +188,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNonNullInitialisationT
 {
     try
     {
-        OptionalTestClass TestClassInstance(6);
-        Optional<OptionalTestClass> OptionalInstance(TestClassInstance);
+        OptionalTestClass testClassInstance(6);
+        Optional<OptionalTestClass> optionalInstance(testClassInstance);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(OptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ((*optionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(optionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -205,12 +205,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalInnerTypeMoveInitialis
 {
     try
     {
-        OptionalTestClass TestClassInstance(7);
-        Optional<OptionalTestClass> OptionalInstance(std::move(TestClassInstance));
+        OptionalTestClass testClassInstance(7);
+        Optional<OptionalTestClass> optionalInstance(std::move(testClassInstance));
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(OptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ((*optionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(optionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -222,16 +222,16 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNonNullCopyInitialisat
 {
     try
     {
-        OptionalTestClass TestClassInstance(8);
-        Optional<OptionalTestClass> OriginalOptionalInstance(TestClassInstance);
+        OptionalTestClass testClassInstance(8);
+        Optional<OptionalTestClass> originalOptionalInstance(testClassInstance);
 
-        EXPECT_TRUE(OriginalOptionalInstance.HasValue());
+        EXPECT_TRUE(originalOptionalInstance.HasValue());
 
-        Optional<OptionalTestClass> CopyOptionalInstance(OriginalOptionalInstance);
+        Optional<OptionalTestClass> copyOptionalInstance(originalOptionalInstance);
 
-        EXPECT_TRUE(CopyOptionalInstance.HasValue());
-        EXPECT_EQ((*CopyOptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(CopyOptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(copyOptionalInstance.HasValue());
+        EXPECT_EQ((*copyOptionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(copyOptionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -243,13 +243,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOptionalTypeMoveInitia
 {
     try
     {
-        OptionalTestClass TestClassInstance(9);
-        Optional<OptionalTestClass> OriginalOptionalInstance(TestClassInstance);
-        Optional<OptionalTestClass> MoveOptionalInstance(std::move(OriginalOptionalInstance));
+        OptionalTestClass testClassInstance(9);
+        Optional<OptionalTestClass> originalOptionalInstance(testClassInstance);
+        Optional<OptionalTestClass> moveOptionalInstance(std::move(originalOptionalInstance));
 
-        EXPECT_TRUE(MoveOptionalInstance.HasValue());
-        EXPECT_EQ((*MoveOptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(MoveOptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(moveOptionalInstance.HasValue());
+        EXPECT_EQ((*moveOptionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(moveOptionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -262,14 +262,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOperatorStarTest)
     // This is tested in pretty much all other tests but an explicit test is added for completion.
     try
     {
-        OptionalTestClass TestClassInstance(10);
-        Optional<OptionalTestClass> OptionalInstance(TestClassInstance);
+        OptionalTestClass testClassInstance(10);
+        Optional<OptionalTestClass> optionalInstance(testClassInstance);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
+        EXPECT_TRUE(optionalInstance.HasValue());
 
-        auto ReturnedTestClassInstance = *OptionalInstance;
+        auto returnedTestClassInstance = *optionalInstance;
 
-        EXPECT_EQ(ReturnedTestClassInstance.SomeField, TestClassInstance.SomeField);
+        EXPECT_EQ(returnedTestClassInstance.SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -282,11 +282,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOperatorArrowTest)
     // This is tested in pretty much all other tests but an explicit test is added for completion.
     try
     {
-        OptionalTestClass TestClassInstance(11);
-        Optional<OptionalTestClass> OptionalInstance(TestClassInstance);
+        OptionalTestClass testClassInstance(11);
+        Optional<OptionalTestClass> optionalInstance(testClassInstance);
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ(OptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ(optionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -298,12 +298,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalInnerTypeOperatorEqual
 {
     try
     {
-        OptionalTestClass TestClassInstance(12);
-        Optional<OptionalTestClass> OptionalInstance = TestClassInstance;
+        OptionalTestClass testClassInstance(12);
+        Optional<OptionalTestClass> optionalInstance = testClassInstance;
 
-        EXPECT_TRUE(OptionalInstance.HasValue());
-        EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(OptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(optionalInstance.HasValue());
+        EXPECT_EQ((*optionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(optionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -315,13 +315,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOptionalTypeOperatorEq
 {
     try
     {
-        OptionalTestClass TestClassInstance(13);
-        Optional<OptionalTestClass> FirstOptionalInstance(TestClassInstance);
-        Optional<OptionalTestClass> SecondOptionalInstance = FirstOptionalInstance;
+        OptionalTestClass testClassInstance(13);
+        Optional<OptionalTestClass> firstOptionalInstance(testClassInstance);
+        Optional<OptionalTestClass> secondOptionalInstance = firstOptionalInstance;
 
-        EXPECT_TRUE(SecondOptionalInstance.HasValue());
-        EXPECT_EQ((*SecondOptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(SecondOptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(secondOptionalInstance.HasValue());
+        EXPECT_EQ((*secondOptionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(secondOptionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -333,13 +333,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOptionalTypeMoveOperat
 {
     try
     {
-        OptionalTestClass TestClassInstance(14);
-        Optional<OptionalTestClass> FirstOptionalInstance(TestClassInstance);
-        Optional<OptionalTestClass> SecondOptionalInstance = std::move(FirstOptionalInstance);
+        OptionalTestClass testClassInstance(14);
+        Optional<OptionalTestClass> firstOptionalInstance(testClassInstance);
+        Optional<OptionalTestClass> secondOptionalInstance = std::move(firstOptionalInstance);
 
-        EXPECT_TRUE(SecondOptionalInstance.HasValue());
-        EXPECT_EQ((*SecondOptionalInstance).SomeField, TestClassInstance.SomeField);
-        EXPECT_EQ(SecondOptionalInstance->SomeField, TestClassInstance.SomeField);
+        EXPECT_TRUE(secondOptionalInstance.HasValue());
+        EXPECT_EQ((*secondOptionalInstance).SomeField, testClassInstance.SomeField);
+        EXPECT_EQ(secondOptionalInstance->SomeField, testClassInstance.SomeField);
     }
     catch (...)
     {
@@ -351,10 +351,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNoValueOptionalTypeMov
 {
     try
     {
-        Optional<OptionalTestClass> FirstOptionalInstance(nullptr);
-        Optional<OptionalTestClass> SecondOptionalInstance = std::move(FirstOptionalInstance);
+        Optional<OptionalTestClass> firstOptionalInstance(nullptr);
+        Optional<OptionalTestClass> secondOptionalInstance = std::move(firstOptionalInstance);
 
-        EXPECT_FALSE(SecondOptionalInstance.HasValue());
+        EXPECT_FALSE(secondOptionalInstance.HasValue());
     }
     catch (...)
     {
@@ -364,11 +364,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNoValueOptionalTypeMov
 
 CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalAssignNull)
 {
-    csp::common::Optional<uint64_t> OptionalInstance = 5;
+    csp::common::Optional<uint64_t> optionalInstance = 5;
 
-    EXPECT_EQ(*OptionalInstance, 5);
+    EXPECT_EQ(*optionalInstance, 5);
 
-    OptionalInstance = nullptr;
+    optionalInstance = nullptr;
 
-    EXPECT_FALSE(OptionalInstance.HasValue());
+    EXPECT_FALSE(optionalInstance.HasValue());
 }

@@ -25,16 +25,16 @@ using namespace csp::services;
 
 CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
 {
-    const int TestLength = 10000;
-    std::unordered_set<std::string> UniqueHexStrings;
-    UniqueHexStrings.reserve(TestLength);
+    const int testLength = 10000;
+    std::unordered_set<std::string> uniqueHexStrings;
+    uniqueHexStrings.reserve(testLength);
 
-    for (int i = 0; i < TestLength; i++)
+    for (int i = 0; i < testLength; i++)
     {
-        std::string HexValue = GetUniqueString();
+        std::string hexValue = GetUniqueString();
 
         // Check if it exists
-        bool IsDuplicate = !UniqueHexStrings.insert(HexValue).second;
-        EXPECT_FALSE(IsDuplicate);
+        bool isDuplicate = !uniqueHexStrings.insert(hexValue).second;
+        EXPECT_FALSE(isDuplicate);
     }
 }

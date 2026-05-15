@@ -11,132 +11,132 @@ namespace chs = csp::services::generated;
 
 namespace csp::systems
 {
-MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
-    , SpaceSystem { &SpaceSystem }
+MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* inWebClient, csp::systems::SpaceSystem& spaceSystem, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
+    , m_spaceSystem { &spaceSystem }
 {
-    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient);
-    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient);
+    m_scopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(inWebClient);
+    m_scopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(inWebClient);
 }
 
 MultiplayerSystem::MultiplayerSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , SpaceSystem { nullptr }
+    , m_spaceSystem { nullptr }
 {
 }
 
 MultiplayerSystem::~MultiplayerSystem() { }
 
-void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback)
+void MultiplayerSystem::GetScopesBySpace(const csp::common::String& spaceId, ScopesResultCallback callback)
 {
     // This specifies that the scope relates to a group (space) using the ReferenceId. Additional values may be possible in the future.
     // We can then allow clients to specify this value.
     // This is currently populated automatically by chs for the default scope that's created with the space.
-    constexpr const char* ReferenceType = "GroupId";
+    constexpr const char* referenceType = "GroupId";
 
     // Ensure we're in the space we want to get scopes for.
-    if (SpaceSystem->GetCurrentSpace().Id != SpaceId)
+    if (m_spaceSystem->GetCurrentSpace().Id != spaceId)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "GetScopesBySpace: You must have entered the space you want to get scopes for");
-        Callback(MakeInvalid<ScopesResult>());
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "GetScopesBySpace: You must have entered the space you want to get scopes for");
+        callback(MakeInvalid<ScopesResult>());
         return;
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ScopeLeaderApi->CreateHandler<ScopesResultCallback, ScopesResult, void, services::DtoArray<chs::multiplayerservice::ScopeDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_scopeLeaderApi->CreateHandler<ScopesResultCallback, ScopesResult, void, services::DtoArray<chs::multiplayerservice::ScopeDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())
-        ->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet({ ReferenceType, SpaceId }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopesApi*>(m_scopesApi.get())
+        ->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet({ referenceType, spaceId }, responseHandler);
 }
 
-async::task<ScopesResult> MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId)
+async::task<ScopesResult> MultiplayerSystem::GetScopesBySpace(const csp::common::String& spaceId)
 {
-    auto Event = std::make_shared<async::event_task<csp::systems::ScopesResult>>();
-    auto Task = Event->get_task();
+    auto event = std::make_shared<async::event_task<csp::systems::ScopesResult>>();
+    auto task = event->get_task();
 
-    GetScopesBySpace(SpaceId,
-        [Event](const ScopesResult& Result)
+    GetScopesBySpace(spaceId,
+        [event](const ScopesResult& result)
         {
-            if (Result.GetResultCode() != EResultCode::InProgress)
+            if (result.GetResultCode() != EResultCode::InProgress)
             {
-                Event->set(Result);
+                event->set(result);
             }
         });
 
-    return Task;
+    return task;
 }
 
-void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, const csp::systems::Scope& Scope, ScopeResultCallback Callback)
+void MultiplayerSystem::UpdateScopeById(const csp::common::String& scopeId, const csp::systems::Scope& scope, ScopeResultCallback callback)
 {
-    auto Dto = std::make_shared<chs::multiplayerservice::ScopeDto>();
+    auto dto = std::make_shared<chs::multiplayerservice::ScopeDto>();
 
-    Dto->SetReferenceId(Scope.ReferenceId);
-    Dto->SetReferenceType(Scope.ReferenceId);
-    Dto->SetName(Scope.Name);
+    dto->SetReferenceId(scope.ReferenceId);
+    dto->SetReferenceType(scope.ReferenceId);
+    dto->SetName(scope.Name);
 
-    auto PubSubModelDto = std::make_shared<chs::multiplayerservice::PubSubModel>();
+    auto pubSubModelDto = std::make_shared<chs::multiplayerservice::PubSubModel>();
 
-    switch (Scope.PubSubType)
+    switch (scope.PubSubType)
     {
     case PubSubModelType::Global:
-        PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::GLOBAL);
+        pubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::GLOBAL);
         break;
     case PubSubModelType::Object:
-        PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT);
+        pubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT);
         break;
     default:
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "UpdateScopeById: Invalid PubSubModel type specified");
-        Callback(MakeInvalid<ScopeResult>());
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "UpdateScopeById: Invalid PubSubModel type specified");
+        callback(MakeInvalid<ScopeResult>());
         return;
     }
 
-    Dto->SetPubSubModel(PubSubModelDto);
-    Dto->SetSolveRadius(Scope.SolveRadius);
-    Dto->SetManagedLeaderElection(Scope.ManagedLeaderElection);
+    dto->SetPubSubModel(pubSubModelDto);
+    dto->SetSolveRadius(scope.SolveRadius);
+    dto->SetManagedLeaderElection(scope.ManagedLeaderElection);
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ScopeLeaderApi->CreateHandler<ScopeResultCallback, ScopeResult, void, chs::multiplayerservice::ScopeDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_scopeLeaderApi->CreateHandler<ScopeResultCallback, ScopeResult, void, chs::multiplayerservice::ScopeDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())->scopesIdPut({ ScopeId, Dto }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopesApi*>(m_scopesApi.get())->scopesIdPut({ scopeId, dto }, responseHandler);
 }
 
-void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, ScopeLeaderResultCallback Callback)
+void MultiplayerSystem::GetScopeLeader(const csp::common::String& scopeId, ScopeLeaderResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ScopeLeaderApi->CreateHandler<ScopeLeaderResultCallback, ScopeLeaderResult, void, chs::multiplayerservice::ScopeLeaderDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_scopeLeaderApi->CreateHandler<ScopeLeaderResultCallback, ScopeLeaderResult, void, chs::multiplayerservice::ScopeLeaderDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(m_scopeLeaderApi.get())->scopesScopeIdLeaderGet({ scopeId }, responseHandler);
 }
 
-async::task<ScopeLeaderResult> MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId)
+async::task<ScopeLeaderResult> MultiplayerSystem::GetScopeLeader(const csp::common::String& scopeId)
 {
-    auto Event = std::make_shared<async::event_task<csp::systems::ScopeLeaderResult>>();
-    auto Task = Event->get_task();
+    auto event = std::make_shared<async::event_task<csp::systems::ScopeLeaderResult>>();
+    auto task = event->get_task();
 
-    GetScopeLeader(ScopeId,
-        [Event](const ScopeLeaderResult& Result)
+    GetScopeLeader(scopeId,
+        [event](const ScopeLeaderResult& result)
         {
-            if (Result.GetResultCode() != EResultCode::InProgress)
+            if (result.GetResultCode() != EResultCode::InProgress)
             {
-                Event->set(Result);
+                event->set(result);
             }
         });
 
-    return Task;
+    return task;
 }
 
-void MultiplayerSystem::__PerformLeaderElectionInScope(const csp::common::String& ScopeId,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& UserIdsToExclude, NullResultCallback Callback)
+void MultiplayerSystem::__PerformLeaderElectionInScope(const csp::common::String& scopeId,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& userIdsToExclude, NullResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ScopeLeaderApi->CreateHandler<NullResultCallback, NullResult, void, chs::multiplayerservice::ScopeLeaderDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_scopeLeaderApi->CreateHandler<NullResultCallback, NullResult, void, chs::multiplayerservice::ScopeLeaderDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())
-        ->scopesScopeIdLeader_electionPost({ ScopeId, csp::common::Convert(UserIdsToExclude) }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(m_scopeLeaderApi.get())
+        ->scopesScopeIdLeader_electionPost({ scopeId, csp::common::Convert(userIdsToExclude) }, responseHandler);
 }
 
 }

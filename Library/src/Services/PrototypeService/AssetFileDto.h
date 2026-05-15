@@ -27,7 +27,7 @@ public:
     AssetFileDto();
     virtual ~AssetFileDto();
 
-    void FromJson(const csp::common::String& Json) override;
+    void FromJson(const csp::common::String& json) override;
 };
 
 } // namespace csp::services

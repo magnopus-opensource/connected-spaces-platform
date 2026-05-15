@@ -49,23 +49,23 @@ class CSP_API ApplicationSettingsResult : public csp::systems::ResultBase
 public:
     const csp::common::ApplicationSettings& GetApplicationSettings() const;
 
-    CSP_NO_EXPORT ApplicationSettingsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT ApplicationSettingsResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
     CSP_NO_EXPORT ApplicationSettingsResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 private:
     ApplicationSettingsResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::ApplicationSettings ApplicationSettings;
+    csp::common::ApplicationSettings m_applicationSettings;
 };
 
 /// @brief Callback containing Application Settings.
 /// @param Result ApplicationSettingsResult : result class
-typedef std::function<void(const ApplicationSettingsResult& Result)> ApplicationSettingsResultCallback;
+typedef std::function<void(const ApplicationSettingsResult& result)> ApplicationSettingsResultCallback;
 
 } // namespace csp::systems

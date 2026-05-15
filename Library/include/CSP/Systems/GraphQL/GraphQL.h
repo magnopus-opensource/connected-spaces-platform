@@ -51,9 +51,9 @@ public:
     [[nodiscard]] const csp::common::String& GetResponse();
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-    csp::common::String GraphQLResponse;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
+    csp::common::String m_graphQlResponse;
 };
 // callback signatures
-typedef std::function<void(GraphQLResult& Result)> GraphQLReceivedCallback;
+typedef std::function<void(GraphQLResult& result)> GraphQLReceivedCallback;
 } // namespace csp::systems

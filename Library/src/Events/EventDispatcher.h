@@ -28,16 +28,16 @@ using EventCallbackList = std::list<csp::events::EventListener*>;
 class EventDispatcher
 {
 public:
-    EventDispatcher(const EventId& InId);
+    EventDispatcher(const EventId& inId);
 
-    void RegisterListener(EventListener* InListener);
-    void UnRegisterListener(EventListener* InListener);
+    void RegisterListener(EventListener* inListener);
+    void UnRegisterListener(EventListener* inListener);
 
-    void Dispatch(const Event& InEvent);
+    void Dispatch(const Event& inEvent);
 
 private:
-    EventId Id;
-    EventCallbackList CallbackList;
+    EventId m_id;
+    EventCallbackList m_callbackList;
 };
 
 } // namespace csp::events

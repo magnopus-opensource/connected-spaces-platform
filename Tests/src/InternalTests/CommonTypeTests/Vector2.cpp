@@ -26,10 +26,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2DefaultInitialisationTest
 {
     try
     {
-        Vector2 Instance;
+        Vector2 instance;
 
-        EXPECT_EQ(Instance.X, 0);
-        EXPECT_EQ(Instance.Y, 0);
+        EXPECT_EQ(instance.X, 0);
+        EXPECT_EQ(instance.Y, 0);
     }
     catch (...)
     {
@@ -41,10 +41,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2ValueInitialisationTest)
 {
     try
     {
-        Vector2 Instance(1, 2);
+        Vector2 instance(1, 2);
 
-        EXPECT_EQ(Instance.X, 1);
-        EXPECT_EQ(Instance.Y, 2);
+        EXPECT_EQ(instance.X, 1);
+        EXPECT_EQ(instance.Y, 2);
     }
     catch (...)
     {
@@ -56,11 +56,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2EqualityTest)
 {
     try
     {
-        Vector2 Instance1(1, 2);
-        Vector2 Instance2(1, 2);
+        Vector2 instance1(1, 2);
+        Vector2 instance2(1, 2);
 
-        EXPECT_TRUE(Instance1 == Instance2);
-        EXPECT_FALSE(Instance1 != Instance2);
+        EXPECT_TRUE(instance1 == instance2);
+        EXPECT_FALSE(instance1 != instance2);
     }
     catch (...)
     {
@@ -72,11 +72,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2NonEqualityTest)
 {
     try
     {
-        Vector2 Instance1(1, 2);
-        Vector2 Instance2(3, 2);
+        Vector2 instance1(1, 2);
+        Vector2 instance2(3, 2);
 
-        EXPECT_FALSE(Instance1 == Instance2);
-        EXPECT_TRUE(Instance1 != Instance2);
+        EXPECT_FALSE(instance1 == instance2);
+        EXPECT_TRUE(instance1 != instance2);
     }
     catch (...)
     {
@@ -88,10 +88,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2ZeroTest)
 {
     try
     {
-        Vector2 Instance = Vector2::Zero();
+        Vector2 instance = Vector2::Zero();
 
-        EXPECT_EQ(Instance.X, 0);
-        EXPECT_EQ(Instance.Y, 0);
+        EXPECT_EQ(instance.X, 0);
+        EXPECT_EQ(instance.Y, 0);
     }
     catch (...)
     {
@@ -103,10 +103,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2OneTest)
 {
     try
     {
-        Vector2 Instance = Vector2::One();
+        Vector2 instance = Vector2::One();
 
-        EXPECT_EQ(Instance.X, 1);
-        EXPECT_EQ(Instance.Y, 1);
+        EXPECT_EQ(instance.X, 1);
+        EXPECT_EQ(instance.Y, 1);
     }
     catch (...)
     {

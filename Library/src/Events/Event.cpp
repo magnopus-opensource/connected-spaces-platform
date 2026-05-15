@@ -27,15 +27,15 @@ public:
     EventPayloadImpl();
     ~EventPayloadImpl();
 
-    void AddInt(const char* Key, const int Value);
-    void AddString(const char* Key, const char* Value);
-    void AddFloat(const char* Key, const float Value);
-    void AddBool(const char* Key, const bool Value);
+    void AddInt(const char* key, const int value);
+    void AddString(const char* key, const char* value);
+    void AddFloat(const char* key, const float value);
+    void AddBool(const char* key, const bool value);
 
-    int GetInt(const char* Key) const;
-    const char* GetString(const char* Key) const;
-    float GetFloat(const char* Key) const;
-    bool GetBool(const char* Key) const;
+    int GetInt(const char* key) const;
+    const char* GetString(const char* key) const;
+    float GetFloat(const char* key) const;
+    bool GetBool(const char* key) const;
 
 private:
     enum EParamType
@@ -48,31 +48,31 @@ private:
 
     struct EventParam
     {
-        EventParam(EParamType Type)
-            : ParamType(Type)
+        EventParam(EParamType type)
+            : ParamType(type)
         {
         }
 
-        EventParam(const EventParam& Other)
+        EventParam(const EventParam& other)
         {
-            ParamType = Other.ParamType;
+            ParamType = other.ParamType;
 
             switch (ParamType)
             {
             case TypeInt:
-                IntParam = Other.IntParam;
+                IntParam = other.IntParam;
                 break;
 
             case TypeFloat:
-                FloatParam = Other.FloatParam;
+                FloatParam = other.FloatParam;
                 break;
 
             case TypeBool:
-                BoolParam = Other.BoolParam;
+                BoolParam = other.BoolParam;
                 break;
 
             case TypeString:
-                SetString(Other.StringParam);
+                SetString(other.StringParam);
                 break;
 
             default:
@@ -88,12 +88,12 @@ private:
             }
         }
 
-        void SetString(const char* InString)
+        void SetString(const char* inString)
         {
-            size_t StringLen = strlen(InString);
-            StringParam = (char*)std::malloc(StringLen + 1);
+            size_t stringLen = strlen(inString);
+            StringParam = (char*)std::malloc(stringLen + 1);
 
-            STRCPY(StringParam, StringLen + 1, InString);
+            STRCPY(StringParam, stringLen + 1, inString);
         }
 
         EParamType ParamType;
@@ -109,45 +109,45 @@ private:
 
     using ParamMap = std::map<std::string, EventParam>;
 
-    ParamMap Parameters;
+    ParamMap m_parameters;
 };
 
 EventPayloadImpl::EventPayloadImpl() { }
 
 EventPayloadImpl::~EventPayloadImpl() { }
 
-void EventPayloadImpl::AddInt(const char* Key, const int Value)
+void EventPayloadImpl::AddInt(const char* key, const int value)
 {
-    EventParam Param(TypeInt);
-    Param.IntParam = Value;
-    Parameters.insert(ParamMap::value_type(Key, Param));
+    EventParam param(TypeInt);
+    param.IntParam = value;
+    m_parameters.insert(ParamMap::value_type(key, param));
 }
 
-void EventPayloadImpl::AddString(const char* Key, const char* Value)
+void EventPayloadImpl::AddString(const char* key, const char* value)
 {
-    EventParam Param(TypeString);
-    Param.SetString(Value);
-    Parameters.insert(ParamMap::value_type(Key, Param));
+    EventParam param(TypeString);
+    param.SetString(value);
+    m_parameters.insert(ParamMap::value_type(key, param));
 }
 
-void EventPayloadImpl::AddFloat(const char* Key, const float Value)
+void EventPayloadImpl::AddFloat(const char* key, const float value)
 {
-    EventParam Param(TypeFloat);
-    Param.FloatParam = Value;
-    Parameters.insert(ParamMap::value_type(Key, Param));
+    EventParam param(TypeFloat);
+    param.FloatParam = value;
+    m_parameters.insert(ParamMap::value_type(key, param));
 }
 
-void EventPayloadImpl::AddBool(const char* Key, const bool Value)
+void EventPayloadImpl::AddBool(const char* key, const bool value)
 {
-    EventParam Param(TypeBool);
-    Param.BoolParam = Value;
-    Parameters.insert(ParamMap::value_type(Key, Param));
+    EventParam param(TypeBool);
+    param.BoolParam = value;
+    m_parameters.insert(ParamMap::value_type(key, param));
 }
 
-int EventPayloadImpl::GetInt(const char* Key) const
+int EventPayloadImpl::GetInt(const char* key) const
 {
-    ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end())
+    ParamMap::const_iterator it = m_parameters.find(key);
+    if (it != m_parameters.end())
     {
         assert(it->second.ParamType == TypeInt);
         return it->second.IntParam;
@@ -156,10 +156,10 @@ int EventPayloadImpl::GetInt(const char* Key) const
     return 0;
 }
 
-const char* EventPayloadImpl::GetString(const char* Key) const
+const char* EventPayloadImpl::GetString(const char* key) const
 {
-    ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end())
+    ParamMap::const_iterator it = m_parameters.find(key);
+    if (it != m_parameters.end())
     {
         assert(it->second.ParamType == TypeString);
         return it->second.StringParam;
@@ -168,10 +168,10 @@ const char* EventPayloadImpl::GetString(const char* Key) const
     return nullptr;
 }
 
-float EventPayloadImpl::GetFloat(const char* Key) const
+float EventPayloadImpl::GetFloat(const char* key) const
 {
-    ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end())
+    ParamMap::const_iterator it = m_parameters.find(key);
+    if (it != m_parameters.end())
     {
         assert(it->second.ParamType == TypeFloat);
         return it->second.FloatParam;
@@ -180,10 +180,10 @@ float EventPayloadImpl::GetFloat(const char* Key) const
     return 0.0f;
 }
 
-bool EventPayloadImpl::GetBool(const char* Key) const
+bool EventPayloadImpl::GetBool(const char* key) const
 {
-    ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end())
+    ParamMap::const_iterator it = m_parameters.find(key);
+    if (it != m_parameters.end())
     {
         assert(it->second.ParamType == TypeBool);
         return it->second.BoolParam;
@@ -192,30 +192,30 @@ bool EventPayloadImpl::GetBool(const char* Key) const
     return false;
 }
 
-Event::Event(const EventId& InId)
-    : Id(InId)
-    , Impl(new EventPayloadImpl())
+Event::Event(const EventId& inId)
+    : m_id(inId)
+    , m_impl(new EventPayloadImpl())
 {
 }
 
-Event::~Event() { delete (Impl); }
+Event::~Event() { delete (m_impl); }
 
-void Event::AddInt(const char* Key, const int Value) { Impl->AddInt(Key, Value); }
+void Event::AddInt(const char* key, const int value) { m_impl->AddInt(key, value); }
 
-void Event::AddString(const char* Key, const char* Value) { Impl->AddString(Key, Value); }
+void Event::AddString(const char* key, const char* value) { m_impl->AddString(key, value); }
 
-void Event::AddFloat(const char* Key, const float Value) { Impl->AddFloat(Key, Value); }
+void Event::AddFloat(const char* key, const float value) { m_impl->AddFloat(key, value); }
 
-void Event::AddBool(const char* Key, const bool Value) { Impl->AddBool(Key, Value); }
+void Event::AddBool(const char* key, const bool value) { m_impl->AddBool(key, value); }
 
-int Event::GetInt(const char* Key) const { return Impl->GetInt(Key); }
+int Event::GetInt(const char* key) const { return m_impl->GetInt(key); }
 
-const char* Event::GetString(const char* Key) const { return Impl->GetString(Key); }
+const char* Event::GetString(const char* key) const { return m_impl->GetString(key); }
 
-float Event::GetFloat(const char* Key) const { return Impl->GetFloat(Key); }
+float Event::GetFloat(const char* key) const { return m_impl->GetFloat(key); }
 
-bool Event::GetBool(const char* Key) const { return Impl->GetBool(Key); }
+bool Event::GetBool(const char* key) const { return m_impl->GetBool(key); }
 
-const EventId& Event::GetId() const { return Id; }
+const EventId& Event::GetId() const { return m_id; }
 
 } // namespace csp::events

@@ -37,7 +37,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -49,134 +49,134 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Login
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Define Avatar properties
-    const csp::common::String& UserName = "Creator 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Creator 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.11f, 2.22f, 3.33f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    const bool IsVisible = false;
-    const AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "Creator1Avatar";
-    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::FreeCamera;
+    const bool isVisible = false;
+    const AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "Creator1Avatar";
+    const AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Creator;
+    const LocomotionModel userAvatarLocomotionModel = LocomotionModel::FreeCamera;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, UserAvatarLocomotionModel);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, userAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-    EXPECT_EQ(Avatar->GetName(), UserName);
-    EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
-    EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);
+    EXPECT_EQ(Avatar->GetName(), userName);
+    EXPECT_EQ(Avatar->GetPosition(), userTransform.Position);
+    EXPECT_EQ(Avatar->GetRotation(), userTransform.Rotation);
 
-    auto& Components = *Avatar->GetComponents();
-    EXPECT_EQ(Components.Size(), 1);
+    auto& components = *Avatar->GetComponents();
+    EXPECT_EQ(components.Size(), 1);
 
-    auto* Component = Components[0];
-    EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+    auto* component = components[0];
+    EXPECT_EQ(component->GetComponentType(), ComponentType::AvatarData);
 
     // Verify that the default AvatarSpaceComponent property values are correct
-    AvatarSpaceComponent* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
-    EXPECT_EQ(AvatarComponent->GetAvatarId(), UserAvatarId);
-    EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
-    EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
-    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "");
-    EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), false);
-    EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
-    EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(AvatarComponent->GetHeadRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(AvatarComponent->GetWalkRunBlendPercentage(), 0.0f);
-    EXPECT_EQ(AvatarComponent->GetTorsoTwistAlpha(), 0.0f);
-    EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::Zero());
+    AvatarSpaceComponent* avatarComponent = dynamic_cast<AvatarSpaceComponent*>(component);
+    EXPECT_EQ(avatarComponent->GetAvatarId(), userAvatarId);
+    EXPECT_EQ(avatarComponent->GetState(), userAvatarState);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), userAvatarPlayMode);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), userAvatarLocomotionModel);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), isVisible);
+    EXPECT_EQ(avatarComponent->GetIsARVisible(), true);
+    EXPECT_EQ(avatarComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(avatarComponent->GetAgoraUserId(), "");
+    EXPECT_EQ(avatarComponent->GetAvatarUrl(), "");
+    EXPECT_EQ(avatarComponent->GetIsHandIKEnabled(), false);
+    EXPECT_EQ(avatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
+    EXPECT_EQ(avatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(avatarComponent->GetHeadRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(avatarComponent->GetWalkRunBlendPercentage(), 0.0f);
+    EXPECT_EQ(avatarComponent->GetTorsoTwistAlpha(), 0.0f);
+    EXPECT_EQ(avatarComponent->GetMovementDirection(), csp::common::Vector3::Zero());
 
     // Set new AvatarSpaceComponent property values
-    constexpr const char* NewAvatarId = "TestAvatarId";
-    const AvatarState NewAvatarState = AvatarState::Flying;
-    const AvatarPlayMode NewAvatarPlayMode = AvatarPlayMode::VR;
-    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::Grounded;
-    const bool NewIsVisible = true;
-    const bool NewIsARVisible = false;
-    const bool NewIsVirtualVisible = false;
-    const csp::common::String NewAgoraUserId = "AgoraUser123";
-    const csp::common::String NewAvatarUrl = "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb";
-    const bool NewIsHandIKEnabled = true;
-    const csp::common::Vector3 NewTargetHandIKTargetLocation = { 0.1f, 0.2f, 0.3f };
-    const csp::common::Vector4 NewHandRotation = { 0.1f, 0.2f, 0.3f, 1.0f };
-    const csp::common::Vector4 NewHeadRotation = { 0.4f, 0.5f, 0.6f, 1.0f };
-    const float NewWalkRunBlendPercentage = 0.75f;
-    const float NewTorsoTwistAlpha = 0.5f;
-    const csp::common::Vector3 NewMovementDirection = { 0.0f, 1.0f, 0.0f };
+    constexpr const char* newAvatarId = "TestAvatarId";
+    const AvatarState newAvatarState = AvatarState::Flying;
+    const AvatarPlayMode newAvatarPlayMode = AvatarPlayMode::VR;
+    const LocomotionModel newAvatarLocomotionModel = LocomotionModel::Grounded;
+    const bool newIsVisible = true;
+    const bool newIsArVisible = false;
+    const bool newIsVirtualVisible = false;
+    const csp::common::String newAgoraUserId = "AgoraUser123";
+    const csp::common::String newAvatarUrl = "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb";
+    const bool newIsHandIkEnabled = true;
+    const csp::common::Vector3 newTargetHandIkTargetLocation = { 0.1f, 0.2f, 0.3f };
+    const csp::common::Vector4 newHandRotation = { 0.1f, 0.2f, 0.3f, 1.0f };
+    const csp::common::Vector4 newHeadRotation = { 0.4f, 0.5f, 0.6f, 1.0f };
+    const float newWalkRunBlendPercentage = 0.75f;
+    const float newTorsoTwistAlpha = 0.5f;
+    const csp::common::Vector3 newMovementDirection = { 0.0f, 1.0f, 0.0f };
 
-    AvatarComponent->SetAvatarId(NewAvatarId);
-    AvatarComponent->SetState(NewAvatarState);
-    AvatarComponent->SetAvatarPlayMode(NewAvatarPlayMode);
-    AvatarComponent->SetLocomotionModel(NewAvatarLocomotionModel);
-    AvatarComponent->SetIsVisible(NewIsVisible);
-    AvatarComponent->SetIsARVisible(NewIsARVisible);
-    AvatarComponent->SetIsVirtualVisible(NewIsVirtualVisible);
-    AvatarComponent->SetAgoraUserId(NewAgoraUserId);
-    AvatarComponent->SetAvatarUrl(NewAvatarUrl);
-    AvatarComponent->SetIsHandIKEnabled(NewIsHandIKEnabled);
-    AvatarComponent->SetTargetHandIKTargetLocation(NewTargetHandIKTargetLocation);
-    AvatarComponent->SetHandRotation(NewHandRotation);
-    AvatarComponent->SetHeadRotation(NewHeadRotation);
-    AvatarComponent->SetWalkRunBlendPercentage(NewWalkRunBlendPercentage);
-    AvatarComponent->SetTorsoTwistAlpha(NewTorsoTwistAlpha);
-    AvatarComponent->SetMovementDirection(NewMovementDirection);
+    avatarComponent->SetAvatarId(newAvatarId);
+    avatarComponent->SetState(newAvatarState);
+    avatarComponent->SetAvatarPlayMode(newAvatarPlayMode);
+    avatarComponent->SetLocomotionModel(newAvatarLocomotionModel);
+    avatarComponent->SetIsVisible(newIsVisible);
+    avatarComponent->SetIsARVisible(newIsArVisible);
+    avatarComponent->SetIsVirtualVisible(newIsVirtualVisible);
+    avatarComponent->SetAgoraUserId(newAgoraUserId);
+    avatarComponent->SetAvatarUrl(newAvatarUrl);
+    avatarComponent->SetIsHandIKEnabled(newIsHandIkEnabled);
+    avatarComponent->SetTargetHandIKTargetLocation(newTargetHandIkTargetLocation);
+    avatarComponent->SetHandRotation(newHandRotation);
+    avatarComponent->SetHeadRotation(newHeadRotation);
+    avatarComponent->SetWalkRunBlendPercentage(newWalkRunBlendPercentage);
+    avatarComponent->SetTorsoTwistAlpha(newTorsoTwistAlpha);
+    avatarComponent->SetMovementDirection(newMovementDirection);
 
     // Verify that the AvatarSpaceComponent property values are updated correctly
-    EXPECT_EQ(AvatarComponent->GetAvatarId(), NewAvatarId);
-    EXPECT_EQ(AvatarComponent->GetState(), NewAvatarState);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), NewAvatarPlayMode);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), NewAvatarLocomotionModel);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), NewIsVisible);
-    EXPECT_EQ(AvatarComponent->GetIsARVisible(), NewIsARVisible);
-    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), NewIsVirtualVisible);
-    EXPECT_EQ(AvatarComponent->GetAgoraUserId(), NewAgoraUserId);
-    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), NewAvatarUrl);
-    EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), NewIsHandIKEnabled);
-    EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), NewTargetHandIKTargetLocation);
-    EXPECT_EQ(AvatarComponent->GetHandRotation(), NewHandRotation);
-    EXPECT_EQ(AvatarComponent->GetHeadRotation(), NewHeadRotation);
-    EXPECT_EQ(AvatarComponent->GetWalkRunBlendPercentage(), NewWalkRunBlendPercentage);
-    EXPECT_EQ(AvatarComponent->GetTorsoTwistAlpha(), NewTorsoTwistAlpha);
-    EXPECT_EQ(AvatarComponent->GetMovementDirection(), NewMovementDirection);
+    EXPECT_EQ(avatarComponent->GetAvatarId(), newAvatarId);
+    EXPECT_EQ(avatarComponent->GetState(), newAvatarState);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), newAvatarPlayMode);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), newAvatarLocomotionModel);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), newIsVisible);
+    EXPECT_EQ(avatarComponent->GetIsARVisible(), newIsArVisible);
+    EXPECT_EQ(avatarComponent->GetIsVirtualVisible(), newIsVirtualVisible);
+    EXPECT_EQ(avatarComponent->GetAgoraUserId(), newAgoraUserId);
+    EXPECT_EQ(avatarComponent->GetAvatarUrl(), newAvatarUrl);
+    EXPECT_EQ(avatarComponent->GetIsHandIKEnabled(), newIsHandIkEnabled);
+    EXPECT_EQ(avatarComponent->GetTargetHandIKTargetLocation(), newTargetHandIkTargetLocation);
+    EXPECT_EQ(avatarComponent->GetHandRotation(), newHandRotation);
+    EXPECT_EQ(avatarComponent->GetHeadRotation(), newHeadRotation);
+    EXPECT_EQ(avatarComponent->GetWalkRunBlendPercentage(), newWalkRunBlendPercentage);
+    EXPECT_EQ(avatarComponent->GetTorsoTwistAlpha(), newTorsoTwistAlpha);
+    EXPECT_EQ(avatarComponent->GetMovementDirection(), newMovementDirection);
 
     // Exit Space
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 /*
@@ -186,78 +186,78 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Login
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Define Avatar properties
-    const csp::common::String& UserName = "Creator 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Creator 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.11f, 2.22f, 3.33f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    const bool IsVisible = false;
-    const AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "Creator1Avatar";
-    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    const bool isVisible = false;
+    const AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "Creator1Avatar";
+    const AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Creator;
+    const LocomotionModel userAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    const auto LoginState = UserSystem->GetLoginState();
+    const auto loginState = userSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, UserAvatarLocomotionModel);
+    auto [Avatar] = AWAIT(realtimeEngine.get(), CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, userAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-    EXPECT_EQ(Avatar->GetName(), UserName);
-    EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
-    EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);
+    EXPECT_EQ(Avatar->GetName(), userName);
+    EXPECT_EQ(Avatar->GetPosition(), userTransform.Position);
+    EXPECT_EQ(Avatar->GetRotation(), userTransform.Rotation);
 
-    auto& Components = *Avatar->GetComponents();
-    EXPECT_EQ(Components.Size(), 1);
+    auto& components = *Avatar->GetComponents();
+    EXPECT_EQ(components.Size(), 1);
 
-    auto* Component = Components[0];
-    EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+    auto* component = components[0];
+    EXPECT_EQ(component->GetComponentType(), ComponentType::AvatarData);
 
     // Verify that the default AvatarSpaceComponent property values are correct
-    AvatarSpaceComponent* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
-    EXPECT_EQ(AvatarComponent->GetAvatarId(), UserAvatarId);
-    EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
-    EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
-    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "");
-    EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), false);
-    EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
-    EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(AvatarComponent->GetHeadRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(AvatarComponent->GetWalkRunBlendPercentage(), 0.0f);
-    EXPECT_EQ(AvatarComponent->GetTorsoTwistAlpha(), 0.0f);
-    EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::Zero());
+    AvatarSpaceComponent* avatarComponent = dynamic_cast<AvatarSpaceComponent*>(component);
+    EXPECT_EQ(avatarComponent->GetAvatarId(), userAvatarId);
+    EXPECT_EQ(avatarComponent->GetState(), userAvatarState);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), userAvatarPlayMode);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), userAvatarLocomotionModel);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), isVisible);
+    EXPECT_EQ(avatarComponent->GetIsARVisible(), true);
+    EXPECT_EQ(avatarComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(avatarComponent->GetAgoraUserId(), "");
+    EXPECT_EQ(avatarComponent->GetAvatarUrl(), "");
+    EXPECT_EQ(avatarComponent->GetIsHandIKEnabled(), false);
+    EXPECT_EQ(avatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
+    EXPECT_EQ(avatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(avatarComponent->GetHeadRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(avatarComponent->GetWalkRunBlendPercentage(), 0.0f);
+    EXPECT_EQ(avatarComponent->GetTorsoTwistAlpha(), 0.0f);
+    EXPECT_EQ(avatarComponent->GetMovementDirection(), csp::common::Vector3::Zero());
 
     Avatar->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script to set new properties
-    std::string AvatarComponentScriptText = R"xx(
+    std::string avatarComponentScriptText = R"xx(
 			var avatar = ThisEntity.getAvatarComponents()[0];
 			avatar.avatarId = "TestAvatarId";
             avatar.state = 3; // Flying
@@ -278,35 +278,35 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
             avatar.movementDirection = [1.0, 0.0, 0.0];
 		)xx";
 
-    Avatar->GetScript().SetScriptSource(AvatarComponentScriptText.c_str());
+    Avatar->GetScript().SetScriptSource(avatarComponentScriptText.c_str());
     Avatar->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Test scripts sets new properties
-    EXPECT_EQ(AvatarComponent->GetAvatarId(), "TestAvatarId");
-    EXPECT_EQ(AvatarComponent->GetState(), AvatarState::Flying);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::VR);
-    EXPECT_EQ(AvatarComponent->GetLocomotionModel(), LocomotionModel::FreeCamera);
-    EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "AgoraUser123");
-    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb");
-    EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), true);
-    EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3(0.1f, 0.2f, 0.3f));
-    EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4(0.1f, 0.2f, 0.3f, 1.0f));
-    EXPECT_EQ(AvatarComponent->GetHeadRotation(), csp::common::Vector4(0.4f, 0.5f, 0.6f, 1.0f));
-    EXPECT_EQ(AvatarComponent->GetWalkRunBlendPercentage(), 0.75f);
-    EXPECT_EQ(AvatarComponent->GetTorsoTwistAlpha(), 0.5f);
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetIsARVisible(), false);
-    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3(1.0f, 0.0f, 0.0f));
+    EXPECT_EQ(avatarComponent->GetAvatarId(), "TestAvatarId");
+    EXPECT_EQ(avatarComponent->GetState(), AvatarState::Flying);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), AvatarPlayMode::VR);
+    EXPECT_EQ(avatarComponent->GetLocomotionModel(), LocomotionModel::FreeCamera);
+    EXPECT_EQ(avatarComponent->GetAgoraUserId(), "AgoraUser123");
+    EXPECT_EQ(avatarComponent->GetAvatarUrl(), "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb");
+    EXPECT_EQ(avatarComponent->GetIsHandIKEnabled(), true);
+    EXPECT_EQ(avatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3(0.1f, 0.2f, 0.3f));
+    EXPECT_EQ(avatarComponent->GetHandRotation(), csp::common::Vector4(0.1f, 0.2f, 0.3f, 1.0f));
+    EXPECT_EQ(avatarComponent->GetHeadRotation(), csp::common::Vector4(0.4f, 0.5f, 0.6f, 1.0f));
+    EXPECT_EQ(avatarComponent->GetWalkRunBlendPercentage(), 0.75f);
+    EXPECT_EQ(avatarComponent->GetTorsoTwistAlpha(), 0.5f);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), true);
+    EXPECT_EQ(avatarComponent->GetIsARVisible(), false);
+    EXPECT_EQ(avatarComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(avatarComponent->GetMovementDirection(), csp::common::Vector3(1.0f, 0.0f, 0.0f));
 
     // Exit space
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

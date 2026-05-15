@@ -61,20 +61,20 @@ public:
 };
 #endif
 
-SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient,
-    csp::common::IAuthContext& AuthContext)
-    : config(
-          [KeepAliveSeconds]
+SignalRConnection::SignalRConnection(const std::string& baseUri, const uint32_t keepAliveSeconds, std::shared_ptr<websocket_client> websocketClient,
+    csp::common::IAuthContext& authContext)
+    : m_config(
+          [keepAliveSeconds]
           {
               auto clientConfig = signalr_client_config();
-              clientConfig.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
+              clientConfig.set_keepalive_interval(std::chrono::seconds(keepAliveSeconds));
               clientConfig.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
               return clientConfig;
           }())
-    , Connection(hub_connection_builder::create(BaseUri)
-              .with_config(config)
-              .with_http_client_factory([&AuthContext](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(AuthContext); })
-              .with_websocket_factory([WebsocketClient](const signalr_client_config&) { return WebsocketClient; })
+    , m_connection(hub_connection_builder::create(baseUri)
+              .with_config(m_config)
+              .with_http_client_factory([&authContext](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(authContext); })
+              .with_websocket_factory([websocketClient](const signalr_client_config&) { return websocketClient; })
               .skip_negotiation(true)
               .with_messagepack_hub_protocol()
 #if ENABLE_SIGNALR_LOGGING
@@ -83,37 +83,37 @@ SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t 
               .with_logging(nullptr, trace_level::error)
 #endif
               .build())
-    , PendingInvocations(0)
+    , m_pendingInvocations(0)
 {
 }
 
 SignalRConnection::~SignalRConnection() { }
 
-void SignalRConnection::Start(std::function<void(std::exception_ptr)> Callback) { Connection.start(Callback); }
+void SignalRConnection::Start(std::function<void(std::exception_ptr)> callback) { m_connection.start(callback); }
 
-void SignalRConnection::Stop(std::function<void(std::exception_ptr)> Callback)
+void SignalRConnection::Stop(std::function<void(std::exception_ptr)> callback)
 {
-    if (PendingInvocations == 0)
+    if (m_pendingInvocations == 0)
     {
-        PendingStopCallback = nullptr;
-        Connection.stop(Callback);
+        m_pendingStopCallback = nullptr;
+        m_connection.stop(callback);
     }
     else
     {
-        PendingStopCallback = Callback;
+        m_pendingStopCallback = callback;
     }
 }
 
-SignalRConnection::ConnectionState SignalRConnection::GetConnectionState() const { return (ConnectionState)Connection.get_connection_state(); }
+SignalRConnection::ConnectionState SignalRConnection::GetConnectionState() const { return (ConnectionState)m_connection.get_connection_state(); }
 
-std::string SignalRConnection::GetConnectionId() const { return Connection.get_connection_id(); }
+std::string SignalRConnection::GetConnectionId() const { return m_connection.get_connection_id(); }
 
-void SignalRConnection::SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback)
+void SignalRConnection::SetDisconnected(const std::function<void(std::exception_ptr)>& disconnectedCallback)
 {
-    Connection.set_disconnected(DisconnectedCallback);
+    m_connection.set_disconnected(disconnectedCallback);
 }
 
-bool SignalRConnection::On(const std::string& EventName, const SignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem)
+bool SignalRConnection::On(const std::string& eventName, const SignalRConnection::MethodInvokedHandler& handler, csp::common::LogSystem& logSystem)
 {
     CSP_PROFILE_SCOPED();
 
@@ -123,63 +123,63 @@ bool SignalRConnection::On(const std::string& EventName, const SignalRConnection
     // connection rebinds every time we login as though it's a fresh object ... which it should be!) Non-ideal, but okay.
     try
     {
-        Connection.on(EventName, Handler);
+        m_connection.on(eventName, handler);
         return true;
     }
     catch (const signalr::signalr_exception& exception)
     {
         // If you register an event twice, you'll throw. Very hard to debug if this happens off thread, which it does with re-logging in.
         // Not really an error though, expected behaviour for our flow, just log to help in debugability
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose,
-            fmt::format("Caught SignalR error, ignoring 'On' registration for {}. : {}", EventName, exception.what()).c_str());
+        logSystem.LogMsg(csp::common::LogLevel::Verbose,
+            fmt::format("Caught SignalR error, ignoring 'On' registration for {}. : {}", eventName, exception.what()).c_str());
         return false;
     }
 }
 
 async::task<std::tuple<signalr::value, std::exception_ptr>> SignalRConnection::Invoke(
-    const std::string& MethodName, const signalr::value& Arguments, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+    const std::string& methodName, const signalr::value& arguments, std::function<void(const signalr::value&, std::exception_ptr)> callback)
 {
     CSP_PROFILE_SCOPED();
 
-    auto InvokeOnCompleteEvent = std::make_shared<async::event_task<std::tuple<signalr::value, std::exception_ptr>>>();
-    auto InvokeOnCompleteContinuation = InvokeOnCompleteEvent->get_task();
+    auto invokeOnCompleteEvent = std::make_shared<async::event_task<std::tuple<signalr::value, std::exception_ptr>>>();
+    auto invokeOnCompleteContinuation = invokeOnCompleteEvent->get_task();
 
-    std::function<void(const signalr::value&, std::exception_ptr)> InvocationCallback
-        = [Callback, this, CompleteContinuation = std::move(InvokeOnCompleteEvent)](const signalr::value& Value, std::exception_ptr ExceptionPtr)
+    std::function<void(const signalr::value&, std::exception_ptr)> invocationCallback
+        = [callback, this, completeContinuation = std::move(invokeOnCompleteEvent)](const signalr::value& value, std::exception_ptr exceptionPtr)
     {
-        if (Callback)
+        if (callback)
         {
-            Callback(Value, ExceptionPtr);
+            callback(value, exceptionPtr);
         }
-        CompleteContinuation->set(std::make_tuple(Value, ExceptionPtr));
+        completeContinuation->set(std::make_tuple(value, exceptionPtr));
 
-        PendingInvocations--;
-        if (PendingStopCallback && PendingInvocations == 0)
+        m_pendingInvocations--;
+        if (m_pendingStopCallback && m_pendingInvocations == 0)
         {
-            Connection.stop(
-                [this, ExceptionPtr](auto /*Exception*/)
+            m_connection.stop(
+                [this, exceptionPtr](auto /*Exception*/)
                 {
                     // making a copy of the PendingStopCallback in case the SignalRConnection object gets deleted inside the callback itself
-                    auto _PendingStopCallback = PendingStopCallback;
-                    PendingStopCallback = nullptr;
+                    auto pendingStopCallback = m_pendingStopCallback;
+                    m_pendingStopCallback = nullptr;
 
-                    _PendingStopCallback(ExceptionPtr);
+                    pendingStopCallback(exceptionPtr);
                 });
         }
     };
 
-    PendingInvocations++;
-    Connection.invoke(MethodName, Arguments, InvocationCallback);
-    return InvokeOnCompleteContinuation;
+    m_pendingInvocations++;
+    m_connection.invoke(methodName, arguments, invocationCallback);
+    return invokeOnCompleteContinuation;
 }
 
-void SignalRConnection::Send(const std::string& MethodName, const signalr::value& Arguments, std::function<void(std::exception_ptr)> Callback)
+void SignalRConnection::Send(const std::string& methodName, const signalr::value& arguments, std::function<void(std::exception_ptr)> callback)
 {
     CSP_PROFILE_SCOPED();
 
-    Connection.send(MethodName, Arguments, Callback);
+    m_connection.send(methodName, arguments, callback);
 }
 
-const std::map<std::string, std::string>& SignalRConnection::HTTPHeaders() const { return config.get_http_headers(); }
+const std::map<std::string, std::string>& SignalRConnection::HTTPHeaders() const { return m_config.get_http_headers(); }
 
 } // namespace csp::multiplayer

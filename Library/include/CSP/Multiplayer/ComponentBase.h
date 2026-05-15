@@ -107,9 +107,9 @@ public:
     typedef std::function<void(ComponentBase*, const csp::common::String&, const csp::common::String&)> EntityActionHandler;
 
     // The LogSystem input may be null, components do not _have_ to log.
-    ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ComponentBase(ComponentType type, csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
-    CSP_NO_EXPORT ComponentBase(const ComponentSchema&, csp::common::LogSystem*, SpaceEntity* Parent);
+    CSP_NO_EXPORT ComponentBase(const ComponentSchema&, csp::common::LogSystem*, SpaceEntity* parent);
 
     /// @brief Virtual destructor for the component.
     virtual ~ComponentBase();
@@ -123,7 +123,7 @@ public:
     uint16_t GetId() const;
 
     /// @brief Set the ID for this component.
-    CSP_NO_EXPORT void SetId(uint16_t NewId);
+    CSP_NO_EXPORT void SetId(uint16_t newId);
 
     /// @brief Get the ComponentType of the component.
     /// @return The type of the component as an enum.
@@ -144,28 +144,28 @@ public:
     /// @brief Part of the scripting interface, allows you to subscribe to a property change and assign a script message to execute when activated.
     /// @param PropertyKey uint32_t : The key of the property to subscribe to.
     /// @param Message csp::common::String : The message to be sent to the script.
-    CSP_NO_EXPORT void SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message);
+    CSP_NO_EXPORT void SubscribeToPropertyChange(uint32_t propertyKey, csp::common::String message);
 
     /// @brief Register an action handler callback to be called when the given action is invoked.
     /// @param InAction csp::common::String : The identifying name of the action.
     /// @param ActionHandler EntityActionHandler : Callback to be called when the action is invoked, contains
     /// a pointer to this component, the name of the action and a string of parameters for the action.
-    void RegisterActionHandler(const csp::common::String& InAction, EntityActionHandler ActionHandler);
+    void RegisterActionHandler(const csp::common::String& inAction, EntityActionHandler actionHandler);
 
     /// @brief Removes the action handler callback for the given action.
     /// @param InAction csp::common::String : The identifying name of the action.
-    void UnregisterActionHandler(const csp::common::String& InAction);
+    void UnregisterActionHandler(const csp::common::String& inAction);
 
     /// @brief Calls the registered action handler callback for the given action and passes the given parameters.
     /// @param InAction csp::common::String : The identifying name of the action.
     /// @param InActionParams csp::common::String : Parameters for the action that will be passed to the action handler callback.
-    void InvokeAction(const csp::common::String& InAction, const csp::common::String& InActionParams);
+    void InvokeAction(const csp::common::String& inAction, const csp::common::String& inActionParams);
 
     /// @brief Gets the name of the component.
     const csp::common::String& GetComponentName() const;
     /// @brief Sets the name for the component.
     /// @param Value - The new name to assign to the componenent.
-    void SetComponentName(const csp::common::String& Value);
+    void SetComponentName(const csp::common::String& value);
 
     // Called when the component is locally deleted from the space,
     // or the entity the component is attached to is locally deleted.
@@ -175,21 +175,21 @@ public:
 protected:
     ComponentBase();
 
-    const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
-    bool GetBooleanProperty(uint32_t Key) const;
-    int64_t GetIntegerProperty(uint32_t Key) const;
-    float GetFloatProperty(uint32_t Key) const;
-    const csp::common::String& GetStringProperty(uint32_t Key) const;
-    const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
-    const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
-    const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
-    const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetStringMapProperty(uint32_t Key) const;
+    const csp::common::ReplicatedValue& GetProperty(uint32_t key) const;
+    bool GetBooleanProperty(uint32_t key) const;
+    int64_t GetIntegerProperty(uint32_t key) const;
+    float GetFloatProperty(uint32_t key) const;
+    const csp::common::String& GetStringProperty(uint32_t key) const;
+    const csp::common::Vector2& GetVector2Property(uint32_t key) const;
+    const csp::common::Vector3& GetVector3Property(uint32_t key) const;
+    const csp::common::Vector4& GetVector4Property(uint32_t key) const;
+    const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetStringMapProperty(uint32_t key) const;
 
-    void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
-    void RemoveProperty(uint32_t Key);
-    void SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value);
+    void SetProperty(uint32_t key, const csp::common::ReplicatedValue& value);
+    void RemoveProperty(uint32_t key);
+    void SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& value);
 
-    virtual void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value);
+    virtual void SetPropertyFromPatch(uint32_t key, const csp::common::ReplicatedValue& value);
 
     // Called when a component has first been created locally, or when the component
     // is first deserialized, after it's properties have been set.
@@ -200,22 +200,22 @@ protected:
     virtual void OnRemove();
 
     CSP_START_IGNORE
-    void SetScriptInterface(ComponentScriptInterface* ScriptInterface);
+    void SetScriptInterface(ComponentScriptInterface* scriptInterface);
     ComponentScriptInterface* GetScriptInterface();
     CSP_END_IGNORE
 
-    SpaceEntity* Parent;
-    uint16_t Id;
-    ComponentType Type;
-    csp::common::Map<uint32_t, csp::common::ReplicatedValue> Properties;
-    csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyProperties;
+    SpaceEntity* m_parent;
+    uint16_t m_id;
+    ComponentType m_type;
+    csp::common::Map<uint32_t, csp::common::ReplicatedValue> m_properties;
+    csp::common::Map<uint32_t, csp::common::ReplicatedValue> m_dirtyProperties;
 
-    std::unique_ptr<ComponentScriptInterface> ScriptInterface;
+    std::unique_ptr<ComponentScriptInterface> m_scriptInterface;
 
     // May be null, should check before use.
-    csp::common::LogSystem* LogSystem = nullptr;
+    csp::common::LogSystem* m_logSystem = nullptr;
 
-    csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
+    csp::common::Map<csp::common::String, EntityActionHandler> m_actionMap;
 
 private:
     void InitialiseProperties();

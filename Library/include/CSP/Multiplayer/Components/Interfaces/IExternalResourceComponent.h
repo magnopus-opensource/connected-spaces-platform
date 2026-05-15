@@ -32,7 +32,7 @@ public:
 
     /// @brief Sets the ID for the asset used to store external data for this component.
     /// @param InValue csp::common::String : The new value.
-    virtual void SetExternalResourceAssetId(const csp::common::String& InValue) = 0;
+    virtual void SetExternalResourceAssetId(const csp::common::String& inValue) = 0;
 
     /// @brief Gets the ID of the asset collection for the asset used to store external data for this component.
     /// @return csp::common::String : The asset ID.
@@ -40,7 +40,7 @@ public:
 
     /// @brief Sets the ID of the asset collection for the asset used to store external data for this component.
     /// @param InValue csp::common::String : The new value.
-    virtual void SetExternalResourceAssetCollectionId(const csp::common::String& InValue) = 0;
+    virtual void SetExternalResourceAssetCollectionId(const csp::common::String& inValue) = 0;
 
 protected:
     virtual ~IExternalResourceComponent() = default;

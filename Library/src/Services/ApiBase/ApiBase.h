@@ -44,26 +44,26 @@ enum class EResponseCode : uint8_t
 class ApiResponseBase
 {
 public:
-    ApiResponseBase(DtoBase* InDto);
+    ApiResponseBase(DtoBase* inDto);
     virtual ~ApiResponseBase() = default;
 
     EResponseCode GetResponseCode() const;
     DtoBase* GetDto() const;
 
-    void SetResponse(csp::web::HttpResponse* Response);
+    void SetResponse(csp::web::HttpResponse* response);
     csp::web::HttpResponse* GetMutableResponse();
     const csp::web::HttpResponse* GetResponse() const;
 
-    void SetResponseCode(csp::web::EResponseCodes InResponseCode, csp::web::EResponseCodes InValidResponseCode);
+    void SetResponseCode(csp::web::EResponseCodes inResponseCode, csp::web::EResponseCodes inValidResponseCode);
 
 protected:
-    EResponseCode ResponseCode = EResponseCode::ResponseFailed;
-    csp::web::EResponseCodes HttpResponseCode = csp::web::EResponseCodes::ResponseInit;
-    DtoBase* Dto;
-    csp::web::HttpResponse* Response = nullptr;
+    EResponseCode m_responseCode = EResponseCode::ResponseFailed;
+    csp::web::EResponseCodes m_httpResponseCode = csp::web::EResponseCodes::ResponseInit;
+    DtoBase* m_dto;
+    csp::web::HttpResponse* m_response = nullptr;
 
 private:
-    bool IsValidResponseCode(int ResponseCodeA, int ResponseCodeB);
+    bool IsValidResponseCode(int responseCodeA, int responseCodeB);
 };
 
 /// @brief Type for returning Array of DTO objects from a web api call
@@ -77,54 +77,54 @@ public:
 
     virtual utility::string_t ToJson() const override { return utility::string_t(""); }
 
-    virtual void FromJson(const utility::string_t& Json) override
+    virtual void FromJson(const utility::string_t& json) override
     {
-        assert(Json.c_str());
+        assert(json.c_str());
 
-        rapidjson::Document JsonDoc;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson");
+        rapidjson::Document jsonDoc;
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(jsonDoc, json, "DtoArray::FromJson");
         if (!ok)
         {
             return;
         }
 
-        if (JsonDoc.IsArray())
+        if (jsonDoc.IsArray())
         {
-            Array.resize(JsonDoc.Size());
+            m_array.resize(jsonDoc.Size());
 
-            for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
+            for (rapidjson::SizeType i = 0; i < jsonDoc.Size(); i++)
             {
-                rapidjson::Value& Val = JsonDoc[i];
+                rapidjson::Value& val = jsonDoc[i];
 
-                DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                DtoType& dto = m_array[i];
+                dto.FromJson(csp::web::JsonObjectToString(val));
             }
         }
-        else if (JsonDoc.HasMember("items"))
+        else if (jsonDoc.HasMember("items"))
         {
-            if (!JsonDoc["items"].IsArray())
+            if (!jsonDoc["items"].IsArray())
             {
                 return;
             }
 
-            Array.resize(JsonDoc["items"].Size());
+            m_array.resize(jsonDoc["items"].Size());
 
-            for (rapidjson::SizeType i = 0; i < JsonDoc["items"].Size(); i++)
+            for (rapidjson::SizeType i = 0; i < jsonDoc["items"].Size(); i++)
             {
-                rapidjson::Value& Val = JsonDoc["items"][i];
+                rapidjson::Value& val = jsonDoc["items"][i];
 
-                DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                DtoType& dto = m_array[i];
+                dto.FromJson(csp::web::JsonObjectToString(val));
             }
         }
     }
 
-    const std::vector<DtoType>& GetArray() const { return Array; }
+    const std::vector<DtoType>& GetArray() const { return m_array; }
 
-    std::vector<DtoType>& GetArray() { return Array; }
+    std::vector<DtoType>& GetArray() { return m_array; }
 
 private:
-    std::vector<DtoType> Array;
+    std::vector<DtoType> m_array;
 };
 
 /// @brief Templated class to handle response codes
@@ -144,8 +144,8 @@ public:
     ApiResponseHandlerBase();
     virtual ~ApiResponseHandlerBase();
 
-    virtual void OnHttpProgress(csp::web::HttpRequest& Request) override = 0;
-    virtual void OnHttpResponse(csp::web::HttpResponse& Response) override = 0;
+    virtual void OnHttpProgress(csp::web::HttpRequest& request) override = 0;
+    virtual void OnHttpResponse(csp::web::HttpResponse& response) override = 0;
 
     // Make sure these get deleted with the request
     bool ShouldDelete() const override { return true; }
@@ -164,50 +164,50 @@ template <typename CallbackType, typename ResponseType, typename ResponseDependT
 class ApiResponseHandler : public ApiResponseHandlerBase
 {
 public:
-    ApiResponseHandler(const CallbackType& InCallback, ResponseDependType* InDepend, csp::web::EResponseCodes InValidResponse,
-        async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
-        : ResponseObject(InDepend)
-        , ResponseObjectPtr(&ResponseObject)
-        , ValidResponse(InValidResponse)
-        , Callback(InCallback)
-        , OnResponseEventTask(std::move(InOnResponseEventTask))
+    ApiResponseHandler(const CallbackType& inCallback, ResponseDependType* inDepend, csp::web::EResponseCodes inValidResponse,
+        async::event_task<ResponseType> inOnResponseEventTask = async::event_task<ResponseType> {})
+        : m_responseObject(inDepend)
+        , m_responseObjectPtr(&m_responseObject)
+        , m_validResponse(inValidResponse)
+        , m_callback(inCallback)
+        , m_onResponseEventTask(std::move(inOnResponseEventTask))
     {
     }
 
-    void OnHttpProgress(csp::web::HttpRequest& Request) override
+    void OnHttpProgress(csp::web::HttpRequest& request) override
     {
-        ApiResp.SetResponse(&Request.GetMutableResponse());
+        m_apiResp.SetResponse(&request.GetMutableResponse());
 
-        ResponseObjectPtr->OnProgress(&ApiResp);
+        m_responseObjectPtr->OnProgress(&m_apiResp);
 
         // Issue progress callback
-        Callback(ResponseObject);
+        m_callback(m_responseObject);
     }
 
-    void OnHttpResponse(csp::web::HttpResponse& Response) override
+    void OnHttpResponse(csp::web::HttpResponse& response) override
     {
-        ApiResp.SetResponse(&Response);
+        m_apiResp.SetResponse(&response);
 
         // Set the appropriate response code from the Http response
-        ApiResp.SetResponseCode(Response.GetResponseCode(), ValidResponse);
+        m_apiResp.SetResponseCode(response.GetResponseCode(), m_validResponse);
 
         // Let the response object extract what it needs
-        ResponseObjectPtr->OnResponse(&ApiResp);
+        m_responseObjectPtr->OnResponse(&m_apiResp);
 
         // Issue final response callback
-        Callback(ResponseObject);
+        m_callback(m_responseObject);
 
         // Call any task continuations
-        OnResponseEventTask.set(ResponseObject);
+        m_onResponseEventTask.set(m_responseObject);
     }
 
 private:
-    ApiResponse<DtoType> ApiResp;
-    ResponseType ResponseObject;
-    csp::systems::ResultBase* ResponseObjectPtr;
-    csp::web::EResponseCodes ValidResponse;
-    CallbackType Callback;
-    async::event_task<ResponseType> OnResponseEventTask;
+    ApiResponse<DtoType> m_apiResp;
+    ResponseType m_responseObject;
+    csp::systems::ResultBase* m_responseObjectPtr;
+    csp::web::EResponseCodes m_validResponse;
+    CallbackType m_callback;
+    async::event_task<ResponseType> m_onResponseEventTask;
 };
 
 /// @brief Response Handler Pointer Type
@@ -219,23 +219,23 @@ using ResponseHandlerPtr = ApiResponseHandlerBase*;
 class ApiBase
 {
 public:
-    ApiBase(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition)
-        : WebClient(InWebClient)
-        , ServiceDefinition(InServiceDefinition)
+    ApiBase(csp::web::WebClient* inWebClient, const csp::ServiceDefinition& inServiceDefinition)
+        : WebClient(inWebClient)
+        , ServiceDefinition(inServiceDefinition)
     {
     }
 
     virtual ~ApiBase() { }
 
     template <typename CallbackType, typename ResponseType, typename ResponseDependType, typename DtoType>
-    ResponseHandlerPtr CreateHandler(const CallbackType& InCallback, ResponseDependType* InDepend,
-        csp::web::EResponseCodes InValidResponseCode = csp::web::EResponseCodes::ResponseOK,
-        async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
+    ResponseHandlerPtr CreateHandler(const CallbackType& inCallback, ResponseDependType* inDepend,
+        csp::web::EResponseCodes inValidResponseCode = csp::web::EResponseCodes::ResponseOK,
+        async::event_task<ResponseType> inOnResponseEventTask = async::event_task<ResponseType> {})
     {
         // This gets owned by the HttpRequest and gets deleted in it's destructor once the request is complete
-        ResponseHandlerPtr Handler = new ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
-            InCallback, InDepend, InValidResponseCode, std::move(InOnResponseEventTask));
-        return Handler;
+        ResponseHandlerPtr handler = new ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
+            inCallback, inDepend, inValidResponseCode, std::move(inOnResponseEventTask));
+        return handler;
     }
 
     csp::web::WebClient* WebClient;
@@ -252,6 +252,6 @@ ApiResponse<DtoType>::ApiResponse()
 {
 }
 
-template <class DtoType> ApiResponse<DtoType>::~ApiResponse() { delete (Dto); }
+template <class DtoType> ApiResponse<DtoType>::~ApiResponse() { delete (m_dto); }
 
 } // namespace csp::services

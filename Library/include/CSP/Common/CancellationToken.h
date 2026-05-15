@@ -62,7 +62,7 @@ public:
 
 private:
     class Impl;
-    Impl* ImplPtr;
+    Impl* m_implPtr;
 };
 
 } // namespace csp::common

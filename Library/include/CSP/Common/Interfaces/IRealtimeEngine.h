@@ -126,23 +126,23 @@ public:
     /// @param LocomotionModel csp::multiplayer::LocomotionModel : The Initial LocomotionModel to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-        const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState AvatarState,
-        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
-        csp::multiplayer::EntityCreatedCallback Callback)
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& name, const csp::common::String& userId,
+        const csp::multiplayer::SpaceTransform& spaceTransform, bool isVisible, csp::multiplayer::AvatarState avatarState,
+        const csp::common::String& avatarId, csp::multiplayer::AvatarPlayMode avatarPlayMode, csp::multiplayer::LocomotionModel locomotionModel,
+        csp::multiplayer::EntityCreatedCallback callback)
     {
         // Marking parameters as unused by casting them to void to suppress warnings.
         // however this method is exported and the wrapper generator does not support that approach.
         // C++ 17 adds support for the [[maybe_unused]] attribute, but again the wrapper generator does not support it.
-        (void)Name;
-        (void)UserId;
-        (void)SpaceTransform;
-        (void)IsVisible;
-        (void)AvatarState;
-        (void)AvatarId;
-        (void)AvatarPlayMode;
-        (void)LocomotionModel;
-        (void)Callback;
+        (void)name;
+        (void)userId;
+        (void)spaceTransform;
+        (void)isVisible;
+        (void)avatarState;
+        (void)avatarId;
+        (void)avatarPlayMode;
+        (void)locomotionModel;
+        (void)callback;
 
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
@@ -154,52 +154,52 @@ public:
     /// empty, entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& name, const csp::multiplayer::SpaceTransform& spaceTransform,
+        const csp::common::Optional<uint64_t>& parentId, csp::multiplayer::EntityCreatedCallback callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Name;
-        (void)SpaceTransform;
-        (void)ParentID;
-        (void)Callback;
+        (void)name;
+        (void)spaceTransform;
+        (void)parentId;
+        (void)callback;
     }
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
-    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
+    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* entity, csp::multiplayer::CallbackHandler callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Entity;
-        (void)Callback;
+        (void)entity;
+        (void)callback;
     }
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
     /// cases.
-    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Entity;
+        (void)entity;
     }
 
     /// @brief Removes an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully removed, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
     /// cases.
-    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Entity;
+        (void)entity;
     }
 
     /**
@@ -214,13 +214,13 @@ public:
      * @post FetchStartedCallback will have been called, and the EntityFetchCompleteCallback the engine was constructed with will either have
      * been called, or an async job started with an intent to call it once fetch is complete.
      */
-    CSP_NO_EXPORT virtual void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId, EntityFetchStartedCallback FetchStartedCallback)
+    CSP_NO_EXPORT virtual void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& spaceId, EntityFetchStartedCallback fetchStartedCallback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)SpaceId;
-        (void)FetchStartedCallback;
+        (void)spaceId;
+        (void)fetchStartedCallback;
     }
 
     /***** ENTITY ACCESS *****************************************************/
@@ -228,81 +228,81 @@ public:
     /// @brief Finds the first found SpaceEntity of a matching Name.
     /// @param Name csp::common::String : The name to search.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& Name)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Name;
+        (void)name;
     }
 
     /// @brief Finds the first found SpaceEntity that has the ID EntityId.
     /// @param EntityId uint64_t : The Id to look for.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t EntityId)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t entityId)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)EntityId;
+        (void)entityId;
     }
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& Name)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Name;
+        (void)name;
     }
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will not contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& Name)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Name;
+        (void)name;
     }
 
     /// @brief Get an Entity by its index.
     ///
     /// @param EntityIndex size_t : The index of the entity to get.
     /// @return A non-owning pointer to the entity at the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t EntityIndex)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t entityIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)EntityIndex;
+        (void)entityIndex;
     }
 
     /// @brief Get an Avatar by its index. The returned pointer will be an entity that contains an AvatarSpaceComponent.
     ///
     /// @param AvatarIndex size_t : The index of the avatar entity to get.
     /// @return A non-owning pointer to the avatar entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t AvatarIndex)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t avatarIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)AvatarIndex;
+        (void)avatarIndex;
     }
 
     /// @brief Get an Object by its index. The returned pointer will be an entity that does not contain an AvatarSpaceComponent.
     ///
     /// @param ObjectIndex size_t : The index of the object entity to get.
     /// @return A non-owning pointer to the object entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t ObjectIndex)
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t objectIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)ObjectIndex;
+        (void)objectIndex;
     }
 
     /// @brief Return all the entities currently known to the realtime engine.
@@ -335,12 +335,12 @@ public:
     /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
     /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
     /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
-    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Entity;
+        (void)entity;
     }
 
     /// @brief Set Callback that notifies when the OnlineRealtimeEngine is in a valid state
@@ -349,10 +349,10 @@ public:
     /// This callback must be set prior to entering a space.
     /// @param FetchCompleteCallback csp::common::EntityFetchCompleteCallback : Callback that notifies when the RealtimeEngine has completed initial
     /// entity fetch
-    CSP_EVENT void SetEntityFetchCompleteCallback(EntityFetchCompleteCallback Callback) { EntityFetchCompleteCallback = Callback; }
+    CSP_EVENT void SetEntityFetchCompleteCallback(EntityFetchCompleteCallback callback) { m_entityFetchCompleteCallback = callback; }
 
     // Wrapper generator limitation, would rather expose this as it'd be handy to know :(
-    CSP_NO_EXPORT EntityFetchCompleteCallback GetEntityFetchCompleteCallback() const { return EntityFetchCompleteCallback; }
+    CSP_NO_EXPORT EntityFetchCompleteCallback GetEntityFetchCompleteCallback() const { return m_entityFetchCompleteCallback; }
 
     /***** ENTITY PROCESSING *************************************************/
 
@@ -371,12 +371,12 @@ public:
     /// If your engine does not require a patch workflow, return null.
     /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
     /// @return A pointer to a statepatcher, or null. Pointer ownership is transferred to the caller.
-    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& spaceEntity) const
     {
         throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)SpaceEntity;
+        (void)spaceEntity;
     }
 
     /// @brief Checks if the given entity can be modified by this client.
@@ -389,12 +389,12 @@ public:
     /// @param SpaceEntity const csp::multiplayer::SpaceEntity* : The entity we are checking can be modified.
     /// @return csp::common::ModifiableStatus : The result of this operation signifying if the entity can be modified.
     /// Will return ModifiableStatus::Modifiable if the entity can be modified.
-    virtual csp::multiplayer::ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+    virtual csp::multiplayer::ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* spaceEntity) const
     {
         throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)SpaceEntity;
+        (void)spaceEntity;
     }
 
     /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
@@ -410,6 +410,6 @@ protected:
     IRealtimeEngine(IRealtimeEngine&&) = delete;
     IRealtimeEngine& operator=(IRealtimeEngine&&) = delete;
 
-    EntityFetchCompleteCallback EntityFetchCompleteCallback = nullptr;
+    EntityFetchCompleteCallback m_entityFetchCompleteCallback = nullptr;
 };
 }

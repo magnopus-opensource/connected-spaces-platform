@@ -61,61 +61,61 @@ static const std::unordered_map<ModifiableStatus, csp::common::String> Modifiabl
     { ModifiableStatus::EntityNotOwnedAndUntransferable, "Entity is not owned by this client and isn't transferable" },
 };
 
-csp::common::String ModifiableStatusToString(ModifiableStatus Failure);
+csp::common::String ModifiableStatusToString(ModifiableStatus failure);
 
 // Finds a space entity in the Entities container. Returns nullptr if the entity is not found.
-csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
+csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name);
 
-csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& RealtimeEngine, uint64_t EntityId);
+csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& realtimeEngine, uint64_t entityId);
 
 // Finds an avatar entity in the Avatar container. Returns nullptr if the avatar is not found.
-csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
+csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name);
 
 // Finds an object in the Objects container. Returns nullptr if the object is not found.
-csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
+csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name);
 
 // Creates a space entity with an avatar component.
-std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId, csp::common::IRealtimeEngine& RealtimeEngine,
-    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem, uint64_t NetworkId, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
-    const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
-    csp::multiplayer::LocomotionModel LocomotionModel);
+std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& userId, csp::common::IRealtimeEngine& realtimeEngine,
+    csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem& logSystem, uint64_t networkId, const csp::common::String& name,
+    const csp::multiplayer::SpaceTransform& transform, bool isVisible, uint64_t ownerId, bool isTransferable, bool isPersistent,
+    const csp::common::String& avatarId, csp::multiplayer::AvatarState avatarState, csp::multiplayer::AvatarPlayMode avatarPlayMode,
+    csp::multiplayer::LocomotionModel locomotionModel);
 
 // Checks if an entity exists within the root hierarchy array
-bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, SpaceEntity* Entity);
+bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& realtimeEngine, SpaceEntity* entity);
 
 // "Resolves" the entity heirarchy, which is really a bit of an unhelpful catch all term to mean
 // "Walk the entity tree, and make sure all our internal buffers are set up to have the right pointers in them".
 // Sets the entities in the root entity heirarchy list, as well as calling SpaceEntity::ResolveParentChildRelationship,
 // which also "resolves" itself, by setting the `Parent` pointer to the correct entity, and making sure it's list of children is correctly populated.
 void ResolveEntityHierarchy(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, SpaceEntity* entity);
 
 // Unparents any child entities from the entity and remove the parent relationship. Need to call this before deleting an entity
 void RemoveParentChildRelationshipsFromEntity(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, SpaceEntity* entity);
 
 // Ensures components attached to the entity are notified of deletion by calling OnLocalDelete.
 // It also fires the entity patch callback, notifying clients that the child entities have been reparented.
 void LocalProcessChildUpdates(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity);
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, csp::multiplayer::SpaceEntity* entity);
 
 // You should lock the entities mutex before calling this, and probably have processed entity operations
-void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& Entities);
+void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& entities);
 
 // ClientID is the ID that comes from the multiplayerConnection
-void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& Entities, uint64_t ClientId);
+void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& entities, uint64_t clientId);
 
 // ClientID is the ID that comes from the multiplayerConnection
-void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId);
+void ClaimScriptOwnership(SpaceEntity* entity, uint64_t clientId);
 
 // TODO: remove in OF-1785
-std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
-    const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
-    csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager);
+std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& entitiesLock, csp::common::RealtimeEngineType realtimeEngineType,
+    const csp::common::List<SpaceEntity*>& entities, std::chrono::system_clock::time_point lastTickTime,
+    csp::common::Optional<csp::multiplayer::ClientElectionManager*> electionManager);
 
 // Returns the current time, meant to be set as LastTickTime. If an offline engine, will not bother checking whether the local client is the leader.
 std::chrono::system_clock::time_point TickEntityScripts(
-    std::recursive_mutex& EntitiesLock, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime);
+    std::recursive_mutex& entitiesLock, const csp::common::List<SpaceEntity*>& entities, std::chrono::system_clock::time_point lastTickTime);
 
 }

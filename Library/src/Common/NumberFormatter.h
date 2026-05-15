@@ -16,47 +16,47 @@ namespace csp
 class NumberFormatterPtr
 {
 public:
-    NumberFormatterPtr(char* InPtr, std::size_t InOffset)
-        : Beg(InPtr)
-        , Cur(InPtr)
-        , End(InPtr + InOffset)
+    NumberFormatterPtr(char* inPtr, std::size_t inOffset)
+        : m_beg(inPtr)
+        , m_cur(inPtr)
+        , m_end(inPtr + inOffset)
     {
     }
 
     char*& operator++() // prefix
     {
-        return ++Cur;
+        return ++m_cur;
     }
 
     char* operator++(int) // postfix
     {
-        char* Tmp = Cur++;
-        return Tmp;
+        char* tmp = m_cur++;
+        return tmp;
     }
 
     char*& operator--() // prefix
     {
-        return --Cur;
+        return --m_cur;
     }
 
     char* operator--(int) // postfix
     {
-        char* tmp = Cur--;
+        char* tmp = m_cur--;
         return tmp;
     }
 
-    char*& operator+=(const int Incr) { return Cur += Incr; }
+    char*& operator+=(const int incr) { return m_cur += incr; }
 
-    char*& operator-=(const int Decr) { return Cur -= Decr; }
+    char*& operator-=(const int decr) { return m_cur -= decr; }
 
-    operator char*() const { return Cur; }
+    operator char*() const { return m_cur; }
 
-    std::size_t span() const { return End - Beg; }
+    std::size_t span() const { return m_end - m_beg; }
 
 private:
-    const char* Beg;
-    char* Cur;
-    const char* End;
+    const char* m_beg;
+    char* m_cur;
+    const char* m_end;
 };
 
 class NumberFormatter
@@ -72,26 +72,26 @@ public:
     static constexpr unsigned NF_MAX_FLT_STRING_LEN = 780;
     static constexpr unsigned CSP_MAX_INT_STRING_LEN = 65;
 
-    static std::string Format(int Value);
+    static std::string Format(int value);
     /// Formats an integer value in decimal notation.
 
-    static std::string Format(int Value, int Width);
+    static std::string Format(int value, int width);
     /// Formats an integer value in decimal notation,
     /// right justified in a field having at least
     /// the specified width.
 
-    static std::string Format0(int Value, int Width);
+    static std::string Format0(int value, int width);
     /// Formats an integer value in decimal notation,
     /// right justified and zero-padded in a field
     /// having at least the specified width.
 
-    static std::string FormatHex(int Value, bool Prefix = false);
+    static std::string FormatHex(int value, bool prefix = false);
     /// Formats an int value in hexadecimal notation.
     /// If prefix is true, "0x" prefix is prepended to the
     /// resulting string.
     /// The value is treated as unsigned.
 
-    static std::string FormatHex(int Value, int Width, bool Prefix = false);
+    static std::string FormatHex(int value, int width, bool prefix = false);
     /// Formats a int value in hexadecimal notation,
     /// right justified and zero-padded in
     /// a field having at least the specified width.
@@ -99,51 +99,51 @@ public:
     /// resulting string.
     /// The value is treated as unsigned.
 
-    static std::string Format(unsigned Value);
+    static std::string Format(unsigned value);
     /// Formats an unsigned int value in decimal notation.
 
-    static std::string Format(unsigned Value, int Width);
+    static std::string Format(unsigned value, int width);
     /// Formats an unsigned long int in decimal notation,
     /// right justified in a field having at least the
     /// specified width.
 
-    static std::string Format0(unsigned int Value, int Width);
+    static std::string Format0(unsigned int value, int width);
     /// Formats an unsigned int value in decimal notation,
     /// right justified and zero-padded in a field having at
     /// least the specified width.
 
-    static std::string FormatHex(unsigned Value, bool Prefix = false);
+    static std::string FormatHex(unsigned value, bool prefix = false);
     /// Formats an unsigned int value in hexadecimal notation.
     /// If prefix is true, "0x" prefix is prepended to the
     /// resulting string.
 
-    static std::string FormatHex(unsigned Value, int Width, bool Prefix = false);
+    static std::string FormatHex(unsigned value, int width, bool prefix = false);
     /// Formats a int value in hexadecimal notation,
     /// right justified and zero-padded in
     /// a field having at least the specified width.
     /// If prefix is true, "0x" prefix is prepended to the
     /// resulting string.
 
-    static std::string Format(long Value);
+    static std::string Format(long value);
     /// Formats a long value in decimal notation.
 
-    static std::string Format(long Value, int Width);
+    static std::string Format(long value, int width);
     /// Formats a long value in decimal notation,
     /// right justified in a field having at least the
     /// specified width.
 
-    static std::string Format0(long Value, int Width);
+    static std::string Format0(long value, int width);
     /// Formats a long value in decimal notation,
     /// right justified and zero-padded in a field
     /// having at least the specified width.
 
-    static std::string FormatHex(long Value, bool Prefix = false);
+    static std::string FormatHex(long value, bool prefix = false);
     /// Formats an unsigned long value in hexadecimal notation.
     /// If prefix is true, "0x" prefix is prepended to the
     /// resulting string.
     /// The value is treated as unsigned.
 
-    static std::string FormatHex(long Value, int Width, bool Prefix = false);
+    static std::string FormatHex(long value, int width, bool prefix = false);
     /// Formats an unsigned long value in hexadecimal notation,
     /// right justified and zero-padded in a field having at least the
     /// specified width.
@@ -151,25 +151,25 @@ public:
     /// resulting string.
     /// The value is treated as unsigned.
 
-    static std::string Format(unsigned long Value);
+    static std::string Format(unsigned long value);
     /// Formats an unsigned long value in decimal notation.
 
-    static std::string Format(unsigned long Value, int Width);
+    static std::string Format(unsigned long value, int width);
     /// Formats an unsigned long value in decimal notation,
     /// right justified in a field having at least the specified
     /// width.
 
-    static std::string Format0(unsigned long Value, int Width);
+    static std::string Format0(unsigned long value, int width);
     /// Formats an unsigned long value in decimal notation,
     /// right justified and zero-padded
     /// in a field having at least the specified width.
 
-    static std::string FormatHex(unsigned long Value, bool Prefix = false);
+    static std::string FormatHex(unsigned long value, bool prefix = false);
     /// Formats an unsigned long value in hexadecimal notation.
     /// If prefix is true, "0x" prefix is prepended to the
     /// resulting string.
 
-    static std::string FormatHex(unsigned long Value, int Width, bool Prefix = false);
+    static std::string FormatHex(unsigned long value, int width, bool prefix = false);
     /// Formats an unsigned long value in hexadecimal notation,
     /// right justified and zero-padded in a field having at least the
     /// specified width.
@@ -179,7 +179,7 @@ public:
 private:
     template <typename T>
     static bool IntToStr(
-        T Value, unsigned short Base, char* Result, std::size_t& Size, bool Prefix = false, int Width = -1, char Fill = ' ', char ThSep = 0)
+        T value, unsigned short base, char* result, std::size_t& size, bool prefix = false, int width = -1, char fill = ' ', char thSep = 0)
     /// Converts integer to string. Numeric bases from binary to hexadecimal are supported.
     /// If width is non-zero, it pads the return value with fill character to the specified width.
     /// When padding is zero character ('0'), it is prepended to the number itself; all other
@@ -188,66 +188,66 @@ private:
     /// "0x" for hexadecimal) is prepended. For all other bases, prefix argument is ignored.
     /// Formatted string has at least [width] total length.
     {
-        if (Base < 2 || Base > 0x10)
+        if (base < 2 || base > 0x10)
         {
-            *Result = '\0';
+            *result = '\0';
             return false;
         }
 
-        NumberFormatterPtr Ptr(Result, Size);
-        int ThCount = 0;
-        T TmpVal;
+        NumberFormatterPtr ptr(result, size);
+        int thCount = 0;
+        T tmpVal;
         do
         {
-            TmpVal = Value;
-            Value /= Base;
-            *Ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (TmpVal - Value * Base)];
-            if (ThSep && (Base == 10) && (++ThCount == 3))
+            tmpVal = value;
+            value /= base;
+            *ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (tmpVal - value * base)];
+            if (thSep && (base == 10) && (++thCount == 3))
             {
-                *Ptr++ = ThSep;
-                ThCount = 0;
+                *ptr++ = thSep;
+                thCount = 0;
             }
-        } while (Value);
+        } while (value);
 
-        if ('0' == Fill)
+        if ('0' == fill)
         {
-            if (TmpVal < 0)
-                --Width;
-            if (Prefix && Base == 010)
-                --Width;
-            if (Prefix && Base == 0x10)
-                Width -= 2;
-            while ((Ptr - Result) < Width)
-                *Ptr++ = Fill;
+            if (tmpVal < 0)
+                --width;
+            if (prefix && base == 010)
+                --width;
+            if (prefix && base == 0x10)
+                width -= 2;
+            while ((ptr - result) < width)
+                *ptr++ = fill;
         }
 
-        if (Prefix && Base == 010)
-            *Ptr++ = '0';
-        else if (Prefix && Base == 0x10)
+        if (prefix && base == 010)
+            *ptr++ = '0';
+        else if (prefix && base == 0x10)
         {
-            *Ptr++ = 'x';
-            *Ptr++ = '0';
+            *ptr++ = 'x';
+            *ptr++ = '0';
         }
 
-        if (TmpVal < 0)
-            *Ptr++ = '-';
+        if (tmpVal < 0)
+            *ptr++ = '-';
 
-        if ('0' != Fill)
+        if ('0' != fill)
         {
-            while ((Ptr - Result) < Width)
-                *Ptr++ = Fill;
+            while ((ptr - result) < width)
+                *ptr++ = fill;
         }
 
-        Size = Ptr - Result;
-        *Ptr-- = '\0';
+        size = ptr - result;
+        *ptr-- = '\0';
 
-        char* Ptrr = Result;
-        char Tmp;
-        while (Ptrr < Ptr)
+        char* ptrr = result;
+        char tmp;
+        while (ptrr < ptr)
         {
-            Tmp = *Ptr;
-            *Ptr-- = *Ptrr;
-            *Ptrr++ = Tmp;
+            tmp = *ptr;
+            *ptr-- = *ptrr;
+            *ptrr++ = tmp;
         }
 
         return true;
@@ -255,7 +255,7 @@ private:
 
     template <typename T>
     static bool UIntToStr(
-        T Value, unsigned short Base, char* Result, std::size_t& Size, bool Prefix = false, int Width = -1, char Fill = ' ', char ThSep = 0)
+        T value, unsigned short base, char* result, std::size_t& size, bool prefix = false, int width = -1, char fill = ' ', char thSep = 0)
     /// Converts unsigned integer to string. Numeric bases from binary to hexadecimal are supported.
     /// If width is non-zero, it pads the return value with fill character to the specified width.
     /// When padding is zero character ('0'), it is prepended to the number itself; all other
@@ -264,61 +264,61 @@ private:
     /// "0x" for hexadecimal) is prepended. For all other bases, prefix argument is ignored.
     /// Formatted string has at least [width] total length.
     {
-        if (Base < 2 || Base > 0x10)
+        if (base < 2 || base > 0x10)
         {
-            *Result = '\0';
+            *result = '\0';
             return false;
         }
 
-        NumberFormatterPtr Ptr(Result, Size);
-        int ThCount = 0;
-        T TmpVal;
+        NumberFormatterPtr ptr(result, size);
+        int thCount = 0;
+        T tmpVal;
         do
         {
-            TmpVal = Value;
-            Value /= Base;
-            *Ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (TmpVal - Value * Base)];
-            if (ThSep && (Base == 10) && (++ThCount == 3))
+            tmpVal = value;
+            value /= base;
+            *ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (tmpVal - value * base)];
+            if (thSep && (base == 10) && (++thCount == 3))
             {
-                *Ptr++ = ThSep;
-                ThCount = 0;
+                *ptr++ = thSep;
+                thCount = 0;
             }
-        } while (Value);
+        } while (value);
 
-        if ('0' == Fill)
+        if ('0' == fill)
         {
-            if (Prefix && Base == 010)
-                --Width;
-            if (Prefix && Base == 0x10)
-                Width -= 2;
-            while ((Ptr - Result) < Width)
-                *Ptr++ = Fill;
+            if (prefix && base == 010)
+                --width;
+            if (prefix && base == 0x10)
+                width -= 2;
+            while ((ptr - result) < width)
+                *ptr++ = fill;
         }
 
-        if (Prefix && Base == 010)
-            *Ptr++ = '0';
-        else if (Prefix && Base == 0x10)
+        if (prefix && base == 010)
+            *ptr++ = '0';
+        else if (prefix && base == 0x10)
         {
-            *Ptr++ = 'x';
-            *Ptr++ = '0';
+            *ptr++ = 'x';
+            *ptr++ = '0';
         }
 
-        if ('0' != Fill)
+        if ('0' != fill)
         {
-            while ((Ptr - Result) < Width)
-                *Ptr++ = Fill;
+            while ((ptr - result) < width)
+                *ptr++ = fill;
         }
 
-        Size = Ptr - Result;
-        *Ptr-- = '\0';
+        size = ptr - result;
+        *ptr-- = '\0';
 
-        char* Ptrr = Result;
-        char Tmp;
-        while (Ptrr < Ptr)
+        char* ptrr = result;
+        char tmp;
+        while (ptrr < ptr)
         {
-            Tmp = *Ptr;
-            *Ptr-- = *Ptrr;
-            *Ptrr++ = Tmp;
+            tmp = *ptr;
+            *ptr-- = *ptrr;
+            *ptrr++ = tmp;
         }
 
         return true;
@@ -329,11 +329,11 @@ private:
     /// Converts integer to string; This is a wrapper function, for details see see the
     /// bool IntToStr(T, unsigned short, char*, int, int, char, char) implementation.
     {
-        char Res[CSP_MAX_INT_STRING_LEN] = { 0 };
-        std::size_t Size = CSP_MAX_INT_STRING_LEN;
-        bool Ret = IntToStr(number, base, Res, Size, prefix, width, fill, thSep);
-        result.assign(Res, Size);
-        return Ret;
+        char res[CSP_MAX_INT_STRING_LEN] = { 0 };
+        std::size_t size = CSP_MAX_INT_STRING_LEN;
+        bool ret = IntToStr(number, base, res, size, prefix, width, fill, thSep);
+        result.assign(res, size);
+        return ret;
     }
 
     template <typename T>
@@ -341,152 +341,152 @@ private:
     /// Converts unsigned integer to string; This is a wrapper function, for details see see the
     /// bool UIntToStr(T, unsigned short, char*, int, int, char, char) implementation.
     {
-        char Res[CSP_MAX_INT_STRING_LEN] = { 0 };
+        char res[CSP_MAX_INT_STRING_LEN] = { 0 };
         std::size_t size = CSP_MAX_INT_STRING_LEN;
-        bool Ret = UIntToStr(number, base, Res, size, prefix, width, fill, thSep);
-        result.assign(Res, size);
-        return Ret;
+        bool ret = UIntToStr(number, base, res, size, prefix, width, fill, thSep);
+        result.assign(res, size);
+        return ret;
     }
 };
 
-inline std::string NumberFormatter::Format(int Value)
+inline std::string NumberFormatter::Format(int value)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result);
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result);
+    return result;
 }
 
-inline std::string NumberFormatter::Format(int Value, int Width)
+inline std::string NumberFormatter::Format(int value, int width)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result, false, Width, ' ');
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result, false, width, ' ');
+    return result;
 }
 
-inline std::string NumberFormatter::Format0(int Value, int Width)
+inline std::string NumberFormatter::Format0(int value, int width)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result, false, Width, '0');
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result, false, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(int Value, bool Prefix)
+inline std::string NumberFormatter::FormatHex(int value, bool prefix)
 {
-    std::string Result;
-    UIntToStr(static_cast<unsigned int>(Value), 0x10, Result, Prefix);
-    return Result;
+    std::string result;
+    UIntToStr(static_cast<unsigned int>(value), 0x10, result, prefix);
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(int Value, int Width, bool Prefix)
+inline std::string NumberFormatter::FormatHex(int value, int width, bool prefix)
 {
-    std::string Result;
-    UIntToStr(static_cast<unsigned int>(Value), 0x10, Result, Prefix, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(static_cast<unsigned int>(value), 0x10, result, prefix, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::Format(unsigned Value)
+inline std::string NumberFormatter::Format(unsigned value)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result);
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result);
+    return result;
 }
 
-inline std::string NumberFormatter::Format(unsigned Value, int Width)
+inline std::string NumberFormatter::Format(unsigned value, int width)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result, false, Width, ' ');
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result, false, width, ' ');
+    return result;
 }
 
-inline std::string NumberFormatter::Format0(unsigned int Value, int Width)
+inline std::string NumberFormatter::Format0(unsigned int value, int width)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result, false, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result, false, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(unsigned Value, bool Prefix)
+inline std::string NumberFormatter::FormatHex(unsigned value, bool prefix)
 {
-    std::string Result;
-    UIntToStr(Value, 0x10, Result, Prefix);
-    return Result;
+    std::string result;
+    UIntToStr(value, 0x10, result, prefix);
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(unsigned Value, int Width, bool Prefix)
+inline std::string NumberFormatter::FormatHex(unsigned value, int width, bool prefix)
 {
-    std::string Result;
-    UIntToStr(Value, 0x10, Result, Prefix, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(value, 0x10, result, prefix, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::Format(long Value)
+inline std::string NumberFormatter::Format(long value)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result);
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result);
+    return result;
 }
 
-inline std::string NumberFormatter::Format(long Value, int Width)
+inline std::string NumberFormatter::Format(long value, int width)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result, false, Width, ' ');
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result, false, width, ' ');
+    return result;
 }
 
-inline std::string NumberFormatter::Format0(long Value, int Width)
+inline std::string NumberFormatter::Format0(long value, int width)
 {
-    std::string Result;
-    IntToStr(Value, 10, Result, false, Width, '0');
-    return Result;
+    std::string result;
+    IntToStr(value, 10, result, false, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(long Value, bool Prefix)
+inline std::string NumberFormatter::FormatHex(long value, bool prefix)
 {
-    std::string Result;
-    UIntToStr(static_cast<unsigned long>(Value), 0x10, Result, Prefix);
-    return Result;
+    std::string result;
+    UIntToStr(static_cast<unsigned long>(value), 0x10, result, prefix);
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(long Value, int Width, bool Prefix)
+inline std::string NumberFormatter::FormatHex(long value, int width, bool prefix)
 {
-    std::string Result;
-    UIntToStr(static_cast<unsigned long>(Value), 0x10, Result, Prefix, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(static_cast<unsigned long>(value), 0x10, result, prefix, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::Format(unsigned long Value)
+inline std::string NumberFormatter::Format(unsigned long value)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result);
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result);
+    return result;
 }
 
-inline std::string NumberFormatter::Format(unsigned long Value, int Width)
+inline std::string NumberFormatter::Format(unsigned long value, int width)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result, false, Width, ' ');
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result, false, width, ' ');
+    return result;
 }
 
-inline std::string NumberFormatter::Format0(unsigned long Value, int Width)
+inline std::string NumberFormatter::Format0(unsigned long value, int width)
 {
-    std::string Result;
-    UIntToStr(Value, 10, Result, false, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(value, 10, result, false, width, '0');
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(unsigned long Value, bool Prefix)
+inline std::string NumberFormatter::FormatHex(unsigned long value, bool prefix)
 {
-    std::string Result;
-    UIntToStr(Value, 0x10, Result, Prefix);
-    return Result;
+    std::string result;
+    UIntToStr(value, 0x10, result, prefix);
+    return result;
 }
 
-inline std::string NumberFormatter::FormatHex(unsigned long Value, int Width, bool Prefix)
+inline std::string NumberFormatter::FormatHex(unsigned long value, int width, bool prefix)
 {
-    std::string Result;
-    UIntToStr(Value, 0x10, Result, Prefix, Width, '0');
-    return Result;
+    std::string result;
+    UIntToStr(value, 0x10, result, prefix, width, '0');
+    return result;
 }
 
 } // namespace csp

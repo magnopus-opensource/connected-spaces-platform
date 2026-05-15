@@ -21,14 +21,14 @@ namespace csp::multiplayer
 
 csp::common::String SequenceConstants::GetHierarchyName()
 {
-    const csp::common::String SequenceHierarchyName = "EntityHierarchy";
-    return SequenceHierarchyName;
+    const csp::common::String sequenceHierarchyName = "EntityHierarchy";
+    return sequenceHierarchyName;
 }
 
 csp::common::String SequenceConstants::GetIdPrefix()
 {
-    const csp::common::String SequenceIdPrefix = "m_Id_";
-    return SequenceIdPrefix;
+    const csp::common::String sequenceIdPrefix = "m_Id_";
+    return sequenceIdPrefix;
 }
 
 } // namespace csp::multiplayer

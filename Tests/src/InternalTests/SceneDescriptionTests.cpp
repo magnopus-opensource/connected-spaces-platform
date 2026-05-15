@@ -38,199 +38,199 @@ using namespace csp::systems;
 
 namespace
 {
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ObjectMessageSerializeTest)
 {
-    const uint64_t TestId = 1;
-    const uint64_t TestType = 2;
-    const bool TestIsTransferable = true;
-    const bool TestIsPersistent = true;
-    const uint64_t TestOwnerId = 0; // TODO: Set to 3 when this is added to the test files.
-    const std::optional<uint64_t> TestParentId = 4;
-    std::map<mcs::PropertyKeyType, mcs::ItemComponentData> TestComponents;
-    TestComponents[0] = mcs::ItemComponentData { { 0ll } };
+    const uint64_t testId = 1;
+    const uint64_t testType = 2;
+    const bool testIsTransferable = true;
+    const bool testIsPersistent = true;
+    const uint64_t testOwnerId = 0; // TODO: Set to 3 when this is added to the test files.
+    const std::optional<uint64_t> testParentId = 4;
+    std::map<mcs::PropertyKeyType, mcs::ItemComponentData> testComponents;
+    testComponents[0] = mcs::ItemComponentData { { 0ll } };
 
-    mcs::ObjectMessage Object { TestId, TestType, TestIsTransferable, TestIsPersistent, TestOwnerId, TestParentId, TestComponents };
+    mcs::ObjectMessage object { testId, testType, testIsTransferable, testIsPersistent, testOwnerId, testParentId, testComponents };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(Object);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(object);
 
-    mcs::ObjectMessage DeserializedObject { 0, 0, false, false, 0, 0, {} };
-    csp::json::JsonDeserializer::Deserialize(SerializedValue.c_str(), DeserializedObject);
+    mcs::ObjectMessage deserializedObject { 0, 0, false, false, 0, 0, {} };
+    csp::json::JsonDeserializer::Deserialize(serializedValue.c_str(), deserializedObject);
 
-    EXPECT_EQ(DeserializedObject, Object);
+    EXPECT_EQ(deserializedObject, object);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeBoolTest)
 {
-    const bool TestValue = true;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const bool testValue = true;
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeInt64Test)
 {
-    const int64_t TestValue = -10;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const int64_t testValue = -10;
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUInt64Test)
 {
-    const uint64_t TestValue = 10;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const uint64_t testValue = 10;
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeDoubleTest)
 {
-    const double TestValue = 10.1;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const double testValue = 10.1;
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatTest)
 {
-    const float TestValue = 10.1f;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const float testValue = 10.1f;
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringTest)
 {
-    const std::string TestValue = "Test";
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::string testValue = "Test";
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringEmptyTest)
 {
-    const std::string TestValue = "";
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::string testValue = "";
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorTest)
 {
-    const std::vector<float> TestValue = { 1.1f, 2.2f, 3.3f };
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::vector<float> testValue = { 1.1f, 2.2f, 3.3f };
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorEmptyTest)
 {
-    const std::vector<float> TestValue = {};
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::vector<float> testValue = {};
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapTest)
 {
-    const std::map<std::string, mcs::ItemComponentData> TestValue
+    const std::map<std::string, mcs::ItemComponentData> testValue
         = { { "Key1", mcs::ItemComponentData { 1.1f } }, { "Key2", mcs::ItemComponentData { std::string { "Test" } } } };
-    mcs::ItemComponentData ComponentValue { TestValue };
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapEmptyTest)
 {
-    const std::map<std::string, mcs::ItemComponentData> TestValue = {};
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::map<std::string, mcs::ItemComponentData> testValue = {};
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapTest)
 {
-    const std::map<uint16_t, mcs::ItemComponentData> TestValue
+    const std::map<uint16_t, mcs::ItemComponentData> testValue
         = { { 0, mcs::ItemComponentData { 1.1f } }, { 1, mcs::ItemComponentData { std::string { "Test" } } } };
-    mcs::ItemComponentData ComponentValue { TestValue };
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapEmptyTest)
 {
-    const std::map<uint16_t, mcs::ItemComponentData> TestValue = {};
-    mcs::ItemComponentData ComponentValue { TestValue };
+    const std::map<uint16_t, mcs::ItemComponentData> testValue = {};
+    mcs::ItemComponentData componentValue { testValue };
 
-    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+    csp::common::String serializedValue = csp::json::JsonSerializer::Serialize(componentValue);
 
-    mcs::ItemComponentData DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+    mcs::ItemComponentData deserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(serializedValue, deserializedValue);
 
-    EXPECT_EQ(DeserializedValue, ComponentValue);
+    EXPECT_EQ(deserializedValue, componentValue);
 }
 
 class MockScriptRunner : public csp::common::IJSScriptRunner
@@ -267,52 +267,52 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-empty.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-empty.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
-    MockScriptRunner ScriptRunner;
-    csp::common::LogSystem LogSystem;
+    MockScriptRunner scriptRunner;
+    csp::common::LogSystem logSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine realtimeEngine(logSystem, scriptRunner);
 
-    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    CSPSceneDescription sceneDescription { csp::common::List<csp::common::String> { json.c_str() } };
+    auto entities = sceneDescription.CreateEntities(realtimeEngine, logSystem, scriptRunner);
 
-    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
+    CSPSceneData sceneData { csp::common::List<csp::common::String> { json.c_str() } };
 
-    EXPECT_EQ(SceneData.Space.Id, "68addce4985d7612f76b9461");
-    EXPECT_EQ(SceneData.Space.Name, "checkpoint-empty");
-    EXPECT_EQ(SceneData.Space.OwnerId, "68addce0985d7612f76b945e");
-    EXPECT_EQ(SceneData.Space.CreatedAt, "2025-08-26T16:12:20.701+00:00");
+    EXPECT_EQ(sceneData.Space.Id, "68addce4985d7612f76b9461");
+    EXPECT_EQ(sceneData.Space.Name, "checkpoint-empty");
+    EXPECT_EQ(sceneData.Space.OwnerId, "68addce0985d7612f76b945e");
+    EXPECT_EQ(sceneData.Space.CreatedAt, "2025-08-26T16:12:20.701+00:00");
 
-    if (SceneData.Space.UserIds.Size() != 1)
+    if (sceneData.Space.UserIds.Size() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(SceneData.Space.UserIds[0], "68addce0985d7612f76b945e");
-    EXPECT_EQ(SceneData.Space.BannedUserIds.Size(), 0);
-    EXPECT_EQ(SceneData.Space.ModeratorIds.Size(), 0);
-    EXPECT_EQ(SceneData.Space.Tags.Size(), 0);
+    EXPECT_EQ(sceneData.Space.UserIds[0], "68addce0985d7612f76b945e");
+    EXPECT_EQ(sceneData.Space.BannedUserIds.Size(), 0);
+    EXPECT_EQ(sceneData.Space.ModeratorIds.Size(), 0);
+    EXPECT_EQ(sceneData.Space.Tags.Size(), 0);
 
-    EXPECT_FALSE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    EXPECT_FALSE(csp::systems::HasFlag(sceneData.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    EXPECT_TRUE(csp::systems::HasFlag(sceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
-    EXPECT_EQ(Entities.Size(), 0);
-    EXPECT_EQ(SceneData.AssetCollections.Size(), 0);
-    EXPECT_EQ(SceneData.Assets.Size(), 0);
-    EXPECT_EQ(SceneData.Sequences.Size(), 0);
+    EXPECT_EQ(entities.Size(), 0);
+    EXPECT_EQ(sceneData.AssetCollections.Size(), 0);
+    EXPECT_EQ(sceneData.Assets.Size(), 0);
+    EXPECT_EQ(sceneData.Sequences.Size(), 0);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -323,120 +323,120 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
-    MockScriptRunner ScriptRunner;
-    csp::common::LogSystem LogSystem;
+    MockScriptRunner scriptRunner;
+    csp::common::LogSystem logSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine realtimeEngine(logSystem, scriptRunner);
 
-    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    CSPSceneDescription sceneDescription { csp::common::List<csp::common::String> { json.c_str() } };
+    auto entities = sceneDescription.CreateEntities(realtimeEngine, logSystem, scriptRunner);
 
-    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
+    CSPSceneData sceneData { csp::common::List<csp::common::String> { json.c_str() } };
 
-    EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
-    EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
+    EXPECT_EQ(sceneData.Space.Id, "68af162f015bb6793cacf4a2");
+    EXPECT_EQ(sceneData.Space.Name, "checkpoint-basic");
 
     // Ensure arrays are the size we expect before continuing.
-    if (Entities.Size() != 1)
+    if (entities.Size() != 1)
     {
         FAIL();
     }
 
-    if (SceneData.AssetCollections.Size() != 1)
+    if (sceneData.AssetCollections.Size() != 1)
     {
         FAIL();
     }
 
-    if (SceneData.Assets.Size() != 1)
+    if (sceneData.Assets.Size() != 1)
     {
         FAIL();
     }
 
-    if (SceneData.Sequences.Size() != 1)
+    if (sceneData.Sequences.Size() != 1)
     {
         FAIL();
     }
 
     // Check entity is parsed correctly.
-    csp::multiplayer::SpaceEntity* Entity = Entities[0];
-    EXPECT_EQ(Entity->GetName(), "Entity");
-    EXPECT_EQ(Entity->GetId(), 255223);
-    EXPECT_EQ(Entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
-    EXPECT_EQ(Entity->GetIsTransferable(), true);
-    EXPECT_EQ(Entity->GetIsPersistent(), true);
-    EXPECT_EQ(Entity->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(Entity->GetRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(Entity->GetScale(), csp::common::Vector3::One());
-    EXPECT_FALSE(Entity->GetParentId().HasValue());
-    EXPECT_EQ(Entity->GetOwnerId(), 0);
+    csp::multiplayer::SpaceEntity* entity = entities[0];
+    EXPECT_EQ(entity->GetName(), "Entity");
+    EXPECT_EQ(entity->GetId(), 255223);
+    EXPECT_EQ(entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
+    EXPECT_EQ(entity->GetIsTransferable(), true);
+    EXPECT_EQ(entity->GetIsPersistent(), true);
+    EXPECT_EQ(entity->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(entity->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(entity->GetScale(), csp::common::Vector3::One());
+    EXPECT_FALSE(entity->GetParentId().HasValue());
+    EXPECT_EQ(entity->GetOwnerId(), 0);
 
-    if (Entity->GetComponents()->Size() != 1)
+    if (entity->GetComponents()->Size() != 1)
     {
         FAIL();
     }
 
-    if (Entity->GetComponent(0)->GetComponentType() != csp::multiplayer::ComponentType::StaticModel)
+    if (entity->GetComponent(0)->GetComponentType() != csp::multiplayer::ComponentType::StaticModel)
     {
         FAIL();
     }
 
-    auto StaticModelComponent = static_cast<csp::multiplayer::StaticModelSpaceComponent*>(Entity->GetComponent(0));
-    EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "TestAssetCollectionId");
+    auto staticModelComponent = static_cast<csp::multiplayer::StaticModelSpaceComponent*>(entity->GetComponent(0));
+    EXPECT_EQ(staticModelComponent->GetExternalResourceAssetCollectionId(), "TestAssetCollectionId");
 
     // Test asset collection is parsed correctly.
-    csp::systems::AssetCollection Collection = SceneData.AssetCollections[0];
-    EXPECT_EQ(Collection.Name, "BasicCheckpointAssetCollection2");
-    EXPECT_EQ(Collection.SpaceId, "68af162f015bb6793cacf4a2");
+    csp::systems::AssetCollection collection = sceneData.AssetCollections[0];
+    EXPECT_EQ(collection.Name, "BasicCheckpointAssetCollection2");
+    EXPECT_EQ(collection.SpaceId, "68af162f015bb6793cacf4a2");
 
-    if (Collection.Tags.Size() != 1)
+    if (collection.Tags.Size() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Collection.GetMetadataMutable().Size(), 0);
-    EXPECT_EQ(Collection.Id, "68af1633e321a47fd460550e");
-    EXPECT_EQ(Collection.Type, csp::systems::EAssetCollectionType::DEFAULT);
-    EXPECT_EQ(Collection.Tags[0], "origin-68af1633e321a47fd460550e");
-    EXPECT_EQ(Collection.PointOfInterestId, "");
-    EXPECT_EQ(Collection.CreatedBy, "68af162b626ccc0c332bd60d");
-    EXPECT_EQ(Collection.CreatedAt, "2025-08-27T14:29:07.329+00:00");
-    EXPECT_EQ(Collection.UpdatedBy, "68af162b626ccc0c332bd60d");
-    EXPECT_EQ(Collection.UpdatedAt, "2025-08-27T14:29:07.329+00:00");
-    EXPECT_EQ(Collection.IsUnique, false);
-    EXPECT_EQ(Collection.Version, "");
+    EXPECT_EQ(collection.GetMetadataMutable().Size(), 0);
+    EXPECT_EQ(collection.Id, "68af1633e321a47fd460550e");
+    EXPECT_EQ(collection.Type, csp::systems::EAssetCollectionType::DEFAULT);
+    EXPECT_EQ(collection.Tags[0], "origin-68af1633e321a47fd460550e");
+    EXPECT_EQ(collection.PointOfInterestId, "");
+    EXPECT_EQ(collection.CreatedBy, "68af162b626ccc0c332bd60d");
+    EXPECT_EQ(collection.CreatedAt, "2025-08-27T14:29:07.329+00:00");
+    EXPECT_EQ(collection.UpdatedBy, "68af162b626ccc0c332bd60d");
+    EXPECT_EQ(collection.UpdatedAt, "2025-08-27T14:29:07.329+00:00");
+    EXPECT_EQ(collection.IsUnique, false);
+    EXPECT_EQ(collection.Version, "");
 
     // Test asset is parsed correctly
-    const csp::systems::Asset& Asset = SceneData.Assets[0];
-    EXPECT_EQ(Asset.Name, "BasicCheckpointAsset2");
-    EXPECT_EQ(Asset.AssetCollectionId, Collection.Id);
+    const csp::systems::Asset& asset = sceneData.Assets[0];
+    EXPECT_EQ(asset.Name, "BasicCheckpointAsset2");
+    EXPECT_EQ(asset.AssetCollectionId, collection.Id);
 
     // Test sequence is parsed correctly
     // We use * as this gets encoded, so we want to ensure the sequence is correctly decoded.
-    const csp::systems::Sequence& Sequence = SceneData.Sequences[0];
-    EXPECT_EQ(Sequence.Key, "*BasicCheckpointSequence2*");
+    const csp::systems::Sequence& sequence = sceneData.Sequences[0];
+    EXPECT_EQ(sequence.Key, "*BasicCheckpointSequence2*");
 
-    if (Sequence.Items.Size() != 3)
+    if (sequence.Items.Size() != 3)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Sequence.Items[0], "1");
-    EXPECT_EQ(Sequence.Items[1], "2");
-    EXPECT_EQ(Sequence.Items[2], "3");
+    EXPECT_EQ(sequence.Items[0], "1");
+    EXPECT_EQ(sequence.Items[1], "2");
+    EXPECT_EQ(sequence.Items[2], "3");
 
     csp::CSPFoundation::Shutdown();
 }
@@ -450,39 +450,39 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
     // Build our line array
-    csp::common::List<csp::common::String> JsonChars;
+    csp::common::List<csp::common::String> jsonChars;
     std::string line;
-    while (std::getline(SStream, line))
+    while (std::getline(sStream, line))
     {
-        JsonChars.Append(csp::common::String(line.c_str()));
+        jsonChars.Append(csp::common::String(line.c_str()));
     }
 
-    MockScriptRunner ScriptRunner;
-    csp::common::LogSystem LogSystem;
+    MockScriptRunner scriptRunner;
+    csp::common::LogSystem logSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine realtimeEngine(logSystem, scriptRunner);
 
-    CSPSceneDescription SceneDescription { JsonChars };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    CSPSceneDescription sceneDescription { jsonChars };
+    auto entities = sceneDescription.CreateEntities(realtimeEngine, logSystem, scriptRunner);
 
-    CSPSceneData SceneData { JsonChars };
+    CSPSceneData sceneData { jsonChars };
 
     // Just do a minimal check, we don't need to fully validate everything here, we're just checking the string concatanation works.
-    EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
-    EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
+    EXPECT_EQ(sceneData.Space.Id, "68af162f015bb6793cacf4a2");
+    EXPECT_EQ(sceneData.Space.Name, "checkpoint-basic");
 
     csp::CSPFoundation::Shutdown();
 }
@@ -492,48 +492,48 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeM
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-material.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-material.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
-    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
-    EXPECT_EQ(SceneData.Space.Name, "checkpoint-material");
+    CSPSceneData sceneData { csp::common::List<csp::common::String> { json.c_str() } };
+    EXPECT_EQ(sceneData.Space.Name, "checkpoint-material");
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    if (SceneData.AssetCollections.Size() != 1)
+    if (sceneData.AssetCollections.Size() != 1)
     {
         FAIL();
     }
 
-    if (SceneData.Assets.Size() != 1)
+    if (sceneData.Assets.Size() != 1)
     {
         FAIL();
     }
 
-    const csp::systems::AssetCollection& Collection = SceneData.AssetCollections[0];
-    const csp::systems::Asset& Asset = SceneData.Assets[0];
+    const csp::systems::AssetCollection& collection = sceneData.AssetCollections[0];
+    const csp::systems::Asset& asset = sceneData.Assets[0];
 
-    auto [MaterialResult] = AWAIT_PRE(AssetSystem, GetMaterialFromUri, RequestPredicate, Collection, Asset.Id, Asset.Uri);
+    auto [MaterialResult] = AWAIT_PRE(assetSystem, GetMaterialFromUri, RequestPredicate, collection, asset.Id, asset.Uri);
     EXPECT_EQ(MaterialResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::systems::Material* Material = MaterialResult.GetMaterial();
+    const csp::systems::Material* material = MaterialResult.GetMaterial();
 
-    EXPECT_EQ(Material->GetName(), "Material");
-    EXPECT_EQ(Material->GetShaderType(), csp::systems::EShaderType::Standard);
-    EXPECT_EQ(Material->GetMaterialCollectionId(), Collection.Id);
-    EXPECT_EQ(Material->GetMaterialId(), Asset.Id);
+    EXPECT_EQ(material->GetName(), "Material");
+    EXPECT_EQ(material->GetShaderType(), csp::systems::EShaderType::Standard);
+    EXPECT_EQ(material->GetMaterialCollectionId(), collection.Id);
+    EXPECT_EQ(material->GetMaterialId(), asset.Id);
 
     csp::CSPFoundation::Shutdown();
 }

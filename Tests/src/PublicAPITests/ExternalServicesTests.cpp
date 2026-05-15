@@ -36,7 +36,7 @@ namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -44,41 +44,41 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ExternalServiceProxySystem = SystemsManager.GetExternalServicesProxySystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* externalServiceProxySystem = systemsManager.GetExternalServicesProxySystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    csp::systems::AgoraUserTokenParams Params;
-    Params.AgoraUserId = UserId;
-    Params.ChannelName = Space.Id;
-    Params.ReferenceId = Space.Id;
-    Params.Lifespan = 10000;
-    Params.ShareAudio = true;
-    Params.ShareScreen = false;
-    Params.ShareVideo = false;
-    Params.ReadOnly = false;
+    csp::systems::AgoraUserTokenParams params;
+    params.AgoraUserId = userId;
+    params.ChannelName = space.Id;
+    params.ReferenceId = space.Id;
+    params.Lifespan = 10000;
+    params.ShareAudio = true;
+    params.ShareScreen = false;
+    params.ShareVideo = false;
+    params.ReadOnly = false;
 
     // Get token
-    auto [Result] = AWAIT_PRE(ExternalServiceProxySystem, GetAgoraUserToken, RequestPredicate, Params);
+    auto [Result] = AWAIT_PRE(externalServiceProxySystem, GetAgoraUserToken, RequestPredicate, params);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty()); // We assume a non-empty string means we got an Agora token back
     EXPECT_EQ(Result.GetHttpResultCode(), 200);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 class ExternalServicesMock
@@ -88,76 +88,76 @@ class ExternalServicesMock
 
 TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 {
-    const auto ExternalServiceProxyMock = std::make_unique<chs_aggregation::ExternalServiceProxyApiMock>();
+    const auto externalServiceProxyMock = std::make_unique<chs_aggregation::ExternalServiceProxyApiMock>();
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
 
     // Expected results
-    const csp::systems::EResultCode ExpectedResultCode = std::get<0>(GetParam());
-    const csp::web::EResponseCodes ExpectedResponseCode = std::get<1>(GetParam());
-    const csp::common::String ExpectedOperationResultJsonString = std::get<2>(GetParam());
-    const bool JsonIsValid = std::get<3>(GetParam());
+    const csp::systems::EResultCode expectedResultCode = std::get<0>(GetParam());
+    const csp::web::EResponseCodes expectedResponseCode = std::get<1>(GetParam());
+    const csp::common::String expectedOperationResultJsonString = std::get<2>(GetParam());
+    const bool jsonIsValid = std::get<3>(GetParam());
 
     // The promise
-    std::promise<csp::systems::StringResult> ResultPromise;
-    std::future<csp::systems::StringResult> ResultFuture = ResultPromise.get_future();
+    std::promise<csp::systems::StringResult> resultPromise;
+    std::future<csp::systems::StringResult> resultFuture = resultPromise.get_future();
 
     // Spoofed parameters
-    csp::systems::ExternalServicesOperationParams ProxyParams;
-    ProxyParams.OperationName = "MockOperationName";
-    ProxyParams.ServiceName = "MockServiceName";
-    ProxyParams.SetHelp = false;
+    csp::systems::ExternalServicesOperationParams proxyParams;
+    proxyParams.OperationName = "MockOperationName";
+    proxyParams.ServiceName = "MockServiceName";
+    proxyParams.SetHelp = false;
 
-    EXPECT_CALL(*ExternalServiceProxyMock, service_proxyPost)
+    EXPECT_CALL(*externalServiceProxyMock, service_proxyPost)
         .WillOnce(
-            [ExpectedResponseCode, ExpectedOperationResultJsonString, JsonIsValid](
+            [expectedResponseCode, expectedOperationResultJsonString, jsonIsValid](
                 const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(ExpectedResponseCode);
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(expectedResponseCode);
 
-                csp::web::HttpPayload Payload;
+                csp::web::HttpPayload payload;
 
-                const csp::common::String RequestBody = R"(
+                const csp::common::String requestBody = R"(
                 {
 	                "operationResult":)"
-                    + ExpectedOperationResultJsonString + R"(
+                    + expectedOperationResultJsonString + R"(
                 })";
 
-                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-                Payload.SetContent(RequestBody);
+                payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                payload.SetContent(requestBody);
 
-                Response.GetMutablePayload() = Payload;
-                ResponseHandler->OnHttpResponse(Response);
+                response.GetMutablePayload() = payload;
+                responseHandler->OnHttpResponse(response);
             });
 
-    auto Callback = [&ResultPromise](const csp::systems::StringResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const csp::systems::StringResult& result) { resultPromise.set_value(result); };
 
-    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
-    TokenInfo->SetServiceName(ProxyParams.ServiceName);
-    TokenInfo->SetOperationName(ProxyParams.OperationName);
-    TokenInfo->SetHelp(ProxyParams.SetHelp);
-    TokenInfo->SetParameters(Convert(ProxyParams.Parameters));
+    auto tokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
+    tokenInfo->SetServiceName(proxyParams.ServiceName);
+    tokenInfo->SetOperationName(proxyParams.OperationName);
+    tokenInfo->SetHelp(proxyParams.SetHelp);
+    tokenInfo->SetParameters(Convert(proxyParams.Parameters));
 
-    auto ResponseHandler = ExternalServiceProxyMock->CreateHandler<csp::systems::StringResultCallback, csp::systems::ExternalServiceInvocationResult,
-        void, chs_aggregation::ServiceResponse>(Callback, nullptr);
-    ExternalServiceProxyMock->service_proxyPost({ TokenInfo }, ResponseHandler, csp::common::CancellationToken::Dummy());
+    auto responseHandler = externalServiceProxyMock->CreateHandler<csp::systems::StringResultCallback, csp::systems::ExternalServiceInvocationResult,
+        void, chs_aggregation::ServiceResponse>(callback, nullptr);
+    externalServiceProxyMock->service_proxyPost({ tokenInfo }, responseHandler, csp::common::CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(ExpectedResponseCode));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), expectedResultCode);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(expectedResponseCode));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    if (JsonIsValid)
+    if (jsonIsValid)
     {
-        EXPECT_EQ(Result.GetValue(), ExpectedOperationResultJsonString);
+        EXPECT_EQ(result.GetValue(), expectedOperationResultJsonString);
     }
     else
     {
         // If Json is malformed, we expect the string to be empty
-        EXPECT_TRUE(Result.GetValue().IsEmpty());
+        EXPECT_TRUE(result.GetValue().IsEmpty());
     }
 }
 

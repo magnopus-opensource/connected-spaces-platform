@@ -24,75 +24,75 @@
 namespace csp::systems
 {
 
-csp::common::String CreateLODStyleVar(int LODLevel) { return std::string("lod:" + std::to_string(LODLevel)).c_str(); }
+csp::common::String CreateLODStyleVar(int lodLevel) { return std::string("lod:" + std::to_string(lodLevel)).c_str(); }
 
-int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& Styles)
+int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& styles)
 {
-    for (size_t i = 0; i < Styles.Size(); ++i)
+    for (size_t i = 0; i < styles.Size(); ++i)
     {
-        std::string Style = Styles[i].c_str();
-        size_t Pos = Style.find("lod:");
+        std::string style = styles[i].c_str();
+        size_t pos = style.find("lod:");
 
-        if (Pos != std::string::npos)
+        if (pos != std::string::npos)
         {
-            return std::stoi(Style.substr(4, 1));
+            return std::stoi(style.substr(4, 1));
         }
     }
 
     return -1;
 }
 
-LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const csp::common::String& AssetCollectionId)
+LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& assets, const csp::common::String& assetCollectionId)
 {
-    LODChain Chain;
-    Chain.AssetCollectionId = AssetCollectionId;
+    LODChain chain;
+    chain.AssetCollectionId = assetCollectionId;
 
-    csp::common::List<LODAsset> AssetList;
+    csp::common::List<LODAsset> assetList;
 
-    if (Assets.Size() == 1)
+    if (assets.Size() == 1)
     {
-        int LODLevel = csp::systems::GetLODLevelFromStylesArray(Assets[0].Styles);
+        int lodLevel = csp::systems::GetLODLevelFromStylesArray(assets[0].Styles);
 
-        if (LODLevel == -1)
+        if (lodLevel == -1)
         {
             // As there is only 1 asset, return this as LOD 0
-            LODLevel = 0;
+            lodLevel = 0;
         }
 
-        AssetList.Append(csp::systems::LODAsset { Assets[0], LODLevel });
+        assetList.Append(csp::systems::LODAsset { assets[0], lodLevel });
     }
     else
     {
-        for (size_t i = 0; i < Assets.Size(); ++i)
+        for (size_t i = 0; i < assets.Size(); ++i)
         {
-            const csp::systems::Asset& Asset = Assets[i];
-            int LODLevel = csp::systems::GetLODLevelFromStylesArray(Asset.Styles);
+            const csp::systems::Asset& asset = assets[i];
+            int lodLevel = csp::systems::GetLODLevelFromStylesArray(asset.Styles);
 
-            if (LODLevel != -1)
+            if (lodLevel != -1)
             {
-                AssetList.Append(csp::systems::LODAsset { Asset, LODLevel });
+                assetList.Append(csp::systems::LODAsset { asset, lodLevel });
             }
         }
     }
 
-    Chain.LODAssets = csp::common::Array<LODAsset>(AssetList.Size());
+    chain.LODAssets = csp::common::Array<LODAsset>(assetList.Size());
 
-    for (size_t i = 0; i < Chain.LODAssets.Size(); ++i)
+    for (size_t i = 0; i < chain.LODAssets.Size(); ++i)
     {
-        Chain.LODAssets[i] = std::move(AssetList[i]);
+        chain.LODAssets[i] = std::move(assetList[i]);
     }
 
     std::sort(
-        Chain.LODAssets.begin(), Chain.LODAssets.end(), [](const LODAsset& Asset1, const LODAsset& Asset2) { return Asset1.Level < Asset2.Level; });
+        chain.LODAssets.begin(), chain.LODAssets.end(), [](const LODAsset& asset1, const LODAsset& asset2) { return asset1.Level < asset2.Level; });
 
-    return Chain;
+    return chain;
 }
 
-bool ValidateNewLODLevelForChain(const LODChain& Chain, int LODLevel)
+bool ValidateNewLODLevelForChain(const LODChain& chain, int lodLevel)
 {
     // Ensure LODLevel doesnt already exist
     const auto it
-        = std::find_if(Chain.LODAssets.begin(), Chain.LODAssets.end(), [LODLevel](const LODAsset& Asset) { return Asset.Level == LODLevel; });
-    return it == Chain.LODAssets.end();
+        = std::find_if(chain.LODAssets.begin(), chain.LODAssets.end(), [lodLevel](const LODAsset& asset) { return asset.Level == lodLevel; });
+    return it == chain.LODAssets.end();
 }
 } // namespace csp::systems

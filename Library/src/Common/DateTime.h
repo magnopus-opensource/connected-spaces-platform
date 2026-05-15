@@ -40,8 +40,8 @@ public:
 
     /// @brief Constructs a DateTime from a timepoint.
     /// @param InTimePoint Clock::time_point : Timepoint to constuct DateTime from
-    explicit DateTime(Clock::time_point InTimePoint)
-        : TimePoint(InTimePoint)
+    explicit DateTime(Clock::time_point inTimePoint)
+        : m_timePoint(inTimePoint)
     {
     }
 
@@ -59,7 +59,7 @@ public:
     /// TZD  = time zone designator (Z or +hh:mm or -hh:mm)
     ///
     /// @param DateString const csp::common::String& : Date string to constuct DateTime from.
-    explicit DateTime(const String& DateString);
+    explicit DateTime(const String& dateString);
 
     /// @brief Constructs a DateTime with the current utc time.
     static DateTime TimeNow() { return DateTime(Clock::now()); }
@@ -68,56 +68,56 @@ public:
     /// @return DateTime
     static DateTime UtcTimeNow()
     {
-        DateTime DateTimeNow;
+        DateTime dateTimeNow;
 
-        time_t Now = time(0);
-        tm* Gmtm = gmtime(&Now);
+        time_t now = time(0);
+        tm* gmtm = gmtime(&now);
 
-        if (Gmtm != nullptr)
+        if (gmtm != nullptr)
         {
-            std::string TimeString;
-            TimeString = std::to_string(1900 + Gmtm->tm_year);
-            TimeString += "-";
-            TimeString += std::to_string(Gmtm->tm_mon + 1);
-            TimeString += "-";
-            TimeString += std::to_string(Gmtm->tm_mday);
-            TimeString += "T";
-            TimeString += std::to_string(Gmtm->tm_hour);
-            TimeString += ":";
-            TimeString += std::to_string(Gmtm->tm_min);
-            TimeString += ":";
-            TimeString += std::to_string(Gmtm->tm_sec);
-            TimeString += ".";
-            TimeString += "0+";
-            TimeString += "00:00";
+            std::string timeString;
+            timeString = std::to_string(1900 + gmtm->tm_year);
+            timeString += "-";
+            timeString += std::to_string(gmtm->tm_mon + 1);
+            timeString += "-";
+            timeString += std::to_string(gmtm->tm_mday);
+            timeString += "T";
+            timeString += std::to_string(gmtm->tm_hour);
+            timeString += ":";
+            timeString += std::to_string(gmtm->tm_min);
+            timeString += ":";
+            timeString += std::to_string(gmtm->tm_sec);
+            timeString += ".";
+            timeString += "0+";
+            timeString += "00:00";
 
-            DateTimeNow = DateTime(String(TimeString.c_str()));
+            dateTimeNow = DateTime(String(timeString.c_str()));
         }
 
-        return DateTimeNow;
+        return dateTimeNow;
     }
 
     /// @brief Gets the time zone, represented as 1 is UTC+1, 2 is UTC+2 etc.
     /// @return int representing timezone offset
     static int GetTimeZone()
     {
-        time_t Now = time(0);
-        struct tm* Lctm;
-        Lctm = localtime(&Now);
-        struct tm* Gmtm;
-        Gmtm = gmtime(&Now);
+        time_t now = time(0);
+        struct tm* lctm;
+        lctm = localtime(&now);
+        struct tm* gmtm;
+        gmtm = gmtime(&now);
 
-        return Lctm->tm_hour - Gmtm->tm_hour;
+        return lctm->tm_hour - gmtm->tm_hour;
     }
 
     /// @brief Checks if this DateTime represents the epoch time (0 seconds since epoch).
     /// @return bool
-    bool IsEpoch() const { return TimePoint.time_since_epoch().count() == 0; }
+    bool IsEpoch() const { return m_timePoint.time_since_epoch().count() == 0; }
 
     /// @brief Checks if this DateTime is more recent than the Other DateTime.
     /// @param const DateTime& Other : DateTime to check against
     /// @return bool : Returns true if current DateTime is greater or equal than given DateTime
-    bool operator>=(const DateTime& Other) const { return TimePoint >= Other.TimePoint; }
+    bool operator>=(const DateTime& other) const { return m_timePoint >= other.m_timePoint; }
 
     /// @brief Gets the time_point from the DateTime.
     /// @return Clock::time_point&
@@ -128,7 +128,7 @@ public:
     csp::common::String GetUtcString() const;
 
 private:
-    Clock::time_point TimePoint;
+    Clock::time_point m_timePoint;
 };
 
 } // namespace csp::common

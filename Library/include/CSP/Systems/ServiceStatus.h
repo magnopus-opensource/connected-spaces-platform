@@ -46,8 +46,8 @@ public:
     /// If empty, the version is currently active, or the deprecation date is unknown.
     csp::common::String DeprecationDatetime;
 
-    bool operator==(const VersionMetadata& Other) const;
-    bool operator!=(const VersionMetadata& Other) const;
+    bool operator==(const VersionMetadata& other) const;
+    bool operator!=(const VersionMetadata& other) const;
 };
 
 /// @ingroup Status System
@@ -67,8 +67,8 @@ public:
     /// @brief The currently active API version; this version is guaranteed to be stable and supported.
     csp::common::String CurrentApiVersion;
 
-    bool operator==(const ServiceStatus& Other) const;
-    bool operator!=(const ServiceStatus& Other) const;
+    bool operator==(const ServiceStatus& other) const;
+    bool operator!=(const ServiceStatus& other) const;
 };
 
 /// @ingroup Status System
@@ -83,8 +83,8 @@ public:
     /// @brief A list of services available in the current deployment, with their metadata and API versions.
     csp::common::Array<ServiceStatus> Services;
 
-    bool operator==(const ServicesDeploymentStatus& Other) const;
-    bool operator!=(const ServicesDeploymentStatus& Other) const;
+    bool operator==(const ServicesDeploymentStatus& other) const;
+    bool operator!=(const ServicesDeploymentStatus& other) const;
 };
 
 /// @ingroup Status System
@@ -107,12 +107,12 @@ private:
     ServicesDeploymentStatusResult() {};
     ServicesDeploymentStatusResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-    ServicesDeploymentStatus ServicesDeploymentStatusResponse;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
+    ServicesDeploymentStatus m_servicesDeploymentStatusResponse;
 };
 
 /// @brief Callback containing a ServicesDeploymentStatus result used when creating or retrieving a ServicesDeploymentStatus.
 /// @param Result ServicesDeploymentStatusResult : Data class containing information on task result/progress
-typedef std::function<void(const ServicesDeploymentStatusResult& Result)> ServicesDeploymentStatusCallback;
+typedef std::function<void(const ServicesDeploymentStatusResult& result)> ServicesDeploymentStatusCallback;
 
 } // namespace csp::systems

@@ -56,7 +56,7 @@ public:
 
     /// @brief Constructs the button space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ButtonSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the text of the label of this button.
     /// @return The text on the label of this button.
@@ -64,7 +64,7 @@ public:
 
     /// @brief Sets the text of the label of this button.
     /// @param Value The text on the label of this button.
-    void SetLabelText(const csp::common::String& Value);
+    void SetLabelText(const csp::common::String& value);
 
     /// @brief Gets the ID of the icon asset associated with the button of this component.
     /// @note This is used to show a specific icon on the button by ID.
@@ -74,7 +74,7 @@ public:
     /// @brief Sets the ID of the icon asset associated with the button of this component.
     /// @note This is used to show a specific icon on the button by ID.
     /// @param Value The ID of the icon asset associated with the button of this component.
-    void SetIconAssetId(const csp::common::String& Value);
+    void SetIconAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's button asset, both the Asset ID and the Asset Collection ID are required.
@@ -84,26 +84,26 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's button asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// \addtogroup IClickableComponent
@@ -111,7 +111,7 @@ public:
     /// @copydoc IClickableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IClickableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -119,15 +119,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 };
 

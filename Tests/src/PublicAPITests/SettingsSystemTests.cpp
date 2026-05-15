@@ -34,13 +34,13 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& result)
 {
-    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+    if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
     {
-        PrintProgress(Result.GetRequestProgress());
+        PrintProgress(result.GetRequestProgress());
 
         return false;
     }
@@ -48,414 +48,414 @@ bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
     return true;
 }
 
-bool IsUriValid(const std::string& Uri, const std::string& FileName)
+bool IsUriValid(const std::string& uri, const std::string& fileName)
 {
     // check that the correct filename is present in the Uri
-    const auto PosLastSlash = Uri.rfind('/');
-    const auto UriFileName = Uri.substr(PosLastSlash + 1, FileName.size());
+    const auto posLastSlash = uri.rfind('/');
+    const auto uriFileName = uri.substr(posLastSlash + 1, fileName.size());
 
-    return (FileName == UriFileName);
+    return (fileName == uriFileName);
 }
 
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, true);
+    auto [SetNDATrue] = AWAIT(settingsSystem, SetNDAStatus, true);
     EXPECT_EQ(SetNDATrue.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [GetNDAResult] = AWAIT(SettingsSystem, GetNDAStatus);
+    auto [GetNDAResult] = AWAIT(settingsSystem, GetNDAStatus);
     EXPECT_EQ(GetNDAResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(GetNDAResult.GetValue(), true);
 
-    auto [SetNDAFalse] = AWAIT(SettingsSystem, SetNDAStatus, false);
+    auto [SetNDAFalse] = AWAIT(settingsSystem, SetNDAStatus, false);
     EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, true);
+    auto [SetNewsletterTrue] = AWAIT(settingsSystem, SetNewsletterStatus, true);
     EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [GetNewsletterResult] = AWAIT(SettingsSystem, GetNewsletterStatus);
+    auto [GetNewsletterResult] = AWAIT(settingsSystem, GetNewsletterStatus);
     EXPECT_EQ(GetNewsletterResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(GetNewsletterResult.GetValue(), true);
 
-    auto [SetNewsletterFalse] = AWAIT(SettingsSystem, SetNewsletterStatus, false);
+    auto [SetNewsletterFalse] = AWAIT(settingsSystem, SetNewsletterStatus, false);
     EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, "RecentSpace");
+    auto [SetRecentSpaces] = AWAIT(settingsSystem, AddRecentlyVisitedSpace, "RecentSpace");
     EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [GetRecentSpaces] = AWAIT(SettingsSystem, GetRecentlyVisitedSpaces);
+    auto [GetRecentSpaces] = AWAIT(settingsSystem, GetRecentlyVisitedSpaces);
     EXPECT_EQ(GetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
-    auto ReturnedStringArray = GetRecentSpaces.GetValue();
-    EXPECT_EQ(ReturnedStringArray.Size(), 1);
-    EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("RecentSpace"));
+    auto returnedStringArray = GetRecentSpaces.GetValue();
+    EXPECT_EQ(returnedStringArray.Size(), 1);
+    EXPECT_EQ(returnedStringArray[0].c_str(), std::string("RecentSpace"));
 
-    auto [ClearRecentSpaces] = AWAIT(SettingsSystem, ClearRecentlyVisitedSpaces);
+    auto [ClearRecentSpaces] = AWAIT(settingsSystem, ClearRecentlyVisitedSpaces);
     EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Clear at start in case another test left something in the list
-    auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+    auto [PreClearBlockedSpaces] = AWAIT(settingsSystem, ClearBlockedSpaces);
     EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, "BlockedSpace");
+    auto [SetBlockedSpaces] = AWAIT(settingsSystem, AddBlockedSpace, "BlockedSpace");
     EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces);
+    auto [GetBlockedSpaces] = AWAIT(settingsSystem, GetBlockedSpaces);
     EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
-    auto ReturnedStringArray = GetBlockedSpaces.GetValue();
-    EXPECT_EQ(ReturnedStringArray.Size(), 1);
-    EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("BlockedSpace"));
+    auto returnedStringArray = GetBlockedSpaces.GetValue();
+    EXPECT_EQ(returnedStringArray.Size(), 1);
+    EXPECT_EQ(returnedStringArray[0].c_str(), std::string("BlockedSpace"));
 
-    auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+    auto [ClearBlockedSpaces] = AWAIT(settingsSystem, ClearBlockedSpaces);
     EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
     // Clear at start in case another test left something in the list
     {
-        auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, ClearBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    csp::common::String BlockedSpace1Name = "BlockedSpace1";
-    csp::common::String BlockedSpace2Name = "BlockedSpace2";
+    csp::common::String blockedSpace1Name = "BlockedSpace1";
+    csp::common::String blockedSpace2Name = "BlockedSpace2";
 
     // check block spaces is empty
     {
-        auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, GetBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto& BlockedSpaces = Result.GetValue();
+        auto& blockedSpaces = Result.GetValue();
 
-        EXPECT_EQ(BlockedSpaces.Size(), 0);
+        EXPECT_EQ(blockedSpaces.Size(), 0);
     }
 
     // Add 1 blocked spaces
     {
 
-        auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace2Name);
+        auto [Result2] = AWAIT(settingsSystem, AddBlockedSpace, blockedSpace2Name);
 
         EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Get blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, GetBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto& BlockedSpaces = Result.GetValue();
+        auto& blockedSpaces = Result.GetValue();
 
-        EXPECT_EQ(BlockedSpaces.Size(), 1);
+        EXPECT_EQ(blockedSpaces.Size(), 1);
     }
 
     // Remove 1 blocked space
     {
-        auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, BlockedSpace2Name);
+        auto [Result] = AWAIT(settingsSystem, RemoveBlockedSpace, blockedSpace2Name);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Get blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, GetBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto& BlockedSpaces = Result.GetValue();
+        auto& blockedSpaces = Result.GetValue();
 
-        EXPECT_EQ(BlockedSpaces.Size(), 0);
+        EXPECT_EQ(blockedSpaces.Size(), 0);
     }
 
     // Clear all blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, ClearBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Clear at start in case another test left something in the list
     {
-        auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, ClearBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Add 2 blocked spaces
     {
-        auto [Result1] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace1Name);
+        auto [Result1] = AWAIT(settingsSystem, AddBlockedSpace, blockedSpace1Name);
 
         EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace2Name);
+        auto [Result2] = AWAIT(settingsSystem, AddBlockedSpace, blockedSpace2Name);
 
         EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Get blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, GetBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto& BlockedSpaces = Result.GetValue();
+        auto& blockedSpaces = Result.GetValue();
 
-        EXPECT_EQ(BlockedSpaces.Size(), 2);
+        EXPECT_EQ(blockedSpaces.Size(), 2);
     }
 
     // Remove 1 blocked space
     {
-        auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, BlockedSpace2Name);
+        auto [Result] = AWAIT(settingsSystem, RemoveBlockedSpace, blockedSpace2Name);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Get blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, GetBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto& BlockedSpaces = Result.GetValue();
+        auto& blockedSpaces = Result.GetValue();
 
-        EXPECT_EQ(BlockedSpaces.Size(), 1);
-        EXPECT_EQ(BlockedSpaces[0], BlockedSpace1Name);
+        EXPECT_EQ(blockedSpaces.Size(), 1);
+        EXPECT_EQ(blockedSpaces[0], blockedSpace1Name);
     }
 
     // Clear all blocked spaces
     {
-        auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+        auto [Result] = AWAIT(settingsSystem, ClearBlockedSpaces);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Clear at start in case another test left something in the list
-    auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+    auto [PreClearBlockedSpaces] = AWAIT(settingsSystem, ClearBlockedSpaces);
     EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-    constexpr int NUM_BLOCKED_SPACES = 10;
+    constexpr int numBlockedSpaces = 10;
 
-    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
+    for (int spaceIndex = 0; spaceIndex < numBlockedSpaces; ++spaceIndex)
     {
-        char BlockedSpaceName[256];
-        SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
+        char blockedSpaceName[256];
+        SPRINTF(blockedSpaceName, "BlockSpace%d", spaceIndex);
 
-        auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpaceName);
+        auto [SetBlockedSpaces] = AWAIT(settingsSystem, AddBlockedSpace, blockedSpaceName);
         EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces);
+    auto [GetBlockedSpaces] = AWAIT(settingsSystem, GetBlockedSpaces);
     EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
-    auto ReturnedStringArray = GetBlockedSpaces.GetValue();
+    auto returnedStringArray = GetBlockedSpaces.GetValue();
 
-    EXPECT_EQ(ReturnedStringArray.Size(), NUM_BLOCKED_SPACES);
+    EXPECT_EQ(returnedStringArray.Size(), numBlockedSpaces);
 
-    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
+    for (int spaceIndex = 0; spaceIndex < numBlockedSpaces; ++spaceIndex)
     {
-        char BlockedSpaceName[256];
-        SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
+        char blockedSpaceName[256];
+        SPRINTF(blockedSpaceName, "BlockSpace%d", spaceIndex);
 
         // Note that spaces come back in reverse order
-        EXPECT_EQ(ReturnedStringArray[NUM_BLOCKED_SPACES - SpaceIndex - 1].c_str(), std::string(BlockedSpaceName));
+        EXPECT_EQ(returnedStringArray[numBlockedSpaces - spaceIndex - 1].c_str(), std::string(blockedSpaceName));
     }
 
-    auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
+    auto [ClearBlockedSpaces] = AWAIT(settingsSystem, ClearBlockedSpaces);
     EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     {
-        csp::systems::FileAssetDataSource AvatarPortrait;
-        const std::string LocalFileName = "OKO.png";
-        const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-        AvatarPortrait.FilePath = FilePath.u8string().c_str();
-        AvatarPortrait.SetMimeType("image/png");
+        csp::systems::FileAssetDataSource avatarPortrait;
+        const std::string localFileName = "OKO.png";
+        const auto filePath = std::filesystem::absolute("assets/" + localFileName);
+        avatarPortrait.FilePath = filePath.u8string().c_str();
+        avatarPortrait.SetMimeType("image/png");
 
-        auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
+        auto [Result] = AWAIT_PRE(settingsSystem, UpdateAvatarPortrait, RequestPredicate, avatarPortrait);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
+        auto [GetAvatarPortraitResult] = AWAIT_PRE(settingsSystem, GetAvatarPortrait, RequestPredicate, userId);
         EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
+        EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), localFileName));
     }
 
     {
-        csp::systems::FileAssetDataSource AvatarPortrait;
-        const std::string LocalFileName = "OKO.png";
-        const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-        AvatarPortrait.FilePath = FilePath.u8string().c_str();
-        AvatarPortrait.SetMimeType("image/png");
+        csp::systems::FileAssetDataSource avatarPortrait;
+        const std::string localFileName = "OKO.png";
+        const auto filePath = std::filesystem::absolute("assets/" + localFileName);
+        avatarPortrait.FilePath = filePath.u8string().c_str();
+        avatarPortrait.SetMimeType("image/png");
 
-        auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
+        auto [Result] = AWAIT_PRE(settingsSystem, UpdateAvatarPortrait, RequestPredicate, avatarPortrait);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
+        auto [GetAvatarPortraitResult] = AWAIT_PRE(settingsSystem, GetAvatarPortrait, RequestPredicate, userId);
         EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
+        EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), localFileName));
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto UploadFileData = OpenFile("assets/OKO.png");
-    ASSERT_NE(UploadFileData, std::nullopt);
+    auto uploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(uploadFileData, std::nullopt);
 
-    csp::systems::BufferAssetDataSource AvatarPortraitThumbnail;
-    AvatarPortraitThumbnail.Buffer = UploadFileData->data();
-    AvatarPortraitThumbnail.BufferLength = UploadFileData->size();
+    csp::systems::BufferAssetDataSource avatarPortraitThumbnail;
+    avatarPortraitThumbnail.Buffer = uploadFileData->data();
+    avatarPortraitThumbnail.BufferLength = uploadFileData->size();
 
-    AvatarPortraitThumbnail.SetMimeType("image/png");
+    avatarPortraitThumbnail.SetMimeType("image/png");
 
-    auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, AvatarPortraitThumbnail);
+    auto [Result] = AWAIT_PRE(settingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, avatarPortraitThumbnail);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     // get asset uri
-    auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
-    csp::systems::Asset Asset;
-    Asset.FileName = "OKO.png";
-    Asset.Uri = GetAvatarPortraitResult.GetUri().c_str();
+    auto [GetAvatarPortraitResult] = AWAIT_PRE(settingsSystem, GetAvatarPortrait, RequestPredicate, userId);
+    csp::systems::Asset asset;
+    asset.FileName = "OKO.png";
+    asset.Uri = GetAvatarPortraitResult.GetUri().c_str();
     printf("Downloading asset data...\n");
     // Get data
-    auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
+    auto [Download_Result] = AWAIT_PRE(assetSystem, DownloadAssetData, RequestPredicateWithProgress, asset);
 
     EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
-    auto DownloadedAssetData = new uint8_t[DownloadedAssetDataSize];
-    memcpy(DownloadedAssetData, Download_Result.GetData(), DownloadedAssetDataSize);
+    size_t downloadedAssetDataSize = Download_Result.GetDataLength();
+    auto downloadedAssetData = new uint8_t[downloadedAssetDataSize];
+    memcpy(downloadedAssetData, Download_Result.GetData(), downloadedAssetDataSize);
 
-    EXPECT_EQ(DownloadedAssetDataSize, UploadFileData->size());
-    EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData->data(), UploadFileData->size()), 0);
+    EXPECT_EQ(downloadedAssetDataSize, uploadFileData->size());
+    EXPECT_EQ(memcmp(downloadedAssetData, uploadFileData->data(), uploadFileData->size()), 0);
 
-    delete[] DownloadedAssetData;
+    delete[] downloadedAssetData;
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, DefaultAvatarInfoTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Get default avatar info (without the user ever having set it)
     {
-        auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
+        auto [Result] = AWAIT(settingsSystem, GetAvatarInfo);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetAvatarType(), csp::systems::AvatarType::None);
@@ -463,7 +463,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, DefaultAvatarInfoTest)
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 namespace CSPEngine
@@ -481,38 +481,38 @@ class SetAvatarInfo : public PublicTestBaseWithParam<std::tuple<csp::systems::Av
 
 TEST_P(SetAvatarInfo, SetAvatarInfoTest)
 {
-    const csp::systems::AvatarType AvatarType = std::get<0>(GetParam());
-    const csp::common::String AvatarIdentifier = std::get<1>(GetParam());
-    const bool AvatarVisible = std::get<2>(GetParam());
+    const csp::systems::AvatarType avatarType = std::get<0>(GetParam());
+    const csp::common::String avatarIdentifier = std::get<1>(GetParam());
+    const bool avatarVisible = std::get<2>(GetParam());
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* settingsSystem = systemsManager.GetSettingsSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Set Avatar info
     {
-        auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, AvatarType, AvatarIdentifier, AvatarVisible);
+        auto [Result] = AWAIT(settingsSystem, SetAvatarInfo, avatarType, avatarIdentifier, avatarVisible);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Get Avatar info
     {
-        auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
+        auto [Result] = AWAIT(settingsSystem, GetAvatarInfo);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetAvatarType(), AvatarType);
-        EXPECT_EQ(Result.GetAvatarIdentifier(), AvatarIdentifier);
-        EXPECT_EQ(Result.GetAvatarVisible(), AvatarVisible);
+        EXPECT_EQ(Result.GetAvatarType(), avatarType);
+        EXPECT_EQ(Result.GetAvatarIdentifier(), avatarIdentifier);
+        EXPECT_EQ(Result.GetAvatarVisible(), avatarVisible);
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 INSTANTIATE_TEST_SUITE_P(SettingsSystemTests, SetAvatarInfo,

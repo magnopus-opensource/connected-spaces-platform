@@ -20,43 +20,43 @@
 namespace csp::systems
 {
 
-bool BooleanResult::GetValue() const { return Value; }
+bool BooleanResult::GetValue() const { return m_value; }
 
-void BooleanResult::SetValue(bool InValue) { Value = InValue; }
+void BooleanResult::SetValue(bool inValue) { m_value = inValue; }
 
-const csp::common::String& StringResult::GetValue() const { return Value; }
+const csp::common::String& StringResult::GetValue() const { return m_value; }
 
-void StringResult::SetValue(const csp::common::String& InValue) { Value = InValue; }
+void StringResult::SetValue(const csp::common::String& inValue) { m_value = inValue; }
 
-const csp::common::Array<csp::common::String>& StringArrayResult::GetValue() const { return Value; }
+const csp::common::Array<csp::common::String>& StringArrayResult::GetValue() const { return m_value; }
 
-void StringArrayResult::SetValue(const csp::common::Array<csp::common::String>& InValue) { Value = csp::common::Array<csp::common::String>(InValue); }
+void StringArrayResult::SetValue(const csp::common::Array<csp::common::String>& inValue) { m_value = csp::common::Array<csp::common::String>(inValue); }
 
-uint64_t UInt64Result::GetValue() const { return Value; }
+uint64_t UInt64Result::GetValue() const { return m_value; }
 
-void UInt64Result::SetValue(uint64_t InValue) { Value = InValue; }
+void UInt64Result::SetValue(uint64_t inValue) { m_value = inValue; }
 
-void HTTPHeadersResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void HTTPHeadersResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseFailed)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseFailed)
     {
         return;
     }
 
-    auto Response = ApiResponse->GetResponse();
-    auto Headers = Response->GetPayload().GetHeaders();
+    auto response = apiResponse->GetResponse();
+    auto headers = response->GetPayload().GetHeaders();
 
-    for (auto& Header : Headers)
+    for (auto& header : headers)
     {
-        csp::common::String Key(Header.first.c_str());
-        csp::common::String Val(Header.second.c_str());
+        csp::common::String key(header.first.c_str());
+        csp::common::String val(header.second.c_str());
 
-        Value[Key] = Val;
+        m_value[key] = val;
     }
 }
 
-const csp::common::Map<csp::common::String, csp::common::String>& HTTPHeadersResult::GetValue() const { return Value; }
+const csp::common::Map<csp::common::String, csp::common::String>& HTTPHeadersResult::GetValue() const { return m_value; }
 
 } // namespace csp::systems

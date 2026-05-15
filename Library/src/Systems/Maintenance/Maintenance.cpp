@@ -30,73 +30,73 @@ bool MaintenanceInfo::IsInsideWindow() const
         return false;
     }
 
-    const auto TimeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
-    return (csp::common::DateTime(StartDateTimestamp).GetTimePoint() <= TimeNow && csp::common::DateTime(EndDateTimestamp).GetTimePoint() >= TimeNow);
+    const auto timeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
+    return (csp::common::DateTime(StartDateTimestamp).GetTimePoint() <= timeNow && csp::common::DateTime(EndDateTimestamp).GetTimePoint() >= timeNow);
 }
 
-void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        rapidjson::Document JsonDoc;
+        rapidjson::Document jsonDoc;
         rapidjson::ParseResult ok
-            = csp::json::ParseWithErrorLogging(JsonDoc, ApiResponse->GetResponse()->GetPayload().GetContent(), "MaintenanceInfoResult::OnResponse");
+            = csp::json::ParseWithErrorLogging(jsonDoc, apiResponse->GetResponse()->GetPayload().GetContent(), "MaintenanceInfoResult::OnResponse");
         if (!ok)
         {
             return;
         }
 
-        assert(JsonDoc.IsArray());
-        auto LocalArray = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
+        assert(jsonDoc.IsArray());
+        auto localArray = csp::common::Array<MaintenanceInfo>(jsonDoc.Size());
 
-        const auto TimeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
-        uint32_t ArrayShrinkage = 0;
+        const auto timeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
+        uint32_t arrayShrinkage = 0;
 
-        for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
+        for (rapidjson::SizeType i = 0; i < jsonDoc.Size(); i++)
         {
             // remove old maintenance windows
-            if (TimeNow <= csp::common::DateTime(JsonDoc[i]["End"].GetString()).GetTimePoint())
+            if (timeNow <= csp::common::DateTime(jsonDoc[i]["End"].GetString()).GetTimePoint())
             {
-                LocalArray[i - ArrayShrinkage].Description = JsonDoc[i]["Description"].GetString();
-                LocalArray[i - ArrayShrinkage].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
-                LocalArray[i - ArrayShrinkage].EndDateTimestamp = JsonDoc[i]["End"].GetString();
+                localArray[i - arrayShrinkage].Description = jsonDoc[i]["Description"].GetString();
+                localArray[i - arrayShrinkage].StartDateTimestamp = jsonDoc[i]["Start"].GetString();
+                localArray[i - arrayShrinkage].EndDateTimestamp = jsonDoc[i]["End"].GetString();
             }
             else
             {
-                ArrayShrinkage++;
+                arrayShrinkage++;
             };
         }
 
-        MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size() - ArrayShrinkage);
+        m_maintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(jsonDoc.Size() - arrayShrinkage);
 
-        for (uint32_t i = 0; i < (JsonDoc.Size() - ArrayShrinkage); i++)
+        for (uint32_t i = 0; i < (jsonDoc.Size() - arrayShrinkage); i++)
         {
-            MaintenanceInfoResponses[i].Description = LocalArray[i].Description;
-            MaintenanceInfoResponses[i].StartDateTimestamp = LocalArray[i].StartDateTimestamp;
-            MaintenanceInfoResponses[i].EndDateTimestamp = LocalArray[i].EndDateTimestamp;
+            m_maintenanceInfoResponses[i].Description = localArray[i].Description;
+            m_maintenanceInfoResponses[i].StartDateTimestamp = localArray[i].StartDateTimestamp;
+            m_maintenanceInfoResponses[i].EndDateTimestamp = localArray[i].EndDateTimestamp;
         }
 
-        if (MaintenanceInfoResponses.Size() == 0)
+        if (m_maintenanceInfoResponses.Size() == 0)
         {
             CSP_LOG_MSG(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
         }
 
         // Sort maintenance windows by latest date
-        SortMaintenanceInfos(MaintenanceInfoResponses);
+        SortMaintenanceInfos(m_maintenanceInfoResponses);
     }
 }
 
-csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() { return MaintenanceInfoResponses; }
+csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() { return m_maintenanceInfoResponses; }
 
-const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() const { return MaintenanceInfoResponses; }
+const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() const { return m_maintenanceInfoResponses; }
 
 const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
 {
     if (HasAnyMaintenanceWindows())
     {
-        return MaintenanceInfoResponses[0];
+        return m_maintenanceInfoResponses[0];
     }
     else
     {
@@ -105,25 +105,25 @@ const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
     }
 }
 
-bool MaintenanceInfoResult::HasAnyMaintenanceWindows() const { return MaintenanceInfoResponses.Size() > 0; }
+bool MaintenanceInfoResult::HasAnyMaintenanceWindows() const { return m_maintenanceInfoResponses.Size() > 0; }
 
 const MaintenanceInfo& MaintenanceInfoResult::GetDefaultMaintenanceInfo() const
 {
-    static MaintenanceInfo DefaultMaintenanceInfo;
-    return DefaultMaintenanceInfo;
+    static MaintenanceInfo defaultMaintenanceInfo;
+    return defaultMaintenanceInfo;
 }
 
-void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
+void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& maintenanceInfos)
 {
-    const csp::common::DateTime CurrentTime(csp::common::DateTime::UtcTimeNow());
+    const csp::common::DateTime currentTime(csp::common::DateTime::UtcTimeNow());
 
-    std::sort(MaintenanceInfos.begin(), MaintenanceInfos.end(),
-        [CurrentTime](const MaintenanceInfo& Item1, const MaintenanceInfo& Item2)
+    std::sort(maintenanceInfos.begin(), maintenanceInfos.end(),
+        [currentTime](const MaintenanceInfo& item1, const MaintenanceInfo& item2)
         {
-            const csp::common::DateTime Item1Time(Item1.EndDateTimestamp);
-            const csp::common::DateTime Item2Time(Item2.EndDateTimestamp);
+            const csp::common::DateTime item1Time(item1.EndDateTimestamp);
+            const csp::common::DateTime item2Time(item2.EndDateTimestamp);
 
-            return Item1Time.GetTimePoint() - CurrentTime.GetTimePoint() < Item2Time.GetTimePoint() - CurrentTime.GetTimePoint();
+            return item1Time.GetTimePoint() - currentTime.GetTimePoint() < item2Time.GetTimePoint() - currentTime.GetTimePoint();
         });
 }
 

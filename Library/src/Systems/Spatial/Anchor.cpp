@@ -23,20 +23,20 @@ namespace chs = csp::services::generated::spatialdataservice;
 namespace
 {
 
-void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, csp::systems::AnchorResolution& AnchorResolution)
+void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& dto, csp::systems::AnchorResolution& anchorResolution)
 {
-    AnchorResolution.Id = Dto.GetId();
-    AnchorResolution.AnchorId = Dto.GetAnchorId();
-    AnchorResolution.SuccessfullyResolved = Dto.GetSuccessfullyResolved();
-    AnchorResolution.ResolveAttempted = Dto.GetResolveAttempted();
-    AnchorResolution.ResolveTime = Dto.GetResolveTime();
+    anchorResolution.Id = dto.GetId();
+    anchorResolution.AnchorId = dto.GetAnchorId();
+    anchorResolution.SuccessfullyResolved = dto.GetSuccessfullyResolved();
+    anchorResolution.ResolveAttempted = dto.GetResolveAttempted();
+    anchorResolution.ResolveTime = dto.GetResolveTime();
 
-    const auto& DtoTags = Dto.GetTags();
-    AnchorResolution.Tags = csp::common::Array<csp::common::String>(DtoTags.size());
+    const auto& dtoTags = dto.GetTags();
+    anchorResolution.Tags = csp::common::Array<csp::common::String>(dtoTags.size());
 
-    for (size_t idx = 0; idx < DtoTags.size(); ++idx)
+    for (size_t idx = 0; idx < dtoTags.size(); ++idx)
     {
-        AnchorResolution.Tags[idx] = DtoTags[idx];
+        anchorResolution.Tags[idx] = dtoTags[idx];
     }
 }
 
@@ -45,87 +45,87 @@ void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, 
 namespace csp::systems
 {
 
-void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
+void AnchorDtoToAnchor(const chs::AnchorDto& dto, csp::systems::Anchor& anchor)
 {
-    Anchor.Id = Dto.GetMgsId();
-    Anchor.CreatedBy = Dto.GetCreatedBy();
-    Anchor.CreatedAt = Dto.GetCreatedAt();
+    anchor.Id = dto.GetMgsId();
+    anchor.CreatedBy = dto.GetCreatedBy();
+    anchor.CreatedAt = dto.GetCreatedAt();
 
-    if (Dto.HasThirdPartyProviderName())
+    if (dto.HasThirdPartyProviderName())
     {
-        const auto Name = Dto.GetThirdPartyProviderName();
-        if (Name == "GoogleCloudAnchors")
+        const auto name = dto.GetThirdPartyProviderName();
+        if (name == "GoogleCloudAnchors")
         {
-            Anchor.ThirdPartyAnchorProvider = csp::systems::AnchorProvider::GoogleCloudAnchors;
+            anchor.ThirdPartyAnchorProvider = csp::systems::AnchorProvider::GoogleCloudAnchors;
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", Name.c_str());
+            CSP_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", name.c_str());
         }
     }
 
-    if (Dto.HasThirdPartyAnchorId())
+    if (dto.HasThirdPartyAnchorId())
     {
-        Anchor.ThirdPartyAnchorId = Dto.GetThirdPartyAnchorId();
+        anchor.ThirdPartyAnchorId = dto.GetThirdPartyAnchorId();
     }
 
-    if (Dto.HasReferenceId())
+    if (dto.HasReferenceId())
     {
-        Anchor.SpaceId = Dto.GetReferenceId();
+        anchor.SpaceId = dto.GetReferenceId();
     }
 
-    if (Dto.HasAnchoredMultiplayerObjectId())
+    if (dto.HasAnchoredMultiplayerObjectId())
     {
-        Anchor.SpaceEntityId = Dto.GetAnchoredMultiplayerObjectId();
+        anchor.SpaceEntityId = dto.GetAnchoredMultiplayerObjectId();
     }
 
-    if (Dto.HasAnchoredPrototypeId())
+    if (dto.HasAnchoredPrototypeId())
     {
-        Anchor.AssetCollectionId = Dto.GetAnchoredPrototypeId();
+        anchor.AssetCollectionId = dto.GetAnchoredPrototypeId();
     }
 
-    if (Dto.HasLocation())
+    if (dto.HasLocation())
     {
-        const auto& Location = Dto.GetLocation();
-        Anchor.Location.Longitude = Location->GetLongitude();
-        Anchor.Location.Latitude = Location->GetLatitude();
+        const auto& location = dto.GetLocation();
+        anchor.Location.Longitude = location->GetLongitude();
+        anchor.Location.Latitude = location->GetLatitude();
     }
 
-    if (Dto.HasPosition())
+    if (dto.HasPosition())
     {
-        const auto& DtoPosition = Dto.GetPosition();
-        Anchor.Position.X = DtoPosition->GetX();
-        Anchor.Position.Y = DtoPosition->GetY();
-        Anchor.Position.Z = DtoPosition->GetZ();
+        const auto& dtoPosition = dto.GetPosition();
+        anchor.Position.X = dtoPosition->GetX();
+        anchor.Position.Y = dtoPosition->GetY();
+        anchor.Position.Z = dtoPosition->GetZ();
     }
 
-    if (Dto.HasRotation())
+    if (dto.HasRotation())
     {
-        const auto& DtoRotation = Dto.GetRotation();
-        Anchor.Rotation.X = DtoRotation->GetX();
-        Anchor.Rotation.Y = DtoRotation->GetY();
-        Anchor.Rotation.Z = DtoRotation->GetZ();
-        Anchor.Rotation.W = DtoRotation->GetW();
+        const auto& dtoRotation = dto.GetRotation();
+        anchor.Rotation.X = dtoRotation->GetX();
+        anchor.Rotation.Y = dtoRotation->GetY();
+        anchor.Rotation.Z = dtoRotation->GetZ();
+        anchor.Rotation.W = dtoRotation->GetW();
     }
 
-    if (Dto.HasTags())
+    if (dto.HasTags())
     {
-        const auto& DtoTags = Dto.GetTags();
-        Anchor.Tags = csp::common::Array<csp::common::String>(DtoTags.size());
+        const auto& dtoTags = dto.GetTags();
+        anchor.Tags = csp::common::Array<csp::common::String>(dtoTags.size());
 
-        for (size_t idx = 0; idx < DtoTags.size(); ++idx)
+        for (size_t idx = 0; idx < dtoTags.size(); ++idx)
         {
-            Anchor.Tags[idx] = DtoTags[idx];
+            anchor.Tags[idx] = dtoTags[idx];
         }
     }
 
-    if (Dto.HasSpatialKeyValue())
+    if (dto.HasSpatialKeyValue())
     {
-        const auto& DtoSpatialKeyValue = Dto.GetSpatialKeyValue();
+        const auto& dtoSpatialKeyValue = dto.GetSpatialKeyValue();
 
-        for (auto& Pair : DtoSpatialKeyValue)
+        for (auto& pair : dtoSpatialKeyValue)
         {
-            Anchor.SpatialKeyValue[Pair.first] = Pair.second;
+            anchor.SpatialKeyValue[pair.first] = pair.second;
         }
     }
 }
@@ -137,113 +137,113 @@ OlyAnchorPosition::OlyAnchorPosition()
 {
 }
 
-bool OlyAnchorPosition::operator==(const OlyAnchorPosition& Other) const { return X == Other.X && Y == Other.Y && Z == Other.Z; }
+bool OlyAnchorPosition::operator==(const OlyAnchorPosition& other) const { return X == other.X && Y == other.Y && Z == other.Z; }
 
-bool Anchor::operator==(const Anchor& Other) const
+bool Anchor::operator==(const Anchor& other) const
 {
-    return Id == Other.Id && ThirdPartyAnchorProvider == Other.ThirdPartyAnchorProvider && ThirdPartyAnchorId == Other.ThirdPartyAnchorId
-        && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && SpaceId == Other.SpaceId && SpaceEntityId == Other.SpaceEntityId
-        && AssetCollectionId == Other.AssetCollectionId && Location == Other.Location && Position == Other.Position && Rotation == Other.Rotation
-        && Tags == Other.Tags && SpatialKeyValue == Other.SpatialKeyValue;
+    return Id == other.Id && ThirdPartyAnchorProvider == other.ThirdPartyAnchorProvider && ThirdPartyAnchorId == other.ThirdPartyAnchorId
+        && CreatedBy == other.CreatedBy && CreatedAt == other.CreatedAt && SpaceId == other.SpaceId && SpaceEntityId == other.SpaceEntityId
+        && AssetCollectionId == other.AssetCollectionId && Location == other.Location && Position == other.Position && Rotation == other.Rotation
+        && Tags == other.Tags && SpatialKeyValue == other.SpatialKeyValue;
 }
 
-bool AnchorResolution::operator==(const AnchorResolution& Other) const
+bool AnchorResolution::operator==(const AnchorResolution& other) const
 {
-    return Id == Other.Id && AnchorId == Other.AnchorId && SuccessfullyResolved == Other.SuccessfullyResolved
-        && ResolveAttempted == Other.ResolveAttempted && ResolveTime == Other.ResolveTime && Tags == Other.Tags;
+    return Id == other.Id && AnchorId == other.AnchorId && SuccessfullyResolved == other.SuccessfullyResolved
+        && ResolveAttempted == other.ResolveAttempted && ResolveTime == other.ResolveTime && Tags == other.Tags;
 }
 
-bool OlyAnchorPosition::operator!=(const OlyAnchorPosition& Other) const { return !(*this == Other); }
-bool Anchor::operator!=(const Anchor& Other) const { return !(*this == Other); }
-bool AnchorResolution::operator!=(const AnchorResolution& Other) const { return !(*this == Other); }
+bool OlyAnchorPosition::operator!=(const OlyAnchorPosition& other) const { return !(*this == other); }
+bool Anchor::operator!=(const Anchor& other) const { return !(*this == other); }
+bool AnchorResolution::operator!=(const AnchorResolution& other) const { return !(*this == other); }
 
-Anchor& AnchorResult::GetAnchor() { return Anchor; }
+Anchor& AnchorResult::GetAnchor() { return m_anchor; }
 
-const Anchor& AnchorResult::GetAnchor() const { return Anchor; }
+const Anchor& AnchorResult::GetAnchor() const { return m_anchor; }
 
-void AnchorResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AnchorResponse = static_cast<chs::AnchorDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* anchorResponse = static_cast<chs::AnchorDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResponse->FromJson(Response->GetPayload().GetContent());
+        anchorResponse->FromJson(response->GetPayload().GetContent());
 
-        AnchorDtoToAnchor(*AnchorResponse, Anchor);
+        AnchorDtoToAnchor(*anchorResponse, m_anchor);
     }
 }
 
-csp::common::Array<Anchor>& AnchorCollectionResult::GetAnchors() { return Anchors; }
+csp::common::Array<Anchor>& AnchorCollectionResult::GetAnchors() { return m_anchors; }
 
-const csp::common::Array<Anchor>& AnchorCollectionResult::GetAnchors() const { return Anchors; }
+const csp::common::Array<Anchor>& AnchorCollectionResult::GetAnchors() const { return m_anchors; }
 
-void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AnchorCollectionResponse = static_cast<csp::services::DtoArray<chs::AnchorDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* anchorCollectionResponse = static_cast<csp::services::DtoArray<chs::AnchorDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        anchorCollectionResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from the response into our Anchors array
-        std::vector<chs::AnchorDto>& AnchorsArray = AnchorCollectionResponse->GetArray();
-        Anchors = csp::common::Array<csp::systems::Anchor>(AnchorsArray.size());
+        std::vector<chs::AnchorDto>& anchorsArray = anchorCollectionResponse->GetArray();
+        m_anchors = csp::common::Array<csp::systems::Anchor>(anchorsArray.size());
 
-        for (size_t idx = 0; idx < AnchorsArray.size(); ++idx)
+        for (size_t idx = 0; idx < anchorsArray.size(); ++idx)
         {
-            AnchorDtoToAnchor(AnchorsArray[idx], Anchors[idx]);
+            AnchorDtoToAnchor(anchorsArray[idx], m_anchors[idx]);
         }
     }
 }
 
-AnchorResolution& AnchorResolutionResult::GetAnchorResolution() { return AnchorResolution; }
+AnchorResolution& AnchorResolutionResult::GetAnchorResolution() { return m_anchorResolution; }
 
-const AnchorResolution& AnchorResolutionResult::GetAnchorResolution() const { return AnchorResolution; }
+const AnchorResolution& AnchorResolutionResult::GetAnchorResolution() const { return m_anchorResolution; }
 
-void AnchorResolutionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResolutionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AnchorResolutionResponse = static_cast<chs::AnchorResolutionDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* anchorResolutionResponse = static_cast<chs::AnchorResolutionDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent());
-        AnchorResolutionDtoToAnchorResolution(*AnchorResolutionResponse, AnchorResolution);
+        anchorResolutionResponse->FromJson(response->GetPayload().GetContent());
+        AnchorResolutionDtoToAnchorResolution(*anchorResolutionResponse, m_anchorResolution);
     }
 }
 
-csp::common::Array<AnchorResolution>& AnchorResolutionCollectionResult::GetAnchorResolutions() { return AnchorResolutions; }
+csp::common::Array<AnchorResolution>& AnchorResolutionCollectionResult::GetAnchorResolutions() { return m_anchorResolutions; }
 
-const csp::common::Array<AnchorResolution>& AnchorResolutionCollectionResult::GetAnchorResolutions() const { return AnchorResolutions; }
+const csp::common::Array<AnchorResolution>& AnchorResolutionCollectionResult::GetAnchorResolutions() const { return m_anchorResolutions; }
 
-void AnchorResolutionCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResolutionCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AnchorResolutionCollectionResponse = static_cast<csp::services::DtoArray<chs::AnchorResolutionDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* anchorResolutionCollectionResponse = static_cast<csp::services::DtoArray<chs::AnchorResolutionDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        anchorResolutionCollectionResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from the response into our Anchors array
-        std::vector<chs::AnchorResolutionDto>& AnchorsResolutionArray = AnchorResolutionCollectionResponse->GetArray();
-        AnchorResolutions = csp::common::Array<csp::systems::AnchorResolution>(AnchorsResolutionArray.size());
+        std::vector<chs::AnchorResolutionDto>& anchorsResolutionArray = anchorResolutionCollectionResponse->GetArray();
+        m_anchorResolutions = csp::common::Array<csp::systems::AnchorResolution>(anchorsResolutionArray.size());
 
-        for (size_t idx = 0; idx < AnchorsResolutionArray.size(); ++idx)
+        for (size_t idx = 0; idx < anchorsResolutionArray.size(); ++idx)
         {
-            AnchorResolutionDtoToAnchorResolution(AnchorsResolutionArray[idx], AnchorResolutions[idx]);
+            AnchorResolutionDtoToAnchorResolution(anchorsResolutionArray[idx], m_anchorResolutions[idx]);
         }
     }
 }

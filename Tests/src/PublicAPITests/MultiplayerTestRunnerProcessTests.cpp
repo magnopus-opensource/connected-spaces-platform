@@ -23,36 +23,36 @@
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {
-    MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
-    EXPECT_EQ(Process.GetTestToRun(), MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
-    Process.SetLoginEmail("FakeEmail@MrMoustacheMan.com");
-    EXPECT_EQ(Process.GetLoginEmail(), std::string { "FakeEmail@MrMoustacheMan.com" });
-    Process.SetPassword("Hunter2");
-    EXPECT_EQ(Process.GetPassword(), std::string { "Hunter2" });
-    EXPECT_EQ(Process.GetInvocationArgs(),
+    MultiplayerTestRunnerProcess process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
+    EXPECT_EQ(process.GetTestToRun(), MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
+    process.SetLoginEmail("FakeEmail@MrMoustacheMan.com");
+    EXPECT_EQ(process.GetLoginEmail(), std::string { "FakeEmail@MrMoustacheMan.com" });
+    process.SetPassword("Hunter2");
+    EXPECT_EQ(process.GetPassword(), std::string { "Hunter2" });
+    EXPECT_EQ(process.GetInvocationArgs(),
         (std::vector<std::string> {
             MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password", "Hunter2" }));
 
     // Optional arguments have no value initially
-    EXPECT_FALSE(Process.GetSpaceId().has_value());
-    EXPECT_FALSE(Process.GetTimeoutInSeconds().has_value());
-    EXPECT_FALSE(Process.GetEndpoint().has_value());
+    EXPECT_FALSE(process.GetSpaceId().has_value());
+    EXPECT_FALSE(process.GetTimeoutInSeconds().has_value());
+    EXPECT_FALSE(process.GetEndpoint().has_value());
 
-    Process.SetSpaceId("MyFakeSpaceId");
-    EXPECT_EQ(Process.GetSpaceId(), std::optional<std::string> { "MyFakeSpaceId" });
-    EXPECT_EQ(Process.GetInvocationArgs(),
+    process.SetSpaceId("MyFakeSpaceId");
+    EXPECT_EQ(process.GetSpaceId(), std::optional<std::string> { "MyFakeSpaceId" });
+    EXPECT_EQ(process.GetInvocationArgs(),
         (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId" }));
 
-    Process.SetTimeoutInSeconds(5);
-    EXPECT_EQ(Process.GetTimeoutInSeconds(), std::optional<int> { 5 });
-    EXPECT_EQ(Process.GetInvocationArgs(),
+    process.SetTimeoutInSeconds(5);
+    EXPECT_EQ(process.GetTimeoutInSeconds(), std::optional<int> { 5 });
+    EXPECT_EQ(process.GetInvocationArgs(),
         (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId", "--timeout", "5" }));
 
-    Process.SetEndpoint("https://www.website.com");
-    EXPECT_EQ(Process.GetEndpoint(), std::optional<std::string> { "https://www.website.com" });
-    EXPECT_EQ(Process.GetInvocationArgs(),
+    process.SetEndpoint("https://www.website.com");
+    EXPECT_EQ(process.GetEndpoint(), std::optional<std::string> { "https://www.website.com" });
+    EXPECT_EQ(process.GetInvocationArgs(),
         (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId", "--timeout", "5", "--endpoint", "https://www.website.com" }));
 }
@@ -60,27 +60,27 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
 {
     // Actually invoke the runner and make sure the futures are all set
-    MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
-    auto TestUser = CreateTestUser();
-    Process.SetLoginEmail(TestUser.Email.c_str());
-    Process.SetPassword(GeneratedTestAccountPassword);
-    Process.SetTimeoutInSeconds(0); // So we don't sit at ready for assertions for any real time.
-    Process.SetEndpoint(EndpointBaseURI());
-    Process.StartProcess();
+    MultiplayerTestRunnerProcess process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
+    auto testUser = CreateTestUser();
+    process.SetLoginEmail(testUser.Email.c_str());
+    process.SetPassword(GeneratedTestAccountPassword);
+    process.SetTimeoutInSeconds(0); // So we don't sit at ready for assertions for any real time.
+    process.SetEndpoint(EndpointBaseURI());
+    process.StartProcess();
 
     // We need to spin up a process, login, create a space, join it, ... so we're a bit permissive with the timeouts to try and prevent flakiness.
-    auto LoggedInFutureStatus = Process.LoggedInFuture().wait_for(std::chrono::seconds(20));
-    EXPECT_EQ(LoggedInFutureStatus, std::future_status::ready);
+    auto loggedInFutureStatus = process.LoggedInFuture().wait_for(std::chrono::seconds(20));
+    EXPECT_EQ(loggedInFutureStatus, std::future_status::ready);
 
-    auto JoinedSpaceFutureStatus = Process.JoinedSpaceFuture().wait_for(std::chrono::seconds(20));
-    EXPECT_EQ(JoinedSpaceFutureStatus, std::future_status::ready);
+    auto joinedSpaceFutureStatus = process.JoinedSpaceFuture().wait_for(std::chrono::seconds(20));
+    EXPECT_EQ(joinedSpaceFutureStatus, std::future_status::ready);
 
-    auto ReadForAssertionsFutureStatus = Process.ReadyForAssertionsFuture().wait_for(std::chrono::seconds(20));
-    EXPECT_EQ(ReadForAssertionsFutureStatus, std::future_status::ready);
+    auto readForAssertionsFutureStatus = process.ReadyForAssertionsFuture().wait_for(std::chrono::seconds(20));
+    EXPECT_EQ(readForAssertionsFutureStatus, std::future_status::ready);
 
-    auto ExitSpaceFutureStatus = Process.ExitSpaceFuture().wait_for(std::chrono::seconds(20));
-    EXPECT_EQ(ExitSpaceFutureStatus, std::future_status::ready);
+    auto exitSpaceFutureStatus = process.ExitSpaceFuture().wait_for(std::chrono::seconds(20));
+    EXPECT_EQ(exitSpaceFutureStatus, std::future_status::ready);
 
-    auto LoggedOutFutureStatus = Process.LoggedOutFuture().wait_for(std::chrono::seconds(20));
-    EXPECT_EQ(LoggedOutFutureStatus, std::future_status::ready);
+    auto loggedOutFutureStatus = process.LoggedOutFuture().wait_for(std::chrono::seconds(20));
+    EXPECT_EQ(loggedOutFutureStatus, std::future_status::ready);
 }

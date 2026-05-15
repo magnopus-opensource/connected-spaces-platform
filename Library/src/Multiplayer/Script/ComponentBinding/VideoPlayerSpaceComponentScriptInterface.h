@@ -25,7 +25,7 @@ class VideoPlayerSpaceComponent;
 class VideoPlayerSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent = nullptr);
+    VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* inComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(float, Volume);
 };

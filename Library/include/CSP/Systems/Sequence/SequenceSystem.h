@@ -50,9 +50,9 @@ public:
     /// @param Items csp::common::Array<csp::common::String> : An ordered array of members
     /// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
     /// @param Callback SequenceResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void CreateSequence(const csp::common::String& SequenceKey, const csp::common::String& ReferenceType,
-        const csp::common::String& ReferenceId, const csp::common::Array<csp::common::String>& Items,
-        const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateSequence(const csp::common::String& sequenceKey, const csp::common::String& referenceType,
+        const csp::common::String& referenceId, const csp::common::Array<csp::common::String>& items,
+        const csp::common::Map<csp::common::String, csp::common::String>& metaData, SequenceResultCallback callback);
 
     /// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
     /// @note This call will fail if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
@@ -62,9 +62,9 @@ public:
     /// @param Items csp::common::Array<csp::common::String> : An ordered array of members
     /// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
     /// @param Callback SequenceResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void UpdateSequence(const csp::common::String& SequenceKey, const csp::common::String& ReferenceType,
-        const csp::common::String& ReferenceId, const csp::common::Array<csp::common::String>& Items,
-        const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateSequence(const csp::common::String& sequenceKey, const csp::common::String& referenceType,
+        const csp::common::String& referenceId, const csp::common::Array<csp::common::String>& items,
+        const csp::common::Map<csp::common::String, csp::common::String>& metaData, SequenceResultCallback callback);
 
     /// @brief Renames a given sequence. This call will fail if the user isn't a creator of the space.
     /// @note This call will fail (Reason InvalidSequenceKey) if the OldSequenceKey, or NewSequenceKey parameters contains invalid keys, such as
@@ -73,7 +73,7 @@ public:
     /// @param NewSequenceKey csp::common::String : The new sequence key name
     /// @param Callback SequenceResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void RenameSequence(
-        const csp::common::String& OldSequenceKey, const csp::common::String& NewSequenceKey, SequenceResultCallback Callback);
+        const csp::common::String& oldSequenceKey, const csp::common::String& newSequenceKey, SequenceResultCallback callback);
 
     /// @brief Finds sequences based on the given criteria
     /// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
@@ -83,31 +83,31 @@ public:
     /// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
     /// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
     /// @param Callback SequencesResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetSequencesByCriteria(const csp::common::Array<csp::common::String>& SequenceKeys,
-        const csp::common::Optional<csp::common::String>& KeyRegex, const csp::common::Optional<csp::common::String>& ReferenceType,
-        const csp::common::Array<csp::common::String>& ReferenceIds, const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
-        SequencesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSequencesByCriteria(const csp::common::Array<csp::common::String>& sequenceKeys,
+        const csp::common::Optional<csp::common::String>& keyRegex, const csp::common::Optional<csp::common::String>& referenceType,
+        const csp::common::Array<csp::common::String>& referenceIds, const csp::common::Map<csp::common::String, csp::common::String>& metaData,
+        SequencesResultCallback callback);
 
     /// @brief Finds all sequences that contain the given items
     /// @param Items csp::common::Array<csp::common::String> : An array of items which should be searched for
     /// @param ReferenceType csp::common::String : The type of reference (GroupId etc.). Must be used with ReferenceIds
     /// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
     /// @param Callback SequencesResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetAllSequencesContainingItems(const csp::common::Array<csp::common::String>& Items,
-        const csp::common::Optional<csp::common::String>& ReferenceType, const csp::common::Array<csp::common::String>& ReferenceIds,
-        SequencesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAllSequencesContainingItems(const csp::common::Array<csp::common::String>& items,
+        const csp::common::Optional<csp::common::String>& referenceType, const csp::common::Array<csp::common::String>& referenceIds,
+        SequencesResultCallback callback);
 
     /// @brief Gets a sequence by it's key
     /// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
     /// @param SequenceKey csp::common::String : The unique grouping name
     /// @param Callback SequenceResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetSequence(const csp::common::String& SequenceKey, SequenceResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSequence(const csp::common::String& sequenceKey, SequenceResultCallback callback);
 
     /// @brief Deletes the given sequences. This call will fail if the user isn't a creator of the space
     /// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
     /// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to delete
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& sequenceKeys, NullResultCallback callback);
 
     // Callback to receive sequence changes, contains a SequenceChangedParams with the details.
     // SequenceChangeEventData will have a null HotspotData member.
@@ -115,21 +115,21 @@ public:
 
     /// @brief Sets a callback for a sequence changed event.
     /// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence that has been changed.
-    CSP_EVENT void SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback);
+    CSP_EVENT void SetSequenceChangedCallback(SequenceChangedCallbackHandler callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& networkEventData);
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SequenceSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
+    SequenceSystem(csp::web::WebClient* webClient, csp::multiplayer::NetworkEventBus& eventBus, csp::common::LogSystem& logSystem);
     ~SequenceSystem();
 
-    csp::services::ApiBase* SequenceAPI;
+    csp::services::ApiBase* m_sequenceApi;
 
-    SequenceChangedCallbackHandler SequenceChangedCallback;
+    SequenceChangedCallbackHandler m_sequenceChangedCallback;
 };
 } // namespace csp::systems

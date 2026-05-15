@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -44,135 +44,135 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create screen sharing component
-    auto* ScreenSharingComponent = static_cast<ScreenSharingSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScreenSharing));
+    auto* screenSharingComponent = static_cast<ScreenSharingSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScreenSharing));
 
     // Ensure defaults are set
-    EXPECT_EQ(ScreenSharingComponent->GetUserId(), "");
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageCollectionId(), "");
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageAssetId(), "");
-    EXPECT_EQ(ScreenSharingComponent->GetAttenuationRadius(), 10.f);
+    EXPECT_EQ(screenSharingComponent->GetUserId(), "");
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageCollectionId(), "");
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageAssetId(), "");
+    EXPECT_EQ(screenSharingComponent->GetAttenuationRadius(), 10.f);
 
-    EXPECT_EQ(ScreenSharingComponent->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(ScreenSharingComponent->GetRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(ScreenSharingComponent->GetScale(), csp::common::Vector3::One());
+    EXPECT_EQ(screenSharingComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(screenSharingComponent->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(screenSharingComponent->GetScale(), csp::common::Vector3::One());
 
-    EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), true);
-    EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), true);
-    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsVisible(), true);
+    EXPECT_EQ(screenSharingComponent->GetIsARVisible(), true);
+    EXPECT_EQ(screenSharingComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(screenSharingComponent->GetIsShadowCaster(), false);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Set new values
-    csp::common::String ScreenSharingUserId = "SCREEN_SHARING_USER_ID";
-    csp::common::String DefaultImageCollectionId = "TEST_COLLECTION_ID";
-    csp::common::String DefaultImageAssetId = "TEST_ASSET_ID";
-    float AttenuationRadius = 22.0f;
+    csp::common::String screenSharingUserId = "SCREEN_SHARING_USER_ID";
+    csp::common::String defaultImageCollectionId = "TEST_COLLECTION_ID";
+    csp::common::String defaultImageAssetId = "TEST_ASSET_ID";
+    float attenuationRadius = 22.0f;
 
-    ScreenSharingComponent->SetUserId(ScreenSharingUserId);
-    ScreenSharingComponent->SetDefaultImageCollectionId(DefaultImageCollectionId);
-    ScreenSharingComponent->SetDefaultImageAssetId(DefaultImageAssetId);
-    ScreenSharingComponent->SetAttenuationRadius(AttenuationRadius);
+    screenSharingComponent->SetUserId(screenSharingUserId);
+    screenSharingComponent->SetDefaultImageCollectionId(defaultImageCollectionId);
+    screenSharingComponent->SetDefaultImageAssetId(defaultImageAssetId);
+    screenSharingComponent->SetAttenuationRadius(attenuationRadius);
 
-    ScreenSharingComponent->SetPosition(csp::common::Vector3::One());
-    ScreenSharingComponent->SetRotation(csp::common::Vector4::One());
-    ScreenSharingComponent->SetScale(csp::common::Vector3::Zero());
+    screenSharingComponent->SetPosition(csp::common::Vector3::One());
+    screenSharingComponent->SetRotation(csp::common::Vector4::One());
+    screenSharingComponent->SetScale(csp::common::Vector3::Zero());
 
-    ScreenSharingComponent->SetIsVisible(false);
-    ScreenSharingComponent->SetIsARVisible(false);
-    ScreenSharingComponent->SetIsVirtualVisible(false);
-    ScreenSharingComponent->SetIsShadowCaster(true);
+    screenSharingComponent->SetIsVisible(false);
+    screenSharingComponent->SetIsARVisible(false);
+    screenSharingComponent->SetIsVirtualVisible(false);
+    screenSharingComponent->SetIsShadowCaster(true);
 
     // Ensure values are set correctly
-    EXPECT_EQ(ScreenSharingComponent->GetUserId(), ScreenSharingUserId);
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageCollectionId(), DefaultImageCollectionId);
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageAssetId(), DefaultImageAssetId);
-    EXPECT_EQ(ScreenSharingComponent->GetAttenuationRadius(), AttenuationRadius);
+    EXPECT_EQ(screenSharingComponent->GetUserId(), screenSharingUserId);
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageCollectionId(), defaultImageCollectionId);
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageAssetId(), defaultImageAssetId);
+    EXPECT_EQ(screenSharingComponent->GetAttenuationRadius(), attenuationRadius);
 
-    EXPECT_EQ(ScreenSharingComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(ScreenSharingComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(ScreenSharingComponent->GetScale(), csp::common::Vector3::Zero());
+    EXPECT_EQ(screenSharingComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(screenSharingComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(screenSharingComponent->GetScale(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
+    EXPECT_EQ(screenSharingComponent->GetIsVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsARVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsShadowCaster(), true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create screen sharing component
-    auto* ScreenSharingComponent = (ScreenSharingSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScreenSharing);
+    auto* screenSharingComponent = (ScreenSharingSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScreenSharing);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
-    const std::string ScreenSharingScriptText = R"xx(
+    const std::string screenSharingScriptText = R"xx(
 		var component = ThisEntity.getScreenSharingComponents()[0];
 		component.userId = "ScreenSharingUserId";
 		component.defaultImageCollectionId = "TestDefaultImageCollectionId";
@@ -187,31 +187,31 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 		component.isShadowCaster = true;
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(ScreenSharingScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(screenSharingScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Test new values
-    EXPECT_EQ(ScreenSharingComponent->GetUserId(), "ScreenSharingUserId");
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageCollectionId(), "TestDefaultImageCollectionId");
-    EXPECT_EQ(ScreenSharingComponent->GetDefaultImageAssetId(), "TestDefaultImageAssetId");
-    EXPECT_EQ(ScreenSharingComponent->GetAttenuationRadius(), 22.0f);
+    EXPECT_EQ(screenSharingComponent->GetUserId(), "ScreenSharingUserId");
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageCollectionId(), "TestDefaultImageCollectionId");
+    EXPECT_EQ(screenSharingComponent->GetDefaultImageAssetId(), "TestDefaultImageAssetId");
+    EXPECT_EQ(screenSharingComponent->GetAttenuationRadius(), 22.0f);
 
-    EXPECT_EQ(ScreenSharingComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(ScreenSharingComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(ScreenSharingComponent->GetScale(), csp::common::Vector3::Zero());
+    EXPECT_EQ(screenSharingComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(screenSharingComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(screenSharingComponent->GetScale(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
+    EXPECT_EQ(screenSharingComponent->GetIsVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsARVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(screenSharingComponent->GetIsShadowCaster(), true);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

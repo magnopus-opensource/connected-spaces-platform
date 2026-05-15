@@ -52,18 +52,18 @@ class ClientElectionManager
 
 public:
     ClientElectionManager(
-        OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
+        OnlineRealtimeEngine* inOnlineRealtimeEngine, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& jsScriptRunner);
     ~ClientElectionManager();
 
-    void OnConnect(const csp::common::List<SpaceEntity*>& Avatars, const csp::common::List<SpaceEntity*>& Objects);
+    void OnConnect(const csp::common::List<SpaceEntity*>& avatars, const csp::common::List<SpaceEntity*>& objects);
     void OnDisconnect();
 
-    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus);
+    void OnLocalClientAdd(const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& avatars, NetworkEventBus& networkEventBus);
 
-    void OnClientAdd(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus);
-    void OnClientRemove(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Objects);
-    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Objects);
+    void OnClientAdd(const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& avatars, NetworkEventBus& networkEventBus);
+    void OnClientRemove(const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& avatars);
+    void OnObjectAdd(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& objects);
+    void OnObjectRemove(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& objects);
 
     void Update();
 
@@ -75,20 +75,20 @@ private:
     void BindNetworkEvents();
     void UnBindNetworkEvents();
 
-    void OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
-    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
+    void OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& data);
+    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& data);
 
-    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar, NetworkEventBus& NetworkEventBus);
-    void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);
-    ClientProxy* FindClientUsingAvatar(const SpaceEntity* ClientAvatar);
+    ClientProxy* AddClientUsingAvatar(const SpaceEntity* clientAvatar, NetworkEventBus& networkEventBus);
+    void RemoveClientUsingAvatar(const SpaceEntity* clientAvatar);
+    ClientProxy* FindClientUsingAvatar(const SpaceEntity* clientAvatar);
 
-    ClientProxy* AddClientUsingId(int64_t ClientId, NetworkEventBus& NetworkEventBus);
-    void RemoveClientUsingId(int64_t ClientId);
-    ClientProxy* FindClientUsingId(int64_t ClientId);
+    ClientProxy* AddClientUsingId(int64_t clientId, NetworkEventBus& networkEventBus);
+    void RemoveClientUsingId(int64_t clientId);
+    ClientProxy* FindClientUsingId(int64_t clientId);
 
     bool IsConnected() const;
 
-    void SetLeader(ClientProxy* Client);
+    void SetLeader(ClientProxy* client);
     void CheckLeaderIsValid();
     void OnLeaderRemoved();
 
@@ -99,32 +99,32 @@ private:
     void HandleElectionStateRequested();
     void HandleElectionStateElecting();
 
-    void OnElectionComplete(int64_t LeaderId);
-    void OnLeaderNotification(int64_t LeaderId);
+    void OnElectionComplete(int64_t leaderId);
+    void OnLeaderNotification(int64_t leaderId);
 
     // Async functions that may take a while as they initiate network events between all clients
     void AsyncNegotiateLeader();
 
-    void SetElectionState(ElectionState NewState);
+    void SetElectionState(ElectionState newState);
 
-    void SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback);
+    void SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback scriptLeaderReadyCallback);
 
 private:
-    OnlineRealtimeEngine* OnlineRealtimeEnginePtr;
-    csp::common::LogSystem& LogSystem;
-    class ClientElectionEventHandler* EventHandler;
+    OnlineRealtimeEngine* m_onlineRealtimeEnginePtr;
+    csp::common::LogSystem& m_logSystem;
+    class ClientElectionEventHandler* m_eventHandler;
 
-    ClientMap Clients;
+    ClientMap m_clients;
 
-    ConnectionState TheConnectionState;
-    std::atomic<ElectionState> TheElectionState;
+    ConnectionState m_theConnectionState;
+    std::atomic<ElectionState> m_theElectionState;
 
-    ClientProxy* LocalClient;
+    ClientProxy* m_localClient;
 
-    ClientProxy* Leader;
+    ClientProxy* m_leader;
 
-    ScriptLeaderReadyCallback LeaderReadyCallback;
-    csp::common::IJSScriptRunner& RemoteScriptRunner;
+    ScriptLeaderReadyCallback m_leaderReadyCallback;
+    csp::common::IJSScriptRunner& m_remoteScriptRunner;
 };
 
 } // namespace csp::multiplayer

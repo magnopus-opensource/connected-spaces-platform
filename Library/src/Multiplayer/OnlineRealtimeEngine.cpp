@@ -62,22 +62,22 @@ namespace
 
 const csp::common::String SequenceTypeName = "EntityHierarchy";
 
-uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common::LogSystem& LogSystem)
+uint64_t ParseGenerateObjectIDsResult(const signalr::value& result, csp::common::LogSystem& logSystem)
 {
-    uint64_t EntityId = 0;
+    uint64_t entityId = 0;
 
-    if (Result.is_array())
+    if (result.is_array())
     {
-        const std::vector<signalr::value>& Ids = Result.as_array();
+        const std::vector<signalr::value>& ids = result.as_array();
 
         // GenerateObjectIds can in theory create multiple Ids at once,
         // but we just assume one for now
-        for (const signalr::value& IdValue : Ids)
+        for (const signalr::value& idValue : ids)
         {
-            if (IdValue.is_uinteger())
+            if (idValue.is_uinteger())
             {
-                LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("Entity Id={}", IdValue.as_uinteger()).c_str());
-                EntityId = IdValue.as_uinteger();
+                logSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("Entity Id={}", idValue.as_uinteger()).c_str());
+                entityId = idValue.as_uinteger();
                 break;
             }
 
@@ -86,10 +86,10 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common:
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array");
+        logSystem.LogMsg(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array");
     }
 
-    return EntityId;
+    return entityId;
 }
 } // namespace
 
@@ -103,58 +103,58 @@ constexpr uint64_t ENTITY_PAGE_LIMIT = 100;
 class SpaceEntityEventHandler : public csp::events::EventListener
 {
 public:
-    SpaceEntityEventHandler(OnlineRealtimeEngine* EntitySystem);
+    SpaceEntityEventHandler(OnlineRealtimeEngine* entitySystem);
 
-    void OnEvent(const csp::events::Event& InEvent) override;
+    void OnEvent(const csp::events::Event& inEvent) override;
 
 private:
-    OnlineRealtimeEngine* EntitySystem;
+    OnlineRealtimeEngine* m_entitySystem;
 };
 
-SpaceEntityEventHandler::SpaceEntityEventHandler(OnlineRealtimeEngine* EntitySystem)
-    : EntitySystem(EntitySystem)
+SpaceEntityEventHandler::SpaceEntityEventHandler(OnlineRealtimeEngine* entitySystem)
+    : m_entitySystem(entitySystem)
 {
 }
 
-void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
+void SpaceEntityEventHandler::OnEvent(const csp::events::Event& inEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->GetMultiplayerConnectionInstance() != nullptr
-        && EntitySystem->GetMultiplayerConnectionInstance()->IsConnected())
+    if (inEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && m_entitySystem->GetMultiplayerConnectionInstance() != nullptr
+        && m_entitySystem->GetMultiplayerConnectionInstance()->IsConnected())
     {
-        EntitySystem->TickEntities();
+        m_entitySystem->TickEntities();
     }
 }
 
-std::map<uint64_t, signalr::value> GetEntityTransformComponents(const SpaceEntity* InEntity)
+std::map<uint64_t, signalr::value> GetEntityTransformComponents(const SpaceEntity* inEntity)
 {
-    const SpaceTransform Transform(InEntity->GetTransform());
-    const std::vector<signalr::value> Position { Transform.Position.X, Transform.Position.Y, Transform.Position.Z };
-    const std::vector<signalr::value> Rotation { Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z, Transform.Rotation.W };
-    const std::vector<signalr::value> Scale { Transform.Scale.X, Transform.Scale.Y, Transform.Scale.Z };
+    const SpaceTransform transform(inEntity->GetTransform());
+    const std::vector<signalr::value> position { transform.Position.X, transform.Position.Y, transform.Position.Z };
+    const std::vector<signalr::value> rotation { transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z, transform.Rotation.W };
+    const std::vector<signalr::value> scale { transform.Scale.X, transform.Scale.Y, transform.Scale.Z };
 
-    std::map<uint64_t, signalr::value> Components { {
+    std::map<uint64_t, signalr::value> components { {
                                                         ENTITY_POSITION,
                                                         std::vector<signalr::value> {
                                                             static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
-                                                            std::vector { signalr::value(Position) },
+                                                            std::vector { signalr::value(position) },
                                                         },
                                                     },
         {
             ENTITY_ROTATION,
             std::vector<signalr::value> {
                 static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
-                std::vector { signalr::value(Rotation) },
+                std::vector { signalr::value(rotation) },
             },
         },
         {
             ENTITY_SCALE,
             std::vector<signalr::value> {
                 static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
-                std::vector { signalr::value(Scale) },
+                std::vector { signalr::value(scale) },
             },
         } };
 
-    return Components;
+    return components;
 }
 
 class DirtyComponent;
@@ -162,54 +162,54 @@ class DirtyComponent;
 using namespace std::chrono;
 
 OnlineRealtimeEngine::OnlineRealtimeEngine()
-    : EntitiesLock(new std::recursive_mutex)
-    , MultiplayerConnectionInst(nullptr)
-    , LogSystem(nullptr)
-    , ScriptBinding(nullptr)
-    , EventHandler(nullptr)
-    , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::recursive_mutex)
-    , PendingAdds(nullptr)
-    , PendingRemoves(nullptr)
-    , PendingOutgoingUpdateUniqueSet(nullptr)
-    , PendingIncomingUpdates(nullptr)
-    , EnableEntityTick(false)
-    , LastTickTime(std::chrono::system_clock::now())
-    , EntityPatchRate(90)
-    , ScriptRunner(nullptr)
-    , NetworkEventBus(nullptr)
+    : m_entitiesLock(new std::recursive_mutex)
+    , m_multiplayerConnectionInst(nullptr)
+    , m_logSystem(nullptr)
+    , m_scriptBinding(nullptr)
+    , m_eventHandler(nullptr)
+    , m_electionManager(nullptr)
+    , m_tickEntitiesLock(new std::recursive_mutex)
+    , m_pendingAdds(nullptr)
+    , m_pendingRemoves(nullptr)
+    , m_pendingOutgoingUpdateUniqueSet(nullptr)
+    , m_pendingIncomingUpdates(nullptr)
+    , m_enableEntityTick(false)
+    , m_lastTickTime(std::chrono::system_clock::now())
+    , m_entityPatchRate(90)
+    , m_scriptRunner(nullptr)
+    , m_networkEventBus(nullptr)
 {
 }
 
-OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-    csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
-    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, {})
+OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& inMultiplayerConnection, csp::common::LogSystem& logSystem,
+    csp::multiplayer::NetworkEventBus& networkEventBus, csp::common::IJSScriptRunner& scriptRunner)
+    : OnlineRealtimeEngine(inMultiplayerConnection, logSystem, networkEventBus, scriptRunner, { })
 {
 }
 
-OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-    csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner,
-    const csp::common::Array<ComponentSchema>& AdditionalComponents)
-    : EntitiesLock(new std::recursive_mutex)
-    , MultiplayerConnectionInst(&InMultiplayerConnection)
-    , LogSystem(&LogSystem)
-    , EventHandler(new SpaceEntityEventHandler(this))
-    , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::recursive_mutex)
-    , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
-    , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
-    , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
-    , PendingIncomingUpdates(new(PatchMessageQueue))
-    , EnableEntityTick(false)
-    , LastTickTime(std::chrono::system_clock::now())
-    , EntityPatchRate(90)
-    , ScriptRunner(&ScriptRunner)
-    , NetworkEventBus(&NetworkEventBus)
-    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
+OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& inMultiplayerConnection, csp::common::LogSystem& logSystem,
+    csp::multiplayer::NetworkEventBus& networkEventBus, csp::common::IJSScriptRunner& scriptRunner,
+    const csp::common::Array<ComponentSchema>& additionalComponents)
+    : m_entitiesLock(new std::recursive_mutex)
+    , m_multiplayerConnectionInst(&inMultiplayerConnection)
+    , m_logSystem(&logSystem)
+    , m_eventHandler(new SpaceEntityEventHandler(this))
+    , m_electionManager(nullptr)
+    , m_tickEntitiesLock(new std::recursive_mutex)
+    , m_pendingAdds(new (std::deque<csp::multiplayer::SpaceEntity*>))
+    , m_pendingRemoves(new (std::deque<csp::multiplayer::SpaceEntity*>))
+    , m_pendingOutgoingUpdateUniqueSet(new (std::set<csp::multiplayer::SpaceEntity*>))
+    , m_pendingIncomingUpdates(new (PatchMessageQueue))
+    , m_enableEntityTick(false)
+    , m_lastTickTime(std::chrono::system_clock::now())
+    , m_entityPatchRate(90)
+    , m_scriptRunner(&scriptRunner)
+    , m_networkEventBus(&networkEventBus)
+    , m_componentRegistry { MergeWithLegacyComponents(additionalComponents) }
 {
-    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
+    m_scriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->m_logSystem, *this->m_scriptRunner));
 
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler);
 }
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
@@ -217,24 +217,24 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
-    EntityScriptBinding::RemoveBinding(ScriptBinding.get(), *ScriptRunner);
+    EntityScriptBinding::RemoveBinding(m_scriptBinding.get(), *m_scriptRunner);
 
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler);
 
-    delete (EventHandler);
+    delete (m_eventHandler);
 
-    delete (TickEntitiesLock);
-    delete (EntitiesLock);
+    delete (m_tickEntitiesLock);
+    delete (m_entitiesLock);
 
-    delete (PendingAdds);
-    delete (PendingRemoves);
-    delete (PendingOutgoingUpdateUniqueSet);
-    delete (PendingIncomingUpdates);
+    delete (m_pendingAdds);
+    delete (m_pendingRemoves);
+    delete (m_pendingOutgoingUpdateUniqueSet);
+    delete (m_pendingIncomingUpdates);
 }
 
-std::deque<csp::multiplayer::SpaceEntity*>* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
+std::deque<csp::multiplayer::SpaceEntity*>* OnlineRealtimeEngine::GetPendingAdds() { return m_pendingAdds; }
 
-MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() const { return MultiplayerConnectionInst; }
+MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() const { return m_multiplayerConnectionInst; }
 
 csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Online; }
 
@@ -242,50 +242,50 @@ async::task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
 {
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
     // I suspect literally no one knows if this is still neccesary.
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
-    const signalr::value Params(Arr);
+    const signalr::value param1((uint64_t)1ULL);
+    const std::vector arr { param1 };
+    const signalr::value params(arr);
 
-    return MultiplayerConnectionInst->GetSignalRConnection()
-        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params,
-            [](const signalr::value&, std::exception_ptr) {})
+    return m_multiplayerConnectionInst->GetSignalRConnection()
+        ->Invoke(m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), params,
+            [](const signalr::value&, std::exception_ptr) { })
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
-            [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
+            [logSystem = this->m_logSystem](const signalr::value& result) // Parse the ID from the server and pass it along the chain
             {
-                const auto NetworkId = ParseGenerateObjectIDsResult(Result, *LogSystem);
-                return NetworkId;
+                const auto networkId = ParseGenerateObjectIDsResult(result, *logSystem);
+                return networkId;
             });
 }
 
-std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(const csp::common::String& Name,
-    const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState,
-    AvatarPlayMode AvatarPlayMode, LocomotionModel LocomotionModel)
+std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(const csp::common::String& name,
+    const csp::common::String& userId, const SpaceTransform& transform, bool isVisible, const csp::common::String& avatarId, AvatarState avatarState,
+    AvatarPlayMode avatarPlayMode, LocomotionModel locomotionModel)
 {
-    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, this](uint64_t NetworkId) // Serialize Avatar
+    return [name, userId, transform, isVisible, avatarId, avatarState, avatarPlayMode, locomotionModel, this](uint64_t networkId) // Serialize Avatar
     {
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
-            MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto newAvatar = RealtimeEngineUtils::BuildNewAvatar(userId, *this, *this->m_scriptRunner, *m_logSystem, networkId, name, transform,
+            isVisible, m_multiplayerConnectionInst->GetClientId(), false, false, avatarId, avatarState, avatarPlayMode, locomotionModel);
 
-        const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
+        const mcs::ObjectMessage message = newAvatar->GetStatePatcher()->CreateObjectMessage();
 
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        SignalRSerializer serializer;
+        serializer.WriteValue(std::vector<mcs::ObjectMessage> { message });
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return MultiplayerConnectionInst->GetSignalRConnection()
-            ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-                [](const signalr::value&, std::exception_ptr) {})
+        return m_multiplayerConnectionInst->GetSignalRConnection()
+            ->Invoke(m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), serializer.Get(),
+                [](const signalr::value&, std::exception_ptr) { })
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
-            .then([NetworkId]() { return NetworkId; });
+            .then([networkId]() { return networkId; });
     };
 }
 
-std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-    const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
-    LocomotionModel LocomotionModel, EntityCreatedCallback Callback)
+std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const csp::common::String& name, const csp::common::String& userId,
+    const SpaceTransform& transform, bool isVisible, const csp::common::String& avatarId, AvatarState avatarState, AvatarPlayMode avatarPlayMode,
+    LocomotionModel locomotionModel, EntityCreatedCallback callback)
 {
-    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, this, Callback](uint64_t NetworkId)
+    return [name, userId, transform, isVisible, avatarId, avatarState, avatarPlayMode, locomotionModel, this, callback](uint64_t networkId)
     {
         /* Note we're constructing the avatar redundantly, both here and in the serialization.
          * The reasons for this are because the gap between where we would first need to construct the avatar prior to serialization and here
@@ -305,445 +305,444 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
-            Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto newAvatar = RealtimeEngineUtils::BuildNewAvatar(userId, *this, *m_scriptRunner, *m_logSystem, networkId, name, transform, isVisible,
+            m_multiplayerConnectionInst->GetClientId(), false, false, avatarId, avatarState, avatarPlayMode, locomotionModel);
 
-        std::scoped_lock EntitiesLocker(*EntitiesLock);
+        std::scoped_lock entitiesLocker(*m_entitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
         // Entities.
-        SpaceEntity* ReleasedAvatar = NewAvatar.release();
-        Entities.Append(ReleasedAvatar);
-        Avatars.Append(ReleasedAvatar);
-        ReleasedAvatar->ApplyLocalPatch(false, GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag());
+        SpaceEntity* releasedAvatar = newAvatar.release();
+        m_entities.Append(releasedAvatar);
+        m_avatars.Append(releasedAvatar);
+        releasedAvatar->ApplyLocalPatch(false, GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag());
 
-        if (ElectionManager != nullptr)
+        if (m_electionManager != nullptr)
         {
-            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->NetworkEventBus);
+            m_electionManager->OnLocalClientAdd(releasedAvatar, m_avatars, *this->m_networkEventBus);
         }
 
-        Callback(ReleasedAvatar);
+        callback(releasedAvatar);
     };
 }
 
-void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-    const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState AvatarState,
-    const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
-    csp::multiplayer::EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& name, const csp::common::String& userId,
+    const csp::multiplayer::SpaceTransform& spaceTransform, bool isVisible, csp::multiplayer::AvatarState avatarState,
+    const csp::common::String& avatarId, csp::multiplayer::AvatarPlayMode avatarPlayMode, csp::multiplayer::LocomotionModel locomotionModel,
+    csp::multiplayer::EntityCreatedCallback callback)
 {
     // Ask the server for an avatar Id via "GenerateObjectIds"
     RemoteGenerateNewAvatarId()
-        .then(SendNewAvatarObjectMessage(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel))
-        .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, Callback))
-        .then(csp::common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback, LogSystem = this->LogSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+        .then(SendNewAvatarObjectMessage(name, userId, spaceTransform, isVisible, avatarId, avatarState, avatarPlayMode, locomotionModel))
+        .then(CreateNewLocalAvatar(name, userId, spaceTransform, isVisible, avatarId, avatarState, avatarPlayMode, locomotionModel, callback))
+        .then(csp::common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback, logSystem = this->m_logSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", exception.what()).c_str());
-                Callback(nullptr);
+                logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", exception.what()).c_str());
+                callback(nullptr);
             }));
 }
 
-void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::CreateEntity(const csp::common::String& name, const csp::multiplayer::SpaceTransform& spaceTransform,
+    const csp::common::Optional<uint64_t>& parentId, csp::multiplayer::EntityCreatedCallback callback)
 {
-    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentID, Callback, &LogSystem = this->LogSystem](
-                                              const signalr::value& Result, const std::exception_ptr& Except)
+    const std::function localIdCallback = [this, name, spaceTransform, parentId, callback, &logSystem = this->m_logSystem](
+                                              const signalr::value& result, const std::exception_ptr& except)
     {
         try
         {
-            if (Except)
+            if (except)
             {
-                std::rethrow_exception(Except);
+                std::rethrow_exception(except);
             }
         }
         catch (const std::exception& e)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
-            Callback(nullptr);
+            logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
+            callback(nullptr);
             return;
         }
 
-        auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
-            MultiplayerConnectionInst->GetClientId(), ParentID, true, true);
+        auto id = ParseGenerateObjectIDsResult(result, *logSystem);
+        auto* newObject = new SpaceEntity(this, *m_scriptRunner, logSystem, SpaceEntityType::Object, id, name, spaceTransform,
+            m_multiplayerConnectionInst->GetClientId(), parentId, true, true);
 
-        const mcs::ObjectMessage Message = NewObject->GetStatePatcher()->CreateObjectMessage();
+        const mcs::ObjectMessage message = newObject->GetStatePatcher()->CreateObjectMessage();
 
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        SignalRSerializer serializer;
+        serializer.WriteValue(std::vector<mcs::ObjectMessage> { message });
 
-        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        const std::function<void(signalr::value, std::exception_ptr)> localSendCallback
+            = [this, callback, newObject, &logSystem = m_logSystem](const signalr::value& /*Result*/, const std::exception_ptr& except)
         {
             try
             {
-                if (Except)
+                if (except)
                 {
-                    std::rethrow_exception(Except);
+                    std::rethrow_exception(except);
                 }
             }
             catch (const std::exception& e)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
-                Callback(nullptr);
+                logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
+                callback(nullptr);
                 return;
             }
 
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
+            std::scoped_lock entitiesLocker(*m_entitiesLock);
 
-            ResolveEntityHierarchy(NewObject);
+            ResolveEntityHierarchy(newObject);
 
-            Entities.Append(NewObject);
-            Objects.Append(NewObject);
-            Callback(NewObject);
+            m_entities.Append(newObject);
+            m_objects.Append(newObject);
+            callback(newObject);
         };
 
-        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-            LocalSendCallback);
+        m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), serializer.Get(),
+            localSendCallback);
     };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
+    const signalr::value param1((uint64_t)1ULL);
+    const std::vector arr { param1 };
 
-    const signalr::value Params(Arr);
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
+    const signalr::value params(arr);
+    m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), params, localIdCallback);
 }
 
-void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
+void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* entity, CallbackHandler callback)
 {
-    const auto& Children = Entity->GetChildEntities()->ToArray();
+    const auto& children = entity->GetChildEntities()->ToArray();
 
-    const std::function LocalCallback
-        = [Callback, &LogSystem = this->LogSystem](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
+    const std::function localCallback
+        = [callback, &logSystem = this->m_logSystem](const signalr::value& /*EntityMessage*/, const std::exception_ptr& except)
     {
         try
         {
-            if (Except)
+            if (except)
             {
-                std::rethrow_exception(Except);
+                std::rethrow_exception(except);
             }
         }
         catch (const std::exception& e)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to destroy entity. Exception: {}", e.what()).c_str());
-            Callback(false);
+            logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to destroy entity. Exception: {}", e.what()).c_str());
+            callback(false);
             return;
         }
 
-        Callback(true);
+        callback(true);
     };
 
-    std::vector<signalr::value> ObjectPatches;
+    std::vector<signalr::value> objectPatches;
 
-    const std::vector<signalr::value> DeletionPatch { Entity->GetId(), MultiplayerConnectionInst->GetClientId(), true,
+    const std::vector<signalr::value> deletionPatch { entity->GetId(), m_multiplayerConnectionInst->GetClientId(), true,
         std::vector<signalr::value> {
             false,
             signalr::value_type::null,
         },
-        {} };
+        { } };
 
-    ObjectPatches.push_back(signalr::value { DeletionPatch });
+    objectPatches.push_back(signalr::value { deletionPatch });
 
     // Move children to the root in the same patch
-    for (size_t i = 0; i < Children.Size(); ++i)
+    for (size_t i = 0; i < children.Size(); ++i)
     {
-        const std::vector<signalr::value> ChildParentIdPatch { Children[i]->GetId(), MultiplayerConnectionInst->GetClientId(), false,
+        const std::vector<signalr::value> childParentIdPatch { children[i]->GetId(), m_multiplayerConnectionInst->GetClientId(), false,
             std::vector<signalr::value> {
                 true, // Update Parent
                 signalr::value_type::null, // Move to root
             },
-            {} };
+            { } };
 
-        ObjectPatches.push_back(signalr::value { ChildParentIdPatch });
+        objectPatches.push_back(signalr::value { childParentIdPatch });
     }
 
-    auto EntityComponents = Entity->GetComponents();
-    auto Keys = EntityComponents->Keys();
+    auto entityComponents = entity->GetComponents();
+    auto keys = entityComponents->Keys();
 
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (size_t i = 0; i < keys->Size(); ++i)
     {
-        auto EntityComponent = Entity->GetComponent((*Keys)[i]);
-        EntityComponent->OnLocalDelete();
+        auto entityComponent = entity->GetComponent((*keys)[i]);
+        entityComponent->OnLocalDelete();
     }
 
-    delete (Keys);
+    delete (keys);
 
-    RootHierarchyEntities.RemoveItem(Entity);
+    m_rootHierarchyEntities.RemoveItem(entity);
 
-    RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
+    RealtimeEngineUtils::LocalProcessChildUpdates(*this, m_rootHierarchyEntities, entity);
 
     // We break the usual pattern of not considering local state to be true until we get the ack back from CHS here
     // and instead immediately delete the local view of the entity before issuing the delete for the remote view.
     // We do this so that clients can immediately respond to the deletion and avoid sending further updates for the
     // entity that has been scheduled for deletion.
-    LocalDestroyEntity(Entity);
+    LocalDestroyEntity(entity);
 
-    const std::vector InvokeArguments = { signalr::value(ObjectPatches) };
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), InvokeArguments, LocalCallback);
+    const std::vector invokeArguments = { signalr::value(objectPatches) };
+    m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), invokeArguments, localCallback);
 }
 
-void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
+void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* entity)
 {
-    if (Entity != nullptr)
+    if (entity != nullptr)
     {
-        if (Entity->GetEntityDestroyCallback() != nullptr)
+        if (entity->GetEntityDestroyCallback() != nullptr)
         {
-            Entity->GetEntityDestroyCallback()(true);
+            entity->GetEntityDestroyCallback()(true);
         }
 
-        RemoveEntity(Entity);
+        RemoveEntity(entity);
     }
 }
 
-SpaceEntity* OnlineRealtimeEngine::FindSpaceEntity(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceEntity(const csp::common::String& inName)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return RealtimeEngineUtils::FindSpaceEntity(*this, InName);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return RealtimeEngineUtils::FindSpaceEntity(*this, inName);
 }
 
-SpaceEntity* OnlineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceEntityById(uint64_t entityId)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return RealtimeEngineUtils::FindSpaceEntityById(*this, EntityId);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return RealtimeEngineUtils::FindSpaceEntityById(*this, entityId);
 }
 
-SpaceEntity* OnlineRealtimeEngine::FindSpaceAvatar(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceAvatar(const csp::common::String& inName)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return RealtimeEngineUtils::FindSpaceAvatar(*this, InName);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return RealtimeEngineUtils::FindSpaceAvatar(*this, inName);
 }
 
-SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& inName)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return RealtimeEngineUtils::FindSpaceObject(*this, InName);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return RealtimeEngineUtils::FindSpaceObject(*this, inName);
 }
 
-void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback callback)
 {
-    if (RemoteSpaceEntityCreatedCallback)
+    if (m_remoteSpaceEntityCreatedCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "RemoteSpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+        m_logSystem->LogMsg(common::LogLevel::Warning, "RemoteSpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
-    RemoteSpaceEntityCreatedCallback = std::move(Callback);
+    m_remoteSpaceEntityCreatedCallback = std::move(callback);
 }
 
-bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* entity)
 {
-    if (!SelectedEntities.Contains(Entity))
+    if (!m_selectedEntities.Contains(entity))
     {
-        SelectedEntities.Append(Entity);
+        m_selectedEntities.Append(entity);
         return true;
     }
     return false;
 }
 
-bool OnlineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+bool OnlineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* entity)
 {
-    if (SelectedEntities.Contains(Entity))
+    if (m_selectedEntities.Contains(entity))
     {
-        SelectedEntities.RemoveItem(Entity);
+        m_selectedEntities.RemoveItem(entity);
         return true;
     }
     return false;
 }
 
-void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback)
+void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler callback)
 {
-    if (ScriptSystemReadyCallback)
+    if (m_scriptSystemReadyCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptLeaderReadyCallback has already been set. Previous callback overwritten.");
+        m_logSystem->LogMsg(common::LogLevel::Warning, "ScriptLeaderReadyCallback has already been set. Previous callback overwritten.");
     }
 
-    ScriptSystemReadyCallback = Callback;
+    m_scriptSystemReadyCallback = callback;
 
-    if (ElectionManager)
+    if (m_electionManager)
     {
-        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+        m_electionManager->SetScriptLeaderReadyCallback(m_scriptSystemReadyCallback);
     }
 }
 
-void OnlineRealtimeEngine::SetOnElectedScopeLeaderCallback(ScopeLeaderCallback Callback) { OnElectedScopeLeaderCallback = Callback; }
+void OnlineRealtimeEngine::SetOnElectedScopeLeaderCallback(ScopeLeaderCallback callback) { m_onElectedScopeLeaderCallback = callback; }
 
-void OnlineRealtimeEngine::SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback Callback) { OnVacatedAsScopeLeaderCallback = Callback; }
+void OnlineRealtimeEngine::SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback callback) { m_onVacatedAsScopeLeaderCallback = callback; }
 
 namespace
 {
     void FireRemoteSpaceEntityCreatedCallback(
-        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback RemoteSpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
+        SpaceEntity* spaceEntity, csp::multiplayer::EntityCreatedCallback remoteSpaceEntityCreatedCallback, csp::common::LogSystem& logSystem)
     {
-        if (RemoteSpaceEntityCreatedCallback)
+        if (remoteSpaceEntityCreatedCallback)
         {
-            RemoteSpaceEntityCreatedCallback(SpaceEntity);
+            remoteSpaceEntityCreatedCallback(spaceEntity);
         }
         else
         {
-            LogSystem.LogMsg(common::LogLevel::Warning,
+            logSystem.LogMsg(common::LogLevel::Warning,
                 "Called RemoteSpaceEntityCreatedCallback without it being set! Call SetRemoteEntityCreatedCallback first!");
         }
     }
 }
 
-SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage)
+SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::value& entityMessage)
 {
     //  Create object message from signalr value
-    mcs::ObjectMessage Message;
-    SignalRDeserializer Deserializer { EntityMessage };
-    Deserializer.ReadValue(Message);
+    mcs::ObjectMessage message;
+    SignalRDeserializer deserializer { entityMessage };
+    deserializer.ReadValue(message);
 
-    auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
+    auto newEntity = SpaceEntityStatePatcher::NewFromObjectMessage(message, *this, *m_scriptRunner, *m_logSystem);
 
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return PendingAdds->emplace_back(NewEntity.release());
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_pendingAdds->emplace_back(newEntity.release());
 }
 
-void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
+void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& params)
 {
     // Params is an array of all params sent, so grab the first
-    auto& EntityMessage = Params.as_array()[0];
+    auto& entityMessage = params.as_array()[0];
 
-    SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
+    SpaceEntity* newEntity = CreateRemotelyRetrievedEntity(entityMessage);
 
-    if (NewEntity)
+    if (newEntity)
     {
-        FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
+        FireRemoteSpaceEntityCreatedCallback(newEntity, m_remoteSpaceEntityCreatedCallback, *m_logSystem);
     }
 }
 
-void OnlineRealtimeEngine::OnObjectPatch(const signalr::value& Params)
+void OnlineRealtimeEngine::OnObjectPatch(const signalr::value& params)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
 
     // Params is an array of all params sent, so grab the first
-    auto& EntityMessage = Params.as_array()[0];
+    auto& entityMessage = params.as_array()[0];
 
-    PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
+    m_pendingIncomingUpdates->emplace_back(new signalr::value(entityMessage));
 }
 
-void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
+void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& params)
 {
-    const uint64_t EntityID = Params.as_array()[0].as_uinteger();
+    const uint64_t entityId = params.as_array()[0].as_uinteger();
 
     // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
-    if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
+    if (SpaceEntity* matchedEntity = FindSpaceEntityById(entityId))
     {
-        mcs::ObjectMessage Message = MatchedEntity->GetStatePatcher()->CreateObjectMessage();
+        mcs::ObjectMessage message = matchedEntity->GetStatePatcher()->CreateObjectMessage();
 
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        SignalRSerializer serializer;
+        serializer.WriteValue(std::vector<mcs::ObjectMessage> { message });
 
-        const std::function LocalSendCallback
-            = [this](const signalr::value&, const std::exception_ptr& Except) { HandleException(Except, "Failed to send server requested object."); };
+        const std::function localSendCallback
+            = [this](const signalr::value&, const std::exception_ptr& except) { HandleException(except, "Failed to send server requested object."); };
 
-        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-            LocalSendCallback);
+        m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), serializer.Get(),
+            localSendCallback);
     }
     else
     {
-        std::vector<signalr::value> const InvokeArguments = { EntityID };
+        std::vector<signalr::value> const invokeArguments = { entityId };
 
-        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
+        m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), invokeArguments);
     }
 }
 
-void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
+void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However, I
-    // decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
-    if (LeaderElectionManager == nullptr)
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    if (m_leaderElectionManager == nullptr)
     {
         return;
     }
 
-    const std::vector<signalr::value> ParamsV = Params.as_array();
+    const std::vector<signalr::value> paramsV = params.as_array();
 
-    const std::string ScopeId = ParamsV[0].as_string();
-    const std::string UserId = ParamsV[1].as_string();
-    const uint64_t ClientId = ParamsV[2].as_uinteger();
+    const std::string scopeId = paramsV[0].as_string();
+    const std::string userId = paramsV[1].as_string();
+    const uint64_t clientId = paramsV[2].as_uinteger();
 
-    LeaderElectionManager->OnElectedScopeLeader(ScopeId, ClientId);
+    m_leaderElectionManager->OnElectedScopeLeader(scopeId, clientId);
 
-    if (OnElectedScopeLeaderCallback)
+    if (m_onElectedScopeLeaderCallback)
     {
-        OnElectedScopeLeaderCallback(ScopeId.c_str(), UserId.c_str());
+        m_onElectedScopeLeaderCallback(scopeId.c_str(), userId.c_str());
     }
 }
 
-void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
+void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection.
-    // These checks could be removed if the election events were bound inside the ScopeLeadershipManager.
-    // However, I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
-    if (LeaderElectionManager == nullptr)
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    if (m_leaderElectionManager == nullptr)
     {
         return;
     }
 
-    const std::vector<signalr::value> ParamsV = Params.as_array();
+    const std::vector<signalr::value> paramsV = params.as_array();
 
-    const std::string ScopeId = ParamsV[0].as_string();
-    const std::string UserId = ParamsV[1].as_string();
+    const std::string scopeId = paramsV[0].as_string();
+    const std::string userId = paramsV[1].as_string();
 
-    LeaderElectionManager->OnVacatedAsScopeLeader(ScopeId);
+    m_leaderElectionManager->OnVacatedAsScopeLeader(scopeId);
 
-    if (OnVacatedAsScopeLeaderCallback)
+    if (m_onVacatedAsScopeLeaderCallback)
     {
-        OnVacatedAsScopeLeaderCallback(ScopeId.c_str(), UserId.c_str());
+        m_onVacatedAsScopeLeaderCallback(scopeId.c_str(), userId.c_str());
     }
 }
 
-void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
+void OnlineRealtimeEngine::GetEntitiesPaged(int skip, int limit, const std::function<void(const signalr::value&, std::exception_ptr)>& callback)
 {
-    std::vector<signalr::value> ParamsVec;
-    ParamsVec.push_back(signalr::value(true)); // excludeClientOwned
-    ParamsVec.push_back(signalr::value(true)); // includeClientOwnedPersistentObjects
-    ParamsVec.push_back(signalr::value((uint64_t)Skip)); // skip
-    ParamsVec.push_back(signalr::value((uint64_t)Limit)); // limit
-    const auto Params = signalr::value(std::move(ParamsVec));
+    std::vector<signalr::value> paramsVec;
+    paramsVec.push_back(signalr::value(true)); // excludeClientOwned
+    paramsVec.push_back(signalr::value(true)); // includeClientOwnedPersistentObjects
+    paramsVec.push_back(signalr::value((uint64_t)skip)); // skip
+    paramsVec.push_back(signalr::value((uint64_t)limit)); // limit
+    const auto params = signalr::value(std::move(paramsVec));
 
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
+    m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), params, callback);
 }
 
 std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
-    int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+    int skip, csp::common::EntityFetchCompleteCallback fetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
+    const std::function callback = [this, skip, fetchCompleteCallback](const signalr::value& result, std::exception_ptr except)
     {
-        HandleException(Except, "Failed to retrieve paged entities.");
+        HandleException(except, "Failed to retrieve paged entities.");
 
-        const auto& Results = Result.as_array();
-        const auto& Items = Results[0].as_array();
-        auto ItemTotalCount = Results[1].as_uinteger();
+        const auto& results = result.as_array();
+        const auto& items = results[0].as_array();
+        auto itemTotalCount = results[1].as_uinteger();
 
-        for (const auto& EntityMessage : Items)
+        for (const auto& entityMessage : items)
         {
-            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
-            FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
+            SpaceEntity* newEntity = CreateRemotelyRetrievedEntity(entityMessage);
+            FireRemoteSpaceEntityCreatedCallback(newEntity, m_remoteSpaceEntityCreatedCallback, *m_logSystem);
         }
 
-        int CurrentEntityCount = Skip + static_cast<int>(Items.size());
+        int currentEntityCount = skip + static_cast<int>(items.size());
 
-        if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
+        if (static_cast<uint64_t>(currentEntityCount) < itemTotalCount)
         {
-            GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount, FetchCompleteCallback));
+            GetEntitiesPaged(currentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(currentEntityCount, fetchCompleteCallback));
         }
         else
         {
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
+            std::scoped_lock entitiesLocker(*m_entitiesLock);
             // Ensure entity list is up to date
             ProcessPendingEntityOperations();
 
-            RealtimeEngineUtils::InitialiseEntityScripts(Entities);
-            EnableEntityTick = true;
+            RealtimeEngineUtils::InitialiseEntityScripts(m_entities);
+            m_enableEntityTick = true;
 
             // This is a suboptimal fix. We shouldn't be doing much of the things we do here. Remember this is the
             // "Space has finished hydrating" call, when all the assets have been fetched. You can be in a space
@@ -751,23 +750,23 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             // Without this lock, calling "DisableLeadershipElection" after entering a space creates a race condition.
             // As this function can be called at any point after entering a space.
 
-            std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+            std::scoped_lock leaderElectionLocker(m_leadershipElectionLock);
 
             if (IsLeaderElectionEnabled())
             {
-                if (ServerSideElectionEnabled)
+                if (m_serverSideElectionEnabled)
                 {
                     // For server-side leader election, we want to listen for script run requests from other clients.
                     // We will receive these if we are the leader and another client modifies a script or sends an event.
-                    this->NetworkEventBus->ListenNetworkEvent(
+                    this->m_networkEventBus->ListenNetworkEvent(
                         csp::multiplayer::NetworkEventRegistration { "CSPInternal::ClientElectionManager", RemoteRunScriptMessage },
-                        [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
+                        [this](const csp::common::NetworkEventData& eventData) { this->OnRemoteRunScriptEvent(eventData.EventValues); });
 
                     // To match the behaviour of the client-side leader election, the ScriptSystemReadyCallback should fire here.
                     // We may want to move this to earlier in the initialization in the future.
-                    if (ScriptSystemReadyCallback)
+                    if (m_scriptSystemReadyCallback)
                     {
-                        ScriptSystemReadyCallback(true);
+                        m_scriptSystemReadyCallback(true);
                     }
                 }
                 else
@@ -776,59 +775,59 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
                     //
                     // If we are the first client to connect then this
                     // will also set this client as the leader
-                    ElectionManager->OnConnect(Avatars, Objects);
+                    m_electionManager->OnConnect(m_avatars, m_objects);
                 }
             }
             else
             {
                 // Leader election not enabled, set ourselves as the script owner.
-                RealtimeEngineUtils::DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
+                RealtimeEngineUtils::DetermineScriptOwners(m_entities, GetMultiplayerConnectionInstance()->GetClientId());
             }
 
-            if (FetchCompleteCallback)
+            if (fetchCompleteCallback)
             {
-                FetchCompleteCallback(CurrentEntityCount);
+                fetchCompleteCallback(currentEntityCount);
             }
         }
     };
 
-    return Callback;
+    return callback;
 };
 
 void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
-    const csp::common::String&, csp::common::EntityFetchStartedCallback FetchStartedCallback)
+    const csp::common::String&, csp::common::EntityFetchStartedCallback fetchStartedCallback)
 {
-    this->RetrieveAllEntities(EntityFetchCompleteCallback);
-    FetchStartedCallback();
+    this->RetrieveAllEntities(m_entityFetchCompleteCallback);
+    fetchStartedCallback();
 }
 
-void OnlineRealtimeEngine::LockEntityUpdate() { EntitiesLock->lock(); }
+void OnlineRealtimeEngine::LockEntityUpdate() { m_entitiesLock->lock(); }
 
-bool OnlineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock->try_lock(); }
+bool OnlineRealtimeEngine::TryLockEntityUpdate() { return m_entitiesLock->try_lock(); }
 
-void OnlineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock->unlock(); }
+void OnlineRealtimeEngine::UnlockEntityUpdate() { m_entitiesLock->unlock(); }
 
-csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
+csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& spaceEntity) const
 {
-    return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
+    return new SpaceEntityStatePatcher(m_logSystem, spaceEntity);
 }
 
-ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* spaceEntity) const
 {
     // This should definitely be true at this point, but be defensive.
-    assert(SpaceEntity->GetStatePatcher() != nullptr);
+    assert(spaceEntity->GetStatePatcher() != nullptr);
 
-    // In order to unlock an entity, we need to modify it. 
+    // In order to unlock an entity, we need to modify it.
     // So we need to check if we are about to unlock the entity, and treat it as modifiabe if so, otherwise we cannot unlock a locked entity.
     // Note : This will stop working if we ever add another lock type
-    const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
-    if (SpaceEntity->GetLockType() == LockType::UserAgnostic && !AboutToUnlock)
+    const bool aboutToUnlock = spaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
+    if (spaceEntity->GetLockType() == LockType::UserAgnostic && !aboutToUnlock)
     {
         return ModifiableStatus::EntityLocked;
     }
 
     // If the entity isn't owned by this client, and ownership cannot be transfered, then we cannot modify this entity.
-    if (SpaceEntity->GetOwnerId() != GetMultiplayerConnectionInstance()->GetClientId() && SpaceEntity->GetIsTransferable() == false)
+    if (spaceEntity->GetOwnerId() != GetMultiplayerConnectionInstance()->GetClientId() && spaceEntity->GetIsTransferable() == false)
     {
         return ModifiableStatus::EntityNotOwnedAndUntransferable;
     }
@@ -836,61 +835,61 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     return ModifiableStatus::Modifiable;
 }
 
-const csp::multiplayer::ComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
+const csp::multiplayer::ComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return &m_componentRegistry; }
 
-void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback fetchCompleteCallback)
 {
-    if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))
+    if ((m_multiplayerConnectionInst == nullptr) || (m_multiplayerConnectionInst->GetSignalRConnection() == nullptr))
     {
         return;
     }
 
     GetEntitiesPaged(
-        0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0, FetchCompleteCallback)); // Get at most ENTITY_PAGE_LIMIT entities at a time
+        0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0, fetchCompleteCallback)); // Get at most ENTITY_PAGE_LIMIT entities at a time
 }
 
 void OnlineRealtimeEngine::LocalDestroyAllEntities()
 {
     LockEntityUpdate();
 
-    const auto NumEntities = GetNumEntities();
+    const auto numEntities = GetNumEntities();
 
-    for (size_t i = 0; i < NumEntities; ++i)
+    for (size_t i = 0; i < numEntities; ++i)
     {
-        SpaceEntity* Entity = GetEntityByIndex(i);
+        SpaceEntity* entity = GetEntityByIndex(i);
 
         // We automatically invoke SignalR deletion for all transient entities that were owned by this local client
         // as these are only ever valid for a single connected session
-        if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
+        if (entity->GetIsTransient() && entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) {});
+            DestroyEntity(entity, [](bool /*Ok*/) { });
         }
         // Otherwise we clear up all all locally represented entities
         else
         {
-            LocalDestroyEntity(Entity);
+            LocalDestroyEntity(entity);
         }
 
-        delete (Entity);
+        delete (entity);
     }
 
-    Entities.Clear();
-    Objects.Clear();
-    Avatars.Clear();
-    RootHierarchyEntities.Clear();
+    m_entities.Clear();
+    m_objects.Clear();
+    m_avatars.Clear();
+    m_rootHierarchyEntities.Clear();
 
     // Clear adds/removes, we don't want to mutate if we're cleaning everything else.
-    PendingAdds->clear();
-    PendingRemoves->clear();
-    PendingIncomingUpdates->clear();
+    m_pendingAdds->clear();
+    m_pendingRemoves->clear();
+    m_pendingIncomingUpdates->clear();
 
     UnlockEntityUpdate();
 }
 
-void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
+void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* entityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
-    if (!EntityToUpdate->GetStatePatcher()->HasPendingPatch())
+    if (!entityToUpdate->GetStatePatcher()->HasPendingPatch())
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
         // etc. CSP_LOG_MSG(csp::common::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -898,14 +897,14 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = EntityToUpdate->IsModifiable();
-    if (Modifiable != ModifiableStatus::Modifiable)
+    ModifiableStatus modifiable = entityToUpdate->IsModifiable();
+    if (modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
-                fmt::format("Failed to queue entity update: {0}. Entity name: {1}", RealtimeEngineUtils::ModifiableStatusToString(Modifiable),
-                    EntityToUpdate->GetName())
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to queue entity update: {0}. Entity name: {1}", RealtimeEngineUtils::ModifiableStatusToString(modifiable),
+                    entityToUpdate->GetName())
                     .c_str());
         }
 
@@ -914,119 +913,119 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 
     // Note that calling Queue many times will be ignored by this emplace call, but may have performance impact in some situations.
     // TODO: consider enabling clients to queue at sensible rates by exposing update rates/next update callbacks/timings.
-    PendingOutgoingUpdateUniqueSet->emplace(EntityToUpdate);
+    m_pendingOutgoingUpdateUniqueSet->emplace(entityToUpdate);
 }
 
-void OnlineRealtimeEngine::RemoveEntity(SpaceEntity* EntityToRemove)
+void OnlineRealtimeEngine::RemoveEntity(SpaceEntity* entityToRemove)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    PendingRemoves->emplace_back(EntityToRemove);
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    m_pendingRemoves->emplace_back(entityToRemove);
 
     // Remove from the unique set to indicate it could be queued again if needed.
-    PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
+    m_pendingOutgoingUpdateUniqueSet->erase(entityToRemove);
 }
 
 void OnlineRealtimeEngine::TickEntities()
 {
     ProcessPendingEntityOperations();
 
-    if (EnableEntityTick)
+    if (m_enableEntityTick)
     {
         // If this is an online engine with leadership election enabled, then only the script leader may run scripts.
         // If there is no leadership election, then we assume all clients may run scripts.
-        bool CanRunScripts = IsLocalClientLeader();
+        bool canRunScripts = IsLocalClientLeader();
 
-        if (CanRunScripts)
+        if (canRunScripts)
         {
-            LastTickTime = RealtimeEngineUtils::TickEntityScripts(*TickEntitiesLock, Entities, LastTickTime);
+            m_lastTickTime = RealtimeEngineUtils::TickEntityScripts(*m_tickEntitiesLock, m_entities, m_lastTickTime);
         }
         else
         {
-            LastTickTime = std::chrono::system_clock::now();
+            m_lastTickTime = std::chrono::system_clock::now();
         }
 
-        if (LeaderElectionManager)
+        if (m_leaderElectionManager)
         {
             // If we are using server-side leader election, we need to send heartbeats if we are the leader of any scopes.
-            LeaderElectionManager->SendHeartbeatIfElectedScopeLeader();
+            m_leaderElectionManager->SendHeartbeatIfElectedScopeLeader();
         }
     }
 
     {
-        std::scoped_lock TickEntitiesLocker(*TickEntitiesLock);
+        std::scoped_lock tickEntitiesLocker(*m_tickEntitiesLock);
 
         // Remove any duplicate Entities
-        constexpr std::less<SpaceEntity*> PointCmp;
-        TickUpdateEntities.sort(PointCmp);
-        TickUpdateEntities.unique(PointCmp);
+        constexpr std::less<SpaceEntity*> pointCmp;
+        m_tickUpdateEntities.sort(pointCmp);
+        m_tickUpdateEntities.unique(pointCmp);
 
-        for (const auto Entity : TickUpdateEntities)
+        for (const auto entity : m_tickUpdateEntities)
         {
-            QueueEntityUpdate(Entity);
+            QueueEntityUpdate(entity);
         }
 
-        TickUpdateEntities.clear();
+        m_tickUpdateEntities.clear();
     }
 }
 
-void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
+void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& scopeId, const std::optional<uint64_t>& leaderId)
 {
-    if (IsLeaderElectionEnabled() && ServerSideElectionEnabled)
+    if (IsLeaderElectionEnabled() && m_serverSideElectionEnabled)
     {
-        LeaderElectionManager->RegisterScope(ScopeId, LeaderId);
-        DefaultScopeId = ScopeId.c_str();
+        m_leaderElectionManager->RegisterScope(scopeId, leaderId);
+        m_defaultScopeId = scopeId.c_str();
     }
     else
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Tried to register scope when server-side leader election was disabled");
+        m_logSystem->LogMsg(csp::common::LogLevel::Warning, "Tried to register scope when server-side leader election was disabled");
     }
 }
 
-void OnlineRealtimeEngine::__AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback)
+void OnlineRealtimeEngine::__AssumeScopeLeadership(const std::string& scopeId, std::function<void(bool)> callback)
 {
-    auto CB = [this, Callback](signalr::value, std::exception_ptr E)
+    auto cb = [this, callback](signalr::value, std::exception_ptr e)
     {
-        if (E)
+        if (e)
         {
             try
             {
-                std::rethrow_exception(E);
+                std::rethrow_exception(e);
             }
-            catch (const std::exception& Exception)
+            catch (const std::exception& exception)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error,
-                    fmt::format("OnlineRealtimeEngine::__AssumeScopeLeadership Failed to send AssumeScopeLeadership with error: {}", Exception.what(),
-                        Exception.what())
+                m_logSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("OnlineRealtimeEngine::__AssumeScopeLeadership Failed to send AssumeScopeLeadership with error: {}", exception.what(),
+                        exception.what())
                         .c_str());
             }
             catch (...)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                m_logSystem->LogMsg(csp::common::LogLevel::Error,
                     "OnlineRealtimeEngine::__AssumeScopeLeadership Failed to send AssumeScopeLeadership with an unknown error.");
             }
 
-            Callback(false);
+            callback(false);
         }
         else
         {
-            Callback(true);
+            callback(true);
         }
     };
 
-    std::vector<signalr::value> Params;
-    Params.push_back({ ScopeId });
+    std::vector<signalr::value> params;
+    params.push_back({ scopeId });
 
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP), signalr::value { Params }, CB);
+    m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP), signalr::value { params }, cb);
 }
 
-void OnlineRealtimeEngine::SetServerSideElectionEnabled(bool Value) { ServerSideElectionEnabled = Value; }
+void OnlineRealtimeEngine::SetServerSideElectionEnabled(bool value) { m_serverSideElectionEnabled = value; }
 
-bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
+bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* entity)
 {
-    for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+    for (size_t i = 0; i < m_rootHierarchyEntities.Size(); ++i)
     {
-        if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+        if (m_rootHierarchyEntities[i]->GetId() == entity->GetId())
         {
             return true;
         }
@@ -1035,50 +1034,50 @@ bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
     return false;
 }
 
-void OnlineRealtimeEngine::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
+void OnlineRealtimeEngine::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& data)
 {
     // @Note This needs to be kept in sync with any changes to message format
-    const int64_t ContextId = static_cast<int64_t>(Data[0].GetInt());
-    const csp::common::String& ScriptText = Data[1].GetString();
+    const int64_t contextId = static_cast<int64_t>(data[0].GetInt());
+    const csp::common::String& scriptText = data[1].GetString();
 
-    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnRemoteRunScriptEvent called. ContextId={0}, Script={1}", ContextId, ScriptText.c_str()).c_str());
+    m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnRemoteRunScriptEvent called. ContextId={0}, Script={1}", contextId, scriptText.c_str()).c_str());
 
-    if (LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str()))
+    if (m_leaderElectionManager->IsLocalClientLeader(m_defaultScopeId.c_str()))
     {
-        ScriptRunner->RunScript(ContextId, ScriptText);
+        m_scriptRunner->RunScript(contextId, scriptText);
     }
     else
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error,
-            fmt::format("Client {} has received remote script event but is not the Leader", MultiplayerConnectionInst->GetClientId()).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Client {} has received remote script event but is not the Leader", m_multiplayerConnectionInst->GetClientId()).c_str());
     }
 }
 
-void OnlineRealtimeEngine::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
+void OnlineRealtimeEngine::SendRemoteRunScriptEvent(int64_t targetClientId, int64_t contextId, const csp::common::String& scriptText)
 {
-    const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [&LogSystem = this->LogSystem](ErrorCode Error)
+    const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [&logSystem = this->m_logSystem](ErrorCode error)
     {
-        if (Error != ErrorCode::None)
+        if (error != ErrorCode::None)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "ClientProxy::SendEvent: SignalR connection: Error");
+            logSystem->LogMsg(csp::common::LogLevel::Error, "ClientProxy::SendEvent: SignalR connection: Error");
         }
     };
 
-    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("SendRemoteRunScriptEvent Target={0} ContextId={1} Script='{2}'", TargetClientId, ContextId, ScriptText).c_str());
+    m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("SendRemoteRunScriptEvent Target={0} ContextId={1} Script='{2}'", targetClientId, contextId, scriptText).c_str());
 
-    NetworkEventBus->SendNetworkEventToClient(RemoteRunScriptMessage,
-        { csp::common::ReplicatedValue(ContextId), csp::common::ReplicatedValue(ScriptText) }, TargetClientId, SignalRCallback);
+    m_networkEventBus->SendNetworkEventToClient(RemoteRunScriptMessage,
+        { csp::common::ReplicatedValue(contextId), csp::common::ReplicatedValue(scriptText) }, targetClientId, signalRCallback);
 }
 
-void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
+void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t clientId)
 {
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < m_entities.Size(); ++i)
     {
-        if (Entities[i]->GetScript().GetOwnerId() == ClientId)
+        if (m_entities[i]->GetScript().GetOwnerId() == clientId)
         {
-            RealtimeEngineUtils::ClaimScriptOwnership(Entities[i], GetMultiplayerConnectionInstance()->GetClientId());
+            RealtimeEngineUtils::ClaimScriptOwnership(m_entities[i], GetMultiplayerConnectionInstance()->GetClientId());
         }
     }
 }
@@ -1090,100 +1089,100 @@ bool OnlineRealtimeEngine::IsLocalClientLeader() const
         return true;
     }
 
-    if (ServerSideElectionEnabled)
+    if (m_serverSideElectionEnabled)
     {
-        return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
+        return m_leaderElectionManager->IsLocalClientLeader(m_defaultScopeId.c_str());
     }
     else
     {
-        return ElectionManager->IsLocalClientLeader();
+        return m_electionManager->IsLocalClientLeader();
     }
 }
 
-void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
+void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* entity) const
 {
-    RealtimeEngineUtils::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
+    RealtimeEngineUtils::ClaimScriptOwnership(entity, GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 void OnlineRealtimeEngine::EnableLeaderElection()
 {
     DisableLeaderElection();
 
-    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+    std::scoped_lock leaderElectionLocker(m_leadershipElectionLock);
 
-    if (ServerSideElectionEnabled)
+    if (m_serverSideElectionEnabled)
     {
-        LeaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*MultiplayerConnectionInst, *LogSystem);
+        m_leaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*m_multiplayerConnectionInst, *m_logSystem);
     }
     else
     {
-        ElectionManager = new ClientElectionManager(this, *LogSystem, *ScriptRunner);
-        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+        m_electionManager = new ClientElectionManager(this, *m_logSystem, *m_scriptRunner);
+        m_electionManager->SetScriptLeaderReadyCallback(m_scriptSystemReadyCallback);
     }
 }
 
 void OnlineRealtimeEngine::DisableLeaderElection()
 {
-    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+    std::scoped_lock leaderElectionLocker(m_leadershipElectionLock);
 
-    if (LeaderElectionManager != nullptr)
+    if (m_leaderElectionManager != nullptr)
     {
-        NetworkEventBus->StopListenNetworkEvent(
+        m_networkEventBus->StopListenNetworkEvent(
             csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 
-        LeaderElectionManager.reset(nullptr);
+        m_leaderElectionManager.reset(nullptr);
     }
-    if (ElectionManager != nullptr)
+    if (m_electionManager != nullptr)
     {
-        delete (ElectionManager);
-        ElectionManager = nullptr;
+        delete (m_electionManager);
+        m_electionManager = nullptr;
     }
 }
 
-bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr) || (LeaderElectionManager.get() != nullptr); }
+bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (m_electionManager != nullptr) || (m_leaderElectionManager.get() != nullptr); }
 
 uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
     if (IsLeaderElectionEnabled())
     {
-        if (ServerSideElectionEnabled)
+        if (m_serverSideElectionEnabled)
         {
-            std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
-            return LeaderId.has_value() ? *LeaderId : 0;
+            std::optional<uint64_t> leaderId = m_leaderElectionManager->GetLeaderClientId(m_defaultScopeId.c_str());
+            return leaderId.has_value() ? *leaderId : 0;
         }
         else
         {
-            return ElectionManager->GetLeader()->GetId();
+            return m_electionManager->GetLeader()->GetId();
         }
     }
     else
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "OnlineRealtimeEngine::GetLeaderId Called when leader election isn't enabled.");
+        m_logSystem->LogMsg(csp::common::LogLevel::Warning, "OnlineRealtimeEngine::GetLeaderId Called when leader election isn't enabled.");
         return 0;
     }
 }
 
-bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
+bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return m_entityPatchRateLimitEnabled; }
 
-void OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
+void OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled(bool enabled) { m_entityPatchRateLimitEnabled = enabled; }
 
-const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEntities() const { return &m_rootHierarchyEntities; }
 
-void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* entity)
 {
-    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+    RealtimeEngineUtils::ResolveEntityHierarchy(*this, m_rootHierarchyEntities, entity);
 }
 
-async::task<void> OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId)
+async::task<void> OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String spaceId)
 {
 
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
-    return MultiplayerConnectionInst->StopListening()
+    return m_multiplayerConnectionInst->StopListening()
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
-        .then(async::inline_scheduler(), [this, SpaceId]() { return MultiplayerConnectionInst->SetScopes(SpaceId); })
+        .then(async::inline_scheduler(), [this, spaceId]() { return m_multiplayerConnectionInst->SetScopes(spaceId); })
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
-        .then(async::inline_scheduler(), [this]() { return MultiplayerConnectionInst->StartListening(); })
+        .then(async::inline_scheduler(), [this]() { return m_multiplayerConnectionInst->StartListening(); })
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 }
 
@@ -1198,276 +1197,276 @@ bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
     else
     {
         // Only run script locally if we are the Leader
-        if (ServerSideElectionEnabled)
+        if (m_serverSideElectionEnabled)
         {
-            return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
+            return m_leaderElectionManager->IsLocalClientLeader(m_defaultScopeId.c_str());
         }
         else
         {
-            return ElectionManager->IsLocalClientLeader();
+            return m_electionManager->IsLocalClientLeader();
         }
     }
 }
 
-void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
+void OnlineRealtimeEngine::RunScriptRemotely(int64_t contextId, const csp::common::String& scriptText)
 {
     // Run script on a remote leader...
-    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnlineRealtimeEngine::RunScriptRemotely Script='{}'", ScriptText).c_str());
+    m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnlineRealtimeEngine::RunScriptRemotely Script='{}'", scriptText).c_str());
 
-    if (ServerSideElectionEnabled)
+    if (m_serverSideElectionEnabled)
     {
-        std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+        std::optional<uint64_t> leaderId = m_leaderElectionManager->GetLeaderClientId(m_defaultScopeId.c_str());
 
-        if (LeaderId.has_value())
+        if (leaderId.has_value())
         {
             // Note: This is cast to an int64. This is because we only support sending signed integers over the network.
-            SendRemoteRunScriptEvent(static_cast<int64_t>(*LeaderId), ContextId, ScriptText);
+            SendRemoteRunScriptEvent(static_cast<int64_t>(*leaderId), contextId, scriptText);
         }
         else
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
+            m_logSystem->LogMsg(csp::common::LogLevel::Error,
                 "OnlineRealtimeEngine::RunScriptRemotely failed due to receiving a script run event for a scope it is not the leader of.");
         }
     }
     else
     {
-        ClientProxy* LeaderProxy = ElectionManager->GetLeader();
-        if (LeaderProxy)
+        ClientProxy* leaderProxy = m_electionManager->GetLeader();
+        if (leaderProxy)
         {
             // This client is the leader, so run the script.
-            LeaderProxy->RunScript(ContextId, ScriptText);
+            leaderProxy->RunScript(contextId, scriptText);
         }
     }
 }
 
 size_t OnlineRealtimeEngine::GetNumEntities() const
 {
-    std::scoped_lock<std::recursive_mutex> EntitiesLocker(*EntitiesLock);
-    return Entities.Size();
+    std::scoped_lock<std::recursive_mutex> entitiesLocker(*m_entitiesLock);
+    return m_entities.Size();
 }
 
 size_t OnlineRealtimeEngine::GetNumAvatars() const
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return Avatars.Size();
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_avatars.Size();
 }
 
 size_t OnlineRealtimeEngine::GetNumObjects() const
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return Objects.Size();
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_objects.Size();
 }
 
-SpaceEntity* OnlineRealtimeEngine::GetEntityByIndex(const size_t EntityIndex)
+SpaceEntity* OnlineRealtimeEngine::GetEntityByIndex(const size_t entityIndex)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return Entities[EntityIndex];
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_entities[entityIndex];
 }
 
-SpaceEntity* OnlineRealtimeEngine::GetAvatarByIndex(const size_t AvatarIndex)
+SpaceEntity* OnlineRealtimeEngine::GetAvatarByIndex(const size_t avatarIndex)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return Avatars[AvatarIndex];
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_avatars[avatarIndex];
 }
 
-SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t ObjectIndex)
+SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t objectIndex)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    return Objects[ObjectIndex];
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    return m_objects[objectIndex];
 }
 
-const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetAllEntities() const { return &Entities; }
+const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetAllEntities() const { return &m_entities; }
 
-void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
+void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> pendingEntities)
 {
-    const std::function LocalCallback = [&LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+    const std::function localCallback = [&logSystem = this->m_logSystem](const signalr::value& /*Result*/, const std::exception_ptr& except)
     {
         try
         {
-            if (Except)
+            if (except)
             {
-                std::rethrow_exception(Except);
+                std::rethrow_exception(except);
             }
         }
         catch (const std::exception& e)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
+            logSystem->LogMsg(csp::common::LogLevel::Error,
                 fmt::format("Failed to send list of entity update due to a signalr exception! Exception: {}", e.what()).c_str());
         }
     };
 
-    std::vector<mcs::ObjectPatch> Patches;
-    SignalRSerializer Serializer;
+    std::vector<mcs::ObjectPatch> patches;
+    SignalRSerializer serializer;
 
-    for (size_t i = 0; i < PendingEntities.Size(); ++i)
+    for (size_t i = 0; i < pendingEntities.Size(); ++i)
     {
-        Patches.push_back(PendingEntities[i]->GetStatePatcher()->CreateObjectPatch());
+        patches.push_back(pendingEntities[i]->GetStatePatcher()->CreateObjectPatch());
     }
 
     // We are writing multiple patches, so we need an additional nested array.
-    Serializer.StartWriteArray();
+    serializer.StartWriteArray();
     {
-        Serializer.WriteValue(Patches);
+        serializer.WriteValue(patches);
     }
-    Serializer.EndWriteArray();
+    serializer.EndWriteArray();
 
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), Serializer.Get(), LocalCallback);
+    m_multiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), serializer.Get(), localCallback);
 }
 
 void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    csp::common::List<SpaceEntity*> PendingEntities;
+    std::scoped_lock entitiesLocker(*m_entitiesLock);
+    csp::common::List<SpaceEntity*> pendingEntities;
     // we run pending entity operations in a specific order
     // 1 - flush pending adds - we do this first to ensure any attempts to apply updates after are successful
     // 2 - flush pending updates - first the local representation, then the remote representation (with rate limiting)
     // 3 - flush pending removes - we do this last so any pending updates can still mutate state on entities that are pending removal
 
     // adds
-    std::unordered_set<SpaceEntity*> AddedEntities;
-    while (PendingAdds->empty() == false)
+    std::unordered_set<SpaceEntity*> addedEntities;
+    while (m_pendingAdds->empty() == false)
     {
-        SpaceEntity* PendingAddEntity = PendingAdds->front();
+        SpaceEntity* pendingAddEntity = m_pendingAdds->front();
 
         // we only want to add an entity once, even though a client could have queued it for updates multiple times
-        if (AddedEntities.find(PendingAddEntity) == AddedEntities.end())
+        if (addedEntities.find(pendingAddEntity) == addedEntities.end())
         {
-            AddPendingEntity(PendingAddEntity);
-            AddedEntities.emplace(PendingAddEntity);
+            AddPendingEntity(pendingAddEntity);
+            addedEntities.emplace(pendingAddEntity);
 
-            ResolveEntityHierarchy(PendingAddEntity);
+            ResolveEntityHierarchy(pendingAddEntity);
         }
-        PendingAdds->pop_front();
+        m_pendingAdds->pop_front();
     }
 
     // local updates
-    while (PendingIncomingUpdates->empty() == false)
+    while (m_pendingIncomingUpdates->empty() == false)
     {
-        ApplyIncomingPatch(PendingIncomingUpdates->front());
-        PendingIncomingUpdates->pop_front();
+        ApplyIncomingPatch(m_pendingIncomingUpdates->front());
+        m_pendingIncomingUpdates->pop_front();
     }
 
     // remote updates
     {
-        for (auto it = PendingOutgoingUpdateUniqueSet->begin(); it != PendingOutgoingUpdateUniqueSet->end();)
+        for (auto it = m_pendingOutgoingUpdateUniqueSet->begin(); it != m_pendingOutgoingUpdateUniqueSet->end();)
         {
-            SpaceEntity* PendingEntity = *it;
+            SpaceEntity* pendingEntity = *it;
 
-            const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+            const milliseconds currentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-            if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
+            if (currentTime - pendingEntity->GetTimeOfLastPatch() >= m_entityPatchRate || !m_entityPatchRateLimitEnabled)
             {
                 // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-                ModifiableStatus Modifiable = PendingEntity->IsModifiable();
-                if (Modifiable != ModifiableStatus::Modifiable)
+                ModifiableStatus modifiable = pendingEntity->IsModifiable();
+                if (modifiable != ModifiableStatus::Modifiable)
                 {
-                    if (LogSystem != nullptr)
+                    if (m_logSystem != nullptr)
                     {
-                        LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                        m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                             fmt::format("Failed to send patch for entity: {0}. Entity name: {1}",
-                                RealtimeEngineUtils::ModifiableStatusToString(Modifiable), PendingEntity->GetName())
+                                RealtimeEngineUtils::ModifiableStatusToString(modifiable), pendingEntity->GetName())
                                 .c_str());
                     }
 
-                    it = PendingOutgoingUpdateUniqueSet->erase(it);
+                    it = m_pendingOutgoingUpdateUniqueSet->erase(it);
                     continue;
                 }
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
-                PendingEntity->SetOwnerId(MultiplayerConnectionInst->GetClientId());
-                RealtimeEngineUtils::ClaimScriptOwnership(PendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
+                pendingEntity->SetOwnerId(m_multiplayerConnectionInst->GetClientId());
+                RealtimeEngineUtils::ClaimScriptOwnership(pendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
 
-                PendingEntities.Append(PendingEntity);
+                pendingEntities.Append(pendingEntity);
 
-                if (PendingEntity->GetStatePatcher()->GetEntityPatchSentCallback() != nullptr)
+                if (pendingEntity->GetStatePatcher()->GetEntityPatchSentCallback() != nullptr)
                 {
-                    PendingEntity->GetStatePatcher()->CallEntityPatchSentCallback(true);
+                    pendingEntity->GetStatePatcher()->CallEntityPatchSentCallback(true);
                 }
 
-                PendingEntity->GetStatePatcher()->SetTimeOfLastPatch(CurrentTime);
-                it = PendingOutgoingUpdateUniqueSet->erase(it);
+                pendingEntity->GetStatePatcher()->SetTimeOfLastPatch(currentTime);
+                it = m_pendingOutgoingUpdateUniqueSet->erase(it);
             }
             else
             {
-                LogSystem->LogMsg(common::LogLevel::VeryVerbose,
+                m_logSystem->LogMsg(common::LogLevel::VeryVerbose,
                     "Skipping patch send in ProcessPendingEntityOperations as not enough time has passed since the last patch");
                 ++it;
             }
         }
 
         // Only send if there are patches in list
-        if (PendingEntities.Size() != 0)
+        if (pendingEntities.Size() != 0)
         {
             // Send list of PendingEntities to chs
-            SendPatches(PendingEntities);
+            SendPatches(pendingEntities);
 
             // Loop through and apply local patches from generated list
-            for (size_t i = 0; i < PendingEntities.Size(); ++i)
+            for (size_t i = 0; i < pendingEntities.Size(); ++i)
             {
-                PendingEntities[i]->ApplyLocalPatch(true, GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag());
+                pendingEntities[i]->ApplyLocalPatch(true, GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag());
             }
         }
     }
 
     // removes
-    std::unordered_set<SpaceEntity*> RemovedEntities;
-    while (PendingRemoves->empty() == false)
+    std::unordered_set<SpaceEntity*> removedEntities;
+    while (m_pendingRemoves->empty() == false)
     {
-        SpaceEntity* PendingRemoveEntity = PendingRemoves->front();
+        SpaceEntity* pendingRemoveEntity = m_pendingRemoves->front();
 
         // we only want to remove an entity once, even though a client could have queued it for updates multiple times
-        if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
+        if (removedEntities.find(pendingRemoveEntity) == removedEntities.end())
         {
-            RemovedEntities.emplace(PendingRemoveEntity);
+            removedEntities.emplace(pendingRemoveEntity);
 
-            RemovePendingEntity(PendingRemoves->front());
+            RemovePendingEntity(m_pendingRemoves->front());
         }
-        PendingRemoves->pop_front();
+        m_pendingRemoves->pop_front();
     }
 }
 
-void OnlineRealtimeEngine::AddPendingEntity(SpaceEntity* EntityToAdd)
+void OnlineRealtimeEngine::AddPendingEntity(SpaceEntity* entityToAdd)
 {
-    if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
+    if (FindSpaceEntityById(entityToAdd->GetId()) == nullptr)
     {
-        Entities.Append(EntityToAdd);
+        m_entities.Append(entityToAdd);
 
-        switch (EntityToAdd->GetEntityType())
+        switch (entityToAdd->GetEntityType())
         {
         case SpaceEntityType::Avatar:
-            Avatars.Append(EntityToAdd);
-            OnAvatarAdd(EntityToAdd, Avatars);
+            m_avatars.Append(entityToAdd);
+            OnAvatarAdd(entityToAdd, m_avatars);
             break;
 
         case SpaceEntityType::Object:
-            Objects.Append(EntityToAdd);
-            OnObjectAdd(EntityToAdd, Objects);
+            m_objects.Append(entityToAdd);
+            OnObjectAdd(entityToAdd, m_objects);
             break;
         }
     }
     else
     {
-        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
+        m_logSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
     }
 }
 
-void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
+void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* entityToRemove)
 {
-    assert(Entities.Contains(EntityToRemove));
+    assert(m_entities.Contains(entityToRemove));
 
-    switch (EntityToRemove->GetEntityType())
+    switch (entityToRemove->GetEntityType())
     {
     case SpaceEntityType::Avatar:
-        assert(Avatars.Contains(EntityToRemove));
-        OnAvatarRemove(EntityToRemove, Avatars);
-        Avatars.RemoveItem(EntityToRemove);
+        assert(m_avatars.Contains(entityToRemove));
+        OnAvatarRemove(entityToRemove, m_avatars);
+        m_avatars.RemoveItem(entityToRemove);
         break;
 
     case SpaceEntityType::Object:
-        assert(Objects.Contains(EntityToRemove));
-        OnObjectRemove(EntityToRemove, Objects);
-        Objects.RemoveItem(EntityToRemove);
+        assert(m_objects.Contains(entityToRemove));
+        OnObjectRemove(entityToRemove, m_objects);
+        m_objects.RemoveItem(entityToRemove);
         break;
 
     default:
@@ -1475,123 +1474,123 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
         break;
     }
 
-    RootHierarchyEntities.RemoveItem(EntityToRemove);
-    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, EntityToRemove);
+    m_rootHierarchyEntities.RemoveItem(entityToRemove);
+    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, m_rootHierarchyEntities, entityToRemove);
 
-    Entities.RemoveItem(EntityToRemove);
+    m_entities.RemoveItem(entityToRemove);
 
-    delete (EntityToRemove);
+    delete (entityToRemove);
 }
 
-void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& AddedAvatars)
+void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* avatar, const csp::common::List<SpaceEntity*>& addedAvatars)
 {
-    if (ElectionManager != nullptr)
+    if (m_electionManager != nullptr)
     {
         // Note we are assuming Avatar==Client,
         // which is true now but may not be in the future
-        ElectionManager->OnClientAdd(Avatar, AddedAvatars, *this->NetworkEventBus);
+        m_electionManager->OnClientAdd(avatar, addedAvatars, *this->m_networkEventBus);
     }
 }
 
-void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& RemovedAvatars)
+void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* avatar, const csp::common::List<SpaceEntity*>& removedAvatars)
 {
-    if (ElectionManager != nullptr)
+    if (m_electionManager != nullptr)
     {
-        ElectionManager->OnClientRemove(Avatar, RemovedAvatars);
+        m_electionManager->OnClientRemove(avatar, removedAvatars);
     }
 }
 
-void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& AddedObjects)
+void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& addedObjects)
 {
-    if (ElectionManager != nullptr)
+    if (m_electionManager != nullptr)
     {
-        ElectionManager->OnObjectAdd(Object, AddedObjects);
+        m_electionManager->OnObjectAdd(object, addedObjects);
     }
 }
 
-void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& RemovedObjects)
+void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& removedObjects)
 {
-    if (ElectionManager != nullptr)
+    if (m_electionManager != nullptr)
     {
-        ElectionManager->OnObjectRemove(Object, RemovedObjects);
+        m_electionManager->OnObjectRemove(object, removedObjects);
     }
 }
 
-void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessage)
+void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* entityMessage)
 {
-    mcs::ObjectPatch Patch;
-    SignalRDeserializer Deserializer { *EntityMessage };
-    Deserializer.ReadValue(Patch);
+    mcs::ObjectPatch patch;
+    SignalRDeserializer deserializer { *entityMessage };
+    deserializer.ReadValue(patch);
 
-    if (Patch.GetDestroy())
+    if (patch.GetDestroy())
     {
         // This is an entity deletion.
-        for (size_t i = 0; i < Entities.Size(); ++i)
+        for (size_t i = 0; i < m_entities.Size(); ++i)
         {
-            SpaceEntity* Entity = Entities[i];
+            SpaceEntity* entity = m_entities[i];
 
-            if (Entity->GetId() == Patch.GetId())
+            if (entity->GetId() == patch.GetId())
             {
-                if (Entity->GetEntityType() == SpaceEntityType::Avatar)
+                if (entity->GetEntityType() == SpaceEntityType::Avatar)
                 {
                     // This can be removed as part of OF-1785.
-                    if (ServerSideElectionEnabled == false)
+                    if (m_serverSideElectionEnabled == false)
                     {
                         // All clients will take ownership of deleted avatars scripts
                         // Last client which receives patch will end up with ownership
-                        ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
+                        ClaimScriptOwnershipFromClient(entity->GetOwnerId());
                     }
 
                     // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                     // This covers disconnected clients as their avatar gets cleaned up after timing out.
-                    for (size_t j = 0; j < Entities.Size(); ++j)
+                    for (size_t j = 0; j < m_entities.Size(); ++j)
                     {
-                        if (Entities[j]->GetSelectingClientID() == Patch.GetId())
+                        if (m_entities[j]->GetSelectingClientID() == patch.GetId())
                         {
-                            Entities[j]->Deselect();
-                            SelectedEntities.RemoveItem(Entities[j]);
+                            m_entities[j]->Deselect();
+                            m_selectedEntities.RemoveItem(m_entities[j]);
                         }
                     }
                 }
 
-                LocalDestroyEntity(Entity);
+                LocalDestroyEntity(entity);
             }
         }
     }
     else
     {
-        bool EntityFound = false;
+        bool entityFound = false;
 
         // Update
-        for (SpaceEntity* Entity : Entities)
+        for (SpaceEntity* entity : m_entities)
         {
-            if (Entity->GetId() == Patch.GetId())
+            if (entity->GetId() == patch.GetId())
             {
-                Entity->GetStatePatcher()->ApplyPatchFromObjectPatch(Patch);
-                EntityFound = true;
+                entity->GetStatePatcher()->ApplyPatchFromObjectPatch(patch);
+                entityFound = true;
             }
         }
 
-        if (!EntityFound)
+        if (!entityFound)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Failed to find an entity with ID {} when received a patch message.", Patch.GetId()).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Failed to find an entity with ID {} when received a patch message.", patch.GetId()).c_str());
         }
     }
 }
 
-void OnlineRealtimeEngine::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
+void OnlineRealtimeEngine::HandleException(const std::exception_ptr& except, const std::string& exceptionDescription)
 {
     try
     {
-        if (Except)
+        if (except)
         {
-            std::rethrow_exception(Except);
+            std::rethrow_exception(except);
         }
     }
     catch (const std::exception& e)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("{0} Exception: {1}", ExceptionDescription.c_str(), e.what()).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("{0} Exception: {1}", exceptionDescription.c_str(), e.what()).c_str());
     }
 }
 } // namespace csp::multiplayer

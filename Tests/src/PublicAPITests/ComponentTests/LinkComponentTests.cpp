@@ -39,7 +39,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -47,147 +47,147 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create custom component
-        auto* ExternalLinkComponent = (ExternalLinkSpaceComponent*)CreatedObject->AddComponent(ComponentType::ExternalLink);
+        auto* externalLinkComponent = (ExternalLinkSpaceComponent*)CreatedObject->AddComponent(ComponentType::ExternalLink);
 
-        const csp::common::String ExternalLinkName = "MyExternalLink";
-        ExternalLinkComponent->SetName(ExternalLinkName);
+        const csp::common::String externalLinkName = "MyExternalLink";
+        externalLinkComponent->SetName(externalLinkName);
 
-        EXPECT_EQ(ExternalLinkComponent->GetName(), ExternalLinkName);
+        EXPECT_EQ(externalLinkComponent->GetName(), externalLinkName);
 
-        const csp::common::String ExternalLinkUrl = "https://oko.live";
-        ExternalLinkComponent->SetLinkUrl(ExternalLinkUrl);
+        const csp::common::String externalLinkUrl = "https://oko.live";
+        externalLinkComponent->SetLinkUrl(externalLinkUrl);
 
-        EXPECT_EQ(ExternalLinkComponent->GetLinkUrl(), ExternalLinkUrl);
+        EXPECT_EQ(externalLinkComponent->GetLinkUrl(), externalLinkUrl);
 
-        const csp::common::Vector3 Position(123.0f, 456.0f, 789.0f);
-        ExternalLinkComponent->SetPosition(Position);
+        const csp::common::Vector3 position(123.0f, 456.0f, 789.0f);
+        externalLinkComponent->SetPosition(position);
 
-        EXPECT_EQ(ExternalLinkComponent->GetPosition(), Position);
+        EXPECT_EQ(externalLinkComponent->GetPosition(), position);
 
-        const csp::common::Vector4 Rotation(1.0f, 2.0f, 3.0f, 4.0f);
-        ExternalLinkComponent->SetRotation(Rotation);
+        const csp::common::Vector4 rotation(1.0f, 2.0f, 3.0f, 4.0f);
+        externalLinkComponent->SetRotation(rotation);
 
-        EXPECT_EQ(ExternalLinkComponent->GetRotation(), Rotation);
+        EXPECT_EQ(externalLinkComponent->GetRotation(), rotation);
 
-        const csp::common::Vector3 Scale(123.0f, 456.0f, 789.0f);
-        ExternalLinkComponent->SetScale(Scale);
+        const csp::common::Vector3 scale(123.0f, 456.0f, 789.0f);
+        externalLinkComponent->SetScale(scale);
 
-        EXPECT_EQ(ExternalLinkComponent->GetScale(), Scale);
+        EXPECT_EQ(externalLinkComponent->GetScale(), scale);
 
-        const csp::common::String DisplayText = "A great link";
-        ExternalLinkComponent->SetDisplayText(DisplayText);
+        const csp::common::String displayText = "A great link";
+        externalLinkComponent->SetDisplayText(displayText);
 
-        EXPECT_EQ(ExternalLinkComponent->GetDisplayText(), DisplayText);
+        EXPECT_EQ(externalLinkComponent->GetDisplayText(), displayText);
 
-        bool IsEnabled = false;
-        ExternalLinkComponent->SetIsEnabled(IsEnabled);
+        bool isEnabled = false;
+        externalLinkComponent->SetIsEnabled(isEnabled);
 
-        EXPECT_EQ(ExternalLinkComponent->GetIsEnabled(), IsEnabled);
+        EXPECT_EQ(externalLinkComponent->GetIsEnabled(), isEnabled);
 
-        bool IsVisible = false;
-        ExternalLinkComponent->SetIsVisible(IsVisible);
+        bool isVisible = false;
+        externalLinkComponent->SetIsVisible(isVisible);
 
-        EXPECT_EQ(ExternalLinkComponent->GetIsVisible(), IsVisible);
+        EXPECT_EQ(externalLinkComponent->GetIsVisible(), isVisible);
 
-        bool IsARVisible = false;
-        ExternalLinkComponent->SetIsARVisible(IsARVisible);
+        bool isArVisible = false;
+        externalLinkComponent->SetIsARVisible(isArVisible);
 
-        EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
+        EXPECT_EQ(externalLinkComponent->GetIsARVisible(), isArVisible);
 
-        bool IsVirtualVisible = false;
-        ExternalLinkComponent->SetIsVirtualVisible(IsVirtualVisible);
+        bool isVirtualVisible = false;
+        externalLinkComponent->SetIsVirtualVisible(isVirtualVisible);
 
-        EXPECT_EQ(ExternalLinkComponent->GetIsVirtualVisible(), IsVirtualVisible);
+        EXPECT_EQ(externalLinkComponent->GetIsVirtualVisible(), isVirtualVisible);
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create external link component
-    auto* LinkComponent = (ExternalLinkSpaceComponent*)CreatedObject->AddComponent(ComponentType::ExternalLink);
+    auto* linkComponent = (ExternalLinkSpaceComponent*)CreatedObject->AddComponent(ComponentType::ExternalLink);
 
     // Create script component
-    auto* ScriptComponent = (ScriptSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScriptData);
+    auto* scriptComponent = (ScriptSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScriptData);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(LinkComponent->GetName(), "");
-    EXPECT_EQ(LinkComponent->GetLinkUrl(), "");
-    EXPECT_EQ(LinkComponent->GetDisplayText(), "");
-    EXPECT_EQ(LinkComponent->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(LinkComponent->GetScale(), csp::common::Vector3::One());
-    EXPECT_EQ(LinkComponent->GetRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(LinkComponent->GetIsEnabled(), true);
-    EXPECT_EQ(LinkComponent->GetIsVisible(), true);
-    EXPECT_EQ(LinkComponent->GetIsARVisible(), true);
-    EXPECT_EQ(LinkComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(linkComponent->GetName(), "");
+    EXPECT_EQ(linkComponent->GetLinkUrl(), "");
+    EXPECT_EQ(linkComponent->GetDisplayText(), "");
+    EXPECT_EQ(linkComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(linkComponent->GetScale(), csp::common::Vector3::One());
+    EXPECT_EQ(linkComponent->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(linkComponent->GetIsEnabled(), true);
+    EXPECT_EQ(linkComponent->GetIsVisible(), true);
+    EXPECT_EQ(linkComponent->GetIsARVisible(), true);
+    EXPECT_EQ(linkComponent->GetIsVirtualVisible(), true);
 
     // Setup script
-    const std::string ExternalLinkScriptText = R"xx(
+    const std::string externalLinkScriptText = R"xx(
 
 		var link = ThisEntity.getExternalLinkComponents()[0];
 
@@ -204,30 +204,30 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
 
     )xx";
 
-    ScriptComponent->SetScriptSource(ExternalLinkScriptText.c_str());
+    scriptComponent->SetScriptSource(externalLinkScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
-    EXPECT_FALSE(ScriptHasErrors);
+    const bool scriptHasErrors = CreatedObject->GetScript().HasError();
+    EXPECT_FALSE(scriptHasErrors);
 
-    EXPECT_EQ(LinkComponent->GetName(), "TestName");
-    EXPECT_EQ(LinkComponent->GetLinkUrl(), "http://youtube.com/avideo");
-    EXPECT_EQ(LinkComponent->GetDisplayText(), "TestDisplayText");
-    EXPECT_EQ(LinkComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(LinkComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-    EXPECT_EQ(LinkComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(LinkComponent->GetIsEnabled(), false);
-    EXPECT_EQ(LinkComponent->GetIsVisible(), false);
-    EXPECT_EQ(LinkComponent->GetIsARVisible(), false);
-    EXPECT_EQ(LinkComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(linkComponent->GetName(), "TestName");
+    EXPECT_EQ(linkComponent->GetLinkUrl(), "http://youtube.com/avideo");
+    EXPECT_EQ(linkComponent->GetDisplayText(), "TestDisplayText");
+    EXPECT_EQ(linkComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(linkComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(linkComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(linkComponent->GetIsEnabled(), false);
+    EXPECT_EQ(linkComponent->GetIsVisible(), false);
+    EXPECT_EQ(linkComponent->GetIsARVisible(), false);
+    EXPECT_EQ(linkComponent->GetIsVirtualVisible(), false);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

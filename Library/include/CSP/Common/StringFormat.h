@@ -33,22 +33,22 @@ namespace csp::common
 /// @param Format String : Format for string (See sprintf)
 /// @param args Args... : Arguments to format into the string
 /// @return String : String built from arguments
-template <typename... Args> static String StringFormat(const String& Format, Args... args)
+template <typename... Args> static String StringFormat(const String& format, Args... args)
 {
-    int SizeS = std::snprintf(nullptr, 0, Format.c_str(), args...) + 1; // Extra space for '\0'
+    int sizeS = std::snprintf(nullptr, 0, format.c_str(), args...) + 1; // Extra space for '\0'
 
-    if (SizeS <= 0)
+    if (sizeS <= 0)
     {
         return String();
     }
 
-    auto Size = static_cast<size_t>(SizeS);
+    auto size = static_cast<size_t>(sizeS);
 
-    std::unique_ptr<char[]> Buf(new char[Size]);
+    std::unique_ptr<char[]> buf(new char[size]);
 
-    std::snprintf(Buf.get(), Size, Format.c_str(), args...);
+    std::snprintf(buf.get(), size, format.c_str(), args...);
 
-    return String(Buf.get(), Size - 1); // We don't want the '\0' inside
+    return String(buf.get(), size - 1); // We don't want the '\0' inside
 };
 
 } // namespace csp::common

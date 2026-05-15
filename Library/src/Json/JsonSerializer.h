@@ -33,12 +33,12 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, T Object);
-template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const T& Object);
-template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const T* Object);
+template <typename T> void ToJson(csp::json::JsonSerializer& serializer, T object);
+template <typename T> void ToJson(csp::json::JsonSerializer& serializer, const T& object);
+template <typename T> void ToJson(csp::json::JsonSerializer& serializer, const T* object);
 
-template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
-template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
+template <typename T> void FromJson(const csp::json::JsonDeserializer& deserializer, T& object);
+template <typename T> void FromJson(const csp::json::JsonDeserializer& deserializer, T* object);
 
 namespace csp::json
 {
@@ -52,12 +52,12 @@ public:
     /// @param Object const T& : The object to serialize.
     /// @return String : The serialized json string.
     /// @return common::String : Returns the serialized string.
-    template <typename T> static common::String Serialize(const T& Object)
+    template <typename T> static common::String Serialize(const T& object)
     {
-        JsonSerializer Serializer;
+        JsonSerializer serializer;
 
-        Serializer.SerializeValue(Object);
-        return Serializer.Buffer.GetString();
+        serializer.SerializeValue(object);
+        return serializer.m_buffer.GetString();
     }
 
     /// @brief Should be called within custom ToJson function.
@@ -65,49 +65,49 @@ public:
     /// If the member is another custom type, this was internally call ToJson on that type.
     /// @param Key const char * Key : The key to reference the item.
     /// @param Value const T& : The value to serialize.
-    template <typename T> void SerializeMember(const char* Key, const T& Value)
+    template <typename T> void SerializeMember(const char* key, const T& value)
     {
-        Writer.String(Key);
-        SerializeValue(Value);
+        m_writer.String(key);
+        SerializeValue(value);
     }
 
 private:
-    rapidjson::StringBuffer Buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> Writer;
+    rapidjson::StringBuffer m_buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> m_writer;
 
     JsonSerializer()
-        : Writer(Buffer)
+        : m_writer(m_buffer)
     {
     }
 
-    template <typename T> void SerializeValue(const T& Value)
+    template <typename T> void SerializeValue(const T& value)
     {
         // If T isn't one of the internal supported types,
         // assume this is a custom object
-        Writer.StartObject();
-        ToJson(*this, Value);
-        Writer.EndObject();
+        m_writer.StartObject();
+        ToJson(*this, value);
+        m_writer.EndObject();
     }
 
-    void SerializeValue(int32_t Value);
-    void SerializeValue(uint32_t Value);
-    void SerializeValue(int64_t Value);
-    void SerializeValue(uint64_t Value);
-    void SerializeValue(bool Value);
-    void SerializeValue(float Value);
-    void SerializeValue(double Value);
-    void SerializeValue(const char* Value);
-    void SerializeValue(const csp::common::String& Value);
-    void SerializeValue(std::nullptr_t Value);
+    void SerializeValue(int32_t value);
+    void SerializeValue(uint32_t value);
+    void SerializeValue(int64_t value);
+    void SerializeValue(uint64_t value);
+    void SerializeValue(bool value);
+    void SerializeValue(float value);
+    void SerializeValue(double value);
+    void SerializeValue(const char* value);
+    void SerializeValue(const csp::common::String& value);
+    void SerializeValue(std::nullptr_t value);
 
-    void SerializeValue(const std::string& Value);
+    void SerializeValue(const std::string& value);
 
-    template <typename T> void SerializeValue(const csp::common::Array<T>& Value);
-    template <typename T> void SerializeValue(const csp::common::List<T>& Value);
-    template <typename T> void SerializeValue(const csp::common::Map<csp::common::String, T>& Value);
+    template <typename T> void SerializeValue(const csp::common::Array<T>& value);
+    template <typename T> void SerializeValue(const csp::common::List<T>& value);
+    template <typename T> void SerializeValue(const csp::common::Map<csp::common::String, T>& value);
 
-    template <typename T> void SerializeValue(const std::vector<T>& Value);
-    template <typename T> void SerializeValue(const std::map<std::string, T>& Value);
+    template <typename T> void SerializeValue(const std::vector<T>& value);
+    template <typename T> void SerializeValue(const std::map<std::string, T>& value);
 };
 
 class JsonDeserializer
@@ -119,21 +119,21 @@ public:
     /// @param Data const char* : The json string to deserialize.
     /// @param Object T& : The object to convert to.
     /// @return bool : Returns true if the Deserializer RapidJson Document has no errors.
-    template <typename T> static bool Deserialize(const char* Data, T& Object)
+    template <typename T> static bool Deserialize(const char* data, T& object)
     {
-        JsonDeserializer Deserializer { Data };
+        JsonDeserializer deserializer { data };
 
-        if (Deserializer.Doc.HasParseError())
+        if (deserializer.m_doc.HasParseError())
         {
             // Error parsing Json
             return false;
         }
 
-        rapidjson::Value Root { Deserializer.Doc.GetObj() };
+        rapidjson::Value root { deserializer.m_doc.GetObj() };
 
-        Deserializer.ValueStack.push(&Root);
-        Deserializer.DeserializeValue(Object);
-        Deserializer.ValueStack.pop();
+        deserializer.m_valueStack.push(&root);
+        deserializer.DeserializeValue(object);
+        deserializer.m_valueStack.pop();
 
         return true;
     }
@@ -143,11 +143,11 @@ public:
     /// If the member is another custom type, this was internally call FromJson on that type.
     /// @param Key const char* : The key which references this member.
     /// @param Val T& : The member to deserialize to.
-    template <typename T> void DeserializeMember(const char* Key, T& Val) const
+    template <typename T> void DeserializeMember(const char* key, T& val) const
     {
-        ValueStack.push(&(*ValueStack.top())[Key]);
-        DeserializeValue(Val);
-        ValueStack.pop();
+        m_valueStack.push(&(*m_valueStack.top())[key]);
+        DeserializeValue(val);
+        m_valueStack.pop();
     }
 
     /// @brief Should be called within custom FromJson function.
@@ -156,11 +156,11 @@ public:
     /// @param Key const char* : The key which references this member.
     /// @param Val T& : The member to deserialize to.
     /// @return bool : Returns true if the key exists in this object and the member has been deserialized.
-    template <typename T> bool SafeDeserializeMember(const char* Key, T& Val) const
+    template <typename T> bool SafeDeserializeMember(const char* key, T& val) const
     {
-        if (HasProperty(Key))
+        if (HasProperty(key))
         {
-            DeserializeMember(Key, Val);
+            DeserializeMember(key, val);
             return true;
         }
         return false;
@@ -170,181 +170,181 @@ public:
     /// @details This will return true if the given key exists
     /// @param Key const char* : The key to check.
     /// @return bool : Returns true if the key exists in this object.
-    bool HasProperty(const char* Key) const { return ValueStack.top()->HasMember(Key); }
+    bool HasProperty(const char* key) const { return m_valueStack.top()->HasMember(key); }
 
-    std::string GetMemberAsString(const char* Key) const;
+    std::string GetMemberAsString(const char* key) const;
 
     /// @brief Starts the deserialization process of the member with the given key.
     /// Subsequent calls with deserialize members within the given member.
     /// @param Key const char* : The Key of the member to enter.
-    void EnterMember(const char* Key) const;
+    void EnterMember(const char* key) const;
 
     /// @brief Stops deserialization of the current object and goes back to the parent object.
     /// Subsequent calls with deserialize members within the parent object.
     void ExitMember() const;
 
 private:
-    JsonDeserializer(const char* Data) { Doc.Parse(Data); }
+    JsonDeserializer(const char* data) { m_doc.Parse(data); }
 
-    template <typename T> inline void DeserializeValue(T& Value) const { FromJson(*this, Value); }
+    template <typename T> inline void DeserializeValue(T& value) const { FromJson(*this, value); }
 
-    rapidjson::Document Doc;
-    mutable std::stack<const rapidjson::Value*> ValueStack;
+    rapidjson::Document m_doc;
+    mutable std::stack<const rapidjson::Value*> m_valueStack;
 
-    void DeserializeValue(int32_t& Value) const;
-    void DeserializeValue(uint32_t& Value) const;
-    void DeserializeValue(int64_t& Value) const;
-    void DeserializeValue(uint64_t& Value) const;
-    void DeserializeValue(bool& Value) const;
-    void DeserializeValue(float& Value) const;
-    void DeserializeValue(double& Value) const;
-    void DeserializeValue(csp::common::String& Value) const;
+    void DeserializeValue(int32_t& value) const;
+    void DeserializeValue(uint32_t& value) const;
+    void DeserializeValue(int64_t& value) const;
+    void DeserializeValue(uint64_t& value) const;
+    void DeserializeValue(bool& value) const;
+    void DeserializeValue(float& value) const;
+    void DeserializeValue(double& value) const;
+    void DeserializeValue(csp::common::String& value) const;
 
-    void DeserializeValue(std::string& Value) const;
+    void DeserializeValue(std::string& value) const;
 
-    template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
-    template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
+    template <typename T> void DeserializeValue(csp::common::Array<T>& value) const;
+    template <typename T> void DeserializeValue(csp::common::List<T>& value) const;
 
-    template <typename T> void DeserializeValue(std::vector<T>& Value) const;
-    template <typename T> void DeserializeValue(std::map<std::string, T>& Value) const;
+    template <typename T> void DeserializeValue(std::vector<T>& value) const;
+    template <typename T> void DeserializeValue(std::map<std::string, T>& value) const;
 };
 
-template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Array<T>& Value)
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Array<T>& value)
 {
-    Writer.StartArray();
+    m_writer.StartArray();
 
-    for (size_t i = 0; i < Value.Size(); ++i)
+    for (size_t i = 0; i < value.Size(); ++i)
     {
-        SerializeValue(Value[i]);
+        SerializeValue(value[i]);
     }
 
-    Writer.EndArray();
+    m_writer.EndArray();
 }
 
-template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::List<T>& Value)
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::List<T>& value)
 {
-    Writer.StartArray();
+    m_writer.StartArray();
 
-    for (size_t i = 0; i < Value.Size(); ++i)
+    for (size_t i = 0; i < value.Size(); ++i)
     {
-        SerializeValue(Value[i]);
+        SerializeValue(value[i]);
     }
 
-    Writer.EndArray();
+    m_writer.EndArray();
 }
 
-template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Map<csp::common::String, T>& Value)
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Map<csp::common::String, T>& value)
 {
-    Writer.StartObject();
+    m_writer.StartObject();
 
-    for (const std::pair<csp::common::String, T>& Pair : Value.GetUnderlying())
+    for (const std::pair<csp::common::String, T>& pair : value.GetUnderlying())
     {
-        SerializeMember(Pair.first.c_str(), Pair.second);
+        SerializeMember(pair.first.c_str(), pair.second);
     }
 
-    Writer.EndObject();
+    m_writer.EndObject();
 }
 
-template <typename T> inline void JsonSerializer::SerializeValue(const std::vector<T>& Value)
+template <typename T> inline void JsonSerializer::SerializeValue(const std::vector<T>& value)
 {
-    Writer.StartArray();
+    m_writer.StartArray();
 
-    for (size_t i = 0; i < Value.size(); ++i)
+    for (size_t i = 0; i < value.size(); ++i)
     {
-        SerializeValue(Value[i]);
+        SerializeValue(value[i]);
     }
 
-    Writer.EndArray();
+    m_writer.EndArray();
 }
 
-template <typename T> inline void JsonSerializer::SerializeValue(const std::map<std::string, T>& Value)
+template <typename T> inline void JsonSerializer::SerializeValue(const std::map<std::string, T>& value)
 {
-    Writer.StartObject();
+    m_writer.StartObject();
 
-    for (const auto& Pair : Value)
+    for (const auto& pair : value)
     {
-        SerializeMember(Pair.first.c_str(), Pair.second);
+        SerializeMember(pair.first.c_str(), pair.second);
     }
 
-    Writer.EndObject();
+    m_writer.EndObject();
 }
 
-template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::Array<T>& Values) const
+template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::Array<T>& values) const
 {
-    rapidjson::SizeType Size = ValueStack.top()->Size();
-    Values = csp::common::Array<T>(Size);
+    rapidjson::SizeType size = m_valueStack.top()->Size();
+    values = csp::common::Array<T>(size);
 
-    for (rapidjson::SizeType i = 0; i < Size; ++i)
+    for (rapidjson::SizeType i = 0; i < size; ++i)
     {
         // Get the json vale in the current array.
-        auto JsonValue = &(*ValueStack.top())[i];
+        auto jsonValue = &(*m_valueStack.top())[i];
         // Push this value to our stack, so subsequent calls affect read the inner object.
-        ValueStack.push(JsonValue);
+        m_valueStack.push(jsonValue);
 
-        T NewVal;
-        DeserializeValue(NewVal);
-        Values[i] = NewVal;
+        T newVal;
+        DeserializeValue(newVal);
+        values[i] = newVal;
 
         // Pop the element as we are finished reading.
-        ValueStack.pop();
+        m_valueStack.pop();
     }
 }
 
-template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::List<T>& Values) const
+template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::List<T>& values) const
 {
-    rapidjson::SizeType Size = ValueStack.top()->Size();
+    rapidjson::SizeType size = m_valueStack.top()->Size();
 
-    for (rapidjson::SizeType i = 0; i < Size; ++i)
+    for (rapidjson::SizeType i = 0; i < size; ++i)
     {
         // Get the json vale in the current array.
-        auto JsonValue = &(*ValueStack.top())[i];
+        auto jsonValue = &(*m_valueStack.top())[i];
         // Push this value to our stack, so subsequent calls affect read the inner object.
-        ValueStack.push(JsonValue);
+        m_valueStack.push(jsonValue);
 
-        T NewVal;
-        DeserializeValue(NewVal);
-        Values.Append(NewVal);
+        T newVal;
+        DeserializeValue(newVal);
+        values.Append(newVal);
 
         // Pop the element as we are finished reading.
-        ValueStack.pop();
+        m_valueStack.pop();
     }
 }
 
-template <typename T> inline void JsonDeserializer::DeserializeValue(std::vector<T>& Values) const
+template <typename T> inline void JsonDeserializer::DeserializeValue(std::vector<T>& values) const
 {
-    rapidjson::SizeType Size = ValueStack.top()->Size();
-    Values.resize(Size);
+    rapidjson::SizeType size = m_valueStack.top()->Size();
+    values.resize(size);
 
-    for (rapidjson::SizeType i = 0; i < Size; ++i)
+    for (rapidjson::SizeType i = 0; i < size; ++i)
     {
         // Get the json vale in the current array.
-        auto JsonValue = &(*ValueStack.top())[i];
+        auto jsonValue = &(*m_valueStack.top())[i];
         // Push this value to our stack, so subsequent calls affect read the inner object.
-        ValueStack.push(JsonValue);
+        m_valueStack.push(jsonValue);
 
-        T NewVal;
-        DeserializeValue(NewVal);
-        Values[i] = NewVal;
+        T newVal;
+        DeserializeValue(newVal);
+        values[i] = newVal;
 
         // Pop the element as we are finished reading.
-        ValueStack.pop();
+        m_valueStack.pop();
     }
 }
 
-template <typename T> inline void JsonDeserializer::DeserializeValue(std::map<std::string, T>& Values) const
+template <typename T> inline void JsonDeserializer::DeserializeValue(std::map<std::string, T>& values) const
 {
-    for (auto Itr = ValueStack.top()->MemberBegin(); Itr != ValueStack.top()->MemberEnd(); ++Itr)
+    for (auto itr = m_valueStack.top()->MemberBegin(); itr != m_valueStack.top()->MemberEnd(); ++itr)
     {
-        const char* Key = Itr->name.GetString();
+        const char* key = itr->name.GetString();
 
-        ValueStack.push(&Itr->value);
+        m_valueStack.push(&itr->value);
 
-        T NewVal;
-        DeserializeValue(NewVal);
+        T newVal;
+        DeserializeValue(newVal);
 
-        Values[Key] = NewVal;
+        values[key] = newVal;
 
-        ValueStack.pop();
+        m_valueStack.pop();
     }
 }
 

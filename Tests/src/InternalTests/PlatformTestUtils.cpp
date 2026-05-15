@@ -51,11 +51,11 @@ void PlatformTestWait(bool& finished)
 }
 
 csp::multiplayer::IWebSocketClient* WebSocketStart(
-    const csp::common::String& Uri, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
+    const csp::common::String& uri, const csp::common::String& accessToken, const csp::common::String& deviceId)
 {
     bool finished = false;
 
-    auto Fn = [&](bool result)
+    auto fn = [&](bool result)
     {
         finished = true;
         EXPECT_TRUE(result);
@@ -67,9 +67,9 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(
 
     std::thread TestThread([&]() { WebSocketClient->Start(Uri.c_str(), Fn); });
 #else
-    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(
-        Uri.c_str(), AccessToken.c_str(), DeviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
-    WebSocketClient->Start(Uri.c_str(), Fn);
+    auto* webSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(
+        uri.c_str(), accessToken.c_str(), deviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
+    webSocketClient->Start(uri.c_str(), fn);
 #endif
 
     PlatformTestWait(finished);
@@ -78,14 +78,14 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(
     TestThread.join();
 #endif
 
-    return WebSocketClient;
+    return webSocketClient;
 }
 
-void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient)
+void WebSocketStop(csp::multiplayer::IWebSocketClient* webSocketClient)
 {
     bool finished = false;
 
-    auto Fn = [&](bool result)
+    auto fn = [&](bool result)
     {
         finished = true;
         EXPECT_TRUE(result);
@@ -96,7 +96,7 @@ void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient)
     std::thread TestThread([&]() { WebSocketClient->Stop(Fn); });
 #else
 
-    WebSocketClient->Stop(Fn);
+    webSocketClient->Stop(fn);
 #endif
 
     PlatformTestWait(finished);
@@ -106,11 +106,11 @@ void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient)
 #endif
 }
 
-void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const csp::common::String& Data)
+void WebSocketSend(csp::multiplayer::IWebSocketClient* webSocketClient, const csp::common::String& data)
 {
     bool finished = false;
 
-    auto Fn = [&](bool result)
+    auto fn = [&](bool result)
     {
         finished = true;
         EXPECT_TRUE(result);
@@ -120,7 +120,7 @@ void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const cs
 
     std::thread TestThread([&]() { WebSocketClient->Send(Data.c_str(), Fn); });
 #else
-    WebSocketClient->Send(Data.c_str(), Fn);
+    webSocketClient->Send(data.c_str(), fn);
 #endif
 
     PlatformTestWait(finished);
@@ -130,11 +130,11 @@ void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const cs
 #endif
 }
 
-void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
+void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* webSocketClient)
 {
     bool finished2 = false;
 
-    auto Fn2 = [&](const std::string& /*S*/, bool result)
+    auto fn2 = [&](const std::string& /*S*/, bool result)
     {
         finished2 = true;
         EXPECT_TRUE(result);
@@ -144,13 +144,13 @@ void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
 
     std::thread TestThread([&]() { WebSocketClient->Receive(Fn2); });
 #else
-    WebSocketClient->Receive(Fn2);
+    webSocketClient->Receive(fn2);
 #endif
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    WebSocketSend(WebSocketClient, "{\"protocol\":\"messagepack\",\"version\":1}\x1e");
-    WebSocketSend(WebSocketClient, "\x2\x6");
+    WebSocketSend(webSocketClient, "{\"protocol\":\"messagepack\",\"version\":1}\x1e");
+    WebSocketSend(webSocketClient, "\x2\x6");
 
     PlatformTestWait(finished2);
 

@@ -25,35 +25,35 @@ class CancellationToken::Impl
 {
 public:
     Impl()
-        : IsCancelled(false)
+        : m_isCancelled(false)
     {
     }
 
     ~Impl() = default;
 
-    void Cancel() { IsCancelled = true; }
+    void Cancel() { m_isCancelled = true; }
 
-    bool Cancelled() const { return IsCancelled; }
+    bool Cancelled() const { return m_isCancelled; }
 
 private:
-    std::atomic_bool IsCancelled;
+    std::atomic_bool m_isCancelled;
 };
 
 CancellationToken::CancellationToken()
-    : ImplPtr(new Impl())
+    : m_implPtr(new Impl())
 {
 }
 
-CancellationToken::~CancellationToken() { delete (ImplPtr); }
+CancellationToken::~CancellationToken() { delete (m_implPtr); }
 
-void CancellationToken::Cancel() { ImplPtr->Cancel(); }
+void CancellationToken::Cancel() { m_implPtr->Cancel(); }
 
-bool CancellationToken::Cancelled() const { return ImplPtr->Cancelled(); }
+bool CancellationToken::Cancelled() const { return m_implPtr->Cancelled(); }
 
 CancellationToken& CancellationToken::Dummy()
 {
-    static CancellationToken Token;
-    return Token;
+    static CancellationToken token;
+    return token;
 }
 
 } // namespace csp::common

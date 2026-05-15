@@ -29,14 +29,14 @@ class LoginEventHandler : public EventListener
 public:
     LoginEventHandler() { }
 
-    virtual void OnEvent(const Event& InEvent) override
+    virtual void OnEvent(const Event& inEvent) override
     {
-        if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
+        if (inEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
         {
             std::cerr << "LoginEvent Received" << std::endl;
 
-            EXPECT_TRUE(strcmp(InEvent.GetString("UserId"), "MyUserId") == 0);
-            EXPECT_TRUE(InEvent.GetInt("TestInt") == 384);
+            EXPECT_TRUE(strcmp(inEvent.GetString("UserId"), "MyUserId") == 0);
+            EXPECT_TRUE(inEvent.GetInt("TestInt") == 384);
         }
         else
         {
@@ -50,12 +50,12 @@ class TestEventHandler : public EventListener
 public:
     TestEventHandler() { }
 
-    virtual void OnEvent(const Event& InEvent) override
+    virtual void OnEvent(const Event& inEvent) override
     {
-        if (InEvent.GetId() == kTestEventId)
+        if (inEvent.GetId() == kTestEventId)
         {
-            EXPECT_TRUE(InEvent.GetFloat("TestFloat") == 3.14f);
-            EXPECT_TRUE(InEvent.GetBool("TestBool") == true);
+            EXPECT_TRUE(inEvent.GetFloat("TestFloat") == 3.14f);
+            EXPECT_TRUE(inEvent.GetBool("TestBool") == true);
 
             std::cerr << "TestEvent Received" << std::endl;
         }
@@ -71,19 +71,19 @@ class AllEventHandler : public EventListener
 public:
     AllEventHandler() { }
 
-    virtual void OnEvent(const Event& InEvent) override
+    virtual void OnEvent(const Event& inEvent) override
     {
-        if (InEvent.GetId() == kTestEventId)
+        if (inEvent.GetId() == kTestEventId)
         {
-            EXPECT_TRUE(InEvent.GetFloat("TestFloat") == 3.14f);
-            EXPECT_TRUE(InEvent.GetBool("TestBool") == true);
+            EXPECT_TRUE(inEvent.GetFloat("TestFloat") == 3.14f);
+            EXPECT_TRUE(inEvent.GetBool("TestBool") == true);
 
             std::cerr << "TestEvent Received" << std::endl;
         }
-        else if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
+        else if (inEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
         {
-            EXPECT_TRUE(strcmp(InEvent.GetString("UserId"), "MyUserId") == 0);
-            EXPECT_TRUE(InEvent.GetInt("TestInt") == 384);
+            EXPECT_TRUE(strcmp(inEvent.GetString("UserId"), "MyUserId") == 0);
+            EXPECT_TRUE(inEvent.GetInt("TestInt") == 384);
 
             std::cerr << "LoginEvent Received" << std::endl;
         }
@@ -96,33 +96,33 @@ public:
 
 CSP_INTERNAL_TEST(CSPEngine, EventTests, EventSystemTest)
 {
-    EventSystem& OlyEvents = EventSystem::Get();
+    EventSystem& olyEvents = EventSystem::Get();
 
-    Event* LoginEvent = OlyEvents.AllocateEvent(USERSERVICE_LOGIN_EVENT_ID);
+    Event* loginEvent = olyEvents.AllocateEvent(USERSERVICE_LOGIN_EVENT_ID);
 
-    LoginEvent->AddString("UserId", "MyUserId");
-    LoginEvent->AddInt("TestInt", 384);
+    loginEvent->AddString("UserId", "MyUserId");
+    loginEvent->AddInt("TestInt", 384);
 
-    Event* TestEvent = OlyEvents.AllocateEvent(kTestEventId);
+    Event* testEvent = olyEvents.AllocateEvent(kTestEventId);
 
-    TestEvent->AddFloat("TestFloat", 3.14f);
-    TestEvent->AddBool("TestBool", true);
+    testEvent->AddFloat("TestFloat", 3.14f);
+    testEvent->AddBool("TestBool", true);
 
-    LoginEventHandler LoginHandler;
-    TestEventHandler TestHandler;
-    AllEventHandler AllHandler;
+    LoginEventHandler loginHandler;
+    TestEventHandler testHandler;
+    AllEventHandler allHandler;
 
-    OlyEvents.RegisterListener(USERSERVICE_LOGIN_EVENT_ID, &LoginHandler);
-    OlyEvents.RegisterListener(USERSERVICE_LOGIN_EVENT_ID, &AllHandler);
-    OlyEvents.RegisterListener(kTestEventId, &TestHandler);
-    OlyEvents.RegisterListener(kTestEventId, &AllHandler);
+    olyEvents.RegisterListener(USERSERVICE_LOGIN_EVENT_ID, &loginHandler);
+    olyEvents.RegisterListener(USERSERVICE_LOGIN_EVENT_ID, &allHandler);
+    olyEvents.RegisterListener(kTestEventId, &testHandler);
+    olyEvents.RegisterListener(kTestEventId, &allHandler);
 
-    OlyEvents.EnqueueEvent(LoginEvent);
-    OlyEvents.EnqueueEvent(TestEvent);
-    OlyEvents.ProcessEvents();
+    olyEvents.EnqueueEvent(loginEvent);
+    olyEvents.EnqueueEvent(testEvent);
+    olyEvents.ProcessEvents();
 
-    OlyEvents.UnRegisterListener(USERSERVICE_LOGIN_EVENT_ID, &LoginHandler);
-    OlyEvents.UnRegisterListener(USERSERVICE_LOGIN_EVENT_ID, &AllHandler);
-    OlyEvents.UnRegisterListener(kTestEventId, &TestHandler);
-    OlyEvents.UnRegisterListener(kTestEventId, &AllHandler);
+    olyEvents.UnRegisterListener(USERSERVICE_LOGIN_EVENT_ID, &loginHandler);
+    olyEvents.UnRegisterListener(USERSERVICE_LOGIN_EVENT_ID, &allHandler);
+    olyEvents.UnRegisterListener(kTestEventId, &testHandler);
+    olyEvents.UnRegisterListener(kTestEventId, &allHandler);
 }

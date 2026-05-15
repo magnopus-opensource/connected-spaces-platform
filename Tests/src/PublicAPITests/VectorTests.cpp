@@ -23,20 +23,20 @@ using namespace csp::common;
 
 CSP_PUBLIC_TEST(CSPEngine, VectorTests, IsNearlyEqualTest)
 {
-    const Vector3 MyVector = { 0, 0, 0 };
-    const Vector3 MyVector2 = { 0.0001f, 0, 0 };
-    const Vector3 MyVector3 = { 0.002f, 0, 0 };
+    const Vector3 myVector = { 0, 0, 0 };
+    const Vector3 myVector2 = { 0.0001f, 0, 0 };
+    const Vector3 myVector3 = { 0.002f, 0, 0 };
 
-    EXPECT_TRUE(MyVector == MyVector2);
+    EXPECT_TRUE(myVector == myVector2);
 
-    EXPECT_TRUE(MyVector != MyVector3);
+    EXPECT_TRUE(myVector != myVector3);
 
-    const Vector4 MyVector4_A = { 0, 0, 0, 0 };
-    const Vector4 MyVector4_B = { 0, 0, 0.0001f, 0 };
-    const Vector4 MyVector4_C = { 0, 0, 0, 0.002f };
+    const Vector4 myVector4A = { 0, 0, 0, 0 };
+    const Vector4 myVector4B = { 0, 0, 0.0001f, 0 };
+    const Vector4 myVector4C = { 0, 0, 0, 0.002f };
 
-    EXPECT_TRUE(MyVector4_A == MyVector4_B);
+    EXPECT_TRUE(myVector4A == myVector4B);
 
-    EXPECT_TRUE(MyVector4_A != MyVector4_C);
+    EXPECT_TRUE(myVector4A != myVector4C);
 }
 

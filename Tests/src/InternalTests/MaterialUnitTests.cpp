@@ -26,462 +26,462 @@ using namespace csp::systems;
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialConstructorTest)
 {
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testAssetId = "TestAssetId";
 
-    GLTFMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+    GLTFMaterial material(testName, testAssetCollectionId, testAssetId);
 
     // Test constructor params
-    EXPECT_EQ(Material.GetMaterialCollectionId(), TestAssetCollectionId);
-    EXPECT_EQ(Material.GetMaterialId(), TestAssetId);
+    EXPECT_EQ(material.GetMaterialCollectionId(), testAssetCollectionId);
+    EXPECT_EQ(material.GetMaterialId(), testAssetId);
 
     // Test defaults
-    EXPECT_EQ(Material.GetName(), TestName);
-    EXPECT_EQ(Material.GetBaseColorFactor(), csp::common::Vector4(1.f, 1.f, 1.f, 1.f));
-    EXPECT_EQ(Material.GetMetallicFactor(), 1.f);
-    EXPECT_EQ(Material.GetRoughnessFactor(), 1.f);
-    EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
-    EXPECT_EQ(Material.GetEmissiveStrength(), 1.f);
-    EXPECT_EQ(Material.GetAlphaCutoff(), 0.5f);
-    EXPECT_EQ(Material.GetDoubleSided(), false);
+    EXPECT_EQ(material.GetName(), testName);
+    EXPECT_EQ(material.GetBaseColorFactor(), csp::common::Vector4(1.f, 1.f, 1.f, 1.f));
+    EXPECT_EQ(material.GetMetallicFactor(), 1.f);
+    EXPECT_EQ(material.GetRoughnessFactor(), 1.f);
+    EXPECT_EQ(material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
+    EXPECT_EQ(material.GetEmissiveStrength(), 1.f);
+    EXPECT_EQ(material.GetAlphaCutoff(), 0.5f);
+    EXPECT_EQ(material.GetDoubleSided(), false);
 
-    EXPECT_EQ(Material.GetBaseColorTexture().IsSet(), false);
-    EXPECT_EQ(Material.GetMetallicRoughnessTexture().IsSet(), false);
-    EXPECT_EQ(Material.GetNormalTexture().IsSet(), false);
-    EXPECT_EQ(Material.GetOcclusionTexture().IsSet(), false);
-    EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), false);
+    EXPECT_EQ(material.GetBaseColorTexture().IsSet(), false);
+    EXPECT_EQ(material.GetMetallicRoughnessTexture().IsSet(), false);
+    EXPECT_EQ(material.GetNormalTexture().IsSet(), false);
+    EXPECT_EQ(material.GetOcclusionTexture().IsSet(), false);
+    EXPECT_EQ(material.GetEmissiveTexture().IsSet(), false);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialConstructorTest)
 {
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testAssetId = "TestAssetId";
 
-    AlphaVideoMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+    AlphaVideoMaterial material(testName, testAssetCollectionId, testAssetId);
 
     // Test constructor params
-    EXPECT_EQ(Material.GetMaterialCollectionId(), TestAssetCollectionId);
-    EXPECT_EQ(Material.GetMaterialId(), TestAssetId);
+    EXPECT_EQ(material.GetMaterialCollectionId(), testAssetCollectionId);
+    EXPECT_EQ(material.GetMaterialId(), testAssetId);
 
     // Test defaults
-    EXPECT_EQ(Material.GetName(), TestName);
-    EXPECT_EQ(Material.GetDoubleSided(), false);
-    EXPECT_EQ(Material.GetIsEmissive(), true);
-    EXPECT_EQ(Material.GetReadAlphaFromChannel(), EColorChannel::A);
-    EXPECT_EQ(Material.GetBlendMode(), EBlendMode::Normal);
-    EXPECT_EQ(Material.GetFresnelFactor(), 0.f);
-    EXPECT_EQ(Material.GetTint(), csp::common::Vector3(1.f, 1.f, 1.f));
-    EXPECT_EQ(Material.GetAlphaFactor(), 1.f);
-    EXPECT_EQ(Material.GetEmissiveIntensity(), 1.f);
-    EXPECT_EQ(Material.GetAlphaMask(), 0.02f);
+    EXPECT_EQ(material.GetName(), testName);
+    EXPECT_EQ(material.GetDoubleSided(), false);
+    EXPECT_EQ(material.GetIsEmissive(), true);
+    EXPECT_EQ(material.GetReadAlphaFromChannel(), EColorChannel::A);
+    EXPECT_EQ(material.GetBlendMode(), EBlendMode::Normal);
+    EXPECT_EQ(material.GetFresnelFactor(), 0.f);
+    EXPECT_EQ(material.GetTint(), csp::common::Vector3(1.f, 1.f, 1.f));
+    EXPECT_EQ(material.GetAlphaFactor(), 1.f);
+    EXPECT_EQ(material.GetEmissiveIntensity(), 1.f);
+    EXPECT_EQ(material.GetAlphaMask(), 0.02f);
 
-    EXPECT_EQ(Material.GetColorTexture().IsSet(), false);
+    EXPECT_EQ(material.GetColorTexture().IsSet(), false);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialSetterTest)
 {
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testAssetId = "TestAssetId";
 
-    csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
-    float TestMetallicFactor = 1.f;
-    float TestRoughnessFactor = 2.f;
-    csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
-    float TestEmissiveStrength = 1.f;
-    float TestAlphaCutoff = 3.f;
-    bool TestDoubleSided = true;
+    csp::common::Vector4 testBaseColorFactor(0.f, 0.f, 0.f, 0.f);
+    float testMetallicFactor = 1.f;
+    float testRoughnessFactor = 2.f;
+    csp::common::Vector3 testEmissiveFactor(1.f, 1.f, 1.f);
+    float testEmissiveStrength = 1.f;
+    float testAlphaCutoff = 3.f;
+    bool testDoubleSided = true;
 
-    GLTFMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+    GLTFMaterial material(testName, testAssetCollectionId, testAssetId);
 
     // Set new values
-    Material.SetBaseColorFactor(TestBaseColorFactor);
-    Material.SetMetallicFactor(TestMetallicFactor);
-    Material.SetRoughnessFactor(TestRoughnessFactor);
-    Material.SetEmissiveFactor(TestEmissiveFactor);
-    Material.SetEmissiveStrength(TestEmissiveStrength);
-    Material.SetAlphaCutoff(TestAlphaCutoff);
-    Material.SetDoubleSided(TestDoubleSided);
+    material.SetBaseColorFactor(testBaseColorFactor);
+    material.SetMetallicFactor(testMetallicFactor);
+    material.SetRoughnessFactor(testRoughnessFactor);
+    material.SetEmissiveFactor(testEmissiveFactor);
+    material.SetEmissiveStrength(testEmissiveStrength);
+    material.SetAlphaCutoff(testAlphaCutoff);
+    material.SetDoubleSided(testDoubleSided);
 
     // Test values are set correctly
-    EXPECT_EQ(Material.GetName(), TestName);
-    EXPECT_EQ(Material.GetBaseColorFactor(), TestBaseColorFactor);
-    EXPECT_EQ(Material.GetMetallicFactor(), TestMetallicFactor);
-    EXPECT_EQ(Material.GetRoughnessFactor(), TestRoughnessFactor);
-    EXPECT_EQ(Material.GetEmissiveFactor(), TestEmissiveFactor);
-    EXPECT_EQ(Material.GetEmissiveStrength(), TestEmissiveStrength);
-    EXPECT_EQ(Material.GetAlphaCutoff(), TestAlphaCutoff);
-    EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
+    EXPECT_EQ(material.GetName(), testName);
+    EXPECT_EQ(material.GetBaseColorFactor(), testBaseColorFactor);
+    EXPECT_EQ(material.GetMetallicFactor(), testMetallicFactor);
+    EXPECT_EQ(material.GetRoughnessFactor(), testRoughnessFactor);
+    EXPECT_EQ(material.GetEmissiveFactor(), testEmissiveFactor);
+    EXPECT_EQ(material.GetEmissiveStrength(), testEmissiveStrength);
+    EXPECT_EQ(material.GetAlphaCutoff(), testAlphaCutoff);
+    EXPECT_EQ(material.GetDoubleSided(), testDoubleSided);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialSetterTest)
 {
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testAssetId = "TestAssetId";
 
-    bool TestDoubleSided = true;
-    bool TestIsEmissive = false;
-    EColorChannel TestReadAlphaFromChannel = EColorChannel::R;
-    EBlendMode TestBlendMode = EBlendMode::Additive;
-    float TestFresnelFactor = 1.f;
-    csp::common::Vector3 TestTint(0.f, 0.f, 0.f);
-    float TestAlphaFactor = 0.f;
-    float TestEmissiveIntensity = 0.f;
-    float TestAlphaMask = 0.05f;
+    bool testDoubleSided = true;
+    bool testIsEmissive = false;
+    EColorChannel testReadAlphaFromChannel = EColorChannel::R;
+    EBlendMode testBlendMode = EBlendMode::Additive;
+    float testFresnelFactor = 1.f;
+    csp::common::Vector3 testTint(0.f, 0.f, 0.f);
+    float testAlphaFactor = 0.f;
+    float testEmissiveIntensity = 0.f;
+    float testAlphaMask = 0.05f;
 
-    AlphaVideoMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+    AlphaVideoMaterial material(testName, testAssetCollectionId, testAssetId);
 
     // Set new values
-    Material.SetDoubleSided(TestDoubleSided);
-    Material.SetIsEmissive(TestIsEmissive);
-    Material.SetReadAlphaFromChannel(TestReadAlphaFromChannel);
-    Material.SetBlendMode(TestBlendMode);
-    Material.SetFresnelFactor(TestFresnelFactor);
-    Material.SetTint(TestTint);
-    Material.SetAlphaFactor(TestAlphaFactor);
-    Material.SetEmissiveIntensity(TestEmissiveIntensity);
-    Material.SetAlphaMask(TestAlphaMask);
+    material.SetDoubleSided(testDoubleSided);
+    material.SetIsEmissive(testIsEmissive);
+    material.SetReadAlphaFromChannel(testReadAlphaFromChannel);
+    material.SetBlendMode(testBlendMode);
+    material.SetFresnelFactor(testFresnelFactor);
+    material.SetTint(testTint);
+    material.SetAlphaFactor(testAlphaFactor);
+    material.SetEmissiveIntensity(testEmissiveIntensity);
+    material.SetAlphaMask(testAlphaMask);
 
     // Test values are set correctly
-    EXPECT_EQ(Material.GetName(), TestName);
-    EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
-    EXPECT_EQ(Material.GetIsEmissive(), TestIsEmissive);
-    EXPECT_EQ(Material.GetReadAlphaFromChannel(), TestReadAlphaFromChannel);
-    EXPECT_EQ(Material.GetBlendMode(), TestBlendMode);
-    EXPECT_EQ(Material.GetFresnelFactor(), TestFresnelFactor);
-    EXPECT_EQ(Material.GetTint(), TestTint);
-    EXPECT_EQ(Material.GetAlphaFactor(), TestAlphaFactor);
-    EXPECT_EQ(Material.GetEmissiveIntensity(), TestEmissiveIntensity);
-    EXPECT_EQ(Material.GetAlphaMask(), TestAlphaMask);
+    EXPECT_EQ(material.GetName(), testName);
+    EXPECT_EQ(material.GetDoubleSided(), testDoubleSided);
+    EXPECT_EQ(material.GetIsEmissive(), testIsEmissive);
+    EXPECT_EQ(material.GetReadAlphaFromChannel(), testReadAlphaFromChannel);
+    EXPECT_EQ(material.GetBlendMode(), testBlendMode);
+    EXPECT_EQ(material.GetFresnelFactor(), testFresnelFactor);
+    EXPECT_EQ(material.GetTint(), testTint);
+    EXPECT_EQ(material.GetAlphaFactor(), testAlphaFactor);
+    EXPECT_EQ(material.GetEmissiveIntensity(), testEmissiveIntensity);
+    EXPECT_EQ(material.GetAlphaMask(), testAlphaMask);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTest)
 {
     // Material vars
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestMaterialAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testMaterialAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testMaterialAssetId = "TestAssetId";
 
-    csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
-    float TestMetallicFactor = 1.f;
-    float TestRoughnessFactor = 2.f;
-    csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
-    float TestEmissiveStrength = 1.f;
-    float TestAlphaCutoff = 3.f;
-    bool TestDoubleSided = true;
+    csp::common::Vector4 testBaseColorFactor(0.f, 0.f, 0.f, 0.f);
+    float testMetallicFactor = 1.f;
+    float testRoughnessFactor = 2.f;
+    csp::common::Vector3 testEmissiveFactor(1.f, 1.f, 1.f);
+    float testEmissiveStrength = 1.f;
+    float testAlphaCutoff = 3.f;
+    bool testDoubleSided = true;
 
-    GLTFMaterial Material(TestName, TestMaterialAssetCollectionId, TestMaterialAssetId);
+    GLTFMaterial material(testName, testMaterialAssetCollectionId, testMaterialAssetId);
 
     // Set new values
-    Material.SetBaseColorFactor(TestBaseColorFactor);
-    Material.SetMetallicFactor(TestMetallicFactor);
-    Material.SetRoughnessFactor(TestRoughnessFactor);
-    Material.SetEmissiveFactor(TestEmissiveFactor);
-    Material.SetAlphaCutoff(TestAlphaCutoff);
-    Material.SetDoubleSided(TestDoubleSided);
+    material.SetBaseColorFactor(testBaseColorFactor);
+    material.SetMetallicFactor(testMetallicFactor);
+    material.SetRoughnessFactor(testRoughnessFactor);
+    material.SetEmissiveFactor(testEmissiveFactor);
+    material.SetAlphaCutoff(testAlphaCutoff);
+    material.SetDoubleSided(testDoubleSided);
 
     // Base colour texture vars
-    const char* TestBaseTextureAssetCollectionId = "TestAssetCollectionId";
-    const char* TestBaseTextureAssetId = "TestAssetId";
-    const csp::common::Vector2 TestBaseTextureUVOffset(1.f, 1.f);
-    float TestBaseTextureRotation = 1.f;
-    const csp::common::Vector2 TestBaseTextureUVScale(2.f, 2.f);
-    const int TestBaseTextureTexCoord = 2;
+    const char* testBaseTextureAssetCollectionId = "TestAssetCollectionId";
+    const char* testBaseTextureAssetId = "TestAssetId";
+    const csp::common::Vector2 testBaseTextureUvOffset(1.f, 1.f);
+    float testBaseTextureRotation = 1.f;
+    const csp::common::Vector2 testBaseTextureUvScale(2.f, 2.f);
+    const int testBaseTextureTexCoord = 2;
 
     // Metallic texture vars
-    const char* TestMetallicTextureEntityComponentId = "TestEntityComponentId2";
-    const csp::common::Vector2 TestMetallicTextureUVOffset(2.f, 2.f);
-    float TestMetallicTextureRotation = 2.f;
-    const csp::common::Vector2 TestMetallicTextureUVScale(3.f, 3.f);
-    const int TestMetallicTextureTexCoord = 3;
+    const char* testMetallicTextureEntityComponentId = "TestEntityComponentId2";
+    const csp::common::Vector2 testMetallicTextureUvOffset(2.f, 2.f);
+    float testMetallicTextureRotation = 2.f;
+    const csp::common::Vector2 testMetallicTextureUvScale(3.f, 3.f);
+    const int testMetallicTextureTexCoord = 3;
 
     // Normal texture vars
-    const char* TestNormalTextureAssetCollectionId = "TestAssetCollectionId3";
-    const char* TestNormalTextureAssetId = "TestAssetId3";
-    const csp::common::Vector2 TestNormalTextureUVOffset(3.f, 3.f);
-    float TestNormalTextureRotation = 3.f;
-    const csp::common::Vector2 TestNormalTextureUVScale(4.f, 4.f);
-    const int TestNormalTextureTexCoord = 4;
+    const char* testNormalTextureAssetCollectionId = "TestAssetCollectionId3";
+    const char* testNormalTextureAssetId = "TestAssetId3";
+    const csp::common::Vector2 testNormalTextureUvOffset(3.f, 3.f);
+    float testNormalTextureRotation = 3.f;
+    const csp::common::Vector2 testNormalTextureUvScale(4.f, 4.f);
+    const int testNormalTextureTexCoord = 4;
 
     // Occlusion texture vars
-    const char* TestOcclusionTextureEntityComponentId = "TestEntityComponentId4";
-    const csp::common::Vector2 TestOcclusionTextureUVOffset(4.f, 4.f);
-    float TestOcclusionTextureRotation = 4.f;
-    const csp::common::Vector2 TestOcclusionTextureUVScale(5.f, 5.f);
-    const int TestOcclusionTextureTexCoord = 6;
+    const char* testOcclusionTextureEntityComponentId = "TestEntityComponentId4";
+    const csp::common::Vector2 testOcclusionTextureUvOffset(4.f, 4.f);
+    float testOcclusionTextureRotation = 4.f;
+    const csp::common::Vector2 testOcclusionTextureUvScale(5.f, 5.f);
+    const int testOcclusionTextureTexCoord = 6;
 
     // Emissive texture vars
-    const char* TestEmissiveTextureAssetCollectionId = "TestAssetCollectionId4";
-    const char* TestEmissiveTextureAssetId = "TestAssetId4";
-    const csp::common::Vector2 TestEmissiveTextureUVOffset(5.f, 5.f);
-    float TestEmissiveTextureRotation = 5.f;
-    const csp::common::Vector2 TestEmissiveTextureUVScale(6.f, 6.f);
-    const int TestEmissiveTextureTexCoord = 7;
+    const char* testEmissiveTextureAssetCollectionId = "TestAssetCollectionId4";
+    const char* testEmissiveTextureAssetId = "TestAssetId4";
+    const csp::common::Vector2 testEmissiveTextureUvOffset(5.f, 5.f);
+    float testEmissiveTextureRotation = 5.f;
+    const csp::common::Vector2 testEmissiveTextureUvScale(6.f, 6.f);
+    const int testEmissiveTextureTexCoord = 7;
 
-    TextureInfo BaseColor(TestBaseTextureAssetCollectionId, TestBaseTextureAssetId);
-    BaseColor.SetUVOffset(TestBaseTextureUVOffset);
-    BaseColor.SetUVRotation(TestBaseTextureRotation);
-    BaseColor.SetUVScale(TestBaseTextureUVScale);
-    BaseColor.SetTexCoord(TestBaseTextureTexCoord);
+    TextureInfo baseColor(testBaseTextureAssetCollectionId, testBaseTextureAssetId);
+    baseColor.SetUVOffset(testBaseTextureUvOffset);
+    baseColor.SetUVRotation(testBaseTextureRotation);
+    baseColor.SetUVScale(testBaseTextureUvScale);
+    baseColor.SetTexCoord(testBaseTextureTexCoord);
 
-    TextureInfo Metallic(TestMetallicTextureEntityComponentId);
-    Metallic.SetUVOffset(TestMetallicTextureUVOffset);
-    Metallic.SetUVRotation(TestMetallicTextureRotation);
-    Metallic.SetUVScale(TestMetallicTextureUVScale);
-    Metallic.SetTexCoord(TestMetallicTextureTexCoord);
+    TextureInfo metallic(testMetallicTextureEntityComponentId);
+    metallic.SetUVOffset(testMetallicTextureUvOffset);
+    metallic.SetUVRotation(testMetallicTextureRotation);
+    metallic.SetUVScale(testMetallicTextureUvScale);
+    metallic.SetTexCoord(testMetallicTextureTexCoord);
 
-    TextureInfo Normal(TestNormalTextureAssetCollectionId, TestNormalTextureAssetId);
-    Normal.SetUVOffset(TestNormalTextureUVOffset);
-    Normal.SetUVRotation(TestNormalTextureRotation);
-    Normal.SetUVScale(TestNormalTextureUVScale);
-    Normal.SetTexCoord(TestNormalTextureTexCoord);
+    TextureInfo normal(testNormalTextureAssetCollectionId, testNormalTextureAssetId);
+    normal.SetUVOffset(testNormalTextureUvOffset);
+    normal.SetUVRotation(testNormalTextureRotation);
+    normal.SetUVScale(testNormalTextureUvScale);
+    normal.SetTexCoord(testNormalTextureTexCoord);
 
-    TextureInfo Occlusion(TestOcclusionTextureEntityComponentId);
-    Occlusion.SetUVOffset(TestOcclusionTextureUVOffset);
-    Occlusion.SetUVRotation(TestOcclusionTextureRotation);
-    Occlusion.SetUVScale(TestOcclusionTextureUVScale);
-    Occlusion.SetTexCoord(TestOcclusionTextureTexCoord);
+    TextureInfo occlusion(testOcclusionTextureEntityComponentId);
+    occlusion.SetUVOffset(testOcclusionTextureUvOffset);
+    occlusion.SetUVRotation(testOcclusionTextureRotation);
+    occlusion.SetUVScale(testOcclusionTextureUvScale);
+    occlusion.SetTexCoord(testOcclusionTextureTexCoord);
 
-    TextureInfo Emissive(TestEmissiveTextureAssetCollectionId, TestEmissiveTextureAssetId);
-    Emissive.SetUVOffset(TestEmissiveTextureUVOffset);
-    Emissive.SetUVRotation(TestEmissiveTextureRotation);
-    Emissive.SetUVScale(TestEmissiveTextureUVScale);
-    Emissive.SetTexCoord(TestEmissiveTextureTexCoord);
-    Emissive.SetStereoVideoType(csp::multiplayer::StereoVideoType::SideBySide);
-    Emissive.SetIsStereoFlipped(true);
+    TextureInfo emissive(testEmissiveTextureAssetCollectionId, testEmissiveTextureAssetId);
+    emissive.SetUVOffset(testEmissiveTextureUvOffset);
+    emissive.SetUVRotation(testEmissiveTextureRotation);
+    emissive.SetUVScale(testEmissiveTextureUvScale);
+    emissive.SetTexCoord(testEmissiveTextureTexCoord);
+    emissive.SetStereoVideoType(csp::multiplayer::StereoVideoType::SideBySide);
+    emissive.SetIsStereoFlipped(true);
 
-    Material.SetBaseColorTexture(BaseColor);
-    Material.SetMetallicRoughnessTexture(Metallic);
-    Material.SetNormalTexture(Normal);
-    Material.SetOcclusionTexture(Occlusion);
-    Material.SetEmissiveTexture(Emissive);
+    material.SetBaseColorTexture(baseColor);
+    material.SetMetallicRoughnessTexture(metallic);
+    material.SetNormalTexture(normal);
+    material.SetOcclusionTexture(occlusion);
+    material.SetEmissiveTexture(emissive);
 
-    csp::common::String JsonData = JsonSerializer::Serialize(Material);
+    csp::common::String jsonData = JsonSerializer::Serialize(material);
 
-    GLTFMaterial DeserializedMaterial;
-    JsonDeserializer::Deserialize(JsonData, DeserializedMaterial);
+    GLTFMaterial deserializedMaterial;
+    JsonDeserializer::Deserialize(jsonData, deserializedMaterial);
 
-    EXPECT_EQ(DeserializedMaterial.GetName(), TestName);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorFactor(), TestBaseColorFactor);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicFactor(), TestMetallicFactor);
-    EXPECT_EQ(DeserializedMaterial.GetRoughnessFactor(), TestRoughnessFactor);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveFactor(), TestEmissiveFactor);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveStrength(), TestEmissiveStrength);
-    EXPECT_EQ(DeserializedMaterial.GetAlphaCutoff(), TestAlphaCutoff);
-    EXPECT_EQ(DeserializedMaterial.GetDoubleSided(), TestDoubleSided);
+    EXPECT_EQ(deserializedMaterial.GetName(), testName);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorFactor(), testBaseColorFactor);
+    EXPECT_EQ(deserializedMaterial.GetMetallicFactor(), testMetallicFactor);
+    EXPECT_EQ(deserializedMaterial.GetRoughnessFactor(), testRoughnessFactor);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveFactor(), testEmissiveFactor);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveStrength(), testEmissiveStrength);
+    EXPECT_EQ(deserializedMaterial.GetAlphaCutoff(), testAlphaCutoff);
+    EXPECT_EQ(deserializedMaterial.GetDoubleSided(), testDoubleSided);
 
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetAssetCollectionId(), TestBaseTextureAssetCollectionId);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetAssetId(), TestBaseTextureAssetId);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetUVOffset(), TestBaseTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetUVRotation(), TestBaseTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetUVScale(), TestBaseTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetTexCoord(), TestBaseTextureTexCoord);
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetAssetCollectionId(), testBaseTextureAssetCollectionId);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetAssetId(), testBaseTextureAssetId);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetUVOffset(), testBaseTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetUVRotation(), testBaseTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetUVScale(), testBaseTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetTexCoord(), testBaseTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetEntityComponentId(), TestMetallicTextureEntityComponentId);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetSourceType(), ETextureResourceType::Component);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetUVOffset(), TestMetallicTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetUVRotation(), TestMetallicTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetUVScale(), TestMetallicTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetTexCoord(), TestMetallicTextureTexCoord);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetEntityComponentId(), testMetallicTextureEntityComponentId);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetSourceType(), ETextureResourceType::Component);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetUVOffset(), testMetallicTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetUVRotation(), testMetallicTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetUVScale(), testMetallicTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetTexCoord(), testMetallicTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetAssetCollectionId(), TestNormalTextureAssetCollectionId);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetAssetId(), TestNormalTextureAssetId);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetUVOffset(), TestNormalTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetUVRotation(), TestNormalTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetUVScale(), TestNormalTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetTexCoord(), TestNormalTextureTexCoord);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetAssetCollectionId(), testNormalTextureAssetCollectionId);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetAssetId(), testNormalTextureAssetId);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetUVOffset(), testNormalTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetUVRotation(), testNormalTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetUVScale(), testNormalTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetTexCoord(), testNormalTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetEntityComponentId(), TestOcclusionTextureEntityComponentId);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetSourceType(), ETextureResourceType::Component);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetUVOffset(), TestOcclusionTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetUVRotation(), TestOcclusionTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetUVScale(), TestOcclusionTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetTexCoord(), TestOcclusionTextureTexCoord);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetEntityComponentId(), testOcclusionTextureEntityComponentId);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetSourceType(), ETextureResourceType::Component);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetUVOffset(), testOcclusionTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetUVRotation(), testOcclusionTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetUVScale(), testOcclusionTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetTexCoord(), testOcclusionTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetAssetCollectionId(), TestEmissiveTextureAssetCollectionId);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetAssetId(), TestEmissiveTextureAssetId);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVOffset(), TestEmissiveTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVRotation(), TestEmissiveTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVScale(), TestEmissiveTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetTexCoord(), TestEmissiveTextureTexCoord);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::SideBySide);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetIsStereoFlipped(), true);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetAssetCollectionId(), testEmissiveTextureAssetCollectionId);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetAssetId(), testEmissiveTextureAssetId);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetUVOffset(), testEmissiveTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetUVRotation(), testEmissiveTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetUVScale(), testEmissiveTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetTexCoord(), testEmissiveTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::SideBySide);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().GetIsStereoFlipped(), true);
 
-    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().IsSet(), true);
-    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().IsSet(), true);
-    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().IsSet(), true);
-    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().IsSet(), true);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetBaseColorTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetMetallicRoughnessTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetNormalTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetOcclusionTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveTexture().IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialJsonSerializationTest)
 {
     // Material vars
-    constexpr const char* TestName = "TestName";
-    constexpr const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestMaterialAssetId = "TestAssetId";
+    constexpr const char* testName = "TestName";
+    constexpr const char* testMaterialAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testMaterialAssetId = "TestAssetId";
 
-    bool TestDoubleSided = true;
-    bool TestIsEmissive = false;
-    EColorChannel TestReadAlphaFromChannel = EColorChannel::R;
-    EBlendMode TestBlendMode = EBlendMode::Additive;
-    float TestFresnelFactor = 1.f;
-    csp::common::Vector3 TestTint(0.f, 0.f, 0.f);
-    float TestAlphaFactor = 0.f;
-    float TestEmissiveIntensity = 0.f;
-    float TestAlphaMask = 0.05f;
+    bool testDoubleSided = true;
+    bool testIsEmissive = false;
+    EColorChannel testReadAlphaFromChannel = EColorChannel::R;
+    EBlendMode testBlendMode = EBlendMode::Additive;
+    float testFresnelFactor = 1.f;
+    csp::common::Vector3 testTint(0.f, 0.f, 0.f);
+    float testAlphaFactor = 0.f;
+    float testEmissiveIntensity = 0.f;
+    float testAlphaMask = 0.05f;
 
-    AlphaVideoMaterial Material(TestName, TestMaterialAssetCollectionId, TestMaterialAssetId);
+    AlphaVideoMaterial material(testName, testMaterialAssetCollectionId, testMaterialAssetId);
 
     // Set new values
-    Material.SetDoubleSided(TestDoubleSided);
-    Material.SetIsEmissive(TestIsEmissive);
-    Material.SetReadAlphaFromChannel(TestReadAlphaFromChannel);
-    Material.SetBlendMode(TestBlendMode);
-    Material.SetFresnelFactor(TestFresnelFactor);
-    Material.SetTint(TestTint);
-    Material.SetAlphaFactor(TestAlphaFactor);
-    Material.SetEmissiveIntensity(TestEmissiveIntensity);
-    Material.SetAlphaMask(TestAlphaMask);
+    material.SetDoubleSided(testDoubleSided);
+    material.SetIsEmissive(testIsEmissive);
+    material.SetReadAlphaFromChannel(testReadAlphaFromChannel);
+    material.SetBlendMode(testBlendMode);
+    material.SetFresnelFactor(testFresnelFactor);
+    material.SetTint(testTint);
+    material.SetAlphaFactor(testAlphaFactor);
+    material.SetEmissiveIntensity(testEmissiveIntensity);
+    material.SetAlphaMask(testAlphaMask);
 
     // Base colour texture vars
-    const char* TestColorTextureAssetCollectionId = "TestAssetCollectionId";
-    const char* TestColorTextureAssetId = "TestAssetId";
-    const csp::common::Vector2 TestColorTextureUVOffset(1.f, 1.f);
-    float TestColorTextureRotation = 1.f;
-    const csp::common::Vector2 TestColorTextureUVScale(2.f, 2.f);
-    const int TestColorTextureTexCoord = 2;
+    const char* testColorTextureAssetCollectionId = "TestAssetCollectionId";
+    const char* testColorTextureAssetId = "TestAssetId";
+    const csp::common::Vector2 testColorTextureUvOffset(1.f, 1.f);
+    float testColorTextureRotation = 1.f;
+    const csp::common::Vector2 testColorTextureUvScale(2.f, 2.f);
+    const int testColorTextureTexCoord = 2;
 
-    TextureInfo ColorTexture(TestColorTextureAssetCollectionId, TestColorTextureAssetId);
-    ColorTexture.SetUVOffset(TestColorTextureUVOffset);
-    ColorTexture.SetUVRotation(TestColorTextureRotation);
-    ColorTexture.SetUVScale(TestColorTextureUVScale);
-    ColorTexture.SetTexCoord(TestColorTextureTexCoord);
+    TextureInfo colorTexture(testColorTextureAssetCollectionId, testColorTextureAssetId);
+    colorTexture.SetUVOffset(testColorTextureUvOffset);
+    colorTexture.SetUVRotation(testColorTextureRotation);
+    colorTexture.SetUVScale(testColorTextureUvScale);
+    colorTexture.SetTexCoord(testColorTextureTexCoord);
 
-    Material.SetColorTexture(ColorTexture);
+    material.SetColorTexture(colorTexture);
 
-    csp::common::String JsonData = JsonSerializer::Serialize(Material);
+    csp::common::String jsonData = JsonSerializer::Serialize(material);
 
-    AlphaVideoMaterial DeserializedMaterial;
-    JsonDeserializer::Deserialize(JsonData, DeserializedMaterial);
+    AlphaVideoMaterial deserializedMaterial;
+    JsonDeserializer::Deserialize(jsonData, deserializedMaterial);
 
-    EXPECT_EQ(DeserializedMaterial.GetName(), TestName);
-    EXPECT_EQ(DeserializedMaterial.GetDoubleSided(), TestDoubleSided);
-    EXPECT_EQ(DeserializedMaterial.GetIsEmissive(), TestIsEmissive);
-    EXPECT_EQ(DeserializedMaterial.GetReadAlphaFromChannel(), TestReadAlphaFromChannel);
-    EXPECT_EQ(DeserializedMaterial.GetBlendMode(), TestBlendMode);
-    EXPECT_EQ(DeserializedMaterial.GetFresnelFactor(), TestFresnelFactor);
-    EXPECT_EQ(DeserializedMaterial.GetTint(), TestTint);
-    EXPECT_EQ(DeserializedMaterial.GetAlphaFactor(), TestAlphaFactor);
-    EXPECT_EQ(DeserializedMaterial.GetEmissiveIntensity(), TestEmissiveIntensity);
-    EXPECT_EQ(DeserializedMaterial.GetAlphaMask(), TestAlphaMask);
+    EXPECT_EQ(deserializedMaterial.GetName(), testName);
+    EXPECT_EQ(deserializedMaterial.GetDoubleSided(), testDoubleSided);
+    EXPECT_EQ(deserializedMaterial.GetIsEmissive(), testIsEmissive);
+    EXPECT_EQ(deserializedMaterial.GetReadAlphaFromChannel(), testReadAlphaFromChannel);
+    EXPECT_EQ(deserializedMaterial.GetBlendMode(), testBlendMode);
+    EXPECT_EQ(deserializedMaterial.GetFresnelFactor(), testFresnelFactor);
+    EXPECT_EQ(deserializedMaterial.GetTint(), testTint);
+    EXPECT_EQ(deserializedMaterial.GetAlphaFactor(), testAlphaFactor);
+    EXPECT_EQ(deserializedMaterial.GetEmissiveIntensity(), testEmissiveIntensity);
+    EXPECT_EQ(deserializedMaterial.GetAlphaMask(), testAlphaMask);
 
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetAssetCollectionId(), TestColorTextureAssetCollectionId);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetAssetId(), TestColorTextureAssetId);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVOffset(), TestColorTextureUVOffset);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVRotation(), TestColorTextureRotation);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVScale(), TestColorTextureUVScale);
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetTexCoord(), TestColorTextureTexCoord);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetAssetCollectionId(), testColorTextureAssetCollectionId);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetAssetId(), testColorTextureAssetId);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetUVOffset(), testColorTextureUvOffset);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetUVRotation(), testColorTextureRotation);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetUVScale(), testColorTextureUvScale);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().GetTexCoord(), testColorTextureTexCoord);
 
-    EXPECT_EQ(DeserializedMaterial.GetColorTexture().IsSet(), true);
+    EXPECT_EQ(deserializedMaterial.GetColorTexture().IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoDefaultConstructorTest)
 {
-    TextureInfo Texture;
+    TextureInfo texture;
 
-    EXPECT_EQ(Texture.GetAssetCollectionId(), "");
-    EXPECT_EQ(Texture.GetAssetId(), "");
-    EXPECT_EQ(Texture.GetEntityComponentId(), "");
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(Texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
-    EXPECT_EQ(Texture.GetUVRotation(), 0.f);
-    EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
-    EXPECT_EQ(Texture.GetTexCoord(), 0);
-    EXPECT_EQ(Texture.IsSet(), true);
+    EXPECT_EQ(texture.GetAssetCollectionId(), "");
+    EXPECT_EQ(texture.GetAssetId(), "");
+    EXPECT_EQ(texture.GetEntityComponentId(), "");
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
+    EXPECT_EQ(texture.GetUVRotation(), 0.f);
+    EXPECT_EQ(texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
+    EXPECT_EQ(texture.GetTexCoord(), 0);
+    EXPECT_EQ(texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoAssetIdConstructorTest)
 {
-    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
-    constexpr const char* TestAssetId = "TestAssetId";
+    constexpr const char* testAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* testAssetId = "TestAssetId";
 
-    TextureInfo Texture(TestAssetCollectionId, TestAssetId);
+    TextureInfo texture(testAssetCollectionId, testAssetId);
 
-    EXPECT_EQ(Texture.GetAssetCollectionId(), TestAssetCollectionId);
-    EXPECT_EQ(Texture.GetAssetId(), TestAssetId);
-    EXPECT_EQ(Texture.GetEntityComponentId(), "");
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(Texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
-    EXPECT_EQ(Texture.GetUVRotation(), 0.f);
-    EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
-    EXPECT_EQ(Texture.GetTexCoord(), 0);
-    EXPECT_EQ(Texture.IsSet(), true);
+    EXPECT_EQ(texture.GetAssetCollectionId(), testAssetCollectionId);
+    EXPECT_EQ(texture.GetAssetId(), testAssetId);
+    EXPECT_EQ(texture.GetEntityComponentId(), "");
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
+    EXPECT_EQ(texture.GetUVRotation(), 0.f);
+    EXPECT_EQ(texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
+    EXPECT_EQ(texture.GetTexCoord(), 0);
+    EXPECT_EQ(texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoComponentIdConstructorTest)
 {
-    constexpr const char* TestComponentId = "TestComponentId";
+    constexpr const char* testComponentId = "TestComponentId";
 
-    TextureInfo Texture(TestComponentId);
+    TextureInfo texture(testComponentId);
 
-    EXPECT_EQ(Texture.GetAssetCollectionId(), "");
-    EXPECT_EQ(Texture.GetAssetId(), "");
-    EXPECT_EQ(Texture.GetEntityComponentId(), TestComponentId);
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::Component);
-    EXPECT_EQ(Texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
-    EXPECT_EQ(Texture.GetUVRotation(), 0.f);
-    EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
-    EXPECT_EQ(Texture.GetTexCoord(), 0);
-    EXPECT_EQ(Texture.IsSet(), true);
+    EXPECT_EQ(texture.GetAssetCollectionId(), "");
+    EXPECT_EQ(texture.GetAssetId(), "");
+    EXPECT_EQ(texture.GetEntityComponentId(), testComponentId);
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::Component);
+    EXPECT_EQ(texture.GetUVOffset(), csp::common::Vector2(0.f, 0.f));
+    EXPECT_EQ(texture.GetUVRotation(), 0.f);
+    EXPECT_EQ(texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
+    EXPECT_EQ(texture.GetTexCoord(), 0);
+    EXPECT_EQ(texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureSetterTest)
 {
-    const char* TestAssetCollectionId = "TestAssetCollectionId";
-    const char* TestAssetId = "TestAssetId";
-    const char* TestEntityComponentId = "TestEntityComponentId";
-    const csp::common::Vector2 TestUVOffset(1.f, 1.f);
-    float TestRotation = 1.f;
-    const csp::common::Vector2 TestUVScale(2.f, 2.f);
-    const int TestTexCoord = 2;
+    const char* testAssetCollectionId = "TestAssetCollectionId";
+    const char* testAssetId = "TestAssetId";
+    const char* testEntityComponentId = "TestEntityComponentId";
+    const csp::common::Vector2 testUvOffset(1.f, 1.f);
+    float testRotation = 1.f;
+    const csp::common::Vector2 testUvScale(2.f, 2.f);
+    const int testTexCoord = 2;
 
-    TextureInfo Texture;
+    TextureInfo texture;
 
-    Texture.SetCollectionAndAssetId(TestAssetCollectionId, TestAssetId);
-    Texture.SetUVOffset(TestUVOffset);
-    Texture.SetUVRotation(TestRotation);
-    Texture.SetUVScale(TestUVScale);
-    Texture.SetTexCoord(TestTexCoord);
-    Texture.SetTexture(false);
+    texture.SetCollectionAndAssetId(testAssetCollectionId, testAssetId);
+    texture.SetUVOffset(testUvOffset);
+    texture.SetUVRotation(testRotation);
+    texture.SetUVScale(testUvScale);
+    texture.SetTexCoord(testTexCoord);
+    texture.SetTexture(false);
 
-    EXPECT_EQ(Texture.GetAssetCollectionId(), TestAssetCollectionId);
-    EXPECT_EQ(Texture.GetAssetId(), TestAssetId);
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::ImageAsset);
-    EXPECT_EQ(Texture.GetUVOffset(), TestUVOffset);
-    EXPECT_EQ(Texture.GetUVRotation(), TestRotation);
-    EXPECT_EQ(Texture.GetUVScale(), TestUVScale);
-    EXPECT_EQ(Texture.GetTexCoord(), TestTexCoord);
-    EXPECT_EQ(Texture.IsSet(), false);
+    EXPECT_EQ(texture.GetAssetCollectionId(), testAssetCollectionId);
+    EXPECT_EQ(texture.GetAssetId(), testAssetId);
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(texture.GetUVOffset(), testUvOffset);
+    EXPECT_EQ(texture.GetUVRotation(), testRotation);
+    EXPECT_EQ(texture.GetUVScale(), testUvScale);
+    EXPECT_EQ(texture.GetTexCoord(), testTexCoord);
+    EXPECT_EQ(texture.IsSet(), false);
 
-    Texture.SetEntityComponentId(TestEntityComponentId);
+    texture.SetEntityComponentId(testEntityComponentId);
 
     // Ensure the component setter is correct
-    EXPECT_EQ(Texture.GetEntityComponentId(), TestEntityComponentId);
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::Component);
+    EXPECT_EQ(texture.GetEntityComponentId(), testEntityComponentId);
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::Component);
 
     // Double-check the Asset setter is working
-    Texture.SetCollectionAndAssetId(TestAssetCollectionId, TestAssetId);
-    EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::ImageAsset);
+    texture.SetCollectionAndAssetId(testAssetCollectionId, testAssetId);
+    EXPECT_EQ(texture.GetSourceType(), ETextureResourceType::ImageAsset);
 }

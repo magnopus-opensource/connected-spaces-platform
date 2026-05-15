@@ -33,8 +33,8 @@ public:
     LoginState();
     ~LoginState();
 
-    LoginState(const LoginState& OtherState);
-    LoginState& operator=(const LoginState& OtherState);
+    LoginState(const LoginState& otherState);
+    LoginState& operator=(const LoginState& otherState);
 
     /// @brief Check if the access token for the login is expired.
     /// @return Is the token expired.
@@ -55,11 +55,11 @@ public:
     /// @see csp::systems::SettingsSystem
     csp::common::List<csp::common::SettingsCollection> DefaultSettings;
 
-    CSP_NO_EXPORT void SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateTime);
+    CSP_NO_EXPORT void SetAccessTokenRefreshTime(const csp::common::DateTime& newDateTime);
 
 private:
-    void CopyStateFrom(const LoginState& OtherState);
+    void CopyStateFrom(const LoginState& otherState);
 
-    csp::common::DateTime* AccessTokenRefreshTime;
+    csp::common::DateTime* m_accessTokenRefreshTime;
 };
 } // namespace csp::common

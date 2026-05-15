@@ -31,55 +31,55 @@ public:
     ITaskQueue() = default;
     virtual ~ITaskQueue() = default;
 
-    virtual void Enqueue(std::function<void*(void*)> Work) = 0;
+    virtual void Enqueue(std::function<void*(void*)> work) = 0;
     virtual void Shutdown() = 0;
 };
 
 class ThreadPool : public ITaskQueue
 {
 public:
-    explicit ThreadPool(size_t Size)
-        : ShutdownFlag(false)
+    explicit ThreadPool(size_t size)
+        : m_shutdownFlag(false)
     {
-        while (Size)
+        while (size)
         {
-            Threads.emplace_back(Worker(*this));
-            Size--;
+            m_threads.emplace_back(Worker(*this));
+            size--;
         }
     }
 
     ThreadPool(const ThreadPool&) = delete;
     ~ThreadPool() override = default;
 
-    void Enqueue(std::function<void*(void*)> Work) override
+    void Enqueue(std::function<void*(void*)> work) override
     {
-        std::unique_lock<std::mutex> Lock(Mutex);
-        Jobs.push_back(std::move(Work));
-        Cond.notify_one();
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_jobs.push_back(std::move(work));
+        m_cond.notify_one();
     }
 
     void Shutdown() override
     {
         // Stop all worker threads...
         {
-            std::unique_lock<std::mutex> Lock(Mutex);
-            ShutdownFlag = true;
+            std::unique_lock<std::mutex> lock(m_mutex);
+            m_shutdownFlag = true;
         }
 
-        Cond.notify_all();
+        m_cond.notify_all();
 
         // Join...
-        for (auto& T : Threads)
+        for (auto& t : m_threads)
         {
-            T.join();
+            t.join();
         }
     }
 
 private:
     struct Worker
     {
-        explicit Worker(ThreadPool& InPool)
-            : Pool(InPool)
+        explicit Worker(ThreadPool& inPool)
+            : Pool(inPool)
         {
         }
 
@@ -87,22 +87,22 @@ private:
         {
             for (;;)
             {
-                std::function<void*(void*)> Work;
+                std::function<void*(void*)> work;
                 {
-                    std::unique_lock<std::mutex> Lock(Pool.Mutex);
+                    std::unique_lock<std::mutex> lock(Pool.m_mutex);
 
-                    Pool.Cond.wait(Lock, [&] { return !Pool.Jobs.empty() || Pool.ShutdownFlag; });
+                    Pool.m_cond.wait(lock, [&] { return !Pool.m_jobs.empty() || Pool.m_shutdownFlag; });
 
-                    if (Pool.ShutdownFlag && Pool.Jobs.empty())
+                    if (Pool.m_shutdownFlag && Pool.m_jobs.empty())
                     {
                         break;
                     }
 
-                    Work = Pool.Jobs.front();
-                    Pool.Jobs.pop_front();
+                    work = Pool.m_jobs.front();
+                    Pool.m_jobs.pop_front();
                 }
 
-                Work(nullptr);
+                work(nullptr);
             }
         }
 
@@ -111,13 +111,13 @@ private:
 
     friend struct Worker;
 
-    std::vector<std::thread> Threads;
-    std::list<std::function<void*(void*)>> Jobs;
+    std::vector<std::thread> m_threads;
+    std::list<std::function<void*(void*)>> m_jobs;
 
-    bool ShutdownFlag;
+    bool m_shutdownFlag;
 
-    std::condition_variable Cond;
-    std::mutex Mutex;
+    std::condition_variable m_cond;
+    std::mutex m_mutex;
 };
 
 } // namespace csp

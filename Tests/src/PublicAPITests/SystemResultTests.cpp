@@ -41,7 +41,7 @@
 using namespace csp::common;
 using namespace csp::systems;
 
-typedef std::function<void(const NullResult& Result)> NullResultCallback;
+typedef std::function<void(const NullResult& result)> NullResultCallback;
 
 #ifdef CSP_WASM
 
@@ -61,8 +61,8 @@ class TestWebClient : public csp::web::POCOWebClient
 {
 public:
     TestWebClient(
-        const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
-        : POCOWebClient(InPort, Tp, AuthContext, LogSystem, false)
+        const csp::web::Port inPort, const csp::web::ETransferProtocol tp, csp::common::IAuthContext& authContext, csp::common::LogSystem* logSystem)
+        : POCOWebClient(inPort, tp, authContext, logSystem, false)
     {
     }
 };
@@ -73,38 +73,38 @@ class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHa
 {
 public:
     ResponseReceiver()
-        : ResponseReceived(false)
-        , ThreadId(std::this_thread::get_id())
+        : m_responseReceived(false)
+        , m_threadId(std::this_thread::get_id())
     {
     }
 
-    void OnHttpResponse(csp::web::HttpResponse& InResponse) override
+    void OnHttpResponse(csp::web::HttpResponse& inResponse) override
     {
-        Response = InResponse;
-        ResponseReceived = true;
+        m_response = inResponse;
+        m_responseReceived = true;
     }
 
-    void OnHttpProgress(csp::web::HttpRequest& Request) override
+    void OnHttpProgress(csp::web::HttpRequest& request) override
     {
-        if (Request.GetProgress().GetProgressPercentage() >= 1.0f)
+        if (request.GetProgress().GetProgressPercentage() >= 1.0f)
         {
-            OnHttpResponse(Request.GetMutableResponse());
+            OnHttpResponse(request.GetMutableResponse());
         }
     }
 
 private:
-    csp::web::HttpResponse Response;
+    csp::web::HttpResponse m_response;
 
-    std::atomic<bool> ResponseReceived;
-    std::thread::id ThreadId;
+    std::atomic<bool> m_responseReceived;
+    std::thread::id m_threadId;
 };
 
-void NullResultTestFunction(NullResultCallback Callback)
+void NullResultTestFunction(NullResultCallback callback)
 {
     try
     {
-        csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t)csp::web::EResponseCodes::ResponseNoContent);
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        csp::systems::NullResult internalResult(csp::systems::EResultCode::Success, (uint16_t)csp::web::EResponseCodes::ResponseNoContent);
+        INVOKE_IF_NOT_NULL(callback, internalResult);
     }
     catch (const std::exception& e)
     {
@@ -115,42 +115,42 @@ void NullResultTestFunction(NullResultCallback Callback)
 
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, NullResultTest)
 {
-    NullResultCallback NullTestCallback
-        = [this](const NullResult& _Result) { EXPECT_EQ(_Result.GetResultCode(), csp::systems::EResultCode::Success); };
-    NullResultTestFunction(NullTestCallback);
+    NullResultCallback nullTestCallback
+        = [this](const NullResult& result) { EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success); };
+    NullResultTestFunction(nullTestCallback);
 }
 
 // BaseResult
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 {
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-    const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
-    const csp::common::String MyTestPayload = "1234";
-    TestAuthContext AuthContext;
-    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, AuthContext, LogSystem);
-    EXPECT_TRUE(WebClient != nullptr);
+    const csp::web::EResponseCodes myTestResponseCode = csp::web::EResponseCodes::ResponseOK;
+    const csp::common::String myTestPayload = "1234";
+    TestAuthContext authContext;
+    auto* webClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, authContext, logSystem);
+    EXPECT_TRUE(webClient != nullptr);
 
-    ResponseReceiver Receiver;
+    ResponseReceiver receiver;
 
     // Synthesise a response to feed to ApiResponseBase
-    csp::web::HttpPayload MyHttpPayload(MyTestPayload);
-    csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(
-        WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(), MyHttpPayload, &Receiver, csp::common::CancellationToken::Dummy());
-    MyTestRequest.SetRequestProgress(1.0f);
-    MyTestRequest.SetResponseCode(MyTestResponseCode);
+    csp::web::HttpPayload myHttpPayload(myTestPayload);
+    csp::web::HttpRequest myTestRequest = csp::web::HttpRequest(
+        webClient, csp::web::ERequestVerb::GET, csp::web::Uri(), myHttpPayload, &receiver, csp::common::CancellationToken::Dummy());
+    myTestRequest.SetRequestProgress(1.0f);
+    myTestRequest.SetResponseCode(myTestResponseCode);
 
-    csp::web::HttpResponse MyTestResponse(&MyTestRequest);
+    csp::web::HttpResponse myTestResponse(&myTestRequest);
 
     // make a response object
-    csp::services::DtoBase* InDto = nullptr;
-    csp::services::ApiResponseBase ResponseBase = csp::services::ApiResponseBase(InDto);
-    ResponseBase.SetResponse(&MyTestResponse);
-    ResponseBase.SetResponseCode(MyTestResponseCode, csp::web::EResponseCodes::ResponseOK);
+    csp::services::DtoBase* inDto = nullptr;
+    csp::services::ApiResponseBase responseBase = csp::services::ApiResponseBase(inDto);
+    responseBase.SetResponse(&myTestResponse);
+    responseBase.SetResponseCode(myTestResponseCode, csp::web::EResponseCodes::ResponseOK);
 
-    csp::web::HttpResponse* ReturnedResponse = &MyTestResponse;
-    EXPECT_EQ(ResponseBase.GetResponse(), ReturnedResponse);
-    csp::web::HttpRequest* MyRequest = ResponseBase.GetResponse()->GetRequest();
-    EXPECT_EQ(MyRequest->GetPayload().GetContent(), "1234");
-    EXPECT_EQ(ResponseBase.GetResponseCode(), csp::services::EResponseCode::ResponseSuccess);
+    csp::web::HttpResponse* returnedResponse = &myTestResponse;
+    EXPECT_EQ(responseBase.GetResponse(), returnedResponse);
+    csp::web::HttpRequest* myRequest = responseBase.GetResponse()->GetRequest();
+    EXPECT_EQ(myRequest->GetPayload().GetContent(), "1234");
+    EXPECT_EQ(responseBase.GetResponseCode(), csp::services::EResponseCode::ResponseSuccess);
 }

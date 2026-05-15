@@ -25,20 +25,20 @@ class PointOfInterestHelpers
 public:
     // Enum to string conversion utilities. This rovides a centralized mechanism for mapping between the two
     // and should be used for all POI type/string conversions internally.
-    static csp::common::String TypeToString(EPointOfInterestType Type)
+    static csp::common::String TypeToString(EPointOfInterestType type)
     {
-        csp::common::String String;
+        csp::common::String string;
 
-        switch (Type)
+        switch (type)
         {
         case EPointOfInterestType::SPACE:
         {
-            String = "SpaceGeoLocation";
+            string = "SpaceGeoLocation";
             break;
         }
         case EPointOfInterestType::DEFAULT:
         {
-            String = "Default";
+            string = "Default";
             break;
         }
         default:
@@ -49,24 +49,24 @@ public:
         }
         }
 
-        return String;
+        return string;
     }
 
-    static EPointOfInterestType StringToType(const csp::common::String& String)
+    static EPointOfInterestType StringToType(const csp::common::String& string)
     {
-        EPointOfInterestType Type = EPointOfInterestType::DEFAULT;
+        EPointOfInterestType type = EPointOfInterestType::DEFAULT;
 
-        if (String == "Default")
+        if (string == "Default")
         {
-            Type = csp::systems::EPointOfInterestType::DEFAULT;
+            type = csp::systems::EPointOfInterestType::DEFAULT;
         }
         // Two terms map to space geolocation, because `OKOSpaceGeoLocation` is a legacy term, preserved for compatibility reasons.
-        else if ((String == csp::common::String("SpaceGeoLocation")) || (String == csp::common::String("OKOSpaceGeoLocation")))
+        else if ((string == csp::common::String("SpaceGeoLocation")) || (string == csp::common::String("OKOSpaceGeoLocation")))
         {
-            Type = csp::systems::EPointOfInterestType::SPACE;
+            type = csp::systems::EPointOfInterestType::SPACE;
         }
 
-        return Type;
+        return type;
     }
 };
 

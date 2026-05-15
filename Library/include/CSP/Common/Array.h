@@ -49,56 +49,56 @@ template <typename T> class CSP_API Array
 public:
     /// @brief Constructs an array with 0 elements
     Array()
-        : ArraySize(0)
-        , ObjectArray(nullptr)
+        : m_arraySize(0)
+        , m_objectArray(nullptr)
     {
     }
 
     /// @brief Constructs an array with the given number of elements.
     /// Each element in the array will have it's default constuctor called.
     /// @param Size const size_t : Number of elements in the array
-    explicit Array(const size_t Size)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
+    explicit Array(const size_t size)
+        : m_arraySize(0)
+        , m_objectArray(nullptr)
     {
-        if (Size > 0)
+        if (size > 0)
         {
-            AllocArray(Size);
+            AllocArray(size);
         }
     }
 
     /// @brief Copy constructor.
     /// @param Other const Array<T>& Other
-    CSP_NO_EXPORT Array(const Array<T>& Other)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
+    CSP_NO_EXPORT Array(const Array<T>& other)
+        : m_arraySize(0)
+        , m_objectArray(nullptr)
     {
-        ArraySize = Other.ArraySize;
+        m_arraySize = other.m_arraySize;
 
-        if (ArraySize > 0)
+        if (m_arraySize > 0)
         {
-            AllocArray(ArraySize);
+            AllocArray(m_arraySize);
 
-            for (size_t i = 0; i < ArraySize; i++)
+            for (size_t i = 0; i < m_arraySize; i++)
             {
-                ObjectArray[i] = Other.ObjectArray[i];
+                m_objectArray[i] = other.m_objectArray[i];
             }
         }
     }
 
     /// @brief Constructs an array from an initializer_list.
     /// @param List std::initializer_list : Elements to construct the array from
-    CSP_NO_EXPORT Array(std::initializer_list<T> List)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
+    CSP_NO_EXPORT Array(std::initializer_list<T> list)
+        : m_arraySize(0)
+        , m_objectArray(nullptr)
     {
-        if (List.size() > 0)
+        if (list.size() > 0)
         {
-            AllocArray(List.size());
+            AllocArray(list.size());
 
-            for (size_t i = 0; i < List.size(); ++i)
+            for (size_t i = 0; i < list.size(); ++i)
             {
-                ObjectArray[i] = *(List.begin() + i);
+                m_objectArray[i] = *(list.begin() + i);
             }
         }
     }
@@ -109,11 +109,11 @@ public:
 
     /// @brief Returns a pointer to the start of the array.
     /// @return T*
-    CSP_NO_EXPORT T* Data() { return ObjectArray; }
+    CSP_NO_EXPORT T* Data() { return m_objectArray; }
 
     /// @brief Returns a const pointer to the start of the array.
     /// @return const T*
-    CSP_NO_EXPORT const T* Data() const { return ObjectArray; }
+    CSP_NO_EXPORT const T* Data() const { return m_objectArray; }
 
     // Iterators
     CSP_NO_EXPORT T* begin() { return Data(); }
@@ -127,23 +127,23 @@ public:
     /// @brief Copy assignment.
     /// @param Other const Array<T>&
     /// @return Array<T>&
-    Array<T>& operator=(const Array<T>& Other)
+    Array<T>& operator=(const Array<T>& other)
     {
-        if (this == &Other)
+        if (this == &other)
         {
             return *this;
         }
 
-        ArraySize = Other.ArraySize;
-        ObjectArray = nullptr;
+        m_arraySize = other.m_arraySize;
+        m_objectArray = nullptr;
 
-        if (ArraySize > 0)
+        if (m_arraySize > 0)
         {
-            AllocArray(ArraySize);
+            AllocArray(m_arraySize);
 
-            for (size_t i = 0; i < ArraySize; i++)
+            for (size_t i = 0; i < m_arraySize; i++)
             {
-                ObjectArray[i] = Other.ObjectArray[i];
+                m_objectArray[i] = other.m_objectArray[i];
             }
         }
 
@@ -153,46 +153,46 @@ public:
     /// @brief Returns an element at the given index of the array.
     /// @param Index const size_t : Element index to access
     /// @return T& : Array element
-    T& operator[](const size_t Index)
+    T& operator[](const size_t index)
     {
 #ifndef CSP_DISABLE_BOUNDS_CHECKING
-        if (Index >= ArraySize)
+        if (index >= m_arraySize)
         {
             throw std::out_of_range("Index");
         }
 #endif
 
-        return ObjectArray[Index];
+        return m_objectArray[index];
     }
 
     /// @brief Returns a const element at the given index of the array.
     /// @param Index const size_t : Element index to access
     /// @return const T& : Array element
-    const T& operator[](const size_t Index) const
+    const T& operator[](const size_t index) const
     {
 #ifndef CSP_DISABLE_BOUNDS_CHECKING
-        if (Index >= ArraySize)
+        if (index >= m_arraySize)
         {
             throw std::out_of_range("Index");
         }
 #endif
 
-        return ObjectArray[Index];
+        return m_objectArray[index];
     }
 
     /// @brief Compares two arrays for equality.
     /// @param Other const Array<T>& : Array to compare against
     /// @return bool
-    bool operator==(const Array<T>& Other) const
+    bool operator==(const Array<T>& other) const
     {
-        if (ArraySize != Other.ArraySize)
+        if (m_arraySize != other.m_arraySize)
         {
             return false;
         }
 
-        for (size_t i = 0; i < ArraySize; ++i)
+        for (size_t i = 0; i < m_arraySize; ++i)
         {
-            if (ObjectArray[i] != Other.ObjectArray[i])
+            if (m_objectArray[i] != other.m_objectArray[i])
             {
                 return false;
             }
@@ -201,51 +201,51 @@ public:
         return true;
     }
 
-    bool operator!=(const Array<T>& Other) const { return !(*this == Other); }
+    bool operator!=(const Array<T>& other) const { return !(*this == other); }
 
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
-    const size_t Size() const { return ArraySize; }
+    const size_t Size() const { return m_arraySize; }
 
     /// @brief Checks if the array has any elements.
     /// @return bool
-    bool IsEmpty() const { return (ArraySize == 0); }
+    bool IsEmpty() const { return (m_arraySize == 0); }
 
     /// @brief Returns a copy of this Array as a List
     /// @return List<T>
     CSP_NO_EXPORT List<T> ToList() const
     {
-        List<T> Result(ArraySize);
+        List<T> result(m_arraySize);
 
-        for (size_t i = 0; i < ArraySize; ++i)
+        for (size_t i = 0; i < m_arraySize; ++i)
         {
-            Result.Append(ObjectArray[i]);
+            result.Append(m_objectArray[i]);
         }
 
-        return std::move(Result);
+        return std::move(result);
     }
 
 private:
     /// @brief Allocates memory for the array.
     /// @param Size const size_t : Number of elements in the array
-    void AllocArray(const size_t Size)
+    void AllocArray(const size_t size)
     {
-        if (ObjectArray == nullptr)
+        if (m_objectArray == nullptr)
         {
-            ObjectArray = new T[Size];
-            ArraySize = Size;
+            m_objectArray = new T[size];
+            m_arraySize = size;
         }
     }
 
     /// @brief Frees memory for the array.
     void FreeArray()
     {
-        delete[] ObjectArray;
-        ObjectArray = nullptr;
+        delete[] m_objectArray;
+        m_objectArray = nullptr;
     }
 
-    size_t ArraySize;
-    T* ObjectArray;
+    size_t m_arraySize;
+    T* m_objectArray;
 };
 
 } // namespace csp::common

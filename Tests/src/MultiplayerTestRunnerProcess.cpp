@@ -21,8 +21,8 @@
 
 #include <utility>
 
-MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier _TestToRun)
-    : TestToRun(_TestToRun)
+MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier testToRun)
+    : m_testToRun(testToRun)
 {
 }
 
@@ -38,12 +38,12 @@ MultiplayerTestRunnerProcess ::~MultiplayerTestRunnerProcess()
 }
 
 MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(const MultiplayerTestRunnerProcess& other)
-    : TestToRun(other.TestToRun)
-    , LoginEmail(other.LoginEmail)
-    , Password(other.Password)
-    , SpaceId(other.SpaceId)
-    , TimeoutInSeconds(other.TimeoutInSeconds)
-    , Endpoint(other.Endpoint)
+    : m_testToRun(other.m_testToRun)
+    , m_loginEmail(other.m_loginEmail)
+    , m_password(other.m_password)
+    , m_spaceId(other.m_spaceId)
+    , m_timeoutInSeconds(other.m_timeoutInSeconds)
+    , m_endpoint(other.m_endpoint)
 {
 }
 
@@ -58,18 +58,18 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(const Mult
 }
 
 MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(MultiplayerTestRunnerProcess&& other)
-    : LoggedInPromise(std::exchange(other.LoggedInPromise, std::promise<void>()))
-    , JoinedSpacePromise(std::exchange(other.JoinedSpacePromise, std::promise<void>()))
-    , ReadyForAssertionsPromise(std::exchange(other.ReadyForAssertionsPromise, std::promise<void>()))
-    , ExitSpacePromise(std::exchange(other.ExitSpacePromise, std::promise<void>()))
-    , LoggedOutPromise(std::exchange(other.LoggedOutPromise, std::promise<void>()))
-    , TestToRun(other.TestToRun)
-    , LoginEmail(other.LoginEmail)
-    , Password(other.Password)
-    , SpaceId(std::exchange(other.SpaceId, std::optional<std::string>()))
-    , TimeoutInSeconds(std::exchange(other.TimeoutInSeconds, std::optional<int>()))
-    , Endpoint(std::exchange(other.Endpoint, std::optional<std::string>()))
-    , ProcessHandle(std::exchange(other.ProcessHandle, nullptr))
+    : m_loggedInPromise(std::exchange(other.m_loggedInPromise, std::promise<void>()))
+    , m_joinedSpacePromise(std::exchange(other.m_joinedSpacePromise, std::promise<void>()))
+    , m_readyForAssertionsPromise(std::exchange(other.m_readyForAssertionsPromise, std::promise<void>()))
+    , m_exitSpacePromise(std::exchange(other.m_exitSpacePromise, std::promise<void>()))
+    , m_loggedOutPromise(std::exchange(other.m_loggedOutPromise, std::promise<void>()))
+    , m_testToRun(other.m_testToRun)
+    , m_loginEmail(other.m_loginEmail)
+    , m_password(other.m_password)
+    , m_spaceId(std::exchange(other.m_spaceId, std::optional<std::string>()))
+    , m_timeoutInSeconds(std::exchange(other.m_timeoutInSeconds, std::optional<int>()))
+    , m_endpoint(std::exchange(other.m_endpoint, std::optional<std::string>()))
+    , m_processHandle(std::exchange(other.m_processHandle, nullptr))
 {
 }
 
@@ -78,125 +78,125 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(Multiplaye
     if (this != &other)
     {
         // Steal the juicy internals, whilst being nice and resetting the moved-from object to a sensible state.
-        this->LoggedInPromise = std::exchange(other.LoggedInPromise, std::promise<void>());
-        this->JoinedSpacePromise = std::exchange(other.JoinedSpacePromise, std::promise<void>());
-        this->ReadyForAssertionsPromise = std::exchange(other.ReadyForAssertionsPromise, std::promise<void>());
-        this->ExitSpacePromise = std::exchange(other.ExitSpacePromise, std::promise<void>());
-        this->LoggedOutPromise = std::exchange(other.LoggedOutPromise, std::promise<void>());
+        this->m_loggedInPromise = std::exchange(other.m_loggedInPromise, std::promise<void>());
+        this->m_joinedSpacePromise = std::exchange(other.m_joinedSpacePromise, std::promise<void>());
+        this->m_readyForAssertionsPromise = std::exchange(other.m_readyForAssertionsPromise, std::promise<void>());
+        this->m_exitSpacePromise = std::exchange(other.m_exitSpacePromise, std::promise<void>());
+        this->m_loggedOutPromise = std::exchange(other.m_loggedOutPromise, std::promise<void>());
 
-        this->TestToRun = other.TestToRun;
-        this->LoginEmail = other.LoginEmail;
-        this->Password = other.Password;
+        this->m_testToRun = other.m_testToRun;
+        this->m_loginEmail = other.m_loginEmail;
+        this->m_password = other.m_password;
 
-        this->SpaceId = std::exchange(other.SpaceId, std::optional<std::string>());
-        this->TimeoutInSeconds = std::exchange(other.TimeoutInSeconds, std::optional<int>());
-        this->Endpoint = std::exchange(other.Endpoint, std::optional<std::string>());
+        this->m_spaceId = std::exchange(other.m_spaceId, std::optional<std::string>());
+        this->m_timeoutInSeconds = std::exchange(other.m_timeoutInSeconds, std::optional<int>());
+        this->m_endpoint = std::exchange(other.m_endpoint, std::optional<std::string>());
 
-        this->ProcessHandle = std::exchange(other.ProcessHandle, nullptr);
+        this->m_processHandle = std::exchange(other.m_processHandle, nullptr);
     }
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string SetLoginEmail)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string setLoginEmail)
 {
-    this->LoginEmail = std::move(SetLoginEmail);
+    this->m_loginEmail = std::move(setLoginEmail);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string SetPassword)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string setPassword)
 {
-    this->Password = std::move(SetPassword);
+    this->m_password = std::move(setPassword);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string SetSpaceId)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string setSpaceId)
 {
-    this->SpaceId = std::move(SetSpaceId);
+    this->m_spaceId = std::move(setSpaceId);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int SetTimeoutInSeconds)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int setTimeoutInSeconds)
 {
-    this->TimeoutInSeconds = SetTimeoutInSeconds;
+    this->m_timeoutInSeconds = setTimeoutInSeconds;
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string SetEndpoint)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string setEndpoint)
 {
-    this->Endpoint = std::move(SetEndpoint);
+    this->m_endpoint = std::move(setEndpoint);
     return *this;
 }
 
 namespace
 {
 /* Construct the CLI arguments to pass to MultiplayerTestRunner with spawning a TinyProcessLib::Process*/
-std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun, std::string LoginEmail,
-    std::string Password, std::optional<std::string> SpaceId, std::optional<int> TimeoutInSeconds, std::optional<std::string> Endpoint)
+std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifiers::TestIdentifier testToRun, std::string loginEmail,
+    std::string password, std::optional<std::string> spaceId, std::optional<int> timeoutInSeconds, std::optional<std::string> endpoint)
 {
-    std::vector<std::string> CLIArgs;
+    std::vector<std::string> cliArgs;
 
     /* The multiplayer test runner application is copied to the active directory
     as a post build command, so we just call it directly*/
-    CLIArgs.push_back(MULTIPLAYER_TEST_RUNNER_PATH);
-    CLIArgs.push_back("--test");
-    CLIArgs.push_back(MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(TestToRun));
-    CLIArgs.push_back("--email");
-    CLIArgs.push_back(LoginEmail);
-    CLIArgs.push_back("--password");
-    CLIArgs.push_back(Password);
+    cliArgs.push_back(MULTIPLAYER_TEST_RUNNER_PATH);
+    cliArgs.push_back("--test");
+    cliArgs.push_back(MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(testToRun));
+    cliArgs.push_back("--email");
+    cliArgs.push_back(loginEmail);
+    cliArgs.push_back("--password");
+    cliArgs.push_back(password);
 
-    if (SpaceId.has_value())
+    if (spaceId.has_value())
     {
-        CLIArgs.push_back("--space");
-        CLIArgs.push_back(SpaceId.value());
+        cliArgs.push_back("--space");
+        cliArgs.push_back(spaceId.value());
     }
 
-    if (TimeoutInSeconds.has_value())
+    if (timeoutInSeconds.has_value())
     {
-        CLIArgs.push_back("--timeout");
-        CLIArgs.push_back(std::to_string(TimeoutInSeconds.value()));
+        cliArgs.push_back("--timeout");
+        cliArgs.push_back(std::to_string(timeoutInSeconds.value()));
     }
 
-    if (Endpoint.has_value())
+    if (endpoint.has_value())
     {
-        CLIArgs.push_back("--endpoint");
-        CLIArgs.push_back(Endpoint.value());
+        cliArgs.push_back("--endpoint");
+        cliArgs.push_back(endpoint.value());
     }
 
-    return CLIArgs;
+    return cliArgs;
 }
 
-bool ContainsStr(const std::string& ContainingString, const std::string& ContainedString)
+bool ContainsStr(const std::string& containingString, const std::string& containedString)
 {
-    auto findR = ContainingString.find(ContainedString);
+    auto findR = containingString.find(containedString);
     return findR != std::string::npos;
 }
 
 } // namespace
 
-MultiplayerTestRunner::TestIdentifiers::TestIdentifier MultiplayerTestRunnerProcess::GetTestToRun() const { return TestToRun; }
+MultiplayerTestRunner::TestIdentifiers::TestIdentifier MultiplayerTestRunnerProcess::GetTestToRun() const { return m_testToRun; }
 
-std::string MultiplayerTestRunnerProcess::GetLoginEmail() const { return LoginEmail; }
+std::string MultiplayerTestRunnerProcess::GetLoginEmail() const { return m_loginEmail; }
 
-std::string MultiplayerTestRunnerProcess::GetPassword() const { return Password; }
+std::string MultiplayerTestRunnerProcess::GetPassword() const { return m_password; }
 
-std::optional<std::string> MultiplayerTestRunnerProcess::GetSpaceId() const { return SpaceId; }
+std::optional<std::string> MultiplayerTestRunnerProcess::GetSpaceId() const { return m_spaceId; }
 
-std::optional<int> MultiplayerTestRunnerProcess::GetTimeoutInSeconds() const { return TimeoutInSeconds; }
+std::optional<int> MultiplayerTestRunnerProcess::GetTimeoutInSeconds() const { return m_timeoutInSeconds; }
 
-std::optional<std::string> MultiplayerTestRunnerProcess::GetEndpoint() const { return Endpoint; }
+std::optional<std::string> MultiplayerTestRunnerProcess::GetEndpoint() const { return m_endpoint; }
 
 std::vector<std::string> MultiplayerTestRunnerProcess::GetInvocationArgs() const
 {
-    return BuildProcessArgList(TestToRun, LoginEmail, Password, SpaceId, TimeoutInSeconds, Endpoint);
+    return BuildProcessArgList(m_testToRun, m_loginEmail, m_password, m_spaceId, m_timeoutInSeconds, m_endpoint);
 }
 
 void MultiplayerTestRunnerProcess::StartProcess()
 {
-    std::vector<std::string> InvocationArgs = BuildProcessArgList(TestToRun, LoginEmail, Password, SpaceId, TimeoutInSeconds, Endpoint);
+    std::vector<std::string> invocationArgs = BuildProcessArgList(m_testToRun, m_loginEmail, m_password, m_spaceId, m_timeoutInSeconds, m_endpoint);
 
     // Be a bit loud in the output, I think this warrants special mention when test output is being displayed.
-    std::cout << "Launching Multiplayer Test Runner Process with Test: " << MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(TestToRun)
+    std::cout << "Launching Multiplayer Test Runner Process with Test: " << MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(m_testToRun)
               << std::endl;
 
     /* Start the MultiplayerTestRunner process with provided CLI args
@@ -205,60 +205,60 @@ void MultiplayerTestRunnerProcess::StartProcess()
        toggle the appropriate promises. The callbacks are async, so beware!
        Don't assume that one cout in the MultiplayerTestRunner translates to one call
        of the callback, I've observed they can be batched, probably an OS thing. */
-    ProcessHandle = std::make_unique<TinyProcessLib::Process>(
-        std::move(InvocationArgs), "",
+    m_processHandle = std::make_unique<TinyProcessLib::Process>(
+        std::move(invocationArgs), "",
         [this](const char* bytes, size_t n)
         {
             // STDOUT
-            std::string StdOutStr = std::string(bytes, n);
-            std::cout << StdOutStr << std::endl;
+            std::string stdOutStr = std::string(bytes, n);
+            std::cout << stdOutStr << std::endl;
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR))
+            if (ContainsStr(stdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR))
             {
-                LoggedInPromise.set_value();
+                m_loggedInPromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR))
+            if (ContainsStr(stdOutStr, MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR))
             {
-                JoinedSpacePromise.set_value();
+                m_joinedSpacePromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::READY_FOR_ASSERTIONS_DESCRIPTOR))
+            if (ContainsStr(stdOutStr, MultiplayerTestRunner::ProcessDescriptors::READY_FOR_ASSERTIONS_DESCRIPTOR))
             {
-                ReadyForAssertionsPromise.set_value();
+                m_readyForAssertionsPromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::EXIT_SPACE_DESCRIPTOR))
+            if (ContainsStr(stdOutStr, MultiplayerTestRunner::ProcessDescriptors::EXIT_SPACE_DESCRIPTOR))
             {
-                ExitSpacePromise.set_value();
+                m_exitSpacePromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_OUT_DESCRIPTOR))
+            if (ContainsStr(stdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_OUT_DESCRIPTOR))
             {
-                LoggedOutPromise.set_value();
+                m_loggedOutPromise.set_value();
             }
         },
         [](const char* bytes, size_t n)
         {
             // STDERR
-            std::string StdErrStr = std::string(bytes, n);
-            std::cout << StdErrStr << "\n";
-            throw std::runtime_error(StdErrStr);
+            std::string stdErrStr = std::string(bytes, n);
+            std::cout << stdErrStr << "\n";
+            throw std::runtime_error(stdErrStr);
         });
 }
 
 void MultiplayerTestRunnerProcess::TerminateProcess()
 {
-    if (ProcessHandle != nullptr)
+    if (m_processHandle != nullptr)
     {
         std::cout << "Terminating Multiplayer Test Runner Process." << std::endl;
-        ProcessHandle->kill();
-        ProcessHandle = nullptr;
+        m_processHandle->kill();
+        m_processHandle = nullptr;
     }
 }
 
-std::future<void> MultiplayerTestRunnerProcess::LoggedInFuture() { return LoggedInPromise.get_future(); }
-std::future<void> MultiplayerTestRunnerProcess::JoinedSpaceFuture() { return JoinedSpacePromise.get_future(); }
-std::future<void> MultiplayerTestRunnerProcess::ReadyForAssertionsFuture() { return ReadyForAssertionsPromise.get_future(); }
-std::future<void> MultiplayerTestRunnerProcess::ExitSpaceFuture() { return ExitSpacePromise.get_future(); }
-std::future<void> MultiplayerTestRunnerProcess::LoggedOutFuture() { return LoggedOutPromise.get_future(); }
+std::future<void> MultiplayerTestRunnerProcess::LoggedInFuture() { return m_loggedInPromise.get_future(); }
+std::future<void> MultiplayerTestRunnerProcess::JoinedSpaceFuture() { return m_joinedSpacePromise.get_future(); }
+std::future<void> MultiplayerTestRunnerProcess::ReadyForAssertionsFuture() { return m_readyForAssertionsPromise.get_future(); }
+std::future<void> MultiplayerTestRunnerProcess::ExitSpaceFuture() { return m_exitSpacePromise.get_future(); }
+std::future<void> MultiplayerTestRunnerProcess::LoggedOutFuture() { return m_loggedOutPromise.get_future(); }

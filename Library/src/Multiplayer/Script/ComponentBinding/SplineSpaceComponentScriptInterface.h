@@ -26,12 +26,12 @@ class SplineSpaceComponent;
 class SplineSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    SplineSpaceComponentScriptInterface(SplineSpaceComponent* InComponent = nullptr);
+    SplineSpaceComponentScriptInterface(SplineSpaceComponent* inComponent = nullptr);
 
-    Vector3 GetLocationAlongSpline(float NormalisedDistance);
+    Vector3 GetLocationAlongSpline(float normalisedDistance);
 
     std::vector<Vector3> GetWaypoints();
 
-    void SetWaypoints(std::vector<Vector3> Waypoints);
+    void SetWaypoints(std::vector<Vector3> waypoints);
 };
 } // namespace csp::multiplayer

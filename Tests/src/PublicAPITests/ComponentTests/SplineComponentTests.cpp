@@ -37,7 +37,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -45,128 +45,128 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    const csp::common::String UserName = "Player 1";
-    const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    const csp::common::String UserAvatarId = "MyCoolAvatar";
+    const csp::common::String userName = "Player 1";
+    const SpaceTransform userTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const csp::common::String userAvatarId = "MyCoolAvatar";
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Ensure we're in the first space
-        EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
+        EXPECT_EQ(spaceSystem->GetCurrentSpace().Id, space.Id);
 
         // Create object to represent the spline
-        csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create spline component
-        auto* SplineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
-        csp::common::List<csp::common::Vector3> WayPoints
+        auto* splineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
+        csp::common::List<csp::common::Vector3> wayPoints
             = { { 0, 0, 0 }, { 0, 1000, 0 }, { 0, 2000, 0 }, { 0, 3000, 0 }, { 0, 4000, 0 }, { 0, 5000, 0 } };
 
         {
-            auto Result = SplineComponent->GetWaypoints();
+            auto result = splineComponent->GetWaypoints();
 
-            EXPECT_EQ(Result.Size(), 0);
+            EXPECT_EQ(result.Size(), 0);
         }
 
         {
-            auto Result = SplineComponent->GetLocationAlongSpline(1);
+            auto result = splineComponent->GetLocationAlongSpline(1);
 
-            EXPECT_EQ(Result.X, 0);
-            EXPECT_EQ(Result.Y, 0);
-            EXPECT_EQ(Result.Z, 0);
+            EXPECT_EQ(result.X, 0);
+            EXPECT_EQ(result.Y, 0);
+            EXPECT_EQ(result.Z, 0);
         }
 
         {
-            SplineComponent->SetWaypoints(WayPoints);
+            splineComponent->SetWaypoints(wayPoints);
 
-            auto Result = SplineComponent->GetWaypoints();
+            auto result = splineComponent->GetWaypoints();
 
-            EXPECT_EQ(Result.Size(), WayPoints.Size());
+            EXPECT_EQ(result.Size(), wayPoints.Size());
 
             // Expect final waypoint to be the same
-            EXPECT_EQ(Result[0], WayPoints[0]);
+            EXPECT_EQ(result[0], wayPoints[0]);
         }
 
         {
             // Calculated cubic interpolate spline
-            auto Result = SplineComponent->GetLocationAlongSpline(1);
+            auto result = splineComponent->GetLocationAlongSpline(1);
 
             // Expect final waypoint to be the same
-            EXPECT_EQ(Result, WayPoints[WayPoints.Size() - 1]);
+            EXPECT_EQ(result, wayPoints[wayPoints.Size() - 1]);
         }
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the spline
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create spline component
-    auto* SplineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
-    csp::common::List<csp::common::Vector3> WayPoints
+    auto* splineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
+    csp::common::List<csp::common::Vector3> wayPoints
         = { { 0, 0, 0 }, { 0, 1000, 0 }, { 0, 2000, 0 }, { 0, 3000, 0 }, { 0, 4000, 0 }, { 0, 5000, 0 } };
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
-    const std::string SplineScriptText = R"xx(
+    const std::string splineScriptText = R"xx(
 	
 		var spline = ThisEntity.getSplineComponents()[0];
 		
@@ -176,21 +176,21 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 		
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(SplineScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(splineScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(SplineComponent->GetWaypoints().Size(), WayPoints.Size());
+    EXPECT_EQ(splineComponent->GetWaypoints().Size(), wayPoints.Size());
 
     // expect final waypoint to be the same
-    EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
+    EXPECT_EQ(splineComponent->GetWaypoints()[0], wayPoints[0]);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

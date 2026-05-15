@@ -49,40 +49,40 @@ public:
 
     using WebClient::WebClient;
 
-    std::string MD5Hash(const void* Data, const size_t Size) override;
+    std::string MD5Hash(const void* data, const size_t size) override;
 
-    void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType) override;
-    void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType) override;
-    void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType) override;
+    void SetFileUploadContentFromFile(HttpPayload* payload, const char* filePath, const char* version, const csp::common::String& mediaType) override;
+    void SetFileUploadContentFromString(HttpPayload* payload, const csp::common::String& stringSource, const csp::common::String& fileName,
+        const char* version, const csp::common::String& mediaType) override;
+    void SetFileUploadContentFromBuffer(HttpPayload* payload, const char* buffer, size_t bufferLength, const csp::common::String& fileName,
+        const char* version, const csp::common::String& mediaType) override;
 
     // Instances of POCOWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    POCOWebClient(const Port inPort, const ETransferProtocol tp, csp::common::LogSystem* logSystem, bool autoRefresh = true);
+    POCOWebClient(const Port inPort, const ETransferProtocol tp, csp::common::IAuthContext& authContext, csp::common::LogSystem* logSystem, bool autoRefresh = true);
 
 protected:
-    void SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version);
+    void SetFileUploadContent(HttpPayload* payload, Poco::Net::PartSource* source, const char* version);
 
-    void Send(HttpRequest& Request) override;
+    void Send(HttpRequest& request) override;
 
-    void Get(HttpRequest& Request);
-    void AddCookie(Poco::Net::HTTPRequest& PocoRequest);
-    void Post(HttpRequest& Request);
-    void Put(HttpRequest& Request);
-    void Delete(HttpRequest& Request);
-    void Head(HttpRequest& Request);
-    void Patch(HttpRequest& Request);
+    void Get(HttpRequest& request);
+    void AddCookie(Poco::Net::HTTPRequest& pocoRequest);
+    void Post(HttpRequest& request);
+    void Put(HttpRequest& request);
+    void Delete(HttpRequest& request);
+    void Head(HttpRequest& request);
+    void Patch(HttpRequest& request);
 
     void ProcessResponseAsync(
-        Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPResponse& PocoResponse, std::istream& ResponseStream, HttpRequest& Request);
+        Poco::Net::HTTPClientSession& clientSession, Poco::Net::HTTPResponse& pocoResponse, std::istream& responseStream, HttpRequest& request);
     void ProcessRequestAsync(
-        Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPRequest& PocoResponse, std::ostream& RequestStream, HttpRequest& Request);
+        Poco::Net::HTTPClientSession& clientSession, Poco::Net::HTTPRequest& pocoResponse, std::ostream& requestStream, HttpRequest& request);
 
-    Poco::Net::Context::Ptr PocoContext;
+    Poco::Net::Context::Ptr m_pocoContext;
 
-    std::vector<Poco::Net::HTTPCookie>* Cookies;
-    std::mutex CookiesMutex;
+    std::vector<Poco::Net::HTTPCookie>* m_cookies;
+    std::mutex m_cookiesMutex;
 
 private:
     /// @brief Specifies how the request body will be sent.
@@ -97,10 +97,10 @@ private:
     };
 
     bool PrepareAndSendRequest(
-        HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode);
+        HttpRequest& request, Poco::Net::HTTPRequest pocoRequest, Poco::Net::HTTPClientSession* clientSession, ERequestBodyMode sendBodyMode);
 
     std::istream& ReceiveResponse(
-        Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request);
+        Poco::Net::HTTPClientSession* clientSession, Poco::Net::HTTPResponse& pocoResponse, HttpRequest& request);
 };
 
 } // namespace csp::web

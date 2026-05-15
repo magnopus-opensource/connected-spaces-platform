@@ -34,11 +34,11 @@ class CSP_API LogoutResult : public NullResult
 
 private:
     LogoutResult();
-    LogoutResult(csp::common::LoginState* InStatePtr);
+    LogoutResult(csp::common::LoginState* inStatePtr);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::LoginState* State;
+    csp::common::LoginState* m_state;
 };
 
 /// @brief Result url for a tier checkout session request
@@ -55,7 +55,7 @@ public:
     CheckoutSessionUrlResult(void*) {};
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 };
 
 /// @brief Result url for a user customer portal request
@@ -72,7 +72,7 @@ public:
     CustomerPortalUrlResult(void*) {};
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 };
 
 } // namespace csp::systems

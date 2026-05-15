@@ -58,7 +58,7 @@ public:
 
     /// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    PortalSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Retrieves the space ID that this portal points to.
     /// @note When the user uses the portal, it should be able to leave the current space and enter the one
@@ -70,14 +70,14 @@ public:
     /// @note When the user uses the portal, it should be able to leave the current space and enter the one
     ///       identified by this function.
     /// @param Value The ID of the space the portal component leads the player to.
-    void SetSpaceId(const csp::common::String& Value);
+    void SetSpaceId(const csp::common::String& value);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// @brief Gets the radius of this portal.
@@ -86,14 +86,14 @@ public:
 
     /// @brief Sets the radius of this portal.
     /// @param Value The radius of this portal.
-    void SetRadius(float Value);
+    void SetRadius(float value);
 
     /// \addtogroup IEnableableComponent
     /// @{
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 };
 

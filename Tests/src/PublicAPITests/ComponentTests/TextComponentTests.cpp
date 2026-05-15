@@ -38,7 +38,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -46,151 +46,151 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the text
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create text component
-    auto* TextComponent = static_cast<TextSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Text));
+    auto* textComponent = static_cast<TextSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Text));
 
     // Ensure defaults are set
-    EXPECT_EQ(TextComponent->GetPosition().X, 0.0f);
-    EXPECT_EQ(TextComponent->GetPosition().Y, 0.0f);
-    EXPECT_EQ(TextComponent->GetPosition().Z, 0.0f);
-    EXPECT_EQ(TextComponent->GetBackgroundColor().X, 0.0f);
-    EXPECT_EQ(TextComponent->GetBackgroundColor().Y, 0.0f);
-    EXPECT_EQ(TextComponent->GetBackgroundColor().Z, 0.0f);
-    EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::Off);
-    EXPECT_EQ(TextComponent->GetComponentType(), ComponentType::Text);
-    EXPECT_EQ(TextComponent->GetHeight(), 1.0f);
-    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(TextComponent->GetIsARVisible(), true);
-    EXPECT_EQ(TextComponent->GetIsVisible(), true);
-    EXPECT_EQ(TextComponent->GetRotation().W, 1);
-    EXPECT_EQ(TextComponent->GetRotation().X, 0);
-    EXPECT_EQ(TextComponent->GetRotation().Y, 0);
-    EXPECT_EQ(TextComponent->GetRotation().Z, 0);
-    EXPECT_EQ(TextComponent->GetText(), "");
-    EXPECT_EQ(TextComponent->GetTextColor().X, 1.0f);
-    EXPECT_EQ(TextComponent->GetTextColor().Y, 1.0f);
-    EXPECT_EQ(TextComponent->GetTextColor().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetScale().X, 1.0f);
-    EXPECT_EQ(TextComponent->GetScale().Y, 1.0f);
-    EXPECT_EQ(TextComponent->GetScale().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetWidth(), 1.0f);
+    EXPECT_EQ(textComponent->GetPosition().X, 0.0f);
+    EXPECT_EQ(textComponent->GetPosition().Y, 0.0f);
+    EXPECT_EQ(textComponent->GetPosition().Z, 0.0f);
+    EXPECT_EQ(textComponent->GetBackgroundColor().X, 0.0f);
+    EXPECT_EQ(textComponent->GetBackgroundColor().Y, 0.0f);
+    EXPECT_EQ(textComponent->GetBackgroundColor().Z, 0.0f);
+    EXPECT_EQ(textComponent->GetBillboardMode(), BillboardMode::Off);
+    EXPECT_EQ(textComponent->GetComponentType(), ComponentType::Text);
+    EXPECT_EQ(textComponent->GetHeight(), 1.0f);
+    EXPECT_EQ(textComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(textComponent->GetIsARVisible(), true);
+    EXPECT_EQ(textComponent->GetIsVisible(), true);
+    EXPECT_EQ(textComponent->GetRotation().W, 1);
+    EXPECT_EQ(textComponent->GetRotation().X, 0);
+    EXPECT_EQ(textComponent->GetRotation().Y, 0);
+    EXPECT_EQ(textComponent->GetRotation().Z, 0);
+    EXPECT_EQ(textComponent->GetText(), "");
+    EXPECT_EQ(textComponent->GetTextColor().X, 1.0f);
+    EXPECT_EQ(textComponent->GetTextColor().Y, 1.0f);
+    EXPECT_EQ(textComponent->GetTextColor().Z, 1.0f);
+    EXPECT_EQ(textComponent->GetScale().X, 1.0f);
+    EXPECT_EQ(textComponent->GetScale().Y, 1.0f);
+    EXPECT_EQ(textComponent->GetScale().Z, 1.0f);
+    EXPECT_EQ(textComponent->GetWidth(), 1.0f);
 
     // Set new values
-    TextComponent->SetPosition(csp::common::Vector3::One());
-    TextComponent->SetHeight(2.0f);
-    TextComponent->SetWidth(2.0f);
-    TextComponent->SetBillboardMode(BillboardMode::YawLockedBillboard);
-    TextComponent->SetIsVirtualVisible(false);
-    TextComponent->SetIsARVisible(false);
-    TextComponent->SetIsVisible(false);
-    TextComponent->SetBackgroundColor(csp::common::Vector3::One());
-    TextComponent->SetTextColor(csp::common::Vector3::Zero());
-    TextComponent->SetPosition(csp::common::Vector3::One());
-    TextComponent->SetRotation(csp::common::Vector4 { 1, 1, 1, 1 });
-    TextComponent->SetText("Text");
-    TextComponent->SetScale(csp::common::Vector3 { 2.0f, 2.0f, 2.0f });
-    TextComponent->SetIsBackgroundVisible(false);
+    textComponent->SetPosition(csp::common::Vector3::One());
+    textComponent->SetHeight(2.0f);
+    textComponent->SetWidth(2.0f);
+    textComponent->SetBillboardMode(BillboardMode::YawLockedBillboard);
+    textComponent->SetIsVirtualVisible(false);
+    textComponent->SetIsARVisible(false);
+    textComponent->SetIsVisible(false);
+    textComponent->SetBackgroundColor(csp::common::Vector3::One());
+    textComponent->SetTextColor(csp::common::Vector3::Zero());
+    textComponent->SetPosition(csp::common::Vector3::One());
+    textComponent->SetRotation(csp::common::Vector4 { 1, 1, 1, 1 });
+    textComponent->SetText("Text");
+    textComponent->SetScale(csp::common::Vector3 { 2.0f, 2.0f, 2.0f });
+    textComponent->SetIsBackgroundVisible(false);
 
     // Ensure values are set correctly
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().Z, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
-    EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
-    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(TextComponent->GetIsARVisible(), false);
-    EXPECT_EQ(TextComponent->GetIsVisible(), false);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().W, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetText(), "Text");
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().X, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Y, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Z, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().X, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Y, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Z, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetWidth(), 2.0f);
-    EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().Z, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().Z, 1.0f);
+    EXPECT_EQ(textComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
+    EXPECT_FLOAT_EQ(textComponent->GetHeight(), 2.0f);
+    EXPECT_EQ(textComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(textComponent->GetIsARVisible(), false);
+    EXPECT_EQ(textComponent->GetIsVisible(), false);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().W, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().Z, 1.0f);
+    EXPECT_EQ(textComponent->GetText(), "Text");
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().X, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().Y, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().Z, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().X, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().Y, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().Z, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetWidth(), 2.0f);
+    EXPECT_EQ(textComponent->GetIsBackgroundVisible(), false);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the text
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create text component
-    auto* TextComponent = (TextSpaceComponent*)CreatedObject->AddComponent(ComponentType::Text);
+    auto* textComponent = (TextSpaceComponent*)CreatedObject->AddComponent(ComponentType::Text);
     // Create script component
-    auto* ScriptComponent = (ScriptSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScriptData);
+    auto* scriptComponent = (ScriptSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScriptData);
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
-    std::string TextScriptText = R"xx(
+    std::string textScriptText = R"xx(
 	
 		const assetId			= "TEST_ASSET_ID";
 		const assetCollectionId = "TEST_COLLECTION_ID";
@@ -212,55 +212,55 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 
     )xx";
 
-    ScriptComponent->SetScriptSource(TextScriptText.c_str());
+    scriptComponent->SetScriptSource(textScriptText.c_str());
     CreatedObject->GetScript().Invoke();
-    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
-    EXPECT_FALSE(ScriptHasErrors);
-    RealtimeEngine->ProcessPendingEntityOperations();
+    const bool scriptHasErrors = CreatedObject->GetScript().HasError();
+    EXPECT_FALSE(scriptHasErrors);
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure values are set correctly
-    EXPECT_EQ(TextComponent->GetText(), "Text");
+    EXPECT_EQ(textComponent->GetText(), "Text");
 
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetPosition().Z, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetPosition().Z, 1.0f);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().X, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Y, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Z, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().X, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().Y, 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetScale().Z, 2.0f);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().W, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetRotation().Z, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().W, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetRotation().Z, 1.0f);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().X, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Y, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Z, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().X, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().Y, 0.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetTextColor().Z, 0.0f);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().X, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().Y, 1.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetBackgroundColor().Z, 1.0f);
 
-    EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
+    EXPECT_EQ(textComponent->GetIsBackgroundVisible(), false);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetWidth(), 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetWidth(), 2.0f);
 
-    EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
+    EXPECT_FLOAT_EQ(textComponent->GetHeight(), 2.0f);
 
-    EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
+    EXPECT_EQ(textComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
 
-    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
-    EXPECT_EQ(TextComponent->GetIsARVisible(), false);
-    EXPECT_EQ(TextComponent->GetIsVisible(), false);
+    EXPECT_EQ(textComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(textComponent->GetIsARVisible(), false);
+    EXPECT_EQ(textComponent->GetIsVisible(), false);
 
-    EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
+    EXPECT_EQ(textComponent->GetIsBackgroundVisible(), false);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

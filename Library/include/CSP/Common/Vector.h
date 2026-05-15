@@ -43,39 +43,39 @@ public:
     /// @brief Constructs a Vector2 with the given x, y values.
     /// @param X float
     /// @param Y float
-    Vector2(float X, float Y)
-        : X(X)
-        , Y(Y)
+    Vector2(float x, float y)
+        : X(x)
+        , Y(y)
     {
     }
 
     /// @brief Member by member addition with another Vector2
     /// @param Vector2 Other
-    Vector2 operator+(const Vector2& Other) const;
+    Vector2 operator+(const Vector2& other) const;
 
     /// @brief Subtracts another Vector2 from this one
     /// @param Vector2 Other
-    Vector2 operator-(const Vector2& Other) const;
+    Vector2 operator-(const Vector2& other) const;
 
     /// @brief Divides the Vector2 by divisor
     /// @param float Divisor
-    Vector2 operator/(float Divisor) const;
+    Vector2 operator/(float divisor) const;
 
     /// @brief Member by member multiplication with another Vector2
     /// @param Vector2 Other
-    Vector2 operator*(const Vector2& Other) const;
+    Vector2 operator*(const Vector2& other) const;
 
     /// @brief Multiplies the Vector2 by a scalar
     /// @param float Scalar
-    Vector2 operator*(float Scalar) const;
+    Vector2 operator*(float scalar) const;
 
     /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator==(Vector2 Other) const;
+    bool operator==(Vector2 other) const;
 
     /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator!=(Vector2 Other) const;
+    bool operator!=(Vector2 other) const;
 
     float X;
     float Y;
@@ -105,40 +105,40 @@ public:
     /// @param X float
     /// @param Y float
     /// @param Z float
-    Vector3(float X, float Y, float Z)
-        : X(X)
-        , Y(Y)
-        , Z(Z)
+    Vector3(float x, float y, float z)
+        : X(x)
+        , Y(y)
+        , Z(z)
     {
     }
 
     /// @brief Member by member addition with another Vector3
     /// @param Vector3 Other
-    Vector3 operator+(const Vector3& Other) const;
+    Vector3 operator+(const Vector3& other) const;
 
     /// @brief Subtracts another Vector3 from this one
     /// @param Vector3 Other
-    Vector3 operator-(const Vector3& Other) const;
+    Vector3 operator-(const Vector3& other) const;
 
     /// @brief Divides the Vector3 by divisor
     /// @param float Divisor
-    Vector3 operator/(float Divisor) const;
+    Vector3 operator/(float divisor) const;
 
     /// @brief Member by member multiplication with another Vector3
     /// @param Vector3 Other
-    Vector3 operator*(const Vector3& Other) const;
+    Vector3 operator*(const Vector3& other) const;
 
     /// @brief Multiplies the Vector3 by a scalar
     /// @param float Scalar
-    Vector3 operator*(float Scalar) const;
+    Vector3 operator*(float scalar) const;
 
     /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator==(Vector3 Other) const;
+    bool operator==(Vector3 other) const;
 
     /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator!=(Vector3 Other) const;
+    bool operator!=(Vector3 other) const;
 
     float X;
     float Y;
@@ -174,41 +174,41 @@ public:
     /// @param Y float
     /// @param Z float
     /// @param W float
-    Vector4(float X, float Y, float Z, float W)
-        : X(X)
-        , Y(Y)
-        , Z(Z)
-        , W(W)
+    Vector4(float x, float y, float z, float w)
+        : X(x)
+        , Y(y)
+        , Z(z)
+        , W(w)
     {
     }
 
     /// @brief Member by member addition with another Vector4
     /// @param Vector4 Other
-    Vector4 operator+(const Vector4& Other) const;
+    Vector4 operator+(const Vector4& other) const;
 
     /// @brief Subtracts another Vector4 from this one
     /// @param Vector4 Other
-    Vector4 operator-(const Vector4& Other) const;
+    Vector4 operator-(const Vector4& other) const;
 
     /// @brief Divides the Vector4 by divisor
     /// @param float Divisor
-    Vector4 operator/(float Divisor) const;
+    Vector4 operator/(float divisor) const;
 
     /// @brief Member by member multiplication with another Vector4
     /// @param Vector4 Other
-    Vector4 operator*(const Vector4& Other) const;
+    Vector4 operator*(const Vector4& other) const;
 
     /// @brief Multiplies the Vector4 by a scalar
     /// @param float Scalar
-    Vector4 operator*(float Scalar) const;
+    Vector4 operator*(float scalar) const;
 
     /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator==(Vector4 Other) const;
+    bool operator==(Vector4 other) const;
 
     /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
     /// @param Vector3 Vector to compare
-    bool operator!=(Vector4 Other) const;
+    bool operator!=(Vector4 other) const;
 
     float X;
     float Y;

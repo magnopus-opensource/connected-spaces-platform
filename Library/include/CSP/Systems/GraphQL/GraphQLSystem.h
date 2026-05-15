@@ -53,21 +53,21 @@ public:
     /// @param RequestBody csp::common::String : graphql request body, JSON encoded string of full graphql request,
     /// can include a query, variables and operationName.
     /// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void RunRequest(const csp::common::String RequestBody, GraphQLReceivedCallback ApiResponse);
+    CSP_ASYNC_RESULT void RunRequest(const csp::common::String requestBody, GraphQLReceivedCallback apiResponse);
 
     /// @brief Send basic query to the Magnopus Connect Services' GraphQL Server, must be a simple query, QueryText will be wrapped with a basic
     /// graphql request body. This function does not support variables. for variable use please see RunRequest.
     /// @param QueryText csp::common::String : graphql query string. will be wrapped in a basic graphql request,
     /// this paramater will be the value of request.query
     /// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback ApiResponse);
+    CSP_ASYNC_RESULT void RunQuery(const csp::common::String queryText, GraphQLReceivedCallback apiResponse);
 
 private:
     GraphQLSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~GraphQLSystem();
 
-    csp::services::ApiBase* GraphQLAPI;
+    csp::services::ApiBase* m_graphQlapi;
 };
 
 } // namespace csp::systems

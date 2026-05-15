@@ -86,10 +86,10 @@ public:
     /// as the space is active. Once the caller has called csp::systems::SpaceSystem::ExitSpace and received the callback, then they are
     /// free to release the memory.
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, csp::common::IRealtimeEngine* RealtimeEngine, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& spaceId, csp::common::IRealtimeEngine* realtimeEngine, SpaceResultCallback callback);
 
     /// @brief Exits the space and deregisters from the space scope.
-    CSP_ASYNC_RESULT void ExitSpace(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void ExitSpace(NullResultCallback callback);
 
     /// @brief Get whether user is currently in a space.
     /// @return Result of whether they are in a Space.
@@ -117,11 +117,11 @@ public:
     /// @param FileThumbnail csp::systems::FileAssetDataSource : optional thumbnail image for the new space
     /// @param Tags csp::common::Array<csp::common::String : optional array of strings to set the metadata tags for the new space
     /// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateSpace(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
-        const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
-        const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-        const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateSpace(const csp::common::String& name, const csp::common::String& description, SpaceAttributes attributes,
+        const csp::common::Optional<InviteUserRoleInfoCollection>& inviteUsers,
+        const csp::common::Map<csp::common::String, csp::common::String>& metadata,
+        const csp::common::Optional<csp::systems::FileAssetDataSource>& fileThumbnail,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, SpaceResultCallback callback);
 
     /// @brief Creates a new space Using BufferAssetDataSource.
     /// @param Name csp::common::String : name for the new space
@@ -133,10 +133,10 @@ public:
     /// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
     /// @param Tags csp::common::Array<csp::common::String : optional array of strings to set the metadata tags for the new space
     /// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateSpaceWithBuffer(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
-        const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
-        const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::systems::BufferAssetDataSource& Thumbnail,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateSpaceWithBuffer(const csp::common::String& name, const csp::common::String& description, SpaceAttributes attributes,
+        const csp::common::Optional<InviteUserRoleInfoCollection>& inviteUsers,
+        const csp::common::Map<csp::common::String, csp::common::String>& metadata, const csp::systems::BufferAssetDataSource& thumbnail,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, SpaceResultCallback callback);
 
     /// @brief Updates the name and/or the description of a Space
     /// @param SpaceId csp::common::String : the Space ID to update
@@ -146,18 +146,18 @@ public:
     /// @param Type csp::common::Optional<csp::systems::SpaceType> : if a new type is provided it will be used to update the Space type
     /// @param Tags csp::common::Optional<csp::common::Array<csp::common::String>> : If new tags are provided they will be used to update the Space
     /// @param Callback BasicSpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& SpaceId, const csp::common::Optional<csp::common::String>& Name,
-        const csp::common::Optional<csp::common::String>& Description, const csp::common::Optional<SpaceAttributes>& Type,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, BasicSpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& spaceId, const csp::common::Optional<csp::common::String>& name,
+        const csp::common::Optional<csp::common::String>& description, const csp::common::Optional<SpaceAttributes>& type,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, BasicSpaceResultCallback callback);
 
     /// @brief Deletes a given space and the associated objects that belong to it. Including UserService group, Metadata, and Thumbnail.
     /// @param SpaceId csp::common::String : space ID to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteSpace(const csp::common::String& spaceId, NullResultCallback callback);
 
     /// @brief Retrieves all spaces corresponding to the currently logged in user.
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpaces(SpacesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpaces(SpacesResultCallback callback);
 
     /// @brief Retrieves basic space details for the spaces with the given attributes available to the logged in user.
     /// Results pagination is supported through the use of ResultsSkip and ResultsMax.
@@ -173,27 +173,27 @@ public:
     /// spaces. For no excluded tags pass nullptr.
     /// @param MustIncludeAllTags csp::common::Optional<bool> : Whether all tags in @param MustContainTags must be present in retrieved spaces.
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpacesByAttributes(const csp::common::Optional<bool>& IsDiscoverable, const csp::common::Optional<bool>& IsArchived,
-        const csp::common::Optional<bool>& RequiresInvite, const csp::common::Optional<int>& ResultsSkip,
-        const csp::common::Optional<int>& ResultsMax, const csp::common::Optional<csp::common::Array<csp::common::String>>& MustContainTags,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& MustExcludeTags, const csp::common::Optional<bool>& MustIncludeAllTags,
-        BasicSpacesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpacesByAttributes(const csp::common::Optional<bool>& isDiscoverable, const csp::common::Optional<bool>& isArchived,
+        const csp::common::Optional<bool>& requiresInvite, const csp::common::Optional<int>& resultsSkip,
+        const csp::common::Optional<int>& resultsMax, const csp::common::Optional<csp::common::Array<csp::common::String>>& mustContainTags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& mustExcludeTags, const csp::common::Optional<bool>& mustIncludeAllTags,
+        BasicSpacesResultCallback callback);
 
     /// @brief Retrieves space details corresponding to the provided Space IDs
     /// @param RequestedSpaceIDs csp::common::Array<csp::common::String> : array of Space IDs for which the space details will be retrieved
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpacesByIds(const csp::common::Array<csp::common::String>& RequestedSpaceIDs, SpacesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpacesByIds(const csp::common::Array<csp::common::String>& requestedSpaceIDs, SpacesResultCallback callback);
 
     /// @brief Retrieves all spaces corresponding to the provided user ID.
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpacesForUserId(const csp::common::String& UserId, SpacesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpacesForUserId(const csp::common::String& userId, SpacesResultCallback callback);
 
     /// @brief Retrieves a space by its unique ID.
     /// @param SpaceId csp::common::String : unique ID of Space
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpace(const csp::common::String& SpaceId, SpaceResultCallback Callback);
-    CSP_NO_EXPORT async::task<SpaceResult> GetSpace(const csp::common::String& SpaceId);
+    CSP_ASYNC_RESULT void GetSpace(const csp::common::String& spaceId, SpaceResultCallback callback);
+    CSP_NO_EXPORT async::task<SpaceResult> GetSpace(const csp::common::String& spaceId);
 
     /// @brief Invites a given email to a specific space.
     /// @param SpaceId csp::common::String : space ID to invite to
@@ -203,127 +203,127 @@ public:
     /// @param EmailLinkUrl csp::common::Optional<csp::common::String> : link that will be provided in the invite email
     /// @param SignupUrl csp::common::Optional<csp::common::String> : destination link that will be provided in the invite email
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void InviteToSpace(const csp::common::String& SpaceId, const csp::common::String& Email,
-        const csp::common::Optional<bool>& IsModeratorRole, const csp::common::Optional<csp::common::String>& EmailLinkUrl,
-        const csp::common::Optional<csp::common::String>& SignupUrl, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void InviteToSpace(const csp::common::String& spaceId, const csp::common::String& email,
+        const csp::common::Optional<bool>& isModeratorRole, const csp::common::Optional<csp::common::String>& emailLinkUrl,
+        const csp::common::Optional<csp::common::String>& signupUrl, NullResultCallback callback);
 
     /// @brief Invites all the given emails to a specific space.
     /// @param SpaceId csp::common::String : space ID to invite to
     /// @param InviteUsers InviteUserRoleInfoCollection : Collection containing the email link URL and the users to invite with their emails and roles
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void BulkInviteToSpace(
-        const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback);
-    CSP_NO_EXPORT async::task<NullResult> BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers);
+        const csp::common::String& spaceId, const InviteUserRoleInfoCollection& inviteUsers, NullResultCallback callback);
+    CSP_NO_EXPORT async::task<NullResult> BulkInviteToSpace(const csp::common::String& spaceId, const InviteUserRoleInfoCollection& inviteUsers);
 
     /// @brief Returns an array of obfuscated email addresses, addresses of users that have not yet accepted the space invite
     /// @param SpaceId csp::common::String : Space ID for which the invites where sent
     /// @param Callback PendingInvitesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetPendingUserInvites(const csp::common::String& SpaceId, PendingInvitesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetPendingUserInvites(const csp::common::String& spaceId, PendingInvitesResultCallback callback);
 
     /// @brief Returns an array of ids of users that accepted the space invite
     /// @param SpaceId csp::common::String : Space ID for which the invites where sent
     /// @param Callback AcceptedInvitesResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAcceptedUserInvites(const csp::common::String& SpaceId, AcceptedInvitesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAcceptedUserInvites(const csp::common::String& spaceId, AcceptedInvitesResultCallback callback);
 
     /// @brief Removes a user from a space by the user's unique ID.
     /// @param SpaceId csp::common::String : space ID to remove user from
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void RemoveUserFromSpace(const csp::common::String& SpaceId, const csp::common::String& UserId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveUserFromSpace(const csp::common::String& spaceId, const csp::common::String& userId, NullResultCallback callback);
 
     /// @brief Adds a user to a space by the user's unique ID.
     /// @param SpaceId csp::common::String : space ID to add user to
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void AddUserToSpace(const csp::common::String& spaceId, const csp::common::String& userId, SpaceResultCallback callback);
 
     /// @brief Adds a user to a space.
     /// @param Result SpaceResult : result object of the space to which the user will be added
     /// @param UserId csp::common::String : unique ID of user
     /// @return async::task<SpaceResult> : a task containing the result of the operation
-    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const SpaceResult& Result, const csp::common::String& UserId);
+    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const SpaceResult& result, const csp::common::String& userId);
 
     /// @brief Creates new Site information and associates it with the Space.
     /// @param SpaceId csp::common::String : Space ID to associate the Site information with
     /// @param SiteInfo Site : Site information to be added
     /// @param Callback SiteResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddSiteInfo(const csp::common::String& SpaceId, Site& SiteInfo, SiteResultCallback Callback);
+    CSP_ASYNC_RESULT void AddSiteInfo(const csp::common::String& spaceId, Site& siteInfo, SiteResultCallback callback);
 
     /// @brief Removes the Site information from the Space.
     /// @param SpaceId csp::common::String : Space ID for which to remove the associated Site information
     /// @param SiteInfo Site : Site information to be removed
     /// @param Callback NullResultCallback : callback when asynchronous task
-    CSP_ASYNC_RESULT void RemoveSiteInfo(const csp::common::String& SpaceId, Site& SiteInfo, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveSiteInfo(const csp::common::String& spaceId, Site& siteInfo, NullResultCallback callback);
 
     /// @brief Retrieves the Sites information associated with a Space.
     /// @param SpaceId csp::common::String : Space ID to be queried for Site information
     /// @param Callback SitesCollectionResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSitesInfo(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSitesInfo(const csp::common::String& spaceId, SitesCollectionResultCallback callback);
 
     /// @brief Updates the space role for a particular user
     /// @param SpaceId csp::common::String : The space ID that the requested user is part of
     /// @param NewUserRoleInfo UserRoleInfo : New user role information containing the new role for the specified user
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateUserRole(const csp::common::String& SpaceId, const UserRoleInfo& NewUserRoleInfo, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateUserRole(const csp::common::String& spaceId, const UserRoleInfo& newUserRoleInfo, NullResultCallback callback);
 
     /// @brief Retrieves the User role information for the User Ids that have been passed in
     /// @param SpaceId csp::common::String : Space ID for which the User Roles will be retrieved
     /// @param RequestedUserIds csp::common::Array<csp::common::String> : Array of User Ids for which the User Roles will be retrieved
     /// @param Callback UserRoleCollectionCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetUsersRoles(
-        const csp::common::String& SpaceId, const csp::common::Array<csp::common::String>& RequestedUserIds, UserRoleCollectionCallback Callback);
+        const csp::common::String& spaceId, const csp::common::Array<csp::common::String>& requestedUserIds, UserRoleCollectionCallback callback);
 
     /// @brief Updates the Space metadata information with the new one provided
     /// @param SpaceId csp::common::String : ID of Space for which the metadata will be updated
     /// @param NewMetadata csp::common::String : New metadata information that will replace the previous one
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& SpaceId,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& spaceId,
+        const csp::common::Map<csp::common::String, csp::common::String>& newMetadata, NullResultCallback callback);
 
     /// @brief Retrieves Spaces metadata information
     /// @param Spaces csp::common::Array<Space> : Spaces for which metadata will be retrieved
     /// @param Callback SpacesMetadataResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpacesMetadata(const csp::common::Array<csp::common::String>& Spaces, SpacesMetadataResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpacesMetadata(const csp::common::Array<csp::common::String>& spaces, SpacesMetadataResultCallback callback);
 
     /// @brief Retrieves the Space metadata information
     /// @param SpaceId csp::common::String : Space ID for which the metadata will be retrieved
     /// @param Callback SpaceMetadataResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpaceMetadata(const csp::common::String& SpaceId, SpaceMetadataResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpaceMetadata(const csp::common::String& spaceId, SpaceMetadataResultCallback callback);
 
     /// @brief Updates the Space thumbnail image or adds one if it didn't have it previously using FileAssetDataSource
     /// @param SpaceId csp::common::String : Space ID for which the thumbnail will be updated
     /// @param NewThumbnail csp::systems::FileAssetDataSource : New thumbnail information
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpaceThumbnail(
-        const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& NewThumbnail, NullResultCallback Callback);
+        const csp::common::String& spaceId, const csp::systems::FileAssetDataSource& newThumbnail, NullResultCallback callback);
 
     /// @brief Updates the Space thumbnail image or adds one if it didn't have it previously using BufferAssetDataSource
     /// @param SpaceId csp::common::String : Space ID for which the thumbnail will be updated
     /// @param NewThumbnail csp::systems::BufferAssetDataSource : New thumbnail information
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpaceThumbnailWithBuffer(
-        const csp::common::String& SpaceId, const csp::systems::BufferAssetDataSource& NewThumbnail, NullResultCallback Callback);
+        const csp::common::String& spaceId, const csp::systems::BufferAssetDataSource& newThumbnail, NullResultCallback callback);
 
     /// @brief Retrieves the space thumbnail information associated with the space
     /// If the space does not have a thumbnail associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
     /// and the Uri field inside the UriResult will be empty
     /// @param SpaceId csp::common::String : Space ID for which the thumbnail information will be retrieved
     /// @param Callback UriResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpaceThumbnail(const csp::common::String& SpaceId, UriResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpaceThumbnail(const csp::common::String& spaceId, UriResultCallback callback);
 
     /// @brief Adds user to group banned list. Banned list can be retrieved from the space
     /// @param SpaceId csp::common::String : Space ID for which the ban will be issued on
     /// @param RequestedUserId csp::common::String : User id to be banned from the space
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void AddUserToSpaceBanList(
-        const csp::common::String& SpaceId, const csp::common::String& RequestedUserId, NullResultCallback Callback);
+        const csp::common::String& spaceId, const csp::common::String& requestedUserId, NullResultCallback callback);
 
     /// @brief Deletes user from group banned list. Banned list can be retrieved from the space
     /// @param SpaceId csp::common::String : Space ID for which the Space for which the ban will be removed on
     /// @param RequestedUserId csp::common::String : User id to have ban removed from the space
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteUserFromSpaceBanList(
-        const csp::common::String& SpaceId, const csp::common::String& RequestedUserId, NullResultCallback Callback);
+        const csp::common::String& spaceId, const csp::common::String& requestedUserId, NullResultCallback callback);
 
     /// @brief Add or update a GeoLocation for the space
     /// @param SpaceId csp::common::String : Id of the space to udpate
@@ -332,19 +332,19 @@ public:
     /// @param GeoFence csp::common::Optional<csp::common::Array<GeoLocation>> : Array of points that creates a geo fence for the space.
     ///                                                                        Must be in clockwise order and start and end with the same value.
     /// @param Callback SpaceGeoLocationResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
-        const csp::common::Optional<float>& Orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-        SpaceGeoLocationResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::Optional<GeoLocation>& location,
+        const csp::common::Optional<float>& orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence,
+        SpaceGeoLocationResultCallback callback);
 
     /// @brief Get the geo location details for the given space id
     /// @param SpaceId csp::common::String : Id of the space
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSpaceGeoLocation(const csp::common::String& spaceId, SpaceGeoLocationResultCallback callback);
 
     /// @brief Delete the geo location information of the space
     /// @param SpaceId csp::common::String : Id of the space to be udpated
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteSpaceGeoLocation(const csp::common::String& spaceId, NullResultCallback callback);
 
     /// @brief Duplicate an existing space and assign it to the current user.
     /// This is a synchronous operation and can have a high execution time for complex spaces. If the user disconnects while waiting for the operation
@@ -359,8 +359,8 @@ public:
     /// @param ShallowCopy bool : If true, the duplicated space will reference the assets of the original space. Otherwise, all assets will be
     /// duplicated.
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void DuplicateSpace(const csp::common::String& SpaceId, const csp::common::String& NewName, SpaceAttributes NewAttributes,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void DuplicateSpace(const csp::common::String& spaceId, const csp::common::String& newName, SpaceAttributes newAttributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& memberGroupIds, bool shallowCopy, SpaceResultCallback callback);
 
     /// @brief Duplicate an existing space and assign it to the current user.
     /// This is an asynchronous operation. If the user disconnects while waiting for the operation to complete it will continue unaffected. Please
@@ -381,13 +381,13 @@ public:
     /// @param ShallowCopy bool : If true, the duplicated space will reference the assets of the original space. Otherwise, all assets will be
     /// duplicated.
     /// @param Callback NullResultCallback : callback when asynchronous task is successfully received by the backend services.
-    CSP_ASYNC_RESULT void DuplicateSpaceAsync(const csp::common::String& SpaceId, const csp::common::String& NewName, SpaceAttributes NewAttributes,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DuplicateSpaceAsync(const csp::common::String& spaceId, const csp::common::String& newName, SpaceAttributes newAttributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& memberGroupIds, bool shallowCopy, NullResultCallback callback);
 
     ///@}
     // This is required due to a circular dependency between SpaceSystem and MultiplayerSystem.
     // This will be broken when we move enter space logic into RealtimeEngine.
-    CSP_NO_EXPORT void SetMultiplayerSystem(csp::systems::MultiplayerSystem& MultiplayerSystem);
+    CSP_NO_EXPORT void SetMultiplayerSystem(csp::systems::MultiplayerSystem& multiplayerSystem);
 
     /// @brief The callback for receiving an alert when an async operation is completed.
     /// Currently this callback is only being used for the DuplicateSpaceAsync operation.
@@ -396,7 +396,7 @@ public:
 
     /// @brief Sets a callback for the async call completed event. Triggered when an async call to DuplicateSpace is completed.
     /// @param Callback AsyncCallCompletedCallbackHandler: Callback to receive data concerning the Space duplication.
-    CSP_EVENT void SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback);
+    CSP_EVENT void SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler callback);
 
     /// @brief Deserialises the AsyncCallCompleted event values.
     /// The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
@@ -408,64 +408,64 @@ public:
     /// - StatusReason: This will be an empty string if the operation was successful, but if the operation failed it will contain the failure status.
     /// 
     /// @param NetworkEventData const csp::common::NetworkEventData& : event values to deserialise
-    CSP_NO_EXPORT void OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& networkEventData);
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     SpaceSystem(
-        csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem, csp::common::LogSystem& LogSystem);
+        csp::web::WebClient* webClient, csp::multiplayer::NetworkEventBus& eventBus, UserSystem* userSystem, csp::common::LogSystem& logSystem);
     ~SpaceSystem();
 
     // Space Metadata
-    void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
-    void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-    void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
+    void GetMetadataAssetCollection(const csp::common::String& spaceId, AssetCollectionResultCallback callback);
+    void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& spaces, AssetCollectionsResultCallback callback);
+    void RemoveMetadata(const csp::common::String& spaceId, NullResultCallback callback);
 
     // Space Thumbnail
-    void AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
+    void AddSpaceThumbnail(const csp::common::String& spaceId, const csp::systems::FileAssetDataSource& imageDataSource, NullResultCallback callback);
     void AddSpaceThumbnailWithBuffer(
-        const csp::common::String& SpaceId, const csp::systems::BufferAssetDataSource& ImageDataSource, NullResultCallback Callback);
-    void GetSpaceThumbnailAssetCollection(const csp::common::String& SpaceId, AssetCollectionsResultCallback Callback);
-    void GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback);
-    void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
+        const csp::common::String& spaceId, const csp::systems::BufferAssetDataSource& imageDataSource, NullResultCallback callback);
+    void GetSpaceThumbnailAssetCollection(const csp::common::String& spaceId, AssetCollectionsResultCallback callback);
+    void GetSpaceThumbnailAsset(const AssetCollection& thumbnailAssetCollection, AssetsResultCallback callback);
+    void RemoveSpaceThumbnail(const csp::common::String& spaceId, NullResultCallback callback);
 
-    void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+    void GetSpaceGeoLocationInternal(const csp::common::String& spaceId, SpaceGeoLocationResultCallback callback);
 
-    AsyncCallCompletedCallbackHandler AsyncCallCompletedCallback;
+    AsyncCallCompletedCallbackHandler m_asyncCallCompletedCallback;
 
     // CreateSpace Continuations
-    async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& name, const csp::common::String& description, SpaceAttributes attributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags);
     std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
-        const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata);
-    async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space);
+        const std::shared_ptr<SpaceResult>& space, const csp::common::Map<csp::common::String, csp::common::String>& metadata);
+    async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& space);
     std::function<async::task<AssetResult>()> CreateSpaceThumbnailAsset(
-        const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult);
-    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAsset(
-        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data);
-    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAssetWithBuffer(
-        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data);
+        const std::shared_ptr<SpaceResult>& space, const std::shared_ptr<AssetCollectionResult>& assetCollectionResult);
+    std::function<async::task<UriResult>(const AssetResult& result)> UploadSpaceThumbnailAsset(
+        const std::shared_ptr<AssetCollectionResult>& assetCollectionResult, FileAssetDataSource& data);
+    std::function<async::task<UriResult>(const AssetResult& result)> UploadSpaceThumbnailAssetWithBuffer(
+        const std::shared_ptr<AssetCollectionResult>& assetCollectionResult, const csp::systems::BufferAssetDataSource& data);
     std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
-        const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data);
+        const std::shared_ptr<SpaceResult>& space, const csp::common::Optional<csp::systems::FileAssetDataSource>& data);
     std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferToSpace(
-        const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data);
+        const std::shared_ptr<SpaceResult>& space, const csp::systems::BufferAssetDataSource& data);
     std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
-        SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
+        SpaceSystem* spaceSystem, const std::shared_ptr<SpaceResult>& space, const csp::common::Optional<InviteUserRoleInfoCollection>& inviteUsers);
     // This currently checks if the default scope has leader election enabled, if so will enable server-side leader election in the
     // OnlineRealtimeEngine and register the scope to keep track of its leader.
-    std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> RegisterScopesInSpace(csp::common::IRealtimeEngine* RealtimeEngine);
+    std::function<async::task<SpaceResult>(const SpaceResult& spaceResult)> RegisterScopesInSpace(csp::common::IRealtimeEngine* realtimeEngine);
 
     // EnterSpace Continuations
-    auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
-    auto FireEnterSpaceEvent(Space& OutCurrentSpace);
+    auto AddUserToSpaceIfNecessary(SpaceResultCallback callback, SpaceSystem& spaceSystem);
+    auto FireEnterSpaceEvent(Space& outCurrentSpace);
 
-    UserSystem* UserSystem;
+    UserSystem* m_userSystem;
 
-    csp::services::ApiBase* GroupAPI;
-    csp::services::ApiBase* SpaceAPI;
-    Space CurrentSpace;
+    csp::services::ApiBase* m_groupApi;
+    csp::services::ApiBase* m_spaceApi;
+    Space m_currentSpace;
 
-    csp::systems::MultiplayerSystem* MultiplayerSystem;
+    csp::systems::MultiplayerSystem* m_multiplayerSystem;
 };
 
 } // namespace csp::systems

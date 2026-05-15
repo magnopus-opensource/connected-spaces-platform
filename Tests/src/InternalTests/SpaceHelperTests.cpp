@@ -26,186 +26,186 @@ using namespace csp::services;
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, SpaceGetSpaceMetadataAssetCollectionNameTest)
 {
-    const String SpaceId = "12345678";
+    const String spaceId = "12345678";
 
-    const String AssetCollectionName = csp::systems::SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
-    const auto AssetCollectionNameList = AssetCollectionName.Split('_');
+    const String assetCollectionName = csp::systems::SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(spaceId);
+    const auto assetCollectionNameList = assetCollectionName.Split('_');
 
-    EXPECT_EQ(AssetCollectionNameList.Size(), 5);
+    EXPECT_EQ(assetCollectionNameList.Size(), 5);
 
-    EXPECT_EQ(AssetCollectionNameList[4], SpaceId);
+    EXPECT_EQ(assetCollectionNameList[4], spaceId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetSpaceIdFromMetadataAssetCollectionNameTest)
 {
-    const String SpaceId = "12345678";
+    const String spaceId = "12345678";
 
-    const String AssetCollectionName = csp::systems::SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
+    const String assetCollectionName = csp::systems::SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(spaceId);
 
-    const auto AssetCollectionNameList = AssetCollectionName.Split('_');
+    const auto assetCollectionNameList = assetCollectionName.Split('_');
 
-    EXPECT_EQ(AssetCollectionNameList.Size(), 5);
+    EXPECT_EQ(assetCollectionNameList.Size(), 5);
 
-    EXPECT_EQ(AssetCollectionNameList[4], SpaceId);
+    EXPECT_EQ(assetCollectionNameList[4], spaceId);
 
-    const String ReturnedSpaceId = csp::systems::SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollectionName);
+    const String returnedSpaceId = csp::systems::SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(assetCollectionName);
 
-    EXPECT_EQ(ReturnedSpaceId, SpaceId);
+    EXPECT_EQ(returnedSpaceId, spaceId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertSpaceMetadataToAssetCollectionMetadataTest)
 {
-    const String MetaData = "CSP_META_DATA";
-    const String MetaDataKey = csp::systems::SpaceSystemHelpers::SPACE_METADATA_KEY;
+    const String metaData = "CSP_META_DATA";
+    const String metaDataKey = csp::systems::SpaceSystemHelpers::SPACE_METADATA_KEY;
 
-    const auto MetaDataMap = csp::systems::SpaceSystemHelpers::ConvertSpaceMetadataToAssetCollectionMetadata(MetaData);
+    const auto metaDataMap = csp::systems::SpaceSystemHelpers::ConvertSpaceMetadataToAssetCollectionMetadata(metaData);
 
-    EXPECT_EQ(MetaDataMap.Size(), 1);
+    EXPECT_EQ(metaDataMap.Size(), 1);
 
-    EXPECT_TRUE(MetaDataMap.HasKey(MetaDataKey));
+    EXPECT_TRUE(metaDataMap.HasKey(metaDataKey));
 
-    EXPECT_EQ(MetaDataMap[MetaDataKey], MetaData);
+    EXPECT_EQ(metaDataMap[metaDataKey], metaData);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetSpaceThumbnailAssetCollectionNameTest)
 {
-    const String SpaceId = "12345678";
+    const String spaceId = "12345678";
 
-    const String SpaceThumbnailName = csp::systems::SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
-    const auto SpaceThumbnailNameList = SpaceThumbnailName.Split('_');
+    const String spaceThumbnailName = csp::systems::SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(spaceId);
+    const auto spaceThumbnailNameList = spaceThumbnailName.Split('_');
 
-    EXPECT_EQ(SpaceThumbnailNameList.Size(), 5);
+    EXPECT_EQ(spaceThumbnailNameList.Size(), 5);
 
-    EXPECT_EQ(SpaceThumbnailNameList[4], SpaceId);
+    EXPECT_EQ(spaceThumbnailNameList[4], spaceId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetUniqueSpaceThumbnailAssetNameTest)
 {
-    const String SpaceId = "12345678";
+    const String spaceId = "12345678";
 
-    const String UniqueSpaceThumbnailAssetName = csp::systems::SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
-    const auto UniqueSpaceThumbnailAssetNameList = UniqueSpaceThumbnailAssetName.Split('_');
+    const String uniqueSpaceThumbnailAssetName = csp::systems::SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(spaceId);
+    const auto uniqueSpaceThumbnailAssetNameList = uniqueSpaceThumbnailAssetName.Split('_');
 
-    EXPECT_EQ(UniqueSpaceThumbnailAssetNameList.Size(), 3);
+    EXPECT_EQ(uniqueSpaceThumbnailAssetNameList.Size(), 3);
 
-    EXPECT_EQ(UniqueSpaceThumbnailAssetNameList[2], SpaceId);
+    EXPECT_EQ(uniqueSpaceThumbnailAssetNameList[2], spaceId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetUniqueAvatarThumbnailAssetNameTest)
 {
-    const String Extension = "user";
+    const String extension = "user";
 
-    const String UniqueAvatarThumbnailAssetName = csp::systems::SpaceSystemHelpers::GetUniqueAvatarThumbnailAssetName("_" + Extension);
-    const auto UniqueAvatarThumbnailAssetNameList = UniqueAvatarThumbnailAssetName.Split('_');
+    const String uniqueAvatarThumbnailAssetName = csp::systems::SpaceSystemHelpers::GetUniqueAvatarThumbnailAssetName("_" + extension);
+    const auto uniqueAvatarThumbnailAssetNameList = uniqueAvatarThumbnailAssetName.Split('_');
 
-    EXPECT_EQ(UniqueAvatarThumbnailAssetNameList.Size(), 3);
+    EXPECT_EQ(uniqueAvatarThumbnailAssetNameList.Size(), 3);
 
-    EXPECT_EQ(UniqueAvatarThumbnailAssetNameList[2], Extension);
+    EXPECT_EQ(uniqueAvatarThumbnailAssetNameList[2], extension);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetAssetFileExtensionTest)
 {
-    String AssetFileExtension;
+    String assetFileExtension;
 
-    const String PngMimeType = "image/png";
-    const String PngExtension = ".png";
+    const String pngMimeType = "image/png";
+    const String pngExtension = ".png";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(PngMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(pngMimeType);
 
-    EXPECT_EQ(AssetFileExtension, PngExtension);
+    EXPECT_EQ(assetFileExtension, pngExtension);
 
-    const String JpegMimeType = "image/jpeg";
-    const String JpegExtension = ".jpeg";
+    const String jpegMimeType = "image/jpeg";
+    const String jpegExtension = ".jpeg";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(JpegMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(jpegMimeType);
 
-    EXPECT_EQ(AssetFileExtension, JpegExtension);
+    EXPECT_EQ(assetFileExtension, jpegExtension);
 
-    const String GifMimeType = "image/gif";
-    const String GifExtension = ".gif";
+    const String gifMimeType = "image/gif";
+    const String gifExtension = ".gif";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(GifMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(gifMimeType);
 
-    EXPECT_EQ(AssetFileExtension, GifExtension);
+    EXPECT_EQ(assetFileExtension, gifExtension);
 
-    const String ApngMimeType = "image/apng";
-    const String ApngExtension = ".apng";
+    const String apngMimeType = "image/apng";
+    const String apngExtension = ".apng";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(ApngMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(apngMimeType);
 
-    EXPECT_EQ(AssetFileExtension, ApngExtension);
+    EXPECT_EQ(assetFileExtension, apngExtension);
 
-    const String AvifMimeType = "image/avif";
-    const String AvifExtension = ".avif";
+    const String avifMimeType = "image/avif";
+    const String avifExtension = ".avif";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(AvifMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(avifMimeType);
 
-    EXPECT_EQ(AssetFileExtension, AvifExtension);
+    EXPECT_EQ(assetFileExtension, avifExtension);
 
-    const String SvgxmlMimeType = "image/svg+xml";
-    const String SvgxmlExtension = ".svg";
+    const String svgxmlMimeType = "image/svg+xml";
+    const String svgxmlExtension = ".svg";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(SvgxmlMimeType);
+    assetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(svgxmlMimeType);
 
-    EXPECT_EQ(AssetFileExtension, SvgxmlExtension);
+    EXPECT_EQ(assetFileExtension, svgxmlExtension);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, IdCheckValidTest)
 {
-    const String UserId = "123";
-    const Array<String> UserIds = { "123", "456", "789" };
+    const String userId = "123";
+    const Array<String> userIds = { "123", "456", "789" };
 
-    bool ValidityCheck = csp::systems::SpaceSystemHelpers::IdCheck(UserId, UserIds);
+    bool validityCheck = csp::systems::SpaceSystemHelpers::IdCheck(userId, userIds);
 
-    EXPECT_TRUE(ValidityCheck);
+    EXPECT_TRUE(validityCheck);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, IdCheckInValidTest)
 {
-    const String InvalidUserId = "101";
-    const Array<String> UserIds = { "123", "456", "789" };
+    const String invalidUserId = "101";
+    const Array<String> userIds = { "123", "456", "789" };
 
-    bool ValidityCheck = csp::systems::SpaceSystemHelpers::IdCheck(InvalidUserId, UserIds);
+    bool validityCheck = csp::systems::SpaceSystemHelpers::IdCheck(invalidUserId, userIds);
 
-    EXPECT_FALSE(ValidityCheck);
+    EXPECT_FALSE(validityCheck);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataNotObjectTest)
 {
-    const String MetaSiteData = "Void";
-    const String MetaDataSiteKey = "site";
-    const String MetaDataMultiplayerVersionKey = "multiplayerVersion";
-    const String MetaDataMultiplayerVersionData = "3";
-    const String NotJsonObject = "{[\"testdata\"]}";
+    const String metaSiteData = "Void";
+    const String metaDataSiteKey = "site";
+    const String metaDataMultiplayerVersionKey = "multiplayerVersion";
+    const String metaDataMultiplayerVersionData = "3";
+    const String notJsonObject = "{[\"testdata\"]}";
 
-    Map<String, String> NotJsonObjectMetaDataMap;
+    Map<String, String> notJsonObjectMetaDataMap;
 
-    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(NotJsonObject, NotJsonObjectMetaDataMap);
+    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(notJsonObject, notJsonObjectMetaDataMap);
 
-    ASSERT_EQ(NotJsonObjectMetaDataMap.Size(), 2);
+    ASSERT_EQ(notJsonObjectMetaDataMap.Size(), 2);
 
-    EXPECT_TRUE(NotJsonObjectMetaDataMap.HasKey(MetaDataSiteKey));
+    EXPECT_TRUE(notJsonObjectMetaDataMap.HasKey(metaDataSiteKey));
 
-    EXPECT_EQ(NotJsonObjectMetaDataMap[MetaDataSiteKey], MetaSiteData);
+    EXPECT_EQ(notJsonObjectMetaDataMap[metaDataSiteKey], metaSiteData);
 
-    EXPECT_TRUE(NotJsonObjectMetaDataMap.HasKey(MetaDataMultiplayerVersionKey));
+    EXPECT_TRUE(notJsonObjectMetaDataMap.HasKey(metaDataMultiplayerVersionKey));
 
-    EXPECT_EQ(NotJsonObjectMetaDataMap[MetaDataMultiplayerVersionKey], MetaDataMultiplayerVersionData);
+    EXPECT_EQ(notJsonObjectMetaDataMap[metaDataMultiplayerVersionKey], metaDataMultiplayerVersionData);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataObjectTest)
 {
-    const String MetaSiteData = "ObjectVoid";
-    const String MetaDataSiteKey = "ObjectSite";
-    const String JsonObject = "{\"" + MetaDataSiteKey + "\" :\"" + MetaSiteData + "\"}";
+    const String metaSiteData = "ObjectVoid";
+    const String metaDataSiteKey = "ObjectSite";
+    const String jsonObject = "{\"" + metaDataSiteKey + "\" :\"" + metaSiteData + "\"}";
 
-    Map<String, String> ObjectMetaDataMap;
+    Map<String, String> objectMetaDataMap;
 
-    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(JsonObject, ObjectMetaDataMap);
+    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(jsonObject, objectMetaDataMap);
 
-    ASSERT_EQ(ObjectMetaDataMap.Size(), 1);
+    ASSERT_EQ(objectMetaDataMap.Size(), 1);
 
-    EXPECT_TRUE(ObjectMetaDataMap.HasKey(MetaDataSiteKey));
+    EXPECT_TRUE(objectMetaDataMap.HasKey(metaDataSiteKey));
 
-    EXPECT_EQ(ObjectMetaDataMap[MetaDataSiteKey], MetaSiteData);
+    EXPECT_EQ(objectMetaDataMap[metaDataSiteKey], metaSiteData);
 }

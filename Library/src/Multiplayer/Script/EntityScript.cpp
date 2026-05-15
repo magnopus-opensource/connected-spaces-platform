@@ -30,15 +30,15 @@ namespace csp::multiplayer
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
-EntityScript::EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
-    csp::common::LogSystem* LogSystem)
-    : Entity(InEntity)
-    , EntityScriptComponent(nullptr)
-    , HasLastError(false)
-    , HasBinding(false)
-    , RealtimeEnginePtr(InRealtimeEngine)
-    , LogSystem(LogSystem)
-    , ScriptRunner(ScriptRunner)
+EntityScript::EntityScript(SpaceEntity* inEntity, csp::common::IRealtimeEngine* inRealtimeEngine, csp::common::IJSScriptRunner* scriptRunner,
+    csp::common::LogSystem* logSystem)
+    : m_entity(inEntity)
+    , m_entityScriptComponent(nullptr)
+    , m_hasLastError(false)
+    , m_hasBinding(false)
+    , m_realtimeEnginePtr(inRealtimeEngine)
+    , m_logSystem(logSystem)
+    , m_scriptRunner(scriptRunner)
 {
 }
 
@@ -46,141 +46,141 @@ EntityScript::~EntityScript() { Shutdown(); }
 
 bool EntityScript::Invoke()
 {
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("EntityScript::Invoke called for {}", Entity->GetName()).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("EntityScript::Invoke called for {}", m_entity->GetName()).c_str());
     }
 
     CheckBinding();
 
-    HasLastError = false;
-    LastError = "Unknown Error";
+    m_hasLastError = false;
+    m_lastError = "Unknown Error";
 
-    if (EntityScriptComponent == nullptr)
+    if (m_entityScriptComponent == nullptr)
     {
-        HasLastError = true;
-        LastError = SCRIPT_ERROR_NO_COMPONENT;
+        m_hasLastError = true;
+        m_lastError = SCRIPT_ERROR_NO_COMPONENT;
     }
     else
     {
-        const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
+        const csp::common::String& scriptSource = m_entityScriptComponent->GetScriptSource();
 
-        if (!ScriptSource.IsEmpty())
+        if (!scriptSource.IsEmpty())
         {
-            HasLastError = !ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
+            m_hasLastError = !m_scriptRunner->RunScript(m_entity->GetId(), scriptSource);
         }
         else
         {
-            HasLastError = true;
-            LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
+            m_hasLastError = true;
+            m_lastError = SCRIPT_ERROR_EMPTY_SCRIPT;
         }
     }
 
-    if (HasLastError)
+    if (m_hasLastError)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", m_lastError).c_str());
         }
     }
 
-    return !HasLastError;
+    return !m_hasLastError;
 }
 
-void EntityScript::RunScript(const csp::common::String& ScriptSource)
+void EntityScript::RunScript(const csp::common::String& scriptSource)
 {
-    if (RealtimeEnginePtr == nullptr)
+    if (m_realtimeEnginePtr == nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Fatal, "Null RealtimeEngine when trying to run script. Aborting Operation.");
+        m_logSystem->LogMsg(csp::common::LogLevel::Fatal, "Null RealtimeEngine when trying to run script. Aborting Operation.");
         return;
     }
 
     // If offline, just run the script
-    if (RealtimeEnginePtr->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
+    if (m_realtimeEnginePtr->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
     {
-        ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
+        m_scriptRunner->RunScript(m_entity->GetId(), scriptSource);
         return;
     }
 
     // Otherwise we're online
-    auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEnginePtr);
-    if (OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally())
+    auto* onlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(m_realtimeEnginePtr);
+    if (onlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally())
     {
-        ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
+        m_scriptRunner->RunScript(m_entity->GetId(), scriptSource);
     }
     else
     {
 
-        OnlineRealtimeEngine->RunScriptRemotely(Entity->GetId(), ScriptSource);
+        onlineRealtimeEngine->RunScriptRemotely(m_entity->GetId(), scriptSource);
     }
 }
 
-void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
+void EntityScript::SetScriptSource(const csp::common::String& inScriptSource)
 {
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-            fmt::format("EntityScript::SetScriptSource called for {0}\nSource: {1}", Entity->GetName(), InScriptSource).c_str());
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, "--EndScriptSource--");
+        m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("EntityScript::SetScriptSource called for {0}\nSource: {1}", m_entity->GetName(), inScriptSource).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, "--EndScriptSource--");
     }
 
-    if (EntityScriptComponent == nullptr)
+    if (m_entityScriptComponent == nullptr)
     {
-        EntityScriptComponent = (ScriptSpaceComponent*)(Entity->AddComponent(ComponentType::ScriptData));
+        m_entityScriptComponent = (ScriptSpaceComponent*)(m_entity->AddComponent(ComponentType::ScriptData));
     }
 
-    EntityScriptComponent->SetScriptSource(InScriptSource);
+    m_entityScriptComponent->SetScriptSource(inScriptSource);
 
-    Entity->QueueUpdate();
+    m_entity->QueueUpdate();
 }
 
-bool EntityScript::HasError() { return HasLastError; }
+bool EntityScript::HasError() { return m_hasLastError; }
 
-bool EntityScript::HasEntityScriptComponent() { return EntityScriptComponent != nullptr; }
+bool EntityScript::HasEntityScriptComponent() { return m_entityScriptComponent != nullptr; }
 
-csp::common::String EntityScript::GetErrorText() { return LastError; }
+csp::common::String EntityScript::GetErrorText() { return m_lastError; }
 
-void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
+void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* inEnityScriptComponent)
 {
-    EntityScriptComponent = InEnityScriptComponent;
-    ScriptRunner->CreateContext(Entity->GetId());
+    m_entityScriptComponent = inEnityScriptComponent;
+    m_scriptRunner->CreateContext(m_entity->GetId());
 }
 
 csp::common::String EntityScript::GetScriptSource()
 {
-    if (EntityScriptComponent == nullptr)
+    if (m_entityScriptComponent == nullptr)
     {
         return csp::common::String();
     }
 
-    return EntityScriptComponent->GetScriptSource();
+    return m_entityScriptComponent->GetScriptSource();
 }
 
 void EntityScript::RegisterSourceAsModule()
 {
-    if (EntityScriptComponent != nullptr)
+    if (m_entityScriptComponent != nullptr)
     {
-        ScriptRunner->SetModuleSource(Entity->GetName(), GetScriptSource());
+        m_scriptRunner->SetModuleSource(m_entity->GetName(), GetScriptSource());
     }
 }
 
-void EntityScript::SetOwnerId(uint64_t ClientId)
+void EntityScript::SetOwnerId(uint64_t clientId)
 {
-    if (EntityScriptComponent != nullptr)
+    if (m_entityScriptComponent != nullptr)
     {
-        if (GetOwnerId() != ClientId)
+        if (GetOwnerId() != clientId)
         {
-            EntityScriptComponent->SetOwnerId(ClientId);
-            Entity->QueueUpdate();
+            m_entityScriptComponent->SetOwnerId(clientId);
+            m_entity->QueueUpdate();
         }
     }
 }
 
 uint64_t EntityScript::GetOwnerId() const
 {
-    if (EntityScriptComponent != nullptr)
+    if (m_entityScriptComponent != nullptr)
     {
-        return EntityScriptComponent->GetOwnerId();
+        return m_entityScriptComponent->GetOwnerId();
     }
 
     return 0;
@@ -188,26 +188,26 @@ uint64_t EntityScript::GetOwnerId() const
 
 void EntityScript::Shutdown()
 {
-    ScriptRunner->ClearModuleSource(Entity->GetName());
-    ScriptRunner->DestroyContext(Entity->GetId());
+    m_scriptRunner->ClearModuleSource(m_entity->GetName());
+    m_scriptRunner->DestroyContext(m_entity->GetId());
 }
 
-void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
+void EntityScript::OnSourceChanged(const csp::common::String& inScriptSource)
 {
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnSourceChanged: {}\n", InScriptSource).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnSourceChanged: {}\n", inScriptSource).c_str());
     }
 
-    if (EntityScriptComponent != nullptr)
+    if (m_entityScriptComponent != nullptr)
     {
-        MessageMap.clear();
-        PropertyMap.clear();
+        m_messageMap.clear();
+        m_propertyMap.clear();
 
-        ScriptRunner->ResetContext(Entity->GetId());
-        HasBinding = false; // we've reset the context which means this script is no longer bound
+        m_scriptRunner->ResetContext(m_entity->GetId());
+        m_hasBinding = false; // we've reset the context which means this script is no longer bound
 
-        ScriptRunner->SetModuleSource(Entity->GetName(), InScriptSource);
+        m_scriptRunner->SetModuleSource(m_entity->GetName(), inScriptSource);
 
         Bind();
     }
@@ -216,90 +216,90 @@ void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
 // Called when an entity has been created
 void EntityScript::Bind()
 {
-    if (EntityScriptComponent != nullptr)
+    if (m_entityScriptComponent != nullptr)
     {
-        ScriptRunner->BindContext(Entity->GetId());
-        HasBinding = true;
+        m_scriptRunner->BindContext(m_entity->GetId());
+        m_hasBinding = true;
     }
 }
 
 void EntityScript::CheckBinding()
 {
-    if (!HasBinding)
+    if (!m_hasBinding)
     {
         Bind();
     }
 }
 
-void EntityScript::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, csp::common::String Message)
+void EntityScript::SubscribeToPropertyChange(int32_t componentId, int32_t propertyKey, csp::common::String message)
 {
-    PropertyChangeKey Key = std::make_pair(ComponentId, PropertyKey);
-    PropertyChangeMap::iterator It = PropertyMap.find(Key);
+    PropertyChangeKey key = std::make_pair(componentId, propertyKey);
+    PropertyChangeMap::iterator it = m_propertyMap.find(key);
 
-    if (It == PropertyMap.end())
+    if (it == m_propertyMap.end())
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-                fmt::format("SubscribeToPropertyChange: ({0}, {1}) {2}\n", ComponentId, PropertyKey, Message).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+                fmt::format("SubscribeToPropertyChange: ({0}, {1}) {2}\n", componentId, propertyKey, message).c_str());
         }
 
-        PropertyMap.insert(PropertyChangeMap::value_type(Key, Message));
+        m_propertyMap.insert(PropertyChangeMap::value_type(key, message));
     }
 }
 
-void EntityScript::OnPropertyChanged(int32_t ComponentId, int32_t PropertyKey)
+void EntityScript::OnPropertyChanged(int32_t componentId, int32_t propertyKey)
 {
-    PropertyChangeKey Key = std::make_pair(ComponentId, PropertyKey);
-    PropertyChangeMap::iterator It = PropertyMap.find(Key);
+    PropertyChangeKey key = std::make_pair(componentId, propertyKey);
+    PropertyChangeMap::iterator it = m_propertyMap.find(key);
 
-    if (It != PropertyMap.end())
+    if (it != m_propertyMap.end())
     {
-        const csp::common::String& Message = It->second;
+        const csp::common::String& message = it->second;
 
         // Generate a call to the callback with the correct parameters
-        csp::common::String ParamJson = csp::common::StringFormat("{\"id\": %d, \"key\": %d}", ComponentId, PropertyKey);
+        csp::common::String paramJson = csp::common::StringFormat("{\"id\": %d, \"key\": %d}", componentId, propertyKey);
 
-        PostMessageToScript(Message, ParamJson);
+        PostMessageToScript(message, paramJson);
     }
 }
 
-void EntityScript::SubscribeToMessage(const csp::common::String Message, const csp::common::String OnMessageCallback)
+void EntityScript::SubscribeToMessage(const csp::common::String message, const csp::common::String onMessageCallback)
 {
-    SubscribedMessageMap::iterator It = MessageMap.find(Message);
+    SubscribedMessageMap::iterator it = m_messageMap.find(message);
 
-    if (It == MessageMap.end())
+    if (it == m_messageMap.end())
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("SubscribeToMessage: {} -> {}\n", Message, OnMessageCallback).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("SubscribeToMessage: {} -> {}\n", message, onMessageCallback).c_str());
         }
 
-        MessageMap.insert(SubscribedMessageMap::value_type(Message, OnMessageCallback));
+        m_messageMap.insert(SubscribedMessageMap::value_type(message, onMessageCallback));
     }
 }
 
-void EntityScript::PostMessageToScript(const csp::common::String Message, const csp::common::String MessageParamsJson)
+void EntityScript::PostMessageToScript(const csp::common::String message, const csp::common::String messageParamsJson)
 {
-    SubscribedMessageMap::iterator It = MessageMap.find(Message);
+    SubscribedMessageMap::iterator it = m_messageMap.find(message);
 
-    if (It != MessageMap.end())
+    if (it != m_messageMap.end())
     {
-        const csp::common::String& OnMessageCallback = It->second;
+        const csp::common::String& onMessageCallback = it->second;
 
         // Generate a call to the callback with the correct parameters
-        csp::common::String ScriptText
-            = csp::common::StringFormat("%s('%s','%s')", OnMessageCallback.c_str(), Message.c_str(), MessageParamsJson.c_str());
+        csp::common::String scriptText
+            = csp::common::StringFormat("%s('%s','%s')", onMessageCallback.c_str(), message.c_str(), messageParamsJson.c_str());
 
-        if (Message != SCRIPT_MSG_ENTITY_TICK)
+        if (message != SCRIPT_MSG_ENTITY_TICK)
         {
-            if (LogSystem != nullptr)
+            if (m_logSystem != nullptr)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("PostMessageToScript: {}\n", ScriptText).c_str());
+                m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("PostMessageToScript: {}\n", scriptText).c_str());
             }
         }
 
-        RunScript(ScriptText.c_str());
+        RunScript(scriptText.c_str());
     }
 }
 

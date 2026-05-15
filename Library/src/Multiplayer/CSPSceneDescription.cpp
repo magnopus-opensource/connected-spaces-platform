@@ -23,34 +23,34 @@
 
 namespace csp::multiplayer
 {
-CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson)
+CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::String>& sceneDescriptionJson)
 
 {
     // Unpack the list into a single JSON string.
     // The reason this JSON is packed into a list _at all_ is merely a wrapper generator workaround,
     // csp::common::Strings cannot be passed as heap objects, and these SceneDescriptions can be large
     // enough to blow the stack
-    this->SceneDescriptionJson = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
+    this->m_sceneDescriptionJson = std::accumulate(sceneDescriptionJson.begin(), sceneDescriptionJson.end(), csp::common::String {});
 }
 
 csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner) const
 {
-    mcs::SceneDescription SceneDescription;
-    csp::json::JsonDeserializer::Deserialize(SceneDescriptionJson.c_str(), SceneDescription);
+    mcs::SceneDescription sceneDescription;
+    csp::json::JsonDeserializer::Deserialize(m_sceneDescriptionJson.c_str(), sceneDescription);
 
-    csp::common::Array<csp::multiplayer::SpaceEntity*> Entities { SceneDescription.Objects.size() };
+    csp::common::Array<csp::multiplayer::SpaceEntity*> entities { sceneDescription.Objects.size() };
 
-    size_t ObjectsIndex = 0;
-    for (const auto& Object : SceneDescription.Objects)
+    size_t objectsIndex = 0;
+    for (const auto& object : sceneDescription.Objects)
     {
-        auto Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, RemoteScriptRunner, LogSystem);
+        auto entity = SpaceEntityStatePatcher::NewFromObjectMessage(object, realtimeEngine, remoteScriptRunner, logSystem);
 
-        Entities[ObjectsIndex] = Entity.release();
-        ObjectsIndex++;
+        entities[objectsIndex] = entity.release();
+        objectsIndex++;
     }
 
-    return Entities;
+    return entities;
 }
 
 }

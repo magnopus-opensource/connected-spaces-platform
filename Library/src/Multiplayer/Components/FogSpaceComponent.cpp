@@ -104,96 +104,96 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& FogSpaceComponent::GetSchema() { return Schema; }
 
-FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
 FogMode FogSpaceComponent::GetFogMode() const { return static_cast<FogMode>(GetIntegerProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode))); }
 
-void FogSpaceComponent::SetFogMode(FogMode Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode), static_cast<int64_t>(Value)); }
+void FogSpaceComponent::SetFogMode(FogMode value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode), static_cast<int64_t>(value)); }
 
 /* ITransformComponent */
 
 const csp::common::Vector3& FogSpaceComponent::GetPosition() const { return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Position)); }
 
-void FogSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Position), Value); }
+void FogSpaceComponent::SetPosition(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Position), value); }
 
 const csp::common::Vector4& FogSpaceComponent::GetRotation() const { return GetVector4Property(static_cast<uint32_t>(FogPropertyKeys::Rotation)); }
 
-void FogSpaceComponent::SetRotation(const csp::common::Vector4& Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Rotation), Value); }
+void FogSpaceComponent::SetRotation(const csp::common::Vector4& value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Rotation), value); }
 
 const csp::common::Vector3& FogSpaceComponent::GetScale() const { return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Scale)); }
 
-void FogSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Scale), Value); }
+void FogSpaceComponent::SetScale(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Scale), value); }
 
 SpaceTransform FogSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void FogSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void FogSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 float FogSpaceComponent::GetStartDistance() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::StartDistance)); }
 
-void FogSpaceComponent::SetStartDistance(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::StartDistance), Value); }
+void FogSpaceComponent::SetStartDistance(float value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::StartDistance), value); }
 
 float FogSpaceComponent::GetEndDistance() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::EndDistance)); }
 
-void FogSpaceComponent::SetEndDistance(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::EndDistance), Value); }
+void FogSpaceComponent::SetEndDistance(float value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::EndDistance), value); }
 
 const csp::common::Vector3& FogSpaceComponent::GetColor() const { return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Color)); }
 
-void FogSpaceComponent::SetColor(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Color), Value); }
+void FogSpaceComponent::SetColor(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Color), value); }
 
 float FogSpaceComponent::GetDensity() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::Density)); }
 
-void FogSpaceComponent::SetDensity(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Density), Value); }
+void FogSpaceComponent::SetDensity(float value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::Density), value); }
 
 float FogSpaceComponent::GetHeightFalloff() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)); }
 
-void FogSpaceComponent::SetHeightFalloff(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff), Value); }
+void FogSpaceComponent::SetHeightFalloff(float value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff), value); }
 
 float FogSpaceComponent::GetMaxOpacity() const { return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)); }
 
-void FogSpaceComponent::SetMaxOpacity(float Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::MaxOpacity), Value); }
+void FogSpaceComponent::SetMaxOpacity(float value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::MaxOpacity), value); }
 
 bool FogSpaceComponent::GetIsVolumetric() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)); }
 
-void FogSpaceComponent::SetIsVolumetric(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVolumetric), Value); }
+void FogSpaceComponent::SetIsVolumetric(bool value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVolumetric), value); }
 
 /* IVisibleComponent */
 
 bool FogSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVisible)); }
 
-void FogSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVisible), Value); }
+void FogSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVisible), value); }
 
 bool FogSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible)); }
 
-void FogSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible), Value); }
+void FogSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible), value); }
 
 bool FogSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVirtualVisible)); }
 
-void FogSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVirtualVisible), Value); }
+void FogSpaceComponent::SetIsVirtualVisible(bool value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVirtualVisible), value); }
 
 const csp::common::String& FogSpaceComponent::GetThirdPartyComponentRef() const
 {
     return GetStringProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef));
 }
 
-void FogSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+void FogSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& inValue)
 {
-    SetProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef), inValue);
 }
 
 } // namespace csp::multiplayer

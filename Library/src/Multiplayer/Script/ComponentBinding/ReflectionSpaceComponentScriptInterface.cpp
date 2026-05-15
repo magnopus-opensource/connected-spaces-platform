@@ -23,8 +23,8 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-ReflectionSpaceComponentScriptInterface::ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+ReflectionSpaceComponentScriptInterface::ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 

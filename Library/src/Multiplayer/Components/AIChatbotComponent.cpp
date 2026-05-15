@@ -50,8 +50,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& AIChatbotSpaceComponent::GetSchema() { return Schema; }
 
-csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -60,16 +60,16 @@ const csp::common::String& AIChatbotSpaceComponent::GetVoice() const
     return GetStringProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Voice));
 }
 
-void AIChatbotSpaceComponent::SetVoice(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Voice), Value); }
+void AIChatbotSpaceComponent::SetVoice(const csp::common::String& value) { SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Voice), value); }
 
 const csp::common::String& AIChatbotSpaceComponent::GetGuardrailAssetCollectionId() const
 {
     return GetStringProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId));
 }
 
-void AIChatbotSpaceComponent::SetGuardrailAssetCollectionId(const csp::common::String& Value)
+void AIChatbotSpaceComponent::SetGuardrailAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId), value);
 }
 
 AIChatbotVisualState AIChatbotSpaceComponent::GetVisualState() const
@@ -77,9 +77,9 @@ AIChatbotVisualState AIChatbotSpaceComponent::GetVisualState() const
     return static_cast<AIChatbotVisualState>(GetIntegerProperty((uint32_t)AIChatbotPropertyKeys::VisualState));
 }
 
-void AIChatbotSpaceComponent::SetVisualState(AIChatbotVisualState Value)
+void AIChatbotSpaceComponent::SetVisualState(AIChatbotVisualState value)
 {
-    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState), static_cast<int64_t>(value));
 }
 
 /* ITransformComponent */
@@ -89,9 +89,9 @@ const csp::common::Vector3& AIChatbotSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(AIChatbotPropertyKeys::Position));
 }
 
-void AIChatbotSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void AIChatbotSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Position), value);
 }
 
 } // namespace csp::multiplayer

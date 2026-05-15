@@ -71,26 +71,26 @@ public:
 
     /// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CollisionSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// @brief Gets the collision shape used by this collision component.
@@ -115,7 +115,7 @@ public:
 
     /// @brief Sets the ID of the collision asset used by this collision component.
     /// @param Value The ID of the collision asset used by this collision component.
-    void SetCollisionAssetId(const csp::common::String& Value);
+    void SetCollisionAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's collision asset, both the Asset ID and the Asset Collection ID are required.
@@ -125,7 +125,7 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's collision asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// @brief Gets the minimum unscaled bounding box of this collision component.
     /// @return The minimum unscaled bounding box of this collision component.
@@ -160,7 +160,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 
     /// \addtogroup IEnableableComponent
@@ -168,7 +168,7 @@ public:
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool Value) override;
+    void SetIsEnabled(bool value) override;
     /// @}
 };
 

@@ -21,78 +21,78 @@
 namespace csp::common
 {
 
-csp::common::String Encode::URI(const csp::common::String& UriToEncode, bool DoubleEncode)
+csp::common::String Encode::URI(const csp::common::String& uriToEncode, bool doubleEncode)
 {
-    std::string RawString(UriToEncode.c_str());
-    std::string EncodedString;
+    std::string rawString(uriToEncode.c_str());
+    std::string encodedString;
 
-    for (auto Char : RawString)
+    for (auto Char : rawString)
     {
         // Covering alphanumeric characters.
         if ((Char >= 'a' && Char <= 'z') || (Char >= 'A' && Char <= 'Z') || (Char >= '0' && Char <= '9') || Char == '-' || Char == '_' || Char == '.'
             || Char == '~')
         {
-            EncodedString += Char;
+            encodedString += Char;
         }
         else
         {
             // A non-alphanumeric character needs encoding with the 0xXX pattern.
-            char Buffer[10];
-            sprintf(Buffer, "%X", Char);
+            char buffer[10];
+            sprintf(buffer, "%X", Char);
             if (Char < 16)
             {
                 // Single hex value with a preceding 0 will suffice
-                EncodedString += "%0";
+                encodedString += "%0";
             }
             else
             {
                 // Needs both hex values to represent it.
-                EncodedString += "%";
+                encodedString += "%";
             }
 
-            EncodedString += Buffer;
+            encodedString += buffer;
         }
     }
 
-    csp::common::String ReturnValue(EncodedString.c_str());
+    csp::common::String returnValue(encodedString.c_str());
 
-    if (DoubleEncode)
+    if (doubleEncode)
     {
-        ReturnValue = Encode::URI(ReturnValue);
+        returnValue = Encode::URI(returnValue);
     }
 
-    return ReturnValue;
+    return returnValue;
 }
 
-csp::common::String Decode::URI(const csp::common::String& UriToDecode, bool DoubleDecode)
+csp::common::String Decode::URI(const csp::common::String& uriToDecode, bool doubleDecode)
 {
-    std::string EncodedString(UriToDecode.c_str());
-    std::string RawString;
+    std::string encodedString(uriToDecode.c_str());
+    std::string rawString;
 
-    for (size_t i = 0; i < EncodedString.length(); i++)
+    for (size_t i = 0; i < encodedString.length(); i++)
     {
-        if (EncodedString[i] != '%')
+        if (encodedString[i] != '%')
         {
-            RawString += EncodedString[i]; // Just a regular character.
+            rawString += encodedString[i]; // Just a regular character.
         }
         else
         {
             // We have an encoded character. Decode to int, cast to char, and append.
-            int CharInteger = 0x0;
-            sscanf(EncodedString.substr(i + 1, 2).c_str(), "%x", &CharInteger);
-            RawString += static_cast<char>(CharInteger);
+            int charInteger = 0x0;
+            sscanf(encodedString.substr(i + 1, 2).c_str(), "%x", &charInteger);
+            rawString += static_cast<char>(charInteger);
             i = i + 2; // done, skip the entire hex value and move onto the next character.
         }
     }
 
-    csp::common::String ReturnValue(RawString.c_str());
+    csp::common::String returnValue(rawString.c_str());
 
-    if (DoubleDecode)
+    if (doubleDecode)
     {
-        ReturnValue = Decode::URI(ReturnValue);
+        returnValue = Decode::URI(returnValue);
     }
 
-    return ReturnValue;
+    return returnValue;
 }
 
 }; // namespace csp::common

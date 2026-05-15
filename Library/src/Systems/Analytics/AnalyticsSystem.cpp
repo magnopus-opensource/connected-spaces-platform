@@ -34,40 +34,40 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-std::shared_ptr<chs::AnalyticsRecord> CreateAnalyticsRecord(const csp::ClientUserAgent* UserAgentInfo, const String& ProductContextSection,
-    const String& Category, const String& InteractionType, const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata)
+std::shared_ptr<chs::AnalyticsRecord> CreateAnalyticsRecord(const csp::ClientUserAgent* userAgentInfo, const String& productContextSection,
+    const String& category, const String& interactionType, const Optional<String>& subCategory, const Optional<Map<String, String>>& metadata)
 {
     // Construct an AnalyticsRecord object
-    auto Record = std::make_shared<chs::AnalyticsRecord>();
-    Record->SetProductIdentifier("csp");
-    Record->SetProductContext(UserAgentInfo->ClientSKU);
-    Record->SetTenantName(CSPFoundation::GetTenant());
-    Record->SetProductContextSection(ProductContextSection);
-    Record->SetCategory(Category);
-    Record->SetInteractionType(InteractionType);
+    auto record = std::make_shared<chs::AnalyticsRecord>();
+    record->SetProductIdentifier("csp");
+    record->SetProductContext(userAgentInfo->ClientSKU);
+    record->SetTenantName(CSPFoundation::GetTenant());
+    record->SetProductContextSection(productContextSection);
+    record->SetCategory(category);
+    record->SetInteractionType(interactionType);
 
-    if (SubCategory.HasValue())
+    if (subCategory.HasValue())
     {
-        Record->SetSubCategory(*SubCategory);
+        record->SetSubCategory(*subCategory);
     }
 
-    String ClientVersion
-        = fmt::format("{}/{}({})", UserAgentInfo->ClientSKU.c_str(), UserAgentInfo->ClientVersion.c_str(), UserAgentInfo->ClientEnvironment.c_str())
+    String clientVersion
+        = fmt::format("{}/{}({})", userAgentInfo->ClientSKU.c_str(), userAgentInfo->ClientVersion.c_str(), userAgentInfo->ClientEnvironment.c_str())
               .c_str();
-    String CSPVersion = fmt::format("CSP/{}({})", CSPFoundation::GetVersion().c_str(), CSPFoundation::GetBuildType().c_str()).c_str();
+    String cspVersion = fmt::format("CSP/{}({})", CSPFoundation::GetVersion().c_str(), CSPFoundation::GetBuildType().c_str()).c_str();
 
-    std::vector<String> VersionsMatrix { ClientVersion, CSPVersion };
-    Record->SetVersionMatrix(VersionsMatrix);
+    std::vector<String> versionsMatrix { clientVersion, cspVersion };
+    record->SetVersionMatrix(versionsMatrix);
 
-    if (Metadata.HasValue())
+    if (metadata.HasValue())
     {
-        std::map<String, String> AnalyticsRecordMetadata = Metadata->GetUnderlying();
-        Record->SetMetadata(AnalyticsRecordMetadata);
+        std::map<String, String> analyticsRecordMetadata = metadata->GetUnderlying();
+        record->SetMetadata(analyticsRecordMetadata);
     }
 
-    Record->SetTimestamp(DateTime::TimeNow().GetUtcString());
+    record->SetTimestamp(DateTime::TimeNow().GetUtcString());
 
-    return Record;
+    return record;
 }
 
 }
@@ -78,122 +78,122 @@ namespace csp::systems
 class AnalyticsQueueEventHandler : public csp::events::EventListener
 {
 public:
-    AnalyticsQueueEventHandler(AnalyticsSystem* AnalyticsSystem);
+    AnalyticsQueueEventHandler(AnalyticsSystem* analyticsSystem);
 
-    void OnEvent(const csp::events::Event& InEvent) override;
+    void OnEvent(const csp::events::Event& inEvent) override;
 
 private:
-    AnalyticsSystem* _AnalyticsSystem;
+    AnalyticsSystem* m_analyticsSystem;
 };
 
-AnalyticsQueueEventHandler::AnalyticsQueueEventHandler(AnalyticsSystem* AnalyticsSystem)
-    : _AnalyticsSystem(AnalyticsSystem)
+AnalyticsQueueEventHandler::AnalyticsQueueEventHandler(AnalyticsSystem* analyticsSystem)
+    : m_analyticsSystem(analyticsSystem)
 {
 }
 
-void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
+void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& inEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && _AnalyticsSystem != nullptr)
+    if (inEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && m_analyticsSystem != nullptr)
     {
-        const std::chrono::milliseconds CurrentTime
+        const std::chrono::milliseconds currentTime
             = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-        if (CurrentTime - _AnalyticsSystem->GetTimeSinceLastQueueSend() >= _AnalyticsSystem->GetQueueSendRate()
-            || _AnalyticsSystem->GetCurrentQueueSize() >= _AnalyticsSystem->GetMaxQueueSize())
+        if (currentTime - m_analyticsSystem->GetTimeSinceLastQueueSend() >= m_analyticsSystem->GetQueueSendRate()
+            || m_analyticsSystem->GetCurrentQueueSize() >= m_analyticsSystem->GetMaxQueueSize())
         {
-            _AnalyticsSystem->FlushAnalyticsEventsQueue([](const NullResult& /*Result*/) {});
+            m_analyticsSystem->FlushAnalyticsEventsQueue([](const NullResult& /*Result*/) {});
         }
     }
 }
 
 AnalyticsSystem::AnalyticsSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , AnalyticsApi(nullptr)
-    , EventHandler(nullptr)
-    , AnalyticsQueueLock()
-    , AnalyticsRecordQueue()
-    , UserAgentInfo(nullptr)
-    , AnalyticsQueueSendRate(std::chrono::seconds(60))
-    , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxQueueSize(25)
+    , m_analyticsApi(nullptr)
+    , m_eventHandler(nullptr)
+    , m_analyticsQueueLock()
+    , m_analyticsRecordQueue()
+    , m_userAgentInfo(nullptr)
+    , m_analyticsQueueSendRate(std::chrono::seconds(60))
+    , m_timeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
+    , m_maxQueueSize(25)
 {
 }
 
-AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
-    , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient))
-    , EventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
-    , AnalyticsQueueLock()
-    , AnalyticsRecordQueue()
-    , UserAgentInfo(AgentInfo)
-    , AnalyticsQueueSendRate(std::chrono::seconds(60))
-    , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxQueueSize(25)
+AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* inWebClient, const csp::ClientUserAgent* agentInfo, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
+    , m_analyticsApi(std::make_unique<chs::AnalyticsApi>(inWebClient))
+    , m_eventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
+    , m_analyticsQueueLock()
+    , m_analyticsRecordQueue()
+    , m_userAgentInfo(agentInfo)
+    , m_analyticsQueueSendRate(std::chrono::seconds(60))
+    , m_timeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
+    , m_maxQueueSize(25)
 {
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler.get());
 }
 
-AnalyticsSystem::~AnalyticsSystem() { csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get()); }
+AnalyticsSystem::~AnalyticsSystem() { csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler.get()); }
 
-void AnalyticsSystem::SetTimeSinceLastQueueSend(std::chrono::milliseconds NewTimeSinceLastQueueSend)
+void AnalyticsSystem::SetTimeSinceLastQueueSend(std::chrono::milliseconds newTimeSinceLastQueueSend)
 {
-    TimeSinceLastQueueSend = NewTimeSinceLastQueueSend;
+    m_timeSinceLastQueueSend = newTimeSinceLastQueueSend;
 }
 
 // This is a utility function to allow us to test the batching functionality in a reasonable time frame.
-void AnalyticsSystem::__SetQueueSendRateAndMaxSize(std::chrono::milliseconds NewSendRate, size_t NewQueueSize)
+void AnalyticsSystem::__SetQueueSendRateAndMaxSize(std::chrono::milliseconds newSendRate, size_t newQueueSize)
 {
-    std::scoped_lock AnalyticsQueueLocker(AnalyticsQueueLock);
+    std::scoped_lock analyticsQueueLocker(m_analyticsQueueLock);
 
-    AnalyticsQueueSendRate = NewSendRate;
-    MaxQueueSize = NewQueueSize;
+    m_analyticsQueueSendRate = newSendRate;
+    m_maxQueueSize = newQueueSize;
 }
 
-void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
-    const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata, NullResultCallback Callback)
+void AnalyticsSystem::SendAnalyticsEvent(const String& productContextSection, const String& category, const String& interactionType,
+    const Optional<String>& subCategory, const Optional<Map<String, String>>& metadata, NullResultCallback callback)
 {
-    if (ProductContextSection.IsEmpty() || Category.IsEmpty() || InteractionType.IsEmpty())
+    if (productContextSection.IsEmpty() || category.IsEmpty() || interactionType.IsEmpty())
     {
         CSP_LOG_MSG(common::LogLevel::Error,
             "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.");
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
 
         return;
     }
 
-    auto Record = CreateAnalyticsRecord(UserAgentInfo, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
+    auto record = CreateAnalyticsRecord(m_userAgentInfo, productContextSection, category, interactionType, subCategory, metadata);
 
-    std::vector<std::shared_ptr<chs::AnalyticsRecord>> Records;
-    Records.push_back(Record);
+    std::vector<std::shared_ptr<chs::AnalyticsRecord>> records;
+    records.push_back(record);
 
-    NullResultCallback SendAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
+    NullResultCallback sendAnalyticsCallback = [logSystem = this->m_logSystem, callback](const NullResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+        if (result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            LogSystem->LogMsg(common::LogLevel::Error,
-                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
-                    Result.GetHttpResultCode())
+            logSystem->LogMsg(common::LogLevel::Error,
+                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(result.GetResultCode()),
+                    result.GetHttpResultCode())
                     .c_str());
         }
 
-        INVOKE_IF_NOT_NULL(Callback, Result);
+        INVOKE_IF_NOT_NULL(callback, result);
     };
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendAnalyticsCallback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_analyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(sendAnalyticsCallback, nullptr);
 
-    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ Records }, ResponseHandler);
+    static_cast<chs::AnalyticsApi*>(m_analyticsApi.get())->analyticsBulkPost({ records }, responseHandler);
 }
 
-void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
-    const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata)
+void AnalyticsSystem::QueueAnalyticsEvent(const String& productContextSection, const String& category, const String& interactionType,
+    const Optional<String>& subCategory, const Optional<Map<String, String>>& metadata)
 {
-    if (ProductContextSection.IsEmpty() || Category.IsEmpty() || InteractionType.IsEmpty())
+    if (productContextSection.IsEmpty() || category.IsEmpty() || interactionType.IsEmpty())
     {
         CSP_LOG_MSG(common::LogLevel::Error,
             "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.");
@@ -201,63 +201,63 @@ void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, c
         return;
     }
 
-    auto Record = CreateAnalyticsRecord(UserAgentInfo, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
+    auto record = CreateAnalyticsRecord(m_userAgentInfo, productContextSection, category, interactionType, subCategory, metadata);
 
-    std::scoped_lock AnalyticsQueueLocker(AnalyticsQueueLock);
-    AnalyticsRecordQueue.emplace_back(Record);
+    std::scoped_lock analyticsQueueLocker(m_analyticsQueueLock);
+    m_analyticsRecordQueue.emplace_back(record);
 }
 
-void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
+void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback callback)
 {
-    std::scoped_lock AnalyticsQueueLocker(AnalyticsQueueLock);
+    std::scoped_lock analyticsQueueLocker(m_analyticsQueueLock);
 
-    if (AnalyticsRecordQueue.empty())
+    if (m_analyticsRecordQueue.empty())
     {
         // Return Success and ResponseNoContent to indicate that the flush operation was successful but there were no records to send.
-        NullResult Result(csp::systems::EResultCode::Success, 204);
-        INVOKE_IF_NOT_NULL(Callback, Result);
+        NullResult result(csp::systems::EResultCode::Success, 204);
+        INVOKE_IF_NOT_NULL(callback, result);
 
         return;
     }
 
-    const std::chrono::milliseconds CurrentTime
+    const std::chrono::milliseconds currentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    SetTimeSinceLastQueueSend(CurrentTime);
+    SetTimeSinceLastQueueSend(currentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
+    NullResultCallback sendBatchAnalyticsCallback = [logSystem = this->m_logSystem, callback](const NullResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        if (result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
+            logSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
         }
-        else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+        else if (result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            LogSystem->LogMsg(common::LogLevel::Error,
-                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
-                    Result.GetHttpResultCode())
+            logSystem->LogMsg(common::LogLevel::Error,
+                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(result.GetResultCode()),
+                    result.GetHttpResultCode())
                     .c_str());
         }
 
-        if (Callback)
+        if (callback)
         {
-            INVOKE_IF_NOT_NULL(Callback, Result);
+            INVOKE_IF_NOT_NULL(callback, result);
         }
     };
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_analyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(sendBatchAnalyticsCallback, nullptr);
 
-    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueue }, ResponseHandler);
+    static_cast<chs::AnalyticsApi*>(m_analyticsApi.get())->analyticsBulkPost({ m_analyticsRecordQueue }, responseHandler);
 
     // Clear the analytics record queue.
     // The async analyticsBulkPost endpoint serializes the records data to json so it is safe to clear here.
-    AnalyticsRecordQueue.clear();
+    m_analyticsRecordQueue.clear();
 }
 
 } // namespace csp::systems

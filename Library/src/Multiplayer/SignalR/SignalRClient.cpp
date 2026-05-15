@@ -39,40 +39,40 @@ namespace csp::multiplayer
 
 csp::multiplayer::IWebSocketClient* CSPWebSocketClientPtr = nullptr;
 
-void SetWebSocketClient(IWebSocketClient* InCSPWebSocketClientPtr) { CSPWebSocketClientPtr = InCSPWebSocketClientPtr; }
+void SetWebSocketClient(IWebSocketClient* inCspWebSocketClientPtr) { CSPWebSocketClientPtr = inCspWebSocketClientPtr; }
 
-CSPWebsocketClient::CSPWebsocketClient() noexcept { RefreshInitialised = false; }
+CSPWebsocketClient::CSPWebsocketClient() noexcept { m_refreshInitialised = false; }
 
 void CSPWebsocketClient::start(const std::string& url, std::function<void(std::exception_ptr)> callback)
 {
-    IWebSocketClient::CallbackHandler LocalCallback
+    IWebSocketClient::CallbackHandler localCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Start Error"))); };
 
-    CSPWebSocketClientPtr->Start(url, LocalCallback);
+    CSPWebSocketClientPtr->Start(url, localCallback);
 }
 
 void CSPWebsocketClient::stop(std::function<void(std::exception_ptr)> callback)
 {
-    IWebSocketClient::CallbackHandler LocalCallback
+    IWebSocketClient::CallbackHandler localCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Stop Error"))); };
 
-    CSPWebSocketClientPtr->Stop(LocalCallback);
+    CSPWebSocketClientPtr->Stop(localCallback);
 }
 
 void CSPWebsocketClient::send(const std::string& payload, signalr::transfer_format /*format*/, std::function<void(std::exception_ptr)> callback)
 {
-    IWebSocketClient::CallbackHandler LocalCallback
+    IWebSocketClient::CallbackHandler localCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Stop Error"))); };
 
-    CSPWebSocketClientPtr->Send(payload, LocalCallback);
+    CSPWebSocketClientPtr->Send(payload, localCallback);
 }
 
 void CSPWebsocketClient::receive(std::function<void(const std::string&, std::exception_ptr)> callback)
 {
-    IWebSocketClient::ReceiveHandler LocalCallback = [callback](const std::string& message, bool ok)
+    IWebSocketClient::ReceiveHandler localCallback = [callback](const std::string& message, bool ok)
     { ok ? callback(message, nullptr) : callback(message, std::make_exception_ptr(std::runtime_error("Socket Receive Error"))); };
 
-    CSPWebSocketClientPtr->Receive(LocalCallback);
+    CSPWebSocketClientPtr->Receive(localCallback);
 }
 
 class SignalRResponseWaiter
@@ -83,24 +83,24 @@ public:
     /// @param TimeOutInSeconds Maximum time to wait in Seconds
     /// @param SleepTimeMs (Optional) Millseconds to sleep for while waiting (default 100 ms)
     /// @return True if event occured or False if timeout period expired
-    bool WaitFor(std::function<bool(void)> IsDone, const std::chrono::seconds& TimeOutInSeconds,
-        const std::chrono::milliseconds SleepTimeMs = std::chrono::milliseconds(100))
+    bool WaitFor(std::function<bool(void)> isDone, const std::chrono::seconds& timeOutInSeconds,
+        const std::chrono::milliseconds sleepTimeMs = std::chrono::milliseconds(100))
     {
         using clock = std::chrono::system_clock;
 
-        auto Start = clock::now();
-        clock::duration Elapsed = clock::now() - Start;
+        auto start = clock::now();
+        clock::duration elapsed = clock::now() - start;
 
-        const std::chrono::duration TimeOut = TimeOutInSeconds;
+        const std::chrono::duration timeOut = timeOutInSeconds;
 
-        while (!IsDone() && (Elapsed < TimeOut))
+        while (!isDone() && (elapsed < timeOut))
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(SleepTimeMs));
-            Elapsed = clock::now() - Start;
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleepTimeMs));
+            elapsed = clock::now() - start;
         }
 
         // Returns True if done event occured or False if we timeout
-        return IsDone();
+        return isDone();
     }
 };
 
@@ -108,15 +108,15 @@ class SignalRResponseReceiver : public SignalRResponseWaiter, public csp::web::I
 {
 public:
     SignalRResponseReceiver()
-        : ResponseReceived(false)
-        , ThreadId(std::this_thread::get_id())
+        : m_responseReceived(false)
+        , m_threadId(std::this_thread::get_id())
     {
     }
 
-    void OnHttpResponse(csp::web::HttpResponse& InResponse) override
+    void OnHttpResponse(csp::web::HttpResponse& inResponse) override
     {
-        Response = InResponse;
-        ResponseReceived = true;
+        m_response = inResponse;
+        m_responseReceived = true;
     }
 
     bool WaitForResponse()
@@ -124,23 +124,23 @@ public:
         return WaitFor([this] { return IsResponseReceived(); }, std::chrono::seconds(5));
     }
 
-    bool IsResponseReceived() const { return ResponseReceived; }
+    bool IsResponseReceived() const { return m_responseReceived; }
 
-    csp::web::HttpResponse& GetResponse() { return Response; }
+    csp::web::HttpResponse& GetResponse() { return m_response; }
 
 private:
-    csp::web::HttpResponse Response;
-    std::atomic<bool> ResponseReceived;
-    std::thread::id ThreadId;
+    csp::web::HttpResponse m_response;
+    std::atomic<bool> m_responseReceived;
+    std::thread::id m_threadId;
 };
 
-CSPHttpClient::CSPHttpClient(csp::common::IAuthContext& AuthContext)
+CSPHttpClient::CSPHttpClient(csp::common::IAuthContext& authContext)
 {
 // Passing null for the LogSystem to the POCO/Emscripten web client ctor to avoid logging high frequency multiplayer API exchange.
 #ifdef CSP_WASM
     WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
 #else
-    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
+    m_webClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS, authContext, nullptr);
 #endif
 }
 
@@ -149,34 +149,34 @@ void CSPHttpClient::send(
 {
     CSP_PROFILE_SCOPED();
 
-    SignalRResponseReceiver SignalRConnectionReceiver;
-    csp::web::HttpPayload PayLoad;
-    PayLoad.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-    PayLoad.SetBearerToken();
+    SignalRResponseReceiver signalRConnectionReceiver;
+    csp::web::HttpPayload payLoad;
+    payLoad.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+    payLoad.SetBearerToken();
 
     // Set headers here
     if (request.headers.size() > 0)
     {
         for (auto& header : request.headers)
         {
-            PayLoad.AddHeader(CSP_TEXT(header.first.c_str()), CSP_TEXT(header.second.c_str()));
+            payLoad.AddHeader(CSP_TEXT(header.first.c_str()), CSP_TEXT(header.second.c_str()));
         }
     }
 
-    PayLoad.AddContent(CSP_TEXT(request.content.c_str()));
-    std::string UriString = "negotiate?negotiateVersion=1";
+    payLoad.AddContent(CSP_TEXT(request.content.c_str()));
+    std::string uriString = "negotiate?negotiateVersion=1";
 
-    WebClientHttps->SendRequest(
-        csp::web::ERequestVerb::POST, csp::web::Uri(UriString.c_str()), PayLoad, &SignalRConnectionReceiver, csp::common::CancellationToken::Dummy());
+    m_webClientHttps->SendRequest(
+        csp::web::ERequestVerb::POST, csp::web::Uri(uriString.c_str()), payLoad, &signalRConnectionReceiver, csp::common::CancellationToken::Dummy());
     // Sleep thread until response is received
-    if (SignalRConnectionReceiver.WaitForResponse())
+    if (signalRConnectionReceiver.WaitForResponse())
     {
-        if (SignalRConnectionReceiver.GetResponse().GetResponseCode() == csp::web::EResponseCodes::ResponseOK)
+        if (signalRConnectionReceiver.GetResponse().GetResponseCode() == csp::web::EResponseCodes::ResponseOK)
         {
-            std::string ResponseContent = SignalRConnectionReceiver.GetResponse().GetPayload().GetContent().c_str();
-            http_response ReceivedResponse
-                = http_response(static_cast<int>(SignalRConnectionReceiver.GetResponse().GetResponseCode()), ResponseContent);
-            callback(ReceivedResponse, nullptr);
+            std::string responseContent = signalRConnectionReceiver.GetResponse().GetPayload().GetContent().c_str();
+            http_response receivedResponse
+                = http_response(static_cast<int>(signalRConnectionReceiver.GetResponse().GetResponseCode()), responseContent);
+            callback(receivedResponse, nullptr);
         }
         else
         {

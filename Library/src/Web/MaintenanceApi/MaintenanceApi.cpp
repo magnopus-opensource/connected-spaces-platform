@@ -22,22 +22,22 @@
 
 namespace csp::systems::maintenanceservice
 {
-MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
+MaintenanceApi::MaintenanceApi(csp::web::WebClient* inWebClient)
+    : ApiBase(inWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
 {
 }
 
 MaintenanceApi::~MaintenanceApi() { }
 
-void MaintenanceApi::Query(const csp::common::String& MaintenanceURL, csp::services::ApiResponseHandlerBase* ResponseHandler,
-    csp::common::CancellationToken& CancellationToken) const
+void MaintenanceApi::Query(const csp::common::String& maintenanceUrl, csp::services::ApiResponseHandlerBase* responseHandler,
+    csp::common::CancellationToken& cancellationToken) const
 {
 
-    std::string MaintenanceURLLower = std::string(MaintenanceURL.c_str());
-    csp::web::Uri Uri = csp::web::Uri(MaintenanceURLLower.c_str());
+    std::string maintenanceUrlLower = std::string(maintenanceUrl.c_str());
+    csp::web::Uri uri = csp::web::Uri(maintenanceUrlLower.c_str());
 
-    csp::web::HttpPayload Payload;
-    Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
-    WebClient->SendRequest(csp::web::ERequestVerb::GET, Uri, Payload, ResponseHandler, CancellationToken);
+    csp::web::HttpPayload payload;
+    payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
+    WebClient->SendRequest(csp::web::ERequestVerb::GET, uri, payload, responseHandler, cancellationToken);
 }
 } // namespace csp::systems::maintenanceservice

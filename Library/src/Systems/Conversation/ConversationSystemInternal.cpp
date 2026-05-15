@@ -25,40 +25,40 @@ namespace csp::systems
 
 namespace
 {
-    void SendConversationEvent(multiplayer::ConversationEventType EventType, const multiplayer::MessageInfo& EventInfo,
-        multiplayer::NetworkEventBus* NetworkEventBus, multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler Callback)
+    void SendConversationEvent(multiplayer::ConversationEventType eventType, const multiplayer::MessageInfo& eventInfo,
+        multiplayer::NetworkEventBus* networkEventBus, multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler callback)
     {
-        auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-        NetworkEventBus->SendNetworkEvent("Conversation", EventParams, Callback);
+        auto eventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(eventType, eventInfo);
+        networkEventBus->SendNetworkEvent("Conversation", eventParams, callback);
     }
 
     // Temp utility function until we adapt the new continuation pattern
     template <class InResultType, class OutResultType>
-    bool HandleConversationResult(const InResultType& Result, const char* ErrorMessage, std::function<void(const OutResultType&)> FailCallback)
+    bool HandleConversationResult(const InResultType& result, const char* errorMessage, std::function<void(const OutResultType&)> failCallback)
     {
-        if (Result.GetResultCode() == EResultCode::InProgress)
+        if (result.GetResultCode() == EResultCode::InProgress)
         {
             return false;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
             CSP_LOG_ERROR_FORMAT(
-                (std::string(ErrorMessage) + "ResCode: %d, HttpResCode: %d").c_str(), (int)Result.GetResultCode(), Result.GetHttpResultCode());
+                (std::string(errorMessage) + "ResCode: %d, HttpResCode: %d").c_str(), (int)result.GetResultCode(), result.GetHttpResultCode());
 
-            const OutResultType InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-            INVOKE_IF_NOT_NULL(FailCallback, InternalResult);
+            const OutResultType internalResult(result.GetResultCode(), result.GetHttpResultCode());
+            INVOKE_IF_NOT_NULL(failCallback, internalResult);
             return false;
         }
 
         return true;
     }
 
-    bool EnsureUserHasPermission(const common::String& UserId, const common::String& ConversationUserId, bool IsConversation)
+    bool EnsureUserHasPermission(const common::String& userId, const common::String& conversationUserId, bool isConversation)
     {
-        if (UserId != ConversationUserId)
+        if (userId != conversationUserId)
         {
-            if (IsConversation)
+            if (isConversation)
             {
                 CSP_LOG_ERROR_MSG("User does not have permission to modify this conversation.");
             }
@@ -73,37 +73,37 @@ namespace
         return true;
     }
 
-    std::function<AssetCollectionResult(const AssetCollectionResult& Result)> ValidateMessageAssetCollection(common::String ConversationId)
+    std::function<AssetCollectionResult(const AssetCollectionResult& result)> ValidateMessageAssetCollection(common::String conversationId)
     {
-        return [ConversationId](const AssetCollectionResult& Result)
+        return [conversationId](const AssetCollectionResult& result)
         {
-            if (Result.GetAssetCollection().ParentId != ConversationId)
+            if (result.GetAssetCollection().ParentId != conversationId)
             {
                 throw csp::common::continuations::ResultException(
                     "Given message doesn't exist on the conversation.", MakeInvalid<AssetCollectionResult>());
             }
 
-            return Result;
+            return result;
         };
     }
 
-    std::function<void(const AssetCollectionResult& Result)> SetMessageAssetCollection(std::shared_ptr<systems::AssetCollection> OutAssetCollection)
+    std::function<void(const AssetCollectionResult& result)> SetMessageAssetCollection(std::shared_ptr<systems::AssetCollection> outAssetCollection)
     {
-        return [OutAssetCollection](const AssetCollectionResult& Result) { *OutAssetCollection = Result.GetAssetCollection(); };
+        return [outAssetCollection](const AssetCollectionResult& result) { *outAssetCollection = result.GetAssetCollection(); };
     }
 
-    std::function<void(const AssetResult& Result)> SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
+    std::function<void(const AssetResult& result)> SetAnnotationAsset(std::shared_ptr<Asset> outAsset)
     {
-        return [OutAsset](const systems::AssetResult& Result) { *OutAsset = Result.GetAsset(); };
+        return [outAsset](const systems::AssetResult& result) { *outAsset = result.GetAsset(); };
     }
 
-    std::function<void(const AssetsResult& Result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
+    std::function<void(const AssetsResult& result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> outAsset)
     {
-        return [OutAsset](const systems::AssetsResult& Result)
+        return [outAsset](const systems::AssetsResult& result)
         {
-            if (Result.GetAssets().Size() == 1)
+            if (result.GetAssets().Size() == 1)
             {
-                *OutAsset = Result.GetAssets()[0];
+                *outAsset = result.GetAssets()[0];
             }
             else
             {
@@ -112,51 +112,51 @@ namespace
         };
     }
 
-    std::function<async::task<UriResult>()> UploadAnnotationAssetData(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection,
-        std::shared_ptr<systems::Asset> Asset, const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
+    std::function<async::task<UriResult>()> UploadAnnotationAssetData(AssetSystem* assetSystem, std::shared_ptr<systems::AssetCollection> collection,
+        std::shared_ptr<systems::Asset> asset, const systems::BufferAssetDataSource& data, const csp::common::String& fileName)
     {
-        return [AssetSystem, Collection, Asset, Data, FileName]()
+        return [assetSystem, collection, asset, data, fileName]()
         {
-            Asset->FileName = FileName;
-            return AssetSystem->UploadAssetDataEx(*Collection, *Asset, Data, csp::common::CancellationToken::Dummy());
+            asset->FileName = fileName;
+            return assetSystem->UploadAssetDataEx(*collection, *asset, data, csp::common::CancellationToken::Dummy());
         };
     }
 
-    std::function<multiplayer::AnnotationResult()> CreateAnnotationResult(std::shared_ptr<systems::AssetCollection> AnnotationAssetCollection,
-        std::shared_ptr<systems::Asset> AnnotationAsset, std::shared_ptr<systems::Asset> AnnotationThumbnailAsset)
+    std::function<multiplayer::AnnotationResult()> CreateAnnotationResult(std::shared_ptr<systems::AssetCollection> annotationAssetCollection,
+        std::shared_ptr<systems::Asset> annotationAsset, std::shared_ptr<systems::Asset> annotationThumbnailAsset)
     {
-        return [AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset]()
+        return [annotationAssetCollection, annotationAsset, annotationThumbnailAsset]()
         {
-            multiplayer::AnnotationResult Result(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
-            Result.ParseAnnotationAssetData(*AnnotationAssetCollection);
-            Result.SetAnnotationAsset(*AnnotationAsset);
-            Result.SetAnnotationThumbnailAsset(*AnnotationThumbnailAsset);
-            return Result;
+            multiplayer::AnnotationResult result(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+            result.ParseAnnotationAssetData(*annotationAssetCollection);
+            result.SetAnnotationAsset(*annotationAsset);
+            result.SetAnnotationThumbnailAsset(*annotationThumbnailAsset);
+            return result;
         };
     }
 
-    std::function<async::task<AssetsResult>()> GetAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection)
+    std::function<async::task<AssetsResult>()> GetAnnotationAsset(AssetSystem* assetSystem, std::shared_ptr<systems::AssetCollection> collection)
     {
-        return [AssetSystem, Collection]()
-        { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION }); };
+        return [assetSystem, collection]()
+        { return assetSystem->GetAssetsByCriteria({ collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION }); };
     }
 
-    std::function<async::task<AssetsResult>()> GetAnnotationThumbnailAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+    std::function<async::task<AssetsResult>()> GetAnnotationThumbnailAsset(AssetSystem* assetSystem, std::shared_ptr<AssetCollection> collection)
     {
-        return [AssetSystem, Collection]()
-        { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
+        return [assetSystem, collection]()
+        { return assetSystem->GetAssetsByCriteria({ collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
     }
 
     std::function<async::task<NullResult>(const AssetsResult&)> DeleteAnnotationAsset(
-        AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+        AssetSystem* assetSystem, std::shared_ptr<AssetCollection> collection)
     {
-        return [AssetSystem, Collection](const AssetsResult& Result)
+        return [assetSystem, collection](const AssetsResult& result)
         {
-            if (Result.GetAssets().Size() == 1)
+            if (result.GetAssets().Size() == 1)
             {
-                return AssetSystem->DeleteAsset(*Collection, Result.GetAssets()[0]);
+                return assetSystem->DeleteAsset(*collection, result.GetAssets()[0]);
             }
-            else if (Result.GetAssets().Size() == 0)
+            else if (result.GetAssets().Size() == 0)
             {
                 throw csp::common::continuations::ResultException("Annotation asset doesn't exist", MakeInvalid<NullResult>());
             }
@@ -168,59 +168,59 @@ namespace
         };
     }
 
-    std::function<void(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> Asset)
+    std::function<void(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> asset)
     {
-        return [Asset](const UriResult& Result) { Asset->Uri = Result.GetUri(); };
+        return [asset](const UriResult& result) { asset->Uri = result.GetUri(); };
     }
 
-    std::function<async::task<AssetCollectionResult>(const csp::common::Map<csp::common::String, csp::common::String>& Metadata)>
-    AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
+    std::function<async::task<AssetCollectionResult>(const csp::common::Map<csp::common::String, csp::common::String>& metadata)>
+    AppendCommentMetadata(AssetSystem* assetSystem, std::shared_ptr<AssetCollection>& messageCollection)
     {
-        return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+        return [assetSystem, messageCollection](const csp::common::Map<csp::common::String, csp::common::String>& metadata)
         {
-            auto NewMetadata = MessageCollection->GetMetadataImmutable();
+            auto newMetadata = messageCollection->GetMetadataImmutable();
 
-            ConversationSystemHelpers::AppendMetadata(NewMetadata, Metadata);
+            ConversationSystemHelpers::AppendMetadata(newMetadata, metadata);
 
-            return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
+            return assetSystem->UpdateAssetCollectionMetadata(*messageCollection, newMetadata, nullptr);
         };
     }
 
-    std::function<async::task<AssetCollectionResult>(const AssetCollectionResult&)> RemoveAnnotationMetadata(AssetSystem* AssetSystem)
+    std::function<async::task<AssetCollectionResult>(const AssetCollectionResult&)> RemoveAnnotationMetadata(AssetSystem* assetSystem)
     {
-        return [AssetSystem](const AssetCollectionResult& Result)
+        return [assetSystem](const AssetCollectionResult& result)
         {
-            auto Metadata = ConversationSystemHelpers::RemoveAnnotationMetadata(Result.GetAssetCollection());
-            return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollection(), Metadata, nullptr);
+            auto metadata = ConversationSystemHelpers::RemoveAnnotationMetadata(result.GetAssetCollection());
+            return assetSystem->UpdateAssetCollectionMetadata(result.GetAssetCollection(), metadata, nullptr);
         };
     }
 
     std::function<async::task<AssetResult>()> GetOrCreateAnnotationAsset(
-        AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type)
+        AssetSystem* assetSystem, std::shared_ptr<systems::AssetCollection> collection, const csp::common::String& name, EAssetType type)
     {
-        return [AssetSystem, Collection, Name, Type]()
+        return [assetSystem, collection, name, type]()
         {
-            return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { Type })
+            return assetSystem->GetAssetsByCriteria({ collection->Id }, nullptr, nullptr, csp::common::Array { type })
                 .then(
-                    [AssetSystem, Collection, Name, Type](const AssetsResult& Result)
+                    [assetSystem, collection, name, type](const AssetsResult& result)
                     {
-                        if (Result.GetAssets().Size() == 0)
+                        if (result.GetAssets().Size() == 0)
                         {
-                            return AssetSystem->CreateAsset(*Collection, Name, nullptr, nullptr, Type);
+                            return assetSystem->CreateAsset(*collection, name, nullptr, nullptr, type);
                         }
-                        else if (Result.GetAssets().Size() == 1)
+                        else if (result.GetAssets().Size() == 1)
                         {
                             CSP_LOG_MSG(
                                 csp::common::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
 
-                            async::event_task<AssetResult> OnCompleteEvent;
-                            async::task<AssetResult> OnCompleteTask = OnCompleteEvent.get_task();
+                            async::event_task<AssetResult> onCompleteEvent;
+                            async::task<AssetResult> onCompleteTask = onCompleteEvent.get_task();
 
-                            AssetResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
-                            NewResult.SetAsset(Result.GetAssets()[0]);
+                            AssetResult newResult(result.GetResultCode(), result.GetHttpResultCode());
+                            newResult.SetAsset(result.GetAssets()[0]);
 
-                            OnCompleteEvent.set(NewResult);
-                            return OnCompleteTask;
+                            onCompleteEvent.set(newResult);
+                            return onCompleteTask;
                         }
                         else
                         {
@@ -231,576 +231,576 @@ namespace
         };
     }
 
-    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(multiplayer::ConversationEventType EventType,
-        std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::NetworkEventBus* NetworkEventBus)
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(multiplayer::ConversationEventType eventType,
+        std::shared_ptr<AssetCollection> conersationCollection, multiplayer::NetworkEventBus* networkEventBus)
     {
-        return [EventType, ConersationCollection, NetworkEventBus]()
+        return [eventType, conersationCollection, networkEventBus]()
         {
-            const multiplayer::MessageInfo& EventInfo
-                = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection);
-            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-            return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
+            const multiplayer::MessageInfo& eventInfo
+                = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*conersationCollection);
+            auto eventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(eventType, eventInfo);
+            return networkEventBus->SendNetworkEvent("Conversation", eventParams);
         };
     }
 
     std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationMessageEvent(
-        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection,
-        multiplayer::NetworkEventBus* NetworkEventBus)
+        multiplayer::ConversationEventType eventType, std::shared_ptr<AssetCollection> messageCollection,
+        multiplayer::NetworkEventBus* networkEventBus)
     {
-        return [EventType, MessageCollection, NetworkEventBus]()
+        return [eventType, messageCollection, networkEventBus]()
         {
-            const multiplayer::MessageInfo& EventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection);
-            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-            return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
+            const multiplayer::MessageInfo& eventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*messageCollection);
+            auto eventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(eventType, eventInfo);
+            return networkEventBus->SendNetworkEvent("Conversation", eventParams);
         };
     }
 
     std::function<async::task<AssetCollectionsResult>()> FindMessageAssetCollections(
-        AssetSystem* AssetSystem, const common::String& ConversationId, const common::String& SpaceId)
+        AssetSystem* assetSystem, const common::String& conversationId, const common::String& spaceId)
     {
-        return [AssetSystem, ConversationId, SpaceId]()
+        return [assetSystem, conversationId, spaceId]()
         {
-            return AssetSystem->FindAssetCollections(nullptr, ConversationId, nullptr, common::Array { EAssetCollectionType::COMMENT }, nullptr,
-                common::Array { SpaceId }, nullptr, nullptr);
+            return assetSystem->FindAssetCollections(nullptr, conversationId, nullptr, common::Array { EAssetCollectionType::COMMENT }, nullptr,
+                common::Array { spaceId }, nullptr, nullptr);
         };
     }
 
     std::function<AssetCollectionResult(const AssetCollectionResult&)> ValidateAnnotationMetadata()
     {
-        return [](const AssetCollectionResult& Result)
+        return [](const AssetCollectionResult& result)
         {
-            bool HasAnnotationData = ConversationSystemHelpers::HasAnnotationMetadata(Result.GetAssetCollection());
+            bool hasAnnotationData = ConversationSystemHelpers::HasAnnotationMetadata(result.GetAssetCollection());
 
-            if (HasAnnotationData == false)
+            if (hasAnnotationData == false)
             {
                 throw csp::common::continuations::ResultException(
                     "Message asset collection doesn't contain annotation data.", MakeInvalid<AssetCollectionResult>());
             }
 
-            return Result;
+            return result;
         };
     }
 
     std::function<std::unordered_map<std::string, std::string>(const AssetCollectionsResult&)> GetAnnotationAssetIdsFromCollections()
     {
-        return [](const AssetCollectionsResult& Result)
+        return [](const AssetCollectionsResult& result)
         {
-            auto ThumbnailIds = ConversationSystemHelpers::GetAnnotationThumbnailAssetIdsFromCollectionResult(Result);
+            auto thumbnailIds = ConversationSystemHelpers::GetAnnotationThumbnailAssetIdsFromCollectionResult(result);
 
-            if (ThumbnailIds.size() == 0)
+            if (thumbnailIds.size() == 0)
             {
                 throw csp::common::continuations::ResultException("No Thumbnails exist.", MakeInvalid<AssetCollectionsResult>());
             }
 
-            return ThumbnailIds;
+            return thumbnailIds;
         };
     }
 
-    std::function<async::task<AssetsResult>(const std::unordered_map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
+    std::function<async::task<AssetsResult>(const std::unordered_map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* assetSystem)
     {
-        return [AssetSystem](const std::unordered_map<std::string, std::string>& Result)
+        return [assetSystem](const std::unordered_map<std::string, std::string>& result)
         {
-            csp::common::Array<csp::common::String> MessageIds(Result.size());
-            csp::common::Array<csp::common::String> AssetIds(Result.size());
+            csp::common::Array<csp::common::String> messageIds(result.size());
+            csp::common::Array<csp::common::String> assetIds(result.size());
             int i = 0;
 
-            for (const auto& Pair : Result)
+            for (const auto& pair : result)
             {
-                MessageIds[i] = Pair.first.c_str();
-                AssetIds[i] = Pair.second.c_str();
+                messageIds[i] = pair.first.c_str();
+                assetIds[i] = pair.second.c_str();
                 i++;
             }
 
-            return AssetSystem->GetAssetsByCriteria(MessageIds, AssetIds, nullptr, common::Array<EAssetType> { EAssetType::ANNOTATION_THUMBNAIL });
+            return assetSystem->GetAssetsByCriteria(messageIds, assetIds, nullptr, common::Array<EAssetType> { EAssetType::ANNOTATION_THUMBNAIL });
         };
     }
 
     std::function<multiplayer::AnnotationThumbnailCollectionResult(const AssetsResult&)> CreateAnnotationThumbnailCollectionResult()
     {
-        return [](const AssetsResult& Result)
+        return [](const AssetsResult& result)
         {
-            multiplayer::AnnotationThumbnailCollectionResult ThumbnailResult(
+            multiplayer::AnnotationThumbnailCollectionResult thumbnailResult(
                 EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
-            ThumbnailResult.ParseAssets(Result);
-            return ThumbnailResult;
+            thumbnailResult.ParseAssets(result);
+            return thumbnailResult;
         };
     }
 
     std::function<common::Map<common::String, common::String>()> GenerateAnnotationMetadata(
-        const multiplayer::AnnotationUpdateParams& NewData, std::shared_ptr<Asset> AnnotationAsset, std::shared_ptr<Asset> AnnotationThumbnailAsset)
+        const multiplayer::AnnotationUpdateParams& newData, std::shared_ptr<Asset> annotationAsset, std::shared_ptr<Asset> annotationThumbnailAsset)
     {
-        return [NewData, AnnotationAsset, AnnotationThumbnailAsset]()
-        { return ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(NewData, AnnotationAsset->Id, AnnotationThumbnailAsset->Id); };
+        return [newData, annotationAsset, annotationThumbnailAsset]()
+        { return ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(newData, annotationAsset->Id, annotationThumbnailAsset->Id); };
     }
 }
 
-ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
-    systems::UserSystem* UserSystem, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(&EventBus, &LogSystem)
-    , AssetSystem { AssetSystem }
-    , SpaceSystem { SpaceSystem }
-    , UserSystem { UserSystem }
+ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* assetSystem, systems::SpaceSystem* spaceSystem,
+    systems::UserSystem* userSystem, multiplayer::NetworkEventBus& eventBus, csp::common::LogSystem& logSystem)
+    : SystemBase(&eventBus, &logSystem)
+    , m_assetSystem { assetSystem }
+    , m_spaceSystem { spaceSystem }
+    , m_userSystem { userSystem }
 {
     RegisterSystemCallback();
 }
 
 ConversationSystemInternal::~ConversationSystemInternal() { }
 
-void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
+void ConversationSystemInternal::CreateConversation(const common::String& message, StringResultCallback callback)
 {
-    const Space& CurrentSpace = SpaceSystem->GetCurrentSpace();
-    const common::String& UserId = UserSystem->GetLoginState().UserId;
-    const common::String& SpaceId = CurrentSpace.Id;
+    const Space& currentSpace = m_spaceSystem->GetCurrentSpace();
+    const common::String& userId = m_userSystem->GetLoginState().UserId;
+    const common::String& spaceId = currentSpace.Id;
 
     // 1. Create the comment container asset collection
-    const AssetCollectionResultCallback AddCommentContainerCallback
-        = [this, Callback, UserId, Message](const AssetCollectionResult& AddCommentContainerResult)
+    const AssetCollectionResultCallback addCommentContainerCallback
+        = [this, callback, userId, message](const AssetCollectionResult& addCommentContainerResult)
     {
-        if (HandleConversationResult(AddCommentContainerResult, "The Comment Container asset collection creation was not successful.", Callback)
+        if (HandleConversationResult(addCommentContainerResult, "The Comment Container asset collection creation was not successful.", callback)
             == false)
         {
             return;
         }
 
         // 2.Send multiplayer event
-        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
+        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback
+            = [callback, addCommentContainerResult](multiplayer::ErrorCode error)
         {
-            if (Error != multiplayer::ErrorCode::None)
+            if (error != multiplayer::ErrorCode::None)
             {
-                const auto ErrorMsg = fmt::format("Create Conversation: SignalR connection error: {}", ErrorCodeToString(Error));
-                CSP_LOG_ERROR_MSG(ErrorMsg.c_str());
+                const auto errorMsg = fmt::format("Create Conversation: SignalR connection error: {}", ErrorCodeToString(error));
+                CSP_LOG_ERROR_MSG(errorMsg.c_str());
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<StringResult>());
                 return;
             }
 
-            StringResult InternalResult(AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
-            InternalResult.SetValue(AddCommentContainerResult.GetAssetCollection().Id);
-            INVOKE_IF_NOT_NULL(Callback, InternalResult);
+            StringResult internalResult(addCommentContainerResult.GetResultCode(), addCommentContainerResult.GetHttpResultCode());
+            internalResult.SetValue(addCommentContainerResult.GetAssetCollection().Id);
+            INVOKE_IF_NOT_NULL(callback, internalResult);
         };
 
-        multiplayer::MessageInfo MessageInfo
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(AddCommentContainerResult.GetAssetCollection());
+        multiplayer::MessageInfo messageInfo
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(addCommentContainerResult.GetAssetCollection());
 
-        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, EventBusPtr, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, messageInfo, m_eventBusPtr, signalRCallback);
     };
 
-    const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
-    multiplayer::MessageInfo DefaultConversationInfo("", true, Message);
+    const auto uniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(spaceId, userId);
+    multiplayer::MessageInfo defaultConversationInfo("", true, message);
 
-    AssetSystem->CreateAssetCollection(SpaceId, nullptr, UniqueAssetCollectionName,
-        ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(DefaultConversationInfo), EAssetCollectionType::COMMENT_CONTAINER,
-        nullptr, AddCommentContainerCallback);
+    m_assetSystem->CreateAssetCollection(spaceId, nullptr, uniqueAssetCollectionName,
+        ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(defaultConversationInfo), EAssetCollectionType::COMMENT_CONTAINER,
+        nullptr, addCommentContainerCallback);
 }
 
-void ConversationSystemInternal::DeleteConversation(const common::String& ConversationId, NullResultCallback Callback)
+void ConversationSystemInternal::DeleteConversation(const common::String& conversationId, NullResultCallback callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetConversationCallback = [this, ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
+    AssetCollectionResultCallback getConversationCallback = [this, conversationId, callback](const AssetCollectionResult& getConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getConversationResult, "The retrieval of Message asset collections was not successful.", callback) == false)
         {
             return;
         }
 
-        AssetCollection ConversationAssetCollection = GetConversationResult.GetAssetCollection();
+        AssetCollection conversationAssetCollection = getConversationResult.GetAssetCollection();
 
         // 2.Send multiplayer event
-        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [this, Callback, ConversationId, ConversationAssetCollection](multiplayer::ErrorCode Error)
+        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback
+            = [this, callback, conversationId, conversationAssetCollection](multiplayer::ErrorCode error)
         {
-            if (Error != multiplayer::ErrorCode::None)
+            if (error != multiplayer::ErrorCode::None)
             {
                 CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
                 return;
             }
 
             // 3. Delete the asset colleciton associated with this conversation
-            NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
+            NullResultCallback deleteAssetCollectionCallback = [callback](const NullResult& deleteAssetCollectionResult)
             {
                 if (HandleConversationResult(
-                        DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback)
+                        deleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", callback)
                     == false)
                 {
                     return;
                 }
 
-                Callback(DeleteAssetCollectionResult);
+                callback(deleteAssetCollectionResult);
             };
 
-            this->AssetSystem->DeleteAssetCollection(ConversationAssetCollection, DeleteAssetCollectionCallback);
+            this->m_assetSystem->DeleteAssetCollection(conversationAssetCollection, deleteAssetCollectionCallback);
         };
 
-        multiplayer::MessageInfo MessageInfo
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBusPtr, SignalRCallback);
+        multiplayer::MessageInfo messageInfo
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(conversationAssetCollection);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, messageInfo, m_eventBusPtr, signalRCallback);
     };
 
-    AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+    m_assetSystem->GetAssetCollectionById(conversationId, getConversationCallback);
 }
 
 void ConversationSystemInternal::AddMessage(
-    const common::String& ConversationId, const common::String& Message, multiplayer::MessageResultCallback Callback)
+    const common::String& conversationId, const common::String& message, multiplayer::MessageResultCallback callback)
 {
     // 1. Store the conversation message
-    const common::String& UserId = UserSystem->GetLoginState().UserId;
+    const common::String& userId = m_userSystem->GetLoginState().UserId;
 
-    const multiplayer::MessageResultCallback MessageResultCallback
-        = [this, Callback, ConversationId, UserId, Message](const multiplayer::MessageResult& MessageResultCallbackResult)
+    const multiplayer::MessageResultCallback messageResultCallback
+        = [this, callback, conversationId, userId, message](const multiplayer::MessageResult& messageResultCallbackResult)
     {
-        if (HandleConversationResult(MessageResultCallbackResult, "Failed to store conversation message.", Callback) == false)
+        if (HandleConversationResult(messageResultCallbackResult, "Failed to store conversation message.", callback) == false)
         {
             return;
         }
 
         // 2. Send multiplayer event
-        const auto SignalRCallback = [Callback, MessageResultCallbackResult](multiplayer::ErrorCode Error)
+        const auto signalRCallback = [callback, messageResultCallbackResult](multiplayer::ErrorCode error)
         {
-            if (Error != multiplayer::ErrorCode::None)
+            if (error != multiplayer::ErrorCode::None)
             {
                 CSP_LOG_ERROR_MSG("AddMessage: SignalR connection: Error");
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<multiplayer::MessageResult>());
                 return;
             }
 
-            INVOKE_IF_NOT_NULL(Callback, MessageResultCallbackResult);
+            INVOKE_IF_NOT_NULL(callback, messageResultCallbackResult);
         };
 
-        const multiplayer::MessageInfo& MessageInfo = MessageResultCallbackResult.GetMessageInfo();
-        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBusPtr, SignalRCallback);
+        const multiplayer::MessageInfo& messageInfo = messageResultCallbackResult.GetMessageInfo();
+        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, messageInfo, m_eventBusPtr, signalRCallback);
     };
 
-    multiplayer::MessageInfo MessageInfo(ConversationId, false, Message);
+    multiplayer::MessageInfo messageInfo(conversationId, false, message);
 
-    const Space CurrentSpace = SpaceSystem->GetCurrentSpace();
+    const Space currentSpace = m_spaceSystem->GetCurrentSpace();
 
-    StoreConversationMessage(MessageInfo, CurrentSpace, MessageResultCallback);
+    StoreConversationMessage(messageInfo, currentSpace, messageResultCallback);
 }
 
-void ConversationSystemInternal::DeleteMessage(const common::String& ConversationId, const common::String& MessageId, NullResultCallback Callback)
+void ConversationSystemInternal::DeleteMessage(const common::String& conversationId, const common::String& messageId, NullResultCallback callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetMessageCallback = [this, ConversationId, MessageId, Callback](const AssetCollectionResult& GetMessageResult)
+    AssetCollectionResultCallback getMessageCallback = [this, conversationId, messageId, callback](const AssetCollectionResult& getMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getMessageResult, "The retrieval of Message asset collections was not successful.", callback) == false)
         {
             return;
         }
 
         // Ensure client has correct permissions to delete the conversation
-        multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+        multiplayer::MessageInfo info
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(getMessageResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        if (EnsureUserHasPermission(m_userSystem->GetLoginState().UserId, info.UserId, false) == false)
         {
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
             return;
         }
 
         // 2. Send multiplayer event
-        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [this, Callback, ConversationId, MessageId](multiplayer::ErrorCode Error)
+        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback
+            = [this, callback, conversationId, messageId](multiplayer::ErrorCode error)
         {
-            if (Error != multiplayer::ErrorCode::None)
+            if (error != multiplayer::ErrorCode::None)
             {
                 CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
                 return;
             }
 
             // 3. Delete the message asset collection
-            AssetCollection MessageAssetCollection;
-            MessageAssetCollection.Id = MessageId;
+            AssetCollection messageAssetCollection;
+            messageAssetCollection.Id = messageId;
 
-            const NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
+            const NullResultCallback deleteAssetCollectionCallback = [callback](const NullResult& deleteAssetCollectionResult)
             {
-                if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback) == false)
+                if (HandleConversationResult(deleteAssetCollectionResult, "Failed to delete Message asset collection.", callback) == false)
                 {
                     return;
                 }
 
-                Callback(DeleteAssetCollectionResult);
+                callback(deleteAssetCollectionResult);
             };
 
-            this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
+            this->m_assetSystem->DeleteAssetCollection(messageAssetCollection, deleteAssetCollectionCallback);
         };
 
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBusPtr, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, info, m_eventBusPtr, signalRCallback);
     };
 
-    AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
+    m_assetSystem->GetAssetCollectionById(messageId, getMessageCallback);
 }
 
-void ConversationSystemInternal::GetMessagesFromConversation(const common::String& ConversationId, const common::Optional<int>& ResultsSkipNumber,
-    const common::Optional<int>& ResultsMaxNumber, multiplayer::MessageCollectionResultCallback Callback)
+void ConversationSystemInternal::GetMessagesFromConversation(const common::String& conversationId, const common::Optional<int>& resultsSkipNumber,
+    const common::Optional<int>& resultsMaxNumber, multiplayer::MessageCollectionResultCallback callback)
 {
     // 1. Find asset collections
-    AssetCollectionsResultCallback GetMessagesCallback = [Callback](const AssetCollectionsResult& GetMessagesResult)
+    AssetCollectionsResultCallback getMessagesCallback = [callback](const AssetCollectionsResult& getMessagesResult)
     {
-        if (HandleConversationResult(GetMessagesResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getMessagesResult, "The retrieval of Message asset collections was not successful.", callback) == false)
         {
             return;
         }
 
         // 2. Give result to caller
-        multiplayer::MessageCollectionResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
-        InternalResult.SetTotalCount(GetMessagesResult.GetTotalCount());
-        InternalResult.FillMessageInfoCollection(GetMessagesResult.GetAssetCollections());
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        multiplayer::MessageCollectionResult internalResult(getMessagesResult.GetResultCode(), getMessagesResult.GetHttpResultCode());
+        internalResult.SetTotalCount(getMessagesResult.GetTotalCount());
+        internalResult.FillMessageInfoCollection(getMessagesResult.GetAssetCollections());
+        INVOKE_IF_NOT_NULL(callback, internalResult);
     };
 
-    static const common::Array<EAssetCollectionType> PrototypeTypes = { EAssetCollectionType::COMMENT };
+    static const common::Array<EAssetCollectionType> prototypeTypes = { EAssetCollectionType::COMMENT };
 
-    AssetSystem->FindAssetCollections(
-        nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, ResultsSkipNumber, ResultsMaxNumber, GetMessagesCallback);
+    m_assetSystem->FindAssetCollections(
+        nullptr, conversationId, nullptr, prototypeTypes, nullptr, nullptr, resultsSkipNumber, resultsMaxNumber, getMessagesCallback);
 }
 
-void ConversationSystemInternal::GetConversationInfo(const common::String& ConversationId, multiplayer::ConversationResultCallback Callback)
+void ConversationSystemInternal::GetConversationInfo(const common::String& conversationId, multiplayer::ConversationResultCallback callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetConversationCallback = [ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
+    AssetCollectionResultCallback getConversationCallback = [conversationId, callback](const AssetCollectionResult& getConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getConversationResult, "The retrieval of Message asset collections was not successful.", callback) == false)
         {
             return;
         }
 
         // 2. Give result to callers
-        multiplayer::ConversationResult InternalResult(GetConversationResult.GetResultCode(), GetConversationResult.GetHttpResultCode());
-        InternalResult.FillConversationInfo(GetConversationResult.GetAssetCollection());
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        multiplayer::ConversationResult internalResult(getConversationResult.GetResultCode(), getConversationResult.GetHttpResultCode());
+        internalResult.FillConversationInfo(getConversationResult.GetAssetCollection());
+        INVOKE_IF_NOT_NULL(callback, internalResult);
     };
 
-    AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+    m_assetSystem->GetAssetCollectionById(conversationId, getConversationCallback);
 }
 
 void ConversationSystemInternal::UpdateConversation(
-    const common::String& ConversationId, const multiplayer::MessageUpdateParams& NewData, multiplayer::ConversationResultCallback Callback)
+    const common::String& conversationId, const multiplayer::MessageUpdateParams& newData, multiplayer::ConversationResultCallback callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetConversationCallback
-        = [this, Callback, ConversationId, NewData](const AssetCollectionResult& GetConversationResult)
+    AssetCollectionResultCallback getConversationCallback
+        = [this, callback, conversationId, newData](const AssetCollectionResult& getConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getConversationResult, "The retrieval of Conversation asset collections was not successful.", callback) == false)
         {
             return;
         }
 
         // Ensure client has correct permissions to delete the conversation
-        multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
+        multiplayer::MessageInfo info
+            = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(getConversationResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, true) == false)
+        if (EnsureUserHasPermission(m_userSystem->GetLoginState().UserId, info.UserId, true) == false)
         {
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<multiplayer::ConversationResult>());
             return;
         }
 
         // 2. Update the conversations asset collection
-        AssetCollectionResultCallback GetUpdatedConversationCallback = [this, Callback](const AssetCollectionResult& GetUpdatedConversationResult)
+        AssetCollectionResultCallback getUpdatedConversationCallback = [this, callback](const AssetCollectionResult& getUpdatedConversationResult)
         {
-            if (HandleConversationResult(GetUpdatedConversationResult, "The Update of Conversation asset collections was not successful.", Callback)
+            if (HandleConversationResult(getUpdatedConversationResult, "The Update of Conversation asset collections was not successful.", callback)
                 == false)
             {
                 return;
             }
 
             // 3. Send multiplayer event
-            const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedConversationResult](multiplayer::ErrorCode Error)
+            const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback
+                = [callback, getUpdatedConversationResult](multiplayer::ErrorCode error)
             {
-                if (Error != multiplayer::ErrorCode::None)
+                if (error != multiplayer::ErrorCode::None)
                 {
                     CSP_LOG_ERROR_MSG("SetConversationInfo: SignalR connection: Error");
 
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
+                    INVOKE_IF_NOT_NULL(callback, MakeInvalid<multiplayer::ConversationResult>());
                     return;
                 }
 
-                multiplayer::ConversationResult Result(
-                    GetUpdatedConversationResult.GetResultCode(), GetUpdatedConversationResult.GetHttpResultCode());
-                Result.FillConversationInfo(GetUpdatedConversationResult.GetAssetCollection());
+                multiplayer::ConversationResult result(
+                    getUpdatedConversationResult.GetResultCode(), getUpdatedConversationResult.GetHttpResultCode());
+                result.FillConversationInfo(getUpdatedConversationResult.GetAssetCollection());
 
-                INVOKE_IF_NOT_NULL(Callback, Result);
+                INVOKE_IF_NOT_NULL(callback, result);
             };
 
-            auto UpdatedInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
-                GetUpdatedConversationResult.GetAssetCollection());
+            auto updatedInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
+                getUpdatedConversationResult.GetAssetCollection());
 
-            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBusPtr, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, updatedInfo, m_eventBusPtr, signalRCallback);
         };
 
-        const AssetCollection& ConversationAssetCollection = GetConversationResult.GetAssetCollection();
-        common::Map<common::String, common::String> ConversationAssetCollectionMetadata = ConversationAssetCollection.GetMetadataImmutable();
+        const AssetCollection& conversationAssetCollection = getConversationResult.GetAssetCollection();
+        common::Map<common::String, common::String> conversationAssetCollectionMetadata = conversationAssetCollection.GetMetadataImmutable();
 
-        multiplayer::MessageInfo NewConversationData
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
-        NewConversationData.Message = NewData.NewMessage;
+        multiplayer::MessageInfo newConversationData
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(conversationAssetCollection);
+        newConversationData.Message = newData.NewMessage;
 
-        common::Map<common::String, common::String> NewConversationMessageMetadata
-            = ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData);
+        common::Map<common::String, common::String> newConversationMessageMetadata
+            = ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(newConversationData);
 
-        ConversationSystemHelpers::AppendMetadata(ConversationAssetCollectionMetadata, NewConversationMessageMetadata);
+        ConversationSystemHelpers::AppendMetadata(conversationAssetCollectionMetadata, newConversationMessageMetadata);
 
-        this->AssetSystem->UpdateAssetCollectionMetadata(
-            ConversationAssetCollection, ConversationAssetCollectionMetadata, nullptr, GetUpdatedConversationCallback);
+        this->m_assetSystem->UpdateAssetCollectionMetadata(
+            conversationAssetCollection, conversationAssetCollectionMetadata, nullptr, getUpdatedConversationCallback);
     };
 
-    AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+    m_assetSystem->GetAssetCollectionById(conversationId, getConversationCallback);
 }
 
 void ConversationSystemInternal::GetMessageInfo(
-    const common::String& /*ConversationId*/, const common::String& MessageId, multiplayer::MessageResultCallback Callback)
+    const common::String& /*ConversationId*/, const common::String& messageId, multiplayer::MessageResultCallback callback)
 {
-    const AssetCollectionResultCallback GetMessageCallback = [Callback](const AssetCollectionResult& GetMessageResult)
+    const AssetCollectionResultCallback getMessageCallback = [callback](const AssetCollectionResult& getMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of the Message asset collection was not successful.", Callback) == false)
+        if (HandleConversationResult(getMessageResult, "The retrieval of the Message asset collection was not successful.", callback) == false)
         {
             return;
         }
 
-        multiplayer::MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
-        InternalResult.FillMessageInfo(GetMessageResult.GetAssetCollection());
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        multiplayer::MessageResult internalResult(getMessageResult.GetResultCode(), getMessageResult.GetHttpResultCode());
+        internalResult.FillMessageInfo(getMessageResult.GetAssetCollection());
+        INVOKE_IF_NOT_NULL(callback, internalResult);
     };
 
-    AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
+    m_assetSystem->GetAssetCollectionById(messageId, getMessageCallback);
 }
 
-void ConversationSystemInternal::UpdateMessage(const common::String& /*ConversationId*/, const common::String& MessageId,
-    const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback)
+void ConversationSystemInternal::UpdateMessage(const common::String& /*ConversationId*/, const common::String& messageId,
+    const multiplayer::MessageUpdateParams& newData, multiplayer::MessageResultCallback callback)
 {
     // 1. Get message asset collection
-    AssetCollectionResultCallback GetMessageCallback = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetMessageResult)
+    AssetCollectionResultCallback getMessageCallback = [this, callback, messageId, newData](const AssetCollectionResult& getMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(getMessageResult, "The retrieval of Conversation asset collections was not successful.", callback) == false)
         {
             return;
         }
 
         // Ensure client has correct permissions to delete the conversation
-        multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+        multiplayer::MessageInfo info
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(getMessageResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        if (EnsureUserHasPermission(m_userSystem->GetLoginState().UserId, info.UserId, false) == false)
         {
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<multiplayer::MessageResult>());
             return;
         }
 
         // 2. Update asset collections metadata
-        AssetCollectionResultCallback GetUpdatedMessageCallback
-            = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetUpdatedMessageResult)
+        AssetCollectionResultCallback getUpdatedMessageCallback
+            = [this, callback, messageId, newData](const AssetCollectionResult& getUpdatedMessageResult)
 
         {
-            if (HandleConversationResult(GetUpdatedMessageResult, "The Update of Message asset collections was not successful.", Callback) == false)
+            if (HandleConversationResult(getUpdatedMessageResult, "The Update of Message asset collections was not successful.", callback) == false)
             {
                 return;
             }
 
-            multiplayer::MessageResult Result(GetUpdatedMessageResult.GetResultCode(), GetUpdatedMessageResult.GetHttpResultCode());
-            Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection());
+            multiplayer::MessageResult result(getUpdatedMessageResult.GetResultCode(), getUpdatedMessageResult.GetHttpResultCode());
+            result.FillMessageInfo(getUpdatedMessageResult.GetAssetCollection());
 
             // 3. Send multiplayer event
-            const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedMessageResult, NewData, Result](multiplayer::ErrorCode Error)
+            const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback
+                = [callback, getUpdatedMessageResult, newData, result](multiplayer::ErrorCode error)
             {
-                if (Error != multiplayer::ErrorCode::None)
+                if (error != multiplayer::ErrorCode::None)
                 {
                     CSP_LOG_ERROR_MSG("SetMessageInfo: SignalR connection: Error");
 
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
+                    INVOKE_IF_NOT_NULL(callback, MakeInvalid<multiplayer::MessageResult>());
                     return;
                 }
 
-                INVOKE_IF_NOT_NULL(Callback, Result);
+                INVOKE_IF_NOT_NULL(callback, result);
             };
 
-            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBusPtr, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, result.GetMessageInfo(), m_eventBusPtr, signalRCallback);
         };
 
-        const AssetCollection& MessageAssetCollection = GetMessageResult.GetAssetCollection();
-        common::Map<common::String, common::String> MessageAssetCollectionMetadata = MessageAssetCollection.GetMetadataImmutable();
+        const AssetCollection& messageAssetCollection = getMessageResult.GetAssetCollection();
+        common::Map<common::String, common::String> messageAssetCollectionMetadata = messageAssetCollection.GetMetadataImmutable();
 
-        multiplayer::MessageInfo NewMessageData = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
-        NewMessageData.Message = NewData.NewMessage;
+        multiplayer::MessageInfo newMessageData = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(messageAssetCollection);
+        newMessageData.Message = newData.NewMessage;
 
-        common::Map<common::String, common::String> NewMessageMetadata
-            = ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData);
+        common::Map<common::String, common::String> newMessageMetadata
+            = ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(newMessageData);
 
-        ConversationSystemHelpers::AppendMetadata(MessageAssetCollectionMetadata, NewMessageMetadata);
+        ConversationSystemHelpers::AppendMetadata(messageAssetCollectionMetadata, newMessageMetadata);
 
-        this->AssetSystem->UpdateAssetCollectionMetadata(MessageAssetCollection, MessageAssetCollectionMetadata, nullptr, GetUpdatedMessageCallback);
+        this->m_assetSystem->UpdateAssetCollectionMetadata(messageAssetCollection, messageAssetCollectionMetadata, nullptr, getUpdatedMessageCallback);
     };
 
-    AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
+    m_assetSystem->GetAssetCollectionById(messageId, getMessageCallback);
 }
 
 void ConversationSystemInternal::StoreConversationMessage(
-    const multiplayer::MessageInfo& Info, const Space& Space, multiplayer::MessageResultCallback Callback) const
+    const multiplayer::MessageInfo& info, const Space& space, multiplayer::MessageResultCallback callback) const
 {
-    const AssetCollectionResultCallback AddCommentCallback = [=](const AssetCollectionResult& AddCommentResult)
+    const AssetCollectionResultCallback addCommentCallback = [=](const AssetCollectionResult& addCommentResult)
     {
-        if (HandleConversationResult(AddCommentResult, "The Comment asset collection creation was not successful.", Callback) == false)
+        if (HandleConversationResult(addCommentResult, "The Comment asset collection creation was not successful.", callback) == false)
         {
             return;
         }
 
-        multiplayer::MessageResult Result;
-        Result.FillMessageInfo(AddCommentResult.GetAssetCollection());
-        INVOKE_IF_NOT_NULL(Callback, Result);
+        multiplayer::MessageResult result;
+        result.FillMessageInfo(addCommentResult.GetAssetCollection());
+        INVOKE_IF_NOT_NULL(callback, result);
     };
 
-    const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueMessageAssetCollectionName(Space.Id, Info.UserId);
-    const auto MessageMetadata = ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(Info);
+    const auto uniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueMessageAssetCollectionName(space.Id, info.UserId);
+    const auto messageMetadata = ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(info);
 
-    AssetSystem->CreateAssetCollection(
-        Space.Id, Info.ConversationId, UniqueAssetCollectionName, MessageMetadata, EAssetCollectionType::COMMENT, nullptr, AddCommentCallback);
+    m_assetSystem->CreateAssetCollection(
+        space.Id, info.ConversationId, uniqueAssetCollectionName, messageMetadata, EAssetCollectionType::COMMENT, nullptr, addCommentCallback);
 }
 
 void ConversationSystemInternal::DeleteMessages(
-    const common::String& /*ConversationId*/, common::Array<AssetCollection>& Messages, NullResultCallback Callback)
+    const common::String& /*ConversationId*/, common::Array<AssetCollection>& messages, NullResultCallback callback)
 {
-    if (Messages.Size() == 0)
+    if (messages.Size() == 0)
     {
-        NullResult InternalResult(EResultCode::Success, (uint16_t)web::EResponseCodes::ResponseNoContent);
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        NullResult internalResult(EResultCode::Success, (uint16_t)web::EResponseCodes::ResponseNoContent);
+        INVOKE_IF_NOT_NULL(callback, internalResult);
 
         return;
     }
 
-    AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
+    m_assetSystem->DeleteMultipleAssetCollections(messages, callback);
 }
 
-void ConversationSystemInternal::GetNumberOfReplies(const common::String& ConversationId, csp::multiplayer::NumberOfRepliesResultCallback Callback)
+void ConversationSystemInternal::GetNumberOfReplies(const common::String& conversationId, csp::multiplayer::NumberOfRepliesResultCallback callback)
 {
-    auto GetMessageCountCallback = [Callback](const csp::systems::AssetCollectionCountResult& GetMessageResult)
+    auto getMessageCountCallback = [callback](const csp::systems::AssetCollectionCountResult& getMessageResult)
     {
-        csp::multiplayer::NumberOfRepliesResult Result(GetMessageResult);
-        Result.Count = GetMessageResult.GetCount();
-        Callback(Result);
+        csp::multiplayer::NumberOfRepliesResult result(getMessageResult);
+        result.m_count = getMessageResult.GetCount();
+        callback(result);
     };
 
-    static const csp::common::Array<csp::systems::EAssetCollectionType> PrototypeTypes = { csp::systems::EAssetCollectionType::COMMENT };
+    static const csp::common::Array<csp::systems::EAssetCollectionType> prototypeTypes = { csp::systems::EAssetCollectionType::COMMENT };
 
-    AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
+    m_assetSystem->GetAssetCollectionCount(nullptr, conversationId, nullptr, prototypeTypes, nullptr, nullptr, getMessageCountCallback);
 }
 
-void ConversationSystemInternal::GetConversationAnnotation(const csp::common::String& ConversationId, multiplayer::AnnotationResultCallback Callback)
+void ConversationSystemInternal::GetConversationAnnotation(const csp::common::String& conversationId, multiplayer::AnnotationResultCallback callback)
 {
-    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
-    auto AnnotationAsset = std::make_shared<Asset>();
-    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+    auto conversationAssetCollection = std::make_shared<AssetCollection>();
+    auto annotationAsset = std::make_shared<Asset>();
+    auto annotationThumbnailAsset = std::make_shared<Asset>();
 
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
     // 1. Get conversation asset collection
-    AssetSystem->GetAssetCollectionById(ConversationId)
+    m_assetSystem->GetAssetCollectionById(conversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved message asset collection",
             "Failed to get message asset collection.", {}, {}, {}))
@@ -808,376 +808,376 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
             {}, {}))
-        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        .then(SetMessageAssetCollection(conversationAssetCollection))
         // 3. Get annotation asset
-        .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(GetAnnotationAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
             {}, {}))
-        .then(SetAnnotationAssetFromAssets(AnnotationAsset))
+        .then(SetAnnotationAssetFromAssets(annotationAsset))
         // 4. Get annotation thumbnail asset
-        .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
+        .then(GetAnnotationThumbnailAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation thumbnail asset",
             "Failed to get annotation thumbnail asset.", {}, {}, {}))
-        .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
+        .then(SetAnnotationAssetFromAssets(annotationThumbnailAsset))
         // 5. Process result
-        .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
+        .then(CreateAnnotationResult(conversationAssetCollection, annotationAsset, annotationThumbnailAsset))
+        .then(systems::continuations::SendResult(callback, "Successfully retrieved annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
-void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& ConversationId,
-    const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& conversationId,
+    const multiplayer::AnnotationUpdateParams& annotationParams, const systems::BufferAssetDataSource& annotation,
+    const systems::BufferAssetDataSource& annotationThumbnail, multiplayer::AnnotationResultCallback callback)
 {
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
+    const csp::common::String userId = m_userSystem->GetLoginState().UserId;
 
-    const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+    const common::String uniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(spaceId, userId);
+    const csp::common::String uniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(spaceId, userId);
+    const csp::common::String uniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(spaceId, userId);
 
-    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
-    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+    const csp::common::String uniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(spaceId, userId)
+        + SpaceSystemHelpers::GetAssetFileExtension(annotation.GetMimeType());
+    const csp::common::String uniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(spaceId, userId)
+        + SpaceSystemHelpers::GetAssetFileExtension(annotationThumbnail.GetMimeType());
 
-    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
-    auto AnnotationAsset = std::make_shared<Asset>();
-    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+    auto conversationAssetCollection = std::make_shared<AssetCollection>();
+    auto annotationAsset = std::make_shared<Asset>();
+    auto annotationThumbnailAsset = std::make_shared<Asset>();
 
     // 1. Get conversation asset collection
-    AssetSystem->GetAssetCollectionById(ConversationId)
+    m_assetSystem->GetAssetCollectionById(conversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully retrieved message asset collection",
             "Failed to get message asset collection.", {}, {}, {}))
-        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        .then(SetMessageAssetCollection(conversationAssetCollection))
         // 2. Create Annotation asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(GetOrCreateAnnotationAsset(m_assetSystem, conversationAssetCollection, uniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {},
             {}, {}))
-        .then(SetAnnotationAsset(AnnotationAsset))
+        .then(SetAnnotationAsset(annotationAsset))
         // 3. Upload Annotation asset data
-        .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
+        .then(UploadAnnotationAssetData(m_assetSystem, conversationAssetCollection, annotationAsset, annotation, uniqueAnnotationAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation asset data",
             "Failed to upload annotation asset data.", {}, {}, {}))
-        .then(SetAssetUri(AnnotationAsset))
+        .then(SetAssetUri(annotationAsset))
         // 4. Create Annotation thumbnail asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(GetOrCreateAnnotationAsset(m_assetSystem, conversationAssetCollection, uniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
-        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        .then(SetAnnotationAsset(annotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
         .then(UploadAnnotationAssetData(
-            AssetSystem, ConversationAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+            m_assetSystem, conversationAssetCollection, annotationThumbnailAsset, annotationThumbnail, uniqueAnnotationThumbnailAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation thumbnail asset data",
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
-        .then(SetAssetUri(AnnotationThumbnailAsset))
+        .then(SetAssetUri(annotationThumbnailAsset))
         // 6. Update asset collection metadata
-        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(AppendCommentMetadata(AssetSystem, ConversationAssetCollection))
+        .then(GenerateAnnotationMetadata(annotationParams, annotationAsset, annotationThumbnailAsset))
+        .then(AppendCommentMetadata(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully updated message asset collection metadata",
             "Failed to update message asset collection metadata.", {}, {}, {}))
-        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        .then(SetMessageAssetCollection(conversationAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBusPtr))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, conversationAssetCollection, m_eventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
-            MakeInvalid<multiplayer::AnnotationResult>(), *LogSystem))
+            MakeInvalid<multiplayer::AnnotationResult>(), *m_logSystem))
         // 8. Process result
-        .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
+        .then(CreateAnnotationResult(conversationAssetCollection, annotationAsset, annotationThumbnailAsset))
+        .then(systems::continuations::SendResult(callback, "Successfully set annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
-void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback)
+void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& conversationId, systems::NullResultCallback callback)
 {
-    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
+    auto conversationAssetCollection = std::make_shared<AssetCollection>();
 
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
     // 1. Get conversation asset collection
-    AssetSystem->GetAssetCollectionById(ConversationId)
+    m_assetSystem->GetAssetCollectionById(conversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
         .then(ValidateAnnotationMetadata())
         // 2. Remove annotation metadata
-        .then(RemoveAnnotationMetadata(AssetSystem))
-        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        .then(RemoveAnnotationMetadata(m_assetSystem))
+        .then(SetMessageAssetCollection(conversationAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBusPtr))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, conversationAssetCollection, m_eventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
+            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *m_logSystem))
         // 4. Delete annoation asset
-        .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(GetAnnotationAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(DeleteAnnotationAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
         // 5. Delete annoation thumbnail asset
-        .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
+        .then(GetAnnotationThumbnailAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
             "Failed to get annotation thumbnail asset.", {}, {}, {}))
-        .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(DeleteAnnotationAsset(m_assetSystem, conversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
+        .then(systems::continuations::ReportSuccess(callback, "Successfully deleted annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotation(
-    const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::AnnotationResultCallback Callback)
+    const csp::common::String& conversationId, const csp::common::String& messageId, multiplayer::AnnotationResultCallback callback)
 {
-    auto MessageAssetCollection = std::make_shared<AssetCollection>();
-    auto AnnotationAsset = std::make_shared<Asset>();
-    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+    auto messageAssetCollection = std::make_shared<AssetCollection>();
+    auto annotationAsset = std::make_shared<Asset>();
+    auto annotationThumbnailAsset = std::make_shared<Asset>();
 
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
     // 1. Get message asset collection
-    AssetSystem->GetAssetCollectionById(MessageId)
+    m_assetSystem->GetAssetCollectionById(messageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
             {}, {}, {}))
-        .then(ValidateMessageAssetCollection(ConversationId))
+        .then(ValidateMessageAssetCollection(conversationId))
         .then(ValidateAnnotationMetadata())
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(SetMessageAssetCollection(MessageAssetCollection))
+        .then(SetMessageAssetCollection(messageAssetCollection))
         // 3. Get annotation asset
-        .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(GetAnnotationAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(SetAnnotationAssetFromAssets(AnnotationAsset))
+        .then(SetAnnotationAssetFromAssets(annotationAsset))
         // 4. Get annotation thumbnail asset
-        .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
+        .then(GetAnnotationThumbnailAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
             "Failed to get annotation thumbnail asset.", {}, {}, {}))
-        .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
+        .then(SetAnnotationAssetFromAssets(annotationThumbnailAsset))
         // 5. Process result
-        .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
+        .then(CreateAnnotationResult(messageAssetCollection, annotationAsset, annotationThumbnailAsset))
+        .then(systems::continuations::SendResult(callback, "Successfully retrieved annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
-void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
-    const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+void ConversationSystemInternal::SetAnnotation(const csp::common::String& conversationId, const csp::common::String& messageId,
+    const multiplayer::AnnotationUpdateParams& annotationParams, const systems::BufferAssetDataSource& annotation,
+    const systems::BufferAssetDataSource& annotationThumbnail, multiplayer::AnnotationResultCallback callback)
 {
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
+    const csp::common::String userId = m_userSystem->GetLoginState().UserId;
 
-    const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+    const common::String uniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(spaceId, userId);
+    const csp::common::String uniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(spaceId, userId);
+    const csp::common::String uniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(spaceId, userId);
 
-    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
-    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+    const csp::common::String uniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(spaceId, userId)
+        + SpaceSystemHelpers::GetAssetFileExtension(annotation.GetMimeType());
+    const csp::common::String uniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(spaceId, userId)
+        + SpaceSystemHelpers::GetAssetFileExtension(annotationThumbnail.GetMimeType());
 
-    auto MessageAssetCollection = std::make_shared<AssetCollection>();
-    auto AnnotationAsset = std::make_shared<Asset>();
-    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+    auto messageAssetCollection = std::make_shared<AssetCollection>();
+    auto annotationAsset = std::make_shared<Asset>();
+    auto annotationThumbnailAsset = std::make_shared<Asset>();
 
     // 1. Get message asset collection
-    AssetSystem->GetAssetCollectionById(MessageId)
+    m_assetSystem->GetAssetCollectionById(messageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
             {}, {}, {}))
-        .then(ValidateMessageAssetCollection(ConversationId))
-        .then(SetMessageAssetCollection(MessageAssetCollection))
+        .then(ValidateMessageAssetCollection(conversationId))
+        .then(SetMessageAssetCollection(messageAssetCollection))
         // 2. Create Annotation asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(GetOrCreateAnnotationAsset(m_assetSystem, messageAssetCollection, uniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
-        .then(SetAnnotationAsset(AnnotationAsset))
+        .then(SetAnnotationAsset(annotationAsset))
         // 3. Upload Annotation asset data
-        .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
+        .then(UploadAnnotationAssetData(m_assetSystem, messageAssetCollection, annotationAsset, annotation, uniqueAnnotationAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.", {},
             {}, {}))
-        .then(SetAssetUri(AnnotationAsset))
+        .then(SetAssetUri(annotationAsset))
         // 4. Create Annotation thumbnail asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(GetOrCreateAnnotationAsset(m_assetSystem, messageAssetCollection, uniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
-        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        .then(SetAnnotationAsset(annotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
         .then(UploadAnnotationAssetData(
-            AssetSystem, MessageAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+            m_assetSystem, messageAssetCollection, annotationThumbnailAsset, annotationThumbnail, uniqueAnnotationThumbnailAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
-        .then(SetAssetUri(AnnotationThumbnailAsset))
+        .then(SetAssetUri(annotationThumbnailAsset))
         // 6. Update asset collection metadata
-        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(AppendCommentMetadata(AssetSystem, MessageAssetCollection))
+        .then(GenerateAnnotationMetadata(annotationParams, annotationAsset, annotationThumbnailAsset))
+        .then(AppendCommentMetadata(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",
             "Failed to update message asset collection metadata.", {}, {}, {}))
-        .then(SetMessageAssetCollection(MessageAssetCollection))
+        .then(SetMessageAssetCollection(messageAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, messageAssetCollection, m_eventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
-            *LogSystem))
+            *m_logSystem))
         // 8. Process result
-        .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(CreateAnnotationResult(messageAssetCollection, annotationAsset, annotationThumbnailAsset))
+        .then(systems::continuations::SendResult(callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            *LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
-            [Callback]([[maybe_unused]] const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            *m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
+            [callback]([[maybe_unused]] const std::exception& exception) { callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::DeleteAnnotation(
-    const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback)
+    const csp::common::String& conversationId, const csp::common::String& messageId, systems::NullResultCallback callback)
 {
-    auto MessageAssetCollection = std::make_shared<AssetCollection>();
+    auto messageAssetCollection = std::make_shared<AssetCollection>();
 
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
     // 1. Get message asset collection
-    AssetSystem->GetAssetCollectionById(MessageId)
+    m_assetSystem->GetAssetCollectionById(messageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
-        .then(ValidateMessageAssetCollection(ConversationId))
+        .then(ValidateMessageAssetCollection(conversationId))
         .then(ValidateAnnotationMetadata())
         // 2. Remove annotation metadata
-        .then(RemoveAnnotationMetadata(AssetSystem))
-        .then(SetMessageAssetCollection(MessageAssetCollection))
+        .then(RemoveAnnotationMetadata(m_assetSystem))
+        .then(SetMessageAssetCollection(messageAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBusPtr))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, messageAssetCollection, m_eventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
+            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *m_logSystem))
         // 4. Delete annoation asset
-        .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(GetAnnotationAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(DeleteAnnotationAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
         // 5. Delete annoation thumbnail asset
-        .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
+        .then(GetAnnotationThumbnailAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
             "Failed to get annotation thumbnail asset.", {}, {}, {}))
-        .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(DeleteAnnotationAsset(m_assetSystem, messageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
+        .then(systems::continuations::ReportSuccess(callback, "Successfully deleted annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
-    const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback)
+    const csp::common::String& conversationId, multiplayer::AnnotationThumbnailCollectionResultCallback callback)
 {
-    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
     // 1. Get all message asset collections
-    FindMessageAssetCollections(AssetSystem, ConversationId, SpaceId)()
+    FindMessageAssetCollections(m_assetSystem, conversationId, spaceId)()
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(
             "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved message asset collections",
             "Failed to get message asset collections.", {}, {}, {}))
         // 2. Get all annotation thumbnail assets
         .then(GetAnnotationAssetIdsFromCollections())
-        .then(GetThumbnailAssetsFromMap(AssetSystem))
+        .then(GetThumbnailAssetsFromMap(m_assetSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved thumbnail assets",
             "Failed to get thumbnail assets.", {}, {}, {}))
         // 3. Process result
         .then(CreateAnnotationThumbnailCollectionResult())
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));
+        .then(systems::continuations::SendResult(callback, "Successfully retrieved annotation thumbnails."))
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));
 }
 
-void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
+void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* component)
 {
-    Components.insert(Component);
+    m_components.insert(component);
     FlushEvents();
 }
 
-void ConversationSystemInternal::DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component) { Components.erase(Component); }
+void ConversationSystemInternal::DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* component) { m_components.erase(component); }
 
 void ConversationSystemInternal::RegisterSystemCallback()
 {
-    if (!EventBusPtr)
+    if (!m_eventBusPtr)
     {
         CSP_LOG_ERROR_MSG(
             "Error: Failed to register ConversationSystemInternal. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
+    m_eventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)),
-        [this](const csp::common::NetworkEventData& NetworkEventData)
+        [this](const csp::common::NetworkEventData& networkEventData)
         {
-            const csp::common::ConversationNetworkEventData& ConversationNetworkEventData
-                = static_cast<const csp::common::ConversationNetworkEventData&>(NetworkEventData);
-            if (TrySendEvent(ConversationNetworkEventData) == false)
+            const csp::common::ConversationNetworkEventData& conversationNetworkEventData
+                = static_cast<const csp::common::ConversationNetworkEventData&>(networkEventData);
+            if (TrySendEvent(conversationNetworkEventData) == false)
             {
                 // If component doesn't exist, add it to the queue for processing later
-                std::unique_ptr<csp::common::ConversationNetworkEventData> EventDataCopy
-                    = std::make_unique<csp::common::ConversationNetworkEventData>(ConversationNetworkEventData);
-                Events.push_back(std::move(EventDataCopy));
+                std::unique_ptr<csp::common::ConversationNetworkEventData> eventDataCopy
+                    = std::make_unique<csp::common::ConversationNetworkEventData>(conversationNetworkEventData);
+                m_events.push_back(std::move(eventDataCopy));
             }
         });
 }
 
 void ConversationSystemInternal::FlushEvents()
 {
-    for (auto It = std::begin(Events); It != std::end(Events);)
+    for (auto it = std::begin(m_events); it != std::end(m_events);)
     {
-        if (TrySendEvent(**It))
+        if (TrySendEvent(**it))
         {
             // Event has now been processed, so remove
-            It = Events.erase(It);
+            it = m_events.erase(it);
         }
         else
         {
-            ++It;
+            ++it;
         }
     }
 }
 
-bool ConversationSystemInternal::TrySendEvent(const csp::common::ConversationNetworkEventData& Params)
+bool ConversationSystemInternal::TrySendEvent(const csp::common::ConversationNetworkEventData& params)
 {
-    for (const auto& Component : Components)
+    for (const auto& component : m_components)
     {
-        if (Component->GetConversationId() == Params.MessageInfo.ConversationId)
+        if (component->GetConversationId() == params.MessageInfo.ConversationId)
         {
-            if (Component->ConversationUpdateCallback != nullptr)
+            if (component->m_conversationUpdateCallback != nullptr)
             {
-                Component->ConversationUpdateCallback(Params);
+                component->m_conversationUpdateCallback(params);
                 return true;
             }
         }

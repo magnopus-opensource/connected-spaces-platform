@@ -55,7 +55,7 @@ public:
 
     /// @brief Constructs the script space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ScriptSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Retrieves the source of the script of this script component.
     /// @return The script source of this script component.
@@ -63,7 +63,7 @@ public:
 
     /// @brief Sets the source of the script of this script component.
     /// @param ScriptSource The script source of this script component.
-    void SetScriptSource(const csp::common::String& ScriptSource);
+    void SetScriptSource(const csp::common::String& scriptSource);
 
     /// @brief Gets the ID of the owner of this script component.
     /// @return The ID of the owner of this script.
@@ -71,7 +71,7 @@ public:
 
     /// @brief Sets the ID of the owner of this script component.
     /// @param OwnerId The ID of the owner of this script.
-    void SetOwnerId(int64_t OwnerId);
+    void SetOwnerId(int64_t ownerId);
 
     /// @brief Gets the scope within which this script operates.
     /// @return The scope of this script.
@@ -79,10 +79,10 @@ public:
 
     /// @brief Sets the scope within which this script operates.
     /// @param Scope The scope of this script.
-    void SetScriptScope(ScriptScope Scope);
+    void SetScriptScope(ScriptScope scope);
 
 protected:
-    void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
+    void SetPropertyFromPatch(uint32_t key, const csp::common::ReplicatedValue& value) override;
     void OnRemove() override;
 };
 

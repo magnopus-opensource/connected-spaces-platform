@@ -34,7 +34,7 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -46,17 +46,17 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
                  "<SpaceId>\nProductId <ProductId> but may also need \nProductId <ProductId>\nCartId <CartId>\n");
     }
 
-    csp::common::Map<csp::common::String, csp::common::String> OutMap;
+    csp::common::Map<csp::common::String, csp::common::String> outMap;
 
-    std::ifstream CredsFile;
-    CredsFile.open("ShopifyCreds.txt");
-    std::string Key, Value;
-    while (CredsFile >> Key >> Value)
+    std::ifstream credsFile;
+    credsFile.open("ShopifyCreds.txt");
+    std::string key, value;
+    while (credsFile >> key >> value)
     {
-        OutMap[Key.c_str()] = Value.c_str();
+        outMap[key.c_str()] = value.c_str();
     }
 
-    return OutMap;
+    return outMap;
 }
 
 /*These test are currently internal tests because they utilise that is currently only available
@@ -84,74 +84,74 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
     Now you can use this test!*/
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
     // This is an example from Shopify dev quickstart "Gift Card"
-    const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
-    const csp::common::String ProductTitle = "Gift Card";
-    const csp::common::String ProductDescription = "This is a gift card for the store";
-    const csp::common::String ImageMediaContentType = "IMAGE";
-    const csp::common::String ImageAlt = "Gift card that shows text: Generated data gift card";
-    const csp::common::String ImageUrl = "https://cdn.shopify.com/s/files/1/0803/6070/2225/products/gift_card.png?v=1691076851";
-    const int32_t ImageWidth = 2881;
-    const int32_t ImageHeight = 2881;
-    const int32_t VariantSize = 4;
-    const int32_t MediaSize = 1;
-    const int32_t OptionsSize = 1;
-    const csp::common::String OptionsName = "Denominations";
-    csp::common::Array<csp::common::String> VariantTitleAndOptionValue = { "$10", "$25", "$50", "$100" };
-    csp::common::Array<csp::common::String> VariantIds = { "gid://shopify/ProductVariant/46314311516433",
+    const csp::common::String productId = "gid://shopify/Product/8660541047057";
+    const csp::common::String productTitle = "Gift Card";
+    const csp::common::String productDescription = "This is a gift card for the store";
+    const csp::common::String imageMediaContentType = "IMAGE";
+    const csp::common::String imageAlt = "Gift card that shows text: Generated data gift card";
+    const csp::common::String imageUrl = "https://cdn.shopify.com/s/files/1/0803/6070/2225/products/gift_card.png?v=1691076851";
+    const int32_t imageWidth = 2881;
+    const int32_t imageHeight = 2881;
+    const int32_t variantSize = 4;
+    const int32_t mediaSize = 1;
+    const int32_t optionsSize = 1;
+    const csp::common::String optionsName = "Denominations";
+    csp::common::Array<csp::common::String> variantTitleAndOptionValue = { "$10", "$25", "$50", "$100" };
+    csp::common::Array<csp::common::String> variantIds = { "gid://shopify/ProductVariant/46314311516433",
         "gid://shopify/ProductVariant/46314311647505", "gid://shopify/ProductVariant/46314311745809", "gid://shopify/ProductVariant/46314311844113" };
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    auto Details = GetShopifyDetails();
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
+    auto details = GetShopifyDetails();
 
-    auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformation, RequestPredicate, Details["SpaceId"], Details["ProductId"]);
+    auto [Result] = AWAIT_PRE(eCommerceSystem, GetProductInformation, RequestPredicate, details["SpaceId"], details["ProductId"]);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EXPECT_EQ(Result.GetProductInfo().Id, ProductId);
-    EXPECT_EQ(Result.GetProductInfo().Title, ProductTitle);
-    EXPECT_EQ(Result.GetProductInfo().Description, ProductDescription);
+    EXPECT_EQ(Result.GetProductInfo().Id, productId);
+    EXPECT_EQ(Result.GetProductInfo().Title, productTitle);
+    EXPECT_EQ(Result.GetProductInfo().Description, productDescription);
     EXPECT_EQ(Result.GetProductInfo().Tags.Size(), 0);
 
-    EXPECT_EQ(Result.GetProductInfo().Media.Size(), MediaSize);
+    EXPECT_EQ(Result.GetProductInfo().Media.Size(), mediaSize);
 
     for (size_t i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
     {
-        EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, ImageMediaContentType);
-        EXPECT_EQ(Result.GetProductInfo().Media[i].Url, ImageUrl);
-        EXPECT_EQ(Result.GetProductInfo().Media[i].Alt, ImageAlt);
-        EXPECT_EQ(Result.GetProductInfo().Media[i].Width, ImageWidth);
-        EXPECT_EQ(Result.GetProductInfo().Media[i].Height, ImageHeight);
+        EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, imageMediaContentType);
+        EXPECT_EQ(Result.GetProductInfo().Media[i].Url, imageUrl);
+        EXPECT_EQ(Result.GetProductInfo().Media[i].Alt, imageAlt);
+        EXPECT_EQ(Result.GetProductInfo().Media[i].Width, imageWidth);
+        EXPECT_EQ(Result.GetProductInfo().Media[i].Height, imageHeight);
     }
-    EXPECT_EQ(Result.GetProductInfo().Variants.Size(), VariantSize);
+    EXPECT_EQ(Result.GetProductInfo().Variants.Size(), variantSize);
 
     for (size_t i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
     {
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, VariantIds[i]);
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, VariantTitleAndOptionValue[i]);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, variantIds[i]);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, variantTitleAndOptionValue[i]);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].AvailableForSale, true);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.MediaContentType, "");
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Alt, ImageAlt);
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Url, ImageUrl);
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Width, ImageWidth);
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Height, ImageHeight);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Alt, imageAlt);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Url, imageUrl);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Width, imageWidth);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Height, imageHeight);
 
-        EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), OptionsSize);
+        EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), optionsSize);
 
         for (size_t n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
         {
-            EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, OptionsName);
-            EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
+            EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, optionsName);
+            EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, variantTitleAndOptionValue[i]);
         }
 
         EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.Amount, 0);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.CurrencyCode, "");
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
@@ -177,75 +177,75 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
     Now you can use this test!*/
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
     // This is an example from Shopify dev quickstart "Gift Card"
-    const csp::common::String ProductId = "gid://shopify/Product/8566195847465";
-    const csp::common::String ProductTitle = "Gift Card";
-    const csp::common::String ProductDescription = "This is a gift card for the store";
-    const csp::common::String ImageMediaContentType = "IMAGE";
-    const csp::common::String ImageAlt = "Gift card that shows text: Generated data gift card";
-    const csp::common::String ImageUrl = "https://cdn.shopify.com/s/files/1/0813/7238/1481/products/gift_card.png?v=1692877145";
-    const int32_t ImageWidth = 2881;
-    const int32_t ImageHeight = 2881;
-    const int32_t VariantSize = 1;
-    const int32_t MediaSize = 1;
-    const int32_t OptionsSize = 0;
-    const csp::common::String OptionsName = "Denominations";
-    csp::common::Array<csp::common::String> VariantTitleAndOptionValue = { "$10", "$25", "$50", "$100" };
-    csp::common::Array<csp::common::String> VariantIds = { "gid://shopify/ProductVariant/46375586136361",
+    const csp::common::String productId = "gid://shopify/Product/8566195847465";
+    const csp::common::String productTitle = "Gift Card";
+    const csp::common::String productDescription = "This is a gift card for the store";
+    const csp::common::String imageMediaContentType = "IMAGE";
+    const csp::common::String imageAlt = "Gift card that shows text: Generated data gift card";
+    const csp::common::String imageUrl = "https://cdn.shopify.com/s/files/1/0813/7238/1481/products/gift_card.png?v=1692877145";
+    const int32_t imageWidth = 2881;
+    const int32_t imageHeight = 2881;
+    const int32_t variantSize = 1;
+    const int32_t mediaSize = 1;
+    const int32_t optionsSize = 0;
+    const csp::common::String optionsName = "Denominations";
+    csp::common::Array<csp::common::String> variantTitleAndOptionValue = { "$10", "$25", "$50", "$100" };
+    csp::common::Array<csp::common::String> variantIds = { "gid://shopify/ProductVariant/46375586136361",
         "gid://shopify/ProductVariant/46375586234665", "gid://shopify/ProductVariant/46375586398505", "gid://shopify/ProductVariant/46375586496809" };
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    auto Details = GetShopifyDetails();
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
+    auto details = GetShopifyDetails();
 
-    auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInfoCollectionByVariantIds, RequestPredicate, Details["SpaceId"], { Details["VariantId"] });
+    auto [Result] = AWAIT_PRE(eCommerceSystem, GetProductInfoCollectionByVariantIds, RequestPredicate, details["SpaceId"], { details["VariantId"] });
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     EXPECT_GT(Result.GetProducts().Size(), 0);
-    EXPECT_EQ(Result.GetProducts()[0].Id, ProductId);
-    EXPECT_EQ(Result.GetProducts()[0].Title, ProductTitle);
-    EXPECT_EQ(Result.GetProducts()[0].Description, ProductDescription);
+    EXPECT_EQ(Result.GetProducts()[0].Id, productId);
+    EXPECT_EQ(Result.GetProducts()[0].Title, productTitle);
+    EXPECT_EQ(Result.GetProducts()[0].Description, productDescription);
     EXPECT_EQ(Result.GetProducts()[0].Tags.Size(), 0);
 
-    EXPECT_EQ(Result.GetProducts()[0].Media.Size(), MediaSize);
+    EXPECT_EQ(Result.GetProducts()[0].Media.Size(), mediaSize);
 
     for (size_t i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
     {
-        EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, ImageMediaContentType);
-        EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, ImageUrl);
-        EXPECT_EQ(Result.GetProducts()[0].Media[i].Alt, ImageAlt);
-        EXPECT_EQ(Result.GetProducts()[0].Media[i].Width, ImageWidth);
-        EXPECT_EQ(Result.GetProducts()[0].Media[i].Height, ImageHeight);
+        EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, imageMediaContentType);
+        EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, imageUrl);
+        EXPECT_EQ(Result.GetProducts()[0].Media[i].Alt, imageAlt);
+        EXPECT_EQ(Result.GetProducts()[0].Media[i].Width, imageWidth);
+        EXPECT_EQ(Result.GetProducts()[0].Media[i].Height, imageHeight);
     }
-    EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), VariantSize);
+    EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), variantSize);
 
     for (size_t i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
     {
-        auto& Variant = Result.GetProducts()[0].Variants[i];
-        EXPECT_EQ(Variant.Id, VariantIds[i]);
-        EXPECT_EQ(Variant.Title, VariantTitleAndOptionValue[i]);
-        EXPECT_EQ(Variant.AvailableForSale, false);
-        EXPECT_EQ(Variant.Media.MediaContentType, "");
-        EXPECT_EQ(Variant.Media.Alt, ImageAlt);
-        EXPECT_EQ(Variant.Media.Url, ImageUrl);
-        EXPECT_EQ(Variant.Media.Width, ImageWidth);
-        EXPECT_EQ(Variant.Media.Height, ImageHeight);
+        auto& variant = Result.GetProducts()[0].Variants[i];
+        EXPECT_EQ(variant.Id, variantIds[i]);
+        EXPECT_EQ(variant.Title, variantTitleAndOptionValue[i]);
+        EXPECT_EQ(variant.AvailableForSale, false);
+        EXPECT_EQ(variant.Media.MediaContentType, "");
+        EXPECT_EQ(variant.Media.Alt, imageAlt);
+        EXPECT_EQ(variant.Media.Url, imageUrl);
+        EXPECT_EQ(variant.Media.Width, imageWidth);
+        EXPECT_EQ(variant.Media.Height, imageHeight);
 
-        EXPECT_EQ(Variant.AvailableStock, 0);
+        EXPECT_EQ(variant.AvailableStock, 0);
 
-        EXPECT_EQ(Variant.Options.Size(), OptionsSize);
+        EXPECT_EQ(variant.Options.Size(), optionsSize);
 
-        for (size_t n = 0; n < Variant.Options.Size(); ++n)
+        for (size_t n = 0; n < variant.Options.Size(); ++n)
         {
-            EXPECT_EQ(Variant.Options[n].Name, OptionsName);
-            EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);
+            EXPECT_EQ(variant.Options[n].Name, optionsName);
+            EXPECT_EQ(variant.Options[n].Value, variantTitleAndOptionValue[i]);
         }
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
@@ -271,39 +271,39 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformation
             Endpoint: /api/v1/spaces/{spaceId}/vendors/shopify/carts
     Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    auto Details = GetShopifyDetails();
-    const csp::common::String FalseSpaceId = "abcdefghijk1234567891011";
-    const csp::common::String FalseCartId = "B1-1234567891011121314151617e8e21er";
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
+    auto details = GetShopifyDetails();
+    const csp::common::String falseSpaceId = "abcdefghijk1234567891011";
+    const csp::common::String falseCartId = "B1-1234567891011121314151617e8e21er";
 
     // The additional info such as "CartId" inside of this test need to be added to the ShopifyCreds.txt file on a new line as: <Key> <Value>
-    auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
+    auto [Result] = AWAIT_PRE(eCommerceSystem, GetCheckoutInformation, RequestPredicate, details["SpaceId"], details["CartId"]);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().StoreUrl.c_str()).find(Details["StoreName"]));
+    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().StoreUrl.c_str()).find(details["StoreName"]));
 
-    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["StoreName"]));
+    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(details["StoreName"]));
 
-    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["CartId"]));
+    EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(details["CartId"]));
 
     // False Ids
-    auto [FalseResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, FalseCartId);
+    auto [FalseResult] = AWAIT_PRE(eCommerceSystem, GetCheckoutInformation, RequestPredicate, falseSpaceId, falseCartId);
     EXPECT_EQ(FalseResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
     // False SpaceId
-    auto [FalseSpaceResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, Details["CartId"]);
+    auto [FalseSpaceResult] = AWAIT_PRE(eCommerceSystem, GetCheckoutInformation, RequestPredicate, falseSpaceId, details["CartId"]);
     EXPECT_EQ(FalseSpaceResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
     // False CartId
-    auto [FalseCartResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], FalseCartId);
+    auto [FalseCartResult] = AWAIT_PRE(eCommerceSystem, GetCheckoutInformation, RequestPredicate, details["SpaceId"], falseCartId);
     EXPECT_EQ(FalseCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
@@ -327,83 +327,83 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
                     }
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+    auto [CreateCartResult] = AWAIT_PRE(eCommerceSystem, CreateCart, RequestPredicate, spaceId);
 
     EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto CreatedCart = CreateCartResult.GetCartInfo();
+    auto createdCart = CreateCartResult.GetCartInfo();
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 0);
+    EXPECT_EQ(createdCart.TotalQuantity, 0);
 
-    auto [GetCartResult] = AWAIT_PRE(ECommerceSystem, GetCart, RequestPredicate, SpaceId, CreatedCart.CartId);
+    auto [GetCartResult] = AWAIT_PRE(eCommerceSystem, GetCart, RequestPredicate, spaceId, createdCart.CartId);
 
     EXPECT_EQ(GetCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto Cart = CreateCartResult.GetCartInfo();
+    auto cart = CreateCartResult.GetCartInfo();
 
-    EXPECT_EQ(Cart.SpaceId, SpaceId);
-    EXPECT_EQ(Cart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(Cart.CartLines.Size(), 0);
-    EXPECT_EQ(Cart.TotalQuantity, 0);
+    EXPECT_EQ(cart.SpaceId, spaceId);
+    EXPECT_EQ(cart.CartId, createdCart.CartId);
+    EXPECT_EQ(cart.CartLines.Size(), 0);
+    EXPECT_EQ(cart.TotalQuantity, 0);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Not a valid space ID
-    csp::common::String SpaceId = "12a345bc6789d012efa3b45c";
+    csp::common::String spaceId = "12a345bc6789d012efa3b45c";
 
-    auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+    auto [CreateCartResult] = AWAIT_PRE(eCommerceSystem, CreateCart, RequestPredicate, spaceId);
 
     EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(CreateCartResult.GetHttpResultCode(), 404);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Not a valid space ID
-    csp::common::String SpaceId = "12a345bc6789d012efa3b45c";
+    csp::common::String spaceId = "12a345bc6789d012efa3b45c";
 
-    auto [GetCartResult] = AWAIT_PRE(ECommerceSystem, GetCart, RequestPredicate, SpaceId, "NotAValidCartId");
+    auto [GetCartResult] = AWAIT_PRE(eCommerceSystem, GetCart, RequestPredicate, spaceId, "NotAValidCartId");
 
     EXPECT_EQ(GetCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(GetCartResult.GetHttpResultCode(), 404);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
@@ -427,69 +427,69 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
                     }
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
-    const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
-    csp::common::Array<csp::common::String> VariantIds = { "gid://shopify/ProductVariant/46314311516433",
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
+    const csp::common::String productId = "gid://shopify/Product/8660541047057";
+    csp::common::Array<csp::common::String> variantIds = { "gid://shopify/ProductVariant/46314311516433",
         "gid://shopify/ProductVariant/46314311647505", "gid://shopify/ProductVariant/46314311745809", "gid://shopify/ProductVariant/46314311844113" };
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create Cart
-    auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+    auto [CreateCartResult] = AWAIT_PRE(eCommerceSystem, CreateCart, RequestPredicate, spaceId);
 
     EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto CreatedCart = CreateCartResult.GetCartInfo();
+    auto createdCart = CreateCartResult.GetCartInfo();
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 0);
+    EXPECT_EQ(createdCart.TotalQuantity, 0);
 
-    auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
+    auto cartLines = csp::common::Array<csp::systems::CartLine>(variantIds.Size());
 
     // Add local cart lines
-    for (size_t i = 0; i < VariantIds.Size(); ++i)
+    for (size_t i = 0; i < variantIds.Size(); ++i)
     {
-        auto CartLine = csp::systems::CartLine();
-        CartLine.Quantity = 1;
-        CartLine.ProductVariantId = VariantIds[i];
+        auto cartLine = csp::systems::CartLine();
+        cartLine.Quantity = 1;
+        cartLine.ProductVariantId = variantIds[i];
 
-        CartLines[i] = CartLine;
+        cartLines[i] = cartLine;
     }
 
-    CreatedCart.CartLines = CartLines;
+    createdCart.CartLines = cartLines;
 
-    CreatedCart.TotalQuantity = 4;
+    createdCart.TotalQuantity = 4;
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 4);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 4);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 4);
+    EXPECT_EQ(createdCart.TotalQuantity, 4);
 
     // Add Cart Lines
-    auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+    auto [AddCartLinesResult] = AWAIT_PRE(eCommerceSystem, UpdateCartInformation, RequestPredicate, createdCart);
 
     EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+    auto addCartLinesCart = AddCartLinesResult.GetCartInfo();
 
-    EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
-    EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
-    EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
+    EXPECT_EQ(addCartLinesCart.SpaceId, spaceId);
+    EXPECT_EQ(addCartLinesCart.CartId, createdCart.CartId);
+    EXPECT_EQ(addCartLinesCart.CartLines.Size(), 4);
+    EXPECT_EQ(addCartLinesCart.TotalQuantity, 4);
 
-    for (size_t i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < cartLines.Size(); ++i)
     {
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
-        EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+        EXPECT_EQ(addCartLinesCart.CartLines[i].ProductVariantId, cartLines[i].ProductVariantId);
+        EXPECT_NE(addCartLinesCart.CartLines[i].CartLineId, "");
+        EXPECT_EQ(addCartLinesCart.CartLines[i].Quantity, 1);
     };
 }
 
@@ -514,101 +514,101 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
                     }
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
-    const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
-    const csp::common::String VariantId = "gid://shopify/ProductVariant/46314311516433";
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
+    const csp::common::String productId = "gid://shopify/Product/8660541047057";
+    const csp::common::String variantId = "gid://shopify/ProductVariant/46314311516433";
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create Cart
-    auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+    auto [CreateCartResult] = AWAIT_PRE(eCommerceSystem, CreateCart, RequestPredicate, spaceId);
 
     EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto CreatedCart = CreateCartResult.GetCartInfo();
+    auto createdCart = CreateCartResult.GetCartInfo();
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 0);
+    EXPECT_EQ(createdCart.TotalQuantity, 0);
 
-    auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+    auto cartLines = csp::common::Array<csp::systems::CartLine>(1);
 
     // Add local cart lines
-    auto CartLine = csp::systems::CartLine();
-    CartLine.Quantity = 1;
-    CartLine.ProductVariantId = VariantId;
+    auto cartLine = csp::systems::CartLine();
+    cartLine.Quantity = 1;
+    cartLine.ProductVariantId = variantId;
 
-    CartLines[0] = CartLine;
+    cartLines[0] = cartLine;
 
-    CreatedCart.CartLines = CartLines;
+    createdCart.CartLines = cartLines;
 
-    CreatedCart.TotalQuantity = 1;
+    createdCart.TotalQuantity = 1;
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 1);
+    EXPECT_EQ(createdCart.TotalQuantity, 1);
 
     // Add Cart Lines
-    auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+    auto [AddCartLinesResult] = AWAIT_PRE(eCommerceSystem, UpdateCartInformation, RequestPredicate, createdCart);
 
     EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+    auto addCartLinesCart = AddCartLinesResult.GetCartInfo();
 
-    EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
-    EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
-    EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+    EXPECT_EQ(addCartLinesCart.SpaceId, spaceId);
+    EXPECT_EQ(addCartLinesCart.CartId, createdCart.CartId);
+    EXPECT_EQ(addCartLinesCart.CartLines.Size(), 1);
+    EXPECT_EQ(addCartLinesCart.TotalQuantity, 1);
 
-    for (size_t i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < cartLines.Size(); ++i)
     {
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
-        EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+        EXPECT_EQ(addCartLinesCart.CartLines[i].ProductVariantId, cartLines[i].ProductVariantId);
+        EXPECT_NE(addCartLinesCart.CartLines[i].CartLineId, "");
+        EXPECT_EQ(addCartLinesCart.CartLines[i].Quantity, 1);
     };
 
     // update cart lines adding 1 extra quantity
-    CartLine = csp::systems::CartLine();
-    CartLine.CartLineId = AddCartLinesCart.CartLines[0].CartLineId;
-    CartLine.Quantity = 2;
-    CartLine.ProductVariantId = VariantId;
+    cartLine = csp::systems::CartLine();
+    cartLine.CartLineId = addCartLinesCart.CartLines[0].CartLineId;
+    cartLine.Quantity = 2;
+    cartLine.ProductVariantId = variantId;
 
-    CartLines[0] = CartLine;
+    cartLines[0] = cartLine;
 
-    CreatedCart.CartLines = CartLines;
+    createdCart.CartLines = cartLines;
 
-    CreatedCart.TotalQuantity = 2;
+    createdCart.TotalQuantity = 2;
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 2);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 1);
+    EXPECT_EQ(createdCart.TotalQuantity, 2);
 
     // Add Cart Lines
-    auto [UpdateCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+    auto [UpdateCartLinesResult] = AWAIT_PRE(eCommerceSystem, UpdateCartInformation, RequestPredicate, createdCart);
 
     EXPECT_EQ(UpdateCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto UpdateCartLinesCart = UpdateCartLinesResult.GetCartInfo();
+    auto updateCartLinesCart = UpdateCartLinesResult.GetCartInfo();
 
-    EXPECT_EQ(UpdateCartLinesCart.SpaceId, SpaceId);
-    EXPECT_EQ(UpdateCartLinesCart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
-    EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
+    EXPECT_EQ(updateCartLinesCart.SpaceId, spaceId);
+    EXPECT_EQ(updateCartLinesCart.CartId, createdCart.CartId);
+    EXPECT_EQ(updateCartLinesCart.CartLines.Size(), 1);
+    EXPECT_EQ(updateCartLinesCart.TotalQuantity, 2);
 
-    for (size_t i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < cartLines.Size(); ++i)
     {
-        EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
-        EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
-        EXPECT_EQ(UpdateCartLinesCart.CartLines[i].Quantity, 2);
+        EXPECT_EQ(updateCartLinesCart.CartLines[i].ProductVariantId, cartLines[i].ProductVariantId);
+        EXPECT_NE(updateCartLinesCart.CartLines[i].CartLineId, "");
+        EXPECT_EQ(updateCartLinesCart.CartLines[i].Quantity, 2);
     };
 }
 
@@ -633,94 +633,94 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
                     }
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
-    const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
-    const csp::common::String VariantIds = "gid://shopify/ProductVariant/46314311516433";
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
+    const csp::common::String productId = "gid://shopify/Product/8660541047057";
+    const csp::common::String variantIds = "gid://shopify/ProductVariant/46314311516433";
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create Cart
-    auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+    auto [CreateCartResult] = AWAIT_PRE(eCommerceSystem, CreateCart, RequestPredicate, spaceId);
 
     EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto CreatedCart = CreateCartResult.GetCartInfo();
+    auto createdCart = CreateCartResult.GetCartInfo();
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 0);
+    EXPECT_EQ(createdCart.TotalQuantity, 0);
 
-    auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+    auto cartLines = csp::common::Array<csp::systems::CartLine>(1);
 
     // Add local cart lines
-    auto CartLine = csp::systems::CartLine();
-    CartLine.Quantity = 1;
-    CartLine.ProductVariantId = VariantIds;
+    auto cartLine = csp::systems::CartLine();
+    cartLine.Quantity = 1;
+    cartLine.ProductVariantId = variantIds;
 
-    CartLines[0] = CartLine;
+    cartLines[0] = cartLine;
 
-    CreatedCart.CartLines = CartLines;
+    createdCart.CartLines = cartLines;
 
-    CreatedCart.TotalQuantity = 1;
+    createdCart.TotalQuantity = 1;
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 1);
+    EXPECT_EQ(createdCart.TotalQuantity, 1);
 
     // Add Cart Lines
-    auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+    auto [AddCartLinesResult] = AWAIT_PRE(eCommerceSystem, UpdateCartInformation, RequestPredicate, createdCart);
 
     EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+    auto addCartLinesCart = AddCartLinesResult.GetCartInfo();
 
-    EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
-    EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
-    EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+    EXPECT_EQ(addCartLinesCart.SpaceId, spaceId);
+    EXPECT_EQ(addCartLinesCart.CartId, createdCart.CartId);
+    EXPECT_EQ(addCartLinesCart.CartLines.Size(), 1);
+    EXPECT_EQ(addCartLinesCart.TotalQuantity, 1);
 
-    for (size_t i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < cartLines.Size(); ++i)
     {
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
-        EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
-        EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+        EXPECT_EQ(addCartLinesCart.CartLines[i].ProductVariantId, cartLines[i].ProductVariantId);
+        EXPECT_NE(addCartLinesCart.CartLines[i].CartLineId, cartLines[i].CartLineId);
+        EXPECT_EQ(addCartLinesCart.CartLines[i].Quantity, 1);
     };
 
     // Add update cart lines quantity to 0
-    CartLine.Quantity = 0;
-    CartLine.ProductVariantId = VariantIds;
-    CartLine.CartLineId = AddCartLinesCart.CartLines[0].CartLineId;
+    cartLine.Quantity = 0;
+    cartLine.ProductVariantId = variantIds;
+    cartLine.CartLineId = addCartLinesCart.CartLines[0].CartLineId;
 
-    CartLines[0] = CartLine;
+    cartLines[0] = cartLine;
 
-    CreatedCart.CartLines = CartLines;
+    createdCart.CartLines = cartLines;
 
-    CreatedCart.TotalQuantity = 1;
+    createdCart.TotalQuantity = 1;
 
-    EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
-    EXPECT_NE(CreatedCart.CartId, "");
-    EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
-    EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+    EXPECT_EQ(createdCart.SpaceId, spaceId);
+    EXPECT_NE(createdCart.CartId, "");
+    EXPECT_EQ(createdCart.CartLines.Size(), 1);
+    EXPECT_EQ(createdCart.TotalQuantity, 1);
 
     // Delete Cart Lines
-    auto [DeleteCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+    auto [DeleteCartLinesResult] = AWAIT_PRE(eCommerceSystem, UpdateCartInformation, RequestPredicate, createdCart);
 
     EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto DeleteCartLinesCart = DeleteCartLinesResult.GetCartInfo();
+    auto deleteCartLinesCart = DeleteCartLinesResult.GetCartInfo();
 
-    EXPECT_EQ(DeleteCartLinesCart.SpaceId, SpaceId);
-    EXPECT_EQ(DeleteCartLinesCart.CartId, CreatedCart.CartId);
-    EXPECT_EQ(DeleteCartLinesCart.CartLines.Size(), 0);
-    EXPECT_EQ(DeleteCartLinesCart.TotalQuantity, 0);
+    EXPECT_EQ(deleteCartLinesCart.SpaceId, spaceId);
+    EXPECT_EQ(deleteCartLinesCart.CartId, createdCart.CartId);
+    EXPECT_EQ(deleteCartLinesCart.CartLines.Size(), 0);
+    EXPECT_EQ(deleteCartLinesCart.TotalQuantity, 0);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
@@ -734,56 +734,56 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
             4. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
-    auto StoreName = Details["StoreName"];
-    auto PrivateAccessToken = Details["PrivateAccessToken"];
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
+    auto storeName = details["StoreName"];
+    auto privateAccessToken = details["PrivateAccessToken"];
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
+    auto [ValidateShopifyStoreResult] = AWAIT_PRE(eCommerceSystem, ValidateShopifyStore, RequestPredicate, storeName, privateAccessToken);
 
     EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     EXPECT_TRUE(ValidateShopifyStoreResult.ValidateResult);
 
-    auto [AddShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, AddShopifyStore, RequestPredicate, StoreName, SpaceId, false, PrivateAccessToken);
+    auto [AddShopifyStoreResult] = AWAIT_PRE(eCommerceSystem, AddShopifyStore, RequestPredicate, storeName, spaceId, false, privateAccessToken);
 
     EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto ShopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
+    auto shopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
 
-    EXPECT_EQ(ShopifyStore.SpaceId, SpaceId);
-    EXPECT_EQ(ShopifyStore.IsEcommerceActive, false);
-    EXPECT_NE(ShopifyStore.StoreId, "");
-    EXPECT_EQ(ShopifyStore.StoreName, StoreName);
+    EXPECT_EQ(shopifyStore.SpaceId, spaceId);
+    EXPECT_EQ(shopifyStore.IsEcommerceActive, false);
+    EXPECT_NE(shopifyStore.StoreId, "");
+    EXPECT_EQ(shopifyStore.StoreName, storeName);
 
     { // Enable Ecommerce
-        auto [EnableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceActiveInSpace, RequestPredicate, StoreName, SpaceId, true);
+        auto [EnableStoreResult] = AWAIT_PRE(eCommerceSystem, SetECommerceActiveInSpace, RequestPredicate, storeName, spaceId, true);
 
         EXPECT_EQ(EnableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto EnableStore = EnableStoreResult.GetShopifyStoreInfo();
+        auto enableStore = EnableStoreResult.GetShopifyStoreInfo();
 
-        EXPECT_EQ(EnableStore.IsEcommerceActive, true);
+        EXPECT_EQ(enableStore.IsEcommerceActive, true);
     }
 
     { // Disable Ecommerce
-        auto [DisableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceActiveInSpace, RequestPredicate, StoreName, SpaceId, false);
+        auto [DisableStoreResult] = AWAIT_PRE(eCommerceSystem, SetECommerceActiveInSpace, RequestPredicate, storeName, spaceId, false);
 
         EXPECT_EQ(DisableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto DisableStore = DisableStoreResult.GetShopifyStoreInfo();
+        auto disableStore = DisableStoreResult.GetShopifyStoreInfo();
 
-        EXPECT_EQ(DisableStore.IsEcommerceActive, false);
+        EXPECT_EQ(disableStore.IsEcommerceActive, false);
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
@@ -797,41 +797,41 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
             3. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
             Now you can use this test!*/
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* eCommerceSystem = systemsManager.GetECommerceSystem();
 
-    auto Details = GetShopifyDetails();
-    auto SpaceId = Details["SpaceId"];
-    auto StoreName = Details["StoreName"];
-    auto PrivateAccessToken = Details["PrivateAccessToken"];
+    auto details = GetShopifyDetails();
+    auto spaceId = details["SpaceId"];
+    auto storeName = details["StoreName"];
+    auto privateAccessToken = details["PrivateAccessToken"];
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
+    auto [ValidateShopifyStoreResult] = AWAIT_PRE(eCommerceSystem, ValidateShopifyStore, RequestPredicate, storeName, privateAccessToken);
 
     EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     EXPECT_TRUE(ValidateShopifyStoreResult.ValidateResult);
 
-    auto [AddShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, AddShopifyStore, RequestPredicate, StoreName, SpaceId, false, PrivateAccessToken);
+    auto [AddShopifyStoreResult] = AWAIT_PRE(eCommerceSystem, AddShopifyStore, RequestPredicate, storeName, spaceId, false, privateAccessToken);
 
     EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto ShopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
+    auto shopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
 
-    EXPECT_EQ(ShopifyStore.SpaceId, SpaceId);
-    EXPECT_EQ(ShopifyStore.IsEcommerceActive, false);
-    EXPECT_NE(ShopifyStore.StoreId, "");
-    EXPECT_EQ(ShopifyStore.StoreName, StoreName);
+    EXPECT_EQ(shopifyStore.SpaceId, spaceId);
+    EXPECT_EQ(shopifyStore.IsEcommerceActive, false);
+    EXPECT_NE(shopifyStore.StoreId, "");
+    EXPECT_EQ(shopifyStore.StoreName, storeName);
 
-    auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, nullptr);
+    auto [GetShopifyStoresResult] = AWAIT_PRE(eCommerceSystem, GetShopifyStores, RequestPredicate, nullptr);
 
-    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreId, ShopifyStore.StoreId);
-    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceId, ShopifyStore.SpaceId);
-    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceOwnerId, ShopifyStore.SpaceOwnerId);
-    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreName, ShopifyStore.StoreName);
+    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreId, shopifyStore.StoreId);
+    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceId, shopifyStore.SpaceId);
+    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceOwnerId, shopifyStore.SpaceOwnerId);
+    EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreName, shopifyStore.StoreName);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

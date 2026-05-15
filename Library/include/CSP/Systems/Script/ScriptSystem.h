@@ -66,38 +66,38 @@ public:
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptText : The script to execute.
     /// @return a boolean representing success running the script.
-    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override;
+    bool RunScript(int64_t contextId, const csp::common::String& scriptText) override;
     /// @brief Attempts to execute a script from a given file path in the given context.
     /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptFilePath  : The file path of the script to execute.
     /// @return a boolean representing success running the script.
-    bool RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath);
+    bool RunScriptFile(int64_t contextId, const csp::common::String& scriptFilePath);
 
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
-    bool CreateContext(int64_t ContextId) override;
-    bool DestroyContext(int64_t ContextId) override;
-    bool BindContext(int64_t ContextId) override;
-    bool ResetContext(int64_t ContextId) override;
-    bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
-    void* GetContext(int64_t ContextId) override;
-    void* GetModule(int64_t ContextId, const csp::common::String& ModuleName) override;
-    void RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override;
-    void UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override;
-    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source) override;
-    void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
-    bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
-    void ClearModuleSource(csp::common::String ModuleUrl) override;
-    csp::common::String GetModuleSource(csp::common::String ModuleUrl);
-    size_t GetNumImportedModules(int64_t ContextId) const;
-    const char* GetImportedModule(int64_t ContextId, size_t Index) const;
+    bool CreateContext(int64_t contextId) override;
+    bool DestroyContext(int64_t contextId) override;
+    bool BindContext(int64_t contextId) override;
+    bool ResetContext(int64_t contextId) override;
+    bool ExistsInContext(int64_t contextId, const csp::common::String& objectName);
+    void* GetContext(int64_t contextId) override;
+    void* GetModule(int64_t contextId, const csp::common::String& moduleName) override;
+    void RegisterScriptBinding(csp::common::IScriptBinding* scriptBinding) override;
+    void UnregisterScriptBinding(csp::common::IScriptBinding* scriptBinding) override;
+    void SetModuleSource(csp::common::String moduleUrl, csp::common::String source) override;
+    void AddModuleUrlAlias(const csp::common::String& moduleUrl, const csp::common::String& moduleUrlAlias);
+    bool GetModuleUrlAlias(const csp::common::String& moduleUrl, csp::common::String& outModuleUrlAlias);
+    void ClearModuleSource(csp::common::String moduleUrl) override;
+    csp::common::String GetModuleSource(csp::common::String moduleUrl);
+    size_t GetNumImportedModules(int64_t contextId) const;
+    const char* GetImportedModule(int64_t contextId, size_t index) const;
     CSP_END_IGNORE
 
 private:
     ScriptSystem();
     ~ScriptSystem();
 
-    class ScriptRuntime* TheScriptRuntime;
+    class ScriptRuntime* m_theScriptRuntime;
 };
 
 } // namespace csp::systems

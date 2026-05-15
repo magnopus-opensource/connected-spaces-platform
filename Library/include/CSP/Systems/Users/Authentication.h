@@ -65,17 +65,17 @@ class CSP_API LoginStateResult : public ResultBase
 
 public:
     [[nodiscard]] const csp::common::LoginState& GetLoginState() const;
-    CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode)
-        , State(nullptr) {};
+    CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode)
+        , m_state(nullptr) {};
 
 private:
     LoginStateResult();
-    LoginStateResult(csp::common::LoginState* InStatePtr);
+    LoginStateResult(csp::common::LoginState* inStatePtr);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::LoginState* State;
+    csp::common::LoginState* m_state;
 };
 
 /// @ingroup User System
@@ -93,10 +93,10 @@ private:
     LoginTokenInfoResult() = default;
     LoginTokenInfoResult(void*) {};
 
-    void FillLoginTokenInfo(const csp::common::String& AccessToken, const csp::common::String& AuthTokenExpiry,
-        const csp::common::String& RefreshToken, const csp::common::String& RefreshTokenExpiry);
+    void FillLoginTokenInfo(const csp::common::String& accessToken, const csp::common::String& authTokenExpiry,
+        const csp::common::String& refreshToken, const csp::common::String& refreshTokenExpiry);
 
-    LoginTokenInfo TokenInfo;
+    LoginTokenInfo m_tokenInfo;
 };
 
 /// @brief Data structure for overrides to the default token options
@@ -115,8 +115,8 @@ public:
     csp::common::String RefreshTokenExpiryLength;
 };
 
-typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;
-typedef std::function<void(const NullResult& Result)> NullResultCallback;
-typedef std::function<void(const LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
+typedef std::function<void(const LoginStateResult& result)> LoginStateResultCallback;
+typedef std::function<void(const NullResult& result)> NullResultCallback;
+typedef std::function<void(const LoginTokenInfoResult& result)> LoginTokenInfoResultCallback;
 
 } // namespace csp::systems

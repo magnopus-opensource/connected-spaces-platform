@@ -67,14 +67,14 @@ public:
     /// @param Location csp::systems::GeoLocation : latitude and longitude coordinates of the new POI
     /// @param AssetCollection csp::systems::AssetCollection : the AssetCollection to assign this POI to
     /// @param Callback CreatePOICallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreatePOI(const csp::common::String& Title, const csp::common::String& Description, const csp::common::String& Name,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, EPointOfInterestType Type, const csp::common::String& Owner,
-        const csp::systems::GeoLocation& Location, const AssetCollection& AssetCollection, POIResultCallback Callback);
+    CSP_ASYNC_RESULT void CreatePOI(const csp::common::String& title, const csp::common::String& description, const csp::common::String& name,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, EPointOfInterestType type, const csp::common::String& owner,
+        const csp::systems::GeoLocation& location, const AssetCollection& assetCollection, POIResultCallback callback);
 
     /// @brief Deletes a given Point of Interest
     /// @param POI PointOfInterest : POI to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeletePOI(const PointOfInterest& POI, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeletePOI(const PointOfInterest& poi, NullResultCallback callback);
 
     /// @brief Retrieves an array with all the Points of Interest that are located inside the circular area defined by the parameters..
     /// @param OriginLocation csp::systems::GeoLocation : The latitude and longitude coordinates of origin of the search location.
@@ -82,50 +82,50 @@ public:
     /// @param Type csp::common::Optional<EPointOfInterestType> : The type of POI to search for. If none is specified, all types will be included in
     /// the returned set.
     /// @param Callback POICollectionResultCallback : callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius,
-        const csp::common::Optional<EPointOfInterestType>& Type, POICollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetPOIsInArea(const csp::systems::GeoLocation& originLocation, const double areaRadius,
+        const csp::common::Optional<EPointOfInterestType>& type, POICollectionResultCallback callback);
     ///@}
 
 protected:
     PointOfInterestSystem(
-        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT PointOfInterestSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+        csp::common::LogSystem& logSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT PointOfInterestSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
 
     /// @brief Creates a new Point of Interest for storing the Space Site information. This functionality should only be accessed through the Space
     /// System.
     /// @param Site Site : Site information to be stored
     /// @param Callback SiteResultCallback : callback when asynchronous task finishes
-    void CreateSite(const Site& Site, SiteResultCallback Callback);
+    void CreateSite(const Site& site, SiteResultCallback callback);
 
     /// @brief Removes the Point of Interest that was storing the Space Site information. This functionality should only be accessed through the Space
     /// System.
     /// @param Site Site : Site information to be removed
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    void DeleteSite(const Site& Site, NullResultCallback Callback);
+    void DeleteSite(const Site& site, NullResultCallback callback);
 
     /// @brief Retrieves the Sites information associated with a Space. This functionality should only be accessed through the Space system
     /// @param Space Space : Space for which the associated POIs will be queried
     /// @param Callback SitesCollectionResultCallback : callback when asynchronous task finishes
-    void GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback);
+    void GetSites(const csp::common::String& spaceId, SitesCollectionResultCallback callback);
 
-    void AddSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
-        const csp::common::Optional<float>& Orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-        SpaceGeoLocationResultCallback Callback);
+    void AddSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::Optional<GeoLocation>& location,
+        const csp::common::Optional<float>& orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence,
+        SpaceGeoLocationResultCallback callback);
 
-    void UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::String& SpaceGeoLocationId,
-        const csp::common::Optional<GeoLocation>& Location, const csp::common::Optional<float>& Orientation,
-        const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence, SpaceGeoLocationResultCallback Callback);
+    void UpdateSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::String& spaceGeoLocationId,
+        const csp::common::Optional<GeoLocation>& location, const csp::common::Optional<float>& orientation,
+        const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence, SpaceGeoLocationResultCallback callback);
 
-    void GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+    void GetSpaceGeoLocation(const csp::common::String& spaceId, SpaceGeoLocationResultCallback callback);
 
-    void DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback);
+    void DeleteSpaceGeoLocation(const csp::common::String& spaceId, NullResultCallback callback);
 
 private:
     ~PointOfInterestSystem();
 
-    void DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback);
+    void DeletePOIInternal(const csp::common::String poiId, NullResultCallback callback);
 
-    csp::services::ApiBase* POIApiPtr;
+    csp::services::ApiBase* m_poiApiPtr;
 };
 
 } // namespace csp::systems

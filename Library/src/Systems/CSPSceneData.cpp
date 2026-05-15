@@ -26,44 +26,44 @@
 namespace csp::systems
 {
 
-CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDescriptionJson)
+CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& sceneDescriptionJson)
 {
     // Unpack the list into a single JSON string.
     // The reason this JSON is packed into a list _at all_ is merely a wrapper generator workaround,
     // csp::common::Strings cannot be passed as heap objects, and these SceneDescriptions can be large
     // enough to blow the stack
-    csp::common::String SceneDescriptionStr = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
+    csp::common::String sceneDescriptionStr = std::accumulate(sceneDescriptionJson.begin(), sceneDescriptionJson.end(), csp::common::String {});
 
-    mcs::SceneData SceneData;
-    csp::json::JsonDeserializer::Deserialize(SceneDescriptionStr.c_str(), SceneData);
+    mcs::SceneData sceneData;
+    csp::json::JsonDeserializer::Deserialize(sceneDescriptionStr.c_str(), sceneData);
 
-    csp::systems::GroupDtoToSpace(SceneData.Group, Space);
+    csp::systems::GroupDtoToSpace(sceneData.Group, Space);
 
-    AssetCollections = csp::common::Array<csp::systems::AssetCollection>(SceneData.Prototypes.size());
+    AssetCollections = csp::common::Array<csp::systems::AssetCollection>(sceneData.Prototypes.size());
 
-    size_t PrototypesIndex = 0;
-    for (const auto& Prototype : SceneData.Prototypes)
+    size_t prototypesIndex = 0;
+    for (const auto& prototype : sceneData.Prototypes)
     {
-        csp::systems::PrototypeDtoToAssetCollection(Prototype, AssetCollections[PrototypesIndex]);
-        PrototypesIndex++;
+        csp::systems::PrototypeDtoToAssetCollection(prototype, AssetCollections[prototypesIndex]);
+        prototypesIndex++;
     }
 
-    Assets = csp::common::Array<csp::systems::Asset>(SceneData.AssetDetails.size());
+    Assets = csp::common::Array<csp::systems::Asset>(sceneData.AssetDetails.size());
 
-    size_t AssetDetailIndex = 0;
-    for (const auto& AssetDetail : SceneData.AssetDetails)
+    size_t assetDetailIndex = 0;
+    for (const auto& assetDetail : sceneData.AssetDetails)
     {
-        csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex]);
-        AssetDetailIndex++;
+        csp::systems::AssetDetailDtoToAsset(assetDetail, Assets[assetDetailIndex]);
+        assetDetailIndex++;
     }
 
-    Sequences = csp::common::Array<csp::systems::Sequence>(SceneData.Sequences.size());
+    Sequences = csp::common::Array<csp::systems::Sequence>(sceneData.Sequences.size());
 
-    size_t SequenceIndex = 0;
-    for (const auto& Sequence : SceneData.Sequences)
+    size_t sequenceIndex = 0;
+    for (const auto& sequence : sceneData.Sequences)
     {
-        csp::systems::SequenceDtoToSequence(Sequence, Sequences[SequenceIndex]);
-        SequenceIndex++;
+        csp::systems::SequenceDtoToSequence(sequence, Sequences[sequenceIndex]);
+        sequenceIndex++;
     }
 }
 }

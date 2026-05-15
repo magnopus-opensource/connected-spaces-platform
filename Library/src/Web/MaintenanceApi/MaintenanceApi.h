@@ -37,10 +37,10 @@ namespace csp::systems::maintenanceservice
 class MaintenanceApi : public csp::services::ApiBase
 {
 public:
-    MaintenanceApi(csp::web::WebClient* InWebClient);
+    MaintenanceApi(csp::web::WebClient* inWebClient);
     ~MaintenanceApi();
 
-    void Query(const csp::common::String& MaintenanceUrl, csp::services::ApiResponseHandlerBase* ResponseHandler,
-        csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
+    void Query(const csp::common::String& maintenanceUrl, csp::services::ApiResponseHandlerBase* responseHandler,
+        csp::common::CancellationToken& cancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
 } // namespace csp::systems::maintenanceservice

@@ -20,7 +20,7 @@
 class TestListener : public testing::EmptyTestEventListener
 {
 public:
-    void OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*iteration*/) override;
+    void OnTestIterationEnd(const testing::UnitTest& unitTest, int /*iteration*/) override;
 
     virtual ~TestListener() = default;
 };

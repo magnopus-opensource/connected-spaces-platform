@@ -30,19 +30,19 @@ csp::multiplayer::SpaceTransform::SpaceTransform()
 }
 
 csp::multiplayer::SpaceTransform::SpaceTransform(
-    const csp::common::Vector3& Position, const csp::common::Vector4& Rotation, const csp::common::Vector3& Scale)
-    : Position(Position)
-    , Rotation(Rotation)
-    , Scale(Scale)
+    const csp::common::Vector3& position, const csp::common::Vector4& rotation, const csp::common::Vector3& scale)
+    : Position(position)
+    , Rotation(rotation)
+    , Scale(scale)
 {
 }
 
-bool csp::multiplayer::SpaceTransform::operator==(const SpaceTransform& Transform) const
+bool csp::multiplayer::SpaceTransform::operator==(const SpaceTransform& transform) const
 {
-    return Position == Transform.Position && Rotation == Transform.Rotation && Scale == Transform.Scale;
+    return Position == transform.Position && Rotation == transform.Rotation && Scale == transform.Scale;
 }
 
-bool csp::multiplayer::SpaceTransform::operator!=(const SpaceTransform& Transform) const { return !(*this == Transform); }
+bool csp::multiplayer::SpaceTransform::operator!=(const SpaceTransform& transform) const { return !(*this == transform); }
 
 namespace
 {
@@ -51,45 +51,45 @@ namespace
  * First is T(Translation), Second is R(Rotation), Third is S(Scale)
  * All Mat4s for uniform application, despite slight space redundancy in T and S matrices.
  */
-std::tuple<glm::mat4, glm::mat4, glm::mat4> GetTRSComponents(const csp::multiplayer::SpaceTransform& Transform)
+std::tuple<glm::mat4, glm::mat4, glm::mat4> GetTRSComponents(const csp::multiplayer::SpaceTransform& transform)
 {
-    glm::mat4 TMatrix = glm::mat4(1.0f); // mat4(1.0f) gives an identity matrix
-    TMatrix = glm::translate(TMatrix, glm::vec3 { Transform.Position.X, Transform.Position.Y, Transform.Position.Z });
+    glm::mat4 tMatrix = glm::mat4(1.0f); // mat4(1.0f) gives an identity matrix
+    tMatrix = glm::translate(tMatrix, glm::vec3 { transform.Position.X, transform.Position.Y, transform.Position.Z });
 
     // Quaternions must be normalized in order to not introduce crazy chaos.
-    glm::quat NormalQ = glm::normalize(glm::quat(Transform.Rotation.W, Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z));
-    glm::mat4 RMatrix = glm::toMat4(std::move(NormalQ));
+    glm::quat normalQ = glm::normalize(glm::quat(transform.Rotation.W, transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z));
+    glm::mat4 rMatrix = glm::toMat4(std::move(normalQ));
 
-    glm::mat4 SMatrix = glm::mat4(1.0f);
-    SMatrix = glm::scale(SMatrix, glm::vec3(Transform.Scale.X, Transform.Scale.Y, Transform.Scale.Z));
+    glm::mat4 sMatrix = glm::mat4(1.0f);
+    sMatrix = glm::scale(sMatrix, glm::vec3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z));
 
-    return { std::move(TMatrix), std::move(RMatrix), std::move(SMatrix) };
+    return { std::move(tMatrix), std::move(rMatrix), std::move(sMatrix) };
 }
 }
 
-csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator*(const SpaceTransform& Transform) const
+csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator*(const SpaceTransform& transform) const
 {
     // Transformation order is important when applying TRS matrices. Scale first, then Rotation, then Translation.
     // Otherwise, non-uniform scaling is effected by previous rotation, introducing skew, which is not normally desired.
     const auto [T1, R1, S1] = GetTRSComponents(*this);
-    const auto [T2, R2, S2] = GetTRSComponents(Transform);
+    const auto [T2, R2, S2] = GetTRSComponents(transform);
 
-    const auto TRS1 = T1 * R1 * S1; // Remember, "First" in matrix composition means the last element listed in the multiplication
-    const auto TRS2 = T2 * R2 * S2;
-    const auto ComposedTRS = TRS1 * TRS2;
+    const auto trS1 = T1 * R1 * S1; // Remember, "First" in matrix composition means the last element listed in the multiplication
+    const auto trS2 = T2 * R2 * S2;
+    const auto composedTrs = trS1 * trS2;
 
-    glm::vec3 TransformScale;
-    glm::quat TransformRotation;
-    glm::vec3 Translation;
-    glm::vec3 Skew;
-    glm::vec4 Perspective;
-    glm::decompose(ComposedTRS, TransformScale, TransformRotation, Translation, Skew, Perspective);
+    glm::vec3 transformScale;
+    glm::quat transformRotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(composedTrs, transformScale, transformRotation, translation, skew, perspective);
     // We're ignoring skew and perspective, as TRS composition should not have introduced any,
     // provided inputs are normalized.
     // Note, if you're getting confusing outputs for rotation when you have negative scales, you're
     // probably flipping the rotation, which is _fine_, but hard to understand without visualization.
 
-    return SpaceTransform({ Translation.x, Translation.y, Translation.z },
-        { TransformRotation.x, TransformRotation.y, TransformRotation.z, TransformRotation.w },
-        { TransformScale.x, TransformScale.y, TransformScale.z });
+    return SpaceTransform({ translation.x, translation.y, translation.z },
+        { transformRotation.x, transformRotation.y, transformRotation.z, transformRotation.w },
+        { transformScale.x, transformScale.y, transformScale.z });
 }

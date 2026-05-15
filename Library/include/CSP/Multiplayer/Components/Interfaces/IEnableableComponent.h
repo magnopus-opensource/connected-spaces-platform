@@ -33,7 +33,7 @@ public:
 
     /// @brief Sets if the component is enabled.
     /// @param InValue True to set the component to enabled, false otherwise.
-    virtual void SetIsEnabled(bool InValue) = 0;
+    virtual void SetIsEnabled(bool inValue) = 0;
 
 protected:
     virtual ~IEnableableComponent() = default;

@@ -33,64 +33,64 @@ namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
 
-inline const char* BoolToApiString(bool Val) { return Val ? "true" : "false"; }
+inline const char* BoolToApiString(bool val) { return val ? "true" : "false"; }
 
 /// @brief Generic function which will make a post request to the services proxy endpoint to trigger some specified operation of specified
 /// service. The class is templated to allow specialized functions to customize the result object used to process the response sent back from
 /// services.
 template <class ResultType>
 void InvokeOperationWithResult(
-    csp::services::ApiBase* InExternalServiceProxyApi, const ExternalServicesOperationParams& Params, StringResultCallback Callback)
+    csp::services::ApiBase* inExternalServiceProxyApi, const ExternalServicesOperationParams& params, StringResultCallback callback)
 {
-    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
-    TokenInfo->SetServiceName(Params.ServiceName);
-    TokenInfo->SetOperationName(Params.OperationName);
-    TokenInfo->SetHelp(Params.SetHelp);
-    TokenInfo->SetParameters(Convert(Params.Parameters));
+    auto tokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
+    tokenInfo->SetServiceName(params.ServiceName);
+    tokenInfo->SetOperationName(params.OperationName);
+    tokenInfo->SetHelp(params.SetHelp);
+    tokenInfo->SetParameters(Convert(params.Parameters));
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = InExternalServiceProxyApi->CreateHandler<StringResultCallback, ResultType, void, chs_aggregation::ServiceResponse>(Callback, nullptr);
-    static_cast<chs_aggregation::ExternalServiceProxyApi*>(InExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
+    csp::services::ResponseHandlerPtr responseHandler
+        = inExternalServiceProxyApi->CreateHandler<StringResultCallback, ResultType, void, chs_aggregation::ServiceResponse>(callback, nullptr);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(inExternalServiceProxyApi)->service_proxyPost({ tokenInfo }, responseHandler);
 }
 
 ExternalServiceProxySystem::ExternalServiceProxySystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , ExternalServiceProxyApi(nullptr)
+    , m_externalServiceProxyApi(nullptr)
 {
 }
 
-ExternalServiceProxySystem::ExternalServiceProxySystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
-    , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient) }
+ExternalServiceProxySystem::ExternalServiceProxySystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
+    , m_externalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(inWebClient) }
 {
 }
 
-ExternalServiceProxySystem::~ExternalServiceProxySystem() { delete (ExternalServiceProxyApi); }
+ExternalServiceProxySystem::~ExternalServiceProxySystem() { delete (m_externalServiceProxyApi); }
 
-void ExternalServiceProxySystem::InvokeOperation(const ExternalServicesOperationParams& Params, StringResultCallback Callback)
+void ExternalServiceProxySystem::InvokeOperation(const ExternalServicesOperationParams& params, StringResultCallback callback)
 {
-    InvokeOperationWithResult<ExternalServiceInvocationResult>(ExternalServiceProxyApi, Params, Callback);
+    InvokeOperationWithResult<ExternalServiceInvocationResult>(m_externalServiceProxyApi, params, callback);
 }
 
-void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback)
+void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& params, StringResultCallback callback)
 {
     // As a specialisation function, we know the service name, operation name, and help params.
-    ExternalServicesOperationParams AgoraUserTokenParams;
-    AgoraUserTokenParams.ServiceName = "Agora";
-    AgoraUserTokenParams.OperationName = "getUserToken";
-    AgoraUserTokenParams.SetHelp = false;
+    ExternalServicesOperationParams agoraUserTokenParams;
+    agoraUserTokenParams.ServiceName = "Agora";
+    agoraUserTokenParams.OperationName = "getUserToken";
+    agoraUserTokenParams.SetHelp = false;
 
     // And we pull the rest of the params from the specialised struct provided.
-    AgoraUserTokenParams.Parameters["userId"] = Params.AgoraUserId;
-    AgoraUserTokenParams.Parameters["channelName"] = Params.ChannelName;
-    AgoraUserTokenParams.Parameters["referenceId"] = Params.ReferenceId;
-    AgoraUserTokenParams.Parameters["lifespan"] = std::to_string(Params.Lifespan).c_str();
-    AgoraUserTokenParams.Parameters["readOnly"] = BoolToApiString(Params.ReadOnly);
-    AgoraUserTokenParams.Parameters["shareAudio"] = BoolToApiString(Params.ShareAudio);
-    AgoraUserTokenParams.Parameters["shareVideo"] = BoolToApiString(Params.ShareVideo);
-    AgoraUserTokenParams.Parameters["shareScreen"] = BoolToApiString(Params.ShareScreen);
+    agoraUserTokenParams.Parameters["userId"] = params.AgoraUserId;
+    agoraUserTokenParams.Parameters["channelName"] = params.ChannelName;
+    agoraUserTokenParams.Parameters["referenceId"] = params.ReferenceId;
+    agoraUserTokenParams.Parameters["lifespan"] = std::to_string(params.Lifespan).c_str();
+    agoraUserTokenParams.Parameters["readOnly"] = BoolToApiString(params.ReadOnly);
+    agoraUserTokenParams.Parameters["shareAudio"] = BoolToApiString(params.ShareAudio);
+    agoraUserTokenParams.Parameters["shareVideo"] = BoolToApiString(params.ShareVideo);
+    agoraUserTokenParams.Parameters["shareScreen"] = BoolToApiString(params.ShareScreen);
 
-    InvokeOperationWithResult<GetAgoraTokenResult>(ExternalServiceProxyApi, AgoraUserTokenParams, Callback);
+    InvokeOperationWithResult<GetAgoraTokenResult>(m_externalServiceProxyApi, agoraUserTokenParams, callback);
 }
 
 } // namespace csp::systems

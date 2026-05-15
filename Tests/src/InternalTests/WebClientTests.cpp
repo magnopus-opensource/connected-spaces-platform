@@ -59,55 +59,55 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientSendRequestTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
-    MockHttpResponseHandler MockHandler;
+    WebClientMock* mockClient = new WebClientMock(80, ETransferProtocol::HTTP, logSystem, true);
+    MockHttpResponseHandler mockHandler;
 
-    HttpResponse Response;
+    HttpResponse response;
 
-    std::promise<bool> OnHttpResponsePromise;
-    std::future<bool> OnHttpResponseFuture = OnHttpResponsePromise.get_future();
+    std::promise<bool> onHttpResponsePromise;
+    std::future<bool> onHttpResponseFuture = onHttpResponsePromise.get_future();
 
-    EXPECT_CALL(*MockClient, SendRequest)
+    EXPECT_CALL(*mockClient, SendRequest)
         .WillOnce(
-            [](ERequestVerb /*Verb*/, const Uri& /*InUri*/, HttpPayload& /*Payload*/, IHttpResponseHandler* ResponseCallback,
+            [](ERequestVerb /*Verb*/, const Uri& /*InUri*/, HttpPayload& /*Payload*/, IHttpResponseHandler* responseCallback,
                 const csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
             {
-                HttpResponse MockResponse;
-                MockResponse.SetResponseCode(EResponseCodes::ResponseOK);
+                HttpResponse mockResponse;
+                mockResponse.SetResponseCode(EResponseCodes::ResponseOK);
 
                 // Mock payload data
-                csp::common::String JsonString = "{\"payloadData\":[{\"id\":123,\"email\":\"mock.user@magnopus.com\"}]}";
-                HttpPayload MockPayload;
-                MockPayload.SetContent(JsonString);
-                ((HttpResponse&)MockResponse).GetMutablePayload() = MockPayload;
+                csp::common::String jsonString = "{\"payloadData\":[{\"id\":123,\"email\":\"mock.user@magnopus.com\"}]}";
+                HttpPayload mockPayload;
+                mockPayload.SetContent(jsonString);
+                ((HttpResponse&)mockResponse).GetMutablePayload() = mockPayload;
 
-                ResponseCallback->OnHttpResponse(MockResponse);
+                responseCallback->OnHttpResponse(mockResponse);
             });
 
-    EXPECT_CALL(MockHandler, OnHttpResponse)
+    EXPECT_CALL(mockHandler, OnHttpResponse)
         .WillOnce(
-            [&](csp::web::HttpResponse& InResponse)
+            [&](csp::web::HttpResponse& inResponse)
             {
-                Response = InResponse;
+                response = inResponse;
 
-                OnHttpResponsePromise.set_value(true);
+                onHttpResponsePromise.set_value(true);
             });
 
-    csp::web::HttpPayload Payload;
-    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
+    csp::web::HttpPayload payload;
+    payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-    MockClient->SendRequest(
-        csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), Payload, &MockHandler, csp::common::CancellationToken::Dummy(), true);
+    mockClient->SendRequest(
+        csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), payload, &mockHandler, csp::common::CancellationToken::Dummy(), true);
 
-    OnHttpResponseFuture.wait();
-    EXPECT_TRUE(OnHttpResponseFuture.get() == true);
+    onHttpResponseFuture.wait();
+    EXPECT_TRUE(onHttpResponseFuture.get() == true);
 
-    std::string ResponseContent = Response.GetPayload().GetContent().c_str();
-    EXPECT_TRUE(ResponseContent.find("payloadData") != std::string::npos) << "PayloadData was not found.";
+    std::string responseContent = response.GetPayload().GetContent().c_str();
+    EXPECT_TRUE(responseContent.find("payloadData") != std::string::npos) << "PayloadData was not found.";
 
-    delete MockClient;
+    delete mockClient;
 
     csp::CSPFoundation::Shutdown();
 }
@@ -117,117 +117,117 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
     InitialiseFoundation();
 
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
 
-        csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-        LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+        csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+        logSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
 
-        WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+        WebClientMock* mockClient = new WebClientMock(80, ETransferProtocol::HTTP, logSystem, true);
 
         // Request/Response logs we expect to receive for our HTTP calls.
         // We are only checking against a substring of the request/response logs.
         // Get logs
-        csp::common::String CSPLogMsgGetRequestSubstring = "HTTP Request\nGET https://mock.service/api/users";
-        csp::common::String CSPLogMsgGetResponseSubstring = "HTTP Response\nGET https://mock.service/api/users";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
+        csp::common::String cspLogMsgGetRequestSubstring = "HTTP Request\nGET https://mock.service/api/users";
+        csp::common::String cspLogMsgGetResponseSubstring = "HTTP Response\nGET https://mock.service/api/users";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgGetRequestSubstring)));
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgGetResponseSubstring)));
         // Put logs
-        csp::common::String CSPLogMsgPutRequestSubstring = "HTTP Request\nPUT https://mock.service/api/users";
-        csp::common::String CSPLogMsgPutResponseSubstring = "HTTP Response\nPUT https://mock.service/api/users";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
+        csp::common::String cspLogMsgPutRequestSubstring = "HTTP Request\nPUT https://mock.service/api/users";
+        csp::common::String cspLogMsgPutResponseSubstring = "HTTP Response\nPUT https://mock.service/api/users";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgPutRequestSubstring)));
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgPutResponseSubstring)));
         // Post logs
-        csp::common::String CSPLogMsgPostRequestSubstring = "HTTP Request\nPOST https://mock.service/api/login";
-        csp::common::String CSPLogMsgPostResponseSubstring = "HTTP Response\nPOST https://mock.service/api/login";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
+        csp::common::String cspLogMsgPostRequestSubstring = "HTTP Request\nPOST https://mock.service/api/login";
+        csp::common::String cspLogMsgPostResponseSubstring = "HTTP Response\nPOST https://mock.service/api/login";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgPostRequestSubstring)));
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgPostResponseSubstring)));
         // Delete logs
-        csp::common::String CSPLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://mock.service/api/users";
-        csp::common::String CSPLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://mock.service/api/users";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
+        csp::common::String cspLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://mock.service/api/users";
+        csp::common::String cspLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://mock.service/api/users";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgDeleteRequestSubstring)));
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(cspLogMsgDeleteResponseSubstring)));
 
-        EXPECT_CALL(*MockClient, SendRequest)
+        EXPECT_CALL(*mockClient, SendRequest)
             .WillRepeatedly(testing::DoAll(
                 // Capture: Verb (0), Uri (1), Payload (2), ResponseCallback (3), CancellationToken (4), AsyncResponse (5)
                 testing::WithArgs<0, 1, 2, 3, 4, 5>(
-                    [&MockClient, &LogSystem](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
-                        csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
+                    [&mockClient, &logSystem](ERequestVerb verb, const Uri& inUri, HttpPayload& payload, IHttpResponseHandler* responseCallback,
+                        csp::common::CancellationToken& cancellationToken, bool asyncResponse)
                     {
                         // Mimic the logging behaviour of the WebClient SendRequest method
-                        auto Request = std::make_unique<csp::web::HttpRequest>(
-                            MockClient, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+                        auto request = std::make_unique<csp::web::HttpRequest>(
+                            mockClient, verb, inUri, payload, responseCallback, cancellationToken, asyncResponse);
 
-                        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("{}", *(Request.get())).c_str());
+                        logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("{}", *(request.get())).c_str());
                     }),
                 // Capture: Verb (0), Uri (1), ResponseCallback (3)
                 testing::WithArgs<0, 1, 3>(
-                    [&](ERequestVerb Verb, const Uri& InUri, IHttpResponseHandler* Handler)
+                    [&](ERequestVerb verb, const Uri& inUri, IHttpResponseHandler* handler)
                     {
-                        EResponseCodes MockedResponseCode
-                            = Verb == ERequestVerb::Delete ? EResponseCodes::ResponseNoContent : EResponseCodes::ResponseOK;
+                        EResponseCodes mockedResponseCode
+                            = verb == ERequestVerb::Delete ? EResponseCodes::ResponseNoContent : EResponseCodes::ResponseOK;
 
-                        HttpResponse MockResponse;
-                        MockResponse.SetResponseCode(MockedResponseCode);
+                        HttpResponse mockResponse;
+                        mockResponse.SetResponseCode(mockedResponseCode);
 
                         // Log the response
-                        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-                            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", ERequestVerbToString(Verb), InUri.GetAsString(),
-                                static_cast<int>(MockResponse.GetResponseCode()), "Success")
+                        logSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+                            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", ERequestVerbToString(verb), inUri.GetAsString(),
+                                static_cast<int>(mockResponse.GetResponseCode()), "Success")
                                 .c_str());
 
-                        Handler->OnHttpResponse(MockResponse);
+                        handler->OnHttpResponse(mockResponse);
                     }),
                 testing::Return()));
 
         // GET request
-        MockHttpResponseHandler MockHandlerGet;
-        HttpPayload PayloadGet;
+        MockHttpResponseHandler mockHandlerGet;
+        HttpPayload payloadGet;
 
-        PayloadGet.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
+        payloadGet.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), PayloadGet, &MockHandlerGet,
+        mockClient->SendRequest(csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), payloadGet, &mockHandlerGet,
             csp::common::CancellationToken::Dummy(), true);
 
         // PUT request
-        MockHttpResponseHandler MockHandlerPut;
-        HttpPayload PayloadPut;
+        MockHttpResponseHandler mockHandlerPut;
+        HttpPayload payloadPut;
 
-        rapidjson::Document JsonDocPut(rapidjson::kObjectType);
-        JsonDocPut.AddMember("name", "bob", JsonDocPut.GetAllocator());
-        JsonDocPut.AddMember("job", "builder", JsonDocPut.GetAllocator());
+        rapidjson::Document jsonDocPut(rapidjson::kObjectType);
+        jsonDocPut.AddMember("name", "bob", jsonDocPut.GetAllocator());
+        jsonDocPut.AddMember("job", "builder", jsonDocPut.GetAllocator());
 
-        PayloadPut.SetContent(JsonDocPut);
-        PayloadPut.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
+        payloadPut.SetContent(jsonDocPut);
+        payloadPut.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Put, Uri("https://mock.service/api/users"), PayloadPut, &MockHandlerPut,
+        mockClient->SendRequest(csp::web::ERequestVerb::Put, Uri("https://mock.service/api/users"), payloadPut, &mockHandlerPut,
             csp::common::CancellationToken::Dummy(), true);
 
         // POST request
-        MockHttpResponseHandler MockHandlerPost;
-        HttpPayload PayloadPost;
+        MockHttpResponseHandler mockHandlerPost;
+        HttpPayload payloadPost;
 
-        rapidjson::Document JsonDocPost(rapidjson::kObjectType);
-        JsonDocPost.AddMember("email", "mock.user@magnopus.com", JsonDocPost.GetAllocator());
-        JsonDocPost.AddMember("password", "secret", JsonDocPost.GetAllocator());
+        rapidjson::Document jsonDocPost(rapidjson::kObjectType);
+        jsonDocPost.AddMember("email", "mock.user@magnopus.com", jsonDocPost.GetAllocator());
+        jsonDocPost.AddMember("password", "secret", jsonDocPost.GetAllocator());
 
-        PayloadPost.SetContent(JsonDocPost);
+        payloadPost.SetContent(jsonDocPost);
 
-        PayloadPost.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-        PayloadPost.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
+        payloadPost.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+        payloadPost.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Post, Uri("https://mock.service/api/login"), PayloadPost, &MockHandlerPost,
+        mockClient->SendRequest(csp::web::ERequestVerb::Post, Uri("https://mock.service/api/login"), payloadPost, &mockHandlerPost,
             csp::common::CancellationToken::Dummy(), true);
 
         // Delete request
-        MockHttpResponseHandler MockHandlerDelete;
-        HttpPayload PayloadDelete;
-        PayloadDelete.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
+        MockHttpResponseHandler mockHandlerDelete;
+        HttpPayload payloadDelete;
+        payloadDelete.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Delete, Uri("https://mock.service/api/users"), PayloadDelete, &MockHandlerDelete,
+        mockClient->SendRequest(csp::web::ERequestVerb::Delete, Uri("https://mock.service/api/users"), payloadDelete, &mockHandlerDelete,
             csp::common::CancellationToken::Dummy(), true);
 
-        delete MockClient;
+        delete mockClient;
     }
 
     csp::CSPFoundation::Shutdown();

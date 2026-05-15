@@ -21,14 +21,14 @@
 namespace csp::systems
 {
 
-bool HotspotGroup::operator==(const HotspotGroup& Other) const { return Name == Other.Name && Items == Other.Items; }
+bool HotspotGroup::operator==(const HotspotGroup& other) const { return Name == other.Name && Items == other.Items; }
 
-bool HotspotGroup::operator!=(const HotspotGroup& Other) const { return !(*this == Other); }
+bool HotspotGroup::operator!=(const HotspotGroup& other) const { return !(*this == other); }
 
-const HotspotGroup& csp::systems::HotspotGroupResult::GetHotspotGroup() const { return Group; }
+const HotspotGroup& csp::systems::HotspotGroupResult::GetHotspotGroup() const { return m_group; }
 
-void csp::systems::HotspotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+void csp::systems::HotspotGroupResult::OnResponse(const csp::services::ApiResponseBase* apiResponse) { ResultBase::OnResponse(apiResponse); }
 
-const csp::common::Array<HotspotGroup>& HotspotGroupsResult::GetHotspotGroups() const { return Groups; }
-void HotspotGroupsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+const csp::common::Array<HotspotGroup>& HotspotGroupsResult::GetHotspotGroups() const { return m_groups; }
+void HotspotGroupsResult::OnResponse(const csp::services::ApiResponseBase* apiResponse) { ResultBase::OnResponse(apiResponse); }
 } // namespace csp::systems

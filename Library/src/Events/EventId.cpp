@@ -19,15 +19,15 @@
 namespace csp::events
 {
 
-EventId::EventId(const char* InEventNamespace, const char* InEventName)
+EventId::EventId(const char* inEventNamespace, const char* inEventName)
 {
 #if DEBUG
-    STRNCPY(EventNamespaceDebug, sizeof(EventNamespaceDebug), InEventNamespace, sizeof(EventNamespaceDebug));
-    STRNCPY(EventNameDebug, sizeof(EventNameDebug), InEventName, sizeof(EventNameDebug));
+    STRNCPY(EventNamespaceDebug, sizeof(EventNamespaceDebug), inEventNamespace, sizeof(EventNamespaceDebug));
+    STRNCPY(EventNameDebug, sizeof(EventNameDebug), inEventName, sizeof(EventNameDebug));
 #endif
 
-    EventNamespace = std::hash<std::string> {}(InEventNamespace);
-    EventName = std::hash<std::string> {}(InEventName);
+    EventNamespace = std::hash<std::string> { }(inEventNamespace);
+    EventName = std::hash<std::string> { }(inEventName);
 }
 
 bool EventId::operator==(const EventId& other) const { return (EventName == other.EventName && EventNamespace == other.EventNamespace); }

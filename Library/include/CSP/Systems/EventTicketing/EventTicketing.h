@@ -61,8 +61,8 @@ public:
     /// @brief Specifies whether ticketing is currently turned on for the space.
     bool IsTicketingActive;
 
-    bool operator==(const TicketedEvent& Other) const;
-    bool operator!=(const TicketedEvent& Other) const;
+    bool operator==(const TicketedEvent& other) const;
+    bool operator!=(const TicketedEvent& other) const;
 };
 
 /// @ingroup Event Ticketing System
@@ -92,8 +92,8 @@ public:
     /// user.
     csp::common::String Email;
 
-    bool operator==(const EventTicket& Other) const;
-    bool operator!=(const EventTicket& Other) const;
+    bool operator==(const EventTicket& other) const;
+    bool operator!=(const EventTicket& other) const;
 };
 
 /// @ingroup Event Ticketing System
@@ -115,8 +115,8 @@ public:
     /// @brief CHS URL the third party vendor can provide the OAuth code to.
     csp::common::String OAuthRedirectUrl;
 
-    bool operator==(const TicketedEventVendorAuthInfo& Other) const;
-    bool operator!=(const TicketedEventVendorAuthInfo& Other) const;
+    bool operator==(const TicketedEventVendorAuthInfo& other) const;
+    bool operator!=(const TicketedEventVendorAuthInfo& other) const;
 };
 
 /// @ingroup Event Ticketing System
@@ -141,9 +141,9 @@ public:
 private:
     TicketedEventResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    TicketedEvent Event;
+    TicketedEvent m_event;
 };
 
 /// @ingroup Event Ticketing System
@@ -168,9 +168,9 @@ public:
 private:
     TicketedEventCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<TicketedEvent> Events;
+    csp::common::Array<TicketedEvent> m_events;
 };
 
 /// @ingroup Event Ticketing System
@@ -195,9 +195,9 @@ public:
 private:
     EventTicketResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    EventTicket Ticket;
+    EventTicket m_ticket;
 };
 
 /// @ingroup Event Ticketing System
@@ -221,11 +221,11 @@ public:
 
 private:
     SpaceIsTicketedResult(void*)
-        : SpaceIsTicketed(false) {};
+        : m_spaceIsTicketed(false) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    bool SpaceIsTicketed;
+    bool m_spaceIsTicketed;
 };
 
 /// @ingroup Event Ticketing System
@@ -239,29 +239,29 @@ class CSP_API TicketedEventVendorAuthInfoResult : public csp::systems::ResultBas
     /** @endcond */
 
 public:
-    TicketedEventVendorAuthInfo GetVendorAuthInfo() const { return VendorInfo; }
+    TicketedEventVendorAuthInfo GetVendorAuthInfo() const { return m_vendorInfo; }
 
 private:
     TicketedEventVendorAuthInfoResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    TicketedEventVendorAuthInfo VendorInfo;
+    TicketedEventVendorAuthInfo m_vendorInfo;
 };
 
 // @brief Callback providing a ticketed event result.
-typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResultCallback;
+typedef std::function<void(const TicketedEventResult& result)> TicketedEventResultCallback;
 
 // @brief Callback providing a ticketed event collection result.
-typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
+typedef std::function<void(const TicketedEventCollectionResult& result)> TicketedEventCollectionResultCallback;
 
 // @brief Callback providing a ticketed event result.
-typedef std::function<void(const EventTicketResult& Result)> EventTicketResultCallback;
+typedef std::function<void(const EventTicketResult& result)> EventTicketResultCallback;
 
 // @brief Callback providing a ticket event status for a space, from an endpoint result.
-typedef std::function<void(const SpaceIsTicketedResult& Result)> SpaceIsTicketedResultCallback;
+typedef std::function<void(const SpaceIsTicketedResult& result)> SpaceIsTicketedResultCallback;
 
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
-typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthorizeInfoCallback;
+typedef std::function<void(const TicketedEventVendorAuthInfoResult& result)> TicketedEventVendorAuthorizeInfoCallback;
 
 } // namespace csp::systems

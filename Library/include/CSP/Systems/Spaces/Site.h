@@ -52,8 +52,8 @@ public:
     OlyRotation Rotation;
     /** @} */
 
-    bool operator==(const Site& Other) const;
-    bool operator!=(const Site& Other) const;
+    bool operator==(const Site& other) const;
+    bool operator!=(const Site& other) const;
 };
 
 /// @ingroup Space System
@@ -75,9 +75,9 @@ public:
 private:
     SiteResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Site Site;
+    Site m_site;
 };
 
 /// @ingroup Space System
@@ -102,16 +102,16 @@ public:
 private:
     SitesCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Site> Sites;
+    csp::common::Array<Site> m_sites;
 };
 
 /// @brief Callback containing a Site and enum result used when adding Site information.
 /// @param Result SiteResult : data class containing information on task result/progress
-typedef std::function<void(const SiteResult& Result)> SiteResultCallback;
+typedef std::function<void(const SiteResult& result)> SiteResultCallback;
 /// @brief Callback containing an array of Site info and enum result used when retrieving a Site info collection.
 /// @param Result POIResult : data class containing information on task result/progress
-typedef std::function<void(const SitesCollectionResult& Result)> SitesCollectionResultCallback;
+typedef std::function<void(const SitesCollectionResult& result)> SitesCollectionResultCallback;
 
 } // namespace csp::systems

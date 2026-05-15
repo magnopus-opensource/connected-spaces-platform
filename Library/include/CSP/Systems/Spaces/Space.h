@@ -92,7 +92,7 @@ inline constexpr SpaceAttributes operator&(SpaceAttributes lhs, SpaceAttributes 
 
 template <typename T> inline constexpr bool HasFlag(T value, T flag) { return (value & flag) == flag; }
 
-void GroupDtoToSpace(const csp::services::generated::userservice::GroupDto& Dto, csp::systems::Space& Space);
+void GroupDtoToSpace(const csp::services::generated::userservice::GroupDto& dto, csp::systems::Space& space);
 
 CSP_END_IGNORE
 
@@ -110,8 +110,8 @@ public:
     SpaceAttributes Attributes;
     csp::common::Array<csp::common::String> Tags;
 
-    bool operator==(const BasicSpace& Other) const;
-    bool operator!=(const BasicSpace& Other) const;
+    bool operator==(const BasicSpace& other) const;
+    bool operator!=(const BasicSpace& other) const;
 };
 
 /// @ingroup Space System
@@ -120,7 +120,7 @@ class CSP_API Space : public BasicSpace
 {
 public:
     Space() = default;
-    Space(const Space& Other) = default;
+    Space(const Space& other) = default;
     Space& operator=(const Space& other) = default;
 
     /** @name Data Values
@@ -138,10 +138,10 @@ public:
     /// @brief Whether or not the user is "known" to the space. That being defined by whether the userID is contained in the UserIds, ModeratorIds or
     /// is the Creator. Banned users do not count as known.
     /// @return Whether or not the user is known to the space
-    CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
+    CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String userId) const;
 
-    bool operator==(const Space& Other) const;
-    bool operator!=(const Space& Other) const;
+    bool operator==(const Space& other) const;
+    bool operator!=(const Space& other) const;
 };
 
 /// @ingroup Space System
@@ -160,14 +160,14 @@ public:
     float Orientation;
     csp::common::Array<csp::systems::GeoLocation> GeoFence;
 
-    bool operator==(const SpaceGeoLocation& Other) const;
-    bool operator!=(const SpaceGeoLocation& Other) const;
+    bool operator==(const SpaceGeoLocation& other) const;
+    bool operator!=(const SpaceGeoLocation& other) const;
 
 private:
     // This ID is the POI ID in the spatial data service. It is intentionally not exposed so that
     // clients cannot directly pass it to the PointOfInterestSystem. This ensures that clients
     // must go through the SpaceSystem for all operations with POIs related to SpaceGeoLocations.
-    csp::common::String Id;
+    csp::common::String m_id;
 };
 
 /// @ingroup Space System
@@ -191,27 +191,27 @@ public:
     /// @return csp::common::String : the space code
     const csp::common::String& GetSpaceCode() const;
 
-    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
     SpaceResult() = default;
 
 private:
     SpaceResult(void*) {};
 
-    void SetSpace(const Space& InSpace);
+    void SetSpace(const Space& inSpace);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Space Space;
+    Space m_space;
 
     // space group codes are used _very_ rarely by our services.
     // as a result they offer minimal value to fdn's users, and so we treat them separately
     // from the far more heavily used `Space` type
-    csp::common::String SpaceCode;
+    csp::common::String m_spaceCode;
 };
 
 /// @ingroup Space System
@@ -233,15 +233,15 @@ public:
     /// @return csp::common::Array<Space> : pointer to spaces array
     const csp::common::Array<Space>& GetSpaces() const;
 
-    CSP_NO_EXPORT SpacesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT SpacesResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     SpacesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Space> Spaces;
+    csp::common::Array<Space> m_spaces;
 };
 
 /// @ingroup Space System
@@ -261,9 +261,9 @@ public:
 private:
     BasicSpaceResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    BasicSpace Space;
+    BasicSpace m_space;
 };
 
 /// @ingroup Space System
@@ -294,12 +294,12 @@ public:
 private:
     BasicSpacesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& jsonContent);
 
-    csp::common::Array<BasicSpace> Spaces;
-    uint64_t ResultTotalCount = 0;
+    csp::common::Array<BasicSpace> m_spaces;
+    uint64_t m_resultTotalCount = 0;
 };
 
 /// @ingroup Space System
@@ -318,17 +318,17 @@ public:
     const csp::common::Map<csp::common::String, csp::common::String>& GetMetadata() const;
 
     CSP_NO_EXPORT
-    SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    SpaceMetadataResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     SpaceMetadataResult(void*) {};
 
     SpaceMetadataResult() {};
 
-    void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& MetadataAssetCollection);
+    void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& metadataAssetCollection);
 
-    csp::common::Map<csp::common::String, csp::common::String> Metadata;
+    csp::common::Map<csp::common::String, csp::common::String> m_metadata;
 };
 
 /// @ingroup Space System
@@ -349,15 +349,15 @@ public:
 
 private:
     SpacesMetadataResult(void*) {};
-    SpacesMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    SpacesMetadataResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
     SpacesMetadataResult() {};
 
-    void SetMetadata(const csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>& InMetadata);
-    void SetTags(const csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>>& InTags);
+    void SetMetadata(const csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>& inMetadata);
+    void SetTags(const csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>>& inTags);
 
-    csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>> Metadata;
-    csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>> Tags;
+    csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>> m_metadata;
+    csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>> m_tags;
 };
 
 /// @ingroup Space System
@@ -382,9 +382,9 @@ public:
 private:
     PendingInvitesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<csp::common::String> PendingInvitesEmailAddresses;
+    csp::common::Array<csp::common::String> m_pendingInvitesEmailAddresses;
 };
 
 /// @ingroup Space System
@@ -409,9 +409,9 @@ public:
 private:
     AcceptedInvitesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<csp::common::String> AcceptedInvitesUserIds;
+    csp::common::Array<csp::common::String> m_acceptedInvitesUserIds;
 };
 
 /// @ingroup Space System
@@ -437,16 +437,16 @@ public:
     /// @return SpaceGeoLocation : Geo location of the space
     const SpaceGeoLocation& GetSpaceGeoLocation() const;
 
-    CSP_NO_EXPORT SpaceGeoLocationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT SpaceGeoLocationResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     SpaceGeoLocationResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    bool HasGeoLocation = false;
-    SpaceGeoLocation GeoLocation;
+    bool m_hasGeoLocation = false;
+    SpaceGeoLocation m_geoLocation;
 };
 
 /// @ingroup Space System
@@ -463,29 +463,29 @@ class SpaceGeoLocationCollectionResult : public csp::systems::ResultBase
 
 private:
     SpaceGeoLocationCollectionResult(void*) {};
-    SpaceGeoLocationCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    SpaceGeoLocationCollectionResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<SpaceGeoLocation> GeoLocations;
+    csp::common::Array<SpaceGeoLocation> m_geoLocations;
 };
 
-typedef std::function<void(const SpaceResult& Result)> SpaceResultCallback;
-typedef std::function<void(const SpacesResult& Result)> SpacesResultCallback;
+typedef std::function<void(const SpaceResult& result)> SpaceResultCallback;
+typedef std::function<void(const SpacesResult& result)> SpacesResultCallback;
 
-typedef std::function<void(const BasicSpaceResult& Result)> BasicSpaceResultCallback;
-typedef std::function<void(const BasicSpacesResult& Result)> BasicSpacesResultCallback;
+typedef std::function<void(const BasicSpaceResult& result)> BasicSpaceResultCallback;
+typedef std::function<void(const BasicSpacesResult& result)> BasicSpacesResultCallback;
 
-typedef std::function<void(const SpaceMetadataResult& Result)> SpaceMetadataResultCallback;
-typedef std::function<void(const SpacesMetadataResult& Result)> SpacesMetadataResultCallback;
+typedef std::function<void(const SpaceMetadataResult& result)> SpaceMetadataResultCallback;
+typedef std::function<void(const SpacesMetadataResult& result)> SpacesMetadataResultCallback;
 
-typedef std::function<void(const PendingInvitesResult& Result)> PendingInvitesResultCallback;
-typedef std::function<void(const AcceptedInvitesResult& Result)> AcceptedInvitesResultCallback;
+typedef std::function<void(const PendingInvitesResult& result)> PendingInvitesResultCallback;
+typedef std::function<void(const AcceptedInvitesResult& result)> AcceptedInvitesResultCallback;
 
-typedef std::function<void(const SpaceGeoLocationResult& Result)> SpaceGeoLocationResultCallback;
-typedef std::function<void(const SpaceGeoLocationCollectionResult& Result)> SpaceGeoLocationCollectionResultCallback;
+typedef std::function<void(const SpaceGeoLocationResult& result)> SpaceGeoLocationResultCallback;
+typedef std::function<void(const SpaceGeoLocationCollectionResult& result)> SpaceGeoLocationCollectionResultCallback;
 
-typedef std::function<void(bool Result)> BoolCallback;
+typedef std::function<void(bool result)> BoolCallback;
 
 } // namespace csp::systems

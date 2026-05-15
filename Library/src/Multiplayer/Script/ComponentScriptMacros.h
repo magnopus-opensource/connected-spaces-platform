@@ -22,38 +22,38 @@
 #define DEFINE_SCRIPT_PROPERTY_TYPE(COMP, CSPTYPE, SCRIPTTYPE, NAME)                                                                                 \
     void COMP##ScriptInterface::Set##NAME(SCRIPTTYPE Value)                                                                                          \
     {                                                                                                                                                \
-        ((COMP*)Component)->Set##NAME((CSPTYPE)Value);                                                                                               \
+        ((COMP*)m_component)->Set##NAME((CSPTYPE)Value);                                                                                               \
         SendPropertyUpdate();                                                                                                                        \
     }                                                                                                                                                \
                                                                                                                                                      \
-    SCRIPTTYPE COMP##ScriptInterface::Get##NAME() const { return (SCRIPTTYPE)((COMP*)Component)->Get##NAME(); }
+    SCRIPTTYPE COMP##ScriptInterface::Get##NAME() const { return (SCRIPTTYPE)((COMP*)m_component)->Get##NAME(); }
 
 #define DEFINE_SCRIPT_PROPERTY_STRING(COMP, NAME)                                                                                                    \
     void COMP##ScriptInterface::Set##NAME(std::string Value)                                                                                         \
     {                                                                                                                                                \
-        ((COMP*)Component)->Set##NAME((csp::common::String)Value.c_str());                                                                           \
+        ((COMP*)m_component)->Set##NAME((csp::common::String)Value.c_str());                                                                           \
         SendPropertyUpdate();                                                                                                                        \
     }                                                                                                                                                \
                                                                                                                                                      \
-    std::string COMP##ScriptInterface::Get##NAME() const { return (std::string)((COMP*)Component)->Get##NAME().c_str(); }
+    std::string COMP##ScriptInterface::Get##NAME() const { return (std::string)((COMP*)m_component)->Get##NAME().c_str(); }
 
 #define DEFINE_SCRIPT_PROPERTY_STRING_ADAPTNAME(COMP, SCRIPTFUNCNAME, UNDERLYINGNAME)                                                                \
     void COMP##ScriptInterface::Set##SCRIPTFUNCNAME(std::string Value)                                                                               \
     {                                                                                                                                                \
-        ((COMP*)Component)->Set##UNDERLYINGNAME((csp::common::String)Value.c_str());                                                                 \
+        ((COMP*)m_component)->Set##UNDERLYINGNAME((csp::common::String)Value.c_str());                                                                 \
         SendPropertyUpdate();                                                                                                                        \
     }                                                                                                                                                \
                                                                                                                                                      \
-    std::string COMP##ScriptInterface::Get##SCRIPTFUNCNAME() const { return (std::string)((COMP*)Component)->Get##UNDERLYINGNAME().c_str(); }
+    std::string COMP##ScriptInterface::Get##SCRIPTFUNCNAME() const { return (std::string)((COMP*)m_component)->Get##UNDERLYINGNAME().c_str(); }
 
 #define DEFINE_SCRIPT_PROPERTY_VEC2(COMP, NAME)                                                                                                      \
     ComponentScriptInterface::Vector2 COMP##ScriptInterface::Get##NAME() const                                                                       \
     {                                                                                                                                                \
         ComponentScriptInterface::Vector2 Vec = { 0, 0 };                                                                                            \
                                                                                                                                                      \
-        if (Component)                                                                                                                               \
+        if (m_component)                                                                                                                               \
         {                                                                                                                                            \
-            csp::common::Vector2 Value = ((COMP*)Component)->Get##NAME();                                                                            \
+            csp::common::Vector2 Value = ((COMP*)m_component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \
             Vec[1] = Value.Y;                                                                                                                        \
@@ -65,7 +65,7 @@
     void COMP##ScriptInterface::Set##NAME(ComponentScriptInterface::Vector2 Vec)                                                                     \
     {                                                                                                                                                \
         csp::common::Vector2 Value(Vec[0], Vec[1]);                                                                                                  \
-        ((COMP*)Component)->Set##NAME(Value);                                                                                                        \
+        ((COMP*)m_component)->Set##NAME(Value);                                                                                                        \
                                                                                                                                                      \
         SendPropertyUpdate();                                                                                                                        \
     }
@@ -75,9 +75,9 @@
     {                                                                                                                                                \
         ComponentScriptInterface::Vector3 Vec = { 0, 0, 0 };                                                                                         \
                                                                                                                                                      \
-        if (Component)                                                                                                                               \
+        if (m_component)                                                                                                                               \
         {                                                                                                                                            \
-            csp::common::Vector3 Value = ((COMP*)Component)->Get##NAME();                                                                            \
+            csp::common::Vector3 Value = ((COMP*)m_component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \
             Vec[1] = Value.Y;                                                                                                                        \
@@ -90,7 +90,7 @@
     void COMP##ScriptInterface::Set##NAME(ComponentScriptInterface::Vector3 Vec)                                                                     \
     {                                                                                                                                                \
         csp::common::Vector3 Value(Vec[0], Vec[1], Vec[2]);                                                                                          \
-        ((COMP*)Component)->Set##NAME(Value);                                                                                                        \
+        ((COMP*)m_component)->Set##NAME(Value);                                                                                                        \
                                                                                                                                                      \
         SendPropertyUpdate();                                                                                                                        \
     }
@@ -100,9 +100,9 @@
     {                                                                                                                                                \
         ComponentScriptInterface::Vector4 Vec = { 0, 0, 0, 0 };                                                                                      \
                                                                                                                                                      \
-        if (Component)                                                                                                                               \
+        if (m_component)                                                                                                                               \
         {                                                                                                                                            \
-            csp::common::Vector4 Value = ((COMP*)Component)->Get##NAME();                                                                            \
+            csp::common::Vector4 Value = ((COMP*)m_component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \
             Vec[1] = Value.Y;                                                                                                                        \
@@ -116,7 +116,7 @@
     void COMP##ScriptInterface::Set##NAME(ComponentScriptInterface::Vector4 Vec)                                                                     \
     {                                                                                                                                                \
         csp::common::Vector4 Value(Vec[0], Vec[1], Vec[2], Vec[3]);                                                                                  \
-        ((COMP*)Component)->Set##NAME(Value);                                                                                                        \
+        ((COMP*)m_component)->Set##NAME(Value);                                                                                                        \
                                                                                                                                                      \
         SendPropertyUpdate();                                                                                                                        \
     }

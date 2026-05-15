@@ -21,6 +21,6 @@
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& AdditionalComponents);
+ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& additionalComponents);
 
 } // namespace csp::multiplayer

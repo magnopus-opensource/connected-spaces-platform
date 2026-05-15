@@ -23,23 +23,23 @@
 namespace csp::systems::graphqlservice
 {
 
-GraphQLApi::GraphQLApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
+GraphQLApi::GraphQLApi(csp::web::WebClient* inWebClient)
+    : ApiBase(inWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
 {
 }
 
 GraphQLApi::~GraphQLApi() { }
 
 void GraphQLApi::Query(
-    csp::common::String QueryText, csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& CancellationToken) const
+    csp::common::String queryText, csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& cancellationToken) const
 {
-    csp::web::Uri Uri((ServiceDefinition.GetURI() + "/graphql").c_str());
-    csp::web::HttpPayload Payload;
-    Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-    Payload.SetContent(QueryText);
+    csp::web::Uri uri((ServiceDefinition.GetURI() + "/graphql").c_str());
+    csp::web::HttpPayload payload;
+    payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+    payload.SetContent(queryText);
 
-    Payload.SetBearerToken();
-    WebClient->SendRequest(csp::web::ERequestVerb::POST, Uri, Payload, ResponseHandler, CancellationToken);
+    payload.SetBearerToken();
+    WebClient->SendRequest(csp::web::ERequestVerb::POST, uri, payload, responseHandler, cancellationToken);
 }
 
 } // namespace csp::systems::graphqlservice

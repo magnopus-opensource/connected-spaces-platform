@@ -44,7 +44,7 @@ namespace csp::systems
 class AssetCollection;
 
 void PrototypeDtoToAssetCollection(
-    const csp::services::generated::prototypeservice::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection);
+    const csp::services::generated::prototypeservice::PrototypeDto& dto, csp::systems::AssetCollection& assetCollection);
 
 enum class EAssetCollectionType
 {
@@ -61,9 +61,9 @@ class CSP_API AssetCollection
 {
 public:
     AssetCollection();
-    AssetCollection(const AssetCollection& Other);
+    AssetCollection(const AssetCollection& other);
     ~AssetCollection();
-    AssetCollection& operator=(const AssetCollection& Other);
+    AssetCollection& operator=(const AssetCollection& other);
 
     /// @brief Retrieves a mutable version of the asset collection's metadata. To be used when it is necessary to mutate the asset collection's
     /// metadata.
@@ -111,14 +111,14 @@ public:
     // NOTE: Why is this here?
     csp::common::String Version;
 
-    bool operator==(const AssetCollection& Other) const;
-    bool operator!=(const AssetCollection& Other) const;
+    bool operator==(const AssetCollection& other) const;
+    bool operator!=(const AssetCollection& other) const;
 
 private:
     // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
     // internal STL map's destructor invokes client application's deallocators when they override 'delete'
     // in their codebase. (Later note, EM. Custom allocators don't exist anymore, we can change this)
-    csp::common::Map<csp::common::String, csp::common::String>* Metadata;
+    csp::common::Map<csp::common::String, csp::common::String>* m_metadata;
 };
 
 /// @ingroup Asset System
@@ -140,23 +140,23 @@ public:
     /// @return AssetCollection : const ref of asset collection class
     const AssetCollection& GetAssetCollection() const;
 
-    CSP_NO_EXPORT void SetAssetCollection(const csp::systems::AssetCollection& Collection);
+    CSP_NO_EXPORT void SetAssetCollection(const csp::systems::AssetCollection& collection);
 
-    CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
     AssetCollectionResult() = default;
 
 private:
     AssetCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    AssetCollection AssetCollection;
+    AssetCollection m_assetCollection;
 };
 
 /// @ingroup Asset System
@@ -186,22 +186,22 @@ public:
     /// @return uint64_t : count number as described above
     uint64_t GetTotalCount() const;
 
-    CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionsResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 protected:
     AssetCollectionsResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& jsonContent);
 
-    csp::common::Array<AssetCollection> AssetCollections;
-    uint64_t ResultTotalCount = 0;
+    csp::common::Array<AssetCollection> m_assetCollections;
+    uint64_t m_resultTotalCount = 0;
 };
 
 /// @ingroup Asset System
@@ -223,16 +223,16 @@ public:
 protected:
     AssetCollectionCountResult() = delete;
     AssetCollectionCountResult(void*)
-        : Count { 0 } {};
+        : m_count { 0 } {};
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CSP_NO_EXPORT AssetCollectionCountResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
-        , Count { 0 } {};
+    CSP_NO_EXPORT AssetCollectionCountResult(const csp::systems::ResultBase& inResult)
+        : csp::systems::ResultBase(inResult.GetResultCode(), inResult.GetHttpResultCode())
+        , m_count { 0 } {};
 
-    uint64_t Count;
+    uint64_t m_count;
 };
 
 /// @ingroup Asset System
@@ -248,30 +248,30 @@ class CSP_API AssetCollectionsCopyResult : public AssetCollectionsResult
     /** @endcond */
 
 public:
-    CSP_NO_EXPORT AssetCollectionsCopyResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : AssetCollectionsResult(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetCollectionsCopyResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : AssetCollectionsResult(resCode, httpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionsCopyResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : AssetCollectionsResult(ResCode, HttpResCode, Reason) {};
+        csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : AssetCollectionsResult(resCode, httpResCode, reason) {};
 
 private:
-    AssetCollectionsCopyResult(void* Ptr)
-        : AssetCollectionsResult(Ptr) {};
+    AssetCollectionsCopyResult(void* ptr)
+        : AssetCollectionsResult(ptr) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 };
 
 /// @brief Callback containing asset collection.
 /// @param Result AssetCollectionResult : result class
-typedef std::function<void(const AssetCollectionResult& Result)> AssetCollectionResultCallback;
+typedef std::function<void(const AssetCollectionResult& result)> AssetCollectionResultCallback;
 
 /// @brief Callback containing array of asset collections.
 /// @param Result AssetCollectionsResult : result class
-typedef std::function<void(const AssetCollectionsResult& Result)> AssetCollectionsResultCallback;
+typedef std::function<void(const AssetCollectionsResult& result)> AssetCollectionsResultCallback;
 
 /// @brief Callback containing number of asset collections.
 /// @param Result AssetCollectionCountResult : result class
-typedef std::function<void(const AssetCollectionCountResult& Result)> AssetCollectionCountResultCallback;
+typedef std::function<void(const AssetCollectionCountResult& result)> AssetCollectionCountResultCallback;
 
 } // namespace csp::systems

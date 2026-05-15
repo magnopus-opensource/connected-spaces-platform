@@ -53,79 +53,79 @@ template <> struct formatter<csp::common::String> : formatter<std::string_view>
 
 template <> struct formatter<csp::web::HttpRequest> : formatter<std::string_view>
 {
-    auto format(const csp::web::HttpRequest& Request, format_context& ctx) const -> format_context::iterator
+    auto format(const csp::web::HttpRequest& request, format_context& ctx) const -> format_context::iterator
     {
-        csp::common::String Verb = "";
-        switch (Request.GetVerb())
+        csp::common::String verb = "";
+        switch (request.GetVerb())
         {
         case csp::web::ERequestVerb::Get:
-            Verb = "GET";
+            verb = "GET";
             break;
         case csp::web::ERequestVerb::Post:
-            Verb = "POST";
+            verb = "POST";
             break;
         case csp::web::ERequestVerb::Put:
-            Verb = "PUT";
+            verb = "PUT";
             break;
         case csp::web::ERequestVerb::Delete:
-            Verb = "DELETE";
+            verb = "DELETE";
             break;
         case csp::web::ERequestVerb::Head:
-            Verb = "HEAD";
+            verb = "HEAD";
             break;
         case csp::web::ERequestVerb::Patch:
-            Verb = "PATCH";
+            verb = "PATCH";
             break;
         default:
-            Verb = "UNKNOWN";
+            verb = "UNKNOWN";
             break;
         }
 
-        csp::common::String Url = Request.GetUri().GetAsString();
+        csp::common::String url = request.GetUri().GetAsString();
 
-        const auto& RequestHeaders = Request.GetPayload().GetHeaders();
+        const auto& requestHeaders = request.GetPayload().GetHeaders();
 
-        csp::common::String Headers;
-        for (const auto& Header : RequestHeaders)
+        csp::common::String headers;
+        for (const auto& header : requestHeaders)
         {
-            Headers.Append(fmt::format("\t{}: {}\n", Header.first, Header.second).c_str());
+            headers.Append(fmt::format("\t{}: {}\n", header.first, header.second).c_str());
         }
 
-        const csp::common::String& RequestPayload = Request.GetPayload().ToJson();
+        const csp::common::String& requestPayload = request.GetPayload().ToJson();
 
-        csp::common::String RequestBody = "";
+        csp::common::String requestBody = "";
 
-        if (!RequestPayload.IsEmpty())
+        if (!requestPayload.IsEmpty())
         {
-            rapidjson::Document RequestJson;
-            rapidjson::ParseResult ok = RequestJson.Parse(RequestPayload);
+            rapidjson::Document requestJson;
+            rapidjson::ParseResult ok = requestJson.Parse(requestPayload);
             if (!ok)
             {
-                RequestBody.Append(fmt::format("\tFailed to parse request body as JSON: {}\n", rapidjson::GetParseError_En(ok.Code())).c_str());
+                requestBody.Append(fmt::format("\tFailed to parse request body as JSON: {}\n", rapidjson::GetParseError_En(ok.Code())).c_str());
             }
-            else if (RequestJson.IsObject())
+            else if (requestJson.IsObject())
             {
-                for (rapidjson::Value::ConstMemberIterator itr = RequestJson.MemberBegin(); itr != RequestJson.MemberEnd(); ++itr)
+                for (rapidjson::Value::ConstMemberIterator itr = requestJson.MemberBegin(); itr != requestJson.MemberEnd(); ++itr)
                 {
                     // Obfuscate the users password when logging the Http request body
                     if (std::string_view(itr->name.GetString()) == "password")
                     {
-                        RequestBody.Append(fmt::format("\t{}: ******\n", csp::web::JsonObjectToString(itr->name)).c_str());
+                        requestBody.Append(fmt::format("\t{}: ******\n", csp::web::JsonObjectToString(itr->name)).c_str());
                     }
                     else
                     {
-                        RequestBody.Append(
+                        requestBody.Append(
                             fmt::format("\t{}: {}\n", csp::web::JsonObjectToString(itr->name), csp::web::JsonObjectToString(itr->value)).c_str());
                     }
                 }
             }
         }
 
-        csp::common::String FormattedRequestString
-            = fmt::format("HTTP Request\n{0} {1}\nRequest Headers\n{2}Request Body\n{3}", Verb, Url, Headers, RequestBody).c_str();
+        csp::common::String formattedRequestString
+            = fmt::format("HTTP Request\n{0} {1}\nRequest Headers\n{2}Request Body\n{3}", verb, url, headers, requestBody).c_str();
 
         // wrap raw data in a string_view and forward to fmt
-        return formatter<std::string_view>::format(std::string_view(FormattedRequestString.c_str(), FormattedRequestString.Length()), ctx);
+        return formatter<std::string_view>::format(std::string_view(formattedRequestString.c_str(), formattedRequestString.Length()), ctx);
     }
 };
 

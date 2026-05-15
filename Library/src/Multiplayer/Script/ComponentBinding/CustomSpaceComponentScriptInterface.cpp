@@ -36,52 +36,52 @@ const uint8_t ValueType_Boolean = 4;
 namespace csp::multiplayer
 {
 
-CustomSpaceComponentScriptInterface::CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+CustomSpaceComponentScriptInterface::CustomSpaceComponentScriptInterface(CustomSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 
-uint32_t CustomSpaceComponentScriptInterface::GetCustomPropertySubscriptionKey(const std::string& Key)
+uint32_t CustomSpaceComponentScriptInterface::GetCustomPropertySubscriptionKey(const std::string& key)
 {
-    return static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertySubscriptionKey(Key.c_str());
+    return static_cast<CustomSpaceComponent*>(m_component)->GetCustomPropertySubscriptionKey(key.c_str());
 }
 
-bool CustomSpaceComponentScriptInterface::HasCustomProperty(const std::string& Key) const
+bool CustomSpaceComponentScriptInterface::HasCustomProperty(const std::string& key) const
 {
-    return static_cast<CustomSpaceComponent*>(Component)->HasCustomProperty(Key.c_str());
+    return static_cast<CustomSpaceComponent*>(m_component)->HasCustomProperty(key.c_str());
 }
 
-void CustomSpaceComponentScriptInterface::RemoveCustomProperty(const std::string& Key)
+void CustomSpaceComponentScriptInterface::RemoveCustomProperty(const std::string& key)
 {
-    static_cast<CustomSpaceComponent*>(Component)->RemoveCustomProperty(Key.c_str());
+    static_cast<CustomSpaceComponent*>(m_component)->RemoveCustomProperty(key.c_str());
 }
 
 const std::variant<bool, int64_t, float, std::string, std::vector<float>> CustomSpaceComponentScriptInterface::GetCustomProperty(
-    const std::string& Key)
+    const std::string& key)
 {
-    csp::common::ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
+    csp::common::ReplicatedValue returnValue = static_cast<CustomSpaceComponent*>(m_component)->GetCustomProperty(key.c_str());
 
-    switch (ReturnValue.GetReplicatedValueType())
+    switch (returnValue.GetReplicatedValueType())
     {
     case csp::common::ReplicatedValueType::Boolean:
-        return ReturnValue.GetBool();
+        return returnValue.GetBool();
     case csp::common::ReplicatedValueType::Integer:
-        return ReturnValue.GetInt();
+        return returnValue.GetInt();
     case csp::common::ReplicatedValueType::Float:
-        return ReturnValue.GetFloat();
+        return returnValue.GetFloat();
     case csp::common::ReplicatedValueType::String:
-        return ReturnValue.GetString().c_str();
+        return returnValue.GetString().c_str();
     case csp::common::ReplicatedValueType::Vector3:
     {
-        std::vector<float> ReturnVector;
-        ReturnVector = { ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z };
-        return ReturnVector;
+        std::vector<float> returnVector;
+        returnVector = { returnValue.GetVector3().X, returnValue.GetVector3().Y, returnValue.GetVector3().Z };
+        return returnVector;
     }
     case csp::common::ReplicatedValueType::Vector4:
     {
-        std::vector<float> ReturnVector;
-        ReturnVector = { ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z };
-        return ReturnVector;
+        std::vector<float> returnVector;
+        returnVector = { returnValue.GetVector4().W, returnValue.GetVector4().X, returnValue.GetVector4().Y, returnValue.GetVector4().Z };
+        return returnVector;
     }
     default:
         throw std::runtime_error("Unknown ReplicatedValue type!");
@@ -90,50 +90,50 @@ const std::variant<bool, int64_t, float, std::string, std::vector<float>> Custom
 
 std::vector<std::string> CustomSpaceComponentScriptInterface::GetCustomPropertyKeys()
 {
-    std::vector<std::string> ReturnValue;
-    csp::common::List<csp::common::String> Keys = static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertyKeys();
+    std::vector<std::string> returnValue;
+    csp::common::List<csp::common::String> keys = static_cast<CustomSpaceComponent*>(m_component)->GetCustomPropertyKeys();
 
-    for (size_t i = 0; i < Keys.Size(); ++i)
+    for (size_t i = 0; i < keys.Size(); ++i)
     {
-        ReturnValue.push_back(Keys[i].c_str());
+        returnValue.push_back(keys[i].c_str());
     }
 
-    return ReturnValue;
+    return returnValue;
 }
 
 void CustomSpaceComponentScriptInterface::SetCustomProperty(
-    const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value)
+    const std::string& key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& value)
 {
-    csp::common::ReplicatedValue SetValue;
+    csp::common::ReplicatedValue setValue;
 
-    switch (Value.index())
+    switch (value.index())
     {
     case ValueType_Boolean:
-        SetValue.SetBool(std::get<ValueType_Boolean>(Value));
+        setValue.SetBool(std::get<ValueType_Boolean>(value));
         break;
     case ValueType_Integer:
-        SetValue.SetInt(std::get<ValueType_Integer>(Value));
+        setValue.SetInt(std::get<ValueType_Integer>(value));
         break;
     case ValueType_Float:
-        SetValue.SetFloat(std::get<ValueType_Float>(Value));
+        setValue.SetFloat(std::get<ValueType_Float>(value));
         break;
     case ValueType_String:
-        SetValue.SetString(std::get<ValueType_String>(Value).c_str());
+        setValue.SetString(std::get<ValueType_String>(value).c_str());
         break;
     case ValueType_Vector:
-        if (std::get<ValueType_Vector>(Value).size() == 3)
+        if (std::get<ValueType_Vector>(value).size() == 3)
         {
-            SetValue.SetVector3({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2] });
+            setValue.SetVector3({ std::get<ValueType_Vector>(value)[0], std::get<ValueType_Vector>(value)[1], std::get<ValueType_Vector>(value)[2] });
         }
         else
         {
-            SetValue.SetVector4({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2],
-                std::get<ValueType_Vector>(Value)[3] });
+            setValue.SetVector4({ std::get<ValueType_Vector>(value)[0], std::get<ValueType_Vector>(value)[1], std::get<ValueType_Vector>(value)[2],
+                std::get<ValueType_Vector>(value)[3] });
         }
         break;
     }
 
-    static_cast<CustomSpaceComponent*>(Component)->SetCustomProperty(Key.c_str(), SetValue);
+    static_cast<CustomSpaceComponent*>(m_component)->SetCustomProperty(key.c_str(), setValue);
     SendPropertyUpdate();
 }
 

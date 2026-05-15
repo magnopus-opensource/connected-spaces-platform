@@ -28,7 +28,7 @@ class HttpResponse;
 struct IHttpResponseHandler
 {
     virtual void OnHttpProgress(HttpRequest& /*Request*/) {};
-    virtual void OnHttpResponse(HttpResponse& Response) = 0;
+    virtual void OnHttpResponse(HttpResponse& response) = 0;
     virtual bool ShouldDelete() const { return false; }
 
     virtual ~IHttpResponseHandler() = default;
@@ -38,10 +38,10 @@ class HttpResponse
 {
 public:
     HttpResponse();
-    HttpResponse(HttpRequest* InRequest);
+    HttpResponse(HttpRequest* inRequest);
     ~HttpResponse();
 
-    void SetResponseCode(EResponseCodes InReponseCode);
+    void SetResponseCode(EResponseCodes inReponseCode);
     EResponseCodes GetResponseCode() const;
 
     HttpPayload& GetMutablePayload();
@@ -55,12 +55,12 @@ public:
     const HttpProgress& GetProgress() const;
 
 private:
-    EResponseCodes ResponseCode;
+    EResponseCodes m_responseCode;
 
-    HttpRequest* Request;
-    HttpPayload Payload;
+    HttpRequest* m_request;
+    HttpPayload m_payload;
 
-    HttpProgress Progress;
+    HttpProgress m_progress;
 };
 
 } // namespace csp::web

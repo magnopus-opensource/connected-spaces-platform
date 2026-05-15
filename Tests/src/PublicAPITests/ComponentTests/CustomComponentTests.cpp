@@ -38,142 +38,142 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
-    SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
+    SpaceEntity* mySpaceEntity = new SpaceEntity();
+    CustomSpaceComponent myCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), mySpaceEntity);
 
-    const csp::common::String PropertyKey("MyPropertyKey");
-    const csp::common::String MyString("MyTestString");
-    csp::common::ReplicatedValue TestStringValue(MyString);
+    const csp::common::String propertyKey("MyPropertyKey");
+    const csp::common::String myString("MyTestString");
+    csp::common::ReplicatedValue testStringValue(myString);
 
-    MyCustomComponent.SetCustomProperty(PropertyKey, TestStringValue);
+    myCustomComponent.SetCustomProperty(propertyKey, testStringValue);
 
-    EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
+    EXPECT_TRUE(myCustomComponent.GetCustomProperty(propertyKey) == testStringValue);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    const csp::common::String ObjectName = "Object 1";
-    const csp::common::String ApplicationOrigin = "Application Origin 1";
+    const csp::common::String objectName = "Object 1";
+    const csp::common::String applicationOrigin = "Application Origin 1";
 
     // Current default properties:
     // - ComponentName
-    const int DefaultComponentProps = 1;
+    const int defaultComponentProps = 1;
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Create object to represent the Custom fields
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
         // Create custom component
-        auto* CustomComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
+        auto* customComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
 
-        EXPECT_EQ(CustomComponent->GetCustomPropertyKeys().Size(), 0);
+        EXPECT_EQ(customComponent->GetCustomPropertyKeys().Size(), 0);
 
         // Spectify the application origin and verify
-        CustomComponent->SetApplicationOrigin(ApplicationOrigin);
+        customComponent->SetApplicationOrigin(applicationOrigin);
 
-        EXPECT_EQ(CustomComponent->GetApplicationOrigin(), ApplicationOrigin);
+        EXPECT_EQ(customComponent->GetApplicationOrigin(), applicationOrigin);
 
         // Vector Check
         {
-            CustomComponent->SetCustomProperty("Vector3", csp::common::ReplicatedValue({ 10, 10, 10 }));
+            customComponent->SetCustomProperty("Vector3", csp::common::ReplicatedValue({ 10, 10, 10 }));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({ 10, 10, 10 }));
+            EXPECT_EQ(customComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({ 10, 10, 10 }));
 
-            CustomComponent->SetCustomProperty("Vector4", csp::common::ReplicatedValue({ 10, 10, 10, 10 }));
+            customComponent->SetCustomProperty("Vector4", csp::common::ReplicatedValue({ 10, 10, 10, 10 }));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({ 10, 10, 10, 10 }));
+            EXPECT_EQ(customComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({ 10, 10, 10, 10 }));
         }
 
         // String Check
         {
-            CustomComponent->SetCustomProperty("String", csp::common::ReplicatedValue("OKO"));
+            customComponent->SetCustomProperty("String", csp::common::ReplicatedValue("OKO"));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
+            EXPECT_EQ(customComponent->GetCustomProperty("String").GetString(), "OKO");
         }
 
         // Boolean Check
         {
-            CustomComponent->SetCustomProperty("Boolean", csp::common::ReplicatedValue(true));
+            customComponent->SetCustomProperty("Boolean", csp::common::ReplicatedValue(true));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("Boolean").GetBool(), true);
+            EXPECT_EQ(customComponent->GetCustomProperty("Boolean").GetBool(), true);
         }
 
         // Integer Check
         {
-            CustomComponent->SetCustomProperty("Integer", csp::common::ReplicatedValue(int64_t(1)));
+            customComponent->SetCustomProperty("Integer", csp::common::ReplicatedValue(int64_t(1)));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
+            EXPECT_EQ(customComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
         }
 
         // Float Check
         {
-            CustomComponent->SetCustomProperty("Float", csp::common::ReplicatedValue(1.00f));
+            customComponent->SetCustomProperty("Float", csp::common::ReplicatedValue(1.00f));
 
-            EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
+            EXPECT_EQ(customComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
         }
 
         // Has Key Check
         {
-            EXPECT_EQ(CustomComponent->HasCustomProperty("Boolean"), true);
-            EXPECT_EQ(CustomComponent->HasCustomProperty("BooleanFalse"), false);
+            EXPECT_EQ(customComponent->HasCustomProperty("Boolean"), true);
+            EXPECT_EQ(customComponent->HasCustomProperty("BooleanFalse"), false);
         }
 
         // Key Size
         {
             // Custom properties including application origin + default props
-            EXPECT_EQ(CustomComponent->GetNumProperties(), 7 + DefaultComponentProps);
+            EXPECT_EQ(customComponent->GetNumProperties(), 7 + defaultComponentProps);
         }
 
         // Remove Key
         {
-            CustomComponent->RemoveCustomProperty("Boolean");
+            customComponent->RemoveCustomProperty("Boolean");
 
             // Custom properties including application origin + default props
-            EXPECT_EQ(CustomComponent->GetNumProperties(), 6 + DefaultComponentProps);
+            EXPECT_EQ(customComponent->GetNumProperties(), 6 + defaultComponentProps);
         }
 
         // List Check
         {
-            auto Keys = CustomComponent->GetCustomPropertyKeys();
+            auto keys = customComponent->GetCustomPropertyKeys();
 
-            EXPECT_EQ(Keys.Size(), 5);
+            EXPECT_EQ(keys.Size(), 5);
         }
 
         // Queue update process before exiting space
-        RealtimeEngine->QueueEntityUpdate(CreatedObject);
-        RealtimeEngine->ProcessPendingEntityOperations();
+        realtimeEngine->QueueEntityUpdate(CreatedObject);
+        realtimeEngine->ProcessPendingEntityOperations();
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
         // Ensure component data has been written to database by chs before entering the space again
         // This is due to an enforced 2 second chs database write delay
@@ -183,94 +183,94 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     // Re-Enter space and verify contents
     {
         // Retrieve all entities
-        auto GotAllEntities = false;
-        SpaceEntity* LoadedObject;
+        auto gotAllEntities = false;
+        SpaceEntity* loadedObject;
 
         // Reload the space and verify the contents match
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+        realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        RealtimeEngine->SetRemoteEntityCreatedCallback(
-            [&](SpaceEntity* Entity)
+        realtimeEngine->SetRemoteEntityCreatedCallback(
+            [&](SpaceEntity* entity)
             {
-                if (Entity->GetName() == ObjectName)
+                if (entity->GetName() == objectName)
                 {
-                    GotAllEntities = true;
-                    LoadedObject = Entity;
+                    gotAllEntities = true;
+                    loadedObject = entity;
                 }
             });
 
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Wait until loaded
-        auto Start = std::chrono::steady_clock::now();
-        auto Current = std::chrono::steady_clock::now();
-        int64_t TestTime = 0;
+        auto start = std::chrono::steady_clock::now();
+        auto current = std::chrono::steady_clock::now();
+        int64_t testTime = 0;
 
-        while (!GotAllEntities && TestTime < 20)
+        while (!gotAllEntities && testTime < 20)
         {
             std::this_thread::sleep_for(50ms);
 
-            Current = std::chrono::steady_clock::now();
-            TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+            current = std::chrono::steady_clock::now();
+            testTime = std::chrono::duration_cast<std::chrono::seconds>(current - start).count();
         }
 
-        ASSERT_TRUE(GotAllEntities);
+        ASSERT_TRUE(gotAllEntities);
 
-        const auto& Components = *LoadedObject->GetComponents();
+        const auto& components = *loadedObject->GetComponents();
 
-        EXPECT_EQ(Components.Size(), 1);
+        EXPECT_EQ(components.Size(), 1);
 
         // Retreive the custom component
-        auto LoadedComponent = Components[0];
+        auto loadedComponent = components[0];
 
         // Verify the component type
-        EXPECT_EQ(LoadedComponent->GetComponentType(), ComponentType::Custom);
+        EXPECT_EQ(loadedComponent->GetComponentType(), ComponentType::Custom);
 
         // Verify the application
-        auto* CustomComponent = (CustomSpaceComponent*)LoadedComponent;
+        auto* customComponent = (CustomSpaceComponent*)loadedComponent;
 
-        EXPECT_EQ(CustomComponent->GetApplicationOrigin(), ApplicationOrigin);
+        EXPECT_EQ(customComponent->GetApplicationOrigin(), applicationOrigin);
 
         // List Check
         {
-            auto Keys = CustomComponent->GetCustomPropertyKeys();
-            EXPECT_EQ(Keys.Size(), 5);
+            auto keys = customComponent->GetCustomPropertyKeys();
+            EXPECT_EQ(keys.Size(), 5);
 
             // Vector Check
             {
-                EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({ 10, 10, 10 }));
-                EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({ 10, 10, 10, 10 }));
+                EXPECT_EQ(customComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({ 10, 10, 10 }));
+                EXPECT_EQ(customComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({ 10, 10, 10, 10 }));
             }
 
             // String Check
             {
-                EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
+                EXPECT_EQ(customComponent->GetCustomProperty("String").GetString(), "OKO");
             }
 
             // Integer Check
             {
-                EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
+                EXPECT_EQ(customComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
             }
 
             // Float Check
             {
-                EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
+                EXPECT_EQ(customComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
             }
 
             // Has Missing Key Check
             {
-                EXPECT_EQ(CustomComponent->HasCustomProperty("Boolean"), false);
+                EXPECT_EQ(customComponent->HasCustomProperty("Boolean"), false);
             }
         }
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

@@ -19,97 +19,97 @@
 namespace csp::common
 {
 
-Variant::Variant() { ValueType = VariantType::InvalidType; }
+Variant::Variant() { m_valueType = VariantType::InvalidType; }
 
 Variant::~Variant()
 {
-    if (ValueType == VariantType::String)
+    if (m_valueType == VariantType::String)
     {
-        Value.String.~String();
+        m_value.String.~String();
     }
 }
 
-Variant::Variant(bool InValue)
-    : ValueType(VariantType::Boolean)
+Variant::Variant(bool inValue)
+    : m_valueType(VariantType::Boolean)
 {
-    Value.Bool = InValue;
+    m_value.Bool = inValue;
 }
 
-Variant::Variant(double InValue)
-    : ValueType(VariantType::Float)
+Variant::Variant(double inValue)
+    : m_valueType(VariantType::Float)
 {
-    Value.Float = InValue;
+    m_value.Float = inValue;
 }
 
-Variant::Variant(int64_t InValue)
-    : ValueType(VariantType::Integer)
+Variant::Variant(int64_t inValue)
+    : m_valueType(VariantType::Integer)
 {
-    Value.Int = InValue;
+    m_value.Int = inValue;
 }
 
-Variant::Variant(const char* InValue)
-    : ValueType(VariantType::String)
+Variant::Variant(const char* inValue)
+    : m_valueType(VariantType::String)
 {
-    Value.String = InValue;
+    m_value.String = inValue;
 }
 
-Variant::Variant(const csp::common::String InValue)
-    : ValueType(VariantType::String)
+Variant::Variant(const csp::common::String inValue)
+    : m_valueType(VariantType::String)
 {
-    Value.String = InValue;
+    m_value.String = inValue;
 }
 
-Variant::Variant(Vector3 InValue)
-    : ValueType(VariantType::Vector3)
+Variant::Variant(Vector3 inValue)
+    : m_valueType(VariantType::Vector3)
 {
-    Value.Vector3 = InValue;
+    m_value.Vector3 = inValue;
 }
 
-Variant::Variant(const Vector4 InValue)
-    : ValueType(VariantType::Vector4)
+Variant::Variant(const Vector4 inValue)
+    : m_valueType(VariantType::Vector4)
 {
-    Value.Vector4 = InValue;
+    m_value.Vector4 = inValue;
 }
 
-Variant::Variant(const Variant& OtherValue) { *this = OtherValue; }
+Variant::Variant(const Variant& otherValue) { *this = otherValue; }
 
-Variant& Variant::operator=(const Variant& InValue)
+Variant& Variant::operator=(const Variant& inValue)
 {
-    switch (InValue.GetValueType())
+    switch (inValue.GetValueType())
     {
     case VariantType::Boolean:
     {
-        SetBool(InValue.GetBool());
+        SetBool(inValue.GetBool());
         break;
     }
     case VariantType::Integer:
     {
-        SetInt(InValue.GetInt());
+        SetInt(inValue.GetInt());
         break;
     }
     case VariantType::Float:
     {
-        SetFloat(InValue.GetFloat());
+        SetFloat(inValue.GetFloat());
         break;
     }
     case VariantType::String:
     {
-        SetString(InValue.GetString());
+        SetString(inValue.GetString());
         break;
     }
     case VariantType::Vector3:
     {
-        SetVector3(InValue.GetVector3());
+        SetVector3(inValue.GetVector3());
         break;
     }
     case VariantType::Vector4:
     {
-        SetVector4(InValue.GetVector4());
+        SetVector4(inValue.GetVector4());
         break;
     }
     case VariantType::InvalidType:
     {
-        ValueType = VariantType::InvalidType;
+        m_valueType = VariantType::InvalidType;
         break;
     }
     default:
@@ -122,42 +122,42 @@ Variant& Variant::operator=(const Variant& InValue)
     return *this;
 }
 
-bool Variant::operator==(const Variant& OtherValue) const
+bool Variant::operator==(const Variant& otherValue) const
 {
-    bool IsEqual = GetValueType() == OtherValue.GetValueType();
+    bool isEqual = GetValueType() == otherValue.GetValueType();
 
-    if (IsEqual)
+    if (isEqual)
     {
-        switch (OtherValue.GetValueType())
+        switch (otherValue.GetValueType())
         {
         case VariantType::Boolean:
         {
-            IsEqual = GetBool() == OtherValue.GetBool();
+            isEqual = GetBool() == otherValue.GetBool();
             break;
         }
         case VariantType::Integer:
         {
-            IsEqual = GetInt() == OtherValue.GetInt();
+            isEqual = GetInt() == otherValue.GetInt();
             break;
         }
         case VariantType::Float:
         {
-            IsEqual = GetFloat() == OtherValue.GetFloat();
+            isEqual = GetFloat() == otherValue.GetFloat();
             break;
         }
         case VariantType::String:
         {
-            IsEqual = GetString() == OtherValue.GetString();
+            isEqual = GetString() == otherValue.GetString();
             break;
         }
         case VariantType::Vector3:
         {
-            IsEqual = GetVector3() == OtherValue.GetVector3();
+            isEqual = GetVector3() == otherValue.GetVector3();
             break;
         }
         case VariantType::Vector4:
         {
-            IsEqual = GetVector4() == OtherValue.GetVector4();
+            isEqual = GetVector4() == otherValue.GetVector4();
             break;
         }
         default:
@@ -168,87 +168,87 @@ bool Variant::operator==(const Variant& OtherValue) const
         }
     }
 
-    return IsEqual;
+    return isEqual;
 }
 
-bool Variant::operator!=(const Variant& OtherValue) const { return (*this == OtherValue) == false; }
+bool Variant::operator!=(const Variant& otherValue) const { return (*this == otherValue) == false; }
 
-void Variant::SetBool(bool InValue)
+void Variant::SetBool(bool inValue)
 {
-    ValueType = VariantType::Boolean;
-    Value.Bool = InValue;
+    m_valueType = VariantType::Boolean;
+    m_value.Bool = inValue;
 }
 
 bool Variant::GetBool() const
 {
-    assert(ValueType == VariantType::Boolean);
-    return Value.Bool;
+    assert(m_valueType == VariantType::Boolean);
+    return m_value.Bool;
 }
 
-void Variant::SetFloat(double InValue)
+void Variant::SetFloat(double inValue)
 {
-    ValueType = VariantType::Float;
-    Value.Float = InValue;
+    m_valueType = VariantType::Float;
+    m_value.Float = inValue;
 }
 
 double Variant::GetFloat() const
 {
-    assert(ValueType == VariantType::Float);
-    return Value.Float;
+    assert(m_valueType == VariantType::Float);
+    return m_value.Float;
 }
 
-void Variant::SetInt(int64_t InValue)
+void Variant::SetInt(int64_t inValue)
 {
-    ValueType = VariantType::Integer;
-    Value.Int = InValue;
+    m_valueType = VariantType::Integer;
+    m_value.Int = inValue;
 }
 
 int64_t Variant::GetInt() const
 {
-    assert(ValueType == VariantType::Integer);
-    return Value.Int;
+    assert(m_valueType == VariantType::Integer);
+    return m_value.Int;
 }
 
-void Variant::SetString(const char* InValue)
+void Variant::SetString(const char* inValue)
 {
-    ValueType = VariantType::String;
-    Value.String = InValue;
+    m_valueType = VariantType::String;
+    m_value.String = inValue;
 }
 
-void Variant::SetString(const csp::common::String& InValue)
+void Variant::SetString(const csp::common::String& inValue)
 {
-    ValueType = VariantType::String;
-    Value.String = InValue;
+    m_valueType = VariantType::String;
+    m_value.String = inValue;
 }
 
 const csp::common::String& Variant::GetString() const
 {
-    assert(ValueType == VariantType::String);
-    return Value.String;
+    assert(m_valueType == VariantType::String);
+    return m_value.String;
 }
 
-void Variant::SetVector3(Vector3 InValue)
+void Variant::SetVector3(Vector3 inValue)
 {
-    ValueType = VariantType::Vector3;
-    Value.Vector3 = InValue;
+    m_valueType = VariantType::Vector3;
+    m_value.Vector3 = inValue;
 }
 
 Vector3 Variant::GetVector3() const
 {
-    assert(ValueType == VariantType::Vector3);
-    return Value.Vector3;
+    assert(m_valueType == VariantType::Vector3);
+    return m_value.Vector3;
 }
 
-void Variant::SetVector4(Vector4 InValue)
+void Variant::SetVector4(Vector4 inValue)
 {
-    ValueType = VariantType::Vector4;
-    Value.Vector4 = InValue;
+    m_valueType = VariantType::Vector4;
+    m_value.Vector4 = inValue;
 }
 
 Vector4 Variant::GetVector4() const
 {
-    assert(ValueType == VariantType::Vector4);
-    return Value.Vector4;
+    assert(m_valueType == VariantType::Vector4);
+    return m_value.Vector4;
 }
 
 size_t Variant::GetSizeOfInternalValue() { return sizeof(InternalValue); }

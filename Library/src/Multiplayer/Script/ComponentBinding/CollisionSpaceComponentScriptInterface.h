@@ -27,7 +27,7 @@ class CollisionSpaceComponent;
 class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent = nullptr);
+    CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* inComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);

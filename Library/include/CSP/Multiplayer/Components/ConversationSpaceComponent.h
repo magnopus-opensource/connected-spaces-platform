@@ -91,7 +91,7 @@ public:
     /// This constructor should not be called directly. Instead, use the SpaceEntity::AddComponent function.
     /// @param Parent csp::multiplayer::SpaceEntity* : The Space entity that owns this component. This will also register the component to the entity.
     /// @pre Parent must not be null.
-    ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ConversationSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Creates a conversation represented by this component.
     /// @param Message const csp::common::String& : The message to be stored.
@@ -100,20 +100,20 @@ public:
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     /// @post The ConversationId property is now internally set when the callback is fired.
     /// This component should now be replicated, so other clients receive the update.
-    CSP_ASYNC_RESULT void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateConversation(const csp::common::String& message, csp::systems::StringResultCallback callback);
 
     /// @brief Deletes this conversation, including all of its messages. This function is called internally when the component is deleted.
     /// @param Callback csp::systems::NullResultCallback : callback when asynchronous task finishes
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void DeleteConversation(csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteConversation(csp::systems::NullResultCallback callback);
 
     /// @brief Adds a message to the conversation.
     /// @param Message const csp::common::String& : The message to be stored.
     /// @param Callback MessageResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void AddMessage(const csp::common::String& Message, MessageResultCallback Callback);
+    CSP_ASYNC_RESULT void AddMessage(const csp::common::String& message, MessageResultCallback callback);
 
     /// @brief Deletes a particular message.
     /// @param MessageId const csp::common::String& : Id of the message to delete.
@@ -124,7 +124,7 @@ public:
     /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
     /// in user).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& messageId, csp::systems::NullResultCallback callback);
 
     /// @brief Retrieves message details that are represented by this component.
     /// This doesn't include the original message that created the conversation.
@@ -135,14 +135,14 @@ public:
     /// @param Callback csp::multiplayer::MessageCollectionResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetMessagesFromConversation(const csp::common::Optional<int>& ResultsSkipNumber,
-        const csp::common::Optional<int>& ResultsMaxNumber, MessageCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetMessagesFromConversation(const csp::common::Optional<int>& resultsSkipNumber,
+        const csp::common::Optional<int>& resultsMaxNumber, MessageCollectionResultCallback callback);
 
     /// @brief Retrieves message details for the root message in the conversation.
     /// @param Callback csp::multiplayer::ConversationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback Callback);
+    CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback callback);
 
     /// @brief Updates information for the root message in the conversation.
     /// @param NewData const csp::multiplayer::MessageUpdateParams& : The information to update the root message with.
@@ -152,7 +152,7 @@ public:
     /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
     /// in user).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void UpdateConversation(const MessageUpdateParams& NewData, ConversationResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateConversation(const MessageUpdateParams& newData, ConversationResultCallback callback);
 
     /// @brief Retrieves message details for a specified message in this conversation.
     /// @param MessageId const csp::common::String& : The message id to retrieve information for.
@@ -160,7 +160,7 @@ public:
     /// @param Callback csp::multiplayer::MessageResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback);
+    CSP_ASYNC_RESULT void GetMessageInfo(const csp::common::String& messageId, MessageResultCallback callback);
 
     /// @brief Updates information for a specified message in the conversation.
     /// @param MessageId const csp::common::String& : The message id to update information for.
@@ -172,13 +172,13 @@ public:
     /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
     /// in user).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void UpdateMessage(const csp::common::String& MessageId, const MessageUpdateParams& NewData, MessageResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateMessage(const csp::common::String& messageId, const MessageUpdateParams& newData, MessageResultCallback callback);
 
     /// @brief Gets the Number Of Replies in the conversation.
     /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback callback);
 
     /// @brief Gets the annotation for the root message in the conversation.
     /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
@@ -186,7 +186,7 @@ public:
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     /// @pre The conversation must have an annotation previously attached using SetConversationAnnotation.
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetConversationAnnotation(AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void GetConversationAnnotation(AnnotationResultCallback callback);
 
     /// @brief Associates an annotation with the root message in the conversation.
     /// If an annotation already exists on the conversation, it will be overwritten.
@@ -196,16 +196,16 @@ public:
     /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void SetConversationAnnotation(const AnnotationUpdateParams& AnnotationParams,
-        const csp::systems::BufferAssetDataSource& Annotation, const csp::systems::BufferAssetDataSource& AnnotationThumbnail,
-        AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void SetConversationAnnotation(const AnnotationUpdateParams& annotationParams,
+        const csp::systems::BufferAssetDataSource& annotation, const csp::systems::BufferAssetDataSource& annotationThumbnail,
+        AnnotationResultCallback callback);
 
     /// @brief Deletes an annotation associated with the root message in the conversation.
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response. if this condition is not met,
     /// with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void DeleteConversationAnnotation(csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteConversationAnnotation(csp::systems::NullResultCallback callback);
 
     /// @brief Gets an annotation associated with a message.
     /// @param MessageId const csp::common::String& : The message id the annotation is associated with.
@@ -214,7 +214,7 @@ public:
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     /// @pre The message must have an annotation previously attached using SetAnnotation.
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAnnotation(const csp::common::String& messageId, AnnotationResultCallback callback);
 
     /// @brief Associates an annotation with a message.
     /// If an annotation already exists on the message, it will be overwritten.
@@ -225,35 +225,35 @@ public:
     /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void SetAnnotation(const csp::common::String& MessageId, const AnnotationUpdateParams& UpdateParams,
-        const csp::systems::BufferAssetDataSource& Annotation, const csp::systems::BufferAssetDataSource& AnnotationThumbnail,
-        AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void SetAnnotation(const csp::common::String& messageId, const AnnotationUpdateParams& updateParams,
+        const csp::systems::BufferAssetDataSource& annotation, const csp::systems::BufferAssetDataSource& annotationThumbnail,
+        AnnotationResultCallback callback);
 
     /// @brief Deletes an annotation associated with a message.
     /// @param MessageId const csp::common::String& : The message id whose annotation to delete.
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& messageId, csp::systems::NullResultCallback callback);
 
     /// @brief Gets all thumbnails in the conversation.
     /// @param Callback csp::multiplayer::AnnotationThumbnailCollectionResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    CSP_ASYNC_RESULT void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback callback);
 
     typedef std::function<void(const csp::common::ConversationNetworkEventData&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.
     /// @param Callback ConversationUpdateCallbackHandler: Callback to receive data for the conversation that has been changed.
-    CSP_EVENT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback);
+    CSP_EVENT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler callback);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// \addtogroup IRotationComponent
@@ -261,36 +261,36 @@ public:
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @}
 
     bool GetIsVisible() const;
-    void SetIsVisible(bool Value);
+    void SetIsVisible(bool value);
     bool GetIsActive() const;
-    void SetIsActive(bool Value);
+    void SetIsActive(bool value);
 
     /// @brief Sets the Title of the conversation.
     /// @param Value - The new title.
-    void SetTitle(const csp::common::String& Value);
+    void SetTitle(const csp::common::String& value);
     /// @brief Gets the Title of the conversation.
     const csp::common::String& GetTitle() const;
 
     /// @brief Sets the resolved value for indicating that a conversation is resolved.
     /// @param Value - The resolved state.
-    void SetResolved(bool Value);
+    void SetResolved(bool value);
     /// @brief Gets the resolved value of the conversation.
     bool GetResolved() const;
 
     /// @brief Sets the value for the camera position used to view the conversation.
     /// @param InValue const csp::common::Vector3& : The position for the camera.
-    void SetConversationCameraPosition(const csp::common::Vector3& InValue);
+    void SetConversationCameraPosition(const csp::common::Vector3& inValue);
     /// @brief Gets the value for the camera position of the conversation.
     /// @return const csp::common::Vector3& : The camera view position.
     const csp::common::Vector3& GetConversationCameraPosition() const;
 
     /// @brief Sets the value for the camera rotation used to view the conversation.
     /// @param InValue const csp::common::Vector4& : The rotation for the camera.
-    void SetConversationCameraRotation(const csp::common::Vector4& InValue);
+    void SetConversationCameraRotation(const csp::common::Vector4& inValue);
     /// @brief Gets the value for the camera rotation of the conversation.
     /// @return const csp::common::Vector4& : The camera view rotation.
     const csp::common::Vector4& GetConversationCameraRotation() const;
@@ -301,14 +301,14 @@ protected:
     void OnCreated() override;
     void OnRemove() override;
 
-    void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
+    void SetPropertyFromPatch(uint32_t key, const csp::common::ReplicatedValue& value) override;
 
 private:
-    void SetConversationId(const csp::common::String& Value);
+    void SetConversationId(const csp::common::String& value);
     void RemoveConversationId();
     const csp::common::String& GetConversationId() const;
 
-    ConversationUpdateCallbackHandler ConversationUpdateCallback;
+    ConversationUpdateCallbackHandler m_conversationUpdateCallback;
 };
 
 } // namespace csp::multiplayer

@@ -19,12 +19,12 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
-csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName)
+csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& vendorName)
 {
-    csp::systems::EventTicketingVendor Vendor = csp::systems::EventTicketingVendor::Unknown;
-    if (VendorName == "eventbrite")
+    csp::systems::EventTicketingVendor vendor = csp::systems::EventTicketingVendor::Unknown;
+    if (vendorName == "eventbrite")
     {
-        Vendor = csp::systems::EventTicketingVendor::Eventbrite;
+        vendor = csp::systems::EventTicketingVendor::Eventbrite;
     }
     else
     {
@@ -32,20 +32,20 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
             "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
     }
 
-    return Vendor;
+    return vendor;
 }
 
-csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus)
+csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& dtoStatus)
 {
-    csp::systems::TicketStatus Status = csp::systems::TicketStatus::Unknown;
+    csp::systems::TicketStatus status = csp::systems::TicketStatus::Unknown;
 
-    if (DtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::PURCHASED)
+    if (dtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::PURCHASED)
     {
-        Status = csp::systems::TicketStatus::Purchased;
+        status = csp::systems::TicketStatus::Purchased;
     }
-    if (DtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::REDEEMED)
+    if (dtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::REDEEMED)
     {
-        Status = csp::systems::TicketStatus::Redeemed;
+        status = csp::systems::TicketStatus::Redeemed;
     }
     else
     {
@@ -53,265 +53,265 @@ csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus
             csp::common::LogLevel::Error, "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
     }
 
-    return Status;
+    return status;
 }
 
-void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event)
+void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& dto, csp::systems::TicketedEvent& event)
 {
-    Event.Id = Dto.GetId();
-    Event.SpaceId = Dto.GetSpaceId();
+    event.Id = dto.GetId();
+    event.SpaceId = dto.GetSpaceId();
 
-    if (Dto.HasVendorName())
+    if (dto.HasVendorName())
     {
-        Event.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        event.Vendor = VendorNameToEnum(dto.GetVendorName());
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceEventDto missing VendorName");
-        Event.Vendor = csp::systems::EventTicketingVendor::Unknown;
+        event.Vendor = csp::systems::EventTicketingVendor::Unknown;
     }
 
-    if (Dto.HasVendorEventId())
+    if (dto.HasVendorEventId())
     {
-        Event.VendorEventId = Dto.GetVendorEventId();
+        event.VendorEventId = dto.GetVendorEventId();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventId");
-        Event.VendorEventId = "";
+        event.VendorEventId = "";
     }
 
-    if (Dto.HasVendorEventUri())
+    if (dto.HasVendorEventUri())
     {
-        Event.VendorEventUri = Dto.GetVendorEventUri();
+        event.VendorEventUri = dto.GetVendorEventUri();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventUri");
-        Event.VendorEventUri = "";
+        event.VendorEventUri = "";
     }
 
-    if (Dto.HasIsTicketingActive())
+    if (dto.HasIsTicketingActive())
     {
-        Event.IsTicketingActive = Dto.GetIsTicketingActive();
+        event.IsTicketingActive = dto.GetIsTicketingActive();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceEventDto missing IsTicketingActive");
-        Event.IsTicketingActive = false;
+        event.IsTicketingActive = false;
     }
 }
 
-void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::EventTicket& Ticket)
+void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& dto, csp::systems::EventTicket& ticket)
 {
-    Ticket.Id = Dto.GetId();
-    Ticket.SpaceId = Dto.GetSpaceId();
+    ticket.Id = dto.GetId();
+    ticket.SpaceId = dto.GetSpaceId();
 
-    if (Dto.HasVendorName())
+    if (dto.HasVendorName())
     {
-        Ticket.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        ticket.Vendor = VendorNameToEnum(dto.GetVendorName());
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorName");
-        Ticket.Vendor = csp::systems::EventTicketingVendor::Unknown;
+        ticket.Vendor = csp::systems::EventTicketingVendor::Unknown;
     }
 
-    if (Dto.HasVendorEventId())
+    if (dto.HasVendorEventId())
     {
-        Ticket.VendorEventId = Dto.GetVendorEventId();
+        ticket.VendorEventId = dto.GetVendorEventId();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorEventId");
-        Ticket.VendorEventId = "";
+        ticket.VendorEventId = "";
     }
 
-    if (Dto.HasVendorTicketId())
+    if (dto.HasVendorTicketId())
     {
-        Ticket.VendorTicketId = Dto.GetVendorTicketId();
+        ticket.VendorTicketId = dto.GetVendorTicketId();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorTicketId");
-        Ticket.VendorTicketId = "";
+        ticket.VendorTicketId = "";
     }
 
-    if (Dto.HasTicketStatus())
+    if (dto.HasTicketStatus())
     {
-        Ticket.Status = TicketStatusToEnum(*Dto.GetTicketStatus());
+        ticket.Status = TicketStatusToEnum(*dto.GetTicketStatus());
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
-        Ticket.UserId = "";
+        ticket.UserId = "";
     }
 
-    if (Dto.HasUserId())
+    if (dto.HasUserId())
     {
-        Ticket.UserId = Dto.GetUserId();
+        ticket.UserId = dto.GetUserId();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
-        Ticket.UserId = "";
+        ticket.UserId = "";
     }
 
-    if (Dto.HasEmailLower())
+    if (dto.HasEmailLower())
     {
-        Ticket.Email = Dto.GetEmailLower();
+        ticket.Email = dto.GetEmailLower();
     }
     else
     {
         CSP_LOG_WARN_MSG("SpaceTicketDto missing EmailLower");
-        Ticket.Email = "";
+        ticket.Email = "";
     }
 }
 
-void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)
+void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& dto, csp::systems::TicketedEventVendorAuthInfo& vendorInfo)
 {
-    if (Dto.HasVendorName())
+    if (dto.HasVendorName())
     {
-        VendorInfo.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        vendorInfo.Vendor = VendorNameToEnum(dto.GetVendorName());
     }
 
-    if (Dto.HasClientId())
+    if (dto.HasClientId())
     {
-        VendorInfo.ClientId = Dto.GetClientId();
+        vendorInfo.ClientId = dto.GetClientId();
     }
 
-    if (Dto.HasAuthorizeEndpoint())
+    if (dto.HasAuthorizeEndpoint())
     {
-        VendorInfo.AuthorizeEndpoint = Dto.GetAuthorizeEndpoint();
+        vendorInfo.AuthorizeEndpoint = dto.GetAuthorizeEndpoint();
     }
 
-    if (Dto.HasOAuthRedirectUrl())
+    if (dto.HasOAuthRedirectUrl())
     {
-        VendorInfo.OAuthRedirectUrl = Dto.GetOAuthRedirectUrl();
+        vendorInfo.OAuthRedirectUrl = dto.GetOAuthRedirectUrl();
     }
 }
 
 namespace csp::systems
 {
 
-bool TicketedEvent::operator==(const TicketedEvent& Other) const
+bool TicketedEvent::operator==(const TicketedEvent& other) const
 {
-    return Id == Other.Id && SpaceId == Other.SpaceId && Vendor == Other.Vendor && VendorEventId == Other.VendorEventId
-        && VendorEventUri == Other.VendorEventUri && IsTicketingActive == Other.IsTicketingActive;
+    return Id == other.Id && SpaceId == other.SpaceId && Vendor == other.Vendor && VendorEventId == other.VendorEventId
+        && VendorEventUri == other.VendorEventUri && IsTicketingActive == other.IsTicketingActive;
 }
 
-bool TicketedEvent::operator!=(const TicketedEvent& Other) const { return !(*this == Other); }
+bool TicketedEvent::operator!=(const TicketedEvent& other) const { return !(*this == other); }
 
-void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* Dto = static_cast<chs::SpaceEventDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* dto = static_cast<chs::SpaceEventDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        dto->FromJson(response->GetPayload().GetContent());
 
-        SpaceEventDtoToTicketedEvent(*Dto, Event);
+        SpaceEventDtoToTicketedEvent(*dto, m_event);
     }
 }
 
-TicketedEvent& TicketedEventResult::GetTicketedEvent() { return Event; }
+TicketedEvent& TicketedEventResult::GetTicketedEvent() { return m_event; }
 
-const TicketedEvent& TicketedEventResult::GetTicketedEvent() const { return Event; }
+const TicketedEvent& TicketedEventResult::GetTicketedEvent() const { return m_event; }
 
-void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* TicketedEventCollectionResponse = static_cast<csp::services::DtoArray<chs::SpaceEventDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* ticketedEventCollectionResponse = static_cast<csp::services::DtoArray<chs::SpaceEventDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        ticketedEventCollectionResponse->FromJson(response->GetPayload().GetContent());
 
-        const std::vector<chs::SpaceEventDto>& DtoArray = TicketedEventCollectionResponse->GetArray();
-        Events = csp::common::Array<csp::systems::TicketedEvent>(DtoArray.size());
+        const std::vector<chs::SpaceEventDto>& dtoArray = ticketedEventCollectionResponse->GetArray();
+        m_events = csp::common::Array<csp::systems::TicketedEvent>(dtoArray.size());
 
-        for (size_t idx = 0; idx < DtoArray.size(); ++idx)
+        for (size_t idx = 0; idx < dtoArray.size(); ++idx)
         {
-            SpaceEventDtoToTicketedEvent(DtoArray[idx], Events[idx]);
+            SpaceEventDtoToTicketedEvent(dtoArray[idx], m_events[idx]);
         }
     }
 }
 
-csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() { return Events; }
+csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() { return m_events; }
 
-const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() const { return Events; }
+const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() const { return m_events; }
 
-void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* Dto = static_cast<chs::SpaceTicketDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* dto = static_cast<chs::SpaceTicketDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        dto->FromJson(response->GetPayload().GetContent());
 
-        SpaceTicketDtoToEventTicket(*Dto, Ticket);
+        SpaceTicketDtoToEventTicket(*dto, m_ticket);
     }
 }
 
-bool EventTicket::operator==(const EventTicket& Other) const
+bool EventTicket::operator==(const EventTicket& other) const
 {
-    return Id == Other.Id && SpaceId == Other.SpaceId && Vendor == Other.Vendor && VendorEventId == Other.VendorEventId
-        && VendorTicketId == Other.VendorTicketId && Status == Other.Status && UserId == Other.UserId && Email == Other.Email;
+    return Id == other.Id && SpaceId == other.SpaceId && Vendor == other.Vendor && VendorEventId == other.VendorEventId
+        && VendorTicketId == other.VendorTicketId && Status == other.Status && UserId == other.UserId && Email == other.Email;
 }
 
-bool EventTicket::operator!=(const EventTicket& Other) const { return !(*this == Other); }
+bool EventTicket::operator!=(const EventTicket& other) const { return !(*this == other); }
 
-EventTicket& EventTicketResult::GetEventTicket() { return Ticket; }
+EventTicket& EventTicketResult::GetEventTicket() { return m_ticket; }
 
-const EventTicket& EventTicketResult::GetEventTicket() const { return Ticket; }
+const EventTicket& EventTicketResult::GetEventTicket() const { return m_ticket; }
 
-bool TicketedEventVendorAuthInfo::operator==(const TicketedEventVendorAuthInfo& Other) const
+bool TicketedEventVendorAuthInfo::operator==(const TicketedEventVendorAuthInfo& other) const
 {
-    return Vendor == Other.Vendor && ClientId == Other.ClientId && AuthorizeEndpoint == Other.AuthorizeEndpoint
-        && OAuthRedirectUrl == Other.OAuthRedirectUrl;
+    return Vendor == other.Vendor && ClientId == other.ClientId && AuthorizeEndpoint == other.AuthorizeEndpoint
+        && OAuthRedirectUrl == other.OAuthRedirectUrl;
 }
 
-bool TicketedEventVendorAuthInfo::operator!=(const TicketedEventVendorAuthInfo& Other) const { return !(*this == Other); }
+bool TicketedEventVendorAuthInfo::operator!=(const TicketedEventVendorAuthInfo& other) const { return !(*this == other); }
 
-void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* Dto = static_cast<chs::VendorProviderInfo*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* dto = static_cast<chs::VendorProviderInfo*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        dto->FromJson(response->GetPayload().GetContent());
 
-        VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
+        VendorInfoDtoToVendorInfo(*dto, m_vendorInfo);
     }
 }
 
-bool SpaceIsTicketedResult::GetIsTicketedEvent() { return SpaceIsTicketed; }
+bool SpaceIsTicketedResult::GetIsTicketedEvent() { return m_spaceIsTicketed; }
 
-bool SpaceIsTicketedResult::GetIsTicketedEvent() const { return SpaceIsTicketed; }
+bool SpaceIsTicketedResult::GetIsTicketedEvent() const { return m_spaceIsTicketed; }
 
-void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        auto InputText = Response->GetPayload().GetContent();
+        auto inputText = response->GetPayload().GetContent();
 
-        rapidjson::Document ResponseJson;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(ResponseJson, InputText, "SpaceIsTicketedResult::OnResponse");
+        rapidjson::Document responseJson;
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(responseJson, inputText, "SpaceIsTicketedResult::OnResponse");
         if (!ok)
         {
             return;
@@ -322,28 +322,28 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
         // We currently however only care about whether the _first_ space is ticketed, because our API only allows clients to
         // reasons about whether a single space is ticketed.
 
-        bool ExpectedResponse = true;
-        const auto JsonRootObject = ResponseJson.GetObject();
-        const rapidjson::Value::ConstMemberIterator FirstJSONMember = JsonRootObject.MemberBegin();
-        if (FirstJSONMember != JsonRootObject.MemberEnd())
+        bool expectedResponse = true;
+        const auto jsonRootObject = responseJson.GetObject();
+        const rapidjson::Value::ConstMemberIterator firstJsonMember = jsonRootObject.MemberBegin();
+        if (firstJsonMember != jsonRootObject.MemberEnd())
         {
-            if (FirstJSONMember->value.IsBool())
+            if (firstJsonMember->value.IsBool())
             {
-                SpaceIsTicketed = FirstJSONMember->value.GetBool();
+                m_spaceIsTicketed = firstJsonMember->value.GetBool();
                 CSP_LOG_FORMAT(common::LogLevel::VeryVerbose, "We found that the space with ID %s has ticketed status: %s",
-                    FirstJSONMember->name.GetString(), SpaceIsTicketed ? "true" : "false");
+                    firstJsonMember->name.GetString(), m_spaceIsTicketed ? "true" : "false");
             }
             else
             {
-                ExpectedResponse = false;
+                expectedResponse = false;
             }
         }
         else
         {
-            ExpectedResponse = false;
+            expectedResponse = false;
         }
 
-        if (ExpectedResponse == false)
+        if (expectedResponse == false)
         {
             CSP_LOG_MSG(common::LogLevel::Error,
                 "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");

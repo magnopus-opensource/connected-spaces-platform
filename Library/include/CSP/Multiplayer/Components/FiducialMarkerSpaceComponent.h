@@ -52,7 +52,7 @@ public:
 
     /// @brief Constructs the fiducial marker space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    FiducialMarkerSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the name of this fiducial marker space component.
     /// @return The name of this fiducial marker space component.
@@ -60,7 +60,7 @@ public:
 
     /// @brief Sets the name of this fiducial marker space component.
     /// @param Value The name of this fiducial marker space component.
-    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& Value);
+    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& value);
 
     /// @brief Gets the ID of the image asset this image component refers to.
     /// @return The ID of the image asset this image component refers to.
@@ -68,7 +68,7 @@ public:
 
     /// @brief Sets the ID of the image asset this fiducial marker component refers to.
     /// @param Value The ID of the image asset this fiducial marker component refers to.
-    void SetMarkerAssetId(const csp::common::String& Value);
+    void SetMarkerAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's image asset, both the Asset ID and the Asset Collection ID are required.
@@ -78,26 +78,26 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's image asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -105,15 +105,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 };
 

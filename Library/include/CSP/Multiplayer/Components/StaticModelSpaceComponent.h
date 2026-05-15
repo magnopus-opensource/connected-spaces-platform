@@ -71,14 +71,14 @@ public:
 
     /// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    StaticModelSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /* clang-format off */
 	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
     const csp::common::String& GetExternalResourceAssetId() const override;
 
 	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
-    void SetExternalResourceAssetId(const csp::common::String& Value) override;
+    void SetExternalResourceAssetId(const csp::common::String& value) override;
     /* clang-format on */
 
     /// @brief Gets the ID of the asset collection associated with this component.
@@ -89,7 +89,7 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
+    void SetExternalResourceAssetCollectionId(const csp::common::String& value) override;
 
     /// @brief Gets the material overrides of this component.
     /// Should be in the format:
@@ -101,30 +101,30 @@ public:
     /// @brief Adds a new material override to this component.
     /// @param The path to the models material to override.
     /// @param The id of the material to override with.
-    void AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId);
+    void AddMaterialOverride(const csp::common::String& modelPath, const csp::common::String& materialAssetId);
 
     /// @brief Removes a material override from this component.
     /// @param The path to the models material to override to be removed.
-    void RemoveMaterialOverride(const csp::common::String& ModelPath);
+    void RemoveMaterialOverride(const csp::common::String& modelPath);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -132,15 +132,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -148,7 +148,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 
     /// \addtogroup IShadowCasterComponent
@@ -156,7 +156,7 @@ public:
     /// @copydoc IShadowCasterComponent::GetIsShadowCaster()
     bool GetIsShadowCaster() const override;
     /// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-    void SetIsShadowCaster(bool Value) override;
+    void SetIsShadowCaster(bool value) override;
     /// @}
 
     /// \addtogroup IRenderBehaviourComponent
@@ -164,11 +164,11 @@ public:
     /// @copydoc IRenderBehaviourComponent::GetShowAsHoldoutInAR()
     bool GetShowAsHoldoutInAR() const override;
     /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInAR()
-    void SetShowAsHoldoutInAR(bool InValue) override;
+    void SetShowAsHoldoutInAR(bool inValue) override;
     /// @copydoc IRenderBehaviourComponent::GetShowAsHoldoutInVirtual()
     bool GetShowAsHoldoutInVirtual() const override;
     /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInVirtual()
-    void SetShowAsHoldoutInVirtual(bool InValue) override;
+    void SetShowAsHoldoutInVirtual(bool inValue) override;
     /// @}
 };
 

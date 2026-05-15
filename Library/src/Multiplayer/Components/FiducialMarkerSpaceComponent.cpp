@@ -75,8 +75,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& FiducialMarkerSpaceComponent::GetSchema() { return Schema; }
 
-FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -85,9 +85,9 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetMarkerAssetId() cons
     return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId));
 }
 
-void FiducialMarkerSpaceComponent::SetMarkerAssetId(const csp::common::String& Value)
+void FiducialMarkerSpaceComponent::SetMarkerAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId), value);
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetAssetCollectionId() const
@@ -95,9 +95,9 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetAssetCollectionId() 
     return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId));
 }
 
-void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId), value);
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
@@ -105,9 +105,9 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
     return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED));
 }
 
-void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
+void FiducialMarkerSpaceComponent::SetName(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED), value);
 }
 
 /* ITransformComponent */
@@ -117,9 +117,9 @@ const csp::common::Vector3& FiducialMarkerSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position));
 }
 
-void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
@@ -127,9 +127,9 @@ const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation));
 }
 
-void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
@@ -137,49 +137,49 @@ const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale));
 }
 
-void FiducialMarkerSpaceComponent::SetScale(const csp::common::Vector3& Value)
+void FiducialMarkerSpaceComponent::SetScale(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), value);
 }
 
 SpaceTransform FiducialMarkerSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void FiducialMarkerSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void FiducialMarkerSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 /* IVisibleComponent */
 
 bool FiducialMarkerSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible)); }
 
-void FiducialMarkerSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible), Value); }
+void FiducialMarkerSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible), value); }
 
 bool FiducialMarkerSpaceComponent::GetIsARVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible));
 }
 
-void FiducialMarkerSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible), Value); }
+void FiducialMarkerSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible), value); }
 
 bool FiducialMarkerSpaceComponent::GetIsVirtualVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible));
 }
 
-void FiducialMarkerSpaceComponent::SetIsVirtualVisible(bool Value)
+void FiducialMarkerSpaceComponent::SetIsVirtualVisible(bool value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible), Value);
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible), value);
 }
 
 } // namespace csp::multiplayer

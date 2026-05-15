@@ -19,10 +19,10 @@
 #include "Multiplayer/WebSocketClient.h"
 
 csp::multiplayer::IWebSocketClient* WebSocketStart(
-    const csp::common::String& Uri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    const csp::common::String& uri, const csp::common::String& accessToken, const csp::common::String& deviceId);
 
-void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient);
-void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const csp::common::String& Data);
-void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient);
+void WebSocketStop(csp::multiplayer::IWebSocketClient* webSocketClient);
+void WebSocketSend(csp::multiplayer::IWebSocketClient* webSocketClient, const csp::common::String& data);
+void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* webSocketClient);
 
 void InitialiseFoundation();

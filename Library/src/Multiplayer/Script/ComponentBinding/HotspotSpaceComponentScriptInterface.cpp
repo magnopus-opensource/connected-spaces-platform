@@ -21,14 +21,14 @@
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponentScriptInterface::HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+HotspotSpaceComponentScriptInterface::HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 
 std::string HotspotSpaceComponentScriptInterface::GetUniqueComponentId()
 {
-    return static_cast<HotspotSpaceComponent*>(Component)->GetUniqueComponentId().c_str();
+    return static_cast<HotspotSpaceComponent*>(m_component)->GetUniqueComponentId().c_str();
 }
 
 } // namespace csp::multiplayer

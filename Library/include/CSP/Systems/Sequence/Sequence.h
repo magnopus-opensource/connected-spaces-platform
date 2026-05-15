@@ -26,7 +26,7 @@ namespace csp::systems
 {
 class Sequence;
 
-void SequenceDtoToSequence(const csp::services::generated::aggregationservice::SequenceDto& Dto, Sequence& Sequence);
+void SequenceDtoToSequence(const csp::services::generated::aggregationservice::SequenceDto& dto, Sequence& sequence);
 
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
@@ -39,8 +39,8 @@ public:
     csp::common::Array<csp::common::String> Items;
     csp::common::Map<csp::common::String, csp::common::String> MetaData;
 
-    bool operator==(const Sequence& Other) const;
-    bool operator!=(const Sequence& Other) const;
+    bool operator==(const Sequence& other) const;
+    bool operator!=(const Sequence& other) const;
 };
 
 /// @ingroup Sequence System
@@ -55,17 +55,17 @@ class CSP_API SequenceResult : public csp::systems::ResultBase
 
 public:
     const Sequence& GetSequence() const;
-    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
+    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode resCode, uint16_t httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, httpResCode, reason) {};
 
 private:
     SequenceResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Sequence Sequence;
+    Sequence m_sequence;
 };
 
 /// @ingroup Sequence System
@@ -81,25 +81,25 @@ class CSP_API SequencesResult : public csp::systems::ResultBase
 public:
     const csp::common::Array<Sequence>& GetSequences() const;
 
-    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
+    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode resCode, uint16_t httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, httpResCode, reason) {};
 
 private:
     SequencesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Sequence> Sequences;
+    csp::common::Array<Sequence> m_sequences;
 };
 
 /// @brief Callback containing a sequence.
 /// @param Result SequenceResult : result class
-typedef std::function<void(const SequenceResult& Result)> SequenceResultCallback;
+typedef std::function<void(const SequenceResult& result)> SequenceResultCallback;
 
 /// @brief Callback containing array of sequences.
 /// @param Result SequenceResult : result class
-typedef std::function<void(const SequencesResult& Result)> SequencesResultCallback;
+typedef std::function<void(const SequencesResult& result)> SequencesResultCallback;
 
 } // namespace csp::systems

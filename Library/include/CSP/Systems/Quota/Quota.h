@@ -83,8 +83,8 @@ public:
     int32_t ActivityCount;
     int32_t Limit;
 
-    bool operator==(const FeatureLimitInfo& Other) const;
-    bool operator!=(const FeatureLimitInfo& Other) const;
+    bool operator==(const FeatureLimitInfo& other) const;
+    bool operator!=(const FeatureLimitInfo& other) const;
 };
 
 /// @ingroup Quota System
@@ -98,8 +98,8 @@ public:
     csp::common::String AssignToId;
     TierNames TierName;
 
-    bool operator==(const UserTierInfo& Other) const;
-    bool operator!=(const UserTierInfo& Other) const;
+    bool operator==(const UserTierInfo& other) const;
+    bool operator!=(const UserTierInfo& other) const;
 };
 
 /// @ingroup Quota System
@@ -110,14 +110,14 @@ class CSP_API FeatureQuotaInfo
 public:
     FeatureQuotaInfo()
         : Limit(-1) {};
-    CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
+    CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures featureNameIn, TierNames tierNameIn, int32_t limitIn, PeriodEnum periodIn, bool allowReductionsIn);
     TierFeatures FeatureName;
     TierNames TierName;
     int32_t Limit;
     PeriodEnum Period;
 
-    bool operator==(const FeatureQuotaInfo& Other) const;
-    bool operator!=(const FeatureQuotaInfo& Other) const;
+    bool operator==(const FeatureQuotaInfo& other) const;
+    bool operator!=(const FeatureQuotaInfo& other) const;
 };
 
 /// @ingroup Quota System
@@ -135,15 +135,15 @@ public:
     /// @return csp::common::Array<FeatureProgress> : const array of feature progress class
     const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
-    CSP_NO_EXPORT FeaturesLimitResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+    CSP_NO_EXPORT FeaturesLimitResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) { };
 
 private:
     FeaturesLimitResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<FeatureLimitInfo> FeaturesLimitInfo;
+    csp::common::Array<FeatureLimitInfo> m_featuresLimitInfo;
 };
 
 /// @ingroup Quota System
@@ -161,15 +161,15 @@ public:
     /// @returnFeatureProgress : const ref to feature progress class
     const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
-     CSP_NO_EXPORT FeatureLimitResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+     CSP_NO_EXPORT FeatureLimitResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) { };
 
 private:
     FeatureLimitResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    FeatureLimitInfo FeatureLimitInfo;
+    FeatureLimitInfo m_featureLimitInfo;
 };
 
 /// @ingroup Quota System
@@ -187,15 +187,15 @@ public:
     /// @returnFeatureProgress : const ref to user tier information class
     const UserTierInfo& GetUserTierInfo() const;
 
-     CSP_NO_EXPORT UserTierResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+     CSP_NO_EXPORT UserTierResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) { };
 
 private:
     UserTierResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    UserTierInfo UserTierInfo;
+    UserTierInfo m_userTierInfo;
 };
 
 /// @ingroup Quota System
@@ -216,9 +216,9 @@ public:
 private:
     FeatureQuotaResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    FeatureQuotaInfo FeatureQuotaInfo;
+    FeatureQuotaInfo m_featureQuotaInfo;
 };
 
 /// @ingroup Quota System
@@ -239,48 +239,48 @@ public:
 private:
     FeaturesQuotaResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
+    csp::common::Array<FeatureQuotaInfo> m_featuresQuotaInfo;
 };
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value TierNames : enum value to be converted to string
 /// @csp::common::String : Const enum Value as a string
-const csp::common::String TierNameEnumToString(const TierNames& Value);
+const csp::common::String TierNameEnumToString(const TierNames& value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value TierFeatures : enum value to be converted to string
 /// @csp::common::String : Const enum Value as a string
-const csp::common::String TierFeatureEnumToString(const TierFeatures& Value);
+const csp::common::String TierFeatureEnumToString(const TierFeatures& value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierNames : Const string as an enum value
-TierNames StringToTierNameEnum(const csp::common::String& Value);
+TierNames StringToTierNameEnum(const csp::common::String& value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierFeatures : Const string as an enum value
-TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
+TierFeatures StringToTierFeatureEnum(const csp::common::String& value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
-typedef std::function<void(const FeaturesLimitResult& Result)> FeaturesLimitCallback;
+typedef std::function<void(const FeaturesLimitResult& result)> FeaturesLimitCallback;
 
 /// @brief Callback containing feature progress.
 /// @param Result FeatureProgressResult : result class
-typedef std::function<void(const FeatureLimitResult& Result)> FeatureLimitCallback;
+typedef std::function<void(const FeatureLimitResult& result)> FeatureLimitCallback;
 
 /// @brief Callback containing User Tier Information.
 /// @param Result FeatureProgressResult : result class
-typedef std::function<void(const UserTierResult& Result)> UserTierCallback;
+typedef std::function<void(const UserTierResult& result)> UserTierCallback;
 
 /// @brief Callback containing Tier Feature Quota Information.
 /// @param Result FeatureProgressResult : result class
-typedef std::function<void(const FeatureQuotaResult& Result)> FeatureQuotaCallback;
+typedef std::function<void(const FeatureQuotaResult& result)> FeatureQuotaCallback;
 
 /// @brief Callback containing Tier Features Quota Information.
 /// @param Result FeatureProgressResult : result class
-typedef std::function<void(const FeaturesQuotaResult& Result)> FeaturesQuotaCallback;
+typedef std::function<void(const FeaturesQuotaResult& result)> FeaturesQuotaCallback;
 } // namespace csp::systems

@@ -103,7 +103,7 @@ public:
 
     /// @brief Constructs the video player component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    VideoPlayerSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the name of this video player.
     /// @return The name of this video player.
@@ -111,7 +111,7 @@ public:
 
     /// @brief Sets the name of this video player.
     /// @param Value The name of this video player.
-    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& Value);
+    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& value);
 
     /// @brief Gets the ID of the video asset associated with this video player.
     /// @return The ID of the video asset assicuated with this video player.
@@ -119,7 +119,7 @@ public:
 
     /// @brief Sets the ID of the video asset associated with this video player.
     /// @param Value The ID of the video asset assicuated with this video player.
-    void SetVideoAssetId(const csp::common::String& Value);
+    void SetVideoAssetId(const csp::common::String& value);
 
     /// @brief Gets the URL of the video asset associated with this video player.
     /// @return The URL of the video asset associated with this video player.
@@ -127,7 +127,7 @@ public:
 
     /// @brief Sets the URL of the video asset associated with this video player.
     /// @param Value The URL of the video asset associated with this video player.
-    void SetVideoAssetURL(const csp::common::String& Value);
+    void SetVideoAssetURL(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's video asset, both the Asset ID and the Asset Collection ID are required.
@@ -137,26 +137,26 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's video asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// @brief Checks if the playback state of this video player needs to be shared with other users through replication.
@@ -165,7 +165,7 @@ public:
 
     /// @brief Establishes if the playback state of this video player needs to be shared with other users through replication.
     /// @param Value True if the playback state of the video needs to be shared among all users, false otherwise.
-    void SetIsStateShared(bool Value);
+    void SetIsStateShared(bool value);
 
     /// @brief Checks if the video plays automatically on load.
     /// @return True if the video auto-plays on load, false otherwise.
@@ -173,7 +173,7 @@ public:
 
     /// @brief Establishes if the video plays automatically on load.
     /// @param Value True if the video auto-plays on load, false otherwise.
-    void SetIsAutoPlay(bool Value);
+    void SetIsAutoPlay(bool value);
 
     /// @brief Checks if the video loops (i.e. starts over on end).
     /// @return True if the video loops, false otherwise.
@@ -181,7 +181,7 @@ public:
 
     /// @brief Establishes if the video loops (i.e. starts over on end).
     /// @param Value True if the video loops, false otherwise.
-    void SetIsLoopPlayback(bool Value);
+    void SetIsLoopPlayback(bool value);
 
     /// @brief Checks if the video auto-resizes if its frame has different dimensions.
     /// @return True if the video will resize automatically, false otherwise.
@@ -189,7 +189,7 @@ public:
 
     /// @brief Establishes if the video auto-resizes if its frame has different dimensions.
     /// @param Value True if the video will resize automatically, false otherwise.
-    void SetIsAutoResize(bool Value);
+    void SetIsAutoResize(bool value);
 
     /// @brief Retrieves the playback state of the video of this component.
     /// @return The playback state of the video.
@@ -197,7 +197,7 @@ public:
 
     /// @brief Sets the playback state of the video of this component.
     /// @param Value The playback state of the video.
-    void SetPlaybackState(VideoPlayerPlaybackState Value);
+    void SetPlaybackState(VideoPlayerPlaybackState value);
 
     /// @brief Gets the current playhead position of the played video.
     /// @return The current playhead position of the played video.
@@ -205,7 +205,7 @@ public:
 
     /// @brief Sets the current playhead position of the played video.
     /// @param Value The current playhead position of the played video.
-    void SetCurrentPlayheadPosition(float Value);
+    void SetCurrentPlayheadPosition(float value);
 
     /// @brief Gets the time in Unix timestamp format that identifies the moment when the video started to play.
     /// @return The time in Unix timestamp format when the video started to play.
@@ -213,7 +213,7 @@ public:
 
     /// @brief Sets the time in Unix timestamp format that identifies the moment when the video started to play.
     /// @param Value The time in Unix timestamp format when the video started to play.
-    void SetTimeSincePlay(float Value);
+    void SetTimeSincePlay(float value);
 
     /// @brief Gets the type of source the video of this component uses.
     /// @return The type of video source used by this component.
@@ -221,7 +221,7 @@ public:
 
     /// @brief Sets the type of source the video of this component uses.
     /// @param Value The type of video source used by this component.
-    void SetVideoPlayerSourceType(VideoPlayerSourceType Value);
+    void SetVideoPlayerSourceType(VideoPlayerSourceType value);
 
     /// @brief Gets the type of stereo the video of this component uses.
     /// @return The type of stereo used by this video.
@@ -229,7 +229,7 @@ public:
 
     /// @brief Sets the type of stereo the video of this component uses.
     /// @param Value The type of stereo used by this video.
-    void SetStereoVideoType(StereoVideoType Value);
+    void SetStereoVideoType(StereoVideoType value);
 
     /// @brief Gets whether the stereo video left and right are flipped.
     /// @return True if the stereo frames are flipped, false for default.
@@ -237,22 +237,22 @@ public:
 
     /// @brief Sets whether the stereo video left and right are flipped.
     /// @param Value True if the stereo frames are flipped, false for default.
-    void SetIsStereoFlipped(bool Value);
+    void SetIsStereoFlipped(bool value);
 
     /// \addtogroup IAudioControlComponent
     /// @{
     /// @copydoc IAudioControlComponent::GetAudioType()
     AudioType GetAudioType() const override;
     /// @copydoc IAudioControlComponent::SetAudioType()
-    void SetAudioType(AudioType Value) override;
+    void SetAudioType(AudioType value) override;
     /// @copydoc IAudioControlComponent::GetAttenuationRadius()
     float GetAttenuationRadius() const override;
     /// @copydoc IAudioControlComponent::SetAttenuationRadius()
-    void SetAttenuationRadius(float Value) override;
+    void SetAttenuationRadius(float value) override;
     /// @copydoc IAudioControlComponent::GetVolume()
     float GetVolume() const override;
     /// @copydoc IAudioControlComponent::SetVolume()
-    void SetVolume(float Value) override;
+    void SetVolume(float value) override;
     /// @}
  
     /// \addtogroup IVisibleComponent
@@ -260,15 +260,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IEnableableComponent
@@ -276,7 +276,7 @@ public:
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 };
 

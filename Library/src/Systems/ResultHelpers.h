@@ -18,14 +18,14 @@
 
 template <typename T> const inline T MakeInvalid()
 {
-    static T Instance(csp::systems::EResultCode::Failed, 0);
+    static T instance(csp::systems::EResultCode::Failed, 0);
 
-    return Instance;
+    return instance;
 }
 
-template <typename T> const inline T MakeInvalid(csp::systems::ERequestFailureReason Reason)
+template <typename T> const inline T MakeInvalid(csp::systems::ERequestFailureReason reason)
 {
-    static T Instance(csp::systems::EResultCode::Failed, 0, Reason);
+    static T instance(csp::systems::EResultCode::Failed, 0, reason);
 
-    return Instance;
+    return instance;
 }

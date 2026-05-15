@@ -22,46 +22,46 @@
 namespace csp::systems
 {
 
-bool UserRoleInfo::operator==(const UserRoleInfo& Other) const { return UserId == Other.UserId && UserRole == Other.UserRole; }
+bool UserRoleInfo::operator==(const UserRoleInfo& other) const { return UserId == other.UserId && UserRole == other.UserRole; }
 
-bool InviteUserRoleInfo::operator==(const InviteUserRoleInfo& Other) const { return UserEmail == Other.UserEmail && UserRole == Other.UserRole; }
+bool InviteUserRoleInfo::operator==(const InviteUserRoleInfo& other) const { return UserEmail == other.UserEmail && UserRole == other.UserRole; }
 
-bool InviteUserRoleInfoCollection::operator==(const InviteUserRoleInfoCollection& Other) const
+bool InviteUserRoleInfoCollection::operator==(const InviteUserRoleInfoCollection& other) const
 {
-    return EmailLinkUrl == Other.EmailLinkUrl && SignupUrl == Other.SignupUrl && InviteUserRoleInfos == Other.InviteUserRoleInfos;
+    return EmailLinkUrl == other.EmailLinkUrl && SignupUrl == other.SignupUrl && InviteUserRoleInfos == other.InviteUserRoleInfos;
 }
 
-bool UserRoleInfo::operator!=(const UserRoleInfo& Other) const { return !(*this == Other); }
-bool InviteUserRoleInfo::operator!=(const InviteUserRoleInfo& Other) const { return !(*this == Other); }
-bool InviteUserRoleInfoCollection::operator!=(const InviteUserRoleInfoCollection& Other) const { return !(*this == Other); }
+bool UserRoleInfo::operator!=(const UserRoleInfo& other) const { return !(*this == other); }
+bool InviteUserRoleInfo::operator!=(const InviteUserRoleInfo& other) const { return !(*this == other); }
+bool InviteUserRoleInfoCollection::operator!=(const InviteUserRoleInfoCollection& other) const { return !(*this == other); }
 
 namespace UserRolesHelpers
 {
 
-    bool GetUserRole(const Space& Space, const csp::common::String& UserId, UserRoleInfo& OutRoleInfo)
+    bool GetUserRole(const Space& space, const csp::common::String& userId, UserRoleInfo& outRoleInfo)
     {
-        OutRoleInfo = { UserId, SpaceUserRole::User };
+        outRoleInfo = { userId, SpaceUserRole::User };
 
-        if (Space.OwnerId == UserId)
+        if (space.OwnerId == userId)
         {
-            OutRoleInfo.UserRole = SpaceUserRole::Owner;
+            outRoleInfo.UserRole = SpaceUserRole::Owner;
             return true;
         }
 
-        for (size_t idx = 0; idx < Space.ModeratorIds.Size(); ++idx)
+        for (size_t idx = 0; idx < space.ModeratorIds.Size(); ++idx)
         {
-            if (UserId == Space.ModeratorIds[idx])
+            if (userId == space.ModeratorIds[idx])
             {
-                OutRoleInfo.UserRole = SpaceUserRole::Moderator;
+                outRoleInfo.UserRole = SpaceUserRole::Moderator;
                 return true;
             }
         }
 
-        for (size_t idx = 0; idx < Space.UserIds.Size(); ++idx)
+        for (size_t idx = 0; idx < space.UserIds.Size(); ++idx)
         {
-            if (UserId == Space.UserIds[idx])
+            if (userId == space.UserIds[idx])
             {
-                OutRoleInfo.UserRole = SpaceUserRole::User;
+                outRoleInfo.UserRole = SpaceUserRole::User;
                 return true;
             }
         }
@@ -71,23 +71,23 @@ namespace UserRolesHelpers
     }
 } // namespace UserRolesHelpers
 
-csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() { return UserRoles; }
+csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() { return m_userRoles; }
 
-const csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() const { return UserRoles; }
+const csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() const { return m_userRoles; }
 
-void UserRoleCollectionResult::FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds)
+void UserRoleCollectionResult::FillUsersRoles(const Space& space, const csp::common::Array<csp::common::String> requestedUserIds)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    UserRoles = csp::common::Array<UserRoleInfo>(RequestedUserIds.Size());
+    m_userRoles = csp::common::Array<UserRoleInfo>(requestedUserIds.Size());
 
-    for (size_t idx = 0; idx < RequestedUserIds.Size(); ++idx)
+    for (size_t idx = 0; idx < requestedUserIds.Size(); ++idx)
     {
-        auto& currentUserId = RequestedUserIds[idx];
+        auto& currentUserId = requestedUserIds[idx];
         UserRoleInfo currentRoleInfo;
-        if (true == UserRolesHelpers::GetUserRole(Space, currentUserId, currentRoleInfo))
+        if (true == UserRolesHelpers::GetUserRole(space, currentUserId, currentRoleInfo))
         {
-            UserRoles[idx] = currentRoleInfo;
+            m_userRoles[idx] = currentRoleInfo;
         }
     }
 }

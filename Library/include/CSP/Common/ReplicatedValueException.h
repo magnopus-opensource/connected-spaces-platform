@@ -22,9 +22,9 @@
 
 namespace csp::common
 {
-inline csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedValueType Type)
+inline csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedValueType type)
 {
-    switch (Type)
+    switch (type)
     {
     case csp::common::ReplicatedValueType::InvalidType:
         return "InvalidType";
@@ -52,24 +52,24 @@ inline csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedVa
 class ReplicatedValueException : public std::runtime_error
 {
 public:
-    ReplicatedValueException(ReplicatedValueType Expected, ReplicatedValueType Actual)
+    ReplicatedValueException(ReplicatedValueType expected, ReplicatedValueType actual)
         : runtime_error("ReplicatedValue type mismatch")
-        , ExpectedType(Expected)
-        , ActualType(Actual)
+        , m_expectedType(expected)
+        , m_actualType(actual)
     {
-        ExceptionMsg = fmt::format(
-            "Expected - {} but found {}.", ReplicatedValueTypeToString(ExpectedType).c_str(), ReplicatedValueTypeToString(ActualType).c_str());
+        m_exceptionMsg = fmt::format(
+            "Expected - {} but found {}.", ReplicatedValueTypeToString(m_expectedType).c_str(), ReplicatedValueTypeToString(m_actualType).c_str());
     }
 
-    const char* what() const noexcept override { return ExceptionMsg.c_str(); }
+    const char* what() const noexcept override { return m_exceptionMsg.c_str(); }
 
-    ReplicatedValueType GetExpectedType() const { return ExpectedType; }
-    ReplicatedValueType GetActualType() const { return ActualType; }
+    ReplicatedValueType GetExpectedType() const { return m_expectedType; }
+    ReplicatedValueType GetActualType() const { return m_actualType; }
 
 private:
-    ReplicatedValueType ExpectedType;
-    ReplicatedValueType ActualType;
-    std::string ExceptionMsg;
+    ReplicatedValueType m_expectedType;
+    ReplicatedValueType m_actualType;
+    std::string m_exceptionMsg;
 };
 }
 

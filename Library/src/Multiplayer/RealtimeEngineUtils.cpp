@@ -25,97 +25,97 @@
 
 namespace
 {
-csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::format("{{\"deltaTimeMS\": {}}}", DeltaTime).c_str(); }
+csp::common::String JSONStringFromDeltaTime(double deltaTime) { return fmt::format("{{\"deltaTimeMS\": {}}}", deltaTime).c_str(); }
 }
 
 namespace csp::multiplayer::RealtimeEngineUtils
 {
-csp::common::String ModifiableStatusToString(ModifiableStatus Failure)
+csp::common::String ModifiableStatusToString(ModifiableStatus failure)
 {
-    if (auto it = ModifiableStatusErrors.find(Failure); it != ModifiableStatusErrors.end())
+    if (auto it = ModifiableStatusErrors.find(failure); it != ModifiableStatusErrors.end())
     {
         return it->second;
     }
     return "No log specified for modifiable status";
 }
 
-csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name)
 {
-    for (size_t i = 0; i < RealtimeEngine.GetNumEntities(); ++i)
+    for (size_t i = 0; i < realtimeEngine.GetNumEntities(); ++i)
     {
-        if (RealtimeEngine.GetEntityByIndex(i)->GetName() == Name)
+        if (realtimeEngine.GetEntityByIndex(i)->GetName() == name)
         {
-            return RealtimeEngine.GetEntityByIndex(i);
+            return realtimeEngine.GetEntityByIndex(i);
         }
     }
 
     return nullptr;
 }
 
-csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& RealtimeEngine, uint64_t EntityId)
+csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& realtimeEngine, uint64_t entityId)
 {
-    for (size_t i = 0; i < RealtimeEngine.GetNumEntities(); ++i)
+    for (size_t i = 0; i < realtimeEngine.GetNumEntities(); ++i)
     {
-        if (RealtimeEngine.GetEntityByIndex(i)->GetId() == EntityId)
+        if (realtimeEngine.GetEntityByIndex(i)->GetId() == entityId)
         {
-            return RealtimeEngine.GetEntityByIndex(i);
+            return realtimeEngine.GetEntityByIndex(i);
         }
     }
 
     return nullptr;
 }
 
-csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name)
 {
-    for (size_t i = 0; i < RealtimeEngine.GetNumAvatars(); ++i)
+    for (size_t i = 0; i < realtimeEngine.GetNumAvatars(); ++i)
     {
-        if (RealtimeEngine.GetAvatarByIndex(i)->GetName() == Name)
+        if (realtimeEngine.GetAvatarByIndex(i)->GetName() == name)
         {
-            return RealtimeEngine.GetAvatarByIndex(i);
+            return realtimeEngine.GetAvatarByIndex(i);
         }
     }
 
     return nullptr;
 }
 
-csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& realtimeEngine, const csp::common::String& name)
 {
-    for (size_t i = 0; i < RealtimeEngine.GetNumObjects(); ++i)
+    for (size_t i = 0; i < realtimeEngine.GetNumObjects(); ++i)
     {
-        if (RealtimeEngine.GetObjectByIndex(i)->GetName() == Name)
+        if (realtimeEngine.GetObjectByIndex(i)->GetName() == name)
         {
-            return RealtimeEngine.GetObjectByIndex(i);
+            return realtimeEngine.GetObjectByIndex(i);
         }
     }
 
     return nullptr;
 }
 
-std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId, csp::common::IRealtimeEngine& RealtimeEngine,
-    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem, uint64_t NetworkId, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
-    const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
-    csp::multiplayer::LocomotionModel LocomotionModel)
+std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& userId, csp::common::IRealtimeEngine& realtimeEngine,
+    csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem& logSystem, uint64_t networkId, const csp::common::String& name,
+    const csp::multiplayer::SpaceTransform& transform, bool isVisible, uint64_t ownerId, bool isTransferable, bool isPersistent,
+    const csp::common::String& avatarId, csp::multiplayer::AvatarState avatarState, csp::multiplayer::AvatarPlayMode avatarPlayMode,
+    csp::multiplayer::LocomotionModel locomotionModel)
 {
-    auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
+    auto newAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
+        &realtimeEngine, scriptRunner, &logSystem, SpaceEntityType::Avatar, networkId, name, transform, ownerId, {}, isTransferable, isPersistent));
 
-    auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
-    AvatarComponent->SetAvatarId(AvatarId);
-    AvatarComponent->SetState(AvatarState);
-    AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
-    AvatarComponent->SetLocomotionModel(LocomotionModel);
-    AvatarComponent->SetUserId(UserId);
-    AvatarComponent->SetIsVisible(IsVisible);
+    auto* avatarComponent = static_cast<AvatarSpaceComponent*>(newAvatar->AddComponent(ComponentType::AvatarData));
+    avatarComponent->SetAvatarId(avatarId);
+    avatarComponent->SetState(avatarState);
+    avatarComponent->SetAvatarPlayMode(avatarPlayMode);
+    avatarComponent->SetLocomotionModel(locomotionModel);
+    avatarComponent->SetUserId(userId);
+    avatarComponent->SetIsVisible(isVisible);
 
-    return NewAvatar;
+    return newAvatar;
 }
 
-bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, SpaceEntity* Entity)
+bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& realtimeEngine, SpaceEntity* entity)
 {
-    for (size_t i = 0; i < RealtimeEngine.GetRootHierarchyEntities()->Size(); ++i)
+    for (size_t i = 0; i < realtimeEngine.GetRootHierarchyEntities()->Size(); ++i)
     {
-        if ((*RealtimeEngine.GetRootHierarchyEntities())[i]->GetId() == Entity->GetId())
+        if ((*realtimeEngine.GetRootHierarchyEntities())[i]->GetId() == entity->GetId())
         {
             return true;
         }
@@ -124,96 +124,96 @@ bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, Space
     return false;
 }
 
-void ResolveEntityHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity)
+void ResolveEntityHierarchy(csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, SpaceEntity* entity)
 {
     // Feels weird this not having a mutex lock, relies on the caller setting the entities lock
 
-    if (Entity->GetParentId().HasValue())
+    if (entity->GetParentId().HasValue())
     {
-        for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+        for (size_t i = 0; i < rootHierarchyEntities.Size(); ++i)
         {
-            if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+            if (rootHierarchyEntities[i]->GetId() == entity->GetId())
             {
-                RootHierarchyEntities.Remove(i);
+                rootHierarchyEntities.Remove(i);
                 break;
             }
         }
     }
     else
     {
-        if (EntityIsInRootHierarchy(RealtimeEngine, Entity) == false)
+        if (EntityIsInRootHierarchy(realtimeEngine, entity) == false)
         {
-            RootHierarchyEntities.Append(Entity);
+            rootHierarchyEntities.Append(entity);
         }
     }
 
-    Entity->ResolveParentChildRelationship();
+    entity->ResolveParentChildRelationship();
 }
 
 void RemoveParentChildRelationshipsFromEntity(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity)
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, SpaceEntity* entity)
 {
-    if (Entity->GetParentEntity())
+    if (entity->GetParentEntity())
     {
-        Entity->RemoveAsChildFromParent();
+        entity->RemoveAsChildFromParent();
     }
 
-    const auto& ChildEntities = Entity->GetChildEntities()->ToArray();
-    for (size_t i = 0; i < ChildEntities.Size(); ++i)
+    const auto& childEntities = entity->GetChildEntities()->ToArray();
+    for (size_t i = 0; i < childEntities.Size(); ++i)
     {
-        Entity->RemoveParentFromChildEntity(i);
+        entity->RemoveParentFromChildEntity(i);
 
-        ResolveEntityHierarchy(RealtimeEngine, RootHierarchyEntities, ChildEntities[i]);
+        ResolveEntityHierarchy(realtimeEngine, rootHierarchyEntities, childEntities[i]);
     }
 }
 
 void LocalProcessChildUpdates(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity)
+    csp::common::IRealtimeEngine& realtimeEngine, csp::common::List<SpaceEntity*>& rootHierarchyEntities, csp::multiplayer::SpaceEntity* entity)
 {
     // Messy, taken from existing cleanup code. Needs a conceptual facelift
 
     // Manually process the parent updates locally
     // We want this callback to fire before the deletion so clients can react to children first
-    auto ChildrenToUpdate = Entity->GetChildEntities()->ToArray();
+    auto childrenToUpdate = entity->GetChildEntities()->ToArray();
 
-    for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
+    for (size_t i = 0; i < childrenToUpdate.Size(); ++i)
     {
-        ChildrenToUpdate[i]->RemoveParentId();
-        ResolveEntityHierarchy(RealtimeEngine, RootHierarchyEntities, ChildrenToUpdate[i]);
+        childrenToUpdate[i]->RemoveParentId();
+        ResolveEntityHierarchy(realtimeEngine, rootHierarchyEntities, childrenToUpdate[i]);
 
-        if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
+        if (childrenToUpdate[i]->GetEntityUpdateCallback())
         {
-            csp::common::Array<ComponentUpdateInfo> Empty;
-            ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Empty);
+            csp::common::Array<ComponentUpdateInfo> empty;
+            childrenToUpdate[i]->GetEntityUpdateCallback()(childrenToUpdate[i], UPDATE_FLAGS_PARENT, empty);
         }
     }
 }
 
 // You should lock the entities mutex before calling this, and probably have processed entity operations
-void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& Entities)
+void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& entities)
 {
     // Register all scripts for import
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.RegisterSourceAsModule();
+        EntityScript& script = entities[i]->GetScript();
+        script.RegisterSourceAsModule();
     }
 
     // Bind and invoke all scripts
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
+        if (EntityScript& script = entities[i]->GetScript(); script.HasEntityScriptComponent())
         {
-            Script.Bind();
-            Script.Invoke();
+            script.Bind();
+            script.Invoke();
         }
     }
 
     // Tell all scripts that all entities are now loaded
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+        EntityScript& script = entities[i]->GetScript();
+        script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
 }
 
@@ -227,71 +227,71 @@ void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& Entities)
 // when the owner will need to be re-assigned, although ownership will also
 // be claimed by anyone who interacts with an object
 //
-void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& Entities, uint64_t ClientId)
+void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& entities, uint64_t clientId)
 {
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        ClaimScriptOwnership(Entities[i], ClientId);
+        ClaimScriptOwnership(entities[i], clientId);
     }
 }
 
-void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId)
+void ClaimScriptOwnership(SpaceEntity* entity, uint64_t clientId)
 {
-    EntityScript& Script = Entity->GetScript();
-    Script.SetOwnerId(ClientId);
+    EntityScript& script = entity->GetScript();
+    script.SetOwnerId(clientId);
 }
 
-std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
-    const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
-    csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager)
+std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& entitiesLock, csp::common::RealtimeEngineType realtimeEngineType,
+    const csp::common::List<SpaceEntity*>& entities, std::chrono::system_clock::time_point lastTickTime,
+    csp::common::Optional<csp::multiplayer::ClientElectionManager*> electionManager)
 {
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(entitiesLock);
 
-    const auto CurrentTime = std::chrono::system_clock::now();
-    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
+    const auto currentTime = std::chrono::system_clock::now();
+    const auto deltaTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTickTime).count();
 
-    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
+    const csp::common::String deltaTimeJson = JSONStringFromDeltaTime(static_cast<double>(deltaTimeMs));
 
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        bool CanRunScripts = true;
+        bool canRunScripts = true;
 
         // Note that offline realtime engines may always run scripts.
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        if (realtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
             // If this is an online engine with leadership election enabled, then only the script leader may run scripts.
             // If there is no leadership election, then we assume all clients may run scripts.
-            csp::multiplayer::ClientElectionManager* ElectionManagerPtr = ElectionManager.HasValue() ? *ElectionManager : nullptr;
-            if (ElectionManagerPtr != nullptr)
+            csp::multiplayer::ClientElectionManager* electionManagerPtr = electionManager.HasValue() ? *electionManager : nullptr;
+            if (electionManagerPtr != nullptr)
             {
-                CanRunScripts = ElectionManagerPtr->IsLocalClientLeader();
+                canRunScripts = electionManagerPtr->IsLocalClientLeader();
             }
         }
 
-        if (CanRunScripts)
+        if (canRunScripts)
         {
-            Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+            entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, deltaTimeJson);
         }
     }
 
-    return CurrentTime;
+    return currentTime;
 }
 
 std::chrono::system_clock::time_point TickEntityScripts(
-    std::recursive_mutex& EntitiesLock, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime)
+    std::recursive_mutex& entitiesLock, const csp::common::List<SpaceEntity*>& entities, std::chrono::system_clock::time_point lastTickTime)
 {
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(entitiesLock);
 
-    const auto CurrentTime = std::chrono::system_clock::now();
-    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
+    const auto currentTime = std::chrono::system_clock::now();
+    const auto deltaTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTickTime).count();
 
-    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
+    const csp::common::String deltaTimeJson = JSONStringFromDeltaTime(static_cast<double>(deltaTimeMs));
 
-    for (size_t i = 0; i < Entities.Size(); ++i)
+    for (size_t i = 0; i < entities.Size(); ++i)
     {
-        Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+        entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, deltaTimeJson);
     }
 
-    return CurrentTime;
+    return currentTime;
 }
 }

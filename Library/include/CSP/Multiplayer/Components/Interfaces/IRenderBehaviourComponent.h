@@ -41,7 +41,7 @@ public:
     /// @param InValue True if the component is shown as holdout in AR mode, false otherwise.
     ///
     /// @see HoldoutConcept
-    virtual void SetShowAsHoldoutInAR(bool InValue) = 0;
+    virtual void SetShowAsHoldoutInAR(bool inValue) = 0;
 
     /// @brief Checks if the component is shown as holdout when in Virtual mode.
     /// @return True if the component is shown as holdout when in Virtual mode, false otherwise.
@@ -53,7 +53,7 @@ public:
     /// @param InValue True if the component is shown as holdout in Virtual mode, false otherwise.
     ///
     /// @see HoldoutConcept
-    virtual void SetShowAsHoldoutInVirtual(bool InValue) = 0;
+    virtual void SetShowAsHoldoutInVirtual(bool inValue) = 0;
 
 protected:
     virtual ~IRenderBehaviourComponent() = default;

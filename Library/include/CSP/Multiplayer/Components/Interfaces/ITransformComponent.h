@@ -37,7 +37,7 @@ public:
 
     /// @brief Sets the transform of this component in world space to the specified value.
     /// @param InValue SpaceTransform : The new value expressed as a SpaceTransform.
-    virtual void SetTransform(const SpaceTransform& InValue) = 0;
+    virtual void SetTransform(const SpaceTransform& inValue) = 0;
 
 protected:
     virtual ~ITransformComponent() = default;

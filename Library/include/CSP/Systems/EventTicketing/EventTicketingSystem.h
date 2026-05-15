@@ -41,9 +41,9 @@ public:
     /// @param VendorEventUri csp::common::String : Specifies the URI for the event in the vendors system.
     /// @param IsTicketingActive bool : Specifies whether ticketing is currently active for this event.
     /// @param Callback TicketedEventResultCallback : Callback providing the TicketedEvent once created.
-    CSP_ASYNC_RESULT void CreateTicketedEvent(const csp::common::String& SpaceId, EventTicketingVendor Vendor,
-        const csp::common::String& VendorEventId, const csp::common::String& VendorEventUri, bool IsTicketingActive,
-        TicketedEventResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateTicketedEvent(const csp::common::String& spaceId, EventTicketingVendor vendor,
+        const csp::common::String& vendorEventId, const csp::common::String& vendorEventUri, bool isTicketingActive,
+        TicketedEventResultCallback callback);
 
     /// @brief Updates a ticketed event in the given space.
     ///
@@ -57,18 +57,18 @@ public:
     /// @param VendorEventUri csp::common::String : Optional value to update the URI for the event in the vendors system with.
     /// @param IsTicketingActive bool : Optional value to update whether ticketing is currently active for this event.
     /// @param Callback TicketedEventResultCallback : Callback providing the TicketedEvent once created.
-    CSP_ASYNC_RESULT void UpdateTicketedEvent(const csp::common::String& SpaceId, const csp::common::String& EventId,
-        const csp::common::Optional<EventTicketingVendor>& Vendor, const csp::common::Optional<csp::common::String>& VendorEventId,
-        const csp::common::Optional<csp::common::String>& VendorEventUri, const csp::common::Optional<bool>& IsTicketingActive,
-        TicketedEventResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateTicketedEvent(const csp::common::String& spaceId, const csp::common::String& eventId,
+        const csp::common::Optional<EventTicketingVendor>& vendor, const csp::common::Optional<csp::common::String>& vendorEventId,
+        const csp::common::Optional<csp::common::String>& vendorEventUri, const csp::common::Optional<bool>& isTicketingActive,
+        TicketedEventResultCallback callback);
 
     /// @brief Creates a ticketed event for the given space.
     /// @param SpaceIds csp::common::Array<csp::common::String> : IDs of the spaces to get the events for.
     /// @param Skip csp::common::Optional<int> : Optional number of results that will be skipped from the result.
     /// @param Limit csp::common::Optional<int> : Optional maximum number of results to be retrieved.
     /// @param Callback TicketedEventCollectionResultCallback : Callback providing the TicketedEvents for the space.
-    CSP_ASYNC_RESULT void GetTicketedEvents(const csp::common::Array<csp::common::String>& SpaceIds, const csp::common::Optional<int>& Skip,
-        const csp::common::Optional<int>& Limit, TicketedEventCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetTicketedEvents(const csp::common::Array<csp::common::String>& spaceIds, const csp::common::Optional<int>& skip,
+        const csp::common::Optional<int>& limit, TicketedEventCollectionResultCallback callback);
 
     /// @brief Submits a ticket from a vendor for the given event.
     ///
@@ -79,29 +79,29 @@ public:
     /// @param OnBehalfOfUserId csp::common::Optional<csp::common::String> : Optionally submit the ticket for another user. Requires super user
     /// permissions.
     /// @param Callback EventTicketResultCallback : Callback providing the TicketedEvent once created.
-    CSP_ASYNC_RESULT void SubmitEventTicket(const csp::common::String& SpaceId, EventTicketingVendor Vendor, const csp::common::String& VendorEventId,
-        const csp::common::String& VendorTicketId, const csp::common::Optional<csp::common::String>& OnBehalfOfUserId,
-        EventTicketResultCallback Callback);
+    CSP_ASYNC_RESULT void SubmitEventTicket(const csp::common::String& spaceId, EventTicketingVendor vendor, const csp::common::String& vendorEventId,
+        const csp::common::String& vendorTicketId, const csp::common::Optional<csp::common::String>& onBehalfOfUserId,
+        EventTicketResultCallback callback);
 
     /// @brief  Looks up the basic info required by a client to initiate an oauth2 flow with the specified vendor.
     /// @param Vendor EventTicketingVendor : The vendor type to retrieve info for.
     /// @param UserId csp::common::String : The ID of the user to obtain authentication info for.
     /// @param Callback TicketedEventVendorInfoResultCallback : Callback providing the oauth2 information.
     CSP_ASYNC_RESULT void GetVendorAuthorizeInfo(
-        EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthorizeInfoCallback Callback);
+        EventTicketingVendor vendor, const csp::common::String& userId, TicketedEventVendorAuthorizeInfoCallback callback);
 
     /// @brief Gets the ticketed status of a space given by ID.
     /// @param SpaceId const csp::common::String& : The space ID to check the status for.
     /// @param Callback SpaceIsTicketedResultCallback : Callback providing the result of the query.
-    CSP_ASYNC_RESULT void GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback);
+    CSP_ASYNC_RESULT void GetIsSpaceTicketed(const csp::common::String& spaceId, SpaceIsTicketedResultCallback callback);
 
 private:
     EventTicketingSystem(
-        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+        csp::common::LogSystem& logSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~EventTicketingSystem();
 
-    csp::services::ApiBase* EventTicketingAPI;
+    csp::services::ApiBase* m_eventTicketingApi;
 };
 
 } // namespace csp::systems

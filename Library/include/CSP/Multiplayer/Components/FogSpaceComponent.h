@@ -66,7 +66,7 @@ public:
 
     /// @brief Constructs the fog space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    FogSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Retrieves the type of fog currently used by this fog component.
     /// @return The modality of fog currently used by this component.
@@ -74,26 +74,26 @@ public:
 
     /// @brief Sets the type of fog to be used by this fog component.
     /// @param Value The modality of fog to be used by this component.
-    void SetFogMode(FogMode Value);
+    void SetFogMode(FogMode value);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// @brief Gets start distance.
@@ -104,7 +104,7 @@ public:
     /// @brief Sets start distance.
     /// @note Distance from camera that the fog will start. 0 = this property has no effect.
     /// @param Value float : Start distance.
-    void SetStartDistance(float Value);
+    void SetStartDistance(float value);
 
     /// @brief Gets end distance.
     /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
@@ -114,7 +114,7 @@ public:
     /// @brief Sets end distance.
     /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
     /// @param Value float : End distance.
-    void SetEndDistance(float Value);
+    void SetEndDistance(float value);
 
     /// @brief Gets fog color.
     /// @return Current fog color.
@@ -122,7 +122,7 @@ public:
 
     /// @brief Sets fog color.
     /// @param Value Vector3 : Fog color.
-    void SetColor(const csp::common::Vector3& Value);
+    void SetColor(const csp::common::Vector3& value);
 
     /// @brief Gets global density factor.
     /// @return Current global density factor.
@@ -130,7 +130,7 @@ public:
 
     /// @brief Sets global density factor.
     /// @param Value float : Global density factor.
-    void SetDensity(float Value);
+    void SetDensity(float value);
 
     /// @brief Gets Height density factor.
     /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
@@ -140,7 +140,7 @@ public:
     /// @brief Sets Height density factor.
     /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
     /// @param Value float : Height density factor.
-    void SetHeightFalloff(float Value);
+    void SetHeightFalloff(float value);
 
     /// @brief Gets maximum opacity of the fog.
     /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
@@ -150,7 +150,7 @@ public:
     /// @brief Sets maximum opacity of the fog.
     /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
     /// @param Value float : Maximum opacity of the fog.
-    void SetMaxOpacity(float Value);
+    void SetMaxOpacity(float value);
 
     /// @brief Gets IsFogVolumetric.
     /// @return Current fog volumetric flag.
@@ -158,22 +158,22 @@ public:
 
     /// @brief Sets IsFogVolumetric.
     /// @param Value boolean : Fog Volumetric Flag.
-    void SetIsVolumetric(bool Value);
+    void SetIsVolumetric(bool value);
 
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -181,7 +181,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 };
 

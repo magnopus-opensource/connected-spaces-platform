@@ -35,17 +35,17 @@
 // Template specializations for some custom csp types we want to use
 template <> struct qjs::js_property_traits<csp::common::String>
 {
-    static void set_property(JSContext* ctx, JSValue this_obj, csp::common::String str, JSValue value)
+    static void set_property(JSContext* ctx, JSValue thisObj, csp::common::String str, JSValue value)
     {
-        int err = JS_SetPropertyStr(ctx, this_obj, str.c_str(), value);
+        int err = JS_SetPropertyStr(ctx, thisObj, str.c_str(), value);
 
         if (err < 0)
             throw exception { ctx };
     }
 
-    static JSValue get_property(JSContext* ctx, JSValue this_obj, csp::common::String str) noexcept
+    static JSValue get_property(JSContext* ctx, JSValue thisObj, csp::common::String str) noexcept
     {
-        return JS_GetPropertyStr(ctx, this_obj, str.c_str());
+        return JS_GetPropertyStr(ctx, thisObj, str.c_str());
     }
 };
 
@@ -70,18 +70,18 @@ namespace csp::systems
 
 std::shared_ptr<ScriptSystem> ScriptSystem::MakeInitialised()
 {
-    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* Ptr) {
-        delete Ptr;
+    auto instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* ptr) {
+        delete ptr;
     });
 
-    Instance->Initialise();
+    instance->Initialise();
 
-    return Instance;
+    return instance;
 }
 
 ScriptSystem::ScriptSystem()
     : csp::common::IJSScriptRunner()
-    , TheScriptRuntime(nullptr)
+    , m_theScriptRuntime(nullptr)
 {
 }
 
@@ -89,13 +89,13 @@ ScriptSystem::~ScriptSystem() { Shutdown(); }
 
 void ScriptSystem::Initialise()
 {
-    if (TheScriptRuntime != nullptr)
+    if (m_theScriptRuntime != nullptr)
     {
         CSP_LOG_ERROR_MSG("ScriptSystem::Initialise already called\n");
         return;
     }
 
-    TheScriptRuntime = new ScriptRuntime(this);
+    m_theScriptRuntime = new ScriptRuntime(this);
 
 #if defined(SCRIPTS_INCLUDE_STD_LIBS)
     js_std_init_handlers(TheScriptRuntime->Runtime->rt);
@@ -115,92 +115,92 @@ void ScriptSystem::Initialise()
 
 void ScriptSystem::Shutdown()
 {
-    if (TheScriptRuntime != nullptr)
+    if (m_theScriptRuntime != nullptr)
     {
-        delete (TheScriptRuntime);
-        TheScriptRuntime = nullptr;
+        delete (m_theScriptRuntime);
+        m_theScriptRuntime = nullptr;
     }
 }
 
-bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& ScriptText)
+bool ScriptSystem::RunScript(int64_t contextId, const csp::common::String& scriptText)
 {
     // CSP_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
 
-    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    if (TheScriptContext == nullptr)
+    ScriptContext* theScriptContext = m_theScriptRuntime->GetContext(contextId);
+    if (theScriptContext == nullptr)
     {
         return false;
     }
 
-    qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), "<eval>", JS_EVAL_TYPE_MODULE);
-    bool HasErrors = Result.isException();
-    return !HasErrors;
+    qjs::Value result = theScriptContext->m_context->eval(scriptText.c_str(), "<eval>", JS_EVAL_TYPE_MODULE);
+    bool hasErrors = result.isException();
+    return !hasErrors;
 }
 
-bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
+bool ScriptSystem::RunScriptFile(int64_t contextId, const csp::common::String& scriptFilePath)
 {
-    CSP_LOG_FORMAT(common::LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
+    CSP_LOG_FORMAT(common::LogLevel::Verbose, "RunScriptFile: %s\n", scriptFilePath.c_str());
 
-    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    if (TheScriptContext == nullptr)
+    ScriptContext* theScriptContext = m_theScriptRuntime->GetContext(contextId);
+    if (theScriptContext == nullptr)
     {
         return false;
     }
 
-    qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
-    bool HasErrors = Result.isException();
-    return !HasErrors;
+    qjs::Value result = theScriptContext->m_context->evalFile(scriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
+    bool hasErrors = result.isException();
+    return !hasErrors;
 }
 
-bool ScriptSystem::CreateContext(int64_t ContextId) { return TheScriptRuntime->AddContext(ContextId); }
+bool ScriptSystem::CreateContext(int64_t contextId) { return m_theScriptRuntime->AddContext(contextId); }
 
-bool ScriptSystem::DestroyContext(int64_t ContextId) { return TheScriptRuntime->RemoveContext(ContextId); }
+bool ScriptSystem::DestroyContext(int64_t contextId) { return m_theScriptRuntime->RemoveContext(contextId); }
 
-bool ScriptSystem::BindContext(int64_t ContextId) { return TheScriptRuntime->BindContext(ContextId); }
+bool ScriptSystem::BindContext(int64_t contextId) { return m_theScriptRuntime->BindContext(contextId); }
 
-bool ScriptSystem::ResetContext(int64_t ContextId) { return TheScriptRuntime->ResetContext(ContextId); }
+bool ScriptSystem::ResetContext(int64_t contextId) { return m_theScriptRuntime->ResetContext(contextId); }
 
-bool ScriptSystem::ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName)
+bool ScriptSystem::ExistsInContext(int64_t contextId, const csp::common::String& objectName)
 {
-    return TheScriptRuntime->ExistsInContext(ContextId, ObjectName);
+    return m_theScriptRuntime->ExistsInContext(contextId, objectName);
 }
 
-void* ScriptSystem::GetContext(int64_t ContextId) { return (void*)TheScriptRuntime->GetContext(ContextId)->Context; }
+void* ScriptSystem::GetContext(int64_t contextId) { return (void*)m_theScriptRuntime->GetContext(contextId)->m_context; }
 
-void* ScriptSystem::GetModule(int64_t ContextId, const csp::common::String& ModuleName)
+void* ScriptSystem::GetModule(int64_t contextId, const csp::common::String& moduleName)
 {
-    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    return (void*)TheScriptContext->GetModule(ModuleName)->Module;
+    ScriptContext* theScriptContext = m_theScriptRuntime->GetContext(contextId);
+    return (void*)theScriptContext->GetModule(moduleName)->Module;
 }
 
-void ScriptSystem::RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { TheScriptRuntime->RegisterScriptBinding(ScriptBinding); }
+void ScriptSystem::RegisterScriptBinding(csp::common::IScriptBinding* scriptBinding) { m_theScriptRuntime->RegisterScriptBinding(scriptBinding); }
 
-void ScriptSystem::UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { TheScriptRuntime->UnregisterScriptBinding(ScriptBinding); }
+void ScriptSystem::UnregisterScriptBinding(csp::common::IScriptBinding* scriptBinding) { m_theScriptRuntime->UnregisterScriptBinding(scriptBinding); }
 
-void ScriptSystem::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
+void ScriptSystem::SetModuleSource(csp::common::String moduleUrl, csp::common::String source)
 {
-    TheScriptRuntime->SetModuleSource(ModuleUrl, Source);
+    m_theScriptRuntime->SetModuleSource(moduleUrl, source);
 }
 
-void ScriptSystem::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
+void ScriptSystem::AddModuleUrlAlias(const csp::common::String& moduleUrl, const csp::common::String& moduleUrlAlias)
 {
-    TheScriptRuntime->AddModuleUrlAlias(ModuleUrl, ModuleUrlAlias);
+    m_theScriptRuntime->AddModuleUrlAlias(moduleUrl, moduleUrlAlias);
 }
 
-void ScriptSystem::ClearModuleSource(csp::common::String ModuleUrl) { TheScriptRuntime->ClearModuleSource(ModuleUrl); }
+void ScriptSystem::ClearModuleSource(csp::common::String moduleUrl) { m_theScriptRuntime->ClearModuleSource(moduleUrl); }
 
-csp::common::String ScriptSystem::GetModuleSource(csp::common::String ModuleUrl) { return TheScriptRuntime->GetModuleSource(ModuleUrl); }
+csp::common::String ScriptSystem::GetModuleSource(csp::common::String moduleUrl) { return m_theScriptRuntime->GetModuleSource(moduleUrl); }
 
-bool ScriptSystem::GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias)
+bool ScriptSystem::GetModuleUrlAlias(const csp::common::String& moduleUrl, csp::common::String& outModuleUrlAlias)
 {
-    return TheScriptRuntime->GetModuleUrlAlias(ModuleUrl, OutModuleUrlAlias);
+    return m_theScriptRuntime->GetModuleUrlAlias(moduleUrl, outModuleUrlAlias);
 }
 
-size_t ScriptSystem::GetNumImportedModules(int64_t ContextId) const { return TheScriptRuntime->GetContext(ContextId)->GetNumImportedModules(); }
+size_t ScriptSystem::GetNumImportedModules(int64_t contextId) const { return m_theScriptRuntime->GetContext(contextId)->GetNumImportedModules(); }
 
-const char* ScriptSystem::GetImportedModule(int64_t ContextId, size_t Index) const
+const char* ScriptSystem::GetImportedModule(int64_t contextId, size_t index) const
 {
-    return TheScriptRuntime->GetContext(ContextId)->GetImportedModule(Index);
+    return m_theScriptRuntime->GetContext(contextId)->GetImportedModule(index);
 }
 
 } // namespace csp::systems

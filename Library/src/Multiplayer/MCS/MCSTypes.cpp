@@ -32,93 +32,93 @@ namespace
     ItemComponentDataType GetComponentEnum(const std::map<uint16_t, ItemComponentData>&) { return ItemComponentDataType::UINT16_DICTIONARY; }
     ItemComponentDataType GetComponentEnum(const std::map<std::string, ItemComponentData>&) { return ItemComponentDataType::STRING_DICTIONARY; }
 
-    void SerializeComponentData(SignalRSerializer& Serializer, bool Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, int64_t Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, uint64_t Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, float Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, const std::vector<float>& Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, double Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, const std::string& Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, const std::map<uint16_t, ItemComponentData>& Value) { Serializer.WriteValue(Value); }
-    void SerializeComponentData(SignalRSerializer& Serializer, const std::map<std::string, ItemComponentData>& Value)
+    void SerializeComponentData(SignalRSerializer& serializer, bool value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, int64_t value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, uint64_t value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, float value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, const std::vector<float>& value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, double value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, const std::string& value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, const std::map<uint16_t, ItemComponentData>& value) { serializer.WriteValue(value); }
+    void SerializeComponentData(SignalRSerializer& serializer, const std::map<std::string, ItemComponentData>& value)
     {
-        Serializer.WriteValue(Value);
+        serializer.WriteValue(value);
     }
 
-    template <class T> void DeserializeComponentDataInternal(SignalRDeserializer& Deserializer, ItemComponentDataVariant& OutVal)
+    template <class T> void DeserializeComponentDataInternal(SignalRDeserializer& deserializer, ItemComponentDataVariant& outVal)
     {
         // It's important we construct the exact type we want to read from our variant,
         // as we want to make sure our variant is populated with the correct type.
-        T DeserializedValue {};
-        Deserializer.ReadValue(DeserializedValue);
-        OutVal = DeserializedValue;
+        T deserializedValue {};
+        deserializer.ReadValue(deserializedValue);
+        outVal = deserializedValue;
     }
 
-    void DeserializeComponentData(SignalRDeserializer& Deserializer, ItemComponentDataType Type, ItemComponentDataVariant& OutVal)
+    void DeserializeComponentData(SignalRDeserializer& deserializer, ItemComponentDataType type, ItemComponentDataVariant& outVal)
     {
-        switch (Type)
+        switch (type)
         {
         case ItemComponentDataType::BOOL:
-            DeserializeComponentDataInternal<bool>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<bool>(deserializer, outVal);
             break;
         case ItemComponentDataType::INT64:
             // We can't guarantee MCS will give us back a signed integer, even if one is sent.
-            if (Deserializer.NextValueIsInt())
+            if (deserializer.NextValueIsInt())
             {
-                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<int64_t>(deserializer, outVal);
             }
             else
             {
-                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<uint64_t>(deserializer, outVal);
             }
             break;
         case ItemComponentDataType::UINT64:
             // Due to us changing some of our types from int64->uint64, we may receive some unexpected int64 values here.
             // So we need to account for this here.
-            if (Deserializer.NextValueIsUint())
+            if (deserializer.NextValueIsUint())
             {
-                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<uint64_t>(deserializer, outVal);
             }
             else
             {
-                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<int64_t>(deserializer, outVal);
             }
 
             break;
         case ItemComponentDataType::DOUBLE:
-            DeserializeComponentDataInternal<double>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<double>(deserializer, outVal);
             break;
         case ItemComponentDataType::FLOAT:
-            DeserializeComponentDataInternal<float>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<float>(deserializer, outVal);
             break;
         case ItemComponentDataType::FLOAT_ARRAY:
-            DeserializeComponentDataInternal<std::vector<float>>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<std::vector<float>>(deserializer, outVal);
             break;
         case ItemComponentDataType::STRING:
-            DeserializeComponentDataInternal<std::string>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<std::string>(deserializer, outVal);
             break;
         case ItemComponentDataType::UINT16_DICTIONARY:
             // If a dictionary is empty, we will receive null from MCS.
-            if (Deserializer.NextValueIsNull())
+            if (deserializer.NextValueIsNull())
             {
-                Deserializer.Skip();
-                OutVal = std::map<uint16_t, ItemComponentData> {};
+                deserializer.Skip();
+                outVal = std::map<uint16_t, ItemComponentData> {};
             }
             else
             {
-                DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(deserializer, outVal);
             }
             break;
         case ItemComponentDataType::STRING_DICTIONARY:
             // If a dictionary is empty, we will receive null from MCS.
-            if (Deserializer.NextValueIsNull())
+            if (deserializer.NextValueIsNull())
             {
-                Deserializer.Skip();
-                OutVal = std::map<std::string, ItemComponentData> {};
+                deserializer.Skip();
+                outVal = std::map<std::string, ItemComponentData> {};
             }
             else
             {
-                DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
+                DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(deserializer, outVal);
             }
             break;
         default:
@@ -126,23 +126,23 @@ namespace
         }
     }
 
-    void DeserializeComponents(SignalRDeserializer& Deserializer, std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
+    void DeserializeComponents(SignalRDeserializer& deserializer, std::optional<std::map<PropertyKeyType, ItemComponentData>>& components)
     {
-        if (Deserializer.NextValueIsNull() == false)
+        if (deserializer.NextValueIsNull() == false)
         {
-            Components = std::map<PropertyKeyType, ItemComponentData> {};
+            components = std::map<PropertyKeyType, ItemComponentData> {};
 
-            size_t ComponentsSize = 0;
-            Deserializer.StartReadUintMap(ComponentsSize);
+            size_t componentsSize = 0;
+            deserializer.StartReadUintMap(componentsSize);
 
-            for (size_t i = 0; i < ComponentsSize; ++i)
+            for (size_t i = 0; i < componentsSize; ++i)
             {
                 try
                 {
-                    std::pair<PropertyKeyType, ItemComponentData> ComponentKeyValue;
-                    Deserializer.ReadKeyValue(ComponentKeyValue);
+                    std::pair<PropertyKeyType, ItemComponentData> componentKeyValue;
+                    deserializer.ReadKeyValue(componentKeyValue);
 
-                    (*Components)[ComponentKeyValue.first] = ComponentKeyValue.second;
+                    (*components)[componentKeyValue.first] = componentKeyValue.second;
                 }
                 catch (const std::exception&)
                 {
@@ -158,211 +158,211 @@ namespace
                 }
             }
 
-            Deserializer.EndReadUintMap();
+            deserializer.EndReadUintMap();
         }
         else
         {
-            Components = std::nullopt;
-            Deserializer.Skip();
+            components = std::nullopt;
+            deserializer.Skip();
         }
     }
 }
 
-ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
-    : Value { Value }
+ItemComponentData::ItemComponentData(const ItemComponentDataVariant& value)
+    : m_value { value }
 {
 }
 
-void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
+void ItemComponentData::Serialize(SignalRSerializer& serializer) const
 {
     // 1. Write an array for type-value pair.
-    Serializer.StartWriteArray();
+    serializer.StartWriteArray();
     {
         // Visit the variant to get the underlying type.
         std::visit(
-            [&Serializer](const auto& ValueType)
+            [&serializer](const auto& valueType)
             {
                 // 2. Write the type.
-                Serializer.WriteValue(static_cast<uint64_t>(GetComponentEnum(ValueType)));
+                serializer.WriteValue(static_cast<uint64_t>(GetComponentEnum(valueType)));
 
                 // 3. Write an array for the value.
-                Serializer.StartWriteArray();
+                serializer.StartWriteArray();
                 {
                     // 4. Write the value.
-                    SerializeComponentData(Serializer, ValueType);
+                    SerializeComponentData(serializer, valueType);
                 }
-                Serializer.EndWriteArray();
+                serializer.EndWriteArray();
             },
-            Value);
+            m_value);
     }
-    Serializer.EndWriteArray();
+    serializer.EndWriteArray();
 }
 
-void ItemComponentData::Deserialize(SignalRDeserializer& Deserializer)
+void ItemComponentData::Deserialize(SignalRDeserializer& deserializer)
 {
     // 1. Read the type and value pair.
-    size_t ArraySize = 0;
-    Deserializer.StartReadArray(ArraySize);
+    size_t arraySize = 0;
+    deserializer.StartReadArray(arraySize);
     {
         // 2. Read the ItemComponentDataType.
-        uint64_t RawType;
-        Deserializer.ReadValue(RawType);
+        uint64_t rawType;
+        deserializer.ReadValue(rawType);
 
-        const auto Type = static_cast<ItemComponentDataType>(RawType);
+        const auto type = static_cast<ItemComponentDataType>(rawType);
 
         // 3. Read the value inside an array.
-        size_t ValueArraySize = 0;
-        Deserializer.StartReadArray(ValueArraySize);
+        size_t valueArraySize = 0;
+        deserializer.StartReadArray(valueArraySize);
         {
             // 4. Deserialize the value.
-            DeserializeComponentData(Deserializer, Type, Value);
+            DeserializeComponentData(deserializer, type, m_value);
         }
-        Deserializer.EndReadArray();
+        deserializer.EndReadArray();
     }
-    Deserializer.EndReadArray();
+    deserializer.EndReadArray();
 }
 
-const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Value; }
+const ItemComponentDataVariant& ItemComponentData::GetValue() const { return m_value; }
 
-bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
+bool ItemComponentData::operator==(const ItemComponentData& other) const { return m_value == other.m_value; }
 
-ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
-    : Id { Id }
-    , Type { Type }
-    , IsTransferable { IsTransferable }
-    , IsPersistent { IsPersistent }
-    , OwnerId { OwnerId }
-    , ParentId { ParentId }
-    , Components { Components }
+ObjectMessage::ObjectMessage(uint64_t id, uint64_t type, bool isTransferable, bool isPersistent, uint64_t ownerId, std::optional<uint64_t> parentId,
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& components)
+    : m_id { id }
+    , m_type { type }
+    , m_isTransferable { isTransferable }
+    , m_isPersistent { isPersistent }
+    , m_ownerId { ownerId }
+    , m_parentId { parentId }
+    , m_components { components }
 {
 }
 
-void ObjectMessage::Serialize(SignalRSerializer& Serializer) const
+void ObjectMessage::Serialize(SignalRSerializer& serializer) const
 {
-    Serializer.StartWriteArray();
+    serializer.StartWriteArray();
     {
-        Serializer.WriteValue(Id);
-        Serializer.WriteValue(Type);
-        Serializer.WriteValue(IsTransferable);
-        Serializer.WriteValue(IsPersistent);
-        Serializer.WriteValue(OwnerId);
-        Serializer.WriteValue(ParentId);
-        Serializer.WriteValue(Components);
+        serializer.WriteValue(m_id);
+        serializer.WriteValue(m_type);
+        serializer.WriteValue(m_isTransferable);
+        serializer.WriteValue(m_isPersistent);
+        serializer.WriteValue(m_ownerId);
+        serializer.WriteValue(m_parentId);
+        serializer.WriteValue(m_components);
     }
-    Serializer.EndWriteArray();
+    serializer.EndWriteArray();
 }
 
-void ObjectMessage::Deserialize(SignalRDeserializer& Deserializer)
+void ObjectMessage::Deserialize(SignalRDeserializer& deserializer)
 {
-    size_t ArraySize = 0;
-    Deserializer.StartReadArray(ArraySize);
+    size_t arraySize = 0;
+    deserializer.StartReadArray(arraySize);
     {
-        Deserializer.ReadValue(Id);
-        Deserializer.ReadValue(Type);
-        Deserializer.ReadValue(IsTransferable);
-        Deserializer.ReadValue(IsPersistent);
-        Deserializer.ReadValue(OwnerId);
-        Deserializer.ReadValue(ParentId);
-        DeserializeComponents(Deserializer, Components);
+        deserializer.ReadValue(m_id);
+        deserializer.ReadValue(m_type);
+        deserializer.ReadValue(m_isTransferable);
+        deserializer.ReadValue(m_isPersistent);
+        deserializer.ReadValue(m_ownerId);
+        deserializer.ReadValue(m_parentId);
+        DeserializeComponents(deserializer, m_components);
     }
-    Deserializer.EndReadArray();
+    deserializer.EndReadArray();
 }
 
-bool ObjectMessage::operator==(const ObjectMessage& Other) const
+bool ObjectMessage::operator==(const ObjectMessage& other) const
 {
-    return Id == Other.Id && Type == Other.Type && IsTransferable == Other.IsTransferable && IsPersistent == Other.IsPersistent
-        && OwnerId == Other.OwnerId && ParentId == Other.ParentId && Components == Other.Components;
+    return m_id == other.m_id && m_type == other.m_type && m_isTransferable == other.m_isTransferable && m_isPersistent == other.m_isPersistent
+        && m_ownerId == other.m_ownerId && m_parentId == other.m_parentId && m_components == other.m_components;
 }
 
-uint64_t ObjectMessage::GetId() const { return Id; }
+uint64_t ObjectMessage::GetId() const { return m_id; }
 
-uint64_t ObjectMessage::GetType() const { return Type; }
+uint64_t ObjectMessage::GetType() const { return m_type; }
 
-bool ObjectMessage::GetIsTransferable() const { return IsTransferable; }
+bool ObjectMessage::GetIsTransferable() const { return m_isTransferable; }
 
-bool ObjectMessage::GetIsPersistent() const { return IsPersistent; }
+bool ObjectMessage::GetIsPersistent() const { return m_isPersistent; }
 
-uint64_t ObjectMessage::GetOwnerId() const { return OwnerId; }
+uint64_t ObjectMessage::GetOwnerId() const { return m_ownerId; }
 
-std::optional<uint64_t> ObjectMessage::GetParentId() const { return ParentId; }
+std::optional<uint64_t> ObjectMessage::GetParentId() const { return m_parentId; }
 
-const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectMessage::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectMessage::GetComponents() const { return m_components; }
 
-ObjectPatch::ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-    const std::map<PropertyKeyType, ItemComponentData>& Components)
-    : Id { Id }
-    , OwnerId { OwnerId }
-    , Destroy { Destroy }
-    , ShouldUpdateParent { ShouldUpdateParent }
-    , ParentId { ParentId }
-    , Components { Components }
+ObjectPatch::ObjectPatch(uint64_t id, uint64_t ownerId, bool destroy, bool shouldUpdateParent, std::optional<uint64_t> parentId,
+    const std::map<PropertyKeyType, ItemComponentData>& components)
+    : m_id { id }
+    , m_ownerId { ownerId }
+    , m_destroy { destroy }
+    , m_shouldUpdateParent { shouldUpdateParent }
+    , m_parentId { parentId }
+    , m_components { components }
 {
 }
 
-void ObjectPatch::Serialize(SignalRSerializer& Serializer) const
+void ObjectPatch::Serialize(SignalRSerializer& serializer) const
 {
-    Serializer.StartWriteArray();
+    serializer.StartWriteArray();
     {
-        Serializer.WriteValue(Id);
-        Serializer.WriteValue(OwnerId);
-        Serializer.WriteValue(Destroy);
+        serializer.WriteValue(m_id);
+        serializer.WriteValue(m_ownerId);
+        serializer.WriteValue(m_destroy);
 
         // Parent changes need to be in a vector.
-        Serializer.StartWriteArray();
+        serializer.StartWriteArray();
         {
-            Serializer.WriteValue(ShouldUpdateParent);
-            Serializer.WriteValue(ParentId);
+            serializer.WriteValue(m_shouldUpdateParent);
+            serializer.WriteValue(m_parentId);
         }
-        Serializer.EndWriteArray();
+        serializer.EndWriteArray();
 
-        Serializer.WriteValue(Components);
+        serializer.WriteValue(m_components);
     }
-    Serializer.EndWriteArray();
+    serializer.EndWriteArray();
 }
 
-void ObjectPatch::Deserialize(SignalRDeserializer& Deserializer)
+void ObjectPatch::Deserialize(SignalRDeserializer& deserializer)
 {
-    size_t ArraySize = 0;
-    Deserializer.StartReadArray(ArraySize);
+    size_t arraySize = 0;
+    deserializer.StartReadArray(arraySize);
     {
-        Deserializer.ReadValue(Id);
-        Deserializer.ReadValue(OwnerId);
-        Deserializer.ReadValue(Destroy);
+        deserializer.ReadValue(m_id);
+        deserializer.ReadValue(m_ownerId);
+        deserializer.ReadValue(m_destroy);
 
         // Array will be null from MCS if there is no parent update.
-        if (Deserializer.NextValueIsNull() == false)
+        if (deserializer.NextValueIsNull() == false)
         {
-            size_t ParentArraySize = 0;
-            Deserializer.StartReadArray(ParentArraySize);
+            size_t parentArraySize = 0;
+            deserializer.StartReadArray(parentArraySize);
             {
-                Deserializer.ReadValue(ShouldUpdateParent);
-                Deserializer.ReadValue(ParentId);
+                deserializer.ReadValue(m_shouldUpdateParent);
+                deserializer.ReadValue(m_parentId);
             }
-            Deserializer.EndReadArray();
+            deserializer.EndReadArray();
         }
 
-        DeserializeComponents(Deserializer, Components);
+        DeserializeComponents(deserializer, m_components);
     }
-    Deserializer.EndReadArray();
+    deserializer.EndReadArray();
 }
 
-bool ObjectPatch::operator==(const ObjectPatch& Other) const
+bool ObjectPatch::operator==(const ObjectPatch& other) const
 {
-    return Id == Other.Id && OwnerId == Other.OwnerId && Destroy == Other.Destroy && ShouldUpdateParent == Other.ShouldUpdateParent
-        && ParentId == Other.ParentId && Components == Other.Components;
+    return m_id == other.m_id && m_ownerId == other.m_ownerId && m_destroy == other.m_destroy && m_shouldUpdateParent == other.m_shouldUpdateParent
+        && m_parentId == other.m_parentId && m_components == other.m_components;
 }
 
-uint64_t ObjectPatch::GetId() const { return Id; }
+uint64_t ObjectPatch::GetId() const { return m_id; }
 
-uint64_t ObjectPatch::GetOwnerId() const { return OwnerId; }
+uint64_t ObjectPatch::GetOwnerId() const { return m_ownerId; }
 
-bool ObjectPatch::GetDestroy() const { return Destroy; }
+bool ObjectPatch::GetDestroy() const { return m_destroy; }
 
-bool ObjectPatch::GetShouldUpdateParent() const { return ShouldUpdateParent; }
+bool ObjectPatch::GetShouldUpdateParent() const { return m_shouldUpdateParent; }
 
-std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
+std::optional<uint64_t> ObjectPatch::GetParentId() const { return m_parentId; }
 
-const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return m_components; }
 
 }

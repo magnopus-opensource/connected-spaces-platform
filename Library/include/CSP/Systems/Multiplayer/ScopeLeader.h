@@ -56,7 +56,7 @@ public:
     bool ElectionInProgress = false;
 };
 
-void DtoToScopeLeader(const csp::services::generated::multiplayerservice::ScopeLeaderDto& Dto, csp::systems::ScopeLeader& ScopeLeader);
+void DtoToScopeLeader(const csp::services::generated::multiplayerservice::ScopeLeaderDto& dto, csp::systems::ScopeLeader& scopeLeader);
 
 /// @ingroup Multiplayer System
 /// @brief Contains details about an async operation which returns a scope leader.
@@ -77,10 +77,10 @@ public:
 private:
     ScopeLeaderResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    ScopeLeader Leader;
+    ScopeLeader m_leader;
 };
 
-typedef std::function<void(const ScopeLeaderResult& Result)> ScopeLeaderResultCallback;
+typedef std::function<void(const ScopeLeaderResult& result)> ScopeLeaderResultCallback;
 }

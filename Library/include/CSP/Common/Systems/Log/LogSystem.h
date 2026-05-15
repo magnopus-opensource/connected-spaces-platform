@@ -41,41 +41,41 @@ public:
 
     /// @brief Set a callback for handling a log. Can be used to debug Connected Spaces Platform within a client application.
     /// @param InLogCallback The callback to execute when a log occurs.
-    CSP_EVENT void SetLogCallback(LogCallbackHandler InLogCallback);
+    CSP_EVENT void SetLogCallback(LogCallbackHandler inLogCallback);
 
     /// @brief Set a callback for handling an event log. Can be used to debug Connected Spaces Platform within a client application.
     /// @param InEventCallback The callback to execute when an event log occurs.
-    CSP_EVENT void SetEventCallback(EventCallbackHandler InEventCallback);
+    CSP_EVENT void SetEventCallback(EventCallbackHandler inEventCallback);
 
     /// @brief Set a callback for handling a begin marker event. Can be used to debug Connected Spaces Platform within a client application.
     /// @param InBeginCallback The callback to execute when the marker begins.
-    CSP_EVENT void SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback);
+    CSP_EVENT void SetBeginMarkerCallback(BeginMarkerCallbackHandler inBeginCallback);
 
     /// @brief Set a callback for handling an end marker event. Can be used to debug Connected Spaces Platform within a client application.
     /// @param InEndCallback The callback to execute when the marker ends.
-    CSP_EVENT void SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback);
+    CSP_EVENT void SetEndMarkerCallback(EndMarkerCallbackHandler inEndCallback);
 
     /// @brief Set the verbosity of logging for a system-wide level.
     /// @param InSystemLevel The level to set the system logging to.
-    void SetSystemLevel(const csp::common::LogLevel InSystemLevel);
+    void SetSystemLevel(const csp::common::LogLevel inSystemLevel);
 
     /// @brief Retreive the log verbosity level.
     csp::common::LogLevel GetSystemLevel();
 
     /// @brief Check if we currently log a specified log verbosity level.
     /// @param Level The level to check.
-    bool LoggingEnabled(const csp::common::LogLevel Level);
+    bool LoggingEnabled(const csp::common::LogLevel level);
 
     /// @brief Log a message at a specific verbosity level.
     /// @param Level The level to log this message at.
     /// @param InMessage The message to be logged.
-    void LogMsg(const csp::common::LogLevel Level, const csp::common::String& InMessage);
+    void LogMsg(const csp::common::LogLevel level, const csp::common::String& inMessage);
     /// @brief Log an event.
     /// @param InEvent The event to be logged.
-    void LogEvent(const csp::common::String& InEvent);
+    void LogEvent(const csp::common::String& inEvent);
 
     /// @brief Specify a 'Marker' event which can be used to communicate a certain process occurring, usually for debugging.
-    void BeginMarker(const csp::common::String& InMarker);
+    void BeginMarker(const csp::common::String& inMarker);
     /// @brief End a 'Marker' event.
     void EndMarker();
 
@@ -83,12 +83,12 @@ public:
     void ClearAllCallbacks();
 
 private:
-    csp::common::LogLevel SystemLevel = LogLevel::All;
+    csp::common::LogLevel m_systemLevel = LogLevel::All;
 
-    void LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage);
+    void LogToFile(const csp::common::LogLevel level, const csp::common::String& inMessage);
 
     // Allocate internally to avoid warning C4251 'needs to have dll-interface to be used by clients'
-    struct LogCallbacks* Callbacks;
+    struct LogCallbacks* m_callbacks;
 };
 
 } // namespace csp::systems

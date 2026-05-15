@@ -27,18 +27,18 @@ public:
     HttpProgress();
     ~HttpProgress();
 
-    void SetProgressPercentage(float Progress);
+    void SetProgressPercentage(float progress);
     float GetProgressPercentage() const;
 
     // Explicit assignment operator because of atomic member
     HttpProgress& operator=(const HttpProgress& other) noexcept
     {
-        Progress = other.Progress.load();
+        m_progress = other.m_progress.load();
         return *this;
     }
 
 private:
-    std::atomic<uint32_t> Progress;
+    std::atomic<uint32_t> m_progress;
 };
 
 } // namespace csp::web

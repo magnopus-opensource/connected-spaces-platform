@@ -33,63 +33,63 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ListTest)
     try
     {
         {
-            csp::common::List<int> List;
+            csp::common::List<int> list;
 
-            EXPECT_TRUE(List.Size() == 0);
+            EXPECT_TRUE(list.Size() == 0);
         }
         {
-            csp::common::List<int> List;
-            List.Append(42);
+            csp::common::List<int> list;
+            list.Append(42);
 
-            EXPECT_TRUE(List.Size() == 1);
-            EXPECT_TRUE(List[0] == 42);
+            EXPECT_TRUE(list.Size() == 1);
+            EXPECT_TRUE(list[0] == 42);
         }
         {
-            csp::common::List<int> List = { 42, 1337, 80085 };
+            csp::common::List<int> list = { 42, 1337, 80085 };
 
-            EXPECT_TRUE(List.Size() == 3);
-            EXPECT_TRUE(List[0] == 42 && List[1] == 1337 && List[2] == 80085);
+            EXPECT_TRUE(list.Size() == 3);
+            EXPECT_TRUE(list[0] == 42 && list[1] == 1337 && list[2] == 80085);
         }
         {
-            csp::common::List<int> List = { 1, 2, 3, 4, 5 };
-            List.Remove(2);
+            csp::common::List<int> list = { 1, 2, 3, 4, 5 };
+            list.Remove(2);
 
-            EXPECT_TRUE(List.Size() == 4);
-            EXPECT_TRUE(List[0] == 1 && List[1] == 2 && List[2] == 4 && List[3] == 5);
+            EXPECT_TRUE(list.Size() == 4);
+            EXPECT_TRUE(list[0] == 1 && list[1] == 2 && list[2] == 4 && list[3] == 5);
         }
         {
-            csp::common::List<int> List;
-            List.Append(1);
-            List.Append(2);
-            List.Append(3);
-            List.Append(4);
-            List.Append(5);
+            csp::common::List<int> list;
+            list.Append(1);
+            list.Append(2);
+            list.Append(3);
+            list.Append(4);
+            list.Append(5);
 
-            EXPECT_TRUE(List.Size() == 5);
-            EXPECT_TRUE(List[0] == 1 && List[1] == 2 && List[2] == 3 && List[3] == 4 && List[4] == 5);
+            EXPECT_TRUE(list.Size() == 5);
+            EXPECT_TRUE(list[0] == 1 && list[1] == 2 && list[2] == 3 && list[3] == 4 && list[4] == 5);
         }
         {
-            csp::common::List<int> List1 { 1, 2, 3 };
-            csp::common::List<int> List2(List1);
+            csp::common::List<int> list1 { 1, 2, 3 };
+            csp::common::List<int> list2(list1);
 
-            EXPECT_TRUE(List1.Size() == 3);
-            EXPECT_TRUE(List1[0] == 1 && List1[1] == 2 && List1[2] == 3);
-            EXPECT_TRUE(List2.Size() == 3);
-            EXPECT_TRUE(List2[0] == 1 && List2[1] == 2 && List2[2] == 3);
+            EXPECT_TRUE(list1.Size() == 3);
+            EXPECT_TRUE(list1[0] == 1 && list1[1] == 2 && list1[2] == 3);
+            EXPECT_TRUE(list2.Size() == 3);
+            EXPECT_TRUE(list2[0] == 1 && list2[1] == 2 && list2[2] == 3);
         }
         {
-            csp::common::List<csp::common::String> List;
-            csp::common::String ListItem = "test item";
-            List.Append(ListItem);
+            csp::common::List<csp::common::String> list;
+            csp::common::String listItem = "test item";
+            list.Append(listItem);
 
-            EXPECT_TRUE(List[0] == ListItem);
+            EXPECT_TRUE(list[0] == listItem);
         }
         {
-            csp::common::List<csp::common::String> List;
-            csp::common::String Item = "test item";
-            List.Append(Item);
+            csp::common::List<csp::common::String> list;
+            csp::common::String item = "test item";
+            list.Append(item);
 
-            EXPECT_TRUE(List[0] == "test item");
+            EXPECT_TRUE(list[0] == "test item");
         }
     }
     catch (...)
@@ -103,68 +103,68 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
     try
     {
         {
-            csp::common::Map<int, csp::common::String> Map;
-            Map[42] = "asd";
+            csp::common::Map<int, csp::common::String> map;
+            map[42] = "asd";
 
-            EXPECT_TRUE(Map.Size() == 1);
-            EXPECT_TRUE(Map.HasKey(42));
-            EXPECT_TRUE(Map[42] == "asd");
+            EXPECT_TRUE(map.Size() == 1);
+            EXPECT_TRUE(map.HasKey(42));
+            EXPECT_TRUE(map[42] == "asd");
 
-            auto* RawKeys = Map.Keys();
-            auto& Keys = *RawKeys;
+            auto* rawKeys = map.Keys();
+            auto& keys = *rawKeys;
 
-            EXPECT_TRUE(Keys.Size() == 1);
-            EXPECT_TRUE(Keys[0] == 42);
+            EXPECT_TRUE(keys.Size() == 1);
+            EXPECT_TRUE(keys[0] == 42);
 
-            delete (RawKeys);
+            delete (rawKeys);
 
-            auto* RawValues = Map.Values();
-            auto& Values = *RawValues;
+            auto* rawValues = map.Values();
+            auto& values = *rawValues;
 
-            EXPECT_TRUE(Values.Size() == 1);
-            EXPECT_TRUE(Values[0] == "asd");
+            EXPECT_TRUE(values.Size() == 1);
+            EXPECT_TRUE(values[0] == "asd");
 
-            delete (RawValues);
+            delete (rawValues);
         }
         {
-            csp::common::Map<csp::common::String, int> Map;
-            Map["asd"] = 42;
+            csp::common::Map<csp::common::String, int> map;
+            map["asd"] = 42;
 
-            EXPECT_TRUE(Map.Size() == 1);
-            EXPECT_TRUE(Map.HasKey("asd"));
-            EXPECT_TRUE(Map["asd"] == 42);
+            EXPECT_TRUE(map.Size() == 1);
+            EXPECT_TRUE(map.HasKey("asd"));
+            EXPECT_TRUE(map["asd"] == 42);
 
-            auto* RawKeys = Map.Keys();
-            auto& Keys = *RawKeys;
+            auto* rawKeys = map.Keys();
+            auto& keys = *rawKeys;
 
-            EXPECT_TRUE(Keys.Size() == 1);
-            EXPECT_TRUE(Keys[0] == "asd");
+            EXPECT_TRUE(keys.Size() == 1);
+            EXPECT_TRUE(keys[0] == "asd");
 
-            delete (RawKeys);
+            delete (rawKeys);
 
-            auto* RawValues = Map.Values();
-            auto& Values = *RawValues;
+            auto* rawValues = map.Values();
+            auto& values = *rawValues;
 
-            EXPECT_TRUE(Values.Size() == 1);
-            EXPECT_TRUE(Values[0] == 42);
+            EXPECT_TRUE(values.Size() == 1);
+            EXPECT_TRUE(values[0] == 42);
 
-            delete (RawValues);
+            delete (rawValues);
         }
         {
-            csp::common::Map<int, csp::common::String> Map;
-            Map[1] = "one";
-            Map[2] = "too";
-            Map[43] = "thorty free";
+            csp::common::Map<int, csp::common::String> map;
+            map[1] = "one";
+            map[2] = "too";
+            map[43] = "thorty free";
 
-            Map.Remove(2);
+            map.Remove(2);
 
-            EXPECT_TRUE(Map.Size() == 2);
+            EXPECT_TRUE(map.Size() == 2);
 
-            auto* RawKeys = Map.Keys();
-            auto& Keys = *RawKeys;
+            auto* rawKeys = map.Keys();
+            auto& keys = *rawKeys;
 
-            EXPECT_TRUE(Keys.Size() == 2);
-            EXPECT_TRUE(Keys[0] == 1 && Keys[1] == 43);
+            EXPECT_TRUE(keys.Size() == 2);
+            EXPECT_TRUE(keys[0] == 1 && keys[1] == 43);
         }
     }
     catch (...)
@@ -177,15 +177,15 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto DeviceId1 = csp::CSPFoundation::GetDeviceId();
+    auto deviceId1 = csp::CSPFoundation::GetDeviceId();
 
     // Shutdown and re-initialise Foundation to verify we get the same DeviceID
     csp::CSPFoundation::Shutdown();
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto DeviceId2 = csp::CSPFoundation::GetDeviceId();
+    auto deviceId2 = csp::CSPFoundation::GetDeviceId();
 
-    ASSERT_EQ(DeviceId1, DeviceId2);
+    ASSERT_EQ(deviceId1, deviceId2);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -201,179 +201,179 @@ public:
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, OptionalAssignmentOperatorTest)
 {
     // assign a string into an empty optional
-    csp::common::String String = "Just a random string";
+    csp::common::String string = "Just a random string";
 
-    csp::common::Optional<csp::common::String> OptString;
-    OptString = String;
-    ASSERT_EQ(*OptString, String);
+    csp::common::Optional<csp::common::String> optString;
+    optString = string;
+    ASSERT_EQ(*optString, string);
 
     // assign a different string into an non-empty optional
-    csp::common::String String2 = "Another random string";
-    OptString = String2;
-    ASSERT_EQ(*OptString, String2);
+    csp::common::String string2 = "Another random string";
+    optString = string2;
+    ASSERT_EQ(*optString, string2);
 
     // assign a vector into an empty optional
-    csp::common::Optional<std::vector<int>> OptVector;
-    std::vector<int> Vector { 1, 2, 3 };
-    OptVector = Vector;
-    ASSERT_EQ(*OptVector, Vector);
+    csp::common::Optional<std::vector<int>> optVector;
+    std::vector<int> vector { 1, 2, 3 };
+    optVector = vector;
+    ASSERT_EQ(*optVector, vector);
 
     // assign a vector into an non-empty optional
-    std::vector<int> Vector2 { 5, 9, 12, 15, 19 };
-    OptVector = Vector2;
-    ASSERT_EQ(*OptVector, Vector2);
+    std::vector<int> vector2 { 5, 9, 12, 15, 19 };
+    optVector = vector2;
+    ASSERT_EQ(*optVector, vector2);
 
     // Test Optional<T*> constructors
     {
-        auto Instance = (MyCoolClass*)std::malloc(sizeof(MyCoolClass));
-        new (Instance) MyCoolClass();
-        csp::common::Optional<MyCoolClass> OptionalInstance(Instance);
+        auto instance = (MyCoolClass*)std::malloc(sizeof(MyCoolClass));
+        new (instance) MyCoolClass();
+        csp::common::Optional<MyCoolClass> optionalInstance(instance);
     }
 
     {
-        auto Instance = new MyCoolClass();
-        csp::common::Optional<MyCoolClass> OptionalInstance(Instance);
+        auto instance = new MyCoolClass();
+        csp::common::Optional<MyCoolClass> optionalInstance(instance);
     }
 
     {
-        auto Instance = new MyCoolClass();
-        csp::common::Optional<MyCoolClass> OptionalInstance(Instance, [](auto Pointer) { delete Pointer; });
+        auto instance = new MyCoolClass();
+        csp::common::Optional<MyCoolClass> optionalInstance(instance, [](auto pointer) { delete pointer; });
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateLODStyleVar)
 {
-    const csp::common::String TestLODStyleVar = "lod:0";
-    csp::common::String LODStyleVar = csp::systems::CreateLODStyleVar(0);
+    const csp::common::String testLodStyleVar = "lod:0";
+    csp::common::String lodStyleVar = csp::systems::CreateLODStyleVar(0);
 
-    EXPECT_EQ(TestLODStyleVar, LODStyleVar);
+    EXPECT_EQ(testLodStyleVar, lodStyleVar);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetLODLevelFromStylesArray)
 {
-    const int TestLodLevel = 0;
-    const csp::common::String TestLODStyleVar = "lod:0";
+    const int testLodLevel = 0;
+    const csp::common::String testLodStyleVar = "lod:0";
 
-    csp::common::Array<csp::common::String> TestStyles { TestLODStyleVar };
+    csp::common::Array<csp::common::String> testStyles { testLodStyleVar };
 
-    int LODLevel = csp::systems::GetLODLevelFromStylesArray(TestStyles);
+    int lodLevel = csp::systems::GetLODLevelFromStylesArray(testStyles);
 
-    EXPECT_EQ(TestLodLevel, LODLevel);
+    EXPECT_EQ(testLodLevel, lodLevel);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetLODLevelFromStylesArrayOtherDataTest)
 {
-    const int TestLodLevel = 0;
-    const csp::common::String TestLODStyleVar = "lod:0";
-    const csp::common::String TestTagData = "TagData";
+    const int testLodLevel = 0;
+    const csp::common::String testLodStyleVar = "lod:0";
+    const csp::common::String testTagData = "TagData";
 
-    csp::common::Array<csp::common::String> TestStyles { TestTagData, TestLODStyleVar };
+    csp::common::Array<csp::common::String> testStyles { testTagData, testLodStyleVar };
 
-    int LODLevel = csp::systems::GetLODLevelFromStylesArray(TestStyles);
+    int lodLevel = csp::systems::GetLODLevelFromStylesArray(testStyles);
 
-    EXPECT_EQ(TestLodLevel, LODLevel);
+    EXPECT_EQ(testLodLevel, lodLevel);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateLODChainFromAssetsTest)
 {
-    const csp::common::String TestCollectionId = "TestCollectionId";
-    const csp::common::String TestAssetId1 = "TestAssetId1";
-    const csp::common::String TestAssetId2 = "TestAssetId2";
-    const csp::common::String TestAssetId3 = "TestAssetId3";
+    const csp::common::String testCollectionId = "TestCollectionId";
+    const csp::common::String testAssetId1 = "TestAssetId1";
+    const csp::common::String testAssetId2 = "TestAssetId2";
+    const csp::common::String testAssetId3 = "TestAssetId3";
 
-    csp::systems::Asset TestAsset1, TestAsset2, TestAsset3;
+    csp::systems::Asset testAsset1, testAsset2, testAsset3;
 
-    TestAsset1.Id = TestAssetId1;
-    TestAsset2.Id = TestAssetId2;
-    TestAsset3.Id = TestAssetId3;
+    testAsset1.Id = testAssetId1;
+    testAsset2.Id = testAssetId2;
+    testAsset3.Id = testAssetId3;
 
-    TestAsset1.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(0) };
-    TestAsset2.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(1) };
-    TestAsset3.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(2) };
+    testAsset1.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(0) };
+    testAsset2.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(1) };
+    testAsset3.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(2) };
 
     // Adding TestAssets to collection out of sequence to ensure they are
     // correctly sorted by the call to CreateLODChainFromAssets().
-    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1, TestAsset3, TestAsset2 };
+    csp::common::Array<csp::systems::Asset> testAssets { testAsset1, testAsset3, testAsset2 };
 
-    csp::systems::LODChain Chain = csp::systems::CreateLODChainFromAssets(TestAssets, TestCollectionId);
+    csp::systems::LODChain chain = csp::systems::CreateLODChainFromAssets(testAssets, testCollectionId);
 
-    EXPECT_EQ(Chain.AssetCollectionId, TestCollectionId);
-    EXPECT_EQ(Chain.LODAssets.Size(), 3);
+    EXPECT_EQ(chain.AssetCollectionId, testCollectionId);
+    EXPECT_EQ(chain.LODAssets.Size(), 3);
 
-    EXPECT_EQ(Chain.LODAssets[0].Level, 0);
-    EXPECT_EQ(Chain.LODAssets[0].Asset.Id, TestAssetId1);
+    EXPECT_EQ(chain.LODAssets[0].Level, 0);
+    EXPECT_EQ(chain.LODAssets[0].Asset.Id, testAssetId1);
 
-    EXPECT_EQ(Chain.LODAssets[1].Level, 1);
-    EXPECT_EQ(Chain.LODAssets[1].Asset.Id, TestAssetId2);
+    EXPECT_EQ(chain.LODAssets[1].Level, 1);
+    EXPECT_EQ(chain.LODAssets[1].Asset.Id, testAssetId2);
 
-    EXPECT_EQ(Chain.LODAssets[2].Level, 2);
-    EXPECT_EQ(Chain.LODAssets[2].Asset.Id, TestAssetId3);
+    EXPECT_EQ(chain.LODAssets[2].Level, 2);
+    EXPECT_EQ(chain.LODAssets[2].Asset.Id, testAssetId3);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateLODChainFromAssetsSingleModelTest)
 {
-    const csp::common::String TestCollectionId = "TestCollectionId";
-    const csp::common::String TestAssetId1 = "TestAssetId1";
+    const csp::common::String testCollectionId = "TestCollectionId";
+    const csp::common::String testAssetId1 = "TestAssetId1";
 
-    csp::systems::Asset TestAsset1;
-    TestAsset1.Id = TestAssetId1;
+    csp::systems::Asset testAsset1;
+    testAsset1.Id = testAssetId1;
 
     // Don't set the style so we can test that this function returns the asset as the default model
 
-    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1 };
+    csp::common::Array<csp::systems::Asset> testAssets { testAsset1 };
 
-    csp::systems::LODChain Chain = csp::systems::CreateLODChainFromAssets(TestAssets, TestCollectionId);
+    csp::systems::LODChain chain = csp::systems::CreateLODChainFromAssets(testAssets, testCollectionId);
 
-    EXPECT_EQ(Chain.AssetCollectionId, TestCollectionId);
-    EXPECT_EQ(Chain.LODAssets.Size(), 1);
+    EXPECT_EQ(chain.AssetCollectionId, testCollectionId);
+    EXPECT_EQ(chain.LODAssets.Size(), 1);
 
-    EXPECT_EQ(Chain.LODAssets[0].Level, 0);
-    EXPECT_EQ(Chain.LODAssets[0].Asset.Id, TestAssetId1);
+    EXPECT_EQ(chain.LODAssets[0].Level, 0);
+    EXPECT_EQ(chain.LODAssets[0].Asset.Id, testAssetId1);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateLODChainFromAssetsMultipleModelTest)
 {
-    const csp::common::String TestCollectionId = "TestCollectionId";
-    const csp::common::String TestAssetId1 = "TestAssetId1";
-    const csp::common::String TestAssetId2 = "TestAssetId2";
+    const csp::common::String testCollectionId = "TestCollectionId";
+    const csp::common::String testAssetId1 = "TestAssetId1";
+    const csp::common::String testAssetId2 = "TestAssetId2";
 
-    csp::systems::Asset TestAsset1, TestAsset2;
-    TestAsset1.Id = TestAssetId1;
-    TestAsset2.Id = TestAssetId2;
+    csp::systems::Asset testAsset1, testAsset2;
+    testAsset1.Id = testAssetId1;
+    testAsset2.Id = testAssetId2;
 
     // Don't set the styles so we can test that this return no LODs as it can't resolve a default
 
-    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1, TestAsset2 };
+    csp::common::Array<csp::systems::Asset> testAssets { testAsset1, testAsset2 };
 
-    csp::systems::LODChain Chain = csp::systems::CreateLODChainFromAssets(TestAssets, TestCollectionId);
+    csp::systems::LODChain chain = csp::systems::CreateLODChainFromAssets(testAssets, testCollectionId);
 
-    EXPECT_EQ(Chain.AssetCollectionId, TestCollectionId);
-    EXPECT_EQ(Chain.LODAssets.Size(), 0);
+    EXPECT_EQ(chain.AssetCollectionId, testCollectionId);
+    EXPECT_EQ(chain.LODAssets.Size(), 0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ValidateNewLODLevelForChainTest)
 {
-    const csp::common::String TestCollectionId = "TestCollectionId";
-    const csp::common::String TestAssetId1 = "TestAssetId1";
-    const csp::common::String TestAssetId2 = "TestAssetId2";
-    const csp::common::String TestAssetId3 = "TestAssetId3";
+    const csp::common::String testCollectionId = "TestCollectionId";
+    const csp::common::String testAssetId1 = "TestAssetId1";
+    const csp::common::String testAssetId2 = "TestAssetId2";
+    const csp::common::String testAssetId3 = "TestAssetId3";
 
-    csp::systems::Asset TestAsset1, TestAsset2, TestAsset3;
-    TestAsset1.Id = TestAssetId1;
-    TestAsset2.Id = TestAssetId2;
-    TestAsset3.Id = TestAssetId3;
+    csp::systems::Asset testAsset1, testAsset2, testAsset3;
+    testAsset1.Id = testAssetId1;
+    testAsset2.Id = testAssetId2;
+    testAsset3.Id = testAssetId3;
 
-    TestAsset1.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(0) };
-    TestAsset2.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(1) };
-    TestAsset3.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(2) };
+    testAsset1.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(0) };
+    testAsset2.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(1) };
+    testAsset3.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(2) };
 
-    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1, TestAsset2, TestAsset3 };
+    csp::common::Array<csp::systems::Asset> testAssets { testAsset1, testAsset2, testAsset3 };
 
-    csp::systems::LODChain TestChain = csp::systems::CreateLODChainFromAssets(TestAssets, TestCollectionId);
+    csp::systems::LODChain testChain = csp::systems::CreateLODChainFromAssets(testAssets, testCollectionId);
 
-    bool Valid = csp::systems::ValidateNewLODLevelForChain(TestChain, 3);
-    EXPECT_TRUE(Valid);
+    bool valid = csp::systems::ValidateNewLODLevelForChain(testChain, 3);
+    EXPECT_TRUE(valid);
 
-    Valid = csp::systems::ValidateNewLODLevelForChain(TestChain, 2);
-    EXPECT_FALSE(Valid);
+    valid = csp::systems::ValidateNewLODLevelForChain(testChain, 2);
+    EXPECT_FALSE(valid);
 }

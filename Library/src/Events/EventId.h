@@ -24,7 +24,7 @@ namespace csp::events
 class CSP_API EventId
 {
 public:
-    EventId(const char* EventNameSpace, const char* EventName);
+    EventId(const char* eventNameSpace, const char* eventName);
 
     bool operator==(const EventId& other) const;
 

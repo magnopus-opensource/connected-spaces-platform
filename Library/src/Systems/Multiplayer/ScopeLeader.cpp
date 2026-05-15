@@ -6,39 +6,39 @@ namespace chs = csp::services::generated;
 
 namespace csp::systems
 {
-const ScopeLeader& ScopeLeaderResult::GetScopeLeader() const { return Leader; }
+const ScopeLeader& ScopeLeaderResult::GetScopeLeader() const { return m_leader; }
 
-void ScopeLeaderResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ScopeLeaderResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* ScopeLeaderResponse = static_cast<chs::multiplayerservice::ScopeLeaderDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* scopeLeaderResponse = static_cast<chs::multiplayerservice::ScopeLeaderDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ScopeLeaderResponse->FromJson(Response->GetPayload().GetContent());
-        DtoToScopeLeader(*ScopeLeaderResponse, Leader);
+        scopeLeaderResponse->FromJson(response->GetPayload().GetContent());
+        DtoToScopeLeader(*scopeLeaderResponse, m_leader);
     }
 }
-void DtoToScopeLeader(const csp::services::generated::multiplayerservice::ScopeLeaderDto& Dto, csp::systems::ScopeLeader& ScopeLeader)
+void DtoToScopeLeader(const csp::services::generated::multiplayerservice::ScopeLeaderDto& dto, csp::systems::ScopeLeader& scopeLeader)
 {
-    if (Dto.HasScopeId())
+    if (dto.HasScopeId())
     {
-        ScopeLeader.ScopeId = Dto.GetScopeId();
+        scopeLeader.ScopeId = dto.GetScopeId();
     }
-    if (Dto.HasLeaderClientId())
+    if (dto.HasLeaderClientId())
     {
-        ScopeLeader.ScopeClientId = Dto.GetLeaderClientId();
+        scopeLeader.ScopeClientId = dto.GetLeaderClientId();
     }
-    if (Dto.HasLeaderUserId())
+    if (dto.HasLeaderUserId())
     {
-        ScopeLeader.ScopeLeaderUserId = Dto.GetLeaderUserId();
+        scopeLeader.ScopeLeaderUserId = dto.GetLeaderUserId();
     }
-    if (Dto.HasElectionInProgress())
+    if (dto.HasElectionInProgress())
     {
-        ScopeLeader.ElectionInProgress = Dto.GetElectionInProgress();
+        scopeLeader.ElectionInProgress = dto.GetElectionInProgress();
     }
 }
 }

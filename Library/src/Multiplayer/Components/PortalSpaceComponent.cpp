@@ -64,14 +64,14 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& PortalSpaceComponent::GetSchema() { return Schema; }
 
-PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
 const csp::common::String& PortalSpaceComponent::GetSpaceId() const { return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId)); }
 
-void PortalSpaceComponent::SetSpaceId(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value); }
+void PortalSpaceComponent::SetSpaceId(const csp::common::String& value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), value); }
 
 /* IPositionComponent */
 
@@ -80,14 +80,14 @@ const csp::common::Vector3& PortalSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
 }
 
-void PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value); }
+void PortalSpaceComponent::SetPosition(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), value); }
 
 float PortalSpaceComponent::GetRadius() const { return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius)); }
 
-void PortalSpaceComponent::SetRadius(float Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
+void PortalSpaceComponent::SetRadius(float value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), value); }
 
 bool PortalSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)); }
 
-void PortalSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }
+void PortalSpaceComponent::SetIsEnabled(bool value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), value); }
 
 } // namespace csp::multiplayer

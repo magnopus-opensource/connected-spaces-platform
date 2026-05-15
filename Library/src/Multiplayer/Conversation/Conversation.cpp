@@ -29,38 +29,38 @@ AnnotationData::AnnotationData()
 {
 }
 
-AnnotationData::AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, double InVerticalFov,
-    const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
-    : AnnotationId(AnnotationId)
-    , AnnotationThumbnailId(AnnotationThumbnailId)
-    , VerticalFov(InVerticalFov)
-    , AuthorCameraPosition(InAuthorCameraPosition)
-    , AuthorCameraRotation(InAuthorCameraRotation)
+AnnotationData::AnnotationData(const csp::common::String& annotationId, const csp::common::String& annotationThumbnailId, double inVerticalFov,
+    const csp::common::Vector3& inAuthorCameraPosition, const csp::common::Vector4& inAuthorCameraRotation)
+    : AnnotationId(annotationId)
+    , AnnotationThumbnailId(annotationThumbnailId)
+    , VerticalFov(inVerticalFov)
+    , AuthorCameraPosition(inAuthorCameraPosition)
+    , AuthorCameraRotation(inAuthorCameraRotation)
 {
 }
 
-AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
-    : VerticalFov(InAnnotationData.VerticalFov)
-    , AuthorCameraPosition(InAnnotationData.AuthorCameraPosition)
-    , AuthorCameraRotation(InAnnotationData.AuthorCameraRotation)
+AnnotationData::AnnotationData(const AnnotationData& inAnnotationData)
+    : VerticalFov(inAnnotationData.VerticalFov)
+    , AuthorCameraPosition(inAnnotationData.AuthorCameraPosition)
+    , AuthorCameraRotation(inAnnotationData.AuthorCameraRotation)
 {
 }
 
-AnnotationData& AnnotationData::operator=(const AnnotationData& InAnnotationData)
+AnnotationData& AnnotationData::operator=(const AnnotationData& inAnnotationData)
 {
-    if (this != &InAnnotationData)
+    if (this != &inAnnotationData)
     {
-        VerticalFov = InAnnotationData.VerticalFov;
-        AuthorCameraPosition = InAnnotationData.AuthorCameraPosition;
-        AuthorCameraRotation = InAnnotationData.AuthorCameraRotation;
+        VerticalFov = inAnnotationData.VerticalFov;
+        AuthorCameraPosition = inAnnotationData.AuthorCameraPosition;
+        AuthorCameraRotation = inAnnotationData.AuthorCameraRotation;
     }
 
     return *this;
 }
 
-MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
+MessageInfo& MessageResult::GetMessageInfo() { return m_msgInfo; }
 
-const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
+const MessageInfo& MessageResult::GetMessageInfo() const { return m_msgInfo; }
 
 MessageInfo::MessageInfo()
     : ConversationId("")
@@ -72,127 +72,127 @@ MessageInfo::MessageInfo()
 {
 }
 
-MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool /*IsConversation*/, const csp::common::String& Message)
-    : ConversationId(ConversationId)
-    , Message(Message)
+MessageInfo::MessageInfo(const csp::common::String& conversationId, bool /*IsConversation*/, const csp::common::String& message)
+    : ConversationId(conversationId)
+    , Message(message)
 {
 }
 
 MessageInfo::MessageInfo(
-    const csp::common::String& ConversationId, bool /*IsConversation*/, const csp::common::String& Message, const csp::common::String& MessageId)
-    : ConversationId(ConversationId)
-    , Message(Message)
-    , MessageId(MessageId)
+    const csp::common::String& conversationId, bool /*IsConversation*/, const csp::common::String& message, const csp::common::String& messageId)
+    : ConversationId(conversationId)
+    , Message(message)
+    , MessageId(messageId)
 {
 }
 
-MessageInfo::MessageInfo(const MessageInfo& MessageData)
-    : ConversationId(MessageData.ConversationId)
-    , CreatedTimestamp(MessageData.CreatedTimestamp)
-    , EditedTimestamp(MessageData.EditedTimestamp)
-    , UserId(MessageData.UserId)
-    , Message(MessageData.Message)
-    , MessageId(MessageData.MessageId)
+MessageInfo::MessageInfo(const MessageInfo& messageData)
+    : ConversationId(messageData.ConversationId)
+    , CreatedTimestamp(messageData.CreatedTimestamp)
+    , EditedTimestamp(messageData.EditedTimestamp)
+    , UserId(messageData.UserId)
+    , Message(messageData.Message)
+    , MessageId(messageData.MessageId)
 {
 }
 
-MessageInfo& MessageInfo::operator=(const MessageInfo& MessageData)
+MessageInfo& MessageInfo::operator=(const MessageInfo& messageData)
 {
-    if (this != &MessageData)
+    if (this != &messageData)
     {
-        ConversationId = MessageData.ConversationId;
-        CreatedTimestamp = MessageData.CreatedTimestamp;
-        EditedTimestamp = MessageData.EditedTimestamp;
-        UserId = MessageData.UserId;
-        Message = MessageData.Message;
-        MessageId = MessageData.MessageId;
+        ConversationId = messageData.ConversationId;
+        CreatedTimestamp = messageData.CreatedTimestamp;
+        EditedTimestamp = messageData.EditedTimestamp;
+        UserId = messageData.UserId;
+        Message = messageData.Message;
+        MessageId = messageData.MessageId;
     }
 
     return *this;
 }
 
-bool MessageInfo::operator==(const MessageInfo& Other) const
+bool MessageInfo::operator==(const MessageInfo& other) const
 {
-    return ConversationId == Other.ConversationId && CreatedTimestamp == Other.CreatedTimestamp && EditedTimestamp == Other.EditedTimestamp
-        && UserId == Other.UserId && Message == Other.Message && MessageId == Other.MessageId;
+    return ConversationId == other.ConversationId && CreatedTimestamp == other.CreatedTimestamp && EditedTimestamp == other.EditedTimestamp
+        && UserId == other.UserId && Message == other.Message && MessageId == other.MessageId;
 }
 
-bool MessageInfo::operator!=(const MessageInfo& Other) const { return !(*this == Other); }
+bool MessageInfo::operator!=(const MessageInfo& other) const { return !(*this == other); }
 
-void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
+void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& messageAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+    m_msgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(messageAssetCollection);
 }
 
-csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return ConversationMessages; }
+csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return m_conversationMessages; }
 
-const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() const { return ConversationMessages; }
+const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() const { return m_conversationMessages; }
 
-uint64_t MessageCollectionResult::GetTotalCount() const { return ResultTotalCount; }
+uint64_t MessageCollectionResult::GetTotalCount() const { return m_resultTotalCount; }
 
-void MessageCollectionResult::SetTotalCount(uint64_t Value) { ResultTotalCount = Value; }
+void MessageCollectionResult::SetTotalCount(uint64_t value) { m_resultTotalCount = value; }
 
-void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections)
+void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& messagesAssetCollections)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    ConversationMessages = csp::common::Array<MessageInfo>(MessagesAssetCollections.Size());
+    m_conversationMessages = csp::common::Array<MessageInfo>(messagesAssetCollections.Size());
 
-    MessageInfo MsgInfo;
+    MessageInfo msgInfo;
 
-    for (size_t idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
+    for (size_t idx = 0; idx < messagesAssetCollections.Size(); ++idx)
     {
-        MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
-        ConversationMessages[idx] = MsgInfo;
+        msgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(messagesAssetCollections[idx]);
+        m_conversationMessages[idx] = msgInfo;
     }
 }
 
-MessageInfo& ConversationResult::GetConversationInfo() { return ConvoInfo; }
+MessageInfo& ConversationResult::GetConversationInfo() { return m_convoInfo; }
 
-const MessageInfo& ConversationResult::GetConversationInfo() const { return ConvoInfo; }
+const MessageInfo& ConversationResult::GetConversationInfo() const { return m_convoInfo; }
 
-void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
+void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& conversationAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+    m_convoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(conversationAssetCollection);
 }
 
-uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
+uint64_t NumberOfRepliesResult::GetCount() const { return m_count; }
 
-void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse) { ResultBase::OnResponse(apiResponse); }
 
-void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& AssetCollection)
+void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& assetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    Data = systems::ConversationSystemHelpers::GetAnnotationDataFromMessageAssetCollection(AssetCollection);
+    m_data = systems::ConversationSystemHelpers::GetAnnotationDataFromMessageAssetCollection(assetCollection);
 }
 
-const AnnotationData& AnnotationResult::GetAnnotationData() const { return Data; }
+const AnnotationData& AnnotationResult::GetAnnotationData() const { return m_data; }
 
-const csp::systems::Asset& AnnotationResult::GetAnnotationAsset() const { return AnnotationAsset; }
+const csp::systems::Asset& AnnotationResult::GetAnnotationAsset() const { return m_annotationAsset; }
 
-const csp::systems::Asset& AnnotationResult::GetAnnotationThumbnailAsset() const { return AnnotationThumbnailAsset; }
+const csp::systems::Asset& AnnotationResult::GetAnnotationThumbnailAsset() const { return m_annotationThumbnailAsset; }
 
-void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* apiResponse) { ResultBase::OnResponse(apiResponse); }
 
 const csp::common::Map<csp::common::String, csp::systems::Asset>& AnnotationThumbnailCollectionResult::GetAnnotationThumbnailAssetsMap() const
 {
-    return AnnotationThumbnailAssetsMap;
+    return m_annotationThumbnailAssetsMap;
 }
 
-uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return AnnotationThumbnailAssetsMap.Size(); }
+uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return m_annotationThumbnailAssetsMap.Size(); }
 
-void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& AssetResult)
+void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& assetResult)
 {
-    common::Array<systems::Asset> Assets = AssetResult.GetAssets();
+    common::Array<systems::Asset> assets = assetResult.GetAssets();
 
-    for (size_t i = 0; i < Assets.Size(); ++i)
+    for (size_t i = 0; i < assets.Size(); ++i)
     {
-        AnnotationThumbnailAssetsMap[Assets[i].AssetCollectionId] = Assets[i];
+        m_annotationThumbnailAssetsMap[assets[i].AssetCollectionId] = assets[i];
     }
 }
 } // namespace csp::multiplayer

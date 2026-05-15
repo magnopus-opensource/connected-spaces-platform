@@ -23,8 +23,8 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-VideoPlayerSpaceComponentScriptInterface::VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+VideoPlayerSpaceComponentScriptInterface::VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 

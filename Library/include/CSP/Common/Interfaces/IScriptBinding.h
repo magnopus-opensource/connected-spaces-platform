@@ -37,6 +37,6 @@ class IScriptBinding
 {
 public:
     virtual ~IScriptBinding() = default;
-    virtual void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) = 0;
+    virtual void Bind(int64_t contextId, csp::common::IJSScriptRunner& scriptRunner) = 0;
 };
 }

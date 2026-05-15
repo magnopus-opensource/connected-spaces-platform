@@ -45,8 +45,8 @@ public:
     /// @brief Currency type
     csp::common::String CurrencyCode;
 
-    bool operator==(const CurrencyInfo& Other) const;
-    bool operator!=(const CurrencyInfo& Other) const;
+    bool operator==(const CurrencyInfo& other) const;
+    bool operator!=(const CurrencyInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -71,8 +71,8 @@ public:
     /// @brief Height of the media.
     int32_t Height;
 
-    bool operator==(const ProductMediaInfo& Other) const;
-    bool operator!=(const ProductMediaInfo& Other) const;
+    bool operator==(const ProductMediaInfo& other) const;
+    bool operator!=(const ProductMediaInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -87,8 +87,8 @@ public:
     /// @brief Value of variant option.
     csp::common::String Value;
 
-    bool operator==(const VariantOptionInfo& Other) const;
-    bool operator!=(const VariantOptionInfo& Other) const;
+    bool operator==(const VariantOptionInfo& other) const;
+    bool operator!=(const VariantOptionInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -119,8 +119,8 @@ public:
     /// @brief Quantity of variant available
     int32_t AvailableStock;
 
-    bool operator==(const ProductVariantInfo& Other) const;
-    bool operator!=(const ProductVariantInfo& Other) const;
+    bool operator==(const ProductVariantInfo& other) const;
+    bool operator!=(const ProductVariantInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -145,8 +145,8 @@ public:
     /// @brief This array holds media for the product
     csp::common::Array<ProductMediaInfo> Media;
 
-    bool operator==(const ProductInfo& Other) const;
-    bool operator!=(const ProductInfo& Other) const;
+    bool operator==(const ProductInfo& other) const;
+    bool operator!=(const ProductInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -161,8 +161,8 @@ public:
     /// @brief Url of Checkout.
     csp::common::String CheckoutUrl;
 
-    bool operator==(const CheckoutInfo& Other) const;
-    bool operator!=(const CheckoutInfo& Other) const;
+    bool operator==(const CheckoutInfo& other) const;
+    bool operator!=(const CheckoutInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -184,8 +184,8 @@ public:
     /// @brief Quantity of the product in the cart.
     int Quantity;
 
-    bool operator==(const CartLine& Other) const;
-    bool operator!=(const CartLine& Other) const;
+    bool operator==(const CartLine& other) const;
+    bool operator!=(const CartLine& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -210,8 +210,8 @@ public:
     /// @brief Total quantity of all lines in the cart.
     int TotalQuantity;
 
-    bool operator==(const CartInfo& Other) const;
-    bool operator!=(const CartInfo& Other) const;
+    bool operator==(const CartInfo& other) const;
+    bool operator!=(const CartInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -239,8 +239,8 @@ public:
     /// @brief Is Ecommerce active.
     bool IsEcommerceActive;
 
-    bool operator==(const ShopifyStoreInfo& Other) const;
-    bool operator!=(const ShopifyStoreInfo& Other) const;
+    bool operator==(const ShopifyStoreInfo& other) const;
+    bool operator!=(const ShopifyStoreInfo& other) const;
 };
 
 /// @ingroup ECommerce System
@@ -265,9 +265,9 @@ public:
 private:
     ProductInfoResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    ProductInfo ProductInformation;
+    ProductInfo m_productInformation;
 };
 
 /// @ingroup ECommerce System
@@ -292,9 +292,9 @@ public:
 private:
     ProductInfoCollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<ProductInfo> Products;
+    csp::common::Array<ProductInfo> m_products;
 };
 
 /// @ingroup ECommerce System
@@ -316,15 +316,15 @@ public:
     /// @return ProductInfo : reference to the CheckoutInfo
     CheckoutInfo& GetCheckoutInfo();
 
-    CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     CheckoutInfoResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CheckoutInfo CheckoutInformation;
+    CheckoutInfo m_checkoutInformation;
 };
 
 /// @ingroup ECommerce System
@@ -348,15 +348,15 @@ public:
     /// @return ProductInfo : reference to the CartInfo
     CartInfo& GetCartInfo();
 
-    CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     CartInfoResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    CartInfo Cart;
+    CartInfo m_cart;
 };
 
 class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase
@@ -375,9 +375,9 @@ public:
 private:
     AddShopifyStoreResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    ShopifyStoreInfo Store;
+    ShopifyStoreInfo m_store;
 };
 
 class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase
@@ -400,9 +400,9 @@ public:
 private:
     GetShopifyStoresResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<ShopifyStoreInfo> Stores;
+    csp::common::Array<ShopifyStoreInfo> m_stores;
 };
 
 class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
@@ -419,23 +419,23 @@ public:
 private:
     ValidateShopifyStoreResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 };
 
-typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;
+typedef std::function<void(const ProductInfoResult& result)> ProductInfoResultCallback;
 
-typedef std::function<void(const ProductInfoCollectionResult& Result)> ProductInfoCollectionResultCallback;
+typedef std::function<void(const ProductInfoCollectionResult& result)> ProductInfoCollectionResultCallback;
 
-typedef std::function<void(const CheckoutInfoResult& Result)> CheckoutInfoResultCallback;
+typedef std::function<void(const CheckoutInfoResult& result)> CheckoutInfoResultCallback;
 
-typedef std::function<void(const CartInfoResult& Result)> CartInfoResultCallback;
+typedef std::function<void(const CartInfoResult& result)> CartInfoResultCallback;
 
-typedef std::function<void(const AddShopifyStoreResult& Result)> AddShopifyStoreResultCallback;
+typedef std::function<void(const AddShopifyStoreResult& result)> AddShopifyStoreResultCallback;
 
-typedef std::function<void(const AddShopifyStoreResult& Result)> SetECommerceActiveResultCallback;
+typedef std::function<void(const AddShopifyStoreResult& result)> SetECommerceActiveResultCallback;
 
-typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
+typedef std::function<void(const ValidateShopifyStoreResult& result)> ValidateShopifyStoreResultCallback;
 
-typedef std::function<void(const GetShopifyStoresResult& Result)> GetShopifyStoresResultCallback;
+typedef std::function<void(const GetShopifyStoresResult& result)> GetShopifyStoresResultCallback;
 
 } // namespace csp::systems

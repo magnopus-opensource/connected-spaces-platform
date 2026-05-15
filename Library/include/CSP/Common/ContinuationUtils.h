@@ -62,29 +62,29 @@ class ResultException : public ExpectedExceptionBase
 {
 public:
     template <typename T>
-    ResultException(const std::string& Message, const T& Result)
-        : ExpectedExceptionBase(Message)
-        , Result(std::make_shared<T>(Result))
+    ResultException(const std::string& message, const T& result)
+        : ExpectedExceptionBase(message)
+        , m_result(std::make_shared<T>(result))
     {
     }
 
     const ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
 
-    const csp::systems::ResultBase& GetResult() const { return *Result; }
+    const csp::systems::ResultBase& GetResult() const { return *m_result; }
 
 private:
     // Throwing an exception copy-initializes a temporary object, meaning unique_ptr will fail due to enforcing exclusive ownership.
-    std::shared_ptr<const csp::systems::ResultBase> Result;
+    std::shared_ptr<const csp::systems::ResultBase> m_result;
 };
 
-template <typename T> const inline T GetResultExceptionOrInvalid(const csp::common::continuations::ExpectedExceptionBase& Exception)
+template <typename T> const inline T GetResultExceptionOrInvalid(const csp::common::continuations::ExpectedExceptionBase& exception)
 {
     // Check that the exception base is of type result and cast to derived type.
-    if (Exception.GetExceptionType() == csp::common::continuations::ExceptionType::Result)
+    if (exception.GetExceptionType() == csp::common::continuations::ExceptionType::Result)
     {
-        const auto ResultException = static_cast<const csp::common::continuations::ResultException*>(&Exception);
-        const auto Result = ResultException->GetResult();
-        return T(Result.GetResultCode(), static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()), Result.GetFailureReason());
+        const auto resultException = static_cast<const csp::common::continuations::ResultException*>(&exception);
+        const auto result = resultException->GetResult();
+        return T(result.GetResultCode(), static_cast<csp::web::EResponseCodes>(result.GetHttpResultCode()), result.GetFailureReason());
     }
 
     return T(csp::systems::EResultCode::Failed, 0);
@@ -99,26 +99,26 @@ template <typename T> const inline T GetResultExceptionOrInvalid(const csp::comm
 class ErrorCodeException : public ExpectedExceptionBase
 {
 public:
-    explicit ErrorCodeException(csp::multiplayer::ErrorCode Code, const std::string& Message)
-        : ExpectedExceptionBase(Message)
-        , m_Code(Code)
+    explicit ErrorCodeException(csp::multiplayer::ErrorCode code, const std::string& message)
+        : ExpectedExceptionBase(message)
+        , m_code(code)
     {
     }
 
     const ExceptionType GetExceptionType() const override { return ExceptionType::Multiplayer; }
 
-    csp::multiplayer::ErrorCode Code() const noexcept { return m_Code; }
+    csp::multiplayer::ErrorCode Code() const noexcept { return m_code; }
 
 private:
-    csp::multiplayer::ErrorCode m_Code;
+    csp::multiplayer::ErrorCode m_code;
 };
 
 /*
  * Print an error with provided string, and throw a cancellation error.
  */
-inline void LogErrorAndCancelContinuation(std::string ErrorMsg, common::LogSystem& LogSystem)
+inline void LogErrorAndCancelContinuation(std::string errorMsg, common::LogSystem& logSystem)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMsg.c_str());
+    logSystem.LogMsg(csp::common::LogLevel::Error, errorMsg.c_str());
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
@@ -130,7 +130,7 @@ inline void LogErrorAndCancelContinuation(std::string ErrorMsg, common::LogSyste
  */
 template <typename ExpectedCallable, typename UnexpectedCallable>
 inline auto InvokeIfExceptionInChain(
-    csp::common::LogSystem& LogSystem, ExpectedCallable&& InvokeIfExpectedErrorCallable, UnexpectedCallable&& InvokeIfUnexpectedErrorCallable)
+    csp::common::LogSystem& logSystem, ExpectedCallable&& invokeIfExpectedErrorCallable, UnexpectedCallable&& invokeIfUnexpectedErrorCallable)
 {
     static_assert(std::is_invocable_v<ExpectedCallable, const ExpectedExceptionBase&>,
         "InvokeIfExpectedErrorCallable must be invocable with a single const ExpectedExceptionBase& arg, if you need other state, try passing a "
@@ -140,40 +140,40 @@ inline auto InvokeIfExceptionInChain(
         "InvokeIfUnexpectedErrorCallable must be invocable with a single const std::exception& arg, if you need other state, try passing a capturing "
         "lambda.");
 
-    return [InvokeIfExpectedErrorCallable = std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable),
-               InvokeIfUnexpectedErrorCallable = std::forward<UnexpectedCallable>(InvokeIfUnexpectedErrorCallable),
-               &LogSystem](async::task<void> ExceptionTask)
+    return [invokeIfExpectedErrorCallable = std::forward<ExpectedCallable>(invokeIfExpectedErrorCallable),
+               invokeIfUnexpectedErrorCallable = std::forward<UnexpectedCallable>(invokeIfUnexpectedErrorCallable),
+               &logSystem](async::task<void> exceptionTask)
     {
         try
         {
-            ExceptionTask.get();
+            exceptionTask.get();
         }
         catch (const csp::common::InvalidInterfaceUseError& exception)
         {
             // Keep specific custom catches here for other types.
-            LogSystem.LogMsg(LogLevel::Verbose, "Error, CSP expects derived IRealtimeEngine type, but has received a base instantiation.");
-            InvokeIfUnexpectedErrorCallable(std::runtime_error(exception.msg));
+            logSystem.LogMsg(LogLevel::Verbose, "Error, CSP expects derived IRealtimeEngine type, but has received a base instantiation.");
+            invokeIfUnexpectedErrorCallable(std::runtime_error(exception.msg));
         }
-        catch (const ExpectedExceptionBase& ExpectedException)
+        catch (const ExpectedExceptionBase& expectedException)
         {
-            LogSystem.LogMsg(LogLevel::Verbose, "Caught expected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
-            LogSystem.LogMsg(LogLevel::Verbose, ExpectedException.what());
-            InvokeIfExpectedErrorCallable(ExpectedException);
+            logSystem.LogMsg(LogLevel::Verbose, "Caught expected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            logSystem.LogMsg(LogLevel::Verbose, expectedException.what());
+            invokeIfExpectedErrorCallable(expectedException);
         }
         catch (const std::exception& exception)
         {
             // Catches all other standard exceptions (the generic fallback).
-            LogSystem.LogMsg(LogLevel::Fatal, "Caught unexpected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
-            InvokeIfUnexpectedErrorCallable(exception);
+            logSystem.LogMsg(LogLevel::Fatal, "Caught unexpected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            invokeIfUnexpectedErrorCallable(exception);
         }
     };
 }
 
 template <typename ExpectedCallable>
-inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, ExpectedCallable&& InvokeIfExpectedErrorCallable)
+inline auto InvokeIfExceptionInChain(csp::common::LogSystem& logSystem, ExpectedCallable&& invokeIfExpectedErrorCallable)
 {
     return InvokeIfExceptionInChain(
-        LogSystem, std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) {});
+        logSystem, std::forward<ExpectedCallable>(invokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) {});
 }
 
 /*
@@ -188,21 +188,21 @@ inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, Expected
  * abstraction, but pragmatically necessary to do the modularization.
  */
 template <typename ErrorResultT>
-inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem)
+inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::string successMsg, ErrorResultT errorResult, csp::common::LogSystem& logSystem)
 {
-    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem](
-               const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
+    return [successMsg = std::move(successMsg), errorResult = std::move(errorResult), &logSystem](
+               const std::optional<csp::multiplayer::ErrorCode>& errorCode)
     {
-        if (ErrorCode.has_value())
+        if (errorCode.has_value())
         {
             // Error Case. We have an error message, abort
-            std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem);
+            std::string errorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(errorCode.value());
+            csp::common::continuations::LogErrorAndCancelContinuation(std::move(errorMsg), logSystem);
         }
         else
         {
             // Success Case
-            LogSystem.LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
+            logSystem.LogMsg(csp::common::LogLevel::Log, successMsg.c_str());
         }
     };
 }

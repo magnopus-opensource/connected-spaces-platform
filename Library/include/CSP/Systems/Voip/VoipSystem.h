@@ -39,7 +39,7 @@ class CSP_API VoipSystem
 public:
     /// @brief Mutes a local user. Not implemented.
     /// @param IsMuted
-    void MuteLocalUser(bool IsMuted);
+    void MuteLocalUser(bool isMuted);
     /// @brief Checks if the user is muted. Not implemented.
     /// @return Is the user muted.
     bool IsLocalUserMuted() const;

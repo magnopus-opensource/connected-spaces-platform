@@ -36,18 +36,18 @@ class ScriptContext
     friend class ScriptSystem;
 
 public:
-    ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId);
+    ScriptContext(ScriptSystem* inScriptSystem, qjs::Runtime* runtime, uint64_t inContextId);
     ~ScriptContext();
 
-    void AddModule(const csp::common::String& ModuleName);
-    ScriptModule* GetModule(const csp::common::String& ModuleName);
+    void AddModule(const csp::common::String& moduleName);
+    ScriptModule* GetModule(const csp::common::String& moduleName);
 
     uint64_t GetId() const;
 
-    bool ExistsInContext(const csp::common::String& ObjectName);
+    bool ExistsInContext(const csp::common::String& objectName);
 
     size_t GetNumImportedModules() const;
-    const char* GetImportedModule(size_t Index) const;
+    const char* GetImportedModule(size_t index) const;
 
     void Reset();
 
@@ -55,18 +55,18 @@ private:
     void Initialise();
     void Shutdown();
 
-    void AddImport(const csp::common::String& Url);
+    void AddImport(const csp::common::String& url);
 
     using ModuleMap = std::map<std::string, ScriptModule*>;
     using ImportedModules = std::vector<std::string>;
 
-    uint64_t ContextId;
-    ScriptSystem* TheScriptSystem;
+    uint64_t m_contextId;
+    ScriptSystem* m_theScriptSystem;
 
-    qjs::Context* Context;
-    qjs::Runtime* Runtime;
-    ModuleMap Modules;
-    ImportedModules Imports;
+    qjs::Context* m_context;
+    qjs::Runtime* m_runtime;
+    ModuleMap m_modules;
+    ImportedModules m_imports;
 };
 
 } // namespace csp::systems

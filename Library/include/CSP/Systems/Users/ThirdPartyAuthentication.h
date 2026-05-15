@@ -74,11 +74,11 @@ public:
     [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    ThirdPartyProviderDetails ProviderDetails;
+    ThirdPartyProviderDetails m_providerDetails;
 };
 
-typedef std::function<void(const ProviderDetailsResult& Result)> ProviderDetailsResultCallback;
+typedef std::function<void(const ProviderDetailsResult& result)> ProviderDetailsResultCallback;
 
 }; // namespace csp::systems

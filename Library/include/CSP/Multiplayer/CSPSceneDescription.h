@@ -32,7 +32,7 @@ public:
     /// @warning The expression of this interface as a list is a wrapper generator workaround, so
     /// whilst you may split your string into many elements, it is not advisable. You should prefer
     /// inserting your entire string as the first, single, and only element of the list.
-    CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson);
+    CSPSceneDescription(const csp::common::List<csp::common::String>& sceneDescriptionJson);
 
     CSPSceneDescription() { }
 
@@ -43,10 +43,10 @@ public:
     /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
     CSP_NO_EXPORT csp::common::Array<csp::multiplayer::SpaceEntity*> CreateEntities(
-        csp::common::IRealtimeEngine& RealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const;
+        csp::common::IRealtimeEngine& realtimeEngine, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner) const;
 
 private:
-    csp::common::String SceneDescriptionJson;
+    csp::common::String m_sceneDescriptionJson;
 };
 
 }

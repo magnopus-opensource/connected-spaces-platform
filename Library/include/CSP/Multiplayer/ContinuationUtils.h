@@ -38,9 +38,9 @@ auto UnwrapSignalRResultOrThrow()
     -> std::conditional_t<ForwardResult, std::function<signalr::value(std::tuple<const signalr::value&, std::exception_ptr>)>,
         std::function<void(std::tuple<const signalr::value&, std::exception_ptr>)>>
 {
-    return [](std::tuple<const signalr::value&, std::exception_ptr> Results)
+    return [](std::tuple<const signalr::value&, std::exception_ptr> results)
     {
-        auto [Result, Exception] = Results;
+        auto [Result, Exception] = results;
 
         if (Exception != nullptr)
         {

@@ -77,8 +77,8 @@ public:
     /// @param Keys csp::common::Optional<csp::common::Array<csp::common::String>> : Array of setting keys to retrieve. If not provided, all settings
     /// for the context are returned.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys, ApplicationSettingsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSettingsByContext(const csp::common::String& applicationName, const csp::common::String& context,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& keys, ApplicationSettingsResultCallback callback);
 
     /// @brief Asynchronously retrieves application settings for a specific context without requiring authentication.
     /// @param Tenant csp::common::String : The tenant identifier under which the application and settings are scoped.
@@ -87,13 +87,13 @@ public:
     /// @param Keys csp::common::Optional<csp::common::Array<csp::common::String>> : Array of setting keys to retrieve. If not provided, all settings
     /// for the context are returned.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void GetSettingsByContextAnonymous(const csp::common::String& Tenant, const csp::common::String& ApplicationName,
-        const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys,
-        ApplicationSettingsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetSettingsByContextAnonymous(const csp::common::String& tenant, const csp::common::String& applicationName,
+        const csp::common::String& context, const csp::common::Optional<csp::common::Array<csp::common::String>>& keys,
+        ApplicationSettingsResultCallback callback);
 
 private:
     ApplicationSettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT ApplicationSettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ApplicationSettingsSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~ApplicationSettingsSystem();
 
     /// @brief Asynchronously creates or updates application settings for a specific context.
@@ -103,17 +103,17 @@ private:
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
     CSP_NO_EXPORT void CreateSettingsByContext(
-        const csp::common::ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
+        const csp::common::ApplicationSettings& applicationSettings, ApplicationSettingsResultCallback callback);
 
     // Application Settings Continuations
-    async::task<ApplicationSettingsResult> CreateSettingsByContext(const csp::common::ApplicationSettings& ApplicationSettings);
-    async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
-    async::task<ApplicationSettingsResult> GetSettingsByContextAnonymous(const csp::common::String& Tenant,
-        const csp::common::String& ApplicationName, const csp::common::String& Context,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
+    async::task<ApplicationSettingsResult> CreateSettingsByContext(const csp::common::ApplicationSettings& applicationSettings);
+    async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& applicationName, const csp::common::String& context,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& keys);
+    async::task<ApplicationSettingsResult> GetSettingsByContextAnonymous(const csp::common::String& tenant,
+        const csp::common::String& applicationName, const csp::common::String& context,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& keys);
 
-    csp::services::ApiBase* ApplicationSettingsAPI;
+    csp::services::ApiBase* m_applicationSettingsApi;
 };
 
 } // namespace csp::systems

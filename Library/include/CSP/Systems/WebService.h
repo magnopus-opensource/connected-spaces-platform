@@ -48,11 +48,11 @@ public:
 
     /// @brief Called when progress has been updated.
     /// @param ApiResponse const ApiResponseBase* : Response received from the request
-    CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);
+    CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* apiResponse);
 
     /// @brief Called when a response has been received.
     /// @param ApiResponse const ApiResponseBase* : Response received from the request
-    CSP_NO_EXPORT virtual void OnResponse(const services::ApiResponseBase* ApiResponse);
+    CSP_NO_EXPORT virtual void OnResponse(const services::ApiResponseBase* apiResponse);
 
     /// @brief Status of this response.
     /// @return EResultCode
@@ -78,22 +78,22 @@ public:
     ERequestFailureReason GetFailureReason() const;
 
 protected:
-    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
-    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
+    ResultBase(csp::systems::EResultCode resCode, uint16_t httpResCode);
+    ResultBase(csp::systems::EResultCode resCode, uint16_t httpResCode, csp::systems::ERequestFailureReason reason);
 
-    void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+    void SetResult(csp::systems::EResultCode resCode, uint16_t httpResCode);
 
-    EResultCode Result = EResultCode::Init;
-    uint16_t HttpResponseCode = 0;
+    EResultCode m_result = EResultCode::Init;
+    uint16_t m_httpResponseCode = 0;
 
-    float RequestProgress = 0.0f;
-    float ResponseProgress = 0.0f;
+    float m_requestProgress = 0.0f;
+    float m_responseProgress = 0.0f;
 
-    csp::common::String ResponseBody;
-    ERequestFailureReason FailureReason;
+    csp::common::String m_responseBody;
+    ERequestFailureReason m_failureReason;
 
 private:
-    ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
+    ERequestFailureReason ParseErrorCode(const csp::common::String& value);
 };
 
 } // namespace csp::systems

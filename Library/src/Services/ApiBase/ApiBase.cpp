@@ -18,46 +18,46 @@
 namespace csp::services
 {
 
-ApiResponseBase::ApiResponseBase(DtoBase* InDto)
-    : Dto(InDto)
+ApiResponseBase::ApiResponseBase(DtoBase* inDto)
+    : m_dto(inDto)
 {
 }
 
-EResponseCode ApiResponseBase::GetResponseCode() const { return ResponseCode; }
+EResponseCode ApiResponseBase::GetResponseCode() const { return m_responseCode; }
 
-DtoBase* ApiResponseBase::GetDto() const { return Dto; }
+DtoBase* ApiResponseBase::GetDto() const { return m_dto; }
 
-void ApiResponseBase::SetResponse(csp::web::HttpResponse* InResponse) { Response = InResponse; }
+void ApiResponseBase::SetResponse(csp::web::HttpResponse* inResponse) { m_response = inResponse; }
 
-csp::web::HttpResponse* ApiResponseBase::GetMutableResponse() { return Response; }
+csp::web::HttpResponse* ApiResponseBase::GetMutableResponse() { return m_response; }
 
-const csp::web::HttpResponse* ApiResponseBase::GetResponse() const { return Response; }
+const csp::web::HttpResponse* ApiResponseBase::GetResponse() const { return m_response; }
 
-void ApiResponseBase::SetResponseCode(csp::web::EResponseCodes InResponseCode, csp::web::EResponseCodes InValidResponseCode)
+void ApiResponseBase::SetResponseCode(csp::web::EResponseCodes inResponseCode, csp::web::EResponseCodes inValidResponseCode)
 {
-    bool IsValidCode = IsValidResponseCode(static_cast<int>(InResponseCode), static_cast<int>(InValidResponseCode));
+    bool isValidCode = IsValidResponseCode(static_cast<int>(inResponseCode), static_cast<int>(inValidResponseCode));
 
-    if (IsValidCode)
+    if (isValidCode)
     {
-        ResponseCode = EResponseCode::ResponseSuccess;
+        m_responseCode = EResponseCode::ResponseSuccess;
     }
     else
     {
-        ResponseCode = EResponseCode::ResponseFailed;
+        m_responseCode = EResponseCode::ResponseFailed;
     }
-    HttpResponseCode = InResponseCode;
+    m_httpResponseCode = inResponseCode;
 }
 
-bool ApiResponseBase::IsValidResponseCode(int ResponseCodeA, int ResponseCodeB)
+bool ApiResponseBase::IsValidResponseCode(int responseCodeA, int responseCodeB)
 {
-    auto ReturnFirstDigit = [](int x)
+    auto returnFirstDigit = [](int x)
     {
         while (x >= 10)
             x /= 10;
         return x;
     };
 
-    return ReturnFirstDigit(ResponseCodeA) == ReturnFirstDigit(ResponseCodeB);
+    return returnFirstDigit(responseCodeA) == returnFirstDigit(responseCodeB);
 }
 
 ApiResponseHandlerBase::ApiResponseHandlerBase() { }

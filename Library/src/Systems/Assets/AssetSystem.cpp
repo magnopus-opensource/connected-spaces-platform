@@ -52,9 +52,9 @@ constexpr const char* MATERIAL_FILE_NAME_PREFIX = "ASSET_MATERIAL_FILE_";
 
 constexpr const char* MATERIAL_SHADERTYPE_METADATA_KEY = "ShaderType";
 
-String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCollectionType)
+String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType assetCollectionType)
 {
-    switch (AssetCollectionType)
+    switch (assetCollectionType)
     {
     case systems::EAssetCollectionType::DEFAULT:
         return "Default";
@@ -74,9 +74,9 @@ String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCol
     }
 }
 
-String ConvertAssetTypeToString(systems::EAssetType AssetType)
+String ConvertAssetTypeToString(systems::EAssetType assetType)
 {
-    switch (AssetType)
+    switch (assetType)
     {
     case systems::EAssetType::IMAGE:
         return "Image";
@@ -112,119 +112,119 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
     }
 }
 
-std::optional<String> ConvertShaderTypeToString(systems::EShaderType ShaderType)
+std::optional<String> ConvertShaderTypeToString(systems::EShaderType shaderType)
 {
-    std::optional<String> Result = {};
+    std::optional<String> result = {};
 
-    switch (ShaderType)
+    switch (shaderType)
     {
     case systems::EShaderType::Standard:
     {
-        Result = "Standard";
+        result = "Standard";
         break;
     }
     case systems::EShaderType::AlphaVideo:
     {
-        Result = "AlphaVideo";
+        result = "AlphaVideo";
         break;
     }
     default:
     {
         // If the shader type is nonsense
-        Result = {};
+        result = {};
         break;
     }
     }
 
-    return Result;
+    return result;
 }
 
-std::optional<systems::EShaderType> ConvertStringToShaderType(const csp::common::String& ShaderType)
+std::optional<systems::EShaderType> ConvertStringToShaderType(const csp::common::String& shaderType)
 {
-    std::optional<systems::EShaderType> Result = {};
+    std::optional<systems::EShaderType> result = {};
 
-    if (ShaderType == "AlphaVideo")
+    if (shaderType == "AlphaVideo")
     {
-        Result = systems::EShaderType::AlphaVideo;
+        result = systems::EShaderType::AlphaVideo;
     }
-    else if (ShaderType == "Standard")
+    else if (shaderType == "Standard")
     {
-        Result = systems::EShaderType::Standard;
+        result = systems::EShaderType::Standard;
     }
     else
     {
         // If there's nonsense data in the shader type.
-        Result = {};
+        result = {};
     }
 
-    return Result;
+    return result;
 }
 
-std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& SpaceId, const Optional<String>& ParentAssetCollectionId,
-    const String& AssetCollectionName, const Optional<Map<String, String>>& Metadata, systems::EAssetCollectionType Type,
-    const Optional<Array<String>>& Tags)
+std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& spaceId, const Optional<String>& parentAssetCollectionId,
+    const String& assetCollectionName, const Optional<Map<String, String>>& metadata, systems::EAssetCollectionType type,
+    const Optional<Array<String>>& tags)
 {
-    auto PrototypeInfo = std::make_shared<chs::PrototypeDto>();
-    PrototypeInfo->SetName(AssetCollectionName);
+    auto prototypeInfo = std::make_shared<chs::PrototypeDto>();
+    prototypeInfo->SetName(assetCollectionName);
 
-    PrototypeInfo->SetType(ConvertAssetCollectionTypeToString(Type));
+    prototypeInfo->SetType(ConvertAssetCollectionTypeToString(type));
 
-    if (SpaceId.HasValue())
+    if (spaceId.HasValue())
     {
-        const std::vector<String> GroupIds = { *SpaceId };
-        PrototypeInfo->SetGroupIds(GroupIds);
+        const std::vector<String> groupIds = { *spaceId };
+        prototypeInfo->SetGroupIds(groupIds);
     }
 
-    if (ParentAssetCollectionId.HasValue())
+    if (parentAssetCollectionId.HasValue())
     {
-        PrototypeInfo->SetParentId(*ParentAssetCollectionId);
+        prototypeInfo->SetParentId(*parentAssetCollectionId);
     }
 
-    if (Metadata.HasValue())
+    if (metadata.HasValue())
     {
-        std::map<String, String> DTOMetadata;
+        std::map<String, String> dtoMetadata;
 
-        auto* Keys = Metadata->Keys();
+        auto* keys = metadata->Keys();
 
-        for (size_t idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < keys->Size(); ++idx)
         {
-            auto Key = Keys->operator[](idx);
-            auto Value = Metadata->operator[](Key);
-            DTOMetadata.insert(std::pair<String, String>(Key, Value));
+            auto key = keys->operator[](idx);
+            auto value = metadata->operator[](key);
+            dtoMetadata.insert(std::pair<String, String>(key, value));
         }
 
-        PrototypeInfo->SetMetadata(DTOMetadata);
+        prototypeInfo->SetMetadata(dtoMetadata);
     }
 
-    if (Tags.HasValue())
+    if (tags.HasValue())
     {
-        std::vector<String> TagsVector;
-        TagsVector.reserve(Tags->Size());
+        std::vector<String> tagsVector;
+        tagsVector.reserve(tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        for (size_t idx = 0; idx < tags->Size(); ++idx)
         {
-            TagsVector.push_back((*Tags)[idx]);
+            tagsVector.push_back((*tags)[idx]);
         }
 
-        PrototypeInfo->SetTags(TagsVector);
+        prototypeInfo->SetTags(tagsVector);
     }
 
-    return PrototypeInfo;
+    return prototypeInfo;
 }
 
-csp::common::String CreateUniqueMaterialAssetCollectionName(const csp::common::String& Name, const csp::common::String& SpaceId)
+csp::common::String CreateUniqueMaterialAssetCollectionName(const csp::common::String& name, const csp::common::String& spaceId)
 {
-    return MATERIAL_ASSET_COLLECTION_NAME_PREFIX + SpaceId + "_" + Name;
+    return MATERIAL_ASSET_COLLECTION_NAME_PREFIX + spaceId + "_" + name;
 }
 
-csp::common::String CreateUniqueMaterialAssetName(const csp::common::String& Name, const csp::common::String& SpaceId)
+csp::common::String CreateUniqueMaterialAssetName(const csp::common::String& name, const csp::common::String& spaceId)
 {
-    return MATERIAL_ASSET_NAME_PREFIX + SpaceId + "_" + Name;
+    return MATERIAL_ASSET_NAME_PREFIX + spaceId + "_" + name;
 }
 
-csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name, const csp::common::String& SpaceId)
+csp::common::String CreateUniqueMaterialFileName(const csp::common::String& name, const csp::common::String& spaceId)
 {
-    return MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name + ".json";
+    return MATERIAL_FILE_NAME_PREFIX + spaceId + "_" + name + ".json";
 }
 
 } // namespace
@@ -232,23 +232,23 @@ csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name
 namespace csp::systems
 {
 
-Material* InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const csp::common::String& Name,
-    const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
+Material* InstantiateMaterialOfType(csp::systems::EShaderType shaderType, const csp::common::String& name,
+    const csp::common::String& assetCollectionId, const csp::common::String& assetId)
 {
-    Material* NewMaterial = nullptr;
+    Material* newMaterial = nullptr;
 
-    switch (ShaderType)
+    switch (shaderType)
     {
     case EShaderType::Standard:
     {
-        GLTFMaterial* NewGLTFMaterial = new GLTFMaterial(Name, AssetCollectionId, AssetId);
-        NewMaterial = static_cast<Material*>(NewGLTFMaterial);
+        GLTFMaterial* newGltfMaterial = new GLTFMaterial(name, assetCollectionId, assetId);
+        newMaterial = static_cast<Material*>(newGltfMaterial);
         break;
     }
     case EShaderType::AlphaVideo:
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = new AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
-        NewMaterial = static_cast<Material*>(NewAlphaVideoMaterial);
+        AlphaVideoMaterial* newAlphaVideoMaterial = new AlphaVideoMaterial(name, assetCollectionId, assetId);
+        newMaterial = static_cast<Material*>(newAlphaVideoMaterial);
         break;
     }
     default:
@@ -258,33 +258,33 @@ Material* InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const 
     }
     }
 
-    return NewMaterial;
+    return newMaterial;
 }
 
 std::optional<Material*> DeserializeIntoMaterialOfType(
-    const char* MaterialData, csp::systems::EShaderType ShaderType, Material* MaterialToDeserialize)
+    const char* materialData, csp::systems::EShaderType shaderType, Material* materialToDeserialize)
 {
-    std::optional<Material*> Result = {};
+    std::optional<Material*> result = {};
 
-    switch (ShaderType)
+    switch (shaderType)
     {
     case csp::systems::EShaderType::Standard:
     {
-        GLTFMaterial* NewGLTFMaterial = static_cast<GLTFMaterial*>(MaterialToDeserialize);
-        const bool Success = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewGLTFMaterial);
-        if (Success)
+        GLTFMaterial* newGltfMaterial = static_cast<GLTFMaterial*>(materialToDeserialize);
+        const bool success = csp::json::JsonDeserializer::Deserialize(materialData, *newGltfMaterial);
+        if (success)
         {
-            Result = MaterialToDeserialize;
+            result = materialToDeserialize;
         }
         break;
     }
     case csp::systems::EShaderType::AlphaVideo:
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(MaterialToDeserialize);
-        const bool Success = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
-        if (Success)
+        AlphaVideoMaterial* newAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(materialToDeserialize);
+        const bool success = csp::json::JsonDeserializer::Deserialize(materialData, *newAlphaVideoMaterial);
+        if (success)
         {
-            Result = MaterialToDeserialize;
+            result = materialToDeserialize;
         }
         break;
     }
@@ -295,23 +295,23 @@ std::optional<Material*> DeserializeIntoMaterialOfType(
     }
     }
 
-    return Result;
+    return result;
 }
 
-void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, csp::common::String& OutMaterialJson)
+void SerializeMaterialOfType(EShaderType shaderType, const Material* material, csp::common::String& outMaterialJson)
 {
-    switch (ShaderType)
+    switch (shaderType)
     {
     case csp::systems::EShaderType::Standard:
     {
-        const GLTFMaterial* NewGLTFMaterial = static_cast<const GLTFMaterial*>(Material);
-        OutMaterialJson = json::JsonSerializer::Serialize(*NewGLTFMaterial);
+        const GLTFMaterial* newGltfMaterial = static_cast<const GLTFMaterial*>(material);
+        outMaterialJson = json::JsonSerializer::Serialize(*newGltfMaterial);
         break;
     }
     case csp::systems::EShaderType::AlphaVideo:
     {
-        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(Material);
-        OutMaterialJson = json::JsonSerializer::Serialize(*NewAlphaVideoMaterial);
+        const AlphaVideoMaterial* newAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(material);
+        outMaterialJson = json::JsonSerializer::Serialize(*newAlphaVideoMaterial);
         break;
     }
     default:
@@ -322,347 +322,347 @@ void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, c
     }
 }
 
-std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::systems::AssetCollection& AssetCollection)
+std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::systems::AssetCollection& assetCollection)
 {
-    std::optional<EShaderType> Result = {};
+    std::optional<EShaderType> result = {};
 
-    const auto Metadata = AssetCollection.GetMetadataImmutable();
-    if (Metadata.HasKey(MATERIAL_SHADERTYPE_METADATA_KEY))
+    const auto metadata = assetCollection.GetMetadataImmutable();
+    if (metadata.HasKey(MATERIAL_SHADERTYPE_METADATA_KEY))
     {
-        Result = ConvertStringToShaderType(Metadata.operator[](MATERIAL_SHADERTYPE_METADATA_KEY));
+        result = ConvertStringToShaderType(metadata.operator[](MATERIAL_SHADERTYPE_METADATA_KEY));
     }
     else
     {
         // Please note: Older Spaces built when only GLTF materials were supported will not have stored
         // shader type metadata in the Material Asset Collection. We therefore default to a standard shader type.
         CSP_LOG_MSG(LogLevel::Verbose, "Shader type metadata missing from Material Asset Collection, defaulting to Standard shader type.");
-        Result = EShaderType::Standard;
+        result = EShaderType::Standard;
     }
 
-    return Result;
+    return result;
 }
 
 AssetSystem::AssetSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , PrototypeAPI(nullptr)
-    , AssetDetailAPI(nullptr)
-    , FileManager(nullptr)
+    , m_prototypeApi(nullptr)
+    , m_assetDetailApi(nullptr)
+    , m_fileManager(nullptr)
 {
 }
 
 AssetSystem::AssetSystem(
-    web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem)
-    : SystemBase(WebClient, &EventBus, &LogSystem)
+    web::WebClient* webClient, multiplayer::NetworkEventBus& eventBus, const csp::common::IAuthContext& inAuthContext, common::LogSystem& logSystem)
+    : SystemBase(webClient, &eventBus, &logSystem)
 {
-    PrototypeAPI = new chs::PrototypeApi(WebClient);
-    AssetDetailAPI = new chs::AssetDetailApi(WebClient);
+    m_prototypeApi = new chs::PrototypeApi(webClient);
+    m_assetDetailApi = new chs::AssetDetailApi(webClient);
 
-    FileManager = new web::RemoteFileManager(WebClient, InAuthContext);
+    m_fileManager = new web::RemoteFileManager(webClient, inAuthContext);
 
     RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
 {
-    delete (FileManager);
+    delete (m_fileManager);
 
-    delete (AssetDetailAPI);
-    delete (PrototypeAPI);
+    delete (m_assetDetailApi);
+    delete (m_prototypeApi);
 }
 
-void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback)
+void AssetSystem::DeleteAssetCollectionById(const csp::common::String& assetCollectionId, NullResultCallback callback)
 {
-    const String PrototypeId = AssetCollectionId;
+    const String prototypeId = assetCollectionId;
 
-    if (PrototypeId.IsEmpty())
+    if (prototypeId.IsEmpty())
     {
         CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
 
         return;
     }
 
-    services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        Callback, nullptr, web::EResponseCodes::ResponseNoContent);
+    services::ResponseHandlerPtr responseHandler = m_prototypeApi->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
+        callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete({ PrototypeId }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdDelete({ prototypeId }, responseHandler);
 }
 
-void AssetSystem::DeleteAssetById(const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback)
+void AssetSystem::DeleteAssetById(const csp::common::String& asseCollectiontId, const csp::common::String& assetId, NullResultCallback callback)
 {
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        Callback, nullptr, web::EResponseCodes::ResponseNoContent);
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
+        callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->prototypesPrototypeIdAsset_detailsAssetDetailIdDelete({ AsseCollectiontId, AssetId }, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
+        ->prototypesPrototypeIdAsset_detailsAssetDetailIdDelete({ asseCollectiontId, assetId }, responseHandler);
 }
 
-void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId, const Optional<String>& ParentAssetCollectionId,
-    const String& AssetCollectionName, const Optional<Map<String, String>>& Metadata, EAssetCollectionType Type, const Optional<Array<String>>& Tags,
-    AssetCollectionResultCallback Callback)
+void AssetSystem::CreateAssetCollection(const Optional<String>& inSpaceId, const Optional<String>& parentAssetCollectionId,
+    const String& assetCollectionName, const Optional<Map<String, String>>& metadata, EAssetCollectionType type, const Optional<Array<String>>& tags,
+    AssetCollectionResultCallback callback)
 {
-    Optional<String> SpaceId;
+    Optional<String> spaceId;
 
-    if (InSpaceId.HasValue())
+    if (inSpaceId.HasValue())
     {
-        SpaceId = *InSpaceId;
+        spaceId = *inSpaceId;
     }
 
-    const auto PrototypeInfo = CreatePrototypeDto(SpaceId, ParentAssetCollectionId, AssetCollectionName, Metadata, Type, Tags);
+    const auto prototypeInfo = CreatePrototypeDto(spaceId, parentAssetCollectionId, assetCollectionName, metadata, type, tags);
 
-    const services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            Callback, nullptr, web::EResponseCodes::ResponseCreated);
+    const services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
+            callback, nullptr, web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesPost({ PrototypeInfo }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesPost({ prototypeInfo }, responseHandler);
 }
 
-async::task<AssetCollectionResult> AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common::String>& InSpaceId,
-    const csp::common::Optional<csp::common::String>& ParentAssetCollectionId, const csp::common::String& AssetCollectionName,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, const EAssetCollectionType Type,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
+async::task<AssetCollectionResult> AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common::String>& inSpaceId,
+    const csp::common::Optional<csp::common::String>& parentAssetCollectionId, const csp::common::String& assetCollectionName,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& metadata, const EAssetCollectionType type,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags)
 {
-    async::event_task<AssetCollectionResult> OnCompleteEvent;
-    async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetCollectionResult> onCompleteEvent;
+    async::task<AssetCollectionResult> onCompleteTask = onCompleteEvent.get_task();
 
-    Optional<String> SpaceId;
+    Optional<String> spaceId;
 
-    if (InSpaceId.HasValue())
+    if (inSpaceId.HasValue())
     {
-        SpaceId = *InSpaceId;
+        spaceId = *inSpaceId;
     }
 
-    const auto PrototypeInfo = CreatePrototypeDto(SpaceId, ParentAssetCollectionId, AssetCollectionName, Metadata, Type, Tags);
+    const auto prototypeInfo = CreatePrototypeDto(spaceId, parentAssetCollectionId, assetCollectionName, metadata, type, tags);
 
-    const services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
+    const services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(onCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesPost({ PrototypeInfo }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesPost({ prototypeInfo }, responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback)
+void AssetSystem::DeleteAssetCollection(const AssetCollection& assetCollection, NullResultCallback callback)
 {
-    const String PrototypeId = AssetCollection.Id;
+    const String prototypeId = assetCollection.Id;
 
-    if (PrototypeId.IsEmpty())
+    if (prototypeId.IsEmpty())
     {
         CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
 
         return;
     }
 
-    services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        Callback, nullptr, web::EResponseCodes::ResponseNoContent);
+    services::ResponseHandlerPtr responseHandler = m_prototypeApi->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
+        callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete({ PrototypeId }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdDelete({ prototypeId }, responseHandler);
 }
 
-async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection)
+async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection& assetCollection)
 {
-    async::event_task<NullResult> OnCompleteEvent;
-    async::task<NullResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<NullResult> onCompleteEvent;
+    async::task<NullResult> onCompleteTask = onCompleteEvent.get_task();
 
-    const String PrototypeId = AssetCollection.Id;
+    const String prototypeId = assetCollection.Id;
 
-    if (PrototypeId.IsEmpty())
+    if (prototypeId.IsEmpty())
     {
-        OnCompleteEvent.set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
+        onCompleteEvent.set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
             "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.", MakeInvalid<NullResult>())));
 
-        return OnCompleteTask;
+        return onCompleteTask;
     }
 
-    services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        [](const NullResult& /*s*/) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler = m_prototypeApi->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
+        [](const NullResult& /*s*/) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(onCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete({ PrototypeId }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdDelete({ prototypeId }, responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& SourceAssetCollectionIDs, NullResultCallback Callback)
+void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& sourceAssetCollectionIDs, NullResultCallback callback)
 {
-    if (SourceAssetCollectionIDs.Size() == 0)
+    if (sourceAssetCollectionIDs.Size() == 0)
     {
         CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to delete.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
         return;
     }
 
-    std::vector<csp::common::String> AssetCollectionIds;
+    std::vector<csp::common::String> assetCollectionIds;
 
-    for (size_t i = 0; i < SourceAssetCollectionIDs.Size(); ++i)
+    for (size_t i = 0; i < sourceAssetCollectionIDs.Size(); ++i)
     {
-        AssetCollectionIds.emplace_back(SourceAssetCollectionIDs[i].Id);
+        assetCollectionIds.emplace_back(sourceAssetCollectionIDs[i].Id);
     }
 
-    if (AssetCollectionIds.size() == 0)
+    if (assetCollectionIds.size() == 0)
     {
         CSP_LOG_MSG(LogLevel::Error, "No asset collections could be converted to to required format to delete.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>());
         return;
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesDelete({ AssetCollectionIds }, ResponseHandler, csp::common::CancellationToken::Dummy());
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesDelete({ assetCollectionIds }, responseHandler, csp::common::CancellationToken::Dummy());
 }
 
-void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections, const csp::common::String& DestSpaceId,
-    bool CopyAsync, AssetCollectionsResultCallback Callback)
+void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& sourceAssetCollections, const csp::common::String& destSpaceId,
+    bool copyAsync, AssetCollectionsResultCallback callback)
 {
-    if (SourceAssetCollections.Size() == 0)
+    if (sourceAssetCollections.Size() == 0)
     {
         CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<AssetCollectionsResult>());
         return;
     }
 
-    csp::common::String SourceSpaceId = SourceAssetCollections[0].SpaceId;
-    std::vector<csp::common::String> AssetCollectionIds = { SourceAssetCollections[0].Id };
+    csp::common::String sourceSpaceId = sourceAssetCollections[0].SpaceId;
+    std::vector<csp::common::String> assetCollectionIds = { sourceAssetCollections[0].Id };
 
-    bool AssetCollectionsBelongToSameSpace = true;
+    bool assetCollectionsBelongToSameSpace = true;
 
-    for (size_t i = 1; i < SourceAssetCollections.Size(); ++i)
+    for (size_t i = 1; i < sourceAssetCollections.Size(); ++i)
     {
-        AssetCollectionsBelongToSameSpace &= SourceAssetCollections[i].SpaceId == SourceSpaceId;
-        AssetCollectionIds.emplace_back(SourceAssetCollections[i].Id);
+        assetCollectionsBelongToSameSpace &= sourceAssetCollections[i].SpaceId == sourceSpaceId;
+        assetCollectionIds.emplace_back(sourceAssetCollections[i].Id);
     }
 
     // Verify we have a valid space ID to copy from.
-    if (SourceSpaceId.IsEmpty())
+    if (sourceSpaceId.IsEmpty())
     {
         CSP_LOG_MSG(LogLevel::Error,
             "An asset with no space ID was provided whilst attempting to perform a copy to another space. All assets must have a valid space ID.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<AssetCollectionsResult>());
         return;
     }
 
     // Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
-    if (!AssetCollectionsBelongToSameSpace)
+    if (!assetCollectionsBelongToSameSpace)
     {
         CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<AssetCollectionsResult>());
         return;
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsCopyResult, void, chs::CopyPrototypesResult>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsCopyResult, void, chs::CopyPrototypesResult>(callback, nullptr);
 
-    auto PrototypeFilters = std::shared_ptr<chs::PrototypeFilters>(new chs::PrototypeFilters);
-    PrototypeFilters->SetIds(AssetCollectionIds);
-    PrototypeFilters->SetHasGroup(true);
+    auto prototypeFilters = std::shared_ptr<chs::PrototypeFilters>(new chs::PrototypeFilters);
+    prototypeFilters->SetIds(assetCollectionIds);
+    prototypeFilters->SetHasGroup(true);
 
-    auto DuplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>(new chs::DuplicateGroupPrototypesOptions);
-    DuplicateGroupPrototypesOptions->SetOriginalGroupId(SourceSpaceId);
-    DuplicateGroupPrototypesOptions->SetNewGroupId(DestSpaceId);
-    DuplicateGroupPrototypesOptions->SetAdditionalFilters(PrototypeFilters);
-    DuplicateGroupPrototypesOptions->SetAsyncCall(CopyAsync);
-    DuplicateGroupPrototypesOptions->SetIncludeMusubiGeneratedAssets(true);
+    auto duplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>(new chs::DuplicateGroupPrototypesOptions);
+    duplicateGroupPrototypesOptions->SetOriginalGroupId(sourceSpaceId);
+    duplicateGroupPrototypesOptions->SetNewGroupId(destSpaceId);
+    duplicateGroupPrototypesOptions->SetAdditionalFilters(prototypeFilters);
+    duplicateGroupPrototypesOptions->SetAsyncCall(copyAsync);
+    duplicateGroupPrototypesOptions->SetIncludeMusubiGeneratedAssets(true);
 
     // Use `GET /api/v1/prototypes` and only pass asset collection IDs
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)
         ->prototypesGroup_ownedOriginalGroupIdDuplicateNewGroupIdPost(
             {
-                SourceSpaceId, // originalGroupId
-                DestSpaceId, // newGroupId
-                DuplicateGroupPrototypesOptions // RequestBody
+                sourceSpaceId, // originalGroupId
+                destSpaceId, // newGroupId
+                duplicateGroupPrototypesOptions // RequestBody
             },
-            ResponseHandler, // ResponseHandler
+            responseHandler, // ResponseHandler
             csp::common::CancellationToken::Dummy() // CancellationToken
         );
 }
 
-void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetCollectionResultCallback Callback)
+void AssetSystem::GetAssetCollectionById(const String& assetCollectionId, AssetCollectionResultCallback callback)
 {
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdGet({ AssetCollectionId }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdGet({ assetCollectionId }, responseHandler);
 }
 
-async::task<AssetCollectionResult> AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollectionId)
+async::task<AssetCollectionResult> AssetSystem::GetAssetCollectionById(const csp::common::String& assetCollectionId)
 {
-    async::event_task<AssetCollectionResult> OnCompleteEvent;
-    async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetCollectionResult> onCompleteEvent;
+    async::task<AssetCollectionResult> onCompleteTask = onCompleteEvent.get_task();
 
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(onCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdGet({ AssetCollectionId }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdGet({ assetCollectionId }, responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::GetAssetCollectionByName(const String& AssetCollectionName, AssetCollectionResultCallback Callback)
+void AssetSystem::GetAssetCollectionByName(const String& assetCollectionName, AssetCollectionResultCallback callback)
 {
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesNameNameGet({ AssetCollectionName }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesNameNameGet({ assetCollectionName }, responseHandler);
 }
 
-void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const Optional<String>& ParentId, const Optional<Array<String>>& Names,
-    const Optional<Array<EAssetCollectionType>>& Types, const Optional<Array<String>>& Tags, const Optional<Array<String>>& SpaceIds,
-    const Optional<int>& ResultsSkipNumber, const Optional<int>& ResultsMaxNumber, AssetCollectionsResultCallback Callback)
+void AssetSystem::FindAssetCollections(const Optional<Array<String>>& ids, const Optional<String>& parentId, const Optional<Array<String>>& names,
+    const Optional<Array<EAssetCollectionType>>& types, const Optional<Array<String>>& tags, const Optional<Array<String>>& spaceIds,
+    const Optional<int>& resultsSkipNumber, const Optional<int>& resultsMaxNumber, AssetCollectionsResultCallback callback)
 {
     typedef std::optional<std::vector<String>> StringVec;
 
-    StringVec PrototypeIds = Convert(Ids);
-    std::optional<String> ParentPrototypeId = Convert(ParentId);
-    StringVec PrototypeNames = Convert(Names);
+    StringVec prototypeIds = Convert(ids);
+    std::optional<String> parentPrototypeId = Convert(parentId);
+    StringVec prototypeNames = Convert(names);
 
-    StringVec PrototypeTypes;
+    StringVec prototypeTypes;
 
-    if (Types.HasValue())
+    if (types.HasValue())
     {
-        std::vector<String> Vals;
+        std::vector<String> vals;
 
-        for (size_t i = 0; i < Types->Size(); ++i)
+        for (size_t i = 0; i < types->Size(); ++i)
         {
-            Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+            vals.push_back(ConvertAssetCollectionTypeToString(types->operator[](i)));
         }
 
-        PrototypeTypes = std::move(Vals);
+        prototypeTypes = std::move(vals);
     }
 
-    StringVec PrototypeTags = Convert(Tags);
-    StringVec GroupIds = Convert(SpaceIds);
+    StringVec prototypeTags = Convert(tags);
+    StringVec groupIds = Convert(spaceIds);
 
-    int32_t Skip = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
-    int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
+    int32_t skip = resultsSkipNumber.HasValue() ? *resultsSkipNumber : DEFAULT_SKIP_NUMBER;
+    int32_t limit = resultsMaxNumber.HasValue() ? *resultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
 
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(
-            Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(
+            callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)
         ->prototypesGet(
             {
-                PrototypeTags, // Tags
+                prototypeTags, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt, // TagsAll
-                PrototypeIds, // Ids
-                PrototypeNames, // Names
+                prototypeIds, // Ids
+                prototypeNames, // Names
                 std::nullopt, // PartialNames
                 std::nullopt, // ExcludedIds
                 std::nullopt, // PointOfInterestIds
-                ParentPrototypeId, // ParentId
-                GroupIds, // GroupIds
-                PrototypeTypes, // Types
+                parentPrototypeId, // ParentId
+                groupIds, // GroupIds
+                prototypeTypes, // Types
                 std::nullopt, // HasGroup
                 std::nullopt, // CreatedBy
                 std::nullopt, // CreatedAfter
@@ -671,68 +671,68 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
                 std::nullopt, // WriteAccessFilters
                 std::nullopt, // OrganizationIds (no longer used)
                 std::nullopt, // ExcludedTypes
-                Skip, // Skip
-                Limit, // Limit
+                skip, // Skip
+                limit, // Limit
                 std::nullopt, // SortBy
                 std::nullopt // SortDirection
             },
-            ResponseHandler);
+            responseHandler);
 }
 
-async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
-    const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
-    const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,
-    const csp::common::Optional<int>& ResultsMaxNumber)
+async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& ids,
+    const csp::common::Optional<csp::common::String>& parentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& names,
+    const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& types,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, const csp::common::Optional<int>& resultsSkipNumber,
+    const csp::common::Optional<int>& resultsMaxNumber)
 {
-    async::event_task<AssetCollectionsResult> OnCompleteEvent;
-    async::task<AssetCollectionsResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetCollectionsResult> onCompleteEvent;
+    async::task<AssetCollectionsResult> onCompleteTask = onCompleteEvent.get_task();
 
     typedef std::optional<std::vector<String>> StringVec;
 
-    StringVec PrototypeIds = Convert(Ids);
-    std::optional<String> ParentPrototypeId = Convert(ParentId);
-    StringVec PrototypeNames = Convert(Names);
+    StringVec prototypeIds = Convert(ids);
+    std::optional<String> parentPrototypeId = Convert(parentId);
+    StringVec prototypeNames = Convert(names);
 
-    StringVec PrototypeTypes;
+    StringVec prototypeTypes;
 
-    if (Types.HasValue())
+    if (types.HasValue())
     {
-        std::vector<String> Vals;
+        std::vector<String> vals;
 
-        for (size_t i = 0; i < Types->Size(); ++i)
+        for (size_t i = 0; i < types->Size(); ++i)
         {
-            Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+            vals.push_back(ConvertAssetCollectionTypeToString(types->operator[](i)));
         }
 
-        PrototypeTypes = std::move(Vals);
+        prototypeTypes = std::move(vals);
     }
 
-    StringVec PrototypeTags = Convert(Tags);
-    StringVec GroupIds = Convert(SpaceIds);
+    StringVec prototypeTags = Convert(tags);
+    StringVec groupIds = Convert(spaceIds);
 
-    int32_t Skip = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
-    int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
+    int32_t skip = resultsSkipNumber.HasValue() ? *resultsSkipNumber : DEFAULT_SKIP_NUMBER;
+    int32_t limit = resultsMaxNumber.HasValue() ? *resultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
 
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(
-            [](const AssetCollectionsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(
+            [](const AssetCollectionsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(onCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)
         ->prototypesGet(
             {
-                PrototypeTags, // Tags
+                prototypeTags, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt, // TagsAll
-                PrototypeIds, // Ids
-                PrototypeNames, // Names
+                prototypeIds, // Ids
+                prototypeNames, // Names
                 std::nullopt, // PartialNames
                 std::nullopt, // ExcludedIds
                 std::nullopt, // PointOfInterestIds
-                ParentPrototypeId, // ParentId
-                GroupIds, // GroupIds
-                PrototypeTypes, // Types
+                parentPrototypeId, // ParentId
+                groupIds, // GroupIds
+                prototypeTypes, // Types
                 std::nullopt, // HasGroup
                 std::nullopt, // CreatedBy
                 std::nullopt, // CreatedAfter
@@ -741,90 +741,90 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
                 std::nullopt, // WriteAccessFilters
                 std::nullopt, // OrganizationIds (no longer used)
                 std::nullopt, // ExcludedTypes
-                Skip, // Skip
-                Limit, // Limit
+                skip, // Skip
+                limit, // Limit
                 std::nullopt, // SortBy
                 std::nullopt // SortDirection
             },
-            ResponseHandler);
+            responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection, const Map<String, String>& NewMetadata,
-    const Optional<Array<String>>& Tags, AssetCollectionResultCallback Callback)
+void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& assetCollection, const Map<String, String>& newMetadata,
+    const Optional<Array<String>>& tags, AssetCollectionResultCallback callback)
 {
-    auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata,
-        AssetCollection.Type, Tags.HasValue() ? Tags : AssetCollection.Tags);
+    auto prototypeInfo = CreatePrototypeDto(assetCollection.SpaceId, assetCollection.ParentId, assetCollection.Name, newMetadata,
+        assetCollection.Type, tags.HasValue() ? tags : assetCollection.Tags);
 
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdPut({ AssetCollection.Id, PrototypeInfo }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdPut({ assetCollection.Id, prototypeInfo }, responseHandler);
 }
 
-async::task<AssetCollectionResult> AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
-    const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
+async::task<AssetCollectionResult> AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& assetCollection,
+    const csp::common::Map<csp::common::String, csp::common::String>& newMetadata,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags)
 {
-    async::event_task<AssetCollectionResult> OnCompleteEvent;
-    async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetCollectionResult> onCompleteEvent;
+    async::task<AssetCollectionResult> onCompleteTask = onCompleteEvent.get_task();
 
-    auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata,
-        AssetCollection.Type, Tags.HasValue() ? Tags : AssetCollection.Tags);
+    auto prototypeInfo = CreatePrototypeDto(assetCollection.SpaceId, assetCollection.ParentId, assetCollection.Name, newMetadata,
+        assetCollection.Type, tags.HasValue() ? tags : assetCollection.Tags);
 
-    services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler
+        = m_prototypeApi->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(onCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdPut({ AssetCollection.Id, PrototypeInfo }, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)->prototypesIdPut({ assetCollection.Id, prototypeInfo }, responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
-    const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
-    const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, csp::systems::AssetCollectionCountResultCallback Callback)
+void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& ids,
+    const csp::common::Optional<csp::common::String>& parentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& names,
+    const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& types,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, csp::systems::AssetCollectionCountResultCallback callback)
 {
-    std::optional<std::vector<String>> PrototypeIds = Convert(Ids);
-    std::optional<String> ParentPrototypeId = Convert(ParentId);
-    std::optional<std::vector<String>> PrototypeNames = Convert(Names);
-    std::optional<std::vector<String>> PrototypeTypes;
+    std::optional<std::vector<String>> prototypeIds = Convert(ids);
+    std::optional<String> parentPrototypeId = Convert(parentId);
+    std::optional<std::vector<String>> prototypeNames = Convert(names);
+    std::optional<std::vector<String>> prototypeTypes;
 
-    if (Types.HasValue())
+    if (types.HasValue())
     {
-        std::vector<String> Vals;
+        std::vector<String> vals;
 
-        for (size_t i = 0; i < Types->Size(); ++i)
+        for (size_t i = 0; i < types->Size(); ++i)
         {
-            Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+            vals.push_back(ConvertAssetCollectionTypeToString(types->operator[](i)));
         }
 
-        PrototypeTypes = std::move(Vals);
+        prototypeTypes = std::move(vals);
     }
 
-    std::optional<std::vector<String>> PrototypeTags = Convert(Tags);
-    std::optional<std::vector<String>> GroupIds = Convert(SpaceIds);
+    std::optional<std::vector<String>> prototypeTags = Convert(tags);
+    std::optional<std::vector<String>> groupIds = Convert(spaceIds);
 
-    services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<csp::systems::AssetCollectionCountResultCallback,
-        csp::systems::AssetCollectionCountResult, void, services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler = m_prototypeApi->CreateHandler<csp::systems::AssetCollectionCountResultCallback,
+        csp::systems::AssetCollectionCountResult, void, services::DtoArray<chs::PrototypeDto>>(callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+    static_cast<chs::PrototypeApi*>(m_prototypeApi)
         ->prototypesCountGet(
             {
-                PrototypeTags, // Tags
+                prototypeTags, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt, // TagsAll
-                PrototypeIds, // Ids
-                PrototypeNames, // Names
+                prototypeIds, // Ids
+                prototypeNames, // Names
                 std::nullopt, // PartialNames
                 std::nullopt, // ExcludedIds
                 std::nullopt, // PointOfInterestIds
-                ParentPrototypeId, // ParentId
-                GroupIds, // GroupIds
-                PrototypeTypes, // Types
+                parentPrototypeId, // ParentId
+                groupIds, // GroupIds
+                prototypeTypes, // Types
                 std::nullopt, // HasGroup
                 std::nullopt, // CreatedBy
                 std::nullopt, // CreatedAfter
@@ -834,166 +834,166 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
                 std::nullopt, // OrganizationIds
                 std::nullopt // ExcludedTypes
             },
-            ResponseHandler);
+            responseHandler);
 }
 
-void AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const String& Name, const Optional<String>& ThirdPartyPackagedAssetIdentifier,
-    const Optional<EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type, AssetResultCallback Callback)
+void AssetSystem::CreateAsset(const AssetCollection& assetCollection, const String& name, const Optional<String>& thirdPartyPackagedAssetIdentifier,
+    const Optional<EThirdPartyPlatform>& thirdPartyPlatform, EAssetType type, AssetResultCallback callback)
 {
-    auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
-    AssetInfo->SetName(Name);
-    String InAddressableId;
+    auto assetInfo = std::make_shared<chs::AssetDetailDto>();
+    assetInfo->SetName(name);
+    String inAddressableId;
 
-    if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue())
+    if (thirdPartyPackagedAssetIdentifier.HasValue() || thirdPartyPlatform.HasValue())
     {
-        if (ThirdPartyPackagedAssetIdentifier.HasValue() && ThirdPartyPlatform.HasValue())
+        if (thirdPartyPackagedAssetIdentifier.HasValue() && thirdPartyPlatform.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(*ThirdPartyPlatform));
+            inAddressableId = StringFormat("%s|%d", thirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(*thirdPartyPlatform));
         }
-        else if (ThirdPartyPackagedAssetIdentifier.HasValue())
+        else if (thirdPartyPackagedAssetIdentifier.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
+            inAddressableId = StringFormat("%s|%d", thirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
         }
-        else if (ThirdPartyPlatform.HasValue())
+        else if (thirdPartyPlatform.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", "", static_cast<int>(*ThirdPartyPlatform));
+            inAddressableId = StringFormat("%s|%d", "", static_cast<int>(*thirdPartyPlatform));
         }
 
         // TODO: CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
-        AssetInfo->SetAddressableId(InAddressableId);
+        assetInfo->SetAddressableId(inAddressableId);
     }
 
-    AssetInfo->SetAssetType(ConvertAssetTypeToString(Type));
+    assetInfo->SetAssetType(ConvertAssetTypeToString(type));
 
     // TODO: Move this to a separate function when we have some different values than DEFAULT
-    std::vector<String> Styles;
-    const auto DefaultStyle = "Default";
-    Styles.push_back(DefaultStyle);
-    AssetInfo->SetStyle(Styles);
+    std::vector<String> styles;
+    const auto defaultStyle = "Default";
+    styles.push_back(defaultStyle);
+    assetInfo->SetStyle(styles);
 
     // TODO: Move this to a separate function when we have some different values than DEFAULT
-    std::vector<String> Platform;
-    const auto DefaultPlatform = "Default";
-    Platform.push_back(DefaultPlatform);
-    AssetInfo->SetSupportedPlatforms(Platform);
+    std::vector<String> platform;
+    const auto defaultPlatform = "Default";
+    platform.push_back(defaultPlatform);
+    assetInfo->SetSupportedPlatforms(platform);
 
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
-        Callback, nullptr, web::EResponseCodes::ResponseCreated);
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
+        callback, nullptr, web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->prototypesPrototypeIdAsset_detailsPost({ AssetCollection.Id, AssetInfo }, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)->prototypesPrototypeIdAsset_detailsPost({ assetCollection.Id, assetInfo }, responseHandler);
 }
 
-async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const csp::common::String& Name,
-    const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
-    const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type)
+async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& assetCollection, const csp::common::String& name,
+    const csp::common::Optional<csp::common::String>& thirdPartyPackagedAssetIdentifier,
+    const csp::common::Optional<csp::systems::EThirdPartyPlatform>& thirdPartyPlatform, EAssetType type)
 {
-    async::event_task<AssetResult> OnCompleteEvent;
-    async::task<AssetResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetResult> onCompleteEvent;
+    async::task<AssetResult> onCompleteTask = onCompleteEvent.get_task();
 
-    auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
-    AssetInfo->SetName(Name);
-    String InAddressableId;
+    auto assetInfo = std::make_shared<chs::AssetDetailDto>();
+    assetInfo->SetName(name);
+    String inAddressableId;
 
-    if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue())
+    if (thirdPartyPackagedAssetIdentifier.HasValue() || thirdPartyPlatform.HasValue())
     {
-        if (ThirdPartyPackagedAssetIdentifier.HasValue() && ThirdPartyPlatform.HasValue())
+        if (thirdPartyPackagedAssetIdentifier.HasValue() && thirdPartyPlatform.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(*ThirdPartyPlatform));
+            inAddressableId = StringFormat("%s|%d", thirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(*thirdPartyPlatform));
         }
-        else if (ThirdPartyPackagedAssetIdentifier.HasValue())
+        else if (thirdPartyPackagedAssetIdentifier.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
+            inAddressableId = StringFormat("%s|%d", thirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::None));
         }
-        else if (ThirdPartyPlatform.HasValue())
+        else if (thirdPartyPlatform.HasValue())
         {
-            InAddressableId = StringFormat("%s|%d", "", static_cast<int>(*ThirdPartyPlatform));
+            inAddressableId = StringFormat("%s|%d", "", static_cast<int>(*thirdPartyPlatform));
         }
 
         // TODO: CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
-        AssetInfo->SetAddressableId(InAddressableId);
+        assetInfo->SetAddressableId(inAddressableId);
     }
 
-    AssetInfo->SetAssetType(ConvertAssetTypeToString(Type));
+    assetInfo->SetAssetType(ConvertAssetTypeToString(type));
 
     // TODO: Move this to a separate function when we have some different values than DEFAULT
-    std::vector<String> Styles;
-    const auto DefaultStyle = "Default";
-    Styles.push_back(DefaultStyle);
-    AssetInfo->SetStyle(Styles);
+    std::vector<String> styles;
+    const auto defaultStyle = "Default";
+    styles.push_back(defaultStyle);
+    assetInfo->SetStyle(styles);
 
     // TODO: Move this to a separate function when we have some different values than DEFAULT
-    std::vector<String> Platform;
-    const auto DefaultPlatform = "Default";
-    Platform.push_back(DefaultPlatform);
-    AssetInfo->SetSupportedPlatforms(Platform);
+    std::vector<String> platform;
+    const auto defaultPlatform = "Default";
+    platform.push_back(defaultPlatform);
+    assetInfo->SetSupportedPlatforms(platform);
 
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
-        [](const AssetResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
+        [](const AssetResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(onCompleteEvent));
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->prototypesPrototypeIdAsset_detailsPost({ AssetCollection.Id, AssetInfo }, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)->prototypesPrototypeIdAsset_detailsPost({ assetCollection.Id, assetInfo }, responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
+void AssetSystem::UpdateAsset(const Asset& asset, AssetResultCallback callback)
 {
-    auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
-    AssetInfo->SetName(Asset.Name);
-    AssetInfo->SetLanguageCode(Asset.LanguageCode);
-    AssetInfo->SetStyle(Convert(Asset.Styles));
+    auto assetInfo = std::make_shared<chs::AssetDetailDto>();
+    assetInfo->SetName(asset.Name);
+    assetInfo->SetLanguageCode(asset.LanguageCode);
+    assetInfo->SetStyle(Convert(asset.Styles));
 
     // TODO: Move this to a separate function when we have some different values than DEFAULT
-    std::vector<String> Platform;
-    const auto DefaultPlatform = "Default";
-    Platform.push_back(DefaultPlatform);
-    AssetInfo->SetSupportedPlatforms(Platform);
+    std::vector<String> platform;
+    const auto defaultPlatform = "Default";
+    platform.push_back(defaultPlatform);
+    assetInfo->SetSupportedPlatforms(platform);
 
-    if (!Asset.ExternalUri.IsEmpty() && !Asset.ExternalMimeType.IsEmpty())
+    if (!asset.ExternalUri.IsEmpty() && !asset.ExternalMimeType.IsEmpty())
     {
-        AssetInfo->SetExternalUri(Asset.ExternalUri);
-        AssetInfo->SetExternalMimeType(Asset.ExternalMimeType);
+        assetInfo->SetExternalUri(asset.ExternalUri);
+        assetInfo->SetExternalMimeType(asset.ExternalMimeType);
     }
 
-    AssetInfo->SetAddressableId(
-        StringFormat("%s|%d", Asset.ThirdPartyPackagedAssetIdentifier.c_str(), static_cast<int>(Asset.ThirdPartyPlatformType)));
+    assetInfo->SetAddressableId(
+        StringFormat("%s|%d", asset.ThirdPartyPackagedAssetIdentifier.c_str(), static_cast<int>(asset.ThirdPartyPlatformType)));
 
-    AssetInfo->SetAssetType(ConvertAssetTypeToString(Asset.Type));
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
-        Callback, nullptr, web::EResponseCodes::ResponseCreated);
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->prototypesPrototypeIdAsset_detailsAssetDetailIdPut({ Asset.AssetCollectionId, Asset.Id, AssetInfo }, ResponseHandler);
+    assetInfo->SetAssetType(ConvertAssetTypeToString(asset.Type));
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
+        callback, nullptr, web::EResponseCodes::ResponseCreated);
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
+        ->prototypesPrototypeIdAsset_detailsAssetDetailIdPut({ asset.AssetCollectionId, asset.Id, assetInfo }, responseHandler);
 }
 
-void AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset, NullResultCallback Callback)
+void AssetSystem::DeleteAsset(const AssetCollection& assetCollection, const Asset& asset, NullResultCallback callback)
 {
-    DeleteAssetById(AssetCollection.Id, Asset.Id, Callback);
+    DeleteAssetById(assetCollection.Id, asset.Id, callback);
 }
 
-async::task<NullResult> AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset)
+async::task<NullResult> AssetSystem::DeleteAsset(const AssetCollection& assetCollection, const Asset& asset)
 {
-    std::shared_ptr<async::event_task<NullResult>> OnCompleteEvent = std::make_shared<async::event_task<NullResult>>();
-    async::task<NullResult> OnCompleteTask = OnCompleteEvent->get_task();
+    std::shared_ptr<async::event_task<NullResult>> onCompleteEvent = std::make_shared<async::event_task<NullResult>>();
+    async::task<NullResult> onCompleteTask = onCompleteEvent->get_task();
 
-    DeleteAssetById(AssetCollection.Id, Asset.Id,
-        [OnCompleteEvent](const NullResult& Result)
+    DeleteAssetById(assetCollection.Id, asset.Id,
+        [onCompleteEvent](const NullResult& result)
         {
-            if (Result.GetResultCode() == EResultCode::Success || Result.GetResultCode() == EResultCode::Failed)
+            if (result.GetResultCode() == EResultCode::Success || result.GetResultCode() == EResultCode::Failed)
             {
-                OnCompleteEvent->set(Result);
+                onCompleteEvent->set(result);
             }
         });
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, AssetsResultCallback Callback)
+void AssetSystem::GetAssetsInCollection(const AssetCollection& assetCollection, AssetsResultCallback callback)
 {
-    std::vector<String> PrototypeIds = { AssetCollection.Id };
+    std::vector<String> prototypeIds = { assetCollection.Id };
 
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(callback, nullptr);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesAsset_detailsGet(
             {
                 std::nullopt, // Ids
@@ -1002,217 +1002,217 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
                 std::nullopt, // Styles
                 std::nullopt, // Names
                 std::nullopt, // CreatedAfter
-                PrototypeIds, // PrototypeIds
+                prototypeIds, // PrototypeIds
                 std::nullopt, // PrototypeNames
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt // TagsAll
             },
-            ResponseHandler);
+            responseHandler);
 }
 
-void AssetSystem::GetAssetById(const String& AssetCollectionId, const String& AssetId, AssetResultCallback Callback)
+void AssetSystem::GetAssetById(const String& assetCollectionId, const String& assetId, AssetResultCallback callback)
 {
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(callback, nullptr);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->prototypesPrototypeIdAsset_detailsAssetDetailIdGet({ AssetCollectionId, AssetId }, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
+        ->prototypesPrototypeIdAsset_detailsAssetDetailIdGet({ assetCollectionId, assetId }, responseHandler);
 }
 
-void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, const Optional<Array<String>>& AssetIds,
-    const Optional<Array<String>>& AssetNames, const Optional<Array<EAssetType>>& AssetTypes, AssetsResultCallback Callback)
+void AssetSystem::GetAssetsByCriteria(const Array<String>& assetCollectionIds, const Optional<Array<String>>& assetIds,
+    const Optional<Array<String>>& assetNames, const Optional<Array<EAssetType>>& assetTypes, AssetsResultCallback callback)
 {
-    if (AssetCollectionIds.IsEmpty())
+    if (assetCollectionIds.IsEmpty())
     {
         CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<AssetsResult>());
 
         return;
     }
 
-    std::vector<String> PrototypeIds;
-    PrototypeIds.reserve(AssetCollectionIds.Size());
+    std::vector<String> prototypeIds;
+    prototypeIds.reserve(assetCollectionIds.Size());
 
-    for (size_t idx = 0; idx < AssetCollectionIds.Size(); ++idx)
+    for (size_t idx = 0; idx < assetCollectionIds.Size(); ++idx)
     {
-        PrototypeIds.push_back(AssetCollectionIds[idx]);
+        prototypeIds.push_back(assetCollectionIds[idx]);
     }
 
-    std::optional<std::vector<String>> AssetDetailIds;
+    std::optional<std::vector<String>> assetDetailIds;
 
-    if (AssetIds.HasValue())
+    if (assetIds.HasValue())
     {
-        AssetDetailIds.emplace(std::vector<String>());
-        AssetDetailIds->reserve(AssetIds->Size());
+        assetDetailIds.emplace(std::vector<String>());
+        assetDetailIds->reserve(assetIds->Size());
 
-        for (size_t idx = 0; idx < AssetIds->Size(); ++idx)
+        for (size_t idx = 0; idx < assetIds->Size(); ++idx)
         {
-            AssetDetailIds->push_back({ (*AssetIds)[idx] });
+            assetDetailIds->push_back({ (*assetIds)[idx] });
         }
     }
 
-    std::optional<std::vector<String>> AssetDetailNames;
+    std::optional<std::vector<String>> assetDetailNames;
 
-    if (AssetNames.HasValue())
+    if (assetNames.HasValue())
     {
-        AssetDetailNames.emplace(std::vector<String>());
-        AssetDetailNames->reserve(AssetNames->Size());
+        assetDetailNames.emplace(std::vector<String>());
+        assetDetailNames->reserve(assetNames->Size());
 
-        for (size_t idx = 0; idx < AssetNames->Size(); ++idx)
+        for (size_t idx = 0; idx < assetNames->Size(); ++idx)
         {
-            AssetDetailNames->push_back((*AssetNames)[idx]);
+            assetDetailNames->push_back((*assetNames)[idx]);
         }
     }
 
-    std::optional<std::vector<String>> AssetDetailTypes;
+    std::optional<std::vector<String>> assetDetailTypes;
 
-    if (AssetTypes.HasValue())
+    if (assetTypes.HasValue())
     {
-        AssetDetailTypes.emplace(std::vector<String>());
-        AssetDetailTypes->reserve(AssetTypes->Size());
+        assetDetailTypes.emplace(std::vector<String>());
+        assetDetailTypes->reserve(assetTypes->Size());
 
-        for (size_t idx = 0; idx < AssetTypes->Size(); ++idx)
+        for (size_t idx = 0; idx < assetTypes->Size(); ++idx)
         {
-            AssetDetailTypes->push_back(ConvertAssetTypeToString((*AssetTypes)[idx]));
+            assetDetailTypes->push_back(ConvertAssetTypeToString((*assetTypes)[idx]));
         }
     }
 
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(callback, nullptr);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesAsset_detailsGet(
             {
-                AssetDetailIds, // Ids
+                assetDetailIds, // Ids
                 std::nullopt, // SupportedPlatforms
-                AssetDetailTypes, // AssetTypes
+                assetDetailTypes, // AssetTypes
                 std::nullopt, // Styles
-                AssetDetailNames, // Names
+                assetDetailNames, // Names
                 std::nullopt, // CreatedAfter
-                PrototypeIds, // PrototypeIds
+                prototypeIds, // PrototypeIds
                 std::nullopt, // PrototypeNames
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt // TagsAll
             },
-            ResponseHandler);
+            responseHandler);
 }
 
-async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
-    const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes)
+async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::String>& assetCollectionIds,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& assetIds,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& assetNames,
+    const csp::common::Optional<csp::common::Array<EAssetType>>& assetTypes)
 {
-    async::event_task<AssetsResult> OnCompleteEvent;
-    async::task<AssetsResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<AssetsResult> onCompleteEvent;
+    async::task<AssetsResult> onCompleteTask = onCompleteEvent.get_task();
 
-    if (AssetCollectionIds.IsEmpty())
+    if (assetCollectionIds.IsEmpty())
     {
-        OnCompleteEvent.set_exception(std::make_exception_ptr(
+        onCompleteEvent.set_exception(std::make_exception_ptr(
             csp::common::continuations::ResultException("You have to provide at least one AssetCollectionId", MakeInvalid<AssetsResult>())));
 
-        return OnCompleteTask;
+        return onCompleteTask;
     }
 
-    std::vector<String> PrototypeIds;
-    PrototypeIds.reserve(AssetCollectionIds.Size());
+    std::vector<String> prototypeIds;
+    prototypeIds.reserve(assetCollectionIds.Size());
 
-    for (size_t idx = 0; idx < AssetCollectionIds.Size(); ++idx)
+    for (size_t idx = 0; idx < assetCollectionIds.Size(); ++idx)
     {
-        PrototypeIds.push_back(AssetCollectionIds[idx]);
+        prototypeIds.push_back(assetCollectionIds[idx]);
     }
 
-    std::optional<std::vector<String>> AssetDetailIds;
+    std::optional<std::vector<String>> assetDetailIds;
 
-    if (AssetIds.HasValue())
+    if (assetIds.HasValue())
     {
-        AssetDetailIds.emplace(std::vector<String>());
-        AssetDetailIds->reserve(AssetIds->Size());
+        assetDetailIds.emplace(std::vector<String>());
+        assetDetailIds->reserve(assetIds->Size());
 
-        for (size_t idx = 0; idx < AssetIds->Size(); ++idx)
+        for (size_t idx = 0; idx < assetIds->Size(); ++idx)
         {
-            AssetDetailIds->push_back({ (*AssetIds)[idx] });
+            assetDetailIds->push_back({ (*assetIds)[idx] });
         }
     }
 
-    std::optional<std::vector<String>> AssetDetailNames;
+    std::optional<std::vector<String>> assetDetailNames;
 
-    if (AssetNames.HasValue())
+    if (assetNames.HasValue())
     {
-        AssetDetailNames.emplace(std::vector<String>());
-        AssetDetailNames->reserve(AssetNames->Size());
+        assetDetailNames.emplace(std::vector<String>());
+        assetDetailNames->reserve(assetNames->Size());
 
-        for (size_t idx = 0; idx < AssetNames->Size(); ++idx)
+        for (size_t idx = 0; idx < assetNames->Size(); ++idx)
         {
-            AssetDetailNames->push_back((*AssetNames)[idx]);
+            assetDetailNames->push_back((*assetNames)[idx]);
         }
     }
 
-    std::optional<std::vector<String>> AssetDetailTypes;
+    std::optional<std::vector<String>> assetDetailTypes;
 
-    if (AssetTypes.HasValue())
+    if (assetTypes.HasValue())
     {
-        AssetDetailTypes.emplace(std::vector<String>());
-        AssetDetailTypes->reserve(AssetTypes->Size());
+        assetDetailTypes.emplace(std::vector<String>());
+        assetDetailTypes->reserve(assetTypes->Size());
 
-        for (size_t idx = 0; idx < AssetTypes->Size(); ++idx)
+        for (size_t idx = 0; idx < assetTypes->Size(); ++idx)
         {
-            AssetDetailTypes->push_back(ConvertAssetTypeToString((*AssetTypes)[idx]));
+            assetDetailTypes->push_back(ConvertAssetTypeToString((*assetTypes)[idx]));
         }
     }
 
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(
-            [](const AssetsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(
+            [](const AssetsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(onCompleteEvent));
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesAsset_detailsGet(
             {
-                AssetDetailIds, // Ids
+                assetDetailIds, // Ids
                 std::nullopt, // SupportedPlatforms
-                AssetDetailTypes, // AssetTypes
+                assetDetailTypes, // AssetTypes
                 std::nullopt, // Styles
-                AssetDetailNames, // Names
+                assetDetailNames, // Names
                 std::nullopt, // CreatedAfter
-                PrototypeIds, // PrototypeIds
+                prototypeIds, // PrototypeIds
                 std::nullopt, // PrototypeNames
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt // TagsAll
             },
-            ResponseHandler);
+            responseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionIds, AssetsResultCallback Callback)
+void AssetSystem::GetAssetsByCollectionIds(const Array<String>& assetCollectionIds, AssetsResultCallback callback)
 {
-    if (AssetCollectionIds.IsEmpty())
+    if (assetCollectionIds.IsEmpty())
     {
         CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<AssetsResult>());
 
         return;
     }
 
-    std::vector<String> Ids;
+    std::vector<String> ids;
 
-    for (size_t i = 0; i < AssetCollectionIds.Size(); ++i)
+    for (size_t i = 0; i < assetCollectionIds.Size(); ++i)
     {
-        Ids.push_back(AssetCollectionIds[i]);
+        ids.push_back(assetCollectionIds[i]);
     }
 
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(callback, nullptr);
 
     // Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesAsset_detailsGet(
             {
                 std::nullopt, // Ids
@@ -1221,387 +1221,387 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
                 std::nullopt, // Styles
                 std::nullopt, // Names
                 std::nullopt, // CreatedAfter
-                Ids, // PrototypeIds
+                ids, // PrototypeIds
                 std::nullopt, // PrototypeNames
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
                 std::nullopt // TagsAll
             },
-            ResponseHandler);
+            responseHandler);
 }
 
 void AssetSystem::UploadAssetData(
-    const AssetCollection& AssetCollection, const Asset& Asset, const AssetDataSource& AssetDataSource, UriResultCallback Callback)
+    const AssetCollection& assetCollection, const Asset& asset, const AssetDataSource& assetDataSource, UriResultCallback callback)
 {
-    UploadAssetDataEx(AssetCollection, Asset, AssetDataSource, CancellationToken::Dummy(), Callback);
+    UploadAssetDataEx(assetCollection, asset, assetDataSource, CancellationToken::Dummy(), callback);
 }
 
-void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset, const AssetDataSource& AssetDataSource,
-    CancellationToken& CancellationToken, UriResultCallback Callback)
+void AssetSystem::UploadAssetDataEx(const AssetCollection& assetCollection, const Asset& asset, const AssetDataSource& assetDataSource,
+    CancellationToken& cancellationToken, UriResultCallback callback)
 {
-    if (Asset.Name.IsEmpty())
+    if (asset.Name.IsEmpty())
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<UriResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<UriResult>());
 
         return;
     }
 
-    auto FormFile = std::make_shared<web::HttpPayload>();
-    AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
+    auto formFile = std::make_shared<web::HttpPayload>();
+    assetDataSource.SetUploadContent(m_webClient, formFile.get(), asset);
 
-    UriResultCallback InternalCallback = [Callback, Asset](const UriResult& Result)
+    UriResultCallback internalCallback = [callback, asset](const UriResult& result)
     {
-        if (Result.GetFailureReason() != ERequestFailureReason::None)
+        if (result.GetFailureReason() != ERequestFailureReason::None)
         {
             CSP_LOG_ERROR_MSG(String("Asset with Id %s has failed to upload").c_str());
         }
 
-        INVOKE_IF_NOT_NULL(Callback, Result);
+        INVOKE_IF_NOT_NULL(callback, result);
     };
 
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<UriResultCallback, UriResult, void, services::NullDto>(
-        InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<UriResultCallback, UriResult, void, services::NullDto>(
+        internalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesPrototypeIdAsset_detailsAssetDetailIdBlobPost(
-            { AssetCollection.Id, Asset.Id, std::nullopt, FormFile }, ResponseHandler, CancellationToken);
+            { assetCollection.Id, asset.Id, std::nullopt, formFile }, responseHandler, cancellationToken);
 }
 
-async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset,
-    const AssetDataSource& AssetDataSource, csp::common::CancellationToken& CancellationToken)
+async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& assetCollection, const Asset& asset,
+    const AssetDataSource& assetDataSource, csp::common::CancellationToken& cancellationToken)
 {
-    async::event_task<UriResult> OnCompleteEvent;
-    async::task<UriResult> OnCompleteTask = OnCompleteEvent.get_task();
+    async::event_task<UriResult> onCompleteEvent;
+    async::task<UriResult> onCompleteTask = onCompleteEvent.get_task();
 
-    if (Asset.Name.IsEmpty())
+    if (asset.Name.IsEmpty())
     {
-        OnCompleteEvent.set_exception(
+        onCompleteEvent.set_exception(
             std::make_exception_ptr(csp::common::continuations::ResultException("Asset name cannot be empty", MakeInvalid<UriResult>())));
 
-        return OnCompleteTask;
+        return onCompleteTask;
     }
 
-    auto FormFile = std::make_shared<web::HttpPayload>();
-    AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
+    auto formFile = std::make_shared<web::HttpPayload>();
+    assetDataSource.SetUploadContent(m_webClient, formFile.get(), asset);
 
-    services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<UriResultCallback, UriResult, void, services::NullDto>(
-        [](const UriResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+    services::ResponseHandlerPtr responseHandler = m_assetDetailApi->CreateHandler<UriResultCallback, UriResult, void, services::NullDto>(
+        [](const UriResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(onCompleteEvent));
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
+    static_cast<chs::AssetDetailApi*>(m_assetDetailApi)
         ->prototypesPrototypeIdAsset_detailsAssetDetailIdBlobPost(
-            { AssetCollection.Id, Asset.Id, std::nullopt, FormFile }, ResponseHandler, CancellationToken);
+            { assetCollection.Id, asset.Id, std::nullopt, formFile }, responseHandler, cancellationToken);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-void AssetSystem::DownloadAssetData(const Asset& Asset, AssetDataResultCallback Callback)
+void AssetSystem::DownloadAssetData(const Asset& asset, AssetDataResultCallback callback)
 {
-    DownloadAssetDataEx(Asset, CancellationToken::Dummy(), Callback);
+    DownloadAssetDataEx(asset, CancellationToken::Dummy(), callback);
 }
 
-void AssetSystem::DownloadAssetDataEx(const Asset& Asset, CancellationToken& CancellationToken, AssetDataResultCallback Callback)
+void AssetSystem::DownloadAssetDataEx(const Asset& asset, CancellationToken& cancellationToken, AssetDataResultCallback callback)
 {
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<AssetDataResultCallback, AssetDataResult, void, services::AssetFileDto>(Callback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<AssetDataResultCallback, AssetDataResult, void, services::AssetFileDto>(callback, nullptr);
 
-    FileManager->GetFile(Asset.Uri, ResponseHandler, CancellationToken);
+    m_fileManager->GetFile(asset.Uri, responseHandler, cancellationToken);
 }
 
-void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Callback)
+void AssetSystem::GetAssetDataSize(const Asset& asset, UInt64ResultCallback callback)
 {
-    HTTPHeadersResultCallback InternalCallback = [Callback](const HTTPHeadersResult& Result)
+    HTTPHeadersResultCallback internalCallback = [callback](const HTTPHeadersResult& result)
     {
-        UInt64Result InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+        UInt64Result internalResult(result.GetResultCode(), result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success)
+        if (result.GetResultCode() == EResultCode::Success)
         {
-            auto& Headers = Result.GetValue();
-            auto& ContentLength = Headers["content-length"];
-            auto Value = std::strtoull(ContentLength.c_str(), nullptr, 10);
-            InternalResult.SetValue(Value);
+            auto& headers = result.GetValue();
+            auto& contentLength = headers["content-length"];
+            auto value = std::strtoull(contentLength.c_str(), nullptr, 10);
+            internalResult.SetValue(value);
         }
 
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        INVOKE_IF_NOT_NULL(callback, internalResult);
     };
 
-    services::ResponseHandlerPtr ResponseHandler
-        = AssetDetailAPI->CreateHandler<HTTPHeadersResultCallback, HTTPHeadersResult, void, services::NullDto>(InternalCallback, nullptr);
+    services::ResponseHandlerPtr responseHandler
+        = m_assetDetailApi->CreateHandler<HTTPHeadersResultCallback, HTTPHeadersResult, void, services::NullDto>(internalCallback, nullptr);
 
-    FileManager->GetResponseHeaders(Asset.Uri, ResponseHandler);
+    m_fileManager->GetResponseHeaders(asset.Uri, responseHandler);
 }
 
-CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetCollection, LODChainResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& assetCollection, LODChainResultCallback callback)
 {
-    auto GetAssetsCallback = [AssetCollection, Callback](const AssetsResult& Result)
+    auto getAssetsCallback = [assetCollection, callback](const AssetsResult& result)
     {
-        LODChainResult LODResult(Result.GetResultCode(), Result.GetHttpResultCode());
+        LODChainResult lodResult(result.GetResultCode(), result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success)
+        if (result.GetResultCode() == EResultCode::Success)
         {
-            LODChain Chain = CreateLODChainFromAssets(Result.GetAssets(), AssetCollection.Id);
-            LODResult.SetLODChain(std::move(Chain));
+            LODChain chain = CreateLODChainFromAssets(result.GetAssets(), assetCollection.Id);
+            lodResult.SetLODChain(std::move(chain));
         }
 
-        INVOKE_IF_NOT_NULL(Callback, LODResult);
+        INVOKE_IF_NOT_NULL(callback, lodResult);
     };
 
-    GetAssetsByCriteria({ AssetCollection.Id }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, GetAssetsCallback);
+    GetAssetsByCriteria({ assetCollection.Id }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, getAssetsCallback);
 }
 
 CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
-    const AssetCollection& AssetCollection, const Asset& InAsset, int LODLevel, AssetResultCallback Callback)
+    const AssetCollection& assetCollection, const Asset& inAsset, int lodLevel, AssetResultCallback callback)
 {
     // GetAssetsByCriteria
-    auto GetAssetsCallback = [this, AssetCollection, InAsset, LODLevel, Callback](const AssetsResult& Result)
+    auto getAssetsCallback = [this, assetCollection, inAsset, lodLevel, callback](const AssetsResult& result)
     {
-        if (Result.GetResultCode() == EResultCode::InProgress)
+        if (result.GetResultCode() == EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            INVOKE_IF_NOT_NULL(Callback, Result);
+            INVOKE_IF_NOT_NULL(callback, result);
 
             return;
         }
 
-        const Array<Asset>& Assets = Result.GetAssets();
-        LODChain Chain = CreateLODChainFromAssets(Assets, AssetCollection.Id);
+        const Array<Asset>& assets = result.GetAssets();
+        LODChain chain = CreateLODChainFromAssets(assets, assetCollection.Id);
 
-        if (!ValidateNewLODLevelForChain(Chain, LODLevel))
+        if (!ValidateNewLODLevelForChain(chain, lodLevel))
         {
             CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
 
-            INVOKE_IF_NOT_NULL(Callback, Result);
+            INVOKE_IF_NOT_NULL(callback, result);
 
             return;
         }
 
         // UpdateAsset
-        auto UpdateAssetCallback = [AssetCollection, Callback, Assets](const AssetResult& Result) { INVOKE_IF_NOT_NULL(Callback, Result); };
+        auto updateAssetCallback = [assetCollection, callback, assets](const AssetResult& result) { INVOKE_IF_NOT_NULL(callback, result); };
 
         // Add new LOD style
-        Asset NewAsset = InAsset;
-        Array<String> NewStyles(NewAsset.Styles.Size() + 1);
+        Asset newAsset = inAsset;
+        Array<String> newStyles(newAsset.Styles.Size() + 1);
 
-        for (size_t i = 0; i < NewAsset.Styles.Size(); ++i)
+        for (size_t i = 0; i < newAsset.Styles.Size(); ++i)
         {
-            NewStyles[i] = NewAsset.Styles[i];
+            newStyles[i] = newAsset.Styles[i];
         }
 
-        NewStyles[NewAsset.Styles.Size()] = CreateLODStyleVar(LODLevel);
-        NewAsset.Styles = std::move(NewStyles);
+        newStyles[newAsset.Styles.Size()] = CreateLODStyleVar(lodLevel);
+        newAsset.Styles = std::move(newStyles);
 
-        UpdateAsset(NewAsset, UpdateAssetCallback);
+        UpdateAsset(newAsset, updateAssetCallback);
     };
 
-    GetAssetsByCriteria({ InAsset.AssetCollectionId }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, GetAssetsCallback);
+    GetAssetsByCriteria({ inAsset.AssetCollectionId }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, getAssetsCallback);
 }
 
-void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType, const csp::common::String& SpaceId,
-    csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
-    MaterialResultCallback Callback)
+void AssetSystem::CreateMaterial(const csp::common::String& name, const csp::systems::EShaderType shaderType, const csp::common::String& spaceId,
+    csp::common::Map<csp::common::String, csp::common::String>& metadata, const csp::common::Array<csp::common::String>& assetTags,
+    MaterialResultCallback callback)
 {
     // 1. Create asset collection
-    auto CreateAssetCollectionCB = [this, Callback, Name, SpaceId, ShaderType](const AssetCollectionResult& CreateAssetCollectionResult)
+    auto createAssetCollectionCb = [this, callback, name, spaceId, shaderType](const AssetCollectionResult& createAssetCollectionResult)
     {
-        if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
+        if (createAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
+            callback(MaterialResult(createAssetCollectionResult.GetResultCode(), createAssetCollectionResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Create asset
-        const AssetCollection& CreatedAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
+        const AssetCollection& createdAssetCollection = createAssetCollectionResult.GetAssetCollection();
 
-        auto CreateAssetCB = [this, Callback, CreatedAssetCollection, SpaceId, Name, ShaderType](const AssetResult& CreateAssetResult)
+        auto createAssetCb = [this, callback, createdAssetCollection, spaceId, name, shaderType](const AssetResult& createAssetResult)
         {
-            if (CreateAssetResult.GetResultCode() != EResultCode::Success)
+            if (createAssetResult.GetResultCode() != EResultCode::Success)
             {
-                Callback(MaterialResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
+                callback(MaterialResult(createAssetResult.GetResultCode(), createAssetResult.GetHttpResultCode()));
                 return;
             }
 
             // 3. Upload default material
-            Asset CreatedAsset = CreateAssetResult.GetAsset();
-            csp::common::String MaterialJson;
+            Asset createdAsset = createAssetResult.GetAsset();
+            csp::common::String materialJson;
 
             // Create material of the specific derived type.
-            Material* NewlyCreatedMaterial = InstantiateMaterialOfType(ShaderType, Name, CreatedAssetCollection.Id, CreatedAsset.Id);
+            Material* newlyCreatedMaterial = InstantiateMaterialOfType(shaderType, name, createdAssetCollection.Id, createdAsset.Id);
 
             // Serialse material data.
-            SerializeMaterialOfType(ShaderType, NewlyCreatedMaterial, MaterialJson);
+            SerializeMaterialOfType(shaderType, newlyCreatedMaterial, materialJson);
 
-            auto UploadMaterialCallback = [Callback, NewlyCreatedMaterial, SpaceId, Name](const UriResult& UploadResult)
+            auto uploadMaterialCallback = [callback, newlyCreatedMaterial, spaceId, name](const UriResult& uploadResult)
             {
-                if (UploadResult.GetResultCode() == EResultCode::InProgress)
+                if (uploadResult.GetResultCode() == EResultCode::InProgress)
                 {
                     return;
                 }
 
                 // 4. Return created material
-                MaterialResult FinalResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
-                FinalResult.SetMaterial(NewlyCreatedMaterial);
+                MaterialResult finalResult(uploadResult.GetResultCode(), uploadResult.GetHttpResultCode());
+                finalResult.SetMaterial(newlyCreatedMaterial);
 
-                Callback(FinalResult);
+                callback(finalResult);
             };
 
-            CreatedAsset.FileName = CreateUniqueMaterialFileName(Name, SpaceId);
+            createdAsset.FileName = CreateUniqueMaterialFileName(name, spaceId);
 
             // Create a new string to prevent const casting
-            std::string Buffer(MaterialJson.c_str());
+            std::string buffer(materialJson.c_str());
 
-            BufferAssetDataSource AssetData;
-            AssetData.SetMimeType("application/json");
-            AssetData.Buffer = Buffer.data();
-            AssetData.BufferLength = MaterialJson.Length();
+            BufferAssetDataSource assetData;
+            assetData.SetMimeType("application/json");
+            assetData.Buffer = buffer.data();
+            assetData.BufferLength = materialJson.Length();
 
-            UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
+            UploadAssetData(createdAssetCollection, createdAsset, assetData, uploadMaterialCallback);
         };
 
-        const csp::common::String MaterialAssetName = CreateUniqueMaterialAssetName(Name, SpaceId);
+        const csp::common::String materialAssetName = CreateUniqueMaterialAssetName(name, spaceId);
 
-        CreateAsset(CreateAssetCollectionResult.GetAssetCollection(), MaterialAssetName, nullptr, nullptr, EAssetType::MATERIAL, CreateAssetCB);
+        CreateAsset(createAssetCollectionResult.GetAssetCollection(), materialAssetName, nullptr, nullptr, EAssetType::MATERIAL, createAssetCb);
     };
 
-    const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
+    const csp::common::String materialCollectionName = CreateUniqueMaterialAssetCollectionName(name, spaceId);
 
-    std::optional<String> ConvertedShaderType = ConvertShaderTypeToString(ShaderType);
-    if (ConvertedShaderType.has_value())
+    std::optional<String> convertedShaderType = ConvertShaderTypeToString(shaderType);
+    if (convertedShaderType.has_value())
     {
         // Set the shader type in the material collection metadata - this is required to deserialize a material to the correct type.
-        Metadata[MATERIAL_SHADERTYPE_METADATA_KEY] = ConvertedShaderType.value();
+        metadata[MATERIAL_SHADERTYPE_METADATA_KEY] = convertedShaderType.value();
     }
     else
     {
         CSP_LOG_MSG(LogLevel::Error, "Specified shader type invalid.");
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<MaterialResult>());
         return;
     }
 
-    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, Metadata, EAssetCollectionType::DEFAULT, AssetTags, CreateAssetCollectionCB);
+    CreateAssetCollection(spaceId, nullptr, materialCollectionName, metadata, EAssetCollectionType::DEFAULT, assetTags, createAssetCollectionCb);
 }
 
-void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Callback)
+void AssetSystem::UpdateMaterial(const Material& material, NullResultCallback callback)
 {
     // 1. Get asset collection
-    auto GetAssetCollectionCB = [this, &Material, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
+    auto getAssetCollectionCb = [this, &material, callback](const AssetCollectionResult& createAssetCollectionResult)
     {
-        if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
+        if (createAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(NullResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
+            callback(NullResult(createAssetCollectionResult.GetResultCode(), createAssetCollectionResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Get asset
-        const AssetCollection& CreatedAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
+        const AssetCollection& createdAssetCollection = createAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [this, Callback, &Material, CreatedAssetCollection](const AssetResult& CreateAssetResult)
+        auto getAssetCb = [this, callback, &material, createdAssetCollection](const AssetResult& createAssetResult)
         {
-            if (CreateAssetResult.GetResultCode() != EResultCode::Success)
+            if (createAssetResult.GetResultCode() != EResultCode::Success)
             {
-                Callback(NullResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
+                callback(NullResult(createAssetResult.GetResultCode(), createAssetResult.GetHttpResultCode()));
                 return;
             }
 
             // 3. Upload material
-            auto UploadMaterialCallback
-                = [Callback](const UriResult& UploadResult) { Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode())); };
+            auto uploadMaterialCallback
+                = [callback](const UriResult& uploadResult) { callback(NullResult(uploadResult.GetResultCode(), uploadResult.GetHttpResultCode())); };
 
-            csp::common::String MaterialJson;
+            csp::common::String materialJson;
 
             // Serialse material data.
-            SerializeMaterialOfType(Material.GetShaderType(), &Material, MaterialJson);
+            SerializeMaterialOfType(material.GetShaderType(), &material, materialJson);
 
-            const Asset& CreatedAsset = CreateAssetResult.GetAsset();
+            const Asset& createdAsset = createAssetResult.GetAsset();
 
             // Create a new string to prevent const casting
-            std::string Buffer(MaterialJson.c_str());
+            std::string buffer(materialJson.c_str());
 
-            BufferAssetDataSource AssetData;
-            AssetData.SetMimeType("application/json");
-            AssetData.Buffer = Buffer.data();
-            AssetData.BufferLength = MaterialJson.Length();
+            BufferAssetDataSource assetData;
+            assetData.SetMimeType("application/json");
+            assetData.Buffer = buffer.data();
+            assetData.BufferLength = materialJson.Length();
 
-            UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
+            UploadAssetData(createdAssetCollection, createdAsset, assetData, uploadMaterialCallback);
         };
-        GetAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), GetAssetCB);
+        GetAssetById(material.GetMaterialCollectionId(), material.GetMaterialId(), getAssetCb);
     };
 
-    GetAssetCollectionById(Material.GetMaterialCollectionId(), GetAssetCollectionCB);
+    GetAssetCollectionById(material.GetMaterialCollectionId(), getAssetCollectionCb);
 }
 
-void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Callback)
+void AssetSystem::DeleteMaterial(const Material& material, NullResultCallback callback)
 {
     // 1. Delete asset
-    auto DeleteAssetCB = [this, Callback, &Material](const NullResult& DeleteAssetResult)
+    auto deleteAssetCb = [this, callback, &material](const NullResult& deleteAssetResult)
     {
-        if (DeleteAssetResult.GetResultCode() != EResultCode::Success)
+        if (deleteAssetResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(NullResult(DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode()));
+            callback(NullResult(deleteAssetResult.GetResultCode(), deleteAssetResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Delete asset collection
-        auto DeleteAssetCollectionCB = [Callback](const NullResult& DeleteAssetCollectionResult) { Callback(DeleteAssetCollectionResult); };
+        auto deleteAssetCollectionCb = [callback](const NullResult& deleteAssetCollectionResult) { callback(deleteAssetCollectionResult); };
 
-        DeleteAssetCollectionById(Material.GetMaterialCollectionId(), DeleteAssetCollectionCB);
+        DeleteAssetCollectionById(material.GetMaterialCollectionId(), deleteAssetCollectionCb);
     };
 
-    DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
+    DeleteAssetById(material.GetMaterialCollectionId(), material.GetMaterialId(), deleteAssetCb);
 }
 
 async::task<MaterialResult> AssetSystem::DownloadMaterial(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+    const AssetCollection& assetCollection, const csp::common::String& assetId, const csp::common::String& uri)
 {
-    auto OnCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
-    auto OnCompleteTask = OnCompleteEvent->get_task();
+    auto onCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
+    auto onCompleteTask = onCompleteEvent->get_task();
 
-    GetMaterialFromUri(AssetCollection, AssetId, Uri,
-        [OnCompleteEvent, AssetId](const auto& Result)
+    GetMaterialFromUri(assetCollection, assetId, uri,
+        [onCompleteEvent, assetId](const auto& result)
         {
-            if (Result.GetResultCode() == EResultCode::Failed)
+            if (result.GetResultCode() == EResultCode::Failed)
             {
-                OnCompleteEvent->set_exception(
-                    std::make_exception_ptr(std::runtime_error(fmt::format("Failed to download Material: {}", AssetId.c_str()))));
+                onCompleteEvent->set_exception(
+                    std::make_exception_ptr(std::runtime_error(fmt::format("Failed to download Material: {}", assetId.c_str()))));
                 return;
             }
 
-            if (Result.GetResultCode() == EResultCode::Success)
+            if (result.GetResultCode() == EResultCode::Success)
             {
-                OnCompleteEvent->set(Result);
+                onCompleteEvent->set(result);
                 return;
             }
         });
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
 std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::DownloadAllMaterials(
-    const csp::common::Array<AssetCollection>& AssetCollections)
+    const csp::common::Array<AssetCollection>& assetCollections)
 {
-    return [this, AssetCollections](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
+    return [this, assetCollections](const AssetsResult& getAssetsResult) -> async::task<MaterialsResult>
     {
-        const auto& Assets = GetAssetsResult.GetAssets();
+        const auto& assets = getAssetsResult.GetAssets();
 
-        if (Assets.IsEmpty())
+        if (assets.IsEmpty())
         {
             // There are no material assets in this space
-            return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+            return async::make_task(MaterialsResult(getAssetsResult.GetResultCode(), getAssetsResult.GetHttpResultCode()));
         }
 
-        auto DownloadTasks = std::vector<async::task<MaterialResult>>();
-        DownloadTasks.reserve(Assets.Size());
+        auto downloadTasks = std::vector<async::task<MaterialResult>>();
+        downloadTasks.reserve(assets.Size());
 
-        for (const auto& Asset : Assets)
+        for (const auto& asset : assets)
         {
-            if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
-                    [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
-                AssetCollection != std::end(AssetCollections))
+            if (const auto assetCollection = std::find_if(std::begin(assetCollections), std::end(assetCollections),
+                    [&](const auto& collection) { return collection.Id == asset.AssetCollectionId; });
+                assetCollection != std::end(assetCollections))
             {
-                DownloadTasks.push_back(DownloadMaterial(*AssetCollection, Asset.Id, Asset.Uri));
+                downloadTasks.push_back(DownloadMaterial(*assetCollection, asset.Id, asset.Uri));
             }
             else
             {
@@ -1609,236 +1609,236 @@ std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::Do
             }
         }
 
-        return async::when_all(DownloadTasks)
+        return async::when_all(downloadTasks)
             .then(
-                [](std::vector<async::task<MaterialResult>> DownloadTasks) -> MaterialsResult
+                [](std::vector<async::task<MaterialResult>> downloadTasks) -> MaterialsResult
                 {
-                    auto DownloadedMaterials = std::vector<Material*>();
-                    DownloadedMaterials.reserve(DownloadTasks.size());
+                    auto downloadedMaterials = std::vector<Material*>();
+                    downloadedMaterials.reserve(downloadTasks.size());
 
-                    for (auto& Task : DownloadTasks)
+                    for (auto& task : downloadTasks)
                     {
                         try
                         {
-                            if (auto Result = Task.get().GetMaterial())
+                            if (auto result = task.get().GetMaterial())
                             {
-                                DownloadedMaterials.push_back(Result);
+                                downloadedMaterials.push_back(result);
                             }
                         }
-                        catch (const std::exception& Exception)
+                        catch (const std::exception& exception)
                         {
-                            CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials: %s", Exception.what());
+                            CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials: %s", exception.what());
                         }
                     }
 
-                    if (DownloadedMaterials.empty())
+                    if (downloadedMaterials.empty())
                     {
                         return MakeInvalid<MaterialsResult>();
                     }
 
-                    auto Materials = csp::common::Array<Material*>(DownloadedMaterials.size());
+                    auto materials = csp::common::Array<Material*>(downloadedMaterials.size());
 
-                    for (size_t i = 0; i < DownloadedMaterials.size(); ++i)
+                    for (size_t i = 0; i < downloadedMaterials.size(); ++i)
                     {
-                        Materials[i] = DownloadedMaterials[i];
+                        materials[i] = downloadedMaterials[i];
                     }
 
-                    auto Result = MaterialsResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-                    Result.SetMaterials(Materials);
+                    auto result = MaterialsResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                    result.SetMaterials(materials);
 
-                    return Result;
+                    return result;
                 });
     };
 }
 
-void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+void AssetSystem::GetMaterials(const csp::common::String& spaceId, MaterialsResultCallback callback)
 {
-    auto FetchMaterials = [this](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
+    auto fetchMaterials = [this](const AssetCollectionsResult& result) -> async::task<MaterialsResult>
     {
-        if (Result.GetResultCode() != EResultCode::Success)
+        if (result.GetResultCode() != EResultCode::Success)
         {
-            throw std::runtime_error(fmt::format("FindAssetCollections returned failure response code {}", Result.GetHttpResultCode()));
+            throw std::runtime_error(fmt::format("FindAssetCollections returned failure response code {}", result.GetHttpResultCode()));
         }
 
-        const auto& AssetCollections = Result.GetAssetCollections();
+        const auto& assetCollections = result.GetAssetCollections();
 
-        if (AssetCollections.IsEmpty())
+        if (assetCollections.IsEmpty())
         {
-            return async::make_task(MaterialsResult(Result.GetResultCode(), Result.GetHttpResultCode()));
+            return async::make_task(MaterialsResult(result.GetResultCode(), result.GetHttpResultCode()));
         }
 
-        auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
+        auto assetCollectionIds = csp::common::Array<csp::common::String>(assetCollections.Size());
 
-        for (size_t i = 0; i < AssetCollections.Size(); ++i)
+        for (size_t i = 0; i < assetCollections.Size(); ++i)
         {
-            AssetCollectionIds[i] = AssetCollections[i].Id;
+            assetCollectionIds[i] = assetCollections[i].Id;
         }
 
-        return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
-            .then(DownloadAllMaterials(AssetCollections));
+        return GetAssetsByCriteria(assetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
+            .then(DownloadAllMaterials(assetCollections));
     };
 
-    FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
-        .then(std::move(FetchMaterials))
+    FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { spaceId }, nullptr, nullptr)
+        .then(std::move(fetchMaterials))
         .then(
-            [Callback](async::task<MaterialsResult> Result)
+            [callback](async::task<MaterialsResult> result)
             {
                 try
                 {
-                    Callback(Result.get());
+                    callback(result.get());
                 }
-                catch (const std::exception& Exception)
+                catch (const std::exception& exception)
                 {
-                    CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials failed: %s", Exception.what());
-                    Callback(MakeInvalid<MaterialsResult>());
+                    CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials failed: %s", exception.what());
+                    callback(MakeInvalid<MaterialsResult>());
                 }
                 catch (...)
                 {
-                    Callback(MakeInvalid<MaterialsResult>());
+                    callback(MakeInvalid<MaterialsResult>());
                 }
             });
 }
 
-void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
+void AssetSystem::GetMaterial(const csp::common::String& assetCollectionId, const csp::common::String& assetId, MaterialResultCallback callback)
 {
     // 1. Get asset collection
-    auto GetAssetCollectionCB = [this, AssetCollectionId, AssetId, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
+    auto getAssetCollectionCb = [this, assetCollectionId, assetId, callback](const AssetCollectionResult& createAssetCollectionResult)
     {
-        if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
+        if (createAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
+            callback(MaterialResult(createAssetCollectionResult.GetResultCode(), createAssetCollectionResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Get asset
-        const AssetCollection& FoundAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
+        const AssetCollection& foundAssetCollection = createAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [this, Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
+        auto getAssetCb = [this, callback, foundAssetCollection](const AssetResult& createAssetResult)
         {
-            if (CreateAssetResult.GetResultCode() != EResultCode::Success)
+            if (createAssetResult.GetResultCode() != EResultCode::Success)
             {
-                Callback(MaterialResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
+                callback(MaterialResult(createAssetResult.GetResultCode(), createAssetResult.GetHttpResultCode()));
                 return;
             }
 
             // 3. Download material
-            const Asset& FoundAsset = CreateAssetResult.GetAsset();
-            GetMaterialFromUri(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, Callback);
+            const Asset& foundAsset = createAssetResult.GetAsset();
+            GetMaterialFromUri(foundAssetCollection, foundAsset.Id, foundAsset.Uri, callback);
         };
 
-        GetAssetById(AssetCollectionId, AssetId, GetAssetCB);
+        GetAssetById(assetCollectionId, assetId, getAssetCb);
     };
 
-    GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
+    GetAssetCollectionById(assetCollectionId, getAssetCollectionCb);
 }
 
-void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
-    const csp::common::String& Uri, MaterialResultCallback Callback)
+void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& assetCollection, const csp::common::String& assetId,
+    const csp::common::String& uri, MaterialResultCallback callback)
 {
-    std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
-    if (!ShaderType.has_value())
+    std::optional<csp::systems::EShaderType> shaderType = GetShaderTypeFromMaterialCollection(assetCollection);
+    if (!shaderType.has_value())
     {
         CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<MaterialResult>());
         return;
     }
 
-    auto DownloadMaterialCallback
-        = [Callback, AssetId, AssetCollectionId = AssetCollection.Id, ShaderType = *ShaderType](const AssetDataResult& DownloadResult)
+    auto downloadMaterialCallback
+        = [callback, assetId, assetCollectionId = assetCollection.Id, shaderType = *shaderType](const AssetDataResult& downloadResult)
     {
-        if (DownloadResult.GetResultCode() != EResultCode::Success)
+        if (downloadResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+            callback(MaterialResult(downloadResult.GetResultCode(), downloadResult.GetHttpResultCode()));
             return;
         }
 
-        const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
+        const char* materialData = static_cast<const char*>(downloadResult.GetData());
 
         // Create material of the specific derived type.
-        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId);
+        Material* foundMaterial = InstantiateMaterialOfType(shaderType, "", assetCollectionId, assetId);
 
         // Deserialse material data.
-        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
+        auto deserializationResult = DeserializeIntoMaterialOfType(materialData, shaderType, foundMaterial);
 
-        if (!DeserializationResult.has_value())
+        if (!deserializationResult.has_value())
         {
             CSP_LOG_ERROR_MSG("Failed to deserialize material");
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<MaterialResult>());
 
             return;
         }
 
-        MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-        Result.SetMaterial(DeserializationResult.value());
+        MaterialResult result(downloadResult.GetResultCode(), downloadResult.GetHttpResultCode());
+        result.SetMaterial(deserializationResult.value());
 
-        Callback(Result);
+        callback(result);
     };
 
-    Asset Asset;
-    Asset.Uri = Uri;
+    Asset asset;
+    asset.Uri = uri;
 
-    DownloadAssetData(Asset, DownloadMaterialCallback);
+    DownloadAssetData(asset, downloadMaterialCallback);
 }
 
-void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler callback)
 {
-    AssetDetailBlobChangedCallback = Callback;
+    m_assetDetailBlobChangedCallback = callback;
 
     RegisterSystemCallback();
 }
 
-void AssetSystem::SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback)
+void AssetSystem::SetMaterialChangedCallback(MaterialChangedCallbackHandler callback)
 {
-    MaterialChangedCallback = Callback;
+    m_materialChangedCallback = callback;
 
     RegisterSystemCallback();
 }
 
 void AssetSystem::RegisterSystemCallback()
 {
-    if (!EventBusPtr)
+    if (!m_eventBusPtr)
     {
         CSP_LOG_ERROR_MSG("Error: Failed to register AssetSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
-    if (!MaterialChangedCallback && !AssetDetailBlobChangedCallback)
+    if (!m_materialChangedCallback && !m_assetDetailBlobChangedCallback)
     {
         CSP_LOG_ERROR_MSG("Error: Neither MaterialChangedCallback nor AssetDetailBlobChangedCallback were set, not registering AssetSystem to "
                           "AssetDetailBlobChanged.\nPlease set either callback before registering.");
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
+    m_eventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& networkEventData) { this->OnAssetDetailBlobChangedEvent(networkEventData); });
 }
 
-void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
+void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& networkEventData)
 {
-    if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
+    if (!m_assetDetailBlobChangedCallback && !m_materialChangedCallback)
     {
         return;
     }
 
-    const csp::common::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedNetworkEventData
-        = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
+    const csp::common::AssetDetailBlobChangedNetworkEventData& assetDetailBlobChangedNetworkEventData
+        = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(networkEventData);
 
-    if (AssetDetailBlobChangedCallback)
+    if (m_assetDetailBlobChangedCallback)
     {
-        AssetDetailBlobChangedCallback(AssetDetailBlobChangedNetworkEventData);
+        m_assetDetailBlobChangedCallback(assetDetailBlobChangedNetworkEventData);
     }
 
-    if (AssetDetailBlobChangedNetworkEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+    if (assetDetailBlobChangedNetworkEventData.AssetType == systems::EAssetType::MATERIAL && m_materialChangedCallback)
     {
-        csp::common::MaterialChangedParams MaterialParams;
-        MaterialParams.ChangeType = AssetDetailBlobChangedNetworkEventData.ChangeType;
-        MaterialParams.MaterialCollectionId = AssetDetailBlobChangedNetworkEventData.AssetCollectionId;
-        MaterialParams.MaterialId = AssetDetailBlobChangedNetworkEventData.AssetId;
+        csp::common::MaterialChangedParams materialParams;
+        materialParams.ChangeType = assetDetailBlobChangedNetworkEventData.ChangeType;
+        materialParams.MaterialCollectionId = assetDetailBlobChangedNetworkEventData.AssetCollectionId;
+        materialParams.MaterialId = assetDetailBlobChangedNetworkEventData.AssetId;
 
-        MaterialChangedCallback(MaterialParams);
+        m_materialChangedCallback(materialParams);
     }
 }
 

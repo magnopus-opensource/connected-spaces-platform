@@ -48,7 +48,7 @@ public:
     ///       - South: -Z
     ///       - West: +X
     /// @param InValue csp::common::Vector4 : The new value expressed as a quaternion.
-    virtual void SetRotation(const csp::common::Vector4& InValue) = 0;
+    virtual void SetRotation(const csp::common::Vector4& inValue) = 0;
 
 protected:
     virtual ~IRotationComponent() = default;

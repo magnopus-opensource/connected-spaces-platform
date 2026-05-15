@@ -33,10 +33,10 @@ using namespace csp::systems;
  * Print an error with provided error context objects and HTTP request status information, and throw a cancellation error.
  */
 template <typename ResultT>
-inline void LogHTTPErrorAndCancelContinuation(std::string ErrorMsg, ResultT Result, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline void LogHTTPErrorAndCancelContinuation(std::string errorMsg, ResultT result, csp::common::LogLevel logLevel = csp::common::LogLevel::Log)
 {
-    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
-    throw csp::common::continuations::ResultException("Continuation cancelled", std::forward<ResultT>(Result)); // Cancels the continuation chain.
+    CSP_LOG_MSG(logLevel, errorMsg.c_str());
+    throw csp::common::continuations::ResultException("Continuation cancelled", std::forward<ResultT>(result)); // Cancels the continuation chain.
 }
 
 /*
@@ -46,66 +46,66 @@ inline void LogHTTPErrorAndCancelContinuation(std::string ErrorMsg, ResultT Resu
  * Error context objects are optional, if unset, the values from the result object will be used.
  */
 template <typename ResultT>
-inline auto AssertRequestSuccessOrErrorFromResult(std::string SuccessMsg, std::string ErrorMsg, std::optional<EResultCode> ResultCode,
-    std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
-    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline auto AssertRequestSuccessOrErrorFromResult(std::string successMsg, std::string errorMsg, std::optional<EResultCode> resultCode,
+    std::optional<csp::web::EResponseCodes> httpResultCode, std::optional<ERequestFailureReason> failureReason,
+    csp::common::LogLevel logLevel = csp::common::LogLevel::Log)
 {
-    return [SuccessMsg = std::move(SuccessMsg), ErrorMsg = std::move(ErrorMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](
-               const ResultT& Result)
+    return [successMsg = std::move(successMsg), errorMsg = std::move(errorMsg), resultCode, httpResultCode, failureReason, logLevel](
+               const ResultT& result)
     {
-        if (Result.GetResultCode() != EResultCode::Success)
+        if (result.GetResultCode() != EResultCode::Success)
         {
-            auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
-            auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
-            auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
-            ResultT InternalResult(ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse);
-            LogHTTPErrorAndCancelContinuation<ResultT>(std::move(ErrorMsg), std::move(InternalResult), LogLevel);
+            auto resultCodeToUse = resultCode.value_or(result.GetResultCode());
+            auto httpResultCodeToUse = httpResultCode.value_or(static_cast<csp::web::EResponseCodes>(result.GetHttpResultCode()));
+            auto failureReasonToUse = failureReason.value_or(result.GetFailureReason());
+            ResultT internalResult(resultCodeToUse, httpResultCodeToUse, failureReasonToUse);
+            LogHTTPErrorAndCancelContinuation<ResultT>(std::move(errorMsg), std::move(internalResult), logLevel);
         }
         else
         {
             // Success Case
-            CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
+            CSP_LOG_MSG(csp::common::LogLevel::Log, successMsg.c_str());
         }
-        return Result;
+        return result;
     };
 }
 
 /* Print a success message and report a successfull result via the callback */
-template <typename ResultT> inline auto ReportSuccess(std::function<void(const ResultT&)> Callback, std::string SuccessMsg)
+template <typename ResultT> inline auto ReportSuccess(std::function<void(const ResultT&)> callback, std::string successMsg)
 {
-    return [Callback, SuccessMsg = std::move(SuccessMsg)]()
+    return [callback, successMsg = std::move(successMsg)]()
     {
         /* Continuation was a success. We're done! */
-        CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
-        ResultT SuccessResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
-        if (Callback)
+        CSP_LOG_MSG(csp::common::LogLevel::Log, successMsg.c_str());
+        ResultT successResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+        if (callback)
         {
-            Callback(SuccessResult);
+            callback(successResult);
         }
     };
 }
 
 /* Print a success message and report and send a result via the callback */
-template <typename ResultT> inline auto SendResult(std::function<void(const ResultT&)> Callback, std::string SuccessMsg)
+template <typename ResultT> inline auto SendResult(std::function<void(const ResultT&)> callback, std::string successMsg)
 {
-    return [Callback, SuccessMsg = std::move(SuccessMsg)](const ResultT& Result)
+    return [callback, successMsg = std::move(successMsg)](const ResultT& result)
     {
         /* Continuation was a success. We're done! */
-        CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
-        if (Callback)
+        CSP_LOG_MSG(csp::common::LogLevel::Log, successMsg.c_str());
+        if (callback)
         {
-            Callback(Result);
+            callback(result);
         }
     };
 }
 
 /* Stores the result in a shared pointer for access outside of continuation */
-template <typename ResultT> inline auto GetResultFromContinuation(std::shared_ptr<ResultT>& Ptr)
+template <typename ResultT> inline auto GetResultFromContinuation(std::shared_ptr<ResultT>& ptr)
 {
-    return [Ptr](const ResultT& Result)
+    return [ptr](const ResultT& result)
     {
-        *Ptr = Result;
-        return Result;
+        *ptr = result;
+        return result;
     };
 }
 
@@ -119,48 +119,48 @@ namespace detail
          * that you'll forgive me for being a little paranoid.
          */
         template <typename ExceptionHandlerCallable>
-        inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
+        inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& exceptionHandler)
         {
             async::spawn([]() { return; })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(exceptionHandler)));
         }
 
         template <typename ExpectedHandlerCallable, typename UnexpectedHandlerCallable, typename ExceptionThrowable>
         inline void SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(
-            ExpectedHandlerCallable&& ExpectedHandler, UnexpectedHandlerCallable&& UnexpectedHandler, ExceptionThrowable&& Throwable)
+            ExpectedHandlerCallable&& expectedHandler, UnexpectedHandlerCallable&& unexpectedHandler, ExceptionThrowable&& throwable)
         {
-            async::spawn([Throwable]() { throw Throwable; })
+            async::spawn([throwable]() { throw throwable; })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
-                    std::forward<ExpectedHandlerCallable>(ExpectedHandler), std::forward<UnexpectedHandlerCallable>(UnexpectedHandler)));
+                    std::forward<ExpectedHandlerCallable>(expectedHandler), std::forward<UnexpectedHandlerCallable>(unexpectedHandler)));
         }
 
         template <typename ExceptionHandlerCallable>
-        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
+        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(ExceptionHandlerCallable&& exceptionHandler)
         {
             async::spawn(
                 []()
                 {
-                    NullResult Result(EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
-                    LogHTTPErrorAndCancelContinuation<NullResult>("", Result);
+                    NullResult result(EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
+                    LogHTTPErrorAndCancelContinuation<NullResult>("", result);
                 })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(exceptionHandler)));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
         inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
-            IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler)
+            IntermediateStepCallable&& intermediateStep, ExceptionHandlerCallable&& exceptionHandler)
         {
             async::spawn(
                 []()
                 {
-                    NullResult Result(EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
-                    LogHTTPErrorAndCancelContinuation<NullResult>("", Result);
+                    NullResult result(EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
+                    LogHTTPErrorAndCancelContinuation<NullResult>("", result);
                 })
-                .then(std::forward<IntermediateStepCallable>(IntermediateStep))
+                .then(std::forward<IntermediateStepCallable>(intermediateStep))
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(exceptionHandler)));
         }
     }
 }

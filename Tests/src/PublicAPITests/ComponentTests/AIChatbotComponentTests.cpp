@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -44,115 +44,115 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create ai chatbot component
-    auto* AIChatbotComponent = static_cast<AIChatbotSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AIChatbot));
+    auto* aiChatbotComponent = static_cast<AIChatbotSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AIChatbot));
 
     // Ensure defaults are set
-    EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(aiChatbotComponent->GetPosition(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(AIChatbotComponent->GetVoice(), "");
+    EXPECT_EQ(aiChatbotComponent->GetVoice(), "");
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), "");
+    EXPECT_EQ(aiChatbotComponent->GetGuardrailAssetCollectionId(), "");
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Waiting);
+    EXPECT_EQ(aiChatbotComponent->GetVisualState(), AIChatbotVisualState::Waiting);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Set new values
-    csp::common::String Voice = "Zephyr";
-    csp::common::String GuardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
+    csp::common::String voice = "Zephyr";
+    csp::common::String guardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
 
-    AIChatbotComponent->SetPosition(csp::common::Vector3::One());
+    aiChatbotComponent->SetPosition(csp::common::Vector3::One());
 
-    AIChatbotComponent->SetVoice(Voice);
+    aiChatbotComponent->SetVoice(voice);
 
-    AIChatbotComponent->SetGuardrailAssetCollectionId(GuardrailAssetCollectionId);
+    aiChatbotComponent->SetGuardrailAssetCollectionId(guardrailAssetCollectionId);
 
-    AIChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
+    aiChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
 
     // Ensure values are set correctly
-    EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(aiChatbotComponent->GetPosition(), csp::common::Vector3::One());
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), GuardrailAssetCollectionId);
+    EXPECT_EQ(aiChatbotComponent->GetGuardrailAssetCollectionId(), guardrailAssetCollectionId);
 
-    EXPECT_EQ(AIChatbotComponent->GetVoice(), Voice);
+    EXPECT_EQ(aiChatbotComponent->GetVoice(), voice);
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
+    EXPECT_EQ(aiChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create ai chatbot component
-    auto* AIChatbotComponent = (AIChatbotSpaceComponent*)CreatedObject->AddComponent(ComponentType::AIChatbot);
+    auto* aiChatbotComponent = (AIChatbotSpaceComponent*)CreatedObject->AddComponent(ComponentType::AIChatbot);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
-    const std::string ScreenSharingScriptText = R"xx(
+    const std::string screenSharingScriptText = R"xx(
 		var component = ThisEntity.getAIChatbotComponents()[0];
 
 		component.position = [1, 1, 1];
@@ -161,25 +161,25 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
         component.visualState = 1;
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(ScreenSharingScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(screenSharingScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure values are set correctly
-    EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(aiChatbotComponent->GetPosition(), csp::common::Vector3::One());
 
-    EXPECT_EQ(AIChatbotComponent->GetVoice(), "Zephyr");
+    EXPECT_EQ(aiChatbotComponent->GetVoice(), "Zephyr");
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), "TEST_GUARDRAIL_ASSET_COLLECTION_ID");
+    EXPECT_EQ(aiChatbotComponent->GetGuardrailAssetCollectionId(), "TEST_GUARDRAIL_ASSET_COLLECTION_ID");
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
+    EXPECT_EQ(aiChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

@@ -33,7 +33,7 @@ public:
 
     /// @brief Sets if the component is visible when in default mode.
     /// @param InValue True if the component is visible, false otherwise.
-    virtual void SetIsVisible(bool InValue) = 0;
+    virtual void SetIsVisible(bool inValue) = 0;
 
     /// @brief Checks if the component is visible when in AR mode.
     /// @return True if the component is visible when in AR mode, false otherwise.
@@ -41,7 +41,7 @@ public:
 
     /// @brief Sets if the component is visible in AR mode.
     /// @param InValue True if the component is visible in AR mode, false otherwise.
-    virtual void SetIsARVisible(bool InValue) = 0;
+    virtual void SetIsARVisible(bool inValue) = 0;
 
     /// @brief Checks if the component is visible when in Virtual mode.
     /// @return True if the component is visible when in Virtual mode, false otherwise.
@@ -49,7 +49,7 @@ public:
 
     /// @brief Sets if the component is visible in Virtual mode.
     /// @param InValue True if the component is visible in Virtual mode, false otherwise.
-    virtual void SetIsVirtualVisible(bool InValue) = 0;
+    virtual void SetIsVirtualVisible(bool inValue) = 0;
 
 protected:
     virtual ~IVisibleComponent() = default;

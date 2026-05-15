@@ -57,7 +57,7 @@ public:
 
     /// @brief Constructs the text space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    TextSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the text  this text component refers to.
     /// @return The text this text component refers to.
@@ -65,7 +65,7 @@ public:
 
     /// @brief Sets the text this text component refers to.
     /// @param Value The text this text component refers to.
-    void SetText(const csp::common::String& Value);
+    void SetText(const csp::common::String& value);
 
     /// @brief Gets the text color.
     /// @return The text color, expected to be in RGB color space, with each value normalised between 0...1.
@@ -73,7 +73,7 @@ public:
 
     /// @brief Sets the text color.
     /// @param Value The text color, expected to be in RGB color space, with each value normalised between 0...1.
-    void SetTextColor(const csp::common::Vector3& Value);
+    void SetTextColor(const csp::common::Vector3& value);
 
     /// @brief Gets the background color that should be globally applied text associated with this component.
     /// @return The background color, expected to be in RGB color space, with each value normalised between 0...1.
@@ -81,47 +81,47 @@ public:
 
     /// @brief Sets the background color.
     /// @param Value The background color, expected to be in RGB color space, with each value normalised between 0...1.
-    void SetBackgroundColor(const csp::common::Vector3& Value);
+    void SetBackgroundColor(const csp::common::Vector3& value);
 
     /// @brief Sets the background visibility.
     /// @param Value The background visibility.
     bool GetIsBackgroundVisible() const;
     /// @brief Sets the background visibility.
     /// @param Value The background visibility.
-    void SetIsBackgroundVisible(bool InValue);
+    void SetIsBackgroundVisible(bool inValue);
 
     /// @brief Sets the Text Width.
     /// @param Value The Text Width.
     float GetWidth() const;
     /// @brief Sets the Text Width.
     /// @param Value The Text Width.
-    void SetWidth(float InValue);
+    void SetWidth(float inValue);
 
     /// @brief Sets the Text Height.
     /// @param Value The Text Height.
     float GetHeight() const;
     /// @brief Sets the Text Height.
     /// @param Value The Text Height.
-    void SetHeight(float InValue);
+    void SetHeight(float inValue);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// @brief Gets the billboard mode used by this text component.
@@ -137,15 +137,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 };
 

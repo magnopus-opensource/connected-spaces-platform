@@ -40,30 +40,30 @@ class AssetCollection;
 
 namespace ConversationSystemHelpers
 {
-    common::String GetUniqueConversationContainerAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueMessageAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueAnnotationAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueAnnotationAssetName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueAnnotationThumbnailAssetName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueAnnotationAssetFileName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::String GetUniqueAnnotationThumbnailFileName(const common::String& SpaceId, const common::String& CreatorUserId);
-    common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData);
-    common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& ConversationData);
-    common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationUpdateParams& AnnotationData,
-        const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId);
-    common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection);
-    multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& ConversationAssetCollection);
-    multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
-    multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
-    bool HasAnnotationMetadata(const AssetCollection& MessageAssetCollection);
+    common::String GetUniqueConversationContainerAssetCollectionName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueMessageAssetCollectionName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueAnnotationAssetCollectionName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueAnnotationAssetName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueAnnotationThumbnailAssetName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueAnnotationAssetFileName(const common::String& spaceId, const common::String& creatorUserId);
+    common::String GetUniqueAnnotationThumbnailFileName(const common::String& spaceId, const common::String& creatorUserId);
+    common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& messageData);
+    common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& conversationData);
+    common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationUpdateParams& annotationData,
+        const csp::common::String& annotationId, const csp::common::String& annotationThumbnailId);
+    common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& messageAssetCollection);
+    multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& conversationAssetCollection);
+    multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& messageAssetCollection);
+    multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& messageAssetCollection);
+    bool HasAnnotationMetadata(const AssetCollection& messageAssetCollection);
     CSP_NO_EXPORT std::unordered_map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(
-        const AssetCollectionsResult& Result);
+        const AssetCollectionsResult& result);
 
     csp::common::Array<common::ReplicatedValue> MessageInfoToReplicatedValueArray(
-        csp::multiplayer::ConversationEventType MessageName, const multiplayer::MessageInfo& MessageInfo);
+        csp::multiplayer::ConversationEventType messageName, const multiplayer::MessageInfo& messageInfo);
 
-    void AppendMetadata(csp::common::Map<csp::common::String, csp::common::String>& MetadataToUpdate,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadataValues);
+    void AppendMetadata(csp::common::Map<csp::common::String, csp::common::String>& metadataToUpdate,
+        const csp::common::Map<csp::common::String, csp::common::String>& newMetadataValues);
 }
 
 } // namespace csp::multiplayer

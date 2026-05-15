@@ -31,22 +31,22 @@ namespace chs = csp::services::generated::aggregationservice;
 
 namespace
 {
-std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId,
-    const Array<String>& Items, const csp::common::Map<csp::common::String, csp::common::String>& MetaData)
+std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& sequenceKey, const String& referenceType, const String& referenceId,
+    const Array<String>& items, const csp::common::Map<csp::common::String, csp::common::String>& metaData)
 {
-    auto SequenceInfo = std::make_shared<chs::SequenceDto>();
-    SequenceInfo->SetKey(csp::common::Encode::URI(SequenceKey)); // We encode the sequence key in order to allow keys to include reserved characters.
-    SequenceInfo->SetReferenceType(ReferenceType);
-    SequenceInfo->SetReferenceId(ReferenceId);
-    SequenceInfo->SetItems(Convert(Items));
-    SequenceInfo->SetMetadata(Convert(MetaData));
+    auto sequenceInfo = std::make_shared<chs::SequenceDto>();
+    sequenceInfo->SetKey(csp::common::Encode::URI(sequenceKey)); // We encode the sequence key in order to allow keys to include reserved characters.
+    sequenceInfo->SetReferenceType(referenceType);
+    sequenceInfo->SetReferenceId(referenceId);
+    sequenceInfo->SetItems(Convert(items));
+    sequenceInfo->SetMetadata(Convert(metaData));
 
-    return SequenceInfo;
+    return sequenceInfo;
 }
 
-bool ValidateKey(const String& Key)
+bool ValidateKey(const String& key)
 {
-    std::string str = Key.c_str();
+    std::string str = key.c_str();
     if (str.find("/") != std::string::npos)
     {
         return false;
@@ -66,288 +66,288 @@ bool ValidateKey(const String& Key)
 
 namespace csp::systems
 {
-void SequenceSystem::CreateSequence(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items,
-    const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback)
+void SequenceSystem::CreateSequence(const String& sequenceKey, const String& referenceType, const String& referenceId, const Array<String>& items,
+    const csp::common::Map<csp::common::String, csp::common::String>& metaData, SequenceResultCallback callback)
 {
-    if (!ValidateKey(SequenceKey))
+    if (!ValidateKey(sequenceKey))
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", sequenceKey.c_str());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
 
-    const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
+    const auto sequenceInfo = CreateSequenceDto(sequenceKey, referenceType, referenceId, items, metaData);
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_sequenceApi->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(callback, nullptr);
 
-    static_cast<chs::SequenceApi*>(SequenceAPI)
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
         ->sequencesPut(
             {
                 std::nullopt, // NewKey
-                SequenceInfo // Dto
+                sequenceInfo // Dto
             },
-            ResponseHandler, // ResponseHandler
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
 }
 
-void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items,
-    const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback)
+void SequenceSystem::UpdateSequence(const String& sequenceKey, const String& referenceType, const String& referenceId, const Array<String>& items,
+    const csp::common::Map<csp::common::String, csp::common::String>& metaData, SequenceResultCallback callback)
 {
-    if (!ValidateKey(SequenceKey))
+    if (!ValidateKey(sequenceKey))
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", sequenceKey.c_str());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
 
-    const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
+    const auto sequenceInfo = CreateSequenceDto(sequenceKey, referenceType, referenceId, items, metaData);
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_sequenceApi->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(callback, nullptr);
 
-    static_cast<chs::SequenceApi*>(SequenceAPI)
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
         ->sequencesPut(
             {
-                csp::common::Encode::URI(SequenceKey), // NewKey
-                SequenceInfo // Dto
+                csp::common::Encode::URI(sequenceKey), // NewKey
+                sequenceInfo // Dto
             },
-            ResponseHandler, // ResponseHandler
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
 }
 
-void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& NewSequenceKey, SequenceResultCallback Callback)
+void SequenceSystem::RenameSequence(const String& oldSequenceKey, const String& newSequenceKey, SequenceResultCallback callback)
 {
-    if (!ValidateKey(OldSequenceKey))
+    if (!ValidateKey(oldSequenceKey))
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", OldSequenceKey.c_str());
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+            "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", oldSequenceKey.c_str());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
-    if (!ValidateKey(NewSequenceKey))
+    if (!ValidateKey(newSequenceKey))
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", NewSequenceKey.c_str());
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+            "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", newSequenceKey.c_str());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
 
-    auto CB = [Callback, NewSequenceKey, this](const SequenceResult& Result)
+    auto cb = [callback, newSequenceKey, this](const SequenceResult& result)
     {
-        if (Result.GetResultCode() != csp::systems::EResultCode::Success)
+        if (result.GetResultCode() != csp::systems::EResultCode::Success)
         {
-            Callback(Result);
+            callback(result);
             return;
         }
 
-        csp::services::ResponseHandlerPtr ResponseHandler
-            = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+        csp::services::ResponseHandlerPtr responseHandler
+            = m_sequenceApi->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(callback, nullptr);
 
-        const auto Sequence = Result.GetSequence();
+        const auto sequence = result.GetSequence();
 
-        const auto SequenceInfo = CreateSequenceDto(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Sequence.Items, Sequence.MetaData);
+        const auto sequenceInfo = CreateSequenceDto(sequence.Key, sequence.ReferenceType, sequence.ReferenceId, sequence.Items, sequence.MetaData);
 
-        static_cast<chs::SequenceApi*>(SequenceAPI)
+        static_cast<chs::SequenceApi*>(m_sequenceApi)
             ->sequencesPut(
                 {
-                    csp::common::Encode::URI(NewSequenceKey), // NewKey
-                    SequenceInfo // Dto
+                    csp::common::Encode::URI(newSequenceKey), // NewKey
+                    sequenceInfo // Dto
                 },
-                ResponseHandler, // ResponseHandler
+                responseHandler, // ResponseHandler
                 CancellationToken::Dummy() // CancellationToken
             );
     };
 
-    GetSequence(OldSequenceKey, CB);
+    GetSequence(oldSequenceKey, cb);
 }
 
-void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys, const Optional<String>& InKeyRegex,
-    const Optional<String>& InReferenceType, const Array<String>& InReferenceIds,
-    const csp::common::Map<csp::common::String, csp::common::String>& /*MetaData*/, SequencesResultCallback Callback)
+void SequenceSystem::GetSequencesByCriteria(const Array<String>& inSequenceKeys, const Optional<String>& inKeyRegex,
+    const Optional<String>& inReferenceType, const Array<String>& inReferenceIds,
+    const csp::common::Map<csp::common::String, csp::common::String>& /*MetaData*/, SequencesResultCallback callback)
 {
-    Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
-    for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+    Array<String> encodedSequenceKeys(inSequenceKeys.Size());
+    for (size_t i = 0; i < inSequenceKeys.Size(); i++)
     {
-        if (!ValidateKey(InSequenceKeys[i]))
+        if (!ValidateKey(inSequenceKeys[i]))
         {
             CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", InSequenceKeys[i].c_str());
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+                "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", inSequenceKeys[i].c_str());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
             return;
         }
 
         // We URI-encode sequence keys to support reserved characters.
-        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
+        encodedSequenceKeys[i] = csp::common::Encode::URI(inSequenceKeys[i]);
     }
 
     // Regexes may also include reserved characters which require encoding.
-    Optional<String> Regex;
-    if (InKeyRegex.HasValue())
+    Optional<String> regex;
+    if (inKeyRegex.HasValue())
     {
-        Regex = csp::common::Encode::URI(*InKeyRegex);
+        regex = csp::common::Encode::URI(*inKeyRegex);
     }
 
-    if ((InReferenceType.HasValue() && InReferenceIds.IsEmpty()) || (!InReferenceIds.IsEmpty() && !InReferenceType.HasValue()))
+    if ((inReferenceType.HasValue() && inReferenceIds.IsEmpty()) || (!inReferenceIds.IsEmpty() && !inReferenceType.HasValue()))
     {
         CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
 
-    std::optional<std::vector<String>> SequenceKeys = Convert(EncodedSequenceKeys);
-    std::optional<String> KeyRegex = Convert(Regex);
-    std::optional<String> ReferenceType = Convert(InReferenceType);
-    std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
+    std::optional<std::vector<String>> sequenceKeys = Convert(encodedSequenceKeys);
+    std::optional<String> keyRegex = Convert(regex);
+    std::optional<String> referenceType = Convert(inReferenceType);
+    std::optional<std::vector<String>> referenceIds = Convert(inReferenceIds);
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_sequenceApi->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(callback, nullptr);
 
-    static_cast<chs::SequenceApi*>(SequenceAPI)
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
         ->sequencesGet(
             {
-                SequenceKeys, // Keys
-                KeyRegex, // Regex
-                ReferenceType, // ReferenceType
-                ReferenceIds, // ReferenceIds
+                sequenceKeys, // Keys
+                keyRegex, // Regex
+                referenceType, // ReferenceType
+                referenceIds, // ReferenceIds
                 std::nullopt, // Items
                 std::nullopt, // MetaData
                 std::nullopt, // Skip
                 std::nullopt // Limit
             },
-            ResponseHandler, // ResponseHandler
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
 }
 
 void SequenceSystem::GetAllSequencesContainingItems(
-    const Array<String>& InItems, const Optional<String>& InReferenceType, const Array<String>& InReferenceIds, SequencesResultCallback Callback)
+    const Array<String>& inItems, const Optional<String>& inReferenceType, const Array<String>& inReferenceIds, SequencesResultCallback callback)
 {
-    std::optional<std::vector<String>> Items = Convert(InItems);
-    std::optional<String> ReferenceType = Convert(InReferenceType);
-    std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
+    std::optional<std::vector<String>> items = Convert(inItems);
+    std::optional<String> referenceType = Convert(inReferenceType);
+    std::optional<std::vector<String>> referenceIds = Convert(inReferenceIds);
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_sequenceApi->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(callback, nullptr);
 
-    static_cast<chs::SequenceApi*>(SequenceAPI)
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
         ->sequencesGet(
             {
                 std::nullopt, // Keys
                 std::nullopt, // Regex
-                ReferenceType, // ReferenceType
-                ReferenceIds, // ReferenceIds
-                Items, // Items
+                referenceType, // ReferenceType
+                referenceIds, // ReferenceIds
+                items, // Items
                 std::nullopt, // MetaData
                 std::nullopt, // Skip
                 std::nullopt // Limit
             },
-            ResponseHandler, // ResponseHandler
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
 }
 
-void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallback Callback)
+void SequenceSystem::GetSequence(const String& sequenceKey, SequenceResultCallback callback)
 {
-    if (!ValidateKey(SequenceKey))
+    if (!ValidateKey(sequenceKey))
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+            "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", sequenceKey.c_str());
+        INVOKE_IF_NOT_NULL(callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_sequenceApi->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(callback, nullptr);
 
-    static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesKeysKeyGet({ csp::common::Encode::URI(SequenceKey, true) }, // Key
-            ResponseHandler, // ResponseHandler
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
+        ->sequencesKeysKeyGet({ csp::common::Encode::URI(sequenceKey, true) }, // Key
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
 }
 
-void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullResultCallback Callback)
+void SequenceSystem::DeleteSequences(const Array<String>& inSequenceKeys, NullResultCallback callback)
 {
-    Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
-    for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+    Array<String> encodedSequenceKeys(inSequenceKeys.Size());
+    for (size_t i = 0; i < inSequenceKeys.Size(); i++)
     {
-        if (!ValidateKey(InSequenceKeys[i]))
+        if (!ValidateKey(inSequenceKeys[i]))
         {
             CSP_LOG_FORMAT(csp::common::LogLevel::Error,
                 "Cannot delete Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"",
-                InSequenceKeys[i].c_str());
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+                inSequenceKeys[i].c_str());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
             return;
         }
 
         // We URI-encode sequence keys to support reserved characters.
-        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
+        encodedSequenceKeys[i] = csp::common::Encode::URI(inSequenceKeys[i]);
     }
-    csp::services::ResponseHandlerPtr ResponseHandler = SequenceAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+    csp::services::ResponseHandlerPtr responseHandler = m_sequenceApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    std::vector<String> SequenceKeys = Convert(EncodedSequenceKeys);
-    static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesKeysDelete({ SequenceKeys }, // Keys
-            ResponseHandler, // ResponseHandler
+    std::vector<String> sequenceKeys = Convert(encodedSequenceKeys);
+    static_cast<chs::SequenceApi*>(m_sequenceApi)
+        ->sequencesKeysDelete({ sequenceKeys }, // Keys
+            responseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken)
         );
 }
 
 SequenceSystem::SequenceSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , SequenceAPI(nullptr)
+    , m_sequenceApi(nullptr)
 {
 }
 
-SequenceSystem::SequenceSystem(web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(WebClient, &EventBus, &LogSystem)
+SequenceSystem::SequenceSystem(web::WebClient* webClient, multiplayer::NetworkEventBus& eventBus, csp::common::LogSystem& logSystem)
+    : SystemBase(webClient, &eventBus, &logSystem)
 {
-    SequenceAPI = new chs::SequenceApi(WebClient);
+    m_sequenceApi = new chs::SequenceApi(webClient);
 
     RegisterSystemCallback();
 }
 
-SequenceSystem::~SequenceSystem() { delete (SequenceAPI); }
+SequenceSystem::~SequenceSystem() { delete (m_sequenceApi); }
 
-void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
+void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler callback)
 {
-    SequenceChangedCallback = Callback;
+    m_sequenceChangedCallback = callback;
     RegisterSystemCallback();
 }
 
 void SequenceSystem::RegisterSystemCallback()
 {
-    if (!EventBusPtr)
+    if (!m_eventBusPtr)
     {
         CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
-    if (!SequenceChangedCallback)
+    if (!m_sequenceChangedCallback)
     {
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
+    m_eventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& networkEventData) { this->OnSequenceChangedEvent(networkEventData); });
 }
 
-void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
+void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& networkEventData)
 {
     // This event may either represent a default sequence or a hotspot sequence. Here we are only concerned with default sequences.
-    const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
+    const auto& sequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(networkEventData);
 
-    if (SequenceEvent.SequenceType == csp::common::ESequenceType::Default && SequenceChangedCallback)
+    if (sequenceEvent.SequenceType == csp::common::ESequenceType::Default && m_sequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
-        SequenceChangedCallback(SequenceEvent);
+        m_sequenceChangedCallback(sequenceEvent);
     }
 }
 

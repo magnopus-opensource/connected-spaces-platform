@@ -19,37 +19,37 @@ namespace csp::web
 {
 
 HttpResponse::HttpResponse()
-    : ResponseCode(EResponseCodes::ResponseNotFound)
-    , Request(nullptr)
+    : m_responseCode(EResponseCodes::ResponseNotFound)
+    , m_request(nullptr)
 {
 }
 
-HttpResponse::HttpResponse(HttpRequest* InRequest)
-    : ResponseCode(EResponseCodes::ResponseNotFound)
-    , Request(InRequest)
+HttpResponse::HttpResponse(HttpRequest* inRequest)
+    : m_responseCode(EResponseCodes::ResponseNotFound)
+    , m_request(inRequest)
 {
 }
 
 HttpResponse::~HttpResponse() { }
 
-void HttpResponse::SetResponseCode(EResponseCodes InReponseCode) { ResponseCode = InReponseCode; }
+void HttpResponse::SetResponseCode(EResponseCodes inReponseCode) { m_responseCode = inReponseCode; }
 
-EResponseCodes HttpResponse::GetResponseCode() const { return ResponseCode; }
+EResponseCodes HttpResponse::GetResponseCode() const { return m_responseCode; }
 
-HttpPayload& HttpResponse::GetMutablePayload() { return Payload; }
+HttpPayload& HttpResponse::GetMutablePayload() { return m_payload; }
 
-const HttpPayload& HttpResponse::GetPayload() const { return Payload; }
+const HttpPayload& HttpResponse::GetPayload() const { return m_payload; }
 
-HttpRequest* HttpResponse::GetRequest() const { return Request; }
+HttpRequest* HttpResponse::GetRequest() const { return m_request; }
 
 void HttpResponse::Reset()
 {
-    ResponseCode = EResponseCodes::ResponseNotFound;
-    Payload.Reset();
+    m_responseCode = EResponseCodes::ResponseNotFound;
+    m_payload.Reset();
 }
 
-HttpProgress& HttpResponse::GetProgress() { return Progress; }
+HttpProgress& HttpResponse::GetProgress() { return m_progress; }
 
-const HttpProgress& HttpResponse::GetProgress() const { return Progress; }
+const HttpProgress& HttpResponse::GetProgress() const { return m_progress; }
 
 } // namespace csp::web

@@ -43,7 +43,7 @@ class Process;
 class MultiplayerTestRunnerProcess
 {
 public:
-    MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier _TestToRun);
+    MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier testToRun);
     ~MultiplayerTestRunnerProcess();
 
     /* Copying this object copies all the configuration data, but does nothing
@@ -65,11 +65,11 @@ public:
        when doing multi-client tests, or you'll get lots of clients in
        isolated spaces.
        */
-    MultiplayerTestRunnerProcess& SetLoginEmail(std::string Email);
-    MultiplayerTestRunnerProcess& SetPassword(std::string Password);
-    MultiplayerTestRunnerProcess& SetSpaceId(std::string SpaceId);
-    MultiplayerTestRunnerProcess& SetTimeoutInSeconds(int TimeoutInSeconds);
-    MultiplayerTestRunnerProcess& SetEndpoint(std::string Endpoint);
+    MultiplayerTestRunnerProcess& SetLoginEmail(std::string email);
+    MultiplayerTestRunnerProcess& SetPassword(std::string password);
+    MultiplayerTestRunnerProcess& SetSpaceId(std::string spaceId);
+    MultiplayerTestRunnerProcess& SetTimeoutInSeconds(int timeoutInSeconds);
+    MultiplayerTestRunnerProcess& SetEndpoint(std::string endpoint);
 
     /* Getters. Mostly for testing, but handy.
        Return null optionals if values have not been set. */
@@ -104,22 +104,22 @@ public:
 
 private:
     // These promises set via parsing stdout for process descriptors.
-    std::promise<void> LoggedInPromise;
-    std::promise<void> JoinedSpacePromise;
-    std::promise<void> ReadyForAssertionsPromise;
-    std::promise<void> ExitSpacePromise;
-    std::promise<void> LoggedOutPromise;
+    std::promise<void> m_loggedInPromise;
+    std::promise<void> m_joinedSpacePromise;
+    std::promise<void> m_readyForAssertionsPromise;
+    std::promise<void> m_exitSpacePromise;
+    std::promise<void> m_loggedOutPromise;
 
     // The test we are telling the multiplayer test runner to invoke. Set on construction. Non-optional.
-    MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun;
-    std::string LoginEmail;
-    std::string Password;
+    MultiplayerTestRunner::TestIdentifiers::TestIdentifier m_testToRun;
+    std::string m_loginEmail;
+    std::string m_password;
 
     // Optional parameters, MultiplayerTestRunner has default behaviour if not set
-    std::optional<std::string> SpaceId;
-    std::optional<int> TimeoutInSeconds;
-    std::optional<std::string> Endpoint;
+    std::optional<std::string> m_spaceId;
+    std::optional<int> m_timeoutInSeconds;
+    std::optional<std::string> m_endpoint;
 
     // Created in StartProcess
-    std::unique_ptr<TinyProcessLib::Process> ProcessHandle;
+    std::unique_ptr<TinyProcessLib::Process> m_processHandle;
 };

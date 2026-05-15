@@ -22,27 +22,27 @@ namespace csp::systems
 {
 
 SystemBase::SystemBase()
-    : WebClient(nullptr)
-    , EventBusPtr(nullptr)
-    , LogSystem(nullptr)
+    : m_webClient(nullptr)
+    , m_eventBusPtr(nullptr)
+    , m_logSystem(nullptr)
 {
 }
 
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
-    : WebClient(InWebClient)
-    , EventBusPtr(EventBus)
-    , LogSystem(LogSystem)
+SystemBase::SystemBase(csp::web::WebClient* inWebClient, csp::multiplayer::NetworkEventBus* eventBus, csp::common::LogSystem* logSystem)
+    : m_webClient(inWebClient)
+    , m_eventBusPtr(eventBus)
+    , m_logSystem(logSystem)
 {
 }
 
-SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
-    : WebClient(nullptr)
-    , EventBusPtr(EventBus)
-    , LogSystem(LogSystem)
+SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* eventBus, csp::common::LogSystem* logSystem)
+    : m_webClient(nullptr)
+    , m_eventBusPtr(eventBus)
+    , m_logSystem(logSystem)
 {
 }
 
-SystemBase::~SystemBase() { EventBusPtr = nullptr; }
+SystemBase::~SystemBase() { m_eventBusPtr = nullptr; }
 
 void SystemBase::RegisterSystemCallback()
 {

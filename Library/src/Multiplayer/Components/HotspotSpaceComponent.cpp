@@ -71,8 +71,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& HotspotSpaceComponent::GetSchema() { return Schema; }
 
-HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
     SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }
@@ -82,26 +82,26 @@ const csp::common::String& HotspotSpaceComponent::GetName() const
     return GetStringProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED));
 }
 
-void HotspotSpaceComponent::SetName(const csp::common::String& Value)
+void HotspotSpaceComponent::SetName(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED), Value);
+    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED), value);
 }
 
 bool HotspotSpaceComponent::GetIsTeleportPoint() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint)); }
 
-void HotspotSpaceComponent::SetIsTeleportPoint(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint), Value); }
+void HotspotSpaceComponent::SetIsTeleportPoint(bool value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint), value); }
 
 bool HotspotSpaceComponent::GetIsSpawnPoint() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint)); }
 
-void HotspotSpaceComponent::SetIsSpawnPoint(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint), Value); }
+void HotspotSpaceComponent::SetIsSpawnPoint(bool value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint), value); }
 
 csp::common::String HotspotSpaceComponent::GetUniqueComponentId() const
 {
-    csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
-    UniqueComponentId += ":";
-    UniqueComponentId += std::to_string(Id).c_str();
+    csp::common::String uniqueComponentId = std::to_string(m_parent->GetId()).c_str();
+    uniqueComponentId += ":";
+    uniqueComponentId += std::to_string(m_id).c_str();
 
-    return UniqueComponentId;
+    return uniqueComponentId;
 }
 
 /* IPositionComponent */
@@ -111,9 +111,9 @@ const csp::common::Vector3& HotspotSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(HotspotPropertyKeys::Position));
 }
 
-void HotspotSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void HotspotSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Position), value);
 }
 
 /* IRotationComponent */
@@ -123,23 +123,23 @@ const csp::common::Vector4& HotspotSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(HotspotPropertyKeys::Rotation));
 }
 
-void HotspotSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void HotspotSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Rotation), value);
 }
 
 /* IVisibleComponent */
 
 bool HotspotSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)); }
 
-void HotspotSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVisible), Value); }
+void HotspotSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVisible), value); }
 
 bool HotspotSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)); }
 
-void HotspotSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value); }
+void HotspotSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), value); }
 
 bool HotspotSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible)); }
 
-void HotspotSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible), Value); }
+void HotspotSpaceComponent::SetIsVirtualVisible(bool value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible), value); }
 
 } // namespace csp::multiplayer

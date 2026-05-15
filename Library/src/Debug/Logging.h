@@ -59,16 +59,16 @@ namespace csp::profile
 {
 constexpr const int CSP_MAX_LOG_FORMAT_LEN = 1024;
 
-template <typename... Args> void LogMsg(const csp::common::LogLevel Level, const csp::common::String& FormatStr, Args... args)
+template <typename... Args> void LogMsg(const csp::common::LogLevel level, const csp::common::String& formatStr, Args... args)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
-        if (csp::systems::SystemsManager::Get().GetLogSystem()->LoggingEnabled(Level))
+        if (csp::systems::SystemsManager::Get().GetLogSystem()->LoggingEnabled(level))
         {
-            char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
-            csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
+            char markerString[CSP_MAX_LOG_FORMAT_LEN];
+            csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, markerString, CSP_MAX_LOG_FORMAT_LEN - 1, formatStr, args...);
 
-            csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(Level, MarkerString);
+            csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(level, markerString);
         }
     }
 }
@@ -102,38 +102,38 @@ template <typename... Args> void LogMsg(const csp::common::LogLevel Level, const
 class ScopedProfiler
 {
 public:
-    ScopedProfiler(const char* Tag)
+    ScopedProfiler(const char* tag)
     {
         if (csp::CSPFoundation::GetIsInitialised())
         {
-            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(csp::common::String(Tag));
+            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(csp::common::String(tag));
         }
     }
 
-    ScopedProfiler(const csp::common::String& Tag)
+    ScopedProfiler(const csp::common::String& tag)
     {
         if (csp::CSPFoundation::GetIsInitialised())
         {
-            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(Tag);
+            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(tag);
         }
     }
 
-    ScopedProfiler(const std::string& Tag)
+    ScopedProfiler(const std::string& tag)
     {
         if (csp::CSPFoundation::GetIsInitialised())
         {
-            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(Tag.c_str());
+            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(tag.c_str());
         }
     }
 
-    template <typename... Args> ScopedProfiler(const csp::common::String& FormatStr, Args... args)
+    template <typename... Args> ScopedProfiler(const csp::common::String& formatStr, Args... args)
     {
         if (csp::CSPFoundation::GetIsInitialised())
         {
-            char MsgString[CSP_MAX_LOG_FORMAT_LEN];
-            csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MsgString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
+            char msgString[CSP_MAX_LOG_FORMAT_LEN];
+            csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, msgString, CSP_MAX_LOG_FORMAT_LEN - 1, formatStr, args...);
 
-            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(MsgString);
+            csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(msgString);
         }
     }
 
@@ -146,40 +146,40 @@ public:
     }
 };
 
-inline std::string TrimFunctionTag(const std::string& Tag)
+inline std::string TrimFunctionTag(const std::string& tag)
 {
-    const size_t TrimStart = Tag.find("csp::");
-    if (TrimStart != std::string::npos)
+    const size_t trimStart = tag.find("csp::");
+    if (trimStart != std::string::npos)
     {
-        const size_t TrimLength = Tag.find_first_of('(') - TrimStart;
-        return Tag.substr(TrimStart, TrimLength);
+        const size_t trimLength = tag.find_first_of('(') - trimStart;
+        return tag.substr(trimStart, trimLength);
     }
     else
     {
-        const size_t TrimLength = Tag.find_first_of('(');
-        return Tag.substr(0, TrimLength);
+        const size_t trimLength = tag.find_first_of('(');
+        return tag.substr(0, trimLength);
     }
 }
 
-template <typename... Args> void BeginMarker(const csp::common::String& FormatStr, Args... args)
+template <typename... Args> void BeginMarker(const csp::common::String& formatStr, Args... args)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
-        char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
-        csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
+        char markerString[CSP_MAX_LOG_FORMAT_LEN];
+        csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, markerString, CSP_MAX_LOG_FORMAT_LEN - 1, formatStr, args...);
 
-        csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(MarkerString);
+        csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(markerString);
     }
 }
 
-template <typename... Args> void LogEvent(const csp::common::String& FormatStr, Args... args)
+template <typename... Args> void LogEvent(const csp::common::String& formatStr, Args... args)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
-        char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
-        csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
+        char markerString[CSP_MAX_LOG_FORMAT_LEN];
+        csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, markerString, CSP_MAX_LOG_FORMAT_LEN - 1, formatStr, args...);
 
-        csp::systems::SystemsManager::Get().GetLogSystem()->LogEvent(MarkerString);
+        csp::systems::SystemsManager::Get().GetLogSystem()->LogEvent(markerString);
     }
 }
 

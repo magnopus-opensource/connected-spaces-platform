@@ -77,19 +77,19 @@ public:
     /// @return MaintenanceInfo : what the platform considers to be a default maintenance window
     [[nodiscard]] const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
 
-    CSP_NO_EXPORT MaintenanceInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT MaintenanceInfoResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     MaintenanceInfoResult() {};
     MaintenanceInfoResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-    csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
+    csp::common::Array<MaintenanceInfo> m_maintenanceInfoResponses;
 };
 
-typedef std::function<void(const MaintenanceInfoResult& Result)> MaintenanceInfoCallback;
+typedef std::function<void(const MaintenanceInfoResult& result)> MaintenanceInfoCallback;
 
-void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos);
+void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& maintenanceInfos);
 
 } // namespace csp::systems

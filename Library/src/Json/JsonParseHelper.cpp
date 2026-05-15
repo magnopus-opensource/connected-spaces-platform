@@ -24,30 +24,30 @@ namespace csp::json
 
 const size_t PARSE_ERROR_CONTEXT_CHARS = 20;
 
-rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& Document, const csp::common::String& JsonString, const char* LogPrefix)
+rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& document, const csp::common::String& jsonString, const char* logPrefix)
 {
-    rapidjson::ParseResult ok = Document.Parse(JsonString.c_str());
+    rapidjson::ParseResult ok = document.Parse(jsonString.c_str());
     if (!ok)
     {
         // Log the error with some context around where in the string the error occurred.
-        const size_t Offset = ok.Offset();
-        const size_t TotalLen = JsonString.Length();
-        const size_t Start = Offset > PARSE_ERROR_CONTEXT_CHARS ? Offset - PARSE_ERROR_CONTEXT_CHARS : 0;
-        size_t End = Offset + PARSE_ERROR_CONTEXT_CHARS;
-        if (End > TotalLen)
+        const size_t offset = ok.Offset();
+        const size_t totalLen = jsonString.Length();
+        const size_t start = offset > PARSE_ERROR_CONTEXT_CHARS ? offset - PARSE_ERROR_CONTEXT_CHARS : 0;
+        size_t end = offset + PARSE_ERROR_CONTEXT_CHARS;
+        if (end > totalLen)
         {
-            End = TotalLen;
+            end = totalLen;
         }
 
-        const std::string Excerpt(JsonString.c_str() + Start, End - Start);
+        const std::string excerpt(jsonString.c_str() + start, end - start);
 
-        CSP_LOG_ERROR_FORMAT("Error: %s: JSON parse error: %s (at offset %zu). Context: %s", LogPrefix, rapidjson::GetParseError_En(ok.Code()),
-            ok.Offset(), Excerpt.c_str());
+        CSP_LOG_ERROR_FORMAT("Error: %s: JSON parse error: %s (at offset %zu). Context: %s", logPrefix, rapidjson::GetParseError_En(ok.Code()),
+            ok.Offset(), excerpt.c_str());
     }
 
     // Return the document to follow the chaining pattern from rapidjson.
     // The document will be in an invalid state if parsing failed.
-    return Document;
+    return document;
 }
 
 } // namespace csp::json

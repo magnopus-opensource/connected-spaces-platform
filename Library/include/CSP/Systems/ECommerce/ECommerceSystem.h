@@ -53,36 +53,36 @@ public:
     /// @param SpaceId csp::common::String : space id of product
     /// @param ProductId csp::common::String : Product id of product
     /// @param Callback ProductInfoResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void GetProductInformation(const common::String& spaceId, const common::String& productId, ProductInfoResultCallback callback);
 
     /// @brief Get product information from a shopify store within a space, by providing an array of VariantIds
     /// @param SpaceId csp::common::String : space id of product
     /// @param VariantIds csp::common::Array<csp::common::String> : Variant ids to search for
     /// @param Callback ProductInfoCollectionResultCallback : callback containing collection of product info when asynchronous task finishes
     CSP_ASYNC_RESULT void GetProductInfoCollectionByVariantIds(
-        const common::String& SpaceId, const csp::common::Array<csp::common::String>& VariantIds, ProductInfoCollectionResultCallback Callback);
+        const common::String& spaceId, const csp::common::Array<csp::common::String>& variantIds, ProductInfoCollectionResultCallback callback);
 
     /// @brief Get checkout information from a shopify store within a space
     /// @param SpaceId csp::common::String : space id of the cart
     /// @param CartId csp::common::String : id of Cart being checked out
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void GetCheckoutInformation(const common::String& spaceId, const common::String& cartId, CheckoutInfoResultCallback callback);
 
     /// @brief Creates a cart for the current user in the given space.
     /// @param SpaceId csp::common::String : ID of the space to create the cart for.
     /// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateCart(const common::String& spaceId, CartInfoResultCallback callback);
 
     /// @brief Gets a cart for the current user in the given space.
     /// @param SpaceId csp::common::String : ID of the space the cart belongs to.
     /// @param CartId csp::common::String : ID of the cart.
     /// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void GetCart(const common::String& spaceId, const common::String& cartId, CartInfoResultCallback callback);
 
     /// @brief Gets all shopify stores for the given user.
     /// @param IsActive csp::common::Optional<bool> : optional bool for filtering returned stores by active status.
     /// @param Callback GetShopifyStoresResultCallback : Callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetShopifyStores(const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback);
+    CSP_ASYNC_RESULT void GetShopifyStores(const csp::common::Optional<bool>& isActive, GetShopifyStoresResultCallback callback);
 
     /// @brief Adds a Shopify store to a space.
     /// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
@@ -90,8 +90,8 @@ public:
     /// @param IsEcommerceActive bool : Bool to set the ecommerce system status on creation.
     /// @param PrivateAccessToken csp::common::String : The access token for the shopify storefront.
     /// @param Callback AddShopifyStoreResultCallback : Callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddShopifyStore(const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive,
-        const common::String& PrivateAccessToken, AddShopifyStoreResultCallback Callback);
+    CSP_ASYNC_RESULT void AddShopifyStore(const common::String& storeName, const common::String& spaceId, const bool isEcommerceActive,
+        const common::String& privateAccessToken, AddShopifyStoreResultCallback callback);
 
     /// @brief Sets a store to be enabled or disabled in a space.
     /// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
@@ -99,26 +99,26 @@ public:
     /// @param IsEcommerceActive bool : Bool to set the ecommerce system status to.
     /// @param Callback SetECommerceActiveResultCallback : Callback when asynchronous task finishes
     CSP_ASYNC_RESULT void SetECommerceActiveInSpace(
-        const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive, SetECommerceActiveResultCallback Callback);
+        const common::String& storeName, const common::String& spaceId, const bool isEcommerceActive, SetECommerceActiveResultCallback callback);
 
     /// @brief Validates a shopify store given a store name and an access token.
     /// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
     /// @param PrivateAccessToken csp::common::String : The access token for the shopify storefront.
     /// @param Callback ValidateShopifyStoreResultCallback : Callback when asynchronous task finishes
     CSP_ASYNC_RESULT void ValidateShopifyStore(
-        const common::String& StoreName, const common::String& PrivateAccessToken, ValidateShopifyStoreResultCallback Callback);
+        const common::String& storeName, const common::String& privateAccessToken, ValidateShopifyStoreResultCallback callback);
 
     /// @brief Update cart information from a shopify store within a space
     /// @param CartInformation CartInfo : Updated Cart Object.
     /// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& cartInformation, CartInfoResultCallback callback);
 
 private:
     ECommerceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~ECommerceSystem();
 
-    csp::services::ApiBase* ShopifyAPI;
+    csp::services::ApiBase* m_shopifyApi;
 };
 
 } // namespace csp::systems

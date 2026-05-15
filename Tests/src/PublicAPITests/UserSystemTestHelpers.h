@@ -23,31 +23,31 @@ const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
 // The implementation for all this is in UserSystemTests.cpp, if you can believe it.
 
-void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, const csp::common::String& Email,
-    const csp::common::String& Password, bool CreateMultiplayerConnection = true, bool AgeVerified = true,
-    const csp::systems::TokenOptions& TokenOptions = csp::systems::TokenOptions(),
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
+void LogIn(csp::systems::UserSystem* userSystem, csp::common::String& outUserId, const csp::common::String& email,
+    const csp::common::String& password, bool createMultiplayerConnection = true, bool ageVerified = true,
+    const csp::systems::TokenOptions& tokenOptions = csp::systems::TokenOptions(),
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success,
+    csp::systems::ERequestFailureReason expectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
-void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
-    const csp::systems::TokenOptions& TokenOptions = csp::systems::TokenOptions(),
-    csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
+void LogInAsGuest(csp::systems::UserSystem* userSystem, csp::common::String& outUserId, bool createMultiplayerConnection = true,
+    const csp::systems::TokenOptions& tokenOptions = csp::systems::TokenOptions(),
+    csp::systems::EResultCode expectedResult = csp::systems::EResultCode::Success);
 
-void LogInAsGuestWithDeferredProfileCreation(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
-    csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
+void LogInAsGuestWithDeferredProfileCreation(csp::systems::UserSystem* userSystem, csp::common::String& outUserId,
+    csp::systems::EResultCode expectedResult = csp::systems::EResultCode::Success);
 
-void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
-    bool AgeVerified = true, csp::systems::TokenOptions TokenOptions = csp::systems::TokenOptions(),
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
+void LogInAsNewTestUser(csp::systems::UserSystem* userSystem, csp::common::String& outUserId, bool createMultiplayerConnection = true,
+    bool ageVerified = true, csp::systems::TokenOptions tokenOptions = csp::systems::TokenOptions(),
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success,
+    csp::systems::ERequestFailureReason expectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
-void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
-    bool AgeVerified = true, csp::systems::TokenOptions TokenOptions = csp::systems::TokenOptions(),
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
+void LogInAsAdminUser(csp::systems::UserSystem* userSystem, csp::common::String& outUserId, bool createMultiplayerConnection = true,
+    bool ageVerified = true, csp::systems::TokenOptions tokenOptions = csp::systems::TokenOptions(),
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success,
+    csp::systems::ERequestFailureReason expectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
-void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);
+void LogOut(csp::systems::UserSystem* userSystem, csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success);
 
 csp::systems::Profile CreateTestUser();
 
-csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSystem, const csp::common::String& UserId);
+csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* userSystem, const csp::common::String& userId);

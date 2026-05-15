@@ -31,16 +31,16 @@ namespace csp::web
 class RemoteFileManager
 {
 public:
-    RemoteFileManager(csp::web::WebClient* InWebClient, const csp::common::IAuthContext& InAuthContext);
+    RemoteFileManager(csp::web::WebClient* inWebClient, const csp::common::IAuthContext& inAuthContext);
     ~RemoteFileManager();
 
-    void GetFile(const csp::common::String& FileUrl, csp::services::ResponseHandlerPtr ResponseHandler,
-        csp::common::CancellationToken& CancellationToken);
-    void GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler);
+    void GetFile(const csp::common::String& fileUrl, csp::services::ResponseHandlerPtr responseHandler,
+        csp::common::CancellationToken& cancellationToken);
+    void GetResponseHeaders(const csp::common::String& url, csp::services::ResponseHandlerPtr responseHandler);
 
 private:
-    csp::web::WebClient* WebClient;
-    const csp::common::IAuthContext& AuthContext;
+    csp::web::WebClient* m_webClient;
+    const csp::common::IAuthContext& m_authContext;
 };
 
 } // namespace csp::web

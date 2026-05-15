@@ -44,22 +44,22 @@ using namespace csp::multiplayer;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void CreateAvatarForLeaderElection(csp::common::IRealtimeEngine* EntitySystem)
+void CreateAvatarForLeaderElection(csp::common::IRealtimeEngine* entitySystem)
 {
-    const csp::common::String& UserName = "Player 1";
-    const SpaceTransform& UserTransform
+    const csp::common::String& userName = "Player 1";
+    const SpaceTransform& userTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = true;
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+    bool isVisible = true;
+    AvatarState userAvatarState = AvatarState::Idle;
+    const csp::common::String& userAvatarId = "MyCoolAvatar";
+    AvatarPlayMode userAvatarPlayMode = AvatarPlayMode::Default;
 
-    const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
+    const auto loginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
-        UserAvatarPlayMode, LocomotionModel::Grounded);
+    auto [Avatar] = AWAIT(entitySystem, CreateAvatar, userName, loginState.UserId, userTransform, isVisible, userAvatarState, userAvatarId,
+        userAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
     std::cout << "CreateAvatar Local Callback" << std::endl;
@@ -70,9 +70,9 @@ void CreateAvatarForLeaderElection(csp::common::IRealtimeEngine* EntitySystem)
     {
         EXPECT_EQ(Avatar->GetComponents()->Size(), 1);
 
-        auto* AvatarComponent = Avatar->GetComponent(0);
+        auto* avatarComponent = Avatar->GetComponent(0);
 
-        EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
+        EXPECT_EQ(avatarComponent->GetComponentType(), ComponentType::AvatarData);
 
         std::cout << "OnUserCreated" << std::endl;
     }
@@ -111,43 +111,43 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
@@ -163,51 +163,51 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptLeaderIsReady = [&ScriptLeaderReady]()
+        auto scriptLeaderIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        EXPECT_EQ(ResponseWaiter::WaitFor(ScriptLeaderIsReady, std::chrono::seconds(5)), true);
+        EXPECT_EQ(ResponseWaiter::WaitFor(scriptLeaderIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3(10, 10, 10), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [ChildObject] = AWAIT(Object, CreateChildEntity, ChildObjectName, ChildObjectTransform);
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3(10, 10, 10), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [ChildObject] = AWAIT(Object, CreateChildEntity, childObjectName, childObjectTransform);
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalPosition(), csp::common::Vector3(1, 1, 1));
         EXPECT_EQ(ChildObject->GetGlobalPosition(), csp::common::Vector3(11, 11, 11));
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
 
         // Need to set this before tick or it won't always get called.
         ChildObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                if (entity->GetName() == "Child Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
                     {
                         std::cout << "Position Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
@@ -216,77 +216,77 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetGlobalPosition(), csp::common::Vector3::One());
         EXPECT_EQ(ChildObject->GetGlobalPosition(), csp::common::Vector3(2, 2, 2));
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(UpdateSpaceEntityGlobalRotation, UpdateSpaceEntityGlobalRotationTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
@@ -302,128 +302,128 @@ TEST_P(UpdateSpaceEntityGlobalRotation, UpdateSpaceEntityGlobalRotationTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        auto scriptSystemIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        ASSERT_EQ(ResponseWaiter::WaitFor(scriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4(1, 1, 1, 1), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4(1, 1, 1, 1), csp::common::Vector3::One() };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4(10, 10, 10, 10), csp::common::Vector3::One() };
-        auto [ChildObject] = AWAIT(Object, CreateChildEntity, ChildObjectName, ChildObjectTransform);
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4(10, 10, 10, 10), csp::common::Vector3::One() };
+        auto [ChildObject] = AWAIT(Object, CreateChildEntity, childObjectName, childObjectTransform);
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
         EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(20, 20, 20, -20));
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
         ChildObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                if (entity->GetName() == "Child Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION)
                     {
                         std::cout << "Rotation Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         csp::CSPFoundation::Tick();
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
         EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(2, 2, 2, -2));
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(UpdateSpaceEntityGlobalScale, UpdateSpaceEntityGlobalScaleTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
@@ -439,128 +439,128 @@ TEST_P(UpdateSpaceEntityGlobalScale, UpdateSpaceEntityGlobalScaleTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        auto scriptSystemIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        ASSERT_EQ(ResponseWaiter::WaitFor(scriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3(2, 2, 2) };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3(2, 2, 2) };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3(10, 10, 10) };
-        auto [ChildObject] = AWAIT(Object, CreateChildEntity, ChildObjectName, ChildObjectTransform);
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3(10, 10, 10) };
+        auto [ChildObject] = AWAIT(Object, CreateChildEntity, childObjectName, childObjectTransform);
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalScale(), csp::common::Vector3(2, 2, 2));
         EXPECT_EQ(ChildObject->GetGlobalScale(), csp::common::Vector3(20, 20, 20));
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
 
         ChildObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                if (entity->GetName() == "Child Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE)
                     {
                         std::cout << "Scale Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         csp::CSPFoundation::Tick();
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetGlobalScale(), csp::common::Vector3(2, 2, 2));
         EXPECT_EQ(ChildObject->GetGlobalScale(), csp::common::Vector3(4, 4, 4));
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 TEST_P(UpdateSpaceEntityParentId, UpdateSpaceEntityParentIdTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
@@ -577,127 +577,127 @@ TEST_P(UpdateSpaceEntityParentId, UpdateSpaceEntityParentIdTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        auto scriptSystemIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        ASSERT_EQ(ResponseWaiter::WaitFor(scriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [ChildObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildObjectName, ChildObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [ChildObject] = AWAIT(realtimeEngine.get(), CreateEntity, childObjectName, childObjectTransform, csp::common::Optional<uint64_t> {});
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         ChildObject->QueueUpdate();
         Object->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_NE(Object, ChildObject->GetParentEntity());
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
 
         ChildObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                if (entity->GetName() == "Child Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                     {
                         std::cout << "Parent Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         csp::CSPFoundation::Tick();
 
         ChildObject->QueueUpdate();
         Object->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object, ChildObject->GetParentEntity());
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(RemoveSpaceEntityParent, RemoveSpaceEntityParentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
@@ -712,127 +712,127 @@ TEST_P(RemoveSpaceEntityParent, RemoveSpaceEntityParentTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        auto scriptSystemIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        ASSERT_EQ(ResponseWaiter::WaitFor(scriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3(10, 10, 10), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [ChildObject] = AWAIT(Object, CreateChildEntity, ChildObjectName, ChildObjectTransform);
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3(10, 10, 10), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [ChildObject] = AWAIT(Object, CreateChildEntity, childObjectName, childObjectTransform);
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_EQ(Object, ChildObject->GetParentEntity());
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
 
         ChildObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                if (entity->GetName() == "Child Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                     {
                         std::cout << "Parent Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         csp::CSPFoundation::Tick();
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_NE(Object, ChildObject->GetParentEntity());
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 TEST_P(GetRootHierarchyEntities, GetRootHierarchyEntitiesTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::atomic_bool ScriptLeaderReady = false;
+    std::atomic_bool scriptLeaderReady = false;
 
-    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
+    auto scriptLeaderReadyCallback = [&scriptLeaderReady](bool ok)
     {
-        EXPECT_EQ(Ok, true);
+        EXPECT_EQ(ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptLeaderReady = true;
+        scriptLeaderReady = true;
     };
 
-    csp::common::RealtimeEngineType EngineType = GetParam();
-    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    csp::common::RealtimeEngineType engineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> realtimeEngine { systemsManager.MakeRealtimeEngine(engineType) };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(realtimeEngine.get())->SetScriptLeaderReadyCallback(scriptLeaderReadyCallback);
     }
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CreateAvatarForLeaderElection(RealtimeEngine.get());
+    CreateAvatarForLeaderElection(realtimeEngine.get());
 
-    const std::string ScriptText = R"xx(
+    const std::string scriptText = R"xx(
 		
 		globalThis.onTick = () => {
 			var entities = TheEntitySystem.getRootHierarchyEntities();
@@ -847,87 +847,87 @@ TEST_P(GetRootHierarchyEntities, GetRootHierarchyEntitiesTest)
 
 	)xx";
 
-    if (EngineType == csp::common::RealtimeEngineType::Online)
+    if (engineType == csp::common::RealtimeEngineType::Online)
     {
-        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        auto scriptSystemIsReady = [&scriptLeaderReady]()
         {
             std::cout << "Waiting for ScriptLeaderReady" << std::endl;
-            return (ScriptLeaderReady == true);
+            return (scriptLeaderReady == true);
         };
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        ASSERT_EQ(ResponseWaiter::WaitFor(scriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
     {
-        const csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+        const csp::common::String objectName = "Object 1";
+        SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [Object] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-        const csp::common::String ChildObjectName = "Child Object 1";
-        SpaceTransform ChildObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [ChildObject] = AWAIT(Object, CreateChildEntity, ChildObjectName, ChildObjectTransform);
+        const csp::common::String childObjectName = "Child Object 1";
+        SpaceTransform childObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [ChildObject] = AWAIT(Object, CreateChildEntity, childObjectName, childObjectTransform);
 
-        ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
+        ScriptSpaceComponent* scriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
         EXPECT_EQ(Object->GetPosition(), csp::common::Vector3::Zero());
         EXPECT_EQ(ChildObject->GetPosition(), csp::common::Vector3::Zero());
 
-        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        scriptComponent->SetScriptSource(csp::common::String(scriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        bool EntityUpdated = false;
+        bool entityUpdated = false;
 
         Object->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            [&entityUpdated](SpaceEntity* entity, SpaceEntityUpdateFlags flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                auto Namer = Entity->GetName();
-                if (Entity->GetName() == "Object 1")
+                auto namer = entity->GetName();
+                if (entity->GetName() == "Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+                    if (flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
                     {
                         std::cout << "Position Updated" << std::endl;
-                        EntityUpdated = true;
+                        entityUpdated = true;
                     }
                 }
             });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
+        auto entityUpdatedIsReady = [&entityUpdated, &realtimeEngine]()
         {
-            ProcessPendingIfOnline(*RealtimeEngine);
+            ProcessPendingIfOnline(*realtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
-            return (EntityUpdated == true);
+            return (entityUpdated == true);
         };
 
         csp::CSPFoundation::Tick();
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        ProcessPendingIfOnline(*RealtimeEngine);
+        ProcessPendingIfOnline(*realtimeEngine);
 
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
+        const bool scriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(scriptHasErrors);
 
         // Wait until the property have been updated and correct callback has been recieved
-        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(entityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetPosition(), csp::common::Vector3::One());
         EXPECT_EQ(ChildObject->GetPosition(), csp::common::Vector3::Zero());
     }
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 INSTANTIATE_TEST_SUITE_P(SpaceEntityTests, UpdateSpaceEntityGlobalPosition,
@@ -951,31 +951,31 @@ INSTANTIATE_TEST_SUITE_P(
 }
 CSP_PUBLIC_TEST(CSPEngine, LockPrerequisites, LockPrerequisitesTest)
 {
-    RAIIMockLogger MockLogger {};
-    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    RAIIMockLogger mockLogger {};
+    csp::systems::ScriptSystem& scriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+    SpaceEntity entity { nullptr, scriptSystem, logSystem };
 
     // Ensure the lock error message is called when we try and lock an entity that is already locked
-    const csp::common::String LockErrorMsg = "Entity is already locked.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, LockErrorMsg)).Times(1);
+    const csp::common::String lockErrorMsg = "Entity is already locked.";
+    EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, lockErrorMsg)).Times(1);
 
     // Set the entity as locked first
-    Entity.Lock();
+    entity.Lock();
     // Check that we error if we try to lock again
-    Entity.Lock();
+    entity.Lock();
 }
 CSP_PUBLIC_TEST(CSPEngine, UnlockPrerequisites, UnlockPrerequisitesTest)
 {
-    RAIIMockLogger MockLogger {};
-    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+    RAIIMockLogger mockLogger {};
+    csp::systems::ScriptSystem& scriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* logSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity entity { nullptr, scriptSystem, logSystem };
 
     // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
-    const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, UnlockErrorMsg)).Times(1);
+    const csp::common::String unlockErrorMsg = "Entity is not currently locked.";
+    EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, unlockErrorMsg)).Times(1);
 
-    Entity.Unlock();
+    entity.Unlock();
 }

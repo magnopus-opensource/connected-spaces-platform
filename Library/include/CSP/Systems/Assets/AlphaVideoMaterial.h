@@ -30,8 +30,8 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj);
+void ToJson(csp::json::JsonSerializer& serializer, const csp::systems::AlphaVideoMaterial& obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::AlphaVideoMaterial& obj);
 
 namespace csp::systems
 {
@@ -50,7 +50,7 @@ public:
     /// The stored texels MUST NOT be premultiplied.
     /// @param Texture const TextureInfo& : The material color texture.
     /// @pre If the fourth component (A) is undefined, the texture MUST be sampled as having 1.0 in all components.
-    void SetColorTexture(const TextureInfo& Texture);
+    void SetColorTexture(const TextureInfo& texture);
 
     /// @brief Gets the color texture.
     /// @return const TextureInfo& : The material color texture.
@@ -60,7 +60,7 @@ public:
     /// @details When this value is false, back-face culling is enabled, i.e., only front-facing triangles are rendered.
     /// When this value is true, back-face culling is disabled and double sided lighting is enabled.
     /// @param DoubleSided bool : The double sided value.
-    void SetDoubleSided(bool DoubleSided);
+    void SetDoubleSided(bool doubleSided);
 
     /// @brief Gets the double sided value.
     /// @return bool : The double sided value.
@@ -68,7 +68,7 @@ public:
 
     /// @brief Sets whether the material is emissive, if not material should be lit by the scene lighting.
     /// @param IsEmissive bool : The emissive value.
-    void SetIsEmissive(bool IsEmissive);
+    void SetIsEmissive(bool isEmissive);
 
     /// @brief Gets whether the material is emissive, if not material should be lit by the scene lighting.
     /// @return bool
@@ -76,7 +76,7 @@ public:
 
     /// @brief Sets the color channel to read the alpha values from.
     /// @param ColorChannel EColorChannel : The color channel to read the alpha values from.
-    void SetReadAlphaFromChannel(EColorChannel ColorChannel);
+    void SetReadAlphaFromChannel(EColorChannel colorChannel);
 
     /// @brief Gets the color channel to read the alpha values from.
     /// @return EColorChannel : The color channel to read the alpha values from.
@@ -84,7 +84,7 @@ public:
 
     /// @brief Sets the mode to use for alpha blending.
     /// @param Mode EBlendMode : The mode to use for alpha blending.
-    void SetBlendMode(EBlendMode Mode);
+    void SetBlendMode(EBlendMode mode);
 
     /// @brief Gets the alpha blend mode.
     /// @return EBlendMode : The alpha blend mode.
@@ -92,7 +92,7 @@ public:
 
     /// @brief Sets the fresnel factor.
     /// @param Factor float : The fresnel factor.
-    void SetFresnelFactor(float Factor);
+    void SetFresnelFactor(float factor);
 
     /// @brief Gets the fresnel factor.
     /// @return float : The fresnel factor.
@@ -100,7 +100,7 @@ public:
 
     /// @brief Set the Material tint.
     /// @param Tint const csp::common::Vector3& : The tint value.
-    void SetTint(const csp::common::Vector3& Tint);
+    void SetTint(const csp::common::Vector3& tint);
 
     /// @brief Get the Material tint.
     /// @return const csp::common::Vector3& GetTint() : The tint value.
@@ -108,7 +108,7 @@ public:
 
     /// @brief Set the alpha factor.
     /// @param Factor float : The alpha factor.
-    void SetAlphaFactor(float Factor);
+    void SetAlphaFactor(float factor);
 
     /// @brief Get the alpha factor.
     /// @return float : The alpha factor.
@@ -116,7 +116,7 @@ public:
 
     /// @brief Set the emissive intensity.
     /// @param Intensity float : The emissive intensity.
-    void SetEmissiveIntensity(float Intensity);
+    void SetEmissiveIntensity(float intensity);
 
     /// @brief Get the emissive intensity.
     /// @return float : The emissive intensity.
@@ -124,7 +124,7 @@ public:
 
     /// @brief Set the alpha mask.
     /// @param Mask float : The alpha mask.
-    void SetAlphaMask(float Mask);
+    void SetAlphaMask(float mask);
 
     /// @brief Get the alpha mask.
     /// @return float : The alpha mask.
@@ -134,25 +134,25 @@ public:
     /// @param Name const csp::common::String& : The name of the material.
     /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
-    AlphaVideoMaterial(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
+    AlphaVideoMaterial(const csp::common::String& name, const csp::common::String& materialCollectionId, const csp::common::String& materialId);
 
     virtual ~AlphaVideoMaterial() = default;
     AlphaVideoMaterial();
 
 private:
-    TextureInfo ColorTexture;
-    bool IsDoubleSided;
-    bool IsEmissive;
-    EColorChannel ReadAlphaFromChannel;
-    EBlendMode BlendMode;
-    float FresnelFactor;
-    csp::common::Vector3 MaterialTint;
-    float AlphaFactor;
-    float EmissiveIntensity;
-    float AlphaMask;
+    TextureInfo m_colorTexture;
+    bool m_isDoubleSided;
+    bool m_isEmissive;
+    EColorChannel m_readAlphaFromChannel;
+    EBlendMode m_blendMode;
+    float m_fresnelFactor;
+    csp::common::Vector3 m_materialTint;
+    float m_alphaFactor;
+    float m_emissiveIntensity;
+    float m_alphaMask;
 
-    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj);
+    friend void ::ToJson(csp::json::JsonSerializer& serializer, const csp::systems::AlphaVideoMaterial& obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::AlphaVideoMaterial& obj);
 };
 
 } // namespace csp::systems

@@ -57,18 +57,18 @@ class EntityProperty
 public:
     EntityProperty() = default;
 
-    EntityProperty(SpaceEntityComponentKey Key, SpaceEntityUpdateFlags UpdateFlag, std::function<csp::common::ReplicatedValue()> ToReplicatedValue,
-        std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue)
-        : Key { Key }
-        , UpdateFlag { UpdateFlag }
-        , ToReplicatedValue { ToReplicatedValue }
-        , FromReplicatedValue { FromReplicatedValue }
+    EntityProperty(SpaceEntityComponentKey key, SpaceEntityUpdateFlags updateFlag, std::function<csp::common::ReplicatedValue()> toReplicatedValue,
+        std::function<void(const csp::common::ReplicatedValue&)> fromReplicatedValue)
+        : m_key { key }
+        , m_updateFlag { updateFlag }
+        , m_toReplicatedValue { toReplicatedValue }
+        , m_fromReplicatedValue { fromReplicatedValue }
     {
     }
 
     // Sets this entity property to the given value.
     // This internally calls the specified FromReplicatedValue function.
-    void Set(const csp::common::ReplicatedValue& RepValue);
+    void Set(const csp::common::ReplicatedValue& repValue);
 
     // Gets this entity property as a ReplicatedValue.
     // This internally calls the specified ToReplicatedValue.
@@ -77,17 +77,17 @@ public:
     // Returns the unique identifier defined for this property.
     // This allows us to keep track of the property when it is replicated.
     // These keys are currently defined in SpaceEntityKeys.h
-    SpaceEntityComponentKey GetKey() const { return Key; }
+    SpaceEntityComponentKey GetKey() const { return m_key; }
 
     // Returns the enum used for specifying which entity property has been updated to callers.
     // These are passed to callers through the SpaceEntity::UpdateCallbacks.
-    SpaceEntityUpdateFlags GetUpdateFlag() const { return UpdateFlag; }
+    SpaceEntityUpdateFlags GetUpdateFlag() const { return m_updateFlag; }
 
 private:
-    SpaceEntityComponentKey Key;
-    SpaceEntityUpdateFlags UpdateFlag;
-    std::function<csp::common::ReplicatedValue()> ToReplicatedValue;
-    std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue;
+    SpaceEntityComponentKey m_key;
+    SpaceEntityUpdateFlags m_updateFlag;
+    std::function<csp::common::ReplicatedValue()> m_toReplicatedValue;
+    std::function<void(const csp::common::ReplicatedValue&)> m_fromReplicatedValue;
 };
 
 /*
@@ -117,7 +117,7 @@ public:
     // Success/fail callback for when a patch is sent
     typedef std::function<void(bool)> PatchSentCallback;
 
-    SpaceEntityStatePatcher(csp::common::LogSystem* LogSystem, csp::multiplayer::SpaceEntity& SpaceEntity);
+    SpaceEntityStatePatcher(csp::common::LogSystem* logSystem, csp::multiplayer::SpaceEntity& spaceEntity);
 
     class DirtyComponent
     {
@@ -126,31 +126,31 @@ public:
         ComponentUpdateType UpdateType;
     };
 
-    bool SetDirtyComponent(uint16_t ComponentKey, DirtyComponent DirtyComponent);
-    bool RemoveDirtyComponent(uint16_t ComponentKey, const csp::common::Map<uint16_t, ComponentBase*>& CurrentComponents);
+    bool SetDirtyComponent(uint16_t componentKey, DirtyComponent dirtyComponent);
+    bool RemoveDirtyComponent(uint16_t componentKey, const csp::common::Map<uint16_t, ComponentBase*>& currentComponents);
 
     // Sometimes, we need to use different types than internal storage ... non-ideal. (Motivating example was selection id's needing to be int64's in
     // patches but are stored as uint64s)
-    template <typename T, typename U> bool SetDirtyProperty(SpaceEntityComponentKey PropertyKey, const T& PriorValue, const U& NewValue)
+    template <typename T, typename U> bool SetDirtyProperty(SpaceEntityComponentKey propertyKey, const T& priorValue, const U& newValue)
     {
-        std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
+        std::scoped_lock<std::mutex> propertiesLocker(m_dirtyPropertiesLock);
 
         // We're not 100% sure, but this erase was likely put here for a very specific case where:
         // A value was changed, but before a patch is sent,
         // the value is set back to its original value.
         // This will prevent a redundant patch from being sent.
-        DirtyProperties.erase(PropertyKey);
+        m_dirtyProperties.erase(propertyKey);
 
-        if (NewValue != static_cast<U>(PriorValue))
+        if (newValue != static_cast<U>(priorValue))
         {
-            DirtyProperties[PropertyKey] = csp::common::ReplicatedValue(NewValue);
+            m_dirtyProperties[propertyKey] = csp::common::ReplicatedValue(newValue);
             return true;
         }
         else
         {
-            if (LogSystem)
+            if (m_logSystem)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, "Attempting to set dirty property to identical value, ignoring.");
+                m_logSystem->LogMsg(csp::common::LogLevel::VeryVerbose, "Attempting to set dirty property to identical value, ignoring.");
             }
             return false;
         }
@@ -164,61 +164,61 @@ public:
     std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
 
     std::chrono::milliseconds GetTimeOfLastPatch() const;
-    void SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch);
+    void SetTimeOfLastPatch(std::chrono::milliseconds newTimeOfLastPatch);
 
     csp::common::Optional<csp::common::Optional<uint64_t>> GetNewParentId() const;
-    void SetNewParentId(csp::common::Optional<uint64_t> NewParentId);
+    void SetNewParentId(csp::common::Optional<uint64_t> newParentId);
 
     bool HasPendingPatch() const;
 
-    csp::multiplayer::ComponentBase* GetFirstPendingComponentOfType(csp::multiplayer::ComponentType Type,
-        std::set<ComponentUpdateType> InterestingUpdateTypes
+    csp::multiplayer::ComponentBase* GetFirstPendingComponentOfType(csp::multiplayer::ComponentType type,
+        std::set<ComponentUpdateType> interestingUpdateTypes
         = { ComponentUpdateType::Add, ComponentUpdateType::Update, ComponentUpdateType::Delete }) const;
 
     [[nodiscard]] mcs::ObjectMessage CreateObjectMessage() const;
     [[nodiscard]] mcs::ObjectPatch CreateObjectPatch() const;
 
-    [[nodiscard]] static std::unique_ptr<csp::multiplayer::SpaceEntity> NewFromObjectMessage(const mcs::ObjectMessage& Message,
-        csp::common::IRealtimeEngine& RealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem);
+    [[nodiscard]] static std::unique_ptr<csp::multiplayer::SpaceEntity> NewFromObjectMessage(const mcs::ObjectMessage& message,
+        csp::common::IRealtimeEngine& realtimeEngine, csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem& logSystem);
 
     // Apply the data inside the object patch to the space entity this patcher relates to.
-    void ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch);
+    void ApplyPatchFromObjectPatch(const mcs::ObjectPatch& patch);
 
     // Patch sent callback, invoked from OnlineRealtimeEngine
-    void SetPatchSentCallback(PatchSentCallback Callback);
+    void SetPatchSentCallback(PatchSentCallback callback);
     SpaceEntityStatePatcher::PatchSentCallback GetEntityPatchSentCallback();
-    void CallEntityPatchSentCallback(bool Success);
+    void CallEntityPatchSentCallback(bool success);
 
     // These add entity properties to the patchers map to be able to set and get replicated entity variables for patches,
     // without having to know about individual entity variables.
-    void RegisterProperty(const EntityProperty& Property);
-    void RegisterProperties(const csp::common::Array<EntityProperty>& Properties);
+    void RegisterProperty(const EntityProperty& property);
+    void RegisterProperties(const csp::common::Array<EntityProperty>& properties);
 
 private:
     CSP_START_IGNORE
-    mutable std::mutex DirtyPropertiesLock;
-    mutable std::mutex DirtyComponentsLock;
+    mutable std::mutex m_dirtyPropertiesLock;
+    mutable std::mutex m_dirtyComponentsLock;
     CSP_END_IGNORE
 
-    std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> DirtyProperties;
-    std::unordered_map<uint16_t, DirtyComponent> DirtyComponents;
-    csp::common::List<uint16_t> TransientDeletionComponentIds;
-    std::chrono::milliseconds TimeOfLastPatch;
+    std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> m_dirtyProperties;
+    std::unordered_map<uint16_t, DirtyComponent> m_dirtyComponents;
+    csp::common::List<uint16_t> m_transientDeletionComponentIds;
+    std::chrono::milliseconds m_timeOfLastPatch;
 
     // Container of EntityProperties, which are proxy types that allow us to get and set specific replicatable
     // values on a SpaceEntity. Populated via RegisterProperty/RegisterProperties.
-    std::unordered_map<SpaceEntityComponentKey, EntityProperty> RegisteredProperties;
+    std::unordered_map<SpaceEntityComponentKey, EntityProperty> m_registeredProperties;
 
     // Weird eh?
     // The deal here is that we need to know :
     // 1. If there is a "new" parent ID, ie, is there a change
     // 2. Is that "new" ID an actual parent ID, or empty to mean "no parent"
     // That's why there's these nested optionals
-    csp::common::Optional<csp::common::Optional<uint64_t>> NewParentId = nullptr;
+    csp::common::Optional<csp::common::Optional<uint64_t>> m_newParentId = nullptr;
 
-    csp::common::LogSystem* LogSystem = nullptr; // May be null
-    csp::multiplayer::SpaceEntity& SpaceEntity;
-    PatchSentCallback EntityPatchSentCallback;
+    csp::common::LogSystem* m_logSystem = nullptr; // May be null
+    csp::multiplayer::SpaceEntity& m_spaceEntity;
+    PatchSentCallback m_entityPatchSentCallback;
 };
 
 } // namespace csp::multiplayer

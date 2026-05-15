@@ -35,7 +35,7 @@ public:
     /// @warning The expression of this interface as a list is a wrapper generator workaround, so
     /// whilst you may split your string into many elements, it is not advisable. You should prefer
     /// inserting your entire string as the first, single, and only element of the list.
-    CSPSceneData(const csp::common::List<csp::common::String>& SceneDescriptionJson);
+    CSPSceneData(const csp::common::List<csp::common::String>& sceneDescriptionJson);
 
     /// @brief The space the scene data represents.
     csp::systems::Space Space;

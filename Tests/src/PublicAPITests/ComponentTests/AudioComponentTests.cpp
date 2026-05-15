@@ -34,139 +34,139 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create audio component
-    auto* AudioComponent = static_cast<AudioSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Audio));
+    auto* audioComponent = static_cast<AudioSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Audio));
 
     // Ensure defaults are set
-    EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Reset);
-    EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Global);
-    EXPECT_EQ(AudioComponent->GetAudioAssetId(), "");
-    EXPECT_EQ(AudioComponent->GetAssetCollectionId(), "");
-    EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 10.f);
-    EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), false);
-    EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 0.f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
-    EXPECT_EQ(AudioComponent->GetIsEnabled(), true);
+    EXPECT_EQ(audioComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(audioComponent->GetPlaybackState(), AudioPlaybackState::Reset);
+    EXPECT_EQ(audioComponent->GetAudioType(), AudioType::Global);
+    EXPECT_EQ(audioComponent->GetAudioAssetId(), "");
+    EXPECT_EQ(audioComponent->GetAssetCollectionId(), "");
+    EXPECT_EQ(audioComponent->GetAttenuationRadius(), 10.f);
+    EXPECT_EQ(audioComponent->GetIsLoopPlayback(), false);
+    EXPECT_EQ(audioComponent->GetTimeSincePlay(), 0.f);
+    EXPECT_EQ(audioComponent->GetVolume(), 1.f);
+    EXPECT_EQ(audioComponent->GetIsEnabled(), true);
 
     // Set new values
-    csp::common::String AssetId = "TEST_ASSET_ID";
-    csp::common::String AssetCollectionId = "TEST_COLLECTION_ID";
+    csp::common::String assetId = "TEST_ASSET_ID";
+    csp::common::String assetCollectionId = "TEST_COLLECTION_ID";
 
-    AudioComponent->SetPosition(csp::common::Vector3::One());
-    AudioComponent->SetPlaybackState(AudioPlaybackState::Play);
-    AudioComponent->SetAudioType(AudioType::Spatial);
-    AudioComponent->SetAudioAssetId(AssetId);
-    AudioComponent->SetAssetCollectionId(AssetCollectionId);
-    AudioComponent->SetAttenuationRadius(100.f);
-    AudioComponent->SetIsLoopPlayback(true);
-    AudioComponent->SetTimeSincePlay(1.f);
-    AudioComponent->SetVolume(0.5f);
-    AudioComponent->SetIsEnabled(false);
+    audioComponent->SetPosition(csp::common::Vector3::One());
+    audioComponent->SetPlaybackState(AudioPlaybackState::Play);
+    audioComponent->SetAudioType(AudioType::Spatial);
+    audioComponent->SetAudioAssetId(assetId);
+    audioComponent->SetAssetCollectionId(assetCollectionId);
+    audioComponent->SetAttenuationRadius(100.f);
+    audioComponent->SetIsLoopPlayback(true);
+    audioComponent->SetTimeSincePlay(1.f);
+    audioComponent->SetVolume(0.5f);
+    audioComponent->SetIsEnabled(false);
 
     // Ensure values are set correctly
-    EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Play);
-    EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Spatial);
-    EXPECT_EQ(AudioComponent->GetAudioAssetId(), AssetId);
-    EXPECT_EQ(AudioComponent->GetAssetCollectionId(), AssetCollectionId);
-    EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 100.f);
-    EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), true);
-    EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 1.f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
-    EXPECT_EQ(AudioComponent->GetIsEnabled(), false);
+    EXPECT_EQ(audioComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(audioComponent->GetPlaybackState(), AudioPlaybackState::Play);
+    EXPECT_EQ(audioComponent->GetAudioType(), AudioType::Spatial);
+    EXPECT_EQ(audioComponent->GetAudioAssetId(), assetId);
+    EXPECT_EQ(audioComponent->GetAssetCollectionId(), assetCollectionId);
+    EXPECT_EQ(audioComponent->GetAttenuationRadius(), 100.f);
+    EXPECT_EQ(audioComponent->GetIsLoopPlayback(), true);
+    EXPECT_EQ(audioComponent->GetTimeSincePlay(), 1.f);
+    EXPECT_EQ(audioComponent->GetVolume(), 0.5f);
+    EXPECT_EQ(audioComponent->GetIsEnabled(), false);
 
     // Test invalid volume values
-    AudioComponent->SetVolume(1.5f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
-    AudioComponent->SetVolume(-2.5f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
+    audioComponent->SetVolume(1.5f);
+    EXPECT_EQ(audioComponent->GetVolume(), 0.5f);
+    audioComponent->SetVolume(-2.5f);
+    EXPECT_EQ(audioComponent->GetVolume(), 0.5f);
 
     // Test boundary volume values
-    AudioComponent->SetVolume(1.f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
-    AudioComponent->SetVolume(0.f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
+    audioComponent->SetVolume(1.f);
+    EXPECT_EQ(audioComponent->GetVolume(), 1.f);
+    audioComponent->SetVolume(0.f);
+    EXPECT_EQ(audioComponent->GetVolume(), 0.f);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
     // Create audio component
-    auto* AudioComponent = (AudioSpaceComponent*)CreatedObject->AddComponent(ComponentType::Audio);
+    auto* audioComponent = (AudioSpaceComponent*)CreatedObject->AddComponent(ComponentType::Audio);
 
     CreatedObject->QueueUpdate();
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
-    std::string AudioScriptText = R"xx(
+    std::string audioScriptText = R"xx(
 	
 		const assetId			= "TEST_ASSET_ID";
 		const assetCollectionId = "TEST_COLLECTION_ID";
@@ -184,69 +184,69 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		audio.isEnabled = false;
     )xx";
 
-    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(audioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    RealtimeEngine->ProcessPendingEntityOperations();
+    realtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure values are set correctly
-    csp::common::String AssetId = "TEST_ASSET_ID";
-    csp::common::String AssetCollectionId = "TEST_COLLECTION_ID";
+    csp::common::String assetId = "TEST_ASSET_ID";
+    csp::common::String assetCollectionId = "TEST_COLLECTION_ID";
 
-    EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Play);
-    EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Spatial);
-    EXPECT_EQ(AudioComponent->GetAudioAssetId(), AssetId);
-    EXPECT_EQ(AudioComponent->GetAssetCollectionId(), AssetCollectionId);
-    EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 100.f);
-    EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), true);
-    EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 1.f);
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
-    EXPECT_EQ(AudioComponent->GetIsEnabled(), false);
+    EXPECT_EQ(audioComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(audioComponent->GetPlaybackState(), AudioPlaybackState::Play);
+    EXPECT_EQ(audioComponent->GetAudioType(), AudioType::Spatial);
+    EXPECT_EQ(audioComponent->GetAudioAssetId(), assetId);
+    EXPECT_EQ(audioComponent->GetAssetCollectionId(), assetCollectionId);
+    EXPECT_EQ(audioComponent->GetAttenuationRadius(), 100.f);
+    EXPECT_EQ(audioComponent->GetIsLoopPlayback(), true);
+    EXPECT_EQ(audioComponent->GetTimeSincePlay(), 1.f);
+    EXPECT_EQ(audioComponent->GetVolume(), 0.75f);
+    EXPECT_EQ(audioComponent->GetIsEnabled(), false);
 
     // Test invalid volume values
-    AudioScriptText = R"xx(
+    audioScriptText = R"xx(
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.75;
     )xx";
-    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(audioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
-    RealtimeEngine->ProcessPendingEntityOperations();
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
+    realtimeEngine->ProcessPendingEntityOperations();
+    EXPECT_EQ(audioComponent->GetVolume(), 0.75f);
 
-    AudioScriptText = R"xx(
+    audioScriptText = R"xx(
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = -2.75;
     )xx";
-    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(audioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
-    RealtimeEngine->ProcessPendingEntityOperations();
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
+    realtimeEngine->ProcessPendingEntityOperations();
+    EXPECT_EQ(audioComponent->GetVolume(), 0.75f);
 
     // Test boundary volume values
-    AudioScriptText = R"xx(
+    audioScriptText = R"xx(
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.0;
     )xx";
-    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(audioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
-    RealtimeEngine->ProcessPendingEntityOperations();
-    EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
+    realtimeEngine->ProcessPendingEntityOperations();
+    EXPECT_EQ(audioComponent->GetVolume(), 1.f);
 
-    AudioScriptText = R"xx(
+    audioScriptText = R"xx(
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 0.0;
     )xx";
-    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().SetScriptSource(audioScriptText.c_str());
     CreatedObject->GetScript().Invoke();
-    RealtimeEngine->ProcessPendingEntityOperations();
-    EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
+    realtimeEngine->ProcessPendingEntityOperations();
+    EXPECT_EQ(audioComponent->GetVolume(), 0.f);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

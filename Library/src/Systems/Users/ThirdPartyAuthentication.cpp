@@ -24,42 +24,42 @@ namespace chs = csp::services::generated::userservice;
 
 namespace
 {
-void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, csp::systems::ThirdPartyProviderDetails& ProviderDetails)
+void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& dto, csp::systems::ThirdPartyProviderDetails& providerDetails)
 {
-    if (Dto.HasProviderName())
+    if (dto.HasProviderName())
     {
-        ProviderDetails.ProviderName = Dto.GetProviderName();
+        providerDetails.ProviderName = dto.GetProviderName();
     }
 
-    if (Dto.HasClientId())
+    if (dto.HasClientId())
     {
-        ProviderDetails.ProviderClientId = Dto.GetClientId();
+        providerDetails.ProviderClientId = dto.GetClientId();
     }
 
-    if (Dto.HasScopes())
+    if (dto.HasScopes())
     {
-        const auto& Scopes = Dto.GetScopes();
-        ProviderDetails.ProviderAuthScopes = csp::common::Array<csp::common::String>(Scopes.size());
+        const auto& scopes = dto.GetScopes();
+        providerDetails.ProviderAuthScopes = csp::common::Array<csp::common::String>(scopes.size());
 
-        for (size_t idx = 0; idx < Scopes.size(); ++idx)
+        for (size_t idx = 0; idx < scopes.size(); ++idx)
         {
-            ProviderDetails.ProviderAuthScopes[idx] = Scopes[idx];
+            providerDetails.ProviderAuthScopes[idx] = scopes[idx];
         }
     }
 
-    if (Dto.HasAuthorizeEndpoint())
+    if (dto.HasAuthorizeEndpoint())
     {
-        ProviderDetails.ProviderAuthURL = Dto.GetAuthorizeEndpoint();
+        providerDetails.ProviderAuthURL = dto.GetAuthorizeEndpoint();
     }
 
-    if (Dto.HasThirdPartyAuthStateId())
+    if (dto.HasThirdPartyAuthStateId())
     {
-        ProviderDetails.ThirdPartyAuthStateId = Dto.GetThirdPartyAuthStateId();
+        providerDetails.ThirdPartyAuthStateId = dto.GetThirdPartyAuthStateId();
     }
 
-    if (Dto.HasRedirectUri())
+    if (dto.HasRedirectUri())
     {
-        ProviderDetails.ProviderRedirectURL = Dto.GetRedirectUri();
+        providerDetails.ProviderRedirectURL = dto.GetRedirectUri();
     }
 }
 }; // namespace
@@ -67,23 +67,23 @@ void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, 
 namespace csp::systems
 {
 
-ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() { return ProviderDetails; }
+ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() { return m_providerDetails; }
 
-const ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() const { return ProviderDetails; }
+const ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() const { return m_providerDetails; }
 
-void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* InfoResponse = static_cast<chs::SocialProviderInfo*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* infoResponse = static_cast<chs::SocialProviderInfo*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        InfoResponse->FromJson(Response->GetPayload().GetContent());
+        infoResponse->FromJson(response->GetPayload().GetContent());
 
-        SocialProviderInfoDtoToProviderDetails(*InfoResponse, ProviderDetails);
+        SocialProviderInfoDtoToProviderDetails(*infoResponse, m_providerDetails);
     }
 }
 } // namespace csp::systems

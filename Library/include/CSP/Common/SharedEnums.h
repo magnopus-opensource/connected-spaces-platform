@@ -158,44 +158,44 @@ enum class ErrorCode
     SpaceUserLimitExceeded
 };
 
-inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
+inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode errorCode)
 {
-    std::string ErrorCodeString;
-    switch (ErrorCode)
+    std::string errorCodeString;
+    switch (errorCode)
     {
     case csp::multiplayer::ErrorCode::None:
     {
-        ErrorCodeString = "None";
+        errorCodeString = "None";
         break;
     }
     case csp::multiplayer::ErrorCode::Unknown:
     {
-        ErrorCodeString = "Unknown";
+        errorCodeString = "Unknown";
         break;
     }
     case csp::multiplayer::ErrorCode::NotConnected:
     {
-        ErrorCodeString = "NotConnected";
+        errorCodeString = "NotConnected";
         break;
     }
     case csp::multiplayer::ErrorCode::AlreadyConnected:
     {
-        ErrorCodeString = "AlreadyConnected";
+        errorCodeString = "AlreadyConnected";
         break;
     }
     case csp::multiplayer::ErrorCode::SpaceUserLimitExceeded:
     {
-        ErrorCodeString = "SpaceUserLimitExceeded";
+        errorCodeString = "SpaceUserLimitExceeded";
         break;
     }
     default:
     {
-        ErrorCodeString = std::string("Unknown error code. Value") + std::to_string(static_cast<unsigned int>(ErrorCode));
+        errorCodeString = std::string("Unknown error code. Value") + std::to_string(static_cast<unsigned int>(errorCode));
         break;
     }
     }
 
-    return ErrorCodeString;
+    return errorCodeString;
 }
 
 /// @brief Enum representing the failure reason of an entity modification operation returned from IRealtimeEngine::IsEntityModifiable.

@@ -826,15 +826,15 @@ public:
     /// @brief Gets mime type from a file path.
     /// @param FilePath const String&
     /// @return const String&
-    const String& GetMimeType(const String& FilePath);
+    const String& GetMimeType(const String& filePath);
 
 private:
     /// @brief Private singleton constructor.
     MimeTypeHelper();
 
-    String Default = MimeType.APPLICATION_OCTET_STREAM;
+    String m_default = MimeType.APPLICATION_OCTET_STREAM;
 
-    Map<String, String> ExtensionToMimeTypeMap;
+    Map<String, String> m_extensionToMimeTypeMap;
 };
 
 } // namespace csp::common

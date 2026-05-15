@@ -34,417 +34,417 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
-void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::systems::EShaderType shaderType,
-    const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-    const csp::common::Array<csp::common::String>& AssetTags, Material** OutMaterial,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success)
+void CreateMaterial(AssetSystem* assetSystem, const csp::common::String& name, const csp::systems::EShaderType shaderType,
+    const csp::common::String& spaceId, const csp::common::Map<csp::common::String, csp::common::String>& metadata,
+    const csp::common::Array<csp::common::String>& assetTags, Material** outMaterial,
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, shaderType, SpaceId, Metadata, AssetTags);
-    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+    auto [Result] = AWAIT_PRE(assetSystem, CreateMaterial, RequestPredicate, name, shaderType, spaceId, metadata, assetTags);
+    EXPECT_EQ(Result.GetResultCode(), expectedResultCode);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
     {
-        *OutMaterial = nullptr;
+        *outMaterial = nullptr;
         return;
     }
 
-    csp::systems::MaterialResult Result2 = Result;
+    csp::systems::MaterialResult result2 = Result;
 
-    Material* Material = Result2.GetMaterial();
-    EXPECT_EQ(Material->GetName(), Name);
+    Material* material = result2.GetMaterial();
+    EXPECT_EQ(material->GetName(), name);
 
-    *OutMaterial = Result2.GetMaterial();
+    *outMaterial = result2.GetMaterial();
 }
 
-void UpdateMaterial(AssetSystem* AssetSystem, const Material& Material)
+void UpdateMaterial(AssetSystem* assetSystem, const Material& material)
 {
     // Future/Promise required here as Awaitable makes a copy when constructing the tuple.
-    std::promise<NullResult> ResultPromise;
-    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+    std::promise<NullResult> resultPromise;
+    std::future<NullResult> resultFuture = resultPromise.get_future();
 
-    NullResultCallback Callback = [&ResultPromise](NullResult Result)
+    NullResultCallback callback = [&resultPromise](NullResult result)
     {
-        if (Result.GetResultCode() == EResultCode::InProgress)
+        if (result.GetResultCode() == EResultCode::InProgress)
         {
             return;
         }
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        ResultPromise.set_value(Result);
+        EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+        resultPromise.set_value(result);
     };
 
-    AssetSystem->UpdateMaterial(Material, Callback);
+    assetSystem->UpdateMaterial(material, callback);
 
-    ResultFuture.wait();
+    resultFuture.wait();
 }
 
-void DeleteMaterial(AssetSystem* AssetSystem, const Material& Material)
+void DeleteMaterial(AssetSystem* assetSystem, const Material& material)
 {
     // Future/Promise required here as Awaitable makes a copy when constructing the tuple.
-    std::promise<NullResult> ResultPromise;
-    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+    std::promise<NullResult> resultPromise;
+    std::future<NullResult> resultFuture = resultPromise.get_future();
 
-    NullResultCallback Callback = [&ResultPromise](NullResult Result)
+    NullResultCallback callback = [&resultPromise](NullResult result)
     {
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        ResultPromise.set_value(Result);
+        EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+        resultPromise.set_value(result);
     };
 
-    AssetSystem->DeleteMaterial(Material, Callback);
+    assetSystem->DeleteMaterial(material, callback);
 
-    ResultFuture.wait();
+    resultFuture.wait();
 }
 
-void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, csp::common::Array<Material*>& OutMaterials,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success)
+void GetMaterials(AssetSystem* assetSystem, const csp::common::String& spaceId, csp::common::Array<Material*>& outMaterials,
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterials, RequestPredicate, SpaceId);
-    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+    auto [Result] = AWAIT_PRE(assetSystem, GetMaterials, RequestPredicate, spaceId);
+    EXPECT_EQ(Result.GetResultCode(), expectedResultCode);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
     {
         return;
     }
 
-    OutMaterials = *(Result.GetMaterials());
+    outMaterials = *(Result.GetMaterials());
 }
 
-void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, Material** OutMaterial,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+void GetMaterial(AssetSystem* assetSystem, const csp::common::String& assetCollectionId, const csp::common::String& assetId, Material** outMaterial,
+    csp::systems::EResultCode expectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ = csp::systems::ERequestFailureReason::None)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
-    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+    auto [Result] = AWAIT_PRE(assetSystem, GetMaterial, RequestPredicate, assetCollectionId, assetId);
+    EXPECT_EQ(Result.GetResultCode(), expectedResultCode);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
     {
-        *OutMaterial = nullptr;
+        *outMaterial = nullptr;
         return;
     }
 
-    csp::systems::MaterialResult Result2 = Result;
+    csp::systems::MaterialResult result2 = Result;
 
-    *OutMaterial = Result2.GetMaterial();
+    *outMaterial = result2.GetMaterial();
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateGLTFMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create a standard material associated with the Space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
+    GLTFMaterial* createdGltfMaterial = dynamic_cast<GLTFMaterial*>(createdMaterial);
+    EXPECT_NE(createdGltfMaterial, nullptr);
 #endif
 
     // Cleanup standard material
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateAlphaVideoMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create a alpha video material associated with the Space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
+    AlphaVideoMaterial* createdAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(createdMaterial);
+    EXPECT_NE(createdAlphaVideoMaterial, nullptr);
 #endif
 
     // Cleanup alpha video material
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateIncorrectMaterialTypeTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    csp::systems::EShaderType IncorrectShaderType = static_cast<csp::systems::EShaderType>(3);
+    csp::systems::EShaderType incorrectShaderType = static_cast<csp::systems::EShaderType>(3);
 
     // Attempt to create a material with an incorrect type
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", IncorrectShaderType, Space.Id, {}, {}, &CreatedMaterial, csp::systems::EResultCode::Failed);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", incorrectShaderType, space.Id, {}, {}, &createdMaterial, csp::systems::EResultCode::Failed);
 
-    EXPECT_EQ(CreatedMaterial, nullptr);
+    EXPECT_EQ(createdMaterial, nullptr);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateGLTFMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create a standard material associated with the space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    GLTFMaterial* CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
+    GLTFMaterial* createdGltfMaterial = static_cast<GLTFMaterial*>(createdMaterial);
 
     // Ensure the material can be updated
-    EXPECT_EQ(CreatedGLTFMaterial->GetAlphaCutoff(), 0.5f);
+    EXPECT_EQ(createdGltfMaterial->GetAlphaCutoff(), 0.5f);
 
-    CreatedGLTFMaterial->SetAlphaCutoff(1.0f);
-    UpdateMaterial(AssetSystem, *CreatedMaterial);
+    createdGltfMaterial->SetAlphaCutoff(1.0f);
+    UpdateMaterial(assetSystem, *createdMaterial);
 
     // Get the material to ensure change have been made
-    Material* UpdatedMaterial = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &UpdatedMaterial);
+    Material* updatedMaterial = nullptr;
+    GetMaterial(assetSystem, createdMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialId(), &updatedMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    GLTFMaterial* UpdatedMaterialGLTF = dynamic_cast<GLTFMaterial*>(UpdatedMaterial);
-    EXPECT_NE(UpdatedMaterialGLTF, nullptr);
-    EXPECT_EQ(UpdatedMaterialGLTF->GetAlphaCutoff(), 1.0f);
+    GLTFMaterial* updatedMaterialGltf = dynamic_cast<GLTFMaterial*>(updatedMaterial);
+    EXPECT_NE(updatedMaterialGltf, nullptr);
+    EXPECT_EQ(updatedMaterialGltf->GetAlphaCutoff(), 1.0f);
 #endif
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateAlphaVideoMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create a alpha video material associated with the space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial);
+    AlphaVideoMaterial* createdAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(createdMaterial);
 
     // Ensure the material can be updated
-    EXPECT_EQ(CreatedAlphaVideoMaterial->GetAlphaFactor(), 1.0f);
+    EXPECT_EQ(createdAlphaVideoMaterial->GetAlphaFactor(), 1.0f);
 
-    CreatedAlphaVideoMaterial->SetAlphaFactor(0.5f);
-    UpdateMaterial(AssetSystem, *CreatedMaterial);
-    EXPECT_EQ(CreatedAlphaVideoMaterial->GetAlphaFactor(), 0.5f);
+    createdAlphaVideoMaterial->SetAlphaFactor(0.5f);
+    UpdateMaterial(assetSystem, *createdMaterial);
+    EXPECT_EQ(createdAlphaVideoMaterial->GetAlphaFactor(), 0.5f);
 
     // Get the material to ensure change have been made
-    Material* UpdatedMaterial = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &UpdatedMaterial);
+    Material* updatedMaterial = nullptr;
+    GetMaterial(assetSystem, createdMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialId(), &updatedMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    AlphaVideoMaterial* UpdatedMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(UpdatedMaterial);
-    EXPECT_NE(UpdatedMaterialAlphaVideo, nullptr);
-    EXPECT_EQ(UpdatedMaterialAlphaVideo->GetAlphaFactor(), 0.5f);
+    AlphaVideoMaterial* updatedMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(updatedMaterial);
+    EXPECT_NE(updatedMaterialAlphaVideo, nullptr);
+    EXPECT_EQ(updatedMaterialAlphaVideo->GetAlphaFactor(), 0.5f);
 #endif
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to search for materials
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Attempt to find materials in a Space none have been created for
-    csp::common::Array<Material*> FoundMaterials;
-    GetMaterials(AssetSystem, Space.Id, FoundMaterials);
+    csp::common::Array<Material*> foundMaterials;
+    GetMaterials(assetSystem, space.Id, foundMaterials);
 
-    EXPECT_TRUE(FoundMaterials.IsEmpty());
+    EXPECT_TRUE(foundMaterials.IsEmpty());
 
     // Cleanup
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to search for materials
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create 4 materials associated with the space - 2 alpha video, 2 standard
-    constexpr const char* TestAlphaVideoMaterialName1 = "TestAlphaVideoMaterial1";
-    Material* CreatedMaterial1 = nullptr;
-    CreateMaterial(AssetSystem, TestAlphaVideoMaterialName1, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial1);
+    constexpr const char* testAlphaVideoMaterialName1 = "TestAlphaVideoMaterial1";
+    Material* createdMaterial1 = nullptr;
+    CreateMaterial(assetSystem, testAlphaVideoMaterialName1, csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial1);
 
-    constexpr const char* TestStandardMaterialName1 = "TestStandardMaterial1";
-    Material* CreatedMaterial2 = nullptr;
-    CreateMaterial(AssetSystem, TestStandardMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial2);
+    constexpr const char* testStandardMaterialName1 = "TestStandardMaterial1";
+    Material* createdMaterial2 = nullptr;
+    CreateMaterial(assetSystem, testStandardMaterialName1, csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial2);
 
-    constexpr const char* TestAlphaVideoMaterialName2 = "TestAlphaVideoMaterial2";
-    Material* CreatedMaterial3 = nullptr;
-    CreateMaterial(AssetSystem, TestAlphaVideoMaterialName2, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial3);
+    constexpr const char* testAlphaVideoMaterialName2 = "TestAlphaVideoMaterial2";
+    Material* createdMaterial3 = nullptr;
+    CreateMaterial(assetSystem, testAlphaVideoMaterialName2, csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial3);
 
-    constexpr const char* TestStandardMaterialName2 = "TestStandardMaterial2";
-    Material* CreatedMaterial4 = nullptr;
-    CreateMaterial(AssetSystem, TestStandardMaterialName2, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial4);
+    constexpr const char* testStandardMaterialName2 = "TestStandardMaterial2";
+    Material* createdMaterial4 = nullptr;
+    CreateMaterial(assetSystem, testStandardMaterialName2, csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial4);
 
     // Attempt to find the 4 materials that have been created
-    csp::common::Array<Material*> FoundMaterials;
-    GetMaterials(AssetSystem, Space.Id, FoundMaterials);
+    csp::common::Array<Material*> foundMaterials;
+    GetMaterials(assetSystem, space.Id, foundMaterials);
 
-    EXPECT_EQ(FoundMaterials.Size(), 4);
+    EXPECT_EQ(foundMaterials.Size(), 4);
 
     // Ensure we found the right materials
-    std::vector<csp::common::String> MaterialNames { TestAlphaVideoMaterialName1, TestStandardMaterialName1, TestAlphaVideoMaterialName2,
-        TestStandardMaterialName2 };
-    std::vector<csp::common::String> MaterialCollectionIds {
-        CreatedMaterial1->GetMaterialCollectionId(),
-        CreatedMaterial2->GetMaterialCollectionId(),
-        CreatedMaterial3->GetMaterialCollectionId(),
-        CreatedMaterial4->GetMaterialCollectionId(),
+    std::vector<csp::common::String> materialNames { testAlphaVideoMaterialName1, testStandardMaterialName1, testAlphaVideoMaterialName2,
+        testStandardMaterialName2 };
+    std::vector<csp::common::String> materialCollectionIds {
+        createdMaterial1->GetMaterialCollectionId(),
+        createdMaterial2->GetMaterialCollectionId(),
+        createdMaterial3->GetMaterialCollectionId(),
+        createdMaterial4->GetMaterialCollectionId(),
     };
-    std::vector<csp::common::String> MaterialIds {
-        CreatedMaterial1->GetMaterialId(),
-        CreatedMaterial2->GetMaterialId(),
-        CreatedMaterial3->GetMaterialId(),
-        CreatedMaterial4->GetMaterialId(),
+    std::vector<csp::common::String> materialIds {
+        createdMaterial1->GetMaterialId(),
+        createdMaterial2->GetMaterialId(),
+        createdMaterial3->GetMaterialId(),
+        createdMaterial4->GetMaterialId(),
     };
 
-    for (size_t i = 0; i < FoundMaterials.Size(); ++i)
+    for (size_t i = 0; i < foundMaterials.Size(); ++i)
     {
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-        if (FoundMaterials[i]->GetShaderType() == EShaderType::AlphaVideo)
+        if (foundMaterials[i]->GetShaderType() == EShaderType::AlphaVideo)
         {
-            AlphaVideoMaterial* FoundMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(FoundMaterials[i]);
-            EXPECT_NE(FoundMaterialAlphaVideo, nullptr);
+            AlphaVideoMaterial* foundMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(foundMaterials[i]);
+            EXPECT_NE(foundMaterialAlphaVideo, nullptr);
         }
-        else if (FoundMaterials[i]->GetShaderType() == EShaderType::Standard)
+        else if (foundMaterials[i]->GetShaderType() == EShaderType::Standard)
         {
-            GLTFMaterial* FoundMaterialGLTF = dynamic_cast<GLTFMaterial*>(FoundMaterials[i]);
-            EXPECT_NE(FoundMaterialGLTF, nullptr);
+            GLTFMaterial* foundMaterialGltf = dynamic_cast<GLTFMaterial*>(foundMaterials[i]);
+            EXPECT_NE(foundMaterialGltf, nullptr);
         }
 #endif
 
-        const csp::common::String& SearchName = FoundMaterials[i]->GetName();
-        const csp::common::String& SearchCollectionId = FoundMaterials[i]->GetMaterialCollectionId();
-        const csp::common::String& SearchId = FoundMaterials[i]->GetMaterialId();
+        const csp::common::String& searchName = foundMaterials[i]->GetName();
+        const csp::common::String& searchCollectionId = foundMaterials[i]->GetMaterialCollectionId();
+        const csp::common::String& searchId = foundMaterials[i]->GetMaterialId();
 
-        auto FoundName = std::find_if(
-            std::begin(MaterialNames), std::end(MaterialNames), [&SearchName](const csp::common::String& Name) { return Name == SearchName; });
+        auto foundName = std::find_if(
+            std::begin(materialNames), std::end(materialNames), [&searchName](const csp::common::String& name) { return name == searchName; });
 
-        EXPECT_TRUE(FoundName != MaterialNames.end());
+        EXPECT_TRUE(foundName != materialNames.end());
 
-        auto FoundCollectionId = std::find_if(std::begin(MaterialCollectionIds), std::end(MaterialCollectionIds),
-            [&SearchCollectionId](const csp::common::String& CollectionId) { return CollectionId == SearchCollectionId; });
+        auto foundCollectionId = std::find_if(std::begin(materialCollectionIds), std::end(materialCollectionIds),
+            [&searchCollectionId](const csp::common::String& collectionId) { return collectionId == searchCollectionId; });
 
-        EXPECT_TRUE(FoundCollectionId != MaterialCollectionIds.end());
+        EXPECT_TRUE(foundCollectionId != materialCollectionIds.end());
 
-        auto FoundId
-            = std::find_if(std::begin(MaterialIds), std::end(MaterialIds), [&SearchId](const csp::common::String& Id) { return Id == SearchId; });
+        auto foundId
+            = std::find_if(std::begin(materialIds), std::end(materialIds), [&searchId](const csp::common::String& id) { return id == searchId; });
 
-        EXPECT_TRUE(FoundId != MaterialIds.end());
+        EXPECT_TRUE(foundId != materialIds.end());
     }
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial1);
-    DeleteMaterial(AssetSystem, *CreatedMaterial2);
-    DeleteMaterial(AssetSystem, *CreatedMaterial3);
-    DeleteMaterial(AssetSystem, *CreatedMaterial4);
+    DeleteMaterial(assetSystem, *createdMaterial1);
+    DeleteMaterial(assetSystem, *createdMaterial2);
+    DeleteMaterial(assetSystem, *createdMaterial3);
+    DeleteMaterial(assetSystem, *createdMaterial4);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 /*
@@ -462,35 +462,35 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    auto AuthContext = TestAuthContext();
-    WebClientMock->WebClient::SetAuthContext(AuthContext);
+    auto authContext = TestAuthContext();
+    m_webClientMock->WebClient::SetAuthContext(authContext);
 
-    EXPECT_CALL(*WebClientMock, SendRequest)
-        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+    EXPECT_CALL(*m_webClientMock, SendRequest)
+        .WillRepeatedly([mock = m_webClientMock](auto&&... args) { mock->WebClient::SendRequest(std::forward<decltype(args)>(args)...); });
 
-    EXPECT_CALL(*WebClientMock, Send)
+    EXPECT_CALL(*m_webClientMock, Send)
         .WillRepeatedly(
-            [](csp::web::HttpRequest& Request)
+            [](csp::web::HttpRequest& request)
             {
-                const auto Verb = Request.GetVerb();
-                const auto Uri = Request.GetUri();
+                const auto verb = request.GetVerb();
+                const auto uri = request.GetUri();
 
-                ASSERT_EQ(Verb, csp::web::ERequestVerb::GET);
+                ASSERT_EQ(verb, csp::web::ERequestVerb::GET);
 
-                auto& Response = Request.GetMutableResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+                auto& response = request.GetMutableResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
 
-                const auto RawUri = csp::common::String(Uri.GetAsString());
+                const auto rawUri = csp::common::String(uri.GetAsString());
 
                 // `/mag-prototype/api/v1/prototypes`: Endpoint hit for requests sent by `AssetSystem::FindAssetCollections`
-                if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
+                if (rawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
                 {
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
 
-                    Response.GetMutablePayload().SetContent(R"([
+                    response.GetMutablePayload().SetContent(R"([
                         {
                             "id": "TestPrototypeIdStandard1",
                             "metadata": {
@@ -530,17 +530,17 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
                     ])");
                 }
                 // `/mag-prototype/api/v1/prototypes/asset-details`: Endpoint hit for requests sent by `AssetSystem::GetAssetsByCriteria`
-                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
+                else if (rawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
                 {
-                    ASSERT_TRUE(RawUri.Contains("AssetTypes=Material"));
-                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdStandard"));
-                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdUnsupportedShaderType"));
-                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdInvalidContent"));
-                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdMissing"));
+                    ASSERT_TRUE(rawUri.Contains("AssetTypes=Material"));
+                    ASSERT_TRUE(rawUri.Contains("PrototypeIds=TestPrototypeIdStandard"));
+                    ASSERT_TRUE(rawUri.Contains("PrototypeIds=TestPrototypeIdUnsupportedShaderType"));
+                    ASSERT_TRUE(rawUri.Contains("PrototypeIds=TestPrototypeIdInvalidContent"));
+                    ASSERT_TRUE(rawUri.Contains("PrototypeIds=TestPrototypeIdMissing"));
 
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
 
-                    Response.GetMutablePayload().SetContent(R"([
+                    response.GetMutablePayload().SetContent(R"([
                         {
                             "id": "TestIdStandard1",
                             "prototypeId": "TestPrototypeIdStandard1",
@@ -574,494 +574,494 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
                     ])");
                 }
                 // Handle requests for individual `Asset::Uri`s
-                else if (RawUri == "https://example.com/standard1.json" || RawUri == "https://example.com/standard2.json"
-                    || RawUri == "https://example.com/standard3.json")
+                else if (rawUri == "https://example.com/standard1.json" || rawUri == "https://example.com/standard2.json"
+                    || rawUri == "https://example.com/standard3.json")
                 {
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
-                    Response.GetMutablePayload().SetContent("{}");
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    response.GetMutablePayload().SetContent("{}");
                 }
-                else if (RawUri == "https://example.com/unsupported.json")
+                else if (rawUri == "https://example.com/unsupported.json")
                 {
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
-                    Response.GetMutablePayload().SetContent(R"({"unsupported": 42})");
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    response.GetMutablePayload().SetContent(R"({"unsupported": 42})");
                 }
-                else if (RawUri == "https://example.com/invalid.json")
+                else if (rawUri == "https://example.com/invalid.json")
                 {
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
-                    Response.GetMutablePayload().SetContent("invalid");
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    response.GetMutablePayload().SetContent("invalid");
                 }
-                else if (RawUri == "https://example.com/missing.json")
+                else if (rawUri == "https://example.com/missing.json")
                 {
-                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+                    response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
                 }
             });
 
-    const auto SpaceId = csp::common::String("TestSpaceId");
+    const auto spaceId = csp::common::String("TestSpaceId");
 
     using OwnedMaterials = std::vector<std::unique_ptr<Material>>;
 
-    const auto FoundMaterials = [&]() -> OwnedMaterials
+    const auto foundMaterials = [&]() -> OwnedMaterials
     {
-        auto FoundMaterials = csp::common::Array<Material*>();
-        GetMaterials(AssetSystem, SpaceId, FoundMaterials);
+        auto foundMaterials = csp::common::Array<Material*>();
+        GetMaterials(assetSystem, spaceId, foundMaterials);
 
-        const auto Adopt = [](const csp::common::Array<Material*>& UnownedMaterials) -> OwnedMaterials
+        const auto adopt = [](const csp::common::Array<Material*>& unownedMaterials) -> OwnedMaterials
         {
-            auto Owned = OwnedMaterials();
-            Owned.reserve(UnownedMaterials.Size());
+            auto owned = OwnedMaterials();
+            owned.reserve(unownedMaterials.Size());
 
-            for (auto* Unowned : UnownedMaterials)
+            for (auto* unowned : unownedMaterials)
             {
-                Owned.emplace_back(Unowned);
+                owned.emplace_back(unowned);
             }
 
-            return Owned;
+            return owned;
         };
 
-        return Adopt(FoundMaterials);
+        return adopt(foundMaterials);
     }();
 
-    EXPECT_EQ(FoundMaterials.size(), 3);
+    EXPECT_EQ(foundMaterials.size(), 3);
 
-    const auto ContainsMaterial = [](const auto& Range, csp::common::String MaterialId)
+    const auto containsMaterial = [](const auto& range, csp::common::String materialId)
     {
         return std::find_if(
-                   std::begin(Range), std::end(Range), [&MaterialId](const auto& Material) { return Material->GetMaterialId() == MaterialId; })
-            != std::end(Range);
+                   std::begin(range), std::end(range), [&materialId](const auto& material) { return material->GetMaterialId() == materialId; })
+            != std::end(range);
     };
 
-    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard1"));
-    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard2"));
-    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard3"));
+    EXPECT_TRUE(containsMaterial(foundMaterials, "TestIdStandard1"));
+    EXPECT_TRUE(containsMaterial(foundMaterials, "TestIdStandard2"));
+    EXPECT_TRUE(containsMaterial(foundMaterials, "TestIdStandard3"));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetGLTFMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
 
     // Get the material
-    Material* FoundMaterial = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
+    Material* foundMaterial = nullptr;
+    GetMaterial(assetSystem, createdMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialId(), &foundMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    GLTFMaterial* FoundGLTFMaterial = dynamic_cast<GLTFMaterial*>(FoundMaterial);
-    EXPECT_NE(FoundGLTFMaterial, nullptr);
+    GLTFMaterial* foundGltfMaterial = dynamic_cast<GLTFMaterial*>(foundMaterial);
+    EXPECT_NE(foundGltfMaterial, nullptr);
 #endif
 
-    EXPECT_EQ(FoundMaterial->GetShaderType(), CreatedMaterial->GetShaderType());
-    EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
-    EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
-    EXPECT_EQ(FoundMaterial->GetMaterialId(), CreatedMaterial->GetMaterialId());
+    EXPECT_EQ(foundMaterial->GetShaderType(), createdMaterial->GetShaderType());
+    EXPECT_EQ(foundMaterial->GetName(), createdMaterial->GetName());
+    EXPECT_EQ(foundMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(foundMaterial->GetMaterialId(), createdMaterial->GetMaterialId());
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetAlphaVideoMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial);
 
     // Get the material
-    Material* FoundMaterial = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
+    Material* foundMaterial = nullptr;
+    GetMaterial(assetSystem, createdMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialId(), &foundMaterial);
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
-    AlphaVideoMaterial* FoundAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(FoundMaterial);
-    EXPECT_NE(FoundAlphaVideoMaterial, nullptr);
+    AlphaVideoMaterial* foundAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(foundMaterial);
+    EXPECT_NE(foundAlphaVideoMaterial, nullptr);
 #endif
 
-    EXPECT_EQ(FoundMaterial->GetShaderType(), CreatedMaterial->GetShaderType());
-    EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
-    EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
-    EXPECT_EQ(FoundMaterial->GetMaterialId(), CreatedMaterial->GetMaterialId());
+    EXPECT_EQ(foundMaterial->GetShaderType(), createdMaterial->GetShaderType());
+    EXPECT_EQ(foundMaterial->GetName(), createdMaterial->GetName());
+    EXPECT_EQ(foundMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(foundMaterial->GetMaterialId(), createdMaterial->GetMaterialId());
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialWithIncorrectShaderTypeTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
 
-    auto [Result1] = AWAIT_PRE(AssetSystem, GetAssetCollectionById, RequestPredicate, CreatedMaterial->GetMaterialCollectionId());
+    auto [Result1] = AWAIT_PRE(assetSystem, GetAssetCollectionById, RequestPredicate, createdMaterial->GetMaterialCollectionId());
     EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
-    AssetCollection OutAssetCollection = Result1.GetAssetCollection();
+    AssetCollection outAssetCollection = Result1.GetAssetCollection();
 
     // Create metadata for MaterialCollection with an invalid shader type
-    csp::common::Map<csp::common::String, csp::common::String> InMetaData;
-    InMetaData["ShaderType"] = "InvalidShaderType";
+    csp::common::Map<csp::common::String, csp::common::String> inMetaData;
+    inMetaData["ShaderType"] = "InvalidShaderType";
 
-    auto [Result2] = AWAIT_PRE(AssetSystem, UpdateAssetCollectionMetadata, RequestPredicate, OutAssetCollection, InMetaData, nullptr);
+    auto [Result2] = AWAIT_PRE(assetSystem, UpdateAssetCollectionMetadata, RequestPredicate, outAssetCollection, inMetaData, nullptr);
     EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the material
-    Material* FoundMaterial = nullptr;
+    Material* foundMaterial = nullptr;
     GetMaterial(
-        AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial, csp::systems::EResultCode::Failed);
+        assetSystem, createdMaterial->GetMaterialCollectionId(), createdMaterial->GetMaterialId(), &foundMaterial, csp::systems::EResultCode::Failed);
 
-    EXPECT_EQ(FoundMaterial, nullptr);
+    EXPECT_EQ(foundMaterial, nullptr);
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialsWithIncorrectShaderTypeTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
 
-    auto [Result1] = AWAIT_PRE(AssetSystem, GetAssetCollectionById, RequestPredicate, CreatedMaterial->GetMaterialCollectionId());
+    auto [Result1] = AWAIT_PRE(assetSystem, GetAssetCollectionById, RequestPredicate, createdMaterial->GetMaterialCollectionId());
     EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
-    AssetCollection OutAssetCollection = Result1.GetAssetCollection();
+    AssetCollection outAssetCollection = Result1.GetAssetCollection();
 
     // Create metadata for MaterialCollection with an invalid shader type
-    csp::common::Map<csp::common::String, csp::common::String> InMetaData;
-    InMetaData["ShaderType"] = "InvalidShaderType";
+    csp::common::Map<csp::common::String, csp::common::String> inMetaData;
+    inMetaData["ShaderType"] = "InvalidShaderType";
 
-    auto [Result2] = AWAIT_PRE(AssetSystem, UpdateAssetCollectionMetadata, RequestPredicate, OutAssetCollection, InMetaData, nullptr);
+    auto [Result2] = AWAIT_PRE(assetSystem, UpdateAssetCollectionMetadata, RequestPredicate, outAssetCollection, inMetaData, nullptr);
     EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get the material using the GetMaterials method
-    csp::common::Array<Material*> FoundMaterials;
-    GetMaterials(AssetSystem, Space.Id, FoundMaterials, csp::systems::EResultCode::Failed);
+    csp::common::Array<Material*> foundMaterials;
+    GetMaterials(assetSystem, space.Id, foundMaterials, csp::systems::EResultCode::Failed);
 
-    EXPECT_EQ(FoundMaterials.Size(), 0);
+    EXPECT_EQ(foundMaterials.Size(), 0);
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create a material so we have one in this space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, "TestMaterial", csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
 
     // Attempt to get an invalid material
-    Material* FoundMaterial = nullptr;
-    GetMaterial(AssetSystem, "InvalidAssetCollectionId", "InvalidAssetId", &FoundMaterial, csp::systems::EResultCode::Failed);
+    Material* foundMaterial = nullptr;
+    GetMaterial(assetSystem, "InvalidAssetCollectionId", "InvalidAssetId", &foundMaterial, csp::systems::EResultCode::Failed);
 
     // Cleanup
-    DeleteMaterial(AssetSystem, *CreatedMaterial);
+    DeleteMaterial(assetSystem, *createdMaterial);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to search for materials
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // Create 2 materials associated with the space
-    constexpr const char* TestMaterialName1 = "TestStandardMaterial";
-    Material* CreatedMaterial1 = nullptr;
-    CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial1);
+    constexpr const char* testMaterialName1 = "TestStandardMaterial";
+    Material* createdMaterial1 = nullptr;
+    CreateMaterial(assetSystem, testMaterialName1, csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial1);
 
-    constexpr const char* TestMaterialName2 = "TestAlphaVideoMaterial";
-    Material* CreatedMaterial2 = nullptr;
-    CreateMaterial(AssetSystem, TestMaterialName2, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial2);
+    constexpr const char* testMaterialName2 = "TestAlphaVideoMaterial";
+    Material* createdMaterial2 = nullptr;
+    CreateMaterial(assetSystem, testMaterialName2, csp::systems::EShaderType::AlphaVideo, space.Id, {}, {}, &createdMaterial2);
 
     // Delete first material
-    DeleteMaterial(AssetSystem, *CreatedMaterial1);
+    DeleteMaterial(assetSystem, *createdMaterial1);
 
     // Ensure the deletion has worked
-    Material* DeletedMaterial1 = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial1->GetMaterialCollectionId(), CreatedMaterial1->GetMaterialId(), &DeletedMaterial1,
+    Material* deletedMaterial1 = nullptr;
+    GetMaterial(assetSystem, createdMaterial1->GetMaterialCollectionId(), createdMaterial1->GetMaterialId(), &deletedMaterial1,
         csp::systems::EResultCode::Failed);
 
     // Make sure we can still get the second material
-    Material* RemainingMaterial = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial2->GetMaterialCollectionId(), CreatedMaterial2->GetMaterialId(), &RemainingMaterial);
+    Material* remainingMaterial = nullptr;
+    GetMaterial(assetSystem, createdMaterial2->GetMaterialCollectionId(), createdMaterial2->GetMaterialId(), &remainingMaterial);
 
     // Delete second material
-    DeleteMaterial(AssetSystem, *CreatedMaterial2);
+    DeleteMaterial(assetSystem, *createdMaterial2);
 
     // Ensure the second material is deleted
-    Material* DeletedMaterial2 = nullptr;
-    GetMaterial(AssetSystem, CreatedMaterial2->GetMaterialCollectionId(), CreatedMaterial2->GetMaterialId(), &DeletedMaterial2,
+    Material* deletedMaterial2 = nullptr;
+    GetMaterial(assetSystem, createdMaterial2->GetMaterialCollectionId(), createdMaterial2->GetMaterialId(), &deletedMaterial2,
         csp::systems::EResultCode::Failed);
 
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space so we can get the material events
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
-    constexpr const char* TestMaterialName1 = "TestMaterial1";
-    GLTFMaterial* CreatedGLTFMaterial = nullptr;
+    constexpr const char* testMaterialName1 = "TestMaterial1";
+    GLTFMaterial* createdGltfMaterial = nullptr;
 
     // Create material and listen for event
     {
-        bool CallbackCalled = false;
+        bool callbackCalled = false;
 
-        csp::common::String MaterialCollectionId;
-        csp::common::String MaterialId;
+        csp::common::String materialCollectionId;
+        csp::common::String materialId;
 
-        auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::common::MaterialChangedParams& Params)
+        auto cb = [&callbackCalled, &materialCollectionId, &materialId](const csp::common::MaterialChangedParams& params)
         {
-            MaterialCollectionId = Params.MaterialCollectionId;
-            MaterialId = Params.MaterialId;
+            materialCollectionId = params.MaterialCollectionId;
+            materialId = params.MaterialId;
 
-            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Created);
-            CallbackCalled = true;
+            EXPECT_EQ(params.ChangeType, csp::common::EAssetChangeType::Created);
+            callbackCalled = true;
         };
 
-        AssetSystem->SetMaterialChangedCallback(CB);
+        assetSystem->SetMaterialChangedCallback(cb);
 
         // Create a material associated with the space
-        Material* CreatedMaterial = nullptr;
-        CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-        CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
+        Material* createdMaterial = nullptr;
+        CreateMaterial(assetSystem, testMaterialName1, csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
+        createdGltfMaterial = static_cast<GLTFMaterial*>(createdMaterial);
 
-        WaitForCallback(CallbackCalled);
-        EXPECT_TRUE(CallbackCalled);
+        WaitForCallback(callbackCalled);
+        EXPECT_TRUE(callbackCalled);
 
         // Do the check here where we know it exists
-        EXPECT_EQ(MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-        EXPECT_EQ(MaterialId, CreatedGLTFMaterial->GetMaterialId());
+        EXPECT_EQ(materialCollectionId, createdGltfMaterial->GetMaterialCollectionId());
+        EXPECT_EQ(materialId, createdGltfMaterial->GetMaterialId());
     }
 
     // Update material and listen for event
     {
-        bool CallbackCalled2 = false;
+        bool callbackCalled2 = false;
 
-        auto CB = [&CallbackCalled2, &CreatedGLTFMaterial](const csp::common::MaterialChangedParams& Params)
+        auto cb = [&callbackCalled2, &createdGltfMaterial](const csp::common::MaterialChangedParams& params)
         {
-            EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-            EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+            EXPECT_EQ(params.MaterialCollectionId, createdGltfMaterial->GetMaterialCollectionId());
+            EXPECT_EQ(params.MaterialId, createdGltfMaterial->GetMaterialId());
 
-            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Updated);
+            EXPECT_EQ(params.ChangeType, csp::common::EAssetChangeType::Updated);
 
-            CallbackCalled2 = true;
+            callbackCalled2 = true;
         };
 
-        AssetSystem->SetMaterialChangedCallback(CB);
+        assetSystem->SetMaterialChangedCallback(cb);
 
-        CreatedGLTFMaterial->SetAlphaCutoff(1);
-        UpdateMaterial(AssetSystem, *CreatedGLTFMaterial);
-        WaitForCallback(CallbackCalled2);
+        createdGltfMaterial->SetAlphaCutoff(1);
+        UpdateMaterial(assetSystem, *createdGltfMaterial);
+        WaitForCallback(callbackCalled2);
 
-        EXPECT_TRUE(CallbackCalled2);
+        EXPECT_TRUE(callbackCalled2);
     }
 
     // Delete material and listen for event
     {
-        bool CallbackCalled3 = false;
+        bool callbackCalled3 = false;
 
-        auto CB = [&CallbackCalled3, &CreatedGLTFMaterial](const csp::common::MaterialChangedParams& Params)
+        auto cb = [&callbackCalled3, &createdGltfMaterial](const csp::common::MaterialChangedParams& params)
         {
-            EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-            EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+            EXPECT_EQ(params.MaterialCollectionId, createdGltfMaterial->GetMaterialCollectionId());
+            EXPECT_EQ(params.MaterialId, createdGltfMaterial->GetMaterialId());
 
-            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Deleted);
+            EXPECT_EQ(params.ChangeType, csp::common::EAssetChangeType::Deleted);
 
-            CallbackCalled3 = true;
+            callbackCalled3 = true;
         };
 
-        AssetSystem->SetMaterialChangedCallback(CB);
+        assetSystem->SetMaterialChangedCallback(cb);
 
-        DeleteMaterial(AssetSystem, *CreatedGLTFMaterial);
-        WaitForCallback(CallbackCalled3);
+        DeleteMaterial(assetSystem, *createdGltfMaterial);
+        WaitForCallback(callbackCalled3);
 
-        EXPECT_TRUE(CallbackCalled3);
+        EXPECT_TRUE(callbackCalled3);
     }
 
     // Cleanup
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = ::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
-    const char* TestAssetName = "CSP-UNITTEST-ASSET";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
+    const char* testAssetName = "CSP-UNITTEST-ASSET";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+    char uniqueAssetName[256];
+    SPRINTF(uniqueAssetName, "%s-%s", testAssetName, GetUniqueString().c_str());
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space to associate a material with
-    ::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    ::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space so we can get the material and asset events
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
-    constexpr const char* TestMaterialName1 = "TestMaterial1";
-    GLTFMaterial* CreatedGLTFMaterial = nullptr;
+    constexpr const char* testMaterialName1 = "TestMaterial1";
+    GLTFMaterial* createdGltfMaterial = nullptr;
 
     // Create material and listen for event
-    bool CallbackCalled = false;
+    bool callbackCalled = false;
 
-    csp::common::String MaterialCollectionId;
-    csp::common::String MaterialId;
+    csp::common::String materialCollectionId;
+    csp::common::String materialId;
 
-    auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::common::MaterialChangedParams& Params)
+    auto cb = [&callbackCalled, &materialCollectionId, &materialId](const csp::common::MaterialChangedParams& params)
     {
-        MaterialCollectionId = Params.MaterialCollectionId;
-        MaterialId = Params.MaterialId;
+        materialCollectionId = params.MaterialCollectionId;
+        materialId = params.MaterialId;
 
-        EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Created);
-        CallbackCalled = true;
+        EXPECT_EQ(params.ChangeType, csp::common::EAssetChangeType::Created);
+        callbackCalled = true;
     };
 
-    AssetSystem->SetMaterialChangedCallback(CB);
+    assetSystem->SetMaterialChangedCallback(cb);
 
     // Create a material associated with the space
-    Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
+    Material* createdMaterial = nullptr;
+    CreateMaterial(assetSystem, testMaterialName1, csp::systems::EShaderType::Standard, space.Id, {}, {}, &createdMaterial);
+    createdGltfMaterial = static_cast<GLTFMaterial*>(createdMaterial);
 
-    WaitForCallback(CallbackCalled);
-    EXPECT_TRUE(CallbackCalled);
+    WaitForCallback(callbackCalled);
+    EXPECT_TRUE(callbackCalled);
 
     // Do the check here where we know it exists
-    EXPECT_EQ(MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-    EXPECT_EQ(MaterialId, CreatedGLTFMaterial->GetMaterialId());
+    EXPECT_EQ(materialCollectionId, createdGltfMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(materialId, createdGltfMaterial->GetMaterialId());
 
     // Cleanup
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }

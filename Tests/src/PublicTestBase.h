@@ -31,10 +31,10 @@ constexpr const char* AdminAccountEmailName = "MAGNOPUS_SERVICES_ADMIN_EMAIL";
 constexpr const char* AdminAccountPasswordName = "MAGNOPUS_SERVICES_ADMIN_PASSWORD";
 
 // If you're trying to run with localMCS, set `MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081` after having launched the maglocal docker instance.
-const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
+const char* GetEnvironmentVariableOrDefault(const char* environmentKey, const char* defaultValue)
 {
-    const auto EnvironmentVariable = std::getenv(EnvironmentKey);
-    return (EnvironmentVariable) ? EnvironmentVariable : DefaultValue;
+    const auto environmentVariable = std::getenv(environmentKey);
+    return (environmentVariable) ? environmentVariable : defaultValue;
 }
 } // namespace
 
@@ -60,8 +60,8 @@ protected:
     // We don't have to/can't clean this up here, we inject it and CSP takes ownership.
     // Confusing from an external user perspective I know, and somewhat fragile because we're relying on SystemsManager::destroy to trigger the RAII
     // behaviour, may change with a new initialisation api.
-    SignalRConnectionMock* SignalRMock;
-    WebClientMock* WebClientMock;
+    SignalRConnectionMock* m_signalRMock;
+    WebClientMock* m_webClientMock;
 };
 
 // For parameterized (data driven) tests

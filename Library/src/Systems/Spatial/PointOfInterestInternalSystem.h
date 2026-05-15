@@ -26,37 +26,37 @@ namespace csp::systems
 class PointOfInterestInternalSystem : public PointOfInterestSystem
 {
 public:
-    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-        : PointOfInterestSystem(InWebClient, LogSystem) {};
+    PointOfInterestInternalSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+        : PointOfInterestSystem(inWebClient, logSystem) {};
 
-    void CreateSite(const Site& Site, SiteResultCallback Callback) { PointOfInterestSystem::CreateSite(Site, Callback); };
+    void CreateSite(const Site& site, SiteResultCallback callback) { PointOfInterestSystem::CreateSite(site, callback); };
 
-    void DeleteSite(const Site& Site, NullResultCallback Callback) { PointOfInterestSystem::DeleteSite(Site, Callback); };
+    void DeleteSite(const Site& site, NullResultCallback callback) { PointOfInterestSystem::DeleteSite(site, callback); };
 
-    void GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback) { PointOfInterestSystem::GetSites(SpaceId, Callback); };
+    void GetSites(const csp::common::String& spaceId, SitesCollectionResultCallback callback) { PointOfInterestSystem::GetSites(spaceId, callback); };
 
-    void AddSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
-        const csp::common::Optional<float>& Orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-        SpaceGeoLocationResultCallback Callback)
+    void AddSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::Optional<GeoLocation>& location,
+        const csp::common::Optional<float>& orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence,
+        SpaceGeoLocationResultCallback callback)
     {
-        PointOfInterestSystem::AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
+        PointOfInterestSystem::AddSpaceGeoLocation(spaceId, location, orientation, geoFence, callback);
     }
 
-    void UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::String& SpaceGeoLocationId,
-        const csp::common::Optional<GeoLocation>& Location, const csp::common::Optional<float>& Orientation,
-        const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence, SpaceGeoLocationResultCallback Callback)
+    void UpdateSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::String& spaceGeoLocationId,
+        const csp::common::Optional<GeoLocation>& location, const csp::common::Optional<float>& orientation,
+        const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence, SpaceGeoLocationResultCallback callback)
     {
-        PointOfInterestSystem::UpdateSpaceGeoLocation(SpaceId, SpaceGeoLocationId, Location, Orientation, GeoFence, Callback);
+        PointOfInterestSystem::UpdateSpaceGeoLocation(spaceId, spaceGeoLocationId, location, orientation, geoFence, callback);
     }
 
-    void GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
+    void GetSpaceGeoLocation(const csp::common::String& spaceId, SpaceGeoLocationResultCallback callback)
     {
-        PointOfInterestSystem::GetSpaceGeoLocation(SpaceId, Callback);
+        PointOfInterestSystem::GetSpaceGeoLocation(spaceId, callback);
     }
 
-    void DeleteSpaceGeoLocation(const csp::common::String& SpaceGeoLocationId, NullResultCallback Callback)
+    void DeleteSpaceGeoLocation(const csp::common::String& spaceGeoLocationId, NullResultCallback callback)
     {
-        PointOfInterestSystem::DeleteSpaceGeoLocation(SpaceGeoLocationId, Callback);
+        PointOfInterestSystem::DeleteSpaceGeoLocation(spaceGeoLocationId, callback);
     }
 };
 

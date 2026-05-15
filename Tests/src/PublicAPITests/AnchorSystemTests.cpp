@@ -34,108 +34,108 @@
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem, const csp::common::String& AssetCollectionId,
-    const csp::common::Optional<csp::systems::GeoLocation>& Location, csp::systems::Anchor& OutAnchor,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
+void CreateAnchor(csp::systems::AnchorSystem* anchorSystem, const csp::common::String& assetCollectionId,
+    const csp::common::Optional<csp::systems::GeoLocation>& location, csp::systems::Anchor& outAnchor,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spatialKeyValue,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags)
 {
-    char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
+    char uniqueThirdPartyAnchorId[256];
+    SPRINTF(uniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
 
-    auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
-    auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
-    auto AnchorLocation = Location.HasValue() ? *Location : csp::systems::GeoLocation(180.0, 90.0);
-    auto AnchorTags = Tags.HasValue() ? *Tags : csp::common::Array<csp::common::String> { "Test1", "Test2" };
-    auto AnchorSpatialKeyValue = SpatialKeyValue.HasValue()
-        ? *SpatialKeyValue
+    auto anchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
+    auto anchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
+    auto anchorLocation = location.HasValue() ? *location : csp::systems::GeoLocation(180.0, 90.0);
+    auto anchorTags = tags.HasValue() ? *tags : csp::common::Array<csp::common::String> { "Test1", "Test2" };
+    auto anchorSpatialKeyValue = spatialKeyValue.HasValue()
+        ? *spatialKeyValue
         : csp::common::Map<csp::common::String, csp::common::String> { { "TestKey1", "TestValue1" }, { "TestKey2", "TestValue2" } };
 
-    auto [Result] = Awaitable(&csp::systems::AnchorSystem::CreateAnchor, AnchorSystem, csp::systems::AnchorProvider::GoogleCloudAnchors,
-        UniqueThirdPartyAnchorId, AssetCollectionId, AnchorLocation, AnchorPosition, AnchorRotation, AnchorSpatialKeyValue, AnchorTags)
+    auto [Result] = Awaitable(&csp::systems::AnchorSystem::CreateAnchor, anchorSystem, csp::systems::AnchorProvider::GoogleCloudAnchors,
+        uniqueThirdPartyAnchorId, assetCollectionId, anchorLocation, anchorPosition, anchorRotation, anchorSpatialKeyValue, anchorTags)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutAnchor = Result.GetAnchor();
-        std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
+        outAnchor = Result.GetAnchor();
+        std::cerr << "Anchor Created: Id=" << outAnchor.Id << std::endl;
     }
 }
 
-void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem, const csp::common::String& SpaceId, uint64_t SpaceEntityId,
-    const csp::common::String& AssetCollectionId, const csp::common::Optional<csp::systems::GeoLocation>& Location, csp::systems::Anchor& OutAnchor,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
+void CreateAnchorInSpace(csp::systems::AnchorSystem* anchorSystem, const csp::common::String& spaceId, uint64_t spaceEntityId,
+    const csp::common::String& assetCollectionId, const csp::common::Optional<csp::systems::GeoLocation>& location, csp::systems::Anchor& outAnchor,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spatialKeyValue,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags)
 {
-    char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
+    char uniqueThirdPartyAnchorId[256];
+    SPRINTF(uniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
 
-    auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
-    auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
-    auto AnchorLocation = Location.HasValue() ? *Location : csp::systems::GeoLocation(180.0, 90.0);
-    auto AnchorTags = Tags.HasValue() ? *Tags : csp::common::Array<csp::common::String> { "Test1", "Test2" };
-    auto AnchorSpatialKeyValue = SpatialKeyValue.HasValue()
-        ? *SpatialKeyValue
+    auto anchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
+    auto anchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
+    auto anchorLocation = location.HasValue() ? *location : csp::systems::GeoLocation(180.0, 90.0);
+    auto anchorTags = tags.HasValue() ? *tags : csp::common::Array<csp::common::String> { "Test1", "Test2" };
+    auto anchorSpatialKeyValue = spatialKeyValue.HasValue()
+        ? *spatialKeyValue
         : csp::common::Map<csp::common::String, csp::common::String> { { "TestKey1", "TestValue1" }, { "TestKey2", "TestValue2" } };
 
-    auto [Result] = Awaitable(&csp::systems::AnchorSystem::CreateAnchorInSpace, AnchorSystem, csp::systems::AnchorProvider::GoogleCloudAnchors,
-        UniqueThirdPartyAnchorId, SpaceId, SpaceEntityId, AssetCollectionId, AnchorLocation, AnchorPosition, AnchorRotation, AnchorSpatialKeyValue,
-        AnchorTags)
+    auto [Result] = Awaitable(&csp::systems::AnchorSystem::CreateAnchorInSpace, anchorSystem, csp::systems::AnchorProvider::GoogleCloudAnchors,
+        uniqueThirdPartyAnchorId, spaceId, spaceEntityId, assetCollectionId, anchorLocation, anchorPosition, anchorRotation, anchorSpatialKeyValue,
+        anchorTags)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutAnchor = Result.GetAnchor();
-        std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
+        outAnchor = Result.GetAnchor();
+        std::cerr << "Anchor Created: Id=" << outAnchor.Id << std::endl;
     }
 }
 
-void DeleteAnchors(csp::systems::AnchorSystem* AnchorSystem, const csp::common::Array<csp::common::String>& AnchorIDs)
+void DeleteAnchors(csp::systems::AnchorSystem* anchorSystem, const csp::common::Array<csp::common::String>& anchorIDs)
 {
-    auto [Result] = Awaitable(&csp::systems::AnchorSystem::DeleteAnchors, AnchorSystem, AnchorIDs).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::AnchorSystem::DeleteAnchors, anchorSystem, anchorIDs).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        for (size_t idx = 0; idx < AnchorIDs.Size(); idx++)
+        for (size_t idx = 0; idx < anchorIDs.Size(); idx++)
         {
             std::cerr << "Anchor Deleted: "
-                      << "Id=" << AnchorIDs[idx] << std::endl;
+                      << "Id=" << anchorIDs[idx] << std::endl;
         }
     }
 }
 
 void CreateAnchorResolution(
-    csp::systems::AnchorSystem* AnchorSystem, const csp::common::String& AnchorId, csp::systems::AnchorResolution& OutAnchorResolution)
+    csp::systems::AnchorSystem* anchorSystem, const csp::common::String& anchorId, csp::systems::AnchorResolution& outAnchorResolution)
 {
-    const bool SuccessfullyResolved = true;
-    const int ResolveAttempted = 3;
-    const double ResolveTime = 1000;
-    const csp::common::String TestTag = "TestTag";
-    csp::common::Array<csp::common::String> Tags { TestTag };
+    const bool successfullyResolved = true;
+    const int resolveAttempted = 3;
+    const double resolveTime = 1000;
+    const csp::common::String testTag = "TestTag";
+    csp::common::Array<csp::common::String> tags { testTag };
 
     auto [Result] = Awaitable(
-        &csp::systems::AnchorSystem::CreateAnchorResolution, AnchorSystem, AnchorId, SuccessfullyResolved, ResolveAttempted, ResolveTime, Tags)
+        &csp::systems::AnchorSystem::CreateAnchorResolution, anchorSystem, anchorId, successfullyResolved, resolveAttempted, resolveTime, tags)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AnchorResolution = Result.GetAnchorResolution();
+    const auto& anchorResolution = Result.GetAnchorResolution();
 
-    EXPECT_FALSE(AnchorResolution.Id.IsEmpty());
-    EXPECT_EQ(AnchorResolution.AnchorId, AnchorId);
-    EXPECT_EQ(AnchorResolution.SuccessfullyResolved, SuccessfullyResolved);
-    EXPECT_EQ(AnchorResolution.ResolveAttempted, ResolveAttempted);
-    EXPECT_EQ(AnchorResolution.Tags.Size(), 1);
-    EXPECT_EQ(AnchorResolution.Tags[0], TestTag);
+    EXPECT_FALSE(anchorResolution.Id.IsEmpty());
+    EXPECT_EQ(anchorResolution.AnchorId, anchorId);
+    EXPECT_EQ(anchorResolution.SuccessfullyResolved, successfullyResolved);
+    EXPECT_EQ(anchorResolution.ResolveAttempted, resolveAttempted);
+    EXPECT_EQ(anchorResolution.Tags.Size(), 1);
+    EXPECT_EQ(anchorResolution.Tags[0], testTag);
 
-    OutAnchorResolution = AnchorResolution;
+    outAnchorResolution = anchorResolution;
 }
 
 } // namespace
@@ -144,287 +144,287 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::AssetCollection AssetCollection;
+    csp::systems::AssetCollection assetCollection;
     CreateAssetCollection(
-        AssetSystem, nullptr, nullptr, UniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection);
+        assetSystem, nullptr, nullptr, uniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection);
 
-    csp::systems::Anchor Anchor;
-    CreateAnchor(AnchorSystem, AssetCollection.Id, nullptr, Anchor, nullptr, nullptr);
-    csp::common::Array<csp::common::String> CreatedAnchorIds(1);
-    CreatedAnchorIds[0] = Anchor.Id;
+    csp::systems::Anchor anchor;
+    CreateAnchor(anchorSystem, assetCollection.Id, nullptr, anchor, nullptr, nullptr);
+    csp::common::Array<csp::common::String> createdAnchorIds(1);
+    createdAnchorIds[0] = anchor.Id;
 
-    EXPECT_EQ(Anchor.ThirdPartyAnchorProvider, csp::systems::AnchorProvider::GoogleCloudAnchors);
-    EXPECT_TRUE(Anchor.SpaceId.IsEmpty());
-    EXPECT_EQ(Anchor.AssetCollectionId, AssetCollection.Id);
+    EXPECT_EQ(anchor.ThirdPartyAnchorProvider, csp::systems::AnchorProvider::GoogleCloudAnchors);
+    EXPECT_TRUE(anchor.SpaceId.IsEmpty());
+    EXPECT_EQ(anchor.AssetCollectionId, assetCollection.Id);
 
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    LogOut(UserSystem);
+    DeleteAnchors(anchorSystem, createdAnchorIds);
+    DeleteAssetCollection(assetSystem, assetCollection);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ObjectName = "Object 1";
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    csp::multiplayer::SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    csp::systems::AssetCollection AssetCollection;
+    csp::systems::AssetCollection assetCollection;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection);
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection);
 
-    csp::systems::Anchor Anchor;
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject->GetId(), AssetCollection.Id, nullptr, Anchor, nullptr, nullptr);
-    csp::common::Array<csp::common::String> CreatedAnchorIds(1);
-    CreatedAnchorIds[0] = Anchor.Id;
+    csp::systems::Anchor anchor;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject->GetId(), assetCollection.Id, nullptr, anchor, nullptr, nullptr);
+    csp::common::Array<csp::common::String> createdAnchorIds(1);
+    createdAnchorIds[0] = anchor.Id;
 
-    EXPECT_EQ(Anchor.ThirdPartyAnchorProvider, csp::systems::AnchorProvider::GoogleCloudAnchors);
-    EXPECT_EQ(Anchor.SpaceId, Space.Id);
-    EXPECT_EQ(Anchor.SpaceEntityId, CreatedObject->GetId());
-    EXPECT_EQ(Anchor.AssetCollectionId, AssetCollection.Id);
+    EXPECT_EQ(anchor.ThirdPartyAnchorProvider, csp::systems::AnchorProvider::GoogleCloudAnchors);
+    EXPECT_EQ(anchor.SpaceId, space.Id);
+    EXPECT_EQ(anchor.SpaceEntityId, CreatedObject->GetId());
+    EXPECT_EQ(anchor.AssetCollectionId, assetCollection.Id);
 
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
+    DeleteAnchors(anchorSystem, createdAnchorIds);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteAssetCollection(assetSystem, assetCollection);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName1[256];
-    SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName2[256];
-    SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName1[256];
+    SPRINTF(uniqueAssetCollectionName1, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName2[256];
+    SPRINTF(uniqueAssetCollectionName2, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    csp::multiplayer::SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    csp::common::String ObjectName1 = "Object 1";
-    auto [CreatedObject1] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName1, ObjectTransform, csp::common::Optional<uint64_t> {});
-    csp::common::String ObjectName2 = "Object 2";
-    auto [CreatedObject2] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName2, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName1 = "Object 1";
+    auto [CreatedObject1] = AWAIT(realtimeEngine.get(), CreateEntity, objectName1, objectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName2 = "Object 2";
+    auto [CreatedObject2] = AWAIT(realtimeEngine.get(), CreateEntity, objectName2, objectTransform, csp::common::Optional<uint64_t> {});
 
-    csp::systems::AssetCollection AssetCollection1;
+    csp::systems::AssetCollection assetCollection1;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName1, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection1);
-    csp::systems::AssetCollection AssetCollection2;
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName1, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection1);
+    csp::systems::AssetCollection assetCollection2;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName2, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection2);
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName2, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection2);
 
-    csp::common::Array<csp::common::String> CreatedAnchorIds(2);
-    csp::systems::Anchor Anchor;
+    csp::common::Array<csp::common::String> createdAnchorIds(2);
+    csp::systems::Anchor anchor;
 
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject1->GetId(), AssetCollection1.Id, nullptr, Anchor, nullptr, nullptr);
-    CreatedAnchorIds[0] = Anchor.Id;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject1->GetId(), assetCollection1.Id, nullptr, anchor, nullptr, nullptr);
+    createdAnchorIds[0] = anchor.Id;
 
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject2->GetId(), AssetCollection2.Id, nullptr, Anchor, nullptr, nullptr);
-    CreatedAnchorIds[1] = Anchor.Id;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject2->GetId(), assetCollection2.Id, nullptr, anchor, nullptr, nullptr);
+    createdAnchorIds[1] = anchor.Id;
 
     auto [PreDeleteGetResult]
-        = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
+        = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, anchorSystem, space.Id, nullptr, nullptr).Await(RequestPredicate);
     EXPECT_EQ(PreDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(PreDeleteGetResult.GetAnchors().Size(), 2);
 
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
+    DeleteAnchors(anchorSystem, createdAnchorIds);
 
     auto [PostDeleteGetResult]
-        = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
+        = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, anchorSystem, space.Id, nullptr, nullptr).Await(RequestPredicate);
     EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    DeleteAssetCollection(AssetSystem, AssetCollection1);
-    DeleteAssetCollection(AssetSystem, AssetCollection2);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteAssetCollection(assetSystem, assetCollection1);
+    DeleteAssetCollection(assetSystem, assetCollection2);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
-    csp::common::Array<csp::common::String> SpaceId(1);
+    csp::systems::Space space;
+    csp::common::Array<csp::common::String> spaceId(1);
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-    SpaceId[0] = Space.Id;
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
+    spaceId[0] = space.Id;
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ObjectName = "Object 1";
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    csp::multiplayer::SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    csp::systems::AssetCollection AssetCollection;
+    csp::systems::AssetCollection assetCollection;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection);
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection);
 
-    csp::systems::GeoLocation AnchorLocation;
-    AnchorLocation.Latitude = 45.0;
-    AnchorLocation.Longitude = 160.0;
+    csp::systems::GeoLocation anchorLocation;
+    anchorLocation.Latitude = 45.0;
+    anchorLocation.Longitude = 160.0;
 
-    csp::systems::Anchor Anchor;
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject->GetId(), AssetCollection.Id, AnchorLocation, Anchor, nullptr, nullptr);
+    csp::systems::Anchor anchor;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject->GetId(), assetCollection.Id, anchorLocation, anchor, nullptr, nullptr);
 
     // Search for the newly created Anchor inside a circular area
-    csp::common::Array<csp::systems::Anchor> AnchorCollection;
+    csp::common::Array<csp::systems::Anchor> anchorCollection;
 
-    csp::systems::GeoLocation SearchLocationOrigin;
-    SearchLocationOrigin.Latitude = 44.0;
-    SearchLocationOrigin.Longitude = 160.0;
-    double SearchRadius = 130000.0;
-    const csp::common::Array<csp::common::String> Tags = { "Test1", "Test2" };
-    const csp::common::Array<csp::common::String> SpacialKeys = { "TestKey1", "TestKey2" };
-    const csp::common::Array<csp::common::String> SpacialValues = { "TestValue1", "TestValue2" };
+    csp::systems::GeoLocation searchLocationOrigin;
+    searchLocationOrigin.Latitude = 44.0;
+    searchLocationOrigin.Longitude = 160.0;
+    double searchRadius = 130000.0;
+    const csp::common::Array<csp::common::String> tags = { "Test1", "Test2" };
+    const csp::common::Array<csp::common::String> spacialKeys = { "TestKey1", "TestKey2" };
+    const csp::common::Array<csp::common::String> spacialValues = { "TestValue1", "TestValue2" };
 
-    auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInArea, AnchorSystem, SearchLocationOrigin, SearchRadius, SpacialKeys,
-        SpacialValues, Tags, true, SpaceId, nullptr, nullptr)
+    auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInArea, anchorSystem, searchLocationOrigin, searchRadius, spacialKeys,
+        spacialValues, tags, true, spaceId, nullptr, nullptr)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        const auto& ResultAnchors = Result.GetAnchors();
-        AnchorCollection = csp::common::Array<csp::systems::Anchor>(ResultAnchors.Size());
+        const auto& resultAnchors = Result.GetAnchors();
+        anchorCollection = csp::common::Array<csp::systems::Anchor>(resultAnchors.Size());
 
-        for (size_t idx = 0; idx < ResultAnchors.Size(); ++idx)
+        for (size_t idx = 0; idx < resultAnchors.Size(); ++idx)
         {
-            AnchorCollection[idx] = ResultAnchors[idx];
+            anchorCollection[idx] = resultAnchors[idx];
         }
 
         // we should have at least the Anchor we've created
-        EXPECT_GT(AnchorCollection.Size(), 0);
+        EXPECT_GT(anchorCollection.Size(), 0);
 
-        bool AnchorFound = false;
+        bool anchorFound = false;
 
-        for (size_t idx = 0; idx < AnchorCollection.Size(); ++idx)
+        for (size_t idx = 0; idx < anchorCollection.Size(); ++idx)
         {
-            if (AnchorCollection[idx].Id == Anchor.Id)
+            if (anchorCollection[idx].Id == anchor.Id)
             {
-                auto ReturnSpatialKeyValue = AnchorCollection[idx].SpatialKeyValue;
-                EXPECT_EQ(ReturnSpatialKeyValue.Size(), SpacialValues.Size());
+                auto returnSpatialKeyValue = anchorCollection[idx].SpatialKeyValue;
+                EXPECT_EQ(returnSpatialKeyValue.Size(), spacialValues.Size());
 
-                for (size_t i = 0; i < ReturnSpatialKeyValue.Size(); ++i)
+                for (size_t i = 0; i < returnSpatialKeyValue.Size(); ++i)
                 {
-                    EXPECT_TRUE(ReturnSpatialKeyValue.HasKey(SpacialKeys[i]));
-                    EXPECT_EQ(ReturnSpatialKeyValue[SpacialKeys[i]], SpacialValues[i]);
+                    EXPECT_TRUE(returnSpatialKeyValue.HasKey(spacialKeys[i]));
+                    EXPECT_EQ(returnSpatialKeyValue[spacialKeys[i]], spacialValues[i]);
                 }
 
-                auto ReturnTags = AnchorCollection[idx].Tags;
-                EXPECT_EQ(ReturnTags.Size(), Tags.Size());
+                auto returnTags = anchorCollection[idx].Tags;
+                EXPECT_EQ(returnTags.Size(), tags.Size());
 
-                for (size_t i = 0; i < ReturnTags.Size(); ++i)
+                for (size_t i = 0; i < returnTags.Size(); ++i)
                 {
-                    EXPECT_EQ(ReturnTags[i], Tags[i]);
+                    EXPECT_EQ(returnTags[i], tags[i]);
                 }
 
-                AnchorFound = true;
+                anchorFound = true;
                 break;
             }
         }
 
-        EXPECT_TRUE(AnchorFound);
+        EXPECT_TRUE(anchorFound);
     }
     else
     {
@@ -432,225 +432,225 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
                   << std::endl;
     }
 
-    csp::common::Array<csp::common::String> CreatedAnchorIds(1);
-    CreatedAnchorIds[0] = Anchor.Id;
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
+    csp::common::Array<csp::common::String> createdAnchorIds(1);
+    createdAnchorIds[0] = anchor.Id;
+    DeleteAnchors(anchorSystem, createdAnchorIds);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteAssetCollection(assetSystem, assetCollection);
+    DeleteSpace(spaceSystem, space.Id);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName1[256];
-    SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName2[256];
-    SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName1[256];
+    SPRINTF(uniqueAssetCollectionName1, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName2[256];
+    SPRINTF(uniqueAssetCollectionName2, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    csp::multiplayer::SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    csp::common::String ObjectName1 = "Object 1";
-    auto [CreatedObject1] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName1, ObjectTransform, csp::common::Optional<uint64_t> {});
-    csp::common::String ObjectName2 = "Object 2";
-    auto [CreatedObject2] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName2, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName1 = "Object 1";
+    auto [CreatedObject1] = AWAIT(realtimeEngine.get(), CreateEntity, objectName1, objectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName2 = "Object 2";
+    auto [CreatedObject2] = AWAIT(realtimeEngine.get(), CreateEntity, objectName2, objectTransform, csp::common::Optional<uint64_t> {});
 
     ASSERT_TRUE(CreatedObject1);
     ASSERT_TRUE(CreatedObject2);
 
-    csp::systems::AssetCollection AssetCollection1;
+    csp::systems::AssetCollection assetCollection1;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName1, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection1);
-    csp::systems::AssetCollection AssetCollection2;
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName1, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection1);
+    csp::systems::AssetCollection assetCollection2;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName2, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection2);
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName2, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection2);
 
-    csp::common::Array<csp::common::String> CreatedAnchorIds(2);
-    csp::systems::Anchor Anchor1;
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject1->GetId(), AssetCollection1.Id, nullptr, Anchor1, nullptr, nullptr);
-    CreatedAnchorIds[0] = Anchor1.Id;
+    csp::common::Array<csp::common::String> createdAnchorIds(2);
+    csp::systems::Anchor anchor1;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject1->GetId(), assetCollection1.Id, nullptr, anchor1, nullptr, nullptr);
+    createdAnchorIds[0] = anchor1.Id;
 
-    csp::systems::Anchor Anchor2;
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject2->GetId(), AssetCollection2.Id, nullptr, Anchor2, nullptr, nullptr);
-    CreatedAnchorIds[1] = Anchor2.Id;
+    csp::systems::Anchor anchor2;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject2->GetId(), assetCollection2.Id, nullptr, anchor2, nullptr, nullptr);
+    createdAnchorIds[1] = anchor2.Id;
 
-    auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, anchorSystem, space.Id, nullptr, nullptr).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto Anchors = Result.GetAnchors();
-    EXPECT_EQ(Anchors.Size(), 2);
+    auto anchors = Result.GetAnchors();
+    EXPECT_EQ(anchors.Size(), 2);
 
-    int AnchorsFound = 0;
-    for (size_t i = 0; i < Anchors.Size(); ++i)
+    int anchorsFound = 0;
+    for (size_t i = 0; i < anchors.Size(); ++i)
     {
-        EXPECT_EQ(Anchors[i].SpaceId, Space.Id);
-        if (Anchors[i].ThirdPartyAnchorId == Anchor1.ThirdPartyAnchorId || Anchors[i].ThirdPartyAnchorId == Anchor2.ThirdPartyAnchorId)
+        EXPECT_EQ(anchors[i].SpaceId, space.Id);
+        if (anchors[i].ThirdPartyAnchorId == anchor1.ThirdPartyAnchorId || anchors[i].ThirdPartyAnchorId == anchor2.ThirdPartyAnchorId)
         {
-            ++AnchorsFound;
+            ++anchorsFound;
         }
     }
-    EXPECT_EQ(AnchorsFound, 2);
+    EXPECT_EQ(anchorsFound, 2);
 
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
+    DeleteAnchors(anchorSystem, createdAnchorIds);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    DeleteAssetCollection(AssetSystem, AssetCollection1);
-    DeleteAssetCollection(AssetSystem, AssetCollection2);
-    DeleteSpace(SpaceSystem, Space.Id);
-    LogOut(UserSystem);
+    DeleteAssetCollection(assetSystem, assetCollection1);
+    DeleteAssetCollection(assetSystem, assetCollection2);
+    DeleteSpace(spaceSystem, space.Id);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", "CSP-UNITTEST-SPACE-MAG", GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", "CSP-UNITTEST-ASSET-COLLECTION-MAG", GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", "CSP-UNITTEST-SPACE-MAG", GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", "CSP-UNITTEST-ASSET-COLLECTION-MAG", GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::AssetCollection AssetCollection;
+    csp::systems::AssetCollection assetCollection;
     CreateAssetCollection(
-        AssetSystem, nullptr, nullptr, UniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection);
+        assetSystem, nullptr, nullptr, uniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection);
 
-    csp::systems::Anchor Anchor1;
-    CreateAnchor(AnchorSystem, AssetCollection.Id, nullptr, Anchor1, nullptr, nullptr);
+    csp::systems::Anchor anchor1;
+    CreateAnchor(anchorSystem, assetCollection.Id, nullptr, anchor1, nullptr, nullptr);
 
-    csp::systems::Anchor Anchor2;
-    CreateAnchor(AnchorSystem, AssetCollection.Id, nullptr, Anchor2, nullptr, nullptr);
+    csp::systems::Anchor anchor2;
+    CreateAnchor(anchorSystem, assetCollection.Id, nullptr, anchor2, nullptr, nullptr);
 
     // Get and validate anchors
     {
-        auto [Result] = AWAIT_PRE(AnchorSystem, GetAnchorsByAssetCollectionId, RequestPredicate, AssetCollection.Id, nullptr, nullptr);
+        auto [Result] = AWAIT_PRE(anchorSystem, GetAnchorsByAssetCollectionId, RequestPredicate, assetCollection.Id, nullptr, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto& Anchors = Result.GetAnchors();
+        const auto& anchors = Result.GetAnchors();
 
-        EXPECT_EQ(Anchors.Size(), 2);
+        EXPECT_EQ(anchors.Size(), 2);
 
-        bool Found1 = false, Found2 = false;
+        bool found1 = false, found2 = false;
 
-        for (size_t i = 0; i < Anchors.Size(); ++i)
+        for (size_t i = 0; i < anchors.Size(); ++i)
         {
-            if (Anchors[i].Id == Anchor1.Id)
+            if (anchors[i].Id == anchor1.Id)
             {
-                Found1 = true;
+                found1 = true;
             }
-            else if (Anchors[i].Id == Anchor2.Id)
+            else if (anchors[i].Id == anchor2.Id)
             {
-                Found2 = true;
+                found2 = true;
             }
         }
 
-        EXPECT_TRUE(Found1 && Found2);
+        EXPECT_TRUE(found1 && found2);
     }
 
-    DeleteAnchors(AnchorSystem, { Anchor1.Id, Anchor2.Id });
-    DeleteAssetCollection(AssetSystem, AssetCollection);
-    LogOut(UserSystem);
+    DeleteAnchors(anchorSystem, { anchor1.Id, anchor2.Id });
+    DeleteAssetCollection(assetSystem, assetCollection);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* anchorSystem = systemsManager.GetAnchorSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
+    csp::systems::Space space;
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    realtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ObjectName = "Object 1";
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    csp::common::String objectName = "Object 1";
+    csp::multiplayer::SpaceTransform objectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(realtimeEngine.get(), CreateEntity, objectName, objectTransform, csp::common::Optional<uint64_t> {});
 
-    csp::systems::AssetCollection AssetCollection;
+    csp::systems::AssetCollection assetCollection;
     CreateAssetCollection(
-        AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, AssetCollection);
+        assetSystem, space.Id, nullptr, uniqueAssetCollectionName, csp::systems::EAssetCollectionType::DEFAULT, nullptr, assetCollection);
 
     // Create Anchor
-    csp::systems::Anchor Anchor;
-    CreateAnchorInSpace(AnchorSystem, Space.Id, CreatedObject->GetId(), AssetCollection.Id, nullptr, Anchor, nullptr, nullptr);
-    csp::common::Array<csp::common::String> CreatedAnchorIds(1);
-    CreatedAnchorIds[0] = Anchor.Id;
+    csp::systems::Anchor anchor;
+    CreateAnchorInSpace(anchorSystem, space.Id, CreatedObject->GetId(), assetCollection.Id, nullptr, anchor, nullptr, nullptr);
+    csp::common::Array<csp::common::String> createdAnchorIds(1);
+    createdAnchorIds[0] = anchor.Id;
 
     // Create AnchorResolution
-    csp::systems::AnchorResolution AnchorResolution;
-    CreateAnchorResolution(AnchorSystem, Anchor.Id, AnchorResolution);
+    csp::systems::AnchorResolution anchorResolution;
+    CreateAnchorResolution(anchorSystem, anchor.Id, anchorResolution);
 
     // Cleanup
-    DeleteAnchors(AnchorSystem, CreatedAnchorIds);
-    DeleteAssetCollection(AssetSystem, AssetCollection);
+    DeleteAnchors(anchorSystem, createdAnchorIds);
+    DeleteAssetCollection(assetSystem, assetCollection);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

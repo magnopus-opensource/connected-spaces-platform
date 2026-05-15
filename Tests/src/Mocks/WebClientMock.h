@@ -28,8 +28,8 @@ class MockHttpResponseHandler : public csp::web::IHttpResponseHandler
 public:
     MockHttpResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& response), (override));
     MOCK_METHOD(bool, ShouldDelete, (), (const, override));
 };
 
@@ -38,39 +38,39 @@ class MockApiResponseHandler : public csp::services::ApiResponseHandlerBase
 public:
     MockApiResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& response), (override));
 };
 
 class WebClientMock : public csp::web::WebClient
 {
 public:
-    WebClientMock(const uint32_t InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-        : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+    WebClientMock(const uint32_t inPort, const csp::web::ETransferProtocol tp, csp::common::LogSystem* logSystem, bool autoRefresh)
+        : WebClient(inPort, tp, logSystem, autoRefresh)
     {
     }
 
     MOCK_METHOD(void, SendRequest,
-        (csp::web::ERequestVerb Verb, const csp::web::Uri& InUri, csp::web::HttpPayload& Payload, csp::web::IHttpResponseHandler* ResponseCallback,
-            csp::common::CancellationToken& CancellationToken, bool AsyncResponse),
+        (csp::web::ERequestVerb verb, const csp::web::Uri& inUri, csp::web::HttpPayload& payload, csp::web::IHttpResponseHandler* responseCallback,
+            csp::common::CancellationToken& cancellationToken, bool asyncResponse),
         (override));
 
-    MOCK_METHOD(void, SetAuthContext, (csp::common::IAuthContext & AuthContext), (override));
+    MOCK_METHOD(void, SetAuthContext, (csp::common::IAuthContext & authContext), (override));
 
-    MOCK_METHOD(std::string, MD5Hash, (const void* Data, const size_t Size), (override));
+    MOCK_METHOD(std::string, MD5Hash, (const void* data, const size_t size), (override));
 
     MOCK_METHOD(void, SetFileUploadContentFromFile,
-        (csp::web::HttpPayload * Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType), (override));
+        (csp::web::HttpPayload * payload, const char* filePath, const char* version, const csp::common::String& mediaType), (override));
 
     MOCK_METHOD(void, SetFileUploadContentFromString,
-        (csp::web::HttpPayload * Payload, const csp::common::String& StringSource, const csp::common::String& FileName, const char* Version,
-            const csp::common::String& MediaTypeType),
+        (csp::web::HttpPayload * payload, const csp::common::String& stringSource, const csp::common::String& fileName, const char* version,
+            const csp::common::String& mediaTypeType),
         (override));
 
     MOCK_METHOD(void, SetFileUploadContentFromBuffer,
-        (csp::web::HttpPayload * Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName, const char* Version,
-            const csp::common::String& MediaType),
+        (csp::web::HttpPayload * payload, const char* buffer, size_t bufferLength, const csp::common::String& fileName, const char* version,
+            const csp::common::String& mediaType),
         (override));
 
-    MOCK_METHOD(void, Send, (csp::web::HttpRequest & Request), (override));
+    MOCK_METHOD(void, Send, (csp::web::HttpRequest & request), (override));
 };

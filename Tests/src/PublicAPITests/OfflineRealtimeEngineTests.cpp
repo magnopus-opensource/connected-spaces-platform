@@ -39,7 +39,7 @@ using namespace csp::multiplayer;
 
 namespace
 {
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 }
 
 /*
@@ -47,12 +47,12 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetRealtimeEngineType)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    EXPECT_EQ(Engine.GetRealtimeEngineType(), csp::common::RealtimeEngineType::Offline);
+    EXPECT_EQ(engine.GetRealtimeEngineType(), csp::common::RealtimeEngineType::Offline);
 }
 
 /*
@@ -67,67 +67,67 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetRealtimeEngineType)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateAvatar)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
     // Create test properties for our avatar.
-    const common::String TestName = "TestName";
-    const SpaceTransform Transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
-    static constexpr const bool IsVisible = false;
-    static constexpr const auto State = AvatarState::Running;
-    const common::String AvatarId = "Id";
-    static constexpr const auto PlayMode = AvatarPlayMode::Creator;
+    const common::String testName = "TestName";
+    const SpaceTransform transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
+    static constexpr const bool isVisible = false;
+    static constexpr const auto state = AvatarState::Running;
+    const common::String avatarId = "Id";
+    static constexpr const auto playMode = AvatarPlayMode::Creator;
 
-    SpaceEntity* CreatedEntity = nullptr;
+    SpaceEntity* createdEntity = nullptr;
 
-    Engine.CreateAvatar(TestName, nullptr, Transform, IsVisible, State, AvatarId, PlayMode, LocomotionModel::Grounded,
-        [&CreatedEntity](SpaceEntity* NewEntity) { CreatedEntity = NewEntity; });
+    engine.CreateAvatar(testName, nullptr, transform, isVisible, state, avatarId, playMode, LocomotionModel::Grounded,
+        [&createdEntity](SpaceEntity* newEntity) { createdEntity = newEntity; });
 
     // Callback should be called before the function ends in offline mode, so this should be set.
-    if (CreatedEntity == nullptr)
+    if (createdEntity == nullptr)
     {
         FAIL();
     }
 
     // Ensure created entity is populated correctly.
-    EXPECT_EQ(CreatedEntity->GetName(), TestName);
-    EXPECT_EQ(CreatedEntity->GetTransform(), Transform);
-    EXPECT_EQ(CreatedEntity->GetParent(), nullptr);
+    EXPECT_EQ(createdEntity->GetName(), testName);
+    EXPECT_EQ(createdEntity->GetTransform(), transform);
+    EXPECT_EQ(createdEntity->GetParent(), nullptr);
 
     // Now check our AvatarComponent which should have been created by CreateAvatar.
-    if (CreatedEntity->GetComponents()->Size() != 1)
+    if (createdEntity->GetComponents()->Size() != 1)
     {
         FAIL();
     }
 
-    const auto* AvatarComponent = static_cast<AvatarSpaceComponent*>((*CreatedEntity->GetComponents())[0]);
+    const auto* avatarComponent = static_cast<AvatarSpaceComponent*>((*createdEntity->GetComponents())[0]);
 
     // Ensure created avatar component is populated correctly.
-    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
-    EXPECT_EQ(AvatarComponent->GetState(), AvatarState::Running);
-    EXPECT_EQ(AvatarComponent->GetAvatarId(), AvatarId);
-    EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), PlayMode);
+    EXPECT_EQ(avatarComponent->GetIsVisible(), isVisible);
+    EXPECT_EQ(avatarComponent->GetState(), AvatarState::Running);
+    EXPECT_EQ(avatarComponent->GetAvatarId(), avatarId);
+    EXPECT_EQ(avatarComponent->GetAvatarPlayMode(), playMode);
 
     // Check that our avatar is registered as an entity in the engine.
-    if (Engine.GetNumEntities() != 1)
+    if (engine.GetNumEntities() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.GetEntityByIndex(0)->GetId(), CreatedEntity->GetId());
+    EXPECT_EQ(engine.GetEntityByIndex(0)->GetId(), createdEntity->GetId());
 
     // Check our avatar is registered as an avatar in the engine.
-    if (Engine.GetNumAvatars() != 1)
+    if (engine.GetNumAvatars() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.GetAvatarByIndex(0)->GetId(), CreatedEntity->GetId());
+    EXPECT_EQ(engine.GetAvatarByIndex(0)->GetId(), createdEntity->GetId());
 
     // Check our avatar is NOT registered as an object in the engine.
-    EXPECT_EQ(Engine.GetNumObjects(), 0);
+    EXPECT_EQ(engine.GetNumObjects(), 0);
 }
 
 /*
@@ -136,47 +136,47 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateAvatar)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
     // Create test properties for our entity.
-    const common::String TestName = "TestName";
-    const SpaceTransform Transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
-    static constexpr const bool IsVisible = false;
-    static constexpr const auto State = AvatarState::Running;
-    const common::String AvatarId = "Id";
-    static constexpr const auto PlayMode = AvatarPlayMode::Creator;
+    const common::String testName = "TestName";
+    const SpaceTransform transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
+    static constexpr const bool isVisible = false;
+    static constexpr const auto state = AvatarState::Running;
+    const common::String avatarId = "Id";
+    static constexpr const auto playMode = AvatarPlayMode::Creator;
 
-    SpaceEntity* CreatedEntity = nullptr;
+    SpaceEntity* createdEntity = nullptr;
 
-    Engine.CreateEntity(TestName, Transform, nullptr, [&CreatedEntity](SpaceEntity* NewEntity) { CreatedEntity = NewEntity; });
+    engine.CreateEntity(testName, transform, nullptr, [&createdEntity](SpaceEntity* newEntity) { createdEntity = newEntity; });
 
     // Callback should be called before the function ends in offline mode, so this should be set.
-    if (CreatedEntity == nullptr)
+    if (createdEntity == nullptr)
     {
         FAIL();
     }
 
     // Ensure created entity is populated correctly.
-    EXPECT_EQ(CreatedEntity->GetName(), TestName);
-    EXPECT_EQ(CreatedEntity->GetTransform(), Transform);
-    EXPECT_EQ(CreatedEntity->GetParent(), nullptr);
+    EXPECT_EQ(createdEntity->GetName(), testName);
+    EXPECT_EQ(createdEntity->GetTransform(), transform);
+    EXPECT_EQ(createdEntity->GetParent(), nullptr);
 
     // Check that our entity is registered as an entity in the engine.
-    if (Engine.GetNumEntities() != 1)
+    if (engine.GetNumEntities() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.GetEntityByIndex(0)->GetId(), CreatedEntity->GetId());
+    EXPECT_EQ(engine.GetEntityByIndex(0)->GetId(), createdEntity->GetId());
 
     // Check our entity is NOT registered as an avatar in the engine.
-    EXPECT_EQ(Engine.GetNumAvatars(), 0);
+    EXPECT_EQ(engine.GetNumAvatars(), 0);
 
     // Check our entity is also registered as an object in the engine.
-    EXPECT_EQ(Engine.GetNumObjects(), 1);
+    EXPECT_EQ(engine.GetNumObjects(), 1);
 }
 
 /*
@@ -186,31 +186,31 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, DestroyEntity)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    Engine.CreateEntity("", SpaceTransform {}, nullptr, [](SpaceEntity*) {});
+    engine.CreateEntity("", SpaceTransform {}, nullptr, [](SpaceEntity*) {});
 
-    if (Engine.GetNumEntities() != 1)
+    if (engine.GetNumEntities() != 1)
     {
         FAIL();
     }
 
-    SpaceEntity* CreatedEntity = Engine.GetEntityByIndex(0);
+    SpaceEntity* createdEntity = engine.GetEntityByIndex(0);
 
-    bool DestroyCalled = false;
+    bool destroyCalled = false;
 
-    Engine.DestroyEntity(CreatedEntity,
-        [&DestroyCalled](bool Destroyed)
+    engine.DestroyEntity(createdEntity,
+        [&destroyCalled](bool destroyed)
         {
-            EXPECT_TRUE(Destroyed);
-            DestroyCalled = true;
+            EXPECT_TRUE(destroyed);
+            destroyCalled = true;
         });
 
-    EXPECT_TRUE(DestroyCalled);
-    EXPECT_EQ(Engine.GetNumEntities(), 0);
+    EXPECT_TRUE(destroyCalled);
+    EXPECT_EQ(engine.GetNumEntities(), 0);
 }
 
 /*
@@ -220,33 +220,33 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, DestroyEntity)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, DestroyAvatar)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    Engine.CreateAvatar(
+    engine.CreateAvatar(
         "", nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded, [](SpaceEntity*) { });
 
-    if (Engine.GetNumEntities() != 1)
+    if (engine.GetNumEntities() != 1)
     {
         FAIL();
     }
 
-    SpaceEntity* CreatedEntity = Engine.GetEntityByIndex(0);
+    SpaceEntity* createdEntity = engine.GetEntityByIndex(0);
 
-    bool DestroyCalled = false;
+    bool destroyCalled = false;
 
-    Engine.DestroyEntity(CreatedEntity,
-        [&DestroyCalled](bool Destroyed)
+    engine.DestroyEntity(createdEntity,
+        [&destroyCalled](bool destroyed)
         {
-            EXPECT_TRUE(Destroyed);
-            DestroyCalled = true;
+            EXPECT_TRUE(destroyed);
+            destroyCalled = true;
         });
 
-    EXPECT_TRUE(DestroyCalled);
-    EXPECT_EQ(Engine.GetNumEntities(), 0);
-    EXPECT_EQ(Engine.GetNumAvatars(), 0);
+    EXPECT_TRUE(destroyCalled);
+    EXPECT_EQ(engine.GetNumEntities(), 0);
+    EXPECT_EQ(engine.GetNumAvatars(), 0);
 }
 
 /*
@@ -255,56 +255,56 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, DestroyAvatar)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, SelectEntity)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    SpaceEntity* CreatedEntity = nullptr;
-    SpaceEntity* CreatedEntity2 = nullptr;
+    SpaceEntity* createdEntity = nullptr;
+    SpaceEntity* createdEntity2 = nullptr;
 
-    Engine.CreateEntity("", SpaceTransform {}, nullptr, [&CreatedEntity](SpaceEntity* NewEntity) { CreatedEntity = NewEntity; });
-    Engine.CreateEntity("", SpaceTransform {}, nullptr, [&CreatedEntity2](SpaceEntity* NewEntity) { CreatedEntity2 = NewEntity; });
+    engine.CreateEntity("", SpaceTransform {}, nullptr, [&createdEntity](SpaceEntity* newEntity) { createdEntity = newEntity; });
+    engine.CreateEntity("", SpaceTransform {}, nullptr, [&createdEntity2](SpaceEntity* newEntity) { createdEntity2 = newEntity; });
 
-    if (CreatedEntity == nullptr)
+    if (createdEntity == nullptr)
     {
         FAIL();
     }
 
-    Engine.AddEntityToSelectedEntities(CreatedEntity);
+    engine.AddEntityToSelectedEntities(createdEntity);
 
-    if (Engine.SelectedEntities.Size() != 1)
+    if (engine.m_selectedEntities.Size() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.SelectedEntities[0]->GetId(), CreatedEntity->GetId());
+    EXPECT_EQ(engine.m_selectedEntities[0]->GetId(), createdEntity->GetId());
 
-    Engine.AddEntityToSelectedEntities(CreatedEntity2);
+    engine.AddEntityToSelectedEntities(createdEntity2);
 
-    if (Engine.SelectedEntities.Size() != 2)
+    if (engine.m_selectedEntities.Size() != 2)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.SelectedEntities[1]->GetId(), CreatedEntity2->GetId());
+    EXPECT_EQ(engine.m_selectedEntities[1]->GetId(), createdEntity2->GetId());
 
     // Remove the second entity
-    Engine.RemoveEntityFromSelectedEntities(CreatedEntity2);
+    engine.RemoveEntityFromSelectedEntities(createdEntity2);
 
-    EXPECT_EQ(Engine.SelectedEntities.Size(), 1);
+    EXPECT_EQ(engine.m_selectedEntities.Size(), 1);
 
-    if (Engine.SelectedEntities.Size() != 1)
+    if (engine.m_selectedEntities.Size() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Engine.SelectedEntities[0]->GetId(), CreatedEntity->GetId());
+    EXPECT_EQ(engine.m_selectedEntities[0]->GetId(), createdEntity->GetId());
 
     // Remove the first entity
-    Engine.RemoveEntityFromSelectedEntities(CreatedEntity);
+    engine.RemoveEntityFromSelectedEntities(createdEntity);
 
-    EXPECT_EQ(Engine.SelectedEntities.Size(), 0);
+    EXPECT_EQ(engine.m_selectedEntities.Size(), 0);
 }
 
 /*
@@ -314,47 +314,47 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, SelectEntity)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntity)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(entityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, nullptr, [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    SpaceEntity* FoundEntity1 = Engine.FindSpaceEntity(EntityName1);
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.FindSpaceEntity(entityName1);
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetId(), Entity1->GetId());
+    EXPECT_EQ(foundEntity1->GetId(), entity1->GetId());
 
-    SpaceEntity* FoundEntity2 = Engine.FindSpaceEntity(EntityName2);
-    if (FoundEntity2 == nullptr)
+    SpaceEntity* foundEntity2 = engine.FindSpaceEntity(entityName2);
+    if (foundEntity2 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity2->GetId(), Entity2->GetId());
+    EXPECT_EQ(foundEntity2->GetId(), entity2->GetId());
 
-    SpaceEntity* FoundEntity3 = Engine.FindSpaceEntity(EntityName3);
-    if (FoundEntity3 == nullptr)
+    SpaceEntity* foundEntity3 = engine.FindSpaceEntity(entityName3);
+    if (foundEntity3 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity3->GetId(), Entity3->GetId());
+    EXPECT_EQ(foundEntity3->GetId(), entity3->GetId());
 }
 
 /*
@@ -363,47 +363,47 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntity)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntityById)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(entityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, nullptr, [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    SpaceEntity* FoundEntity1 = Engine.FindSpaceEntityById(Entity1->GetId());
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.FindSpaceEntityById(entity1->GetId());
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetId(), Entity1->GetId());
+    EXPECT_EQ(foundEntity1->GetId(), entity1->GetId());
 
-    SpaceEntity* FoundEntity2 = Engine.FindSpaceEntityById(Entity2->GetId());
-    if (FoundEntity2 == nullptr)
+    SpaceEntity* foundEntity2 = engine.FindSpaceEntityById(entity2->GetId());
+    if (foundEntity2 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity2->GetId(), Entity2->GetId());
+    EXPECT_EQ(foundEntity2->GetId(), entity2->GetId());
 
-    SpaceEntity* FoundEntity3 = Engine.FindSpaceEntityById(Entity3->GetId());
-    if (FoundEntity3 == nullptr)
+    SpaceEntity* foundEntity3 = engine.FindSpaceEntityById(entity3->GetId());
+    if (foundEntity3 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity3->GetId(), Entity3->GetId());
+    EXPECT_EQ(foundEntity3->GetId(), entity3->GetId());
 }
 
 /*
@@ -412,49 +412,49 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntityById)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceAvatar)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String AvatarName1 = "Avatar1";
-    const csp::common::String EntityName1 = "Avatar2";
-    const csp::common::String AvatarName3 = "Avatar3";
+    const csp::common::String avatarName1 = "Avatar1";
+    const csp::common::String entityName1 = "Avatar2";
+    const csp::common::String avatarName3 = "Avatar3";
 
-    SpaceEntity* Avatar1 = nullptr;
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Avatar3 = nullptr;
+    SpaceEntity* avatar1 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* avatar3 = nullptr;
 
-    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Avatar1](SpaceEntity* NewEntity) { Avatar1 = NewEntity; });
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Avatar3](SpaceEntity* NewEntity) { Avatar3 = NewEntity; });
+    engine.CreateAvatar(avatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&avatar1](SpaceEntity* newEntity) { avatar1 = newEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(avatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&avatar3](SpaceEntity* newEntity) { avatar3 = newEntity; });
 
-    SpaceEntity* FoundAvatar1 = Engine.FindSpaceEntity(AvatarName1);
-    if (FoundAvatar1 == nullptr)
+    SpaceEntity* foundAvatar1 = engine.FindSpaceEntity(avatarName1);
+    if (foundAvatar1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundAvatar1->GetId(), Avatar1->GetId());
+    EXPECT_EQ(foundAvatar1->GetId(), avatar1->GetId());
 
     // Avatar should still be found using FindSpaceEntity
-    SpaceEntity* FoundEntity1 = Engine.FindSpaceEntity(EntityName1);
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.FindSpaceEntity(entityName1);
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetId(), Entity1->GetId());
+    EXPECT_EQ(foundEntity1->GetId(), entity1->GetId());
 
-    SpaceEntity* FoundAvatar3 = Engine.FindSpaceEntity(AvatarName3);
-    if (FoundAvatar3 == nullptr)
+    SpaceEntity* foundAvatar3 = engine.FindSpaceEntity(avatarName3);
+    if (foundAvatar3 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundAvatar3->GetId(), Avatar3->GetId());
+    EXPECT_EQ(foundAvatar3->GetId(), avatar3->GetId());
 }
 
 /*
@@ -463,43 +463,43 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceAvatar)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceObject)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(entityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, nullptr, [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    SpaceEntity* FoundEntity1 = Engine.FindSpaceObject(Entity1->GetName());
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.FindSpaceObject(entity1->GetName());
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetName(), Entity1->GetName());
+    EXPECT_EQ(foundEntity1->GetName(), entity1->GetName());
 
     // Our avatar should not be found.
-    SpaceEntity* FoundEntity2 = Engine.FindSpaceObject(Entity2->GetName());
-    EXPECT_EQ(FoundEntity2, nullptr);
+    SpaceEntity* foundEntity2 = engine.FindSpaceObject(entity2->GetName());
+    EXPECT_EQ(foundEntity2, nullptr);
 
-    SpaceEntity* FoundEntity3 = Engine.FindSpaceObject(Entity3->GetName());
-    if (FoundEntity3 == nullptr)
+    SpaceEntity* foundEntity3 = engine.FindSpaceObject(entity3->GetName());
+    if (foundEntity3 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity3->GetName(), Entity3->GetName());
+    EXPECT_EQ(foundEntity3->GetName(), entity3->GetName());
 }
 
 /*
@@ -509,51 +509,51 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceObject)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetEntityByIndex)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(entityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, nullptr, [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    EXPECT_EQ(Engine.GetNumEntities(), 3);
-    EXPECT_EQ(Engine.GetNumAvatars(), 1);
-    EXPECT_EQ(Engine.GetNumObjects(), 2);
+    EXPECT_EQ(engine.GetNumEntities(), 3);
+    EXPECT_EQ(engine.GetNumAvatars(), 1);
+    EXPECT_EQ(engine.GetNumObjects(), 2);
 
-    SpaceEntity* FoundEntity1 = Engine.GetEntityByIndex(0);
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.GetEntityByIndex(0);
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetId(), Entity1->GetId());
+    EXPECT_EQ(foundEntity1->GetId(), entity1->GetId());
 
-    SpaceEntity* FoundEntity2 = Engine.GetEntityByIndex(1);
-    if (FoundEntity2 == nullptr)
+    SpaceEntity* foundEntity2 = engine.GetEntityByIndex(1);
+    if (foundEntity2 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity2->GetId(), Entity2->GetId());
+    EXPECT_EQ(foundEntity2->GetId(), entity2->GetId());
 
-    SpaceEntity* FoundEntity3 = Engine.GetEntityByIndex(2);
-    if (FoundEntity3 == nullptr)
+    SpaceEntity* foundEntity3 = engine.GetEntityByIndex(2);
+    if (foundEntity3 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity3->GetId(), Entity3->GetId());
+    EXPECT_EQ(foundEntity3->GetId(), entity3->GetId());
 }
 
 /*
@@ -563,45 +563,45 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetEntityByIndex)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetAvatarByIndex)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String AvatarName1 = "Avatar1";
-    const csp::common::String AvatarName2 = "Avatar2";
-    const csp::common::String AvatarName3 = "Avatar3";
+    const csp::common::String avatarName1 = "Avatar1";
+    const csp::common::String avatarName2 = "Avatar2";
+    const csp::common::String avatarName3 = "Avatar3";
 
-    SpaceEntity* Avatar1 = nullptr;
-    SpaceEntity* Avatar2 = nullptr;
-    SpaceEntity* Avatar3 = nullptr;
+    SpaceEntity* avatar1 = nullptr;
+    SpaceEntity* avatar2 = nullptr;
+    SpaceEntity* avatar3 = nullptr;
 
-    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Avatar1](SpaceEntity* NewEntity) { Avatar1 = NewEntity; });
-    Engine.CreateEntity(AvatarName2, SpaceTransform {}, nullptr, [&Avatar2](SpaceEntity* NewEntity) { Avatar2 = NewEntity; });
-    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Avatar3](SpaceEntity* NewEntity) { Avatar3 = NewEntity; });
+    engine.CreateAvatar(avatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&avatar1](SpaceEntity* newEntity) { avatar1 = newEntity; });
+    engine.CreateEntity(avatarName2, SpaceTransform {}, nullptr, [&avatar2](SpaceEntity* newEntity) { avatar2 = newEntity; });
+    engine.CreateAvatar(avatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&avatar3](SpaceEntity* newEntity) { avatar3 = newEntity; });
 
-    EXPECT_EQ(Engine.GetNumEntities(), 3);
-    EXPECT_EQ(Engine.GetNumAvatars(), 2);
-    EXPECT_EQ(Engine.GetNumObjects(), 1);
+    EXPECT_EQ(engine.GetNumEntities(), 3);
+    EXPECT_EQ(engine.GetNumAvatars(), 2);
+    EXPECT_EQ(engine.GetNumObjects(), 1);
 
-    SpaceEntity* FoundAvatar1 = Engine.GetAvatarByIndex(0);
-    if (FoundAvatar1 == nullptr)
+    SpaceEntity* foundAvatar1 = engine.GetAvatarByIndex(0);
+    if (foundAvatar1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundAvatar1->GetId(), Avatar1->GetId());
+    EXPECT_EQ(foundAvatar1->GetId(), avatar1->GetId());
 
     // The second avatar (the one added third) should be found in the second element.
-    SpaceEntity* FoundAvatar2 = Engine.GetAvatarByIndex(1);
-    if (FoundAvatar2 == nullptr)
+    SpaceEntity* foundAvatar2 = engine.GetAvatarByIndex(1);
+    if (foundAvatar2 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundAvatar2->GetId(), Avatar3->GetId());
+    EXPECT_EQ(foundAvatar2->GetId(), avatar3->GetId());
 }
 
 /*
@@ -611,44 +611,44 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetAvatarByIndex)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetObjectByIndex)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
-        [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateAvatar(entityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
+        [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, nullptr, [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    EXPECT_EQ(Engine.GetNumEntities(), 3);
-    EXPECT_EQ(Engine.GetNumAvatars(), 1);
-    EXPECT_EQ(Engine.GetNumObjects(), 2);
+    EXPECT_EQ(engine.GetNumEntities(), 3);
+    EXPECT_EQ(engine.GetNumAvatars(), 1);
+    EXPECT_EQ(engine.GetNumObjects(), 2);
 
-    SpaceEntity* FoundEntity1 = Engine.GetObjectByIndex(0);
-    if (FoundEntity1 == nullptr)
+    SpaceEntity* foundEntity1 = engine.GetObjectByIndex(0);
+    if (foundEntity1 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity1->GetId(), Entity1->GetId());
+    EXPECT_EQ(foundEntity1->GetId(), entity1->GetId());
 
     // The second entity (the one added third) should be found in the second element.
-    SpaceEntity* FoundEntity2 = Engine.GetObjectByIndex(1);
-    if (FoundEntity2 == nullptr)
+    SpaceEntity* foundEntity2 = engine.GetObjectByIndex(1);
+    if (foundEntity2 == nullptr)
     {
         FAIL();
     }
 
-    EXPECT_EQ(FoundEntity2->GetId(), Entity3->GetId());
+    EXPECT_EQ(foundEntity2->GetId(), entity3->GetId());
 }
 
 /*
@@ -656,43 +656,43 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetObjectByIndex)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentLoadTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-parents.json");
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    auto filePath = std::filesystem::absolute("assets/checkpoint-parents.json");
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
-    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription { csp::common::List<csp::common::String> { json.c_str() } };
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::List<csp::multiplayer::SpaceEntity*>* AllEntities = Engine.GetAllEntities();
+    const csp::common::List<csp::multiplayer::SpaceEntity*>* allEntities = engine.GetAllEntities();
 
     // Should be 3 entities
-    ASSERT_EQ(AllEntities->Size(), 3);
-    const csp::multiplayer::SpaceEntity* Entity1 = (*AllEntities)[0]; // id: 1510, parent: 1511
-    const csp::multiplayer::SpaceEntity* Entity2 = (*AllEntities)[1]; // id: 1511, parent: 1512
-    const csp::multiplayer::SpaceEntity* Entity3 = (*AllEntities)[2]; // id: 1512, parent: empty
+    ASSERT_EQ(allEntities->Size(), 3);
+    const csp::multiplayer::SpaceEntity* entity1 = (*allEntities)[0]; // id: 1510, parent: 1511
+    const csp::multiplayer::SpaceEntity* entity2 = (*allEntities)[1]; // id: 1511, parent: 1512
+    const csp::multiplayer::SpaceEntity* entity3 = (*allEntities)[2]; // id: 1512, parent: empty
 
-    ASSERT_EQ(Entity1->GetId(), 1510);
-    ASSERT_EQ((*Entity1->GetParentId()), 1511);
-    ASSERT_EQ(Entity1->GetParentEntity(), Entity2);
+    ASSERT_EQ(entity1->GetId(), 1510);
+    ASSERT_EQ((*entity1->GetParentId()), 1511);
+    ASSERT_EQ(entity1->GetParentEntity(), entity2);
 
-    ASSERT_EQ(Entity2->GetId(), 1511);
-    ASSERT_EQ((*Entity2->GetParentId()), 1512);
-    ASSERT_EQ(Entity2->GetParentEntity(), Entity3);
+    ASSERT_EQ(entity2->GetId(), 1511);
+    ASSERT_EQ((*entity2->GetParentId()), 1512);
+    ASSERT_EQ(entity2->GetParentEntity(), entity3);
 
-    ASSERT_EQ(Entity3->GetId(), 1512);
-    ASSERT_EQ(Entity3->GetParentId().HasValue(), false);
-    ASSERT_EQ(Entity3->GetParentEntity(), nullptr);
+    ASSERT_EQ(entity3->GetId(), 1512);
+    ASSERT_EQ(entity3->GetParentId().HasValue(), false);
+    ASSERT_EQ(entity3->GetParentEntity(), nullptr);
 }
 
 /*
@@ -702,61 +702,61 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentLoadTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName1 = "Entity1";
-    const csp::common::String EntityName2 = "Entity2";
-    const csp::common::String EntityName3 = "Entity3";
+    const csp::common::String entityName1 = "Entity1";
+    const csp::common::String entityName2 = "Entity2";
+    const csp::common::String entityName3 = "Entity3";
 
-    SpaceEntity* Entity1 = nullptr;
-    SpaceEntity* Entity2 = nullptr;
-    SpaceEntity* Entity3 = nullptr;
+    SpaceEntity* entity1 = nullptr;
+    SpaceEntity* entity2 = nullptr;
+    SpaceEntity* entity3 = nullptr;
 
-    Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateEntity(EntityName2, SpaceTransform {}, Entity1->GetId(), [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
-    Engine.CreateEntity(EntityName3, SpaceTransform {}, Entity2->GetId(), [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
+    engine.CreateEntity(entityName1, SpaceTransform {}, nullptr, [&entity1](SpaceEntity* newEntity) { entity1 = newEntity; });
+    engine.CreateEntity(entityName2, SpaceTransform {}, entity1->GetId(), [&entity2](SpaceEntity* newEntity) { entity2 = newEntity; });
+    engine.CreateEntity(entityName3, SpaceTransform {}, entity2->GetId(), [&entity3](SpaceEntity* newEntity) { entity3 = newEntity; });
 
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    ASSERT_NE(Entity2->GetParent(), nullptr);
-    ASSERT_NE(Entity3->GetParent(), nullptr);
+    EXPECT_EQ(entity1->GetParent(), nullptr);
+    ASSERT_NE(entity2->GetParent(), nullptr);
+    ASSERT_NE(entity3->GetParent(), nullptr);
 
-    EXPECT_EQ(Entity2->GetParent(), Entity1);
-    EXPECT_EQ(Entity3->GetParent(), Entity2);
+    EXPECT_EQ(entity2->GetParent(), entity1);
+    EXPECT_EQ(entity3->GetParent(), entity2);
 
-    ASSERT_EQ(Engine.GetRootHierarchyEntities()->Size(), 1);
+    ASSERT_EQ(engine.GetRootHierarchyEntities()->Size(), 1);
 
-    EXPECT_EQ((*Engine.GetRootHierarchyEntities())[0]->GetId(), Entity1->GetId());
+    EXPECT_EQ((*engine.GetRootHierarchyEntities())[0]->GetId(), entity1->GetId());
 
     // Reparent the third entity to be a child of the first
-    Entity3->SetParentId(Entity2->GetId());
+    entity3->SetParentId(entity2->GetId());
 
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), Entity1);
-    EXPECT_EQ(Entity3->GetParent(), Entity2);
+    EXPECT_EQ(entity1->GetParent(), nullptr);
+    EXPECT_EQ(entity2->GetParent(), entity1);
+    EXPECT_EQ(entity3->GetParent(), entity2);
 
     // Move all entities to the root.
-    Entity2->RemoveParentEntity();
-    Entity3->RemoveParentEntity();
+    entity2->RemoveParentEntity();
+    entity3->RemoveParentEntity();
 
     // Parents should all be null.
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), nullptr);
-    EXPECT_EQ(Entity3->GetParent(), nullptr);
+    EXPECT_EQ(entity1->GetParent(), nullptr);
+    EXPECT_EQ(entity2->GetParent(), nullptr);
+    EXPECT_EQ(entity3->GetParent(), nullptr);
 
     // All entities should be at the root.
-    EXPECT_EQ(Engine.GetRootHierarchyEntities()->Size(), 3);
+    EXPECT_EQ(engine.GetRootHierarchyEntities()->Size(), 3);
 
     // Ensure Root hierarchy is updated if entity is moved from the root.
-    Entity3->SetParentId(Entity1->GetId());
+    entity3->SetParentId(entity1->GetId());
 
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), nullptr);
-    EXPECT_EQ(Entity3->GetParent(), Entity1);
+    EXPECT_EQ(entity1->GetParent(), nullptr);
+    EXPECT_EQ(entity2->GetParent(), nullptr);
+    EXPECT_EQ(entity3->GetParent(), entity1);
 
-    EXPECT_EQ(Engine.GetRootHierarchyEntities()->Size(), 2);
+    EXPECT_EQ(engine.GetRootHierarchyEntities()->Size(), 2);
 }
 
 /*
@@ -765,21 +765,21 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName = "Entity1";
-    SpaceEntity* Entity = nullptr;
+    const csp::common::String entityName = "Entity1";
+    SpaceEntity* entity = nullptr;
 
-    Engine.CreateEntity(EntityName, SpaceTransform {}, nullptr, [&Entity](SpaceEntity* NewEntity) { Entity = NewEntity; });
+    engine.CreateEntity(entityName, SpaceTransform {}, nullptr, [&entity](SpaceEntity* newEntity) { entity = newEntity; });
 
-    const csp::common::String NewEntityName = "NewEntity1";
+    const csp::common::String newEntityName = "NewEntity1";
 
-    Entity->SetName(NewEntityName);
+    entity->SetName(newEntityName);
 
-    EXPECT_EQ(Entity->GetName(), NewEntityName);
+    EXPECT_EQ(entity->GetName(), newEntityName);
 }
 
 /*
@@ -787,56 +787,56 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, false);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, false);
 
     // Get checkpoint file
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-empty.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-empty.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
-    systems::CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
-    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
+    systems::CSPSceneData sceneData { csp::common::List<csp::common::String> { json.c_str() } };
+    CSPSceneDescription sceneDescription { csp::common::List<csp::common::String> { json.c_str() } };
 
     // Enter space from scene description
-    auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
-        SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem());
+    auto realtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
+        sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem());
 
     // Ensure callback is called correctly with the correct number of entities.
-    bool CallbackCalled = false;
+    bool callbackCalled = false;
 
-    RealtimeEngine->SetEntityFetchCompleteCallback(
-        [&CallbackCalled](uint32_t Count)
+    realtimeEngine->SetEntityFetchCompleteCallback(
+        [&callbackCalled](uint32_t count)
         {
-            EXPECT_EQ(Count, 0);
-            CallbackCalled = true;
+            EXPECT_EQ(count, 0);
+            callbackCalled = true;
         });
 
-    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, SceneData.Space.Id, RealtimeEngine.get());
+    auto [EnterSpaceResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, sceneData.Space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_TRUE(CallbackCalled);
+    EXPECT_TRUE(callbackCalled);
 
-    EXPECT_EQ(RealtimeEngine->GetAllEntities()->Size(), 0);
+    EXPECT_EQ(realtimeEngine->GetAllEntities()->Size(), 0);
 
     // Cleanup
-    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 /*
@@ -844,80 +844,80 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
 
     // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId, false);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId, false);
 
     // Get checkpoint file
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+    auto filePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream stream { filePath.u8string().c_str() };
 
-    if (!Stream)
+    if (!stream)
     {
         FAIL();
     }
 
-    std::stringstream SStream;
-    SStream << Stream.rdbuf();
+    std::stringstream sStream;
+    sStream << stream.rdbuf();
 
-    std::string Json = SStream.str();
+    std::string json = sStream.str();
 
     // Enter space from scene description{
-    systems::CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
-    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
+    systems::CSPSceneData sceneData { csp::common::List<csp::common::String> { json.c_str() } };
+    CSPSceneDescription sceneDescription { csp::common::List<csp::common::String> { json.c_str() } };
 
-    auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
-        SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem());
+    auto realtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
+        sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem());
 
     // Ensure callback is called correctly with the correct number of entities.
-    bool CallbackCalled = false;
+    bool callbackCalled = false;
 
-    RealtimeEngine->SetEntityFetchCompleteCallback(
-        [&CallbackCalled](uint32_t Count)
+    realtimeEngine->SetEntityFetchCompleteCallback(
+        [&callbackCalled](uint32_t count)
         {
-            EXPECT_EQ(Count, 1);
-            CallbackCalled = true;
+            EXPECT_EQ(count, 1);
+            callbackCalled = true;
         });
 
-    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, SceneData.Space.Id, RealtimeEngine.get());
+    auto [EnterSpaceResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, sceneData.Space.Id, realtimeEngine.get());
     EXPECT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_TRUE(CallbackCalled);
+    EXPECT_TRUE(callbackCalled);
 
-    if (RealtimeEngine->GetAllEntities()->Size() != 1)
+    if (realtimeEngine->GetAllEntities()->Size() != 1)
     {
         FAIL();
     }
 
     // Ensure entity has a static model component.
-    SpaceEntity* Entity = (*RealtimeEngine->GetAllEntities())[0];
+    SpaceEntity* entity = (*realtimeEngine->GetAllEntities())[0];
 
-    EXPECT_EQ(Entity->GetName(), "Entity");
-    EXPECT_EQ(Entity->GetId(), 255223);
-    EXPECT_EQ(Entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
-    EXPECT_EQ(Entity->GetIsTransferable(), true);
-    EXPECT_EQ(Entity->GetIsPersistent(), true);
-    EXPECT_EQ(Entity->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(Entity->GetRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(Entity->GetScale(), csp::common::Vector3::One());
-    EXPECT_FALSE(Entity->GetParentId().HasValue());
-    EXPECT_EQ(Entity->GetOwnerId(), 0);
+    EXPECT_EQ(entity->GetName(), "Entity");
+    EXPECT_EQ(entity->GetId(), 255223);
+    EXPECT_EQ(entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
+    EXPECT_EQ(entity->GetIsTransferable(), true);
+    EXPECT_EQ(entity->GetIsPersistent(), true);
+    EXPECT_EQ(entity->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(entity->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(entity->GetScale(), csp::common::Vector3::One());
+    EXPECT_FALSE(entity->GetParentId().HasValue());
+    EXPECT_EQ(entity->GetOwnerId(), 0);
 
-    if (Entity->GetComponents()->Size() != 1)
+    if (entity->GetComponents()->Size() != 1)
     {
         FAIL();
     }
 
-    EXPECT_EQ(Entity->GetComponent(0)->GetComponentType(), csp::multiplayer::ComponentType::StaticModel);
+    EXPECT_EQ(entity->GetComponent(0)->GetComponentType(), csp::multiplayer::ComponentType::StaticModel);
 
     // Cleanup
-    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 /*
@@ -926,39 +926,39 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, IsModifiableTest) 
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+    CSPSceneDescription sceneDescription;
+    OfflineRealtimeEngine engine { sceneDescription, *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem() };
 
-    const csp::common::String EntityName = "Entity1";
+    const csp::common::String entityName = "Entity1";
 
-    SpaceEntity* Entity = nullptr;
-    Engine.CreateEntity(EntityName, SpaceTransform {}, nullptr, [&Entity](SpaceEntity* NewEntity) { Entity = NewEntity; });
+    SpaceEntity* entity = nullptr;
+    engine.CreateEntity(entityName, SpaceTransform {}, nullptr, [&entity](SpaceEntity* newEntity) { entity = newEntity; });
 
     // Entity should be modifiable when first created as it is not locked by default.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+    EXPECT_EQ(engine.IsEntityModifiable(entity), ModifiableStatus::Modifiable);
 
-    Entity->Lock();
+    entity->Lock();
 
     // Entity should not be modifiable now it is locked.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::EntityLocked);
+    EXPECT_EQ(engine.IsEntityModifiable(entity), ModifiableStatus::EntityLocked);
 
-    Entity->Unlock();
+    entity->Unlock();
 
     // Entity should be modifiable again.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+    EXPECT_EQ(engine.IsEntityModifiable(entity), ModifiableStatus::Modifiable);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchema) 
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
 
-    const auto ExampleSchemaId = ComponentSchema::TypeIdType{666};
+    const auto exampleSchemaId = ComponentSchema::TypeIdType{666};
 
-    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+    const auto components = csp::common::Array<csp::multiplayer::ComponentSchema> {
         {
-            ExampleSchemaId,
+            exampleSchemaId,
             "Example",
             csp::common::Array<ComponentProperty> {
                 {
@@ -970,7 +970,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
         },
     };
 
-    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
+    const auto engine = OfflineRealtimeEngine { *systemsManager.GetLogSystem(), *systemsManager.GetScriptSystem(), components };
 
-    EXPECT_TRUE(Engine.GetComponentSchemaRegistry()->HasKey(ExampleSchemaId));
+    EXPECT_TRUE(engine.GetComponentSchemaRegistry()->HasKey(exampleSchemaId));
 }

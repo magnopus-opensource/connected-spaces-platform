@@ -26,154 +26,154 @@ namespace csp::systems
 {
 QuotaSystem::QuotaSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , QuotaTierAssignmentAPI(nullptr)
-    , QuotaManagementAPI(nullptr)
-    , QuotaActivityAPI(nullptr)
-    , Context { nullptr }
+    , m_quotaTierAssignmentApi(nullptr)
+    , m_quotaManagementApi(nullptr)
+    , m_quotaActivityApi(nullptr)
+    , m_context { nullptr }
 {
 }
 
-QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
-    , Context { &Context }
+QuotaSystem::QuotaSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem, const csp::common::IAuthContext& context)
+    : SystemBase(inWebClient, nullptr, &logSystem)
+    , m_context { &context }
 {
-    QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient);
-    QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);
-    QuotaActivityAPI = new chs::QuotaActivityApi(InWebClient);
+    m_quotaManagementApi = new chs::QuotaManagementApi(inWebClient);
+    m_quotaTierAssignmentApi = new chs::QuotaTierAssignmentApi(inWebClient);
+    m_quotaActivityApi = new chs::QuotaActivityApi(inWebClient);
 }
 
 QuotaSystem::~QuotaSystem()
 {
-    delete (QuotaManagementAPI);
-    delete (QuotaTierAssignmentAPI);
-    delete (QuotaActivityAPI);
+    delete (m_quotaManagementApi);
+    delete (m_quotaTierAssignmentApi);
+    delete (m_quotaActivityApi);
 }
 
-void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
+void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    if (m_context->GetLoginState().State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
-        Callback(MakeInvalid<FeatureLimitResult>());
+        m_logSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
+        callback(MakeInvalid<FeatureLimitResult>());
         return;
     }
 
-    std::vector<csp::common::String> FeatureNamesList = { TierFeatureEnumToString(TierFeatures::SpaceOwner) };
+    std::vector<csp::common::String> featureNamesList = { TierFeatureEnumToString(TierFeatures::SpaceOwner) };
 
-    csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
-        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_quotaManagementApi->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
+        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet({ Context->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(m_quotaManagementApi)
+        ->usersUserIdQuota_progressGet({ m_context->GetLoginState().UserId, featureNamesList }, responseHandler);
 }
 
-void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
+void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& spaceId, FeatureLimitCallback callback)
 {
-    std::vector<csp::common::String> FeatureNamesList = { TierFeatureEnumToString(TierFeatures::ScopeConcurrentUsers) };
+    std::vector<csp::common::String> featureNamesList = { TierFeatureEnumToString(TierFeatures::ScopeConcurrentUsers) };
 
-    csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
-        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_quotaManagementApi->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
+        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId.c_str(), FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(m_quotaManagementApi)->groupsGroupIdQuota_progressGet({ spaceId.c_str(), featureNamesList }, responseHandler);
 }
 
-void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
+void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& spaceId, FeatureLimitCallback callback)
 {
-    std::vector<csp::common::String> FeatureNamesList = { TierFeatureEnumToString(TierFeatures::TotalUploadSizeInKilobytes) };
+    std::vector<csp::common::String> featureNamesList = { TierFeatureEnumToString(TierFeatures::TotalUploadSizeInKilobytes) };
 
-    csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
-        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_quotaManagementApi->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
+        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(m_quotaManagementApi)->groupsGroupIdQuota_progressGet({ spaceId, featureNamesList }, responseHandler);
 }
 
-void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
+void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& featureNames, FeaturesLimitCallback callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    if (m_context->GetLoginState().State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
-        Callback(MakeInvalid<FeaturesLimitResult>());
+        m_logSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
+        callback(MakeInvalid<FeaturesLimitResult>());
         return;
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeaturesLimitCallback, FeaturesLimitResult, void,
-        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_quotaManagementApi->CreateHandler<FeaturesLimitCallback, FeaturesLimitResult, void,
+        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(callback, nullptr);
 
-    std::vector<csp::common::String> FeatureNamesList;
-    FeatureNamesList.reserve(FeatureNames.Size());
+    std::vector<csp::common::String> featureNamesList;
+    featureNamesList.reserve(featureNames.Size());
 
-    for (size_t idx = 0; idx < FeatureNames.Size(); ++idx)
+    for (size_t idx = 0; idx < featureNames.Size(); ++idx)
     {
-        FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
+        featureNamesList.push_back(TierFeatureEnumToString(featureNames[idx]));
     }
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet({ Context->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(m_quotaManagementApi)
+        ->usersUserIdQuota_progressGet({ m_context->GetLoginState().UserId, featureNamesList }, responseHandler);
 }
 
 void QuotaSystem::GetTierFeatureProgressForSpace(
-    const csp::common::String& SpaceId, const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
+    const csp::common::String& spaceId, const csp::common::Array<TierFeatures>& featureNames, FeaturesLimitCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler = QuotaActivityAPI->CreateHandler<FeaturesLimitCallback, FeaturesLimitResult, void,
-        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_quotaActivityApi->CreateHandler<FeaturesLimitCallback, FeaturesLimitResult, void,
+        csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(callback, nullptr);
 
-    std::vector<csp::common::String> FeatureNamesList;
-    FeatureNamesList.reserve(FeatureNames.Size());
+    std::vector<csp::common::String> featureNamesList;
+    featureNamesList.reserve(featureNames.Size());
 
-    for (size_t idx = 0; idx < FeatureNames.Size(); ++idx)
+    for (size_t idx = 0; idx < featureNames.Size(); ++idx)
     {
-        FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
+        featureNamesList.push_back(TierFeatureEnumToString(featureNames[idx]));
     }
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(m_quotaManagementApi)->groupsGroupIdQuota_progressGet({ spaceId, featureNamesList }, responseHandler);
 }
 
-void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
+void QuotaSystem::GetCurrentUserTier(UserTierCallback callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    if (m_context->GetLoginState().State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
-        Callback(MakeInvalid<UserTierResult>());
+        m_logSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
+        callback(MakeInvalid<UserTierResult>());
         return;
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_quotaTierAssignmentApi->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(callback, nullptr);
 
-    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)
-        ->usersUserIdTier_assignmentGet({ Context->GetLoginState().UserId }, ResponseHandler);
+    static_cast<chs::QuotaTierAssignmentApi*>(m_quotaTierAssignmentApi)
+        ->usersUserIdTier_assignmentGet({ m_context->GetLoginState().UserId }, responseHandler);
 }
 
-void QuotaSystem::SetUserTier(TierNames TierName, const csp::common::String& UserId, UserTierCallback Callback)
+void QuotaSystem::SetUserTier(TierNames tierName, const csp::common::String& userId, UserTierCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_quotaTierAssignmentApi->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(callback, nullptr);
 
-    auto RequestBody = std::make_shared<chs::QuotaTierAssignmentDto>();
-    RequestBody->SetTierName(TierNameEnumToString(TierName));
-    RequestBody->SetTenantName(CSPFoundation::GetTenant());
+    auto requestBody = std::make_shared<chs::QuotaTierAssignmentDto>();
+    requestBody->SetTierName(TierNameEnumToString(tierName));
+    requestBody->SetTenantName(CSPFoundation::GetTenant());
 
     // There is an expiry timestamp in the DTO, but it isn't documented, and from experimenting
     // I could not get it to return a non rejected code, so omitting it.
 
-    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)->usersUserIdTier_assignmentPut({ UserId, RequestBody }, ResponseHandler);
+    static_cast<chs::QuotaTierAssignmentApi*>(m_quotaTierAssignmentApi)->usersUserIdTier_assignmentPut({ userId, requestBody }, responseHandler);
 }
 
-void QuotaSystem::GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback)
+void QuotaSystem::GetTierFeatureQuota(TierNames tierName, TierFeatures featureName, FeatureQuotaCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = QuotaManagementAPI->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaFeatureTierDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_quotaManagementApi->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaFeatureTierDto>(callback, nullptr);
 
-    static_cast<chs::QuotaManagementApi*>(QuotaManagementAPI)
-        ->tiersTierNameFeaturesFeatureNameQuotaGet({ TierNameEnumToString(TierName), TierFeatureEnumToString(FeatureName) }, ResponseHandler);
+    static_cast<chs::QuotaManagementApi*>(m_quotaManagementApi)
+        ->tiersTierNameFeaturesFeatureNameQuotaGet({ TierNameEnumToString(tierName), TierFeatureEnumToString(featureName) }, responseHandler);
 }
 
-void QuotaSystem::GetTierFeaturesQuota(TierNames TierName, FeaturesQuotaCallback Callback)
+void QuotaSystem::GetTierFeaturesQuota(TierNames tierName, FeaturesQuotaCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = QuotaManagementAPI->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaFeatureTierDto>>(
-            Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_quotaManagementApi->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaFeatureTierDto>>(
+            callback, nullptr);
 
-    static_cast<chs::QuotaManagementApi*>(QuotaManagementAPI)->tiersTierNameQuotasGet({ TierNameEnumToString(TierName) }, ResponseHandler);
+    static_cast<chs::QuotaManagementApi*>(m_quotaManagementApi)->tiersTierNameQuotasGet({ TierNameEnumToString(tierName) }, responseHandler);
 }
 } // namespace csp::systems

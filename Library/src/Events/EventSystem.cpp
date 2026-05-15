@@ -26,14 +26,14 @@ namespace std
 template <> struct hash<csp::events::EventId>
 {
     // This is taken from boost hash_combine, I doubt the author understood the magic number. I don't either.
-    void HashCombine(std::size_t& InHash, std::size_t Other) const { InHash ^= Other + 0x9e3779b9 + (InHash << 6) + (InHash >> 2); }
+    void HashCombine(std::size_t& inHash, std::size_t other) const { inHash ^= other + 0x9e3779b9 + (inHash << 6) + (inHash >> 2); }
 
-    std::size_t operator()(const csp::events::EventId& Id) const
+    std::size_t operator()(const csp::events::EventId& id) const
     {
-        std::size_t Hash = Id.EventNamespace;
-        HashCombine(Hash, Id.EventName);
+        std::size_t hash = id.EventNamespace;
+        HashCombine(hash, id.EventName);
 
-        return Hash;
+        return hash;
     }
 };
 
@@ -50,32 +50,32 @@ public:
     EventSystemImpl();
     ~EventSystemImpl();
 
-    EventDispatcher& GetDispatcher(const EventId& Id);
+    EventDispatcher& GetDispatcher(const EventId& id);
 
-    void EnqueueEvent(const Event* InEvent);
+    void EnqueueEvent(const Event* inEvent);
 
-    void RegisterListener(const EventId& Id, EventListener* InListener);
-    void UnRegisterListener(const EventId& Id, EventListener* InListener);
+    void RegisterListener(const EventId& id, EventListener* inListener);
+    void UnRegisterListener(const EventId& id, EventListener* inListener);
     void UnRegisterAllListeners();
     void ProcessEvents();
 
 private:
-    csp::Queue<const Event*> EventQueue;
+    csp::Queue<const Event*> m_eventQueue;
 
     // Define eastl map using above defined hasher and our custom allocator
     using DispatcherMap = std::unordered_map<EventId, EventDispatcher, std::hash<EventId>, std::equal_to<EventId>>;
 
-    DispatcherMap Dispatchers;
+    DispatcherMap m_dispatchers;
 };
 
 EventSystemImpl::EventSystemImpl() { }
 
 EventSystemImpl::~EventSystemImpl() { }
 
-EventDispatcher& EventSystemImpl::GetDispatcher(const EventId& Id)
+EventDispatcher& EventSystemImpl::GetDispatcher(const EventId& id)
 {
-    DispatcherMap::iterator it = Dispatchers.find(Id);
-    if (it != Dispatchers.end())
+    DispatcherMap::iterator it = m_dispatchers.find(id);
+    if (it != m_dispatchers.end())
     {
         // Use existing dispatcher
         return it->second;
@@ -83,38 +83,38 @@ EventDispatcher& EventSystemImpl::GetDispatcher(const EventId& Id)
     else
     {
         // Add new dispatcher
-        auto result = Dispatchers.insert(DispatcherMap::value_type(Id, EventDispatcher(Id)));
+        auto result = m_dispatchers.insert(DispatcherMap::value_type(id, EventDispatcher(id)));
         return result.first->second;
     }
 }
 
-void EventSystemImpl::EnqueueEvent(const Event* InEvent) { EventQueue.Enqueue(InEvent); }
+void EventSystemImpl::EnqueueEvent(const Event* inEvent) { m_eventQueue.Enqueue(inEvent); }
 
-void EventSystemImpl::RegisterListener(const EventId& Id, EventListener* InListener)
+void EventSystemImpl::RegisterListener(const EventId& id, EventListener* inListener)
 {
-    EventDispatcher& Dispatcher = GetDispatcher(Id);
-    Dispatcher.RegisterListener(InListener);
+    EventDispatcher& dispatcher = GetDispatcher(id);
+    dispatcher.RegisterListener(inListener);
 }
 
-void EventSystemImpl::UnRegisterListener(const EventId& Id, EventListener* InListener)
+void EventSystemImpl::UnRegisterListener(const EventId& id, EventListener* inListener)
 {
-    EventDispatcher& Dispatcher = GetDispatcher(Id);
-    Dispatcher.UnRegisterListener(InListener);
+    EventDispatcher& dispatcher = GetDispatcher(id);
+    dispatcher.UnRegisterListener(inListener);
 }
 
-void EventSystemImpl::UnRegisterAllListeners() { Dispatchers.clear(); }
+void EventSystemImpl::UnRegisterAllListeners() { m_dispatchers.clear(); }
 
 void EventSystemImpl::ProcessEvents()
 {
-    while (EventQueue.IsEmpty() == false)
+    while (m_eventQueue.IsEmpty() == false)
     {
-        auto QueuedItem = EventQueue.Dequeue();
+        auto queuedItem = m_eventQueue.Dequeue();
 
-        const Event* QueuedEvent = QueuedItem.value();
-        const EventId& Id = QueuedEvent->GetId();
-        GetDispatcher(Id).Dispatch(*QueuedEvent);
+        const Event* queuedEvent = queuedItem.value();
+        const EventId& id = queuedEvent->GetId();
+        GetDispatcher(id).Dispatch(*queuedEvent);
 
-        delete (QueuedEvent);
+        delete (queuedEvent);
     }
 }
 
@@ -122,56 +122,56 @@ void EventSystemImpl::ProcessEvents()
 
 EventSystem& EventSystem::Get()
 {
-    static EventSystem TheEventSystem;
-    return TheEventSystem;
+    static EventSystem theEventSystem;
+    return theEventSystem;
 }
 
 EventSystem::EventSystem()
-    : Impl(new EventSystemImpl())
+    : m_impl(new EventSystemImpl())
 {
 }
 
-EventSystem::~EventSystem() { delete (Impl); }
+EventSystem::~EventSystem() { delete (m_impl); }
 
-Event* EventSystem::AllocateEvent(const EventId& Id) { return new Event(Id); }
+Event* EventSystem::AllocateEvent(const EventId& id) { return new Event(id); }
 
-void EventSystem::EnqueueEvent(const Event* InEvent)
+void EventSystem::EnqueueEvent(const Event* inEvent)
 {
-    if (Impl)
+    if (m_impl)
     {
-        Impl->EnqueueEvent(InEvent);
+        m_impl->EnqueueEvent(inEvent);
     }
 }
 
-void EventSystem::RegisterListener(const EventId& Id, EventListener* InListener)
+void EventSystem::RegisterListener(const EventId& id, EventListener* inListener)
 {
-    if (Impl)
+    if (m_impl)
     {
-        Impl->RegisterListener(Id, InListener);
+        m_impl->RegisterListener(id, inListener);
     }
 }
 
-void EventSystem::UnRegisterListener(const EventId& Id, EventListener* InListener)
+void EventSystem::UnRegisterListener(const EventId& id, EventListener* inListener)
 {
-    if (Impl)
+    if (m_impl)
     {
-        Impl->UnRegisterListener(Id, InListener);
+        m_impl->UnRegisterListener(id, inListener);
     }
 }
 
 void EventSystem::UnRegisterAllListeners()
 {
-    if (Impl)
+    if (m_impl)
     {
-        Impl->UnRegisterAllListeners();
+        m_impl->UnRegisterAllListeners();
     }
 }
 
 void EventSystem::ProcessEvents()
 {
-    if (Impl)
+    if (m_impl)
     {
-        Impl->ProcessEvents();
+        m_impl->ProcessEvents();
     }
 }
 

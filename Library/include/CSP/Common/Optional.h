@@ -27,7 +27,7 @@ CSP_NO_EXPORT
 namespace
 {
 
-template <typename T> void DefaultDestructor(T* Pointer) { delete Pointer; }
+template <typename T> void DefaultDestructor(T* pointer) { delete pointer; }
 
 } // namespace
 /** @endcond */
@@ -44,119 +44,119 @@ template <typename T> class CSP_API Optional
 public:
     /// @brief Constructs an optional with a null value.
     Optional()
-        : Value(nullptr)
+        : m_value(nullptr)
     {
-        ValueDestructor = DefaultDestructor<T>;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Constructs an optional with a given pointer.
     /// @param InValue T* : Pointer to construct optional with
     /// @param InValueDestructor std::function<void(T*)> : Optional deleter to be called on destructer
-    Optional(T* InValue, std::function<void(T*)> InValueDestructor = DefaultDestructor<T>)
+    Optional(T* inValue, std::function<void(T*)> inValueDestructor = DefaultDestructor<T>)
     {
-        Value = InValue;
-        ValueDestructor = InValueDestructor;
+        m_value = inValue;
+        m_valueDestructor = inValueDestructor;
     }
 
     /// @brief Constructs an optional with a null value.
     /// @param InValue std::nullptr_t : nullptr value
     Optional(std::nullptr_t /*InValue*/)
     {
-        Value = nullptr;
-        ValueDestructor = DefaultDestructor<T>;
+        m_value = nullptr;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Constructs an optional by copying given value of a different type.
     /// @param InValue const U& : Reference to construct optional with
-    template <typename U> Optional(const U& InValue)
+    template <typename U> Optional(const U& inValue)
     {
         static_assert(std::is_constructible<T, U>::value, "Inner type not constructible from argument type!");
-        Value = new T(InValue);
+        m_value = new T(inValue);
 
-        ValueDestructor = DefaultDestructor<T>;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Constructs an optional with a given reference.
     /// @param InValue const T& : Reference to construct optional with
-    Optional(const T& InValue)
+    Optional(const T& inValue)
     {
-        Value = new T(InValue);
+        m_value = new T(inValue);
 
-        ValueDestructor = DefaultDestructor<T>;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Constructs an optional with a given rvalue reference.
     /// @param InValue T&& : Rvalue reference to construct optional with
-    Optional(T&& InValue)
+    Optional(T&& inValue)
     {
-        Value = new T(std::move(InValue));
-        ValueDestructor = DefaultDestructor<T>;
+        m_value = new T(std::move(inValue));
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Copy constructor.
     /// @param Other const Optional<T>&
-    Optional(const Optional<T>& Other)
+    Optional(const Optional<T>& other)
     {
-        if (Other.HasValue())
+        if (other.HasValue())
         {
-            Value = new T(*Other.Value);
+            m_value = new T(*other.m_value);
         }
         else
         {
-            Value = nullptr;
+            m_value = nullptr;
         }
 
-        ValueDestructor = DefaultDestructor<T>;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Move constructor.
     /// @param Other Optional<T>&&
-    Optional(Optional<T>&& Other)
+    Optional(Optional<T>&& other)
     {
-        if (Other.HasValue())
+        if (other.HasValue())
         {
-            Value = new T(std::move(*Other.Value)); // move the object, not the pointer
+            m_value = new T(std::move(*other.m_value)); // move the object, not the pointer
         }
         else
         {
-            Value = nullptr;
+            m_value = nullptr;
         }
 
-        ValueDestructor = DefaultDestructor<T>;
+        m_valueDestructor = DefaultDestructor<T>;
     }
 
     /// @brief Destructor.
     ~Optional()
     {
-        if (Value)
+        if (m_value)
         {
-            ValueDestructor(Value);
+            m_valueDestructor(m_value);
         }
     }
 
     /// @brief Checks of the options contains a value (non null).
     /// @return bool
-    bool HasValue() const { return Value != nullptr; }
+    bool HasValue() const { return m_value != nullptr; }
 
     /// @brief Accesses internal value by pointer.
     /// @return T*
-    T* operator->() const { return Value; }
+    T* operator->() const { return m_value; }
 
     /// @brief Accesses internal value by reference.
     /// @return T&
-    T& operator*() const { return *Value; }
+    T& operator*() const { return *m_value; }
 
     /// @brief Assigns a value to the optional.
     /// @param Other const T& : Reference to assign to optional
     /// @return Optional<T>&
-    Optional<T>& operator=(const T& InValue)
+    Optional<T>& operator=(const T& inValue)
     {
-        if (Value)
+        if (m_value)
         {
-            ValueDestructor(Value);
+            m_valueDestructor(m_value);
         }
 
-        Value = new T(InValue);
+        m_value = new T(inValue);
 
         return *this;
     }
@@ -164,20 +164,20 @@ public:
     /// @brief Copy assignment
     /// @param Other const T& : Reference to assign to optional
     /// @return Optional<T>&
-    Optional<T>& operator=(const Optional<T>& Other)
+    Optional<T>& operator=(const Optional<T>& other)
     {
-        if (Value)
+        if (m_value)
         {
-            ValueDestructor(Value);
+            m_valueDestructor(m_value);
         }
 
-        if (Other.HasValue())
+        if (other.HasValue())
         {
-            Value = new T(*Other.Value);
+            m_value = new T(*other.m_value);
         }
         else
         {
-            Value = nullptr;
+            m_value = nullptr;
         }
 
         return *this;
@@ -186,23 +186,23 @@ public:
     /// @brief Move assignment
     /// @param Other const T& : Reference to assign to optional
     /// @return Optional<T>&
-    Optional<T>& operator=(Optional<T>&& Other)
+    Optional<T>& operator=(Optional<T>&& other)
     {
-        if (Value)
+        if (m_value)
         {
-            ValueDestructor(Value);
+            m_valueDestructor(m_value);
         }
 
-        Value = Other.Value;
-        Other.Value = nullptr;
+        m_value = other.m_value;
+        other.m_value = nullptr;
 
         return *this;
     }
 
 private:
-    T* Value;
+    T* m_value;
 
-    std::function<void(T*)> ValueDestructor;
+    std::function<void(T*)> m_valueDestructor;
 };
 
 } // namespace csp::common

@@ -28,8 +28,8 @@ public:
 
     using AccessToken = csp::common::String;
 
-    static void SetAccessToken(const AccessToken& InToken, const csp::common::String& InTokenExpiry, const AccessToken& InRefreshToken,
-        const csp::common::String& InRefreshTokenExpiry);
+    static void SetAccessToken(const AccessToken& inToken, const csp::common::String& inTokenExpiry, const AccessToken& inRefreshToken,
+        const csp::common::String& inRefreshTokenExpiry);
 
     static const AccessToken& GetAccessToken();
     static const AccessToken& GetRefreshToken();

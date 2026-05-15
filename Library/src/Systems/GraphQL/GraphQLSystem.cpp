@@ -28,38 +28,38 @@ namespace csp::systems
 
 GraphQLSystem::GraphQLSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , GraphQLAPI(nullptr)
+    , m_graphQlapi(nullptr)
 {
 }
 
-GraphQLSystem::GraphQLSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+GraphQLSystem::GraphQLSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
 {
-    GraphQLAPI = new chs::GraphQLApi(InWebClient);
+    m_graphQlapi = new chs::GraphQLApi(inWebClient);
 }
 
-GraphQLSystem::~GraphQLSystem() { delete (GraphQLAPI); }
+GraphQLSystem::~GraphQLSystem() { delete (m_graphQlapi); }
 
-void GraphQLSystem::RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback Callback)
+void GraphQLSystem::RunQuery(const csp::common::String queryText, GraphQLReceivedCallback callback)
 {
-    std::string QueryTextStr = QueryText.c_str();
+    std::string queryTextStr = queryText.c_str();
 
     std::regex reg("\"");
-    QueryTextStr = std::regex_replace(QueryTextStr, reg, "\\\"");
-    std::string RequestBody = "{\"query\":\"query{" + QueryTextStr + "}\"}";
+    queryTextStr = std::regex_replace(queryTextStr, reg, "\\\"");
+    std::string requestBody = "{\"query\":\"query{" + queryTextStr + "}\"}";
 
-    RunRequest(csp::common::String(RequestBody.c_str()), Callback);
+    RunRequest(csp::common::String(requestBody.c_str()), callback);
 }
 
-void GraphQLSystem::RunRequest(const csp::common::String RequestBody, GraphQLReceivedCallback Callback)
+void GraphQLSystem::RunRequest(const csp::common::String requestBody, GraphQLReceivedCallback callback)
 {
     std::ostringstream strm;
-    std::string QueryTextStr = RequestBody.c_str();
-    strm << QueryTextStr;
+    std::string queryTextStr = requestBody.c_str();
+    strm << queryTextStr;
 
-    csp::services::ResponseHandlerPtr GraphQLResponseHandler
-        = GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs::GraphQLApi*>(GraphQLAPI)->Query(strm.str().c_str(), GraphQLResponseHandler);
+    csp::services::ResponseHandlerPtr graphQlResponseHandler
+        = m_graphQlapi->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(callback, nullptr);
+    static_cast<chs::GraphQLApi*>(m_graphQlapi)->Query(strm.str().c_str(), graphQlResponseHandler);
 }
 
 } // namespace csp::systems

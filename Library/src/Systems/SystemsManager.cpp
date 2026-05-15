@@ -63,49 +63,49 @@ SystemsManager& SystemsManager::Get()
     return *SystemsManager::Instance;
 }
 
-UserSystem* SystemsManager::GetUserSystem() { return UserSystem; }
+UserSystem* SystemsManager::GetUserSystem() { return m_userSystem; }
 
-SpaceSystem* SystemsManager::GetSpaceSystem() { return SpaceSystem; }
+SpaceSystem* SystemsManager::GetSpaceSystem() { return m_spaceSystem; }
 
-AssetSystem* SystemsManager::GetAssetSystem() { return AssetSystem; }
+AssetSystem* SystemsManager::GetAssetSystem() { return m_assetSystem; }
 
-ScriptSystem* SystemsManager::GetScriptSystem() { return ScriptSystem; }
+ScriptSystem* SystemsManager::GetScriptSystem() { return m_scriptSystem; }
 
-VoipSystem* SystemsManager::GetVoipSystem() { return VoipSystem; }
+VoipSystem* SystemsManager::GetVoipSystem() { return m_voipSystem; }
 
-PointOfInterestSystem* SystemsManager::GetPointOfInterestSystem() { return PointOfInterestSystem; }
+PointOfInterestSystem* SystemsManager::GetPointOfInterestSystem() { return m_pointOfInterestSystem; }
 
-AnchorSystem* SystemsManager::GetAnchorSystem() { return AnchorSystem; }
+AnchorSystem* SystemsManager::GetAnchorSystem() { return m_anchorSystem; }
 
-csp::common::LogSystem* SystemsManager::GetLogSystem() { return LogSystem; }
+csp::common::LogSystem* SystemsManager::GetLogSystem() { return m_logSystem; }
 
-ApplicationSettingsSystem* SystemsManager::GetApplicationSettingsSystem() { return ApplicationSettingsSystem; }
+ApplicationSettingsSystem* SystemsManager::GetApplicationSettingsSystem() { return m_applicationSettingsSystem; }
 
-SettingsSystem* SystemsManager::GetSettingsSystem() { return SettingsSystem; }
+SettingsSystem* SystemsManager::GetSettingsSystem() { return m_settingsSystem; }
 
-GraphQLSystem* SystemsManager::GetGraphQLSystem() { return GraphQLSystem; }
+GraphQLSystem* SystemsManager::GetGraphQLSystem() { return m_graphQlSystem; }
 
-MaintenanceSystem* SystemsManager::GetMaintenanceSystem() { return MaintenanceSystem; }
+MaintenanceSystem* SystemsManager::GetMaintenanceSystem() { return m_maintenanceSystem; }
 
-EventTicketingSystem* SystemsManager::GetEventTicketingSystem() { return EventTicketingSystem; }
+EventTicketingSystem* SystemsManager::GetEventTicketingSystem() { return m_eventTicketingSystem; }
 
-ECommerceSystem* SystemsManager::GetECommerceSystem() { return ECommerceSystem; }
+ECommerceSystem* SystemsManager::GetECommerceSystem() { return m_eCommerceSystem; }
 
-QuotaSystem* SystemsManager::GetQuotaSystem() { return QuotaSystem; }
+QuotaSystem* SystemsManager::GetQuotaSystem() { return m_quotaSystem; }
 
-SequenceSystem* SystemsManager::GetSequenceSystem() { return SequenceSystem; }
+SequenceSystem* SystemsManager::GetSequenceSystem() { return m_sequenceSystem; }
 
-HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem() { return HotspotSequenceSystem; }
+HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem() { return m_hotspotSequenceSystem; }
 
-AnalyticsSystem* SystemsManager::GetAnalyticsSystem() { return AnalyticsSystem; }
+AnalyticsSystem* SystemsManager::GetAnalyticsSystem() { return m_analyticsSystem; }
 
-ExternalServiceProxySystem* SystemsManager::GetExternalServicesProxySystem() { return ExternalServiceProxySystem; }
+ExternalServiceProxySystem* SystemsManager::GetExternalServicesProxySystem() { return m_externalServiceProxySystem; }
 
-MultiplayerSystem* SystemsManager::GetMultiplayerSystem() { return MultiplayerSystem; }
+MultiplayerSystem* SystemsManager::GetMultiplayerSystem() { return m_multiplayerSystem; }
 
-csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
+csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return m_multiplayerConnection; }
 
-csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
+csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &m_multiplayerConnection->GetEventBus(); }
 
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
@@ -117,9 +117,9 @@ csp::multiplayer::OfflineRealtimeEngine* SystemsManager::MakeOfflineRealtimeEngi
     return new csp::multiplayer::OfflineRealtimeEngine { *GetLogSystem(), *GetScriptSystem() };
 }
 
-csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::RealtimeEngineType RealtimeEngineType)
+csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::RealtimeEngineType realtimeEngineType)
 {
-    switch (RealtimeEngineType)
+    switch (realtimeEngineType)
     {
     case RealtimeEngineType::Online:
         return MakeOnlineRealtimeEngine();
@@ -131,131 +131,131 @@ csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::Re
 }
 
 SystemsManager::SystemsManager()
-    : WebClient(nullptr)
-    , MultiplayerConnection(nullptr)
-    , RealtimeEngine(nullptr)
-    , UserSystem(nullptr)
-    , SpaceSystem(nullptr)
-    , AssetSystem(nullptr)
-    , ScriptSystem(nullptr)
-    , VoipSystem(nullptr)
-    , PointOfInterestSystem(nullptr)
-    , AnchorSystem(nullptr)
-    , LogSystem(nullptr)
-    , ApplicationSettingsSystem(nullptr)
-    , SettingsSystem(nullptr)
-    , GraphQLSystem(nullptr)
-    , MaintenanceSystem(nullptr)
-    , EventTicketingSystem(nullptr)
-    , ECommerceSystem(nullptr)
-    , QuotaSystem(nullptr)
-    , SequenceSystem(nullptr)
-    , HotspotSequenceSystem(nullptr)
-    , ConversationSystem(nullptr)
-    , AnalyticsSystem(nullptr)
-    , ExternalServiceProxySystem(nullptr)
-    , MultiplayerSystem(nullptr)
+    : m_webClient(nullptr)
+    , m_multiplayerConnection(nullptr)
+    , m_realtimeEngine(nullptr)
+    , m_userSystem(nullptr)
+    , m_spaceSystem(nullptr)
+    , m_assetSystem(nullptr)
+    , m_scriptSystem(nullptr)
+    , m_voipSystem(nullptr)
+    , m_pointOfInterestSystem(nullptr)
+    , m_anchorSystem(nullptr)
+    , m_logSystem(nullptr)
+    , m_applicationSettingsSystem(nullptr)
+    , m_settingsSystem(nullptr)
+    , m_graphQlSystem(nullptr)
+    , m_maintenanceSystem(nullptr)
+    , m_eventTicketingSystem(nullptr)
+    , m_eCommerceSystem(nullptr)
+    , m_quotaSystem(nullptr)
+    , m_sequenceSystem(nullptr)
+    , m_hotspotSequenceSystem(nullptr)
+    , m_conversationSystem(nullptr)
+    , m_analyticsSystem(nullptr)
+    , m_externalServiceProxySystem(nullptr)
+    , m_multiplayerSystem(nullptr)
 {
 }
 
 SystemsManager::~SystemsManager() { DestroySystems(); }
 
-ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
+ConversationSystemInternal* SystemsManager::GetConversationSystem() { return m_conversationSystem; }
 
-void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* signalRInject, csp::web::WebClient* webClientInject)
 {
     // Create Log system first, so we can log any startup issues in other systems
-    LogSystem = new csp::common::LogSystem();
+    m_logSystem = new csp::common::LogSystem();
 
-    if (WebClientInject)
+    if (webClientInject)
     {
-        WebClient = WebClientInject;
+        m_webClient = webClientInject;
     }
     else
     {
 #ifdef CSP_WASM
         WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #else
-        WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        m_webClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, m_logSystem);
 #endif
     }
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
-    UserSystem = new csp::systems::UserSystem(WebClient, nullptr, *LogSystem);
+    m_userSystem = new csp::systems::UserSystem(m_webClient, nullptr, *m_logSystem);
 
-    WebClient->SetAuthContext(UserSystem->GetAuthContext());
+    m_webClient->SetAuthContext(m_userSystem->GetAuthContext());
 
-    ScriptSystem = new csp::systems::ScriptSystem();
-    ScriptSystem->Initialise();
+    m_scriptSystem = new csp::systems::ScriptSystem();
+    m_scriptSystem->Initialise();
 
     // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.
-    auto* SignalRConnection
-        = (SignalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(UserSystem->GetAuthContext()) : SignalRInject;
+    auto* signalRConnection
+        = (signalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(m_userSystem->GetAuthContext()) : signalRInject;
 
-    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
+    m_multiplayerConnection = new csp::multiplayer::MultiplayerConnection(*m_logSystem, *signalRConnection);
 
     // Set the NetworkEventBus now that it has been initialized.
-    UserSystem->SetNetworkEventBus(MultiplayerConnection->GetEventBus());
+    m_userSystem->SetNetworkEventBus(m_multiplayerConnection->GetEventBus());
 
-    VoipSystem = new csp::systems::VoipSystem();
+    m_voipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
-    AssetSystem = new csp::systems::AssetSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem->GetAuthContext(), *LogSystem);
-    AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
-    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
-    ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, *LogSystem);
-    SettingsSystem = new csp::systems::SettingsSystem(WebClient, *LogSystem);
-    GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, *LogSystem);
-    MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, *LogSystem);
-    EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, *LogSystem);
-    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, *LogSystem);
-    QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem, UserSystem->GetAuthContext());
-    SequenceSystem = new csp::systems::SequenceSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
-    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
-    ConversationSystem
-        = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
-    AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
-    ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
-    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
-    SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
+    m_spaceSystem = new csp::systems::SpaceSystem(m_webClient, m_multiplayerConnection->GetEventBus(), m_userSystem, *m_logSystem);
+    m_assetSystem = new csp::systems::AssetSystem(m_webClient, m_multiplayerConnection->GetEventBus(), m_userSystem->GetAuthContext(), *m_logSystem);
+    m_anchorSystem = new csp::systems::AnchorSystem(m_webClient, *m_logSystem);
+    m_pointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(m_webClient, *m_logSystem);
+    m_applicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(m_webClient, *m_logSystem);
+    m_settingsSystem = new csp::systems::SettingsSystem(m_webClient, *m_logSystem);
+    m_graphQlSystem = new csp::systems::GraphQLSystem(m_webClient, *m_logSystem);
+    m_maintenanceSystem = new csp::systems::MaintenanceSystem(m_webClient, *m_logSystem);
+    m_eventTicketingSystem = new csp::systems::EventTicketingSystem(m_webClient, *m_logSystem);
+    m_eCommerceSystem = new csp::systems::ECommerceSystem(m_webClient, *m_logSystem);
+    m_quotaSystem = new csp::systems::QuotaSystem(m_webClient, *m_logSystem, m_userSystem->GetAuthContext());
+    m_sequenceSystem = new csp::systems::SequenceSystem(m_webClient, m_multiplayerConnection->GetEventBus(), *m_logSystem);
+    m_hotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(m_sequenceSystem, m_spaceSystem, m_multiplayerConnection->GetEventBus(), *m_logSystem);
+    m_conversationSystem
+        = new csp::systems::ConversationSystemInternal(m_assetSystem, m_spaceSystem, m_userSystem, m_multiplayerConnection->GetEventBus(), *m_logSystem);
+    m_analyticsSystem = new csp::systems::AnalyticsSystem(m_webClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *m_logSystem);
+    m_externalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(m_webClient, *m_logSystem);
+    m_multiplayerSystem = new csp::systems::MultiplayerSystem(m_webClient, *m_spaceSystem, *m_logSystem);
+    m_spaceSystem->SetMultiplayerSystem(*m_multiplayerSystem);
 }
 
 void SystemsManager::DestroySystems()
 {
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
-    delete ExternalServiceProxySystem;
-    delete AnalyticsSystem;
-    delete ConversationSystem;
-    delete HotspotSequenceSystem;
-    delete SequenceSystem;
-    delete QuotaSystem;
-    delete ECommerceSystem;
-    delete EventTicketingSystem;
-    delete MaintenanceSystem;
-    delete GraphQLSystem;
-    delete SettingsSystem;
-    delete ApplicationSettingsSystem;
-    delete PointOfInterestSystem;
-    delete AnchorSystem;
-    delete AssetSystem;
-    delete SpaceSystem;
-    delete UserSystem;
-    delete VoipSystem;
-    delete MultiplayerConnection; // Also deletes NetworkEventBus
-    delete ScriptSystem;
-    delete MultiplayerSystem;
-    delete WebClient;
-    delete LogSystem;
+    delete m_externalServiceProxySystem;
+    delete m_analyticsSystem;
+    delete m_conversationSystem;
+    delete m_hotspotSequenceSystem;
+    delete m_sequenceSystem;
+    delete m_quotaSystem;
+    delete m_eCommerceSystem;
+    delete m_eventTicketingSystem;
+    delete m_maintenanceSystem;
+    delete m_graphQlSystem;
+    delete m_settingsSystem;
+    delete m_applicationSettingsSystem;
+    delete m_pointOfInterestSystem;
+    delete m_anchorSystem;
+    delete m_assetSystem;
+    delete m_spaceSystem;
+    delete m_userSystem;
+    delete m_voipSystem;
+    delete m_multiplayerConnection; // Also deletes NetworkEventBus
+    delete m_scriptSystem;
+    delete m_multiplayerSystem;
+    delete m_webClient;
+    delete m_logSystem;
 }
 
-void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* signalRInject, csp::web::WebClient* webClientInject)
 {
     Instance = new SystemsManager();
-    Instance->CreateSystems(SignalRInject, WebClientInject);
+    Instance->CreateSystems(signalRInject, webClientInject);
 }
 
 void SystemsManager::Destroy()

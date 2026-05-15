@@ -32,133 +32,133 @@ class String::Impl
 public:
     ~Impl() { delete[] Text; }
 
-    explicit Impl(char const* const InText)
+    explicit Impl(char const* const inText)
         : Text(nullptr)
         , Length(0)
     {
-        const char* EffectiveText = InText;
+        const char* effectiveText = inText;
 
-        if (InText == nullptr)
+        if (inText == nullptr)
         {
-            EffectiveText = "";
+            effectiveText = "";
         }
 
-        const size_t Len = strlen(EffectiveText);
+        const size_t len = strlen(effectiveText);
 
-        char* NewText = new char[Len + 1];
+        char* newText = new char[len + 1];
 
-        if (Len > 0)
+        if (len > 0)
         {
-            memcpy((void*)NewText, EffectiveText, Len * sizeof(char));
+            memcpy((void*)newText, effectiveText, len * sizeof(char));
         }
 
-        NewText[Len] = 0;
+        newText[len] = 0;
 
-        Text = NewText;
-        Length = Len;
+        Text = newText;
+        Length = len;
     }
 
-    Impl(char const* const InText, size_t Len)
+    Impl(char const* const inText, size_t len)
         : Text(nullptr)
         , Length(0)
     {
-        const char* EffectiveText = InText;
+        const char* effectiveText = inText;
 
-        if (InText == nullptr || Len == 0)
+        if (inText == nullptr || len == 0)
         {
-            EffectiveText = "";
-            Len = 0;
+            effectiveText = "";
+            len = 0;
         }
 
-        char* NewText = new char[Len + 1];
+        char* newText = new char[len + 1];
 
-        if (Len > 0)
+        if (len > 0)
         {
-            memcpy((void*)NewText, EffectiveText, Len * sizeof(char));
+            memcpy((void*)newText, effectiveText, len * sizeof(char));
         }
 
-        NewText[Len] = 0;
+        newText[len] = 0;
 
-        Text = NewText;
-        Length = Len;
+        Text = newText;
+        Length = len;
     }
 
-    explicit Impl(size_t Len)
+    explicit Impl(size_t len)
         : Text(nullptr)
         , Length(0)
     {
-        char* NewText = new char[Len + 1];
+        char* newText = new char[len + 1];
 
-        NewText[Len] = 0;
-        Text = NewText;
-        Length = Len;
+        newText[len] = 0;
+        Text = newText;
+        Length = len;
     }
 
     Impl* Clone() const { return new Impl(Text, Length); }
 
-    inline void Append(const char* Other, size_t OtherLength)
+    inline void Append(const char* other, size_t otherLength)
     {
-        if (Other == nullptr || OtherLength == 0)
+        if (other == nullptr || otherLength == 0)
         {
             return;
         }
 
-        auto NewLength = Length + OtherLength;
-        auto NewText = new char[NewLength + 1];
-        memcpy(NewText, Text, Length);
-        memcpy(NewText + Length, Other, OtherLength);
-        NewText[NewLength] = '\0';
+        auto newLength = Length + otherLength;
+        auto newText = new char[newLength + 1];
+        memcpy(newText, Text, Length);
+        memcpy(newText + Length, other, otherLength);
+        newText[newLength] = '\0';
 
         delete[] Text;
-        Text = NewText;
-        Length = NewLength;
+        Text = newText;
+        Length = newLength;
     }
 
-    void Append(const Impl& Other) { Append(Other.Text, Other.Length); }
+    void Append(const Impl& other) { Append(other.Text, other.Length); }
 
-    void Append(const char* Other)
+    void Append(const char* other)
     {
-        if (Other == nullptr)
+        if (other == nullptr)
         {
             return;
         }
 
-        auto OtherLength = strlen(Other);
-        Append(Other, OtherLength);
+        auto otherLength = strlen(other);
+        Append(other, otherLength);
     }
 
-    List<String> Split(char Separator)
+    List<String> Split(char separator)
     {
-        List<String> Parts;
+        List<String> parts;
 
         // NOTE: Don't use strtok here because it ignores empty entries!
-        auto Index = strchr(Text, Separator);
+        auto index = strchr(Text, separator);
 
-        if (Index == nullptr)
+        if (index == nullptr)
         {
-            Parts.Append(Text);
+            parts.Append(Text);
 
-            return Parts;
+            return parts;
         }
 
-        auto Start = Text;
+        auto start = Text;
 
         for (;;)
         {
-            Parts.Append(String(Start, Index - Start));
-            Start = Index + 1;
-            Index = strchr(Start, Separator);
+            parts.Append(String(start, index - start));
+            start = index + 1;
+            index = strchr(start, separator);
 
             // Also look for null-terminator
-            if (Index == nullptr)
+            if (index == nullptr)
             {
-                Index = strchr(Start, '\0');
-                Parts.Append(String(Start, Index - Start));
+                index = strchr(start, '\0');
+                parts.Append(String(start, index - start));
                 break;
             }
         }
 
-        return Parts;
+        return parts;
     }
 
     char* Text;
@@ -166,347 +166,347 @@ public:
 };
 
 String::String()
-    : ImplPtr(new Impl(""))
+    : m_implPtr(new Impl(""))
 {
 }
 
-String::String(char const* const Text, size_t Length)
-    : ImplPtr(new Impl(Text, Length))
+String::String(char const* const text, size_t length)
+    : m_implPtr(new Impl(text, length))
 {
 }
 
-String::String(size_t Length)
-    : ImplPtr(new Impl(Length))
+String::String(size_t length)
+    : m_implPtr(new Impl(length))
 {
 }
 
-String::String(const char* Text)
-    : ImplPtr(new Impl(Text))
+String::String(const char* text)
+    : m_implPtr(new Impl(text))
 {
 }
 
-String::String(String const& Other)
-    : ImplPtr(Other.ImplPtr->Clone())
+String::String(String const& other)
+    : m_implPtr(other.m_implPtr->Clone())
 {
 }
 
-String::String(String&& Other)
+String::String(String&& other)
 {
-    ImplPtr = Other.ImplPtr;
-    Other.ImplPtr = nullptr;
+    m_implPtr = other.m_implPtr;
+    other.m_implPtr = nullptr;
 }
 
-List<String> String::Split(char Separator) const { return ImplPtr->Split(Separator); }
+List<String> String::Split(char separator) const { return m_implPtr->Split(separator); }
 
-String& String::swap(String& Other)
+String& String::swap(String& other)
 {
-    std::swap(ImplPtr, Other.ImplPtr);
+    std::swap(m_implPtr, other.m_implPtr);
     return *this;
 }
 
-String& String::operator=(const String& Rhs)
+String& String::operator=(const String& rhs)
 {
-    if (ImplPtr != nullptr)
+    if (m_implPtr != nullptr)
     {
-        delete (ImplPtr);
+        delete (m_implPtr);
     }
 
-    ImplPtr = Rhs.ImplPtr->Clone();
+    m_implPtr = rhs.m_implPtr->Clone();
     return *this;
 }
 
-String& String::operator=(String&& Rhs)
+String& String::operator=(String&& rhs)
 {
-    if (ImplPtr != nullptr)
+    if (m_implPtr != nullptr)
     {
-        delete (ImplPtr);
+        delete (m_implPtr);
     }
 
-    ImplPtr = Rhs.ImplPtr;
-    Rhs.ImplPtr = nullptr;
+    m_implPtr = rhs.m_implPtr;
+    rhs.m_implPtr = nullptr;
     return *this;
 }
 
-String& String::operator=(char const* const Text)
+String& String::operator=(char const* const text)
 {
-    if (ImplPtr != nullptr)
+    if (m_implPtr != nullptr)
     {
-        delete (ImplPtr);
+        delete (m_implPtr);
     }
 
-    ImplPtr = new Impl(Text);
+    m_implPtr = new Impl(text);
     return *this;
 }
 
-const char* String::Get() const { return ImplPtr->Text; }
+const char* String::Get() const { return m_implPtr->Text; }
 
-size_t String::Length() const { return ImplPtr->Length; }
+size_t String::Length() const { return m_implPtr->Length; }
 
-size_t String::AllocatedMemorySize() const { return ImplPtr->Length + 1; }
+size_t String::AllocatedMemorySize() const { return m_implPtr->Length + 1; }
 
-bool String::IsEmpty() const { return ImplPtr->Length == 0; }
+bool String::IsEmpty() const { return m_implPtr->Length == 0; }
 
-bool String::operator==(const String& Other) const
+bool String::operator==(const String& other) const
 {
-    if (ImplPtr->Length == 0 && Other.Length() == 0)
+    if (m_implPtr->Length == 0 && other.Length() == 0)
     {
         return true;
     }
 
-    if (ImplPtr->Length == 0 || Other.Length() == 0)
+    if (m_implPtr->Length == 0 || other.Length() == 0)
     {
         return false;
     }
 
-    return strcmp(Get(), Other.Get()) == 0;
+    return strcmp(Get(), other.Get()) == 0;
 }
 
-bool String::operator==(const char* Other) const
+bool String::operator==(const char* other) const
 {
-    auto OtherLength = strlen(Other);
+    auto otherLength = strlen(other);
 
-    if (ImplPtr->Length == 0 && OtherLength == 0)
+    if (m_implPtr->Length == 0 && otherLength == 0)
     {
         return true;
     }
 
-    if (ImplPtr->Length == 0 || OtherLength == 0)
+    if (m_implPtr->Length == 0 || otherLength == 0)
     {
         return false;
     }
 
-    return strcmp(Get(), Other) == 0;
+    return strcmp(Get(), other) == 0;
 }
 
-bool String::operator!=(const String& Other) const { return !(*this == Other); }
+bool String::operator!=(const String& other) const { return !(*this == other); }
 
-bool String::operator!=(const char* Other) const { return !(*this == Other); }
+bool String::operator!=(const char* other) const { return !(*this == other); }
 
-bool String::operator<(const String& Other) const { return strcmp(Get(), Other.Get()) < 0; }
+bool String::operator<(const String& other) const { return strcmp(Get(), other.Get()) < 0; }
 
 String::~String()
 {
-    if (ImplPtr != nullptr)
+    if (m_implPtr != nullptr)
     {
-        delete (ImplPtr);
+        delete (m_implPtr);
     }
 }
 
-void String::Append(const String& Other) { ImplPtr->Append(*Other.ImplPtr); }
+void String::Append(const String& other) { m_implPtr->Append(*other.m_implPtr); }
 
-void String::Append(const char* Other) { ImplPtr->Append(Other); }
+void String::Append(const char* other) { m_implPtr->Append(other); }
 
-String& String::operator+=(const String& Other)
+String& String::operator+=(const String& other)
 {
-    Append(Other);
+    Append(other);
 
     return *this;
 }
 
-String& String::operator+=(const char* Other)
+String& String::operator+=(const char* other)
 {
-    Append(Other);
+    Append(other);
 
     return *this;
 }
 
 String String::Trim() const
 {
-    static char Whitespace[] = { ' ', '\r', '\n', '\t' };
+    static char whitespace[] = { ' ', '\r', '\n', '\t' };
 
-    auto Length = ImplPtr->Length;
-    auto Text = ImplPtr->Text;
+    auto length = m_implPtr->Length;
+    auto text = m_implPtr->Text;
 
     // Trim leading whitespace
-    while (Length > 0)
+    while (length > 0)
     {
-        auto IsWhitespace = std::find(std::begin(Whitespace), std::end(Whitespace), Text[0]) != std::end(Whitespace);
+        auto isWhitespace = std::find(std::begin(whitespace), std::end(whitespace), text[0]) != std::end(whitespace);
 
-        if (!IsWhitespace)
+        if (!isWhitespace)
             break;
 
-        ++Text;
-        --Length;
+        ++text;
+        --length;
     }
 
     // Trim trailing whitespace
-    while (Length > 0)
+    while (length > 0)
     {
-        auto IsWhitespace = std::find(std::begin(Whitespace), std::end(Whitespace), Text[Length - 1]) != std::end(Whitespace);
+        auto isWhitespace = std::find(std::begin(whitespace), std::end(whitespace), text[length - 1]) != std::end(whitespace);
 
-        if (!IsWhitespace)
+        if (!isWhitespace)
             break;
 
-        --Length;
+        --length;
     }
 
-    return String(Text, Length);
+    return String(text, length);
 }
 
 String String::ToLower() const
 {
-    String Copy = *this;
-    auto Length = Copy.ImplPtr->Length;
-    auto Text = Copy.ImplPtr->Text;
+    String copy = *this;
+    auto length = copy.m_implPtr->Length;
+    auto text = copy.m_implPtr->Text;
 
-    for (size_t i = 0; i < Length; ++i)
+    for (size_t i = 0; i < length; ++i)
     {
-        Text[i] = static_cast<char>(std::tolower(Text[i]));
+        text[i] = static_cast<char>(std::tolower(text[i]));
     }
 
-    return Copy;
+    return copy;
 }
 
-String String::Join(const List<String>& Parts, Optional<char> Separator)
+String String::Join(const List<String>& parts, Optional<char> separator)
 {
-    if (Parts.Size() == 0)
+    if (parts.Size() == 0)
     {
         return String();
     }
 
-    size_t Length = 0;
+    size_t length = 0;
 
-    for (size_t i = 0; i < Parts.Size(); ++i)
+    for (size_t i = 0; i < parts.Size(); ++i)
     {
-        Length += Parts[i].Length();
+        length += parts[i].Length();
     }
 
-    if (Length == 0)
+    if (length == 0)
     {
         return String();
     }
 
-    if (Separator.HasValue())
+    if (separator.HasValue())
     {
-        Length += Parts.Size() - 1;
+        length += parts.Size() - 1;
     }
 
-    auto Buffer = new char[Length + 1]();
-    size_t Pos = 0;
+    auto buffer = new char[length + 1]();
+    size_t pos = 0;
 
-    for (size_t i = 0; i < Parts.Size(); ++i)
+    for (size_t i = 0; i < parts.Size(); ++i)
     {
-        auto PartLength = Parts[i].Length();
+        auto partLength = parts[i].Length();
 
-        if (PartLength == 0)
+        if (partLength == 0)
         {
             continue;
         }
 
-        memcpy(Buffer + Pos, Parts[i].c_str(), PartLength);
-        Pos += PartLength;
+        memcpy(buffer + pos, parts[i].c_str(), partLength);
+        pos += partLength;
 
-        if (Separator.HasValue())
+        if (separator.HasValue())
         {
-            Buffer[Pos++] = *Separator;
+            buffer[pos++] = *separator;
         }
     }
 
-    Buffer[Length] = '\0';
+    buffer[length] = '\0';
 
-    String JoinedString(Buffer);
+    String joinedString(buffer);
 
-    delete[] Buffer;
+    delete[] buffer;
 
-    return JoinedString;
+    return joinedString;
 }
 
-bool String::Contains(const String& Substring) const
+bool String::Contains(const String& substring) const
 {
-    if (Substring.Length() == 0)
+    if (substring.Length() == 0)
     {
         return false;
     }
 
-    return strstr(Get(), Substring.Get()) != nullptr;
+    return strstr(Get(), substring.Get()) != nullptr;
 }
 
-bool String::StartsWith(const String& Prefix) const
+bool String::StartsWith(const String& prefix) const
 {
-    if (Prefix.Length() == 0 || Prefix.Length() > ImplPtr->Length)
+    if (prefix.Length() == 0 || prefix.Length() > m_implPtr->Length)
     {
         return false;
     }
 
-    return std::memcmp(Get(), Prefix.Get(), Prefix.Length()) == 0;
+    return std::memcmp(Get(), prefix.Get(), prefix.Length()) == 0;
 }
 
-bool String::EndsWith(const String& Postfix) const
+bool String::EndsWith(const String& postfix) const
 {
-    if (Postfix.Length() == 0 || Postfix.Length() > ImplPtr->Length)
+    if (postfix.Length() == 0 || postfix.Length() > m_implPtr->Length)
     {
         return false;
     }
 
-    return std::memcmp(Get() + (ImplPtr->Length - Postfix.Length()), Postfix.Get(), Postfix.Length()) == 0;
+    return std::memcmp(Get() + (m_implPtr->Length - postfix.Length()), postfix.Get(), postfix.Length()) == 0;
 }
 
-String String::SubString(size_t Offset, Optional<size_t> Length)
+String String::SubString(size_t offset, Optional<size_t> length)
 {
-    if (Offset >= ImplPtr->Length)
+    if (offset >= m_implPtr->Length)
     {
         return "";
     }
 
-    size_t MaxSubStringLength = ImplPtr->Length - Offset;
+    size_t maxSubStringLength = m_implPtr->Length - offset;
 
-    size_t SubstringLength = Length.HasValue() ? std::min(*Length, MaxSubStringLength) : MaxSubStringLength;
+    size_t substringLength = length.HasValue() ? std::min(*length, maxSubStringLength) : maxSubStringLength;
 
-    return String(ImplPtr->Text + Offset, SubstringLength);
+    return String(m_implPtr->Text + offset, substringLength);
 }
 
-String String::Join(const std::initializer_list<String>& Parts, Optional<char> Separator)
+String String::Join(const std::initializer_list<String>& parts, Optional<char> separator)
 {
-    if (Parts.size() == 0)
+    if (parts.size() == 0)
     {
         return String();
     }
 
-    size_t Length = 0;
+    size_t length = 0;
 
-    for (size_t i = 0; i < Parts.size(); ++i)
+    for (size_t i = 0; i < parts.size(); ++i)
     {
-        Length += (Parts.begin() + i)->Length();
+        length += (parts.begin() + i)->Length();
     }
 
-    if (Length == 0)
+    if (length == 0)
     {
         return String();
     }
 
-    if (Separator.HasValue())
+    if (separator.HasValue())
     {
-        Length += Parts.size() - 1;
+        length += parts.size() - 1;
     }
 
-    auto Buffer = new char[Length + 1]();
-    size_t Pos = 0;
+    auto buffer = new char[length + 1]();
+    size_t pos = 0;
 
-    for (size_t i = 0; i < Parts.size(); ++i)
+    for (size_t i = 0; i < parts.size(); ++i)
     {
-        auto PartLength = (Parts.begin() + i)->Length();
+        auto partLength = (parts.begin() + i)->Length();
 
-        if (PartLength == 0)
+        if (partLength == 0)
         {
             continue;
         }
 
-        memcpy(Buffer + Pos, (Parts.begin() + i)->c_str(), PartLength);
-        Pos += PartLength;
+        memcpy(buffer + pos, (parts.begin() + i)->c_str(), partLength);
+        pos += partLength;
 
-        if (Separator.HasValue())
+        if (separator.HasValue())
         {
-            Buffer[Pos++] = *Separator;
+            buffer[pos++] = *separator;
         }
     }
 
-    Buffer[Length] = '\0';
+    buffer[length] = '\0';
 
-    String JoinedString(Buffer);
+    String joinedString(buffer);
 
-    delete[] Buffer;
+    delete[] buffer;
 
-    return JoinedString;
+    return joinedString;
 }
 
 } // namespace csp::common

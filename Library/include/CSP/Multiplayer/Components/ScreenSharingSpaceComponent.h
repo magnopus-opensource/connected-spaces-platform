@@ -61,7 +61,7 @@ public:
 
     /// @brief Constructs the screen sharing component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ScreenSharingSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the ID of the user who is currently sharing their screen to this component.
     /// @note An empty string means that no user is currently sharing their screen to this component.
@@ -71,7 +71,7 @@ public:
     /// @brief Sets the ID of the user who is sharing their screen to this component.
     /// @param Value csp::common::String& : The ID of the user who is sharing their screen to this component. This must be set to an empty string when
     /// the user finishes sharing.
-    void SetUserId(const csp::common::String& Value);
+    void SetUserId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with the default image for this component.
     /// @note To retrieve this component's default image, both the DefaultImageCollectionId and the DefaultImageAssetId are required.
@@ -81,7 +81,7 @@ public:
     /// @brief Sets the ID of the asset collection associated with the default image for this component.
     /// @note To retrieve this component's default image, both the DefaultImageCollectionId and the DefaultImageAssetId are required.
     /// @param Value csp::common::String& : The ID of the default image asset collection associated with this component.
-    void SetDefaultImageCollectionId(const csp::common::String& Value);
+    void SetDefaultImageCollectionId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset associated with the default image for this component.
     /// @note To retrieve this component's default image, both the DefaultImageCollectionId and the DefaultImageAssetId are required.
@@ -91,7 +91,7 @@ public:
     /// @brief Sets the ID of the asset associated with the default image for this component.
     /// @note To retrieve this component's default image, both the DefaultImageCollectionId and the DefaultImageAssetId are required.
     /// @param Value csp::common::String& : The ID of the default image asset associated with this component.
-    void SetDefaultImageAssetId(const csp::common::String& Value);
+    void SetDefaultImageAssetId(const csp::common::String& value);
 
     /// @brief Gets the radius from this component origin within which the audio of this video can be heard by the user.
     /// @note Only when the user position is within this radius the audio of the video should be heard.
@@ -101,7 +101,7 @@ public:
     /// @brief Sets the radius from this component origin within which the audio of this video can be heard by the user.
     /// @note Only when the user position is within this radius the audio of the video should be heard.
     /// @param Value The radius within which the audio of the video can be heard by the user.
-    void SetAttenuationRadius(float Value);
+    void SetAttenuationRadius(float value);
 
     // Attenuation radius
 
@@ -110,19 +110,19 @@ public:
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -130,15 +130,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IShadowCasterComponent
@@ -146,7 +146,7 @@ public:
     /// @copydoc IShadowCasterComponent::GetIsShadowCaster()
     bool GetIsShadowCaster() const override;
     /// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-    void SetIsShadowCaster(bool Value) override;
+    void SetIsShadowCaster(bool value) override;
     /// @}
 };
 

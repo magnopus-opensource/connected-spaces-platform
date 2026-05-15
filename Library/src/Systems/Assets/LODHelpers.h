@@ -20,11 +20,11 @@
 namespace csp::systems
 {
 
-csp::common::String CreateLODStyleVar(int LODLevel);
-int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& Styles);
+csp::common::String CreateLODStyleVar(int lodLevel);
+int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& styles);
 
-LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const csp::common::String& AssetCollectionId);
+LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& assets, const csp::common::String& assetCollectionId);
 
-bool ValidateNewLODLevelForChain(const LODChain& Chain, int LODLevel);
+bool ValidateNewLODLevelForChain(const LODChain& chain, int lodLevel);
 
 } // namespace csp::systems

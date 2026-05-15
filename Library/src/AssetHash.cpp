@@ -144,12 +144,12 @@ uint32_t Hash32Len13to24(const char* s, uint32_t len)
 namespace csp
 {
 
-uint32_t GenerateAssetHash(const csp::common::String& AssetId)
+uint32_t GenerateAssetHash(const csp::common::String& assetId)
 {
-    const char* s = AssetId.c_str();
+    const char* s = assetId.c_str();
 
     // The length of an ID will always be short enough that this is a safe cast.
-    uint32_t len = static_cast<uint32_t>(AssetId.Length());
+    uint32_t len = static_cast<uint32_t>(assetId.Length());
 
     if (len <= 24)
     {
@@ -182,28 +182,28 @@ uint32_t GenerateAssetHash(const csp::common::String& AssetId)
 
     do
     {
-        uint32_t _a0 = Rotate32(Fetch32(s) * c1, 17) * c2;
-        uint32_t _a1 = Fetch32(s + 4);
-        uint32_t _a2 = Rotate32(Fetch32(s + 8) * c1, 17) * c2;
-        uint32_t _a3 = Rotate32(Fetch32(s + 12) * c1, 17) * c2;
-        uint32_t _a4 = Fetch32(s + 16);
-        h ^= _a0;
+        uint32_t iterA0 = Rotate32(Fetch32(s) * c1, 17) * c2;
+        uint32_t iterA1 = Fetch32(s + 4);
+        uint32_t iterA2 = Rotate32(Fetch32(s + 8) * c1, 17) * c2;
+        uint32_t iterA3 = Rotate32(Fetch32(s + 12) * c1, 17) * c2;
+        uint32_t iterA4 = Fetch32(s + 16);
+        h ^= iterA0;
         h = Rotate32(h, 18);
         h = h * 5 + 0xe6546b64;
-        f += _a1;
+        f += iterA1;
         f = Rotate32(f, 19);
         f = f * c1;
-        g += _a2;
+        g += iterA2;
         g = Rotate32(g, 18);
         g = g * 5 + 0xe6546b64;
-        h ^= _a3 + _a1;
+        h ^= iterA3 + iterA1;
         h = Rotate32(h, 19);
         h = h * 5 + 0xe6546b64;
-        g ^= _a4;
+        g ^= iterA4;
         g = bswap_32(g) * 5;
-        h += _a4 * 5;
+        h += iterA4 * 5;
         h = bswap_32(h);
-        f += _a0;
+        f += iterA0;
         PERMUTE3(f, h, g);
         s += 20;
     } while (--iters != 0);

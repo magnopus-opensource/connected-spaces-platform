@@ -28,39 +28,39 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto GraphQLSystem = SystemsManager.GetGraphQLSystem();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto graphQlSystem = systemsManager.GetGraphQLSystem();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
-    csp::systems::Space Space;
+    csp::common::String userId;
+    csp::systems::Space space;
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAGNOPUS";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAGNOPUS";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAGNOPUS";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAGNOPUS";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     csp::common::String testQuery = "spaces(pagination:{limit:10,skip:0},filters:{discoverable:false,requiresInvite:true}){itemTotalCount "
                                     "items{groupId name discoverable requiresInvite createdAt}}";
 
     // Create Space
     CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+        spaceSystem, uniqueSpaceName, testSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    csp::common::String expectedResponse = UniqueSpaceName;
+    csp::common::String expectedResponse = uniqueSpaceName;
 
-    auto [Result] = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
+    auto [Result] = AWAIT_PRE(graphQlSystem, RunQuery, RequestPredicate, testQuery);
 
     // Search Space Name
     EXPECT_NE(std::string(Result.GetResponse().c_str()).find(expectedResponse), std::string::npos);
@@ -69,46 +69,46 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
                                         " name\n    }\n  }\n}\n\n\",\"variables\":{\"limit\":5},\"operationName\":\"getSpaces\"}";
 
     // run full query
-    auto [ResultFull] = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQueryFull);
+    auto [ResultFull] = AWAIT_PRE(graphQlSystem, RunRequest, RequestPredicate, testQueryFull);
 
     // Search Space Name
     EXPECT_NE(std::string(ResultFull.GetResponse().c_str()).find(expectedResponse), std::string::npos);
 
     // Delete Space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log Out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto GraphQLSystem = SystemsManager.GetGraphQLSystem();
-    auto UserSystem = SystemsManager.GetUserSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto graphQlSystem = systemsManager.GetGraphQLSystem();
+    auto userSystem = systemsManager.GetUserSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     csp::common::String testQuery = "badQuery";
-    auto [Result] = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
+    auto [Result] = AWAIT_PRE(graphQlSystem, RunQuery, RequestPredicate, testQuery);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto GraphQLSystem = SystemsManager.GetGraphQLSystem();
-    auto UserSystem = SystemsManager.GetUserSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto graphQlSystem = systemsManager.GetGraphQLSystem();
+    auto userSystem = systemsManager.GetUserSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     csp::common::String testQuery = "badRequest";
-    auto [Result] = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);
+    auto [Result] = AWAIT_PRE(graphQlSystem, RunRequest, RequestPredicate, testQuery);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

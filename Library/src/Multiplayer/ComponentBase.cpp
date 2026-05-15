@@ -34,318 +34,318 @@ namespace csp::multiplayer
 static const csp::common::ReplicatedValue InvalidValue = csp::common::ReplicatedValue();
 
 ComponentBase::ComponentBase()
-    : Parent(nullptr)
-    , Id(0)
-    , Type(ComponentType::Invalid)
-    , ScriptInterface(nullptr)
-    , LogSystem(nullptr)
+    : m_parent(nullptr)
+    , m_id(0)
+    , m_type(ComponentType::Invalid)
+    , m_scriptInterface(nullptr)
+    , m_logSystem(nullptr)
 {
     InitialiseProperties();
 }
 
-ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : Parent(Parent)
-    , Id(0)
-    , Type(Type)
-    , ScriptInterface(nullptr)
-    , LogSystem(LogSystem)
+ComponentBase::ComponentBase(ComponentType type, csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : m_parent(parent)
+    , m_id(0)
+    , m_type(type)
+    , m_scriptInterface(nullptr)
+    , m_logSystem(logSystem)
 {
     InitialiseProperties();
 }
 
-ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(static_cast<ComponentType>(Schema.TypeId), LogSystem, Parent)
+ComponentBase::ComponentBase(const ComponentSchema& schema, csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(static_cast<ComponentType>(schema.TypeId), logSystem, parent)
 {
-    for (const auto& Property : Schema.Properties)
+    for (const auto& property : schema.Properties)
     {
-        Properties[Property.Key] = Property.DefaultValue;
+        m_properties[property.Key] = property.DefaultValue;
     }
 
-    if (IsScriptable(Schema))
+    if (IsScriptable(schema))
     {
-        ScriptInterface = std::make_unique<ComponentScriptInterface>(this);
+        m_scriptInterface = std::make_unique<ComponentScriptInterface>(this);
     }
 }
 
 ComponentBase::~ComponentBase() { }
 
-uint16_t ComponentBase::GetId() const { return Id; }
+uint16_t ComponentBase::GetId() const { return m_id; }
 
-void ComponentBase::SetId(uint16_t NewId) { this->Id = NewId; }
+void ComponentBase::SetId(uint16_t newId) { this->m_id = newId; }
 
-ComponentType ComponentBase::GetComponentType() const { return Type; }
+ComponentType ComponentBase::GetComponentType() const { return m_type; }
 
-const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
+const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &m_properties; }
 
-const csp::common::ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
+const csp::common::ReplicatedValue& ComponentBase::GetProperty(uint32_t key) const
 {
-    if (Properties.HasKey(Key))
+    if (m_properties.HasKey(key))
     {
-        return Properties[Key];
+        return m_properties[key];
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("No Property with this key: {}", Key).c_str());
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("No Property with this key: {}", key).c_str());
     }
 
     return InvalidValue;
 }
 
-bool ComponentBase::GetBooleanProperty(uint32_t Key) const
+bool ComponentBase::GetBooleanProperty(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
     {
-        return RepVal.GetBool();
+        return repVal.GetBool();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Boolean type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Boolean type");
     }
 
     return false;
 }
 
-int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
+int64_t ComponentBase::GetIntegerProperty(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
     {
-        return RepVal.GetInt();
+        return repVal.GetInt();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Integer type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Integer type");
     }
 
     return 0;
 }
 
-float ComponentBase::GetFloatProperty(uint32_t Key) const
+float ComponentBase::GetFloatProperty(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
     {
-        return RepVal.GetFloat();
+        return repVal.GetFloat();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Float type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Float type");
     }
 
     return 0.0f;
 }
 
-const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
+const csp::common::String& ComponentBase::GetStringProperty(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
-        return RepVal.GetString();
+        return repVal.GetString();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String type");
     }
 
     return csp::common::ReplicatedValue::GetDefaultString();
 }
 
-const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) const
+const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
     {
-        return RepVal.GetVector2();
+        return repVal.GetVector2();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector2 type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector2 type");
     }
 
     return csp::common::ReplicatedValue::GetDefaultVector2();
 }
 
-const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) const
+const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
     {
-        return RepVal.GetVector3();
+        return repVal.GetVector3();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector3 type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector3 type");
     }
 
     return csp::common::ReplicatedValue::GetDefaultVector3();
 }
 
-const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) const
+const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
     {
-        return RepVal.GetVector4();
+        return repVal.GetVector4();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector4 type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector4 type");
     }
 
     return csp::common::ReplicatedValue::GetDefaultVector4();
 }
 
-const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& ComponentBase::GetStringMapProperty(uint32_t Key) const
+const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& ComponentBase::GetStringMapProperty(uint32_t key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& repVal = GetProperty(key);
 
-    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
+    if (repVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
     {
-        return RepVal.GetStringMap();
+        return repVal.GetStringMap();
     }
 
-    if (LogSystem != nullptr)
+    if (m_logSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String Map type");
+        m_logSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String Map type");
     }
 
     return csp::common::ReplicatedValue::GetDefaultStringMap();
 }
 
-void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value)
+void ComponentBase::SetProperty(uint32_t key, const csp::common::ReplicatedValue& value)
 {
-    if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
+    if (m_properties.HasKey(key) && value.GetReplicatedValueType() != m_properties[key].GetReplicatedValueType())
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("ValueType is unexpected. Expected: {0} Received: {1}", static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
-                    static_cast<uint32_t>(Value.GetReplicatedValueType()))
+            m_logSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("ValueType is unexpected. Expected: {0} Received: {1}", static_cast<uint32_t>(m_properties[key].GetReplicatedValueType()),
+                    static_cast<uint32_t>(value.GetReplicatedValueType()))
                     .c_str());
         }
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = GetParent()->IsModifiable();
-    if (Modifiable != ModifiableStatus::Modifiable)
+    ModifiableStatus modifiable = GetParent()->IsModifiable();
+    if (modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to set property on component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetParent()->GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(modifiable), GetParent()->GetName())
                     .c_str());
         }
 
         return;
     }
 
-    if (!Properties.HasKey(Key) || Properties[Key] != Value)
+    if (!m_properties.HasKey(key) || m_properties[key] != value)
     {
         // Weird that this is instant and dosen't go through the regular lock/patch flow
         // I think it should ... note the lock above which every other SpaceEntity thing has in its setter methods.
         // This is the _one_ thing that in online mode, dosen't need ProcessPending() to be called ... _Weird_.
         // Note how `UpdateComponent` dosen't actually set the data, just does notification in this case. :(
         // TODO, fix. Look at `SetPropertyFromPatch` below, it's basically a `SetPropetyDirect`
-        Properties[Key] = Value;
-        Parent->UpdateComponent(this);
+        m_properties[key] = value;
+        m_parent->UpdateComponent(this);
 
         // Hack alert
         // So, this is for the case where we already have a dirty component of update type ADD pending, but we've just updated it.
         // It just so happens that the ADD is enough to replicate the component well enough, as anything will do, BUT, we still
         // need to notify the scripting system here that a property has changed.
-        Parent->OnPropertyChanged(this, Key);
+        m_parent->OnPropertyChanged(this, key);
     }
 }
 
-void ComponentBase::RemoveProperty(uint32_t Key)
+void ComponentBase::RemoveProperty(uint32_t key)
 {
     // Weird that this is instant and dosen't go through the regular lock/patch flow
-    Properties.Remove(Key);
-    Parent->UpdateComponent(this);
+    m_properties.Remove(key);
+    m_parent->UpdateComponent(this);
 }
 
-void ComponentBase::SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value) { Properties = Value; }
+void ComponentBase::SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& value) { m_properties = value; }
 
-void ComponentBase::SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) { Properties[Key] = Value; }
+void ComponentBase::SetPropertyFromPatch(uint32_t key, const csp::common::ReplicatedValue& value) { m_properties[key] = value; }
 
 void ComponentBase::OnCreated() { }
 
 void ComponentBase::OnRemove() { }
 
-SpaceEntity* ComponentBase::GetParent() { return Parent; }
+SpaceEntity* ComponentBase::GetParent() { return m_parent; }
 
 void ComponentBase::OnLocalDelete() { }
 
-void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface) { ScriptInterface.reset(InScriptInterface); }
+void ComponentBase::SetScriptInterface(ComponentScriptInterface* inScriptInterface) { m_scriptInterface.reset(inScriptInterface); }
 
-ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInterface.get(); }
+ComponentScriptInterface* ComponentBase::GetScriptInterface() { return m_scriptInterface.get(); }
 
-void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message)
+void ComponentBase::SubscribeToPropertyChange(uint32_t propertyKey, csp::common::String message)
 {
-    GetParent()->GetScript().SubscribeToPropertyChange(GetId(), PropertyKey, Message);
+    GetParent()->GetScript().SubscribeToPropertyChange(GetId(), propertyKey, message);
 }
 
-void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, EntityActionHandler ActionHandler)
+void ComponentBase::RegisterActionHandler(const csp::common::String& inAction, EntityActionHandler actionHandler)
 {
-    if (!ActionMap.HasKey(InAction.c_str()))
+    if (!m_actionMap.HasKey(inAction.c_str()))
     {
-        ActionMap[InAction.c_str()] = ActionHandler;
+        m_actionMap[inAction.c_str()] = actionHandler;
     }
     else
     {
         // Already registered
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} already registered\n", InAction).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} already registered\n", inAction).c_str());
         }
     }
 }
 
-void ComponentBase::UnregisterActionHandler(const csp::common::String& InAction)
+void ComponentBase::UnregisterActionHandler(const csp::common::String& inAction)
 {
-    if (ActionMap.HasKey(InAction.c_str()))
+    if (m_actionMap.HasKey(inAction.c_str()))
     {
-        ActionMap.Remove(InAction.c_str());
+        m_actionMap.Remove(inAction.c_str());
     }
     else
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} not found\n", InAction).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} not found\n", inAction).c_str());
         }
     }
 }
 
-void ComponentBase::InvokeAction(const csp::common::String& InAction, const csp::common::String& InActionParams)
+void ComponentBase::InvokeAction(const csp::common::String& inAction, const csp::common::String& inActionParams)
 {
-    if (ActionMap.HasKey(InAction.c_str()))
+    if (m_actionMap.HasKey(inAction.c_str()))
     {
-        EntityActionHandler ActionHandler = ActionMap[InAction.c_str()];
-        ActionHandler(this, InAction, InActionParams);
+        EntityActionHandler actionHandler = m_actionMap[inAction.c_str()];
+        actionHandler(this, inAction, inActionParams);
     }
 }
 
 const csp::common::String& ComponentBase::GetComponentName() const { return GetStringProperty(COMPONENT_KEY_NAME); }
 
-void ComponentBase::SetComponentName(const csp::common::String& Value) { SetProperty(COMPONENT_KEY_NAME, Value); }
+void ComponentBase::SetComponentName(const csp::common::String& value) { SetProperty(COMPONENT_KEY_NAME, value); }
 
-void ComponentBase::InitialiseProperties() { Properties[COMPONENT_KEY_NAME] = ""; }
+void ComponentBase::InitialiseProperties() { m_properties[COMPONENT_KEY_NAME] = ""; }
 
 } // namespace csp::multiplayer

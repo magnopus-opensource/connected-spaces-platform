@@ -53,7 +53,7 @@ public:
 
     /// @brief Constructs the Hotspot space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    HotspotSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the Name of the Hotspot.
     /// @return The Name of the Hotspot.
@@ -61,21 +61,21 @@ public:
 
     /// @brief Sets the Name of this Hotspot.
     /// @param Value The Name of this Hotspot.
-    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& Value);
+    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& value);
 
     /// @brief Gets the IsTeleportPoint of this Hotspot.
     bool GetIsTeleportPoint() const;
 
     /// @brief Sets this Hotspot to be a teleport point.
     /// @param InValue The teleport point state flag value.
-    void SetIsTeleportPoint(bool InValue);
+    void SetIsTeleportPoint(bool inValue);
 
     /// @brief Gets the IsSpawnPoint of this Hotspot.
     bool GetIsSpawnPoint() const;
 
     /// @brief Sets this Hotspot to be a spawn point.
     /// @param InValue The spawn point state flag value.
-    void SetIsSpawnPoint(bool InValue);
+    void SetIsSpawnPoint(bool inValue);
 
     /// @brief Gets a unique identifier for this component in the hierarchy.
     /// @note This does not give a complete hierarchy path, only the entityId of the parent for the component.
@@ -87,7 +87,7 @@ public:
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// \addtogroup IRotationComponent
@@ -95,7 +95,7 @@ public:
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -103,15 +103,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 };
 

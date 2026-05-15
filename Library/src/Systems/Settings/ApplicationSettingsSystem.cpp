@@ -33,153 +33,153 @@ namespace csp::systems
 
 ApplicationSettingsSystem::ApplicationSettingsSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , ApplicationSettingsAPI(nullptr)
+    , m_applicationSettingsApi(nullptr)
 {
 }
 
-ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
 {
-    ApplicationSettingsAPI = new chs::ApplicationSettingsApi(InWebClient);
+    m_applicationSettingsApi = new chs::ApplicationSettingsApi(inWebClient);
 }
 
-ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (ApplicationSettingsAPI); }
+ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (m_applicationSettingsApi); }
 
 void ApplicationSettingsSystem::GetSettingsByContext(
-    const String& ApplicationName, const String& Context, const Optional<Array<String>>& Keys, ApplicationSettingsResultCallback Callback)
+    const String& applicationName, const String& context, const Optional<Array<String>>& keys, ApplicationSettingsResultCallback callback)
 {
-    GetSettingsByContext(ApplicationName, Context, Keys)
+    GetSettingsByContext(applicationName, context, keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
             {}, {}))
-        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
+        .then([callback](const ApplicationSettingsResult& result) { callback(result); })
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }
 
-void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& Tenant, const csp::common::String& ApplicationName,
-    const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys,
-    ApplicationSettingsResultCallback Callback)
+void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& tenant, const csp::common::String& applicationName,
+    const csp::common::String& context, const csp::common::Optional<csp::common::Array<csp::common::String>>& keys,
+    ApplicationSettingsResultCallback callback)
 {
-    GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
+    GetSettingsByContextAnonymous(tenant, applicationName, context, keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
-        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
+        .then([callback](const ApplicationSettingsResult& result) { callback(result); })
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }
 
-void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback)
+void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& applicationSettings, ApplicationSettingsResultCallback callback)
 {
-    CreateSettingsByContext(ApplicationSettings)
+    CreateSettingsByContext(applicationSettings)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
             {}, {}, {}))
-        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
+        .then([callback](const ApplicationSettingsResult& result) { callback(result); })
+        .then(common::continuations::InvokeIfExceptionInChain(*m_logSystem,
+            [callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            { callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }
 
-async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings)
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& applicationSettings)
 {
-    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
-    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+    auto onCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> onCompleteTask = onCompleteEvent->get_task();
 
-    if (ApplicationSettings.ApplicationName.IsEmpty())
+    if (applicationSettings.ApplicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    if (ApplicationSettings.Context.IsEmpty())
+    if (applicationSettings.Context.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    services::ResponseHandlerPtr SettingsResponseHandler
-        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+    services::ResponseHandlerPtr settingsResponseHandler
+        = m_applicationSettingsApi->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*onCompleteEvent.get()));
 
-    auto Request = std::make_shared<chs::ApplicationSettingsDto>();
-    Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
-    Request->SetSettings(Convert(ApplicationSettings.Settings));
+    auto request = std::make_shared<chs::ApplicationSettingsDto>();
+    request->SetAllowAnonymous(applicationSettings.AllowAnonymous);
+    request->SetSettings(Convert(applicationSettings.Settings));
 
-    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
+    static_cast<chs::ApplicationSettingsApi*>(m_applicationSettingsApi)
         ->applicationsApplicationNameSettingsContextPut(
-            { ApplicationSettings.ApplicationName, ApplicationSettings.Context, Request }, SettingsResponseHandler);
+            { applicationSettings.ApplicationName, applicationSettings.Context, request }, settingsResponseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContext(const csp::common::String& ApplicationName,
-    const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys)
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContext(const csp::common::String& applicationName,
+    const csp::common::String& context, const csp::common::Optional<csp::common::Array<csp::common::String>>& keys)
 {
-    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
-    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+    auto onCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> onCompleteTask = onCompleteEvent->get_task();
 
-    if (ApplicationName.IsEmpty())
+    if (applicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    if (Context.IsEmpty())
+    if (context.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    services::ResponseHandlerPtr SettingsResponseHandler
-        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+    services::ResponseHandlerPtr settingsResponseHandler
+        = m_applicationSettingsApi->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*onCompleteEvent.get()));
 
-    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
-        ->applicationsApplicationNameSettingsContextGet({ ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);
+    static_cast<chs::ApplicationSettingsApi*>(m_applicationSettingsApi)
+        ->applicationsApplicationNameSettingsContextGet({ applicationName, context, Convert(keys) }, settingsResponseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
-async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& Tenant,
-    const csp::common::String& ApplicationName, const csp::common::String& Context,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys)
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& tenant,
+    const csp::common::String& applicationName, const csp::common::String& context,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& keys)
 {
-    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
-    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+    auto onCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> onCompleteTask = onCompleteEvent->get_task();
 
-    if (ApplicationName.IsEmpty())
+    if (applicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    if (Context.IsEmpty())
+    if (context.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
-        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
-        return OnCompleteTask;
+        onCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return onCompleteTask;
     }
 
-    services::ResponseHandlerPtr SettingsResponseHandler
-        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+    services::ResponseHandlerPtr settingsResponseHandler
+        = m_applicationSettingsApi->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*onCompleteEvent.get()));
 
-    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
-        ->tenantsTenantApplicationsApplicationNameSettingsContextGet({ Tenant, ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);
+    static_cast<chs::ApplicationSettingsApi*>(m_applicationSettingsApi)
+        ->tenantsTenantApplicationsApplicationNameSettingsContextGet({ tenant, applicationName, context, Convert(keys) }, settingsResponseHandler);
 
-    return OnCompleteTask;
+    return onCompleteTask;
 }
 
 } // namespace csp::systems

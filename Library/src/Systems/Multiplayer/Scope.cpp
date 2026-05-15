@@ -8,105 +8,105 @@ namespace csp::systems
 {
 namespace
 {
-    void DtoToPubSubModelType(const chs::multiplayerservice::PubSubModel& Model, PubSubModelType& Type)
+    void DtoToPubSubModelType(const chs::multiplayerservice::PubSubModel& model, PubSubModelType& type)
     {
-        if (Model.GetValue() == chs::multiplayerservice::PubSubModel::ePubSubModel::GLOBAL)
+        if (model.GetValue() == chs::multiplayerservice::PubSubModel::ePubSubModel::GLOBAL)
         {
-            Type = PubSubModelType::Global;
+            type = PubSubModelType::Global;
         }
-        else if (Model.GetValue() == chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT)
+        else if (model.GetValue() == chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT)
         {
-            Type = PubSubModelType::Object;
+            type = PubSubModelType::Object;
         }
     }
 }
 
-bool Scope::operator==(const Scope& Other) const
+bool Scope::operator==(const Scope& other) const
 {
-    return Id == Other.Id && ReferenceId == Other.ReferenceId && ReferenceType == Other.ReferenceType && Name == Other.Name
-        && PubSubType == Other.PubSubType && SolveRadius == Other.SolveRadius && ManagedLeaderElection == Other.ManagedLeaderElection;
+    return Id == other.Id && ReferenceId == other.ReferenceId && ReferenceType == other.ReferenceType && Name == other.Name
+        && PubSubType == other.PubSubType && SolveRadius == other.SolveRadius && ManagedLeaderElection == other.ManagedLeaderElection;
 }
 
-bool Scope::operator!=(const Scope& Other) const { return !(*this == Other); }
+bool Scope::operator!=(const Scope& other) const { return !(*this == other); }
 
-void DtoToScope(const chs::multiplayerservice::ScopeDto& Dto, csp::systems::Scope& ScopeLeader)
+void DtoToScope(const chs::multiplayerservice::ScopeDto& dto, csp::systems::Scope& scopeLeader)
 {
-    if (Dto.HasId())
+    if (dto.HasId())
     {
-        ScopeLeader.Id = Dto.GetId();
+        scopeLeader.Id = dto.GetId();
     }
-    if (Dto.HasReferenceId())
+    if (dto.HasReferenceId())
     {
-        ScopeLeader.ReferenceId = Dto.GetReferenceId();
+        scopeLeader.ReferenceId = dto.GetReferenceId();
     }
-    if (Dto.HasReferenceType())
+    if (dto.HasReferenceType())
     {
-        ScopeLeader.ReferenceType = Dto.GetReferenceType();
+        scopeLeader.ReferenceType = dto.GetReferenceType();
     }
-    if (Dto.HasName())
+    if (dto.HasName())
     {
-        ScopeLeader.Name = Dto.GetName();
+        scopeLeader.Name = dto.GetName();
     }
-    if (Dto.HasPubSubModel())
+    if (dto.HasPubSubModel())
     {
-        DtoToPubSubModelType(*Dto.GetPubSubModel(), ScopeLeader.PubSubType);
+        DtoToPubSubModelType(*dto.GetPubSubModel(), scopeLeader.PubSubType);
     }
-    if (Dto.HasSolveRadius())
+    if (dto.HasSolveRadius())
     {
-        ScopeLeader.SolveRadius = Dto.GetSolveRadius();
+        scopeLeader.SolveRadius = dto.GetSolveRadius();
     }
-    if (Dto.HasManagedLeaderElection())
+    if (dto.HasManagedLeaderElection())
     {
-        ScopeLeader.ManagedLeaderElection = Dto.GetManagedLeaderElection();
+        scopeLeader.ManagedLeaderElection = dto.GetManagedLeaderElection();
     }
 }
 
-const Scope& ScopeResult::GetScope() const { return Scope; }
+const Scope& ScopeResult::GetScope() const { return m_scope; }
 
-ScopeResult::ScopeResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-    : ResultBase { ResCode, HttpResCode }
+ScopeResult::ScopeResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+    : ResultBase { resCode, httpResCode }
 {
 }
 
-void ScopeResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ScopeResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* ScopeResponse = static_cast<chs::multiplayerservice::ScopeDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* scopeResponse = static_cast<chs::multiplayerservice::ScopeDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ScopeResponse->FromJson(Response->GetPayload().GetContent());
-        DtoToScope(*ScopeResponse, Scope);
+        scopeResponse->FromJson(response->GetPayload().GetContent());
+        DtoToScope(*scopeResponse, m_scope);
     }
 }
-ScopesResult::ScopesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-    : ResultBase { ResCode, HttpResCode }
+ScopesResult::ScopesResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+    : ResultBase { resCode, httpResCode }
 {
 }
 
-const csp::common::Array<Scope>& ScopesResult::GetScopes() const { return Scopes; }
+const csp::common::Array<Scope>& ScopesResult::GetScopes() const { return m_scopes; }
 
-void ScopesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ScopesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        auto* ScopesResponse = static_cast<csp::services::DtoArray<chs::multiplayerservice::ScopeDto>*>(ApiResponse->GetDto());
-        ScopesResponse->FromJson(Response->GetPayload().GetContent());
+        auto* scopesResponse = static_cast<csp::services::DtoArray<chs::multiplayerservice::ScopeDto>*>(apiResponse->GetDto());
+        scopesResponse->FromJson(response->GetPayload().GetContent());
 
-        std::vector<chs::multiplayerservice::ScopeDto>& ScopesArray = ScopesResponse->GetArray();
-        Scopes = csp::common::Array<Scope>(ScopesArray.size());
+        std::vector<chs::multiplayerservice::ScopeDto>& scopesArray = scopesResponse->GetArray();
+        m_scopes = csp::common::Array<Scope>(scopesArray.size());
 
-        for (size_t i = 0; i < ScopesArray.size(); ++i)
+        for (size_t i = 0; i < scopesArray.size(); ++i)
         {
-            DtoToScope(ScopesArray[i], Scopes[i]);
+            DtoToScope(scopesArray[i], m_scopes[i]);
         }
     }
 }

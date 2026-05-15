@@ -42,7 +42,7 @@ public:
     ///       - +X is left (facing forward)
     ///       - +Z is forward
     /// @param InValue csp::common::Vector3 : The new value expressed as a vector.
-    virtual void SetPosition(const csp::common::Vector3& InValue) = 0;
+    virtual void SetPosition(const csp::common::Vector3& inValue) = 0;
 
 protected:
     virtual ~IPositionComponent() = default;

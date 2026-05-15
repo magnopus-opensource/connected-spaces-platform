@@ -180,7 +180,7 @@ public:
     // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
     CSP_NO_EXPORT csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
     CSP_NO_EXPORT csp::multiplayer::OfflineRealtimeEngine* MakeOfflineRealtimeEngine();
-    CSP_NO_EXPORT csp::common::IRealtimeEngine* MakeRealtimeEngine(csp::common::RealtimeEngineType RealtimeEngineType);
+    CSP_NO_EXPORT csp::common::IRealtimeEngine* MakeRealtimeEngine(csp::common::RealtimeEngineType realtimeEngineType);
 
 private:
     SystemsManager();
@@ -189,40 +189,40 @@ private:
     ConversationSystemInternal* GetConversationSystem();
 
     // Optional SignalR inject, null means the systemsmanager will make one of its own
-    static void Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject = nullptr, csp::web::WebClient* WebClientInject =  nullptr);
+    static void Instantiate(csp::multiplayer::ISignalRConnection* signalRInject = nullptr, csp::web::WebClient* webClientInject =  nullptr);
     static void Destroy();
 
     static SystemsManager* Instance;
 
     // Optional SignalR inject, null means the systemsmanager will make one of its own
-    void CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject);
+    void CreateSystems(csp::multiplayer::ISignalRConnection* signalRInject, csp::web::WebClient* webClientInject);
     void DestroySystems();
 
-    csp::web::WebClient* WebClient;
+    csp::web::WebClient* m_webClient;
 
-    csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
-    std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine;
-    UserSystem* UserSystem;
-    SpaceSystem* SpaceSystem;
-    AssetSystem* AssetSystem;
-    ScriptSystem* ScriptSystem;
-    VoipSystem* VoipSystem;
-    PointOfInterestInternalSystem* PointOfInterestSystem;
-    AnchorSystem* AnchorSystem;
-    csp::common::LogSystem* LogSystem;
-    ApplicationSettingsSystem* ApplicationSettingsSystem;
-    SettingsSystem* SettingsSystem;
-    GraphQLSystem* GraphQLSystem;
-    MaintenanceSystem* MaintenanceSystem;
-    EventTicketingSystem* EventTicketingSystem;
-    ECommerceSystem* ECommerceSystem;
-    QuotaSystem* QuotaSystem;
-    SequenceSystem* SequenceSystem;
-    HotspotSequenceSystem* HotspotSequenceSystem;
-    ConversationSystemInternal* ConversationSystem;
-    AnalyticsSystem* AnalyticsSystem;
-    ExternalServiceProxySystem* ExternalServiceProxySystem;
-    MultiplayerSystem* MultiplayerSystem;
+    csp::multiplayer::MultiplayerConnection* m_multiplayerConnection;
+    std::shared_ptr<csp::common::IRealtimeEngine> m_realtimeEngine;
+    UserSystem* m_userSystem;
+    SpaceSystem* m_spaceSystem;
+    AssetSystem* m_assetSystem;
+    ScriptSystem* m_scriptSystem;
+    VoipSystem* m_voipSystem;
+    PointOfInterestInternalSystem* m_pointOfInterestSystem;
+    AnchorSystem* m_anchorSystem;
+    csp::common::LogSystem* m_logSystem;
+    ApplicationSettingsSystem* m_applicationSettingsSystem;
+    SettingsSystem* m_settingsSystem;
+    GraphQLSystem* m_graphQlSystem;
+    MaintenanceSystem* m_maintenanceSystem;
+    EventTicketingSystem* m_eventTicketingSystem;
+    ECommerceSystem* m_eCommerceSystem;
+    QuotaSystem* m_quotaSystem;
+    SequenceSystem* m_sequenceSystem;
+    HotspotSequenceSystem* m_hotspotSequenceSystem;
+    ConversationSystemInternal* m_conversationSystem;
+    AnalyticsSystem* m_analyticsSystem;
+    ExternalServiceProxySystem* m_externalServiceProxySystem;
+    MultiplayerSystem* m_multiplayerSystem;
 };
 
 } // namespace csp::systems

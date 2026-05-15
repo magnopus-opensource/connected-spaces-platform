@@ -45,14 +45,14 @@ public:
 
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ECommerceSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// @brief Gets the product ID associated with the ECommerce component.
@@ -61,7 +61,7 @@ public:
 
     /// @brief Sets the new product ID for the ECommerce component.
     /// @param Value The product ID to set for the ECommerce component.
-    void SetProductId(csp::common::String Value);
+    void SetProductId(csp::common::String value);
 };
 
 } // namespace csp::multiplayer

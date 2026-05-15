@@ -49,8 +49,8 @@ class CSP_API EntityScript
 public:
     // Don't want to be constructable by public users.
     CSP_START_IGNORE
-    EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
-        csp::common::LogSystem* LogSystem);
+    EntityScript(SpaceEntity* inEntity, csp::common::IRealtimeEngine* inRealtimeEngine, csp::common::IJSScriptRunner* scriptRunner,
+        csp::common::LogSystem* logSystem);
     CSP_END_IGNORE
 
     /// @brief Destroy the instance of EntityScript.
@@ -58,7 +58,7 @@ public:
 
     /// @brief Sets the source code for the script.
     /// @param ScriptSource csp::common::String : The source as a string.
-    void SetScriptSource(const csp::common::String& ScriptSource);
+    void SetScriptSource(const csp::common::String& scriptSource);
 
     /// @brief Runs the script.
     /// @return True if the script runs successfully or false if there are errors.
@@ -69,7 +69,7 @@ public:
     /// Will be run locally or remotely depending on leader election.
     ///
     /// @param ScriptSource csp::common::String : The source to use.
-    void RunScript(const csp::common::String& ScriptSource);
+    void RunScript(const csp::common::String& scriptSource);
 
     /// @brief Checks if there was an error with the last script invocation.
     /// @return True if there was an error, false otherwise.
@@ -89,33 +89,33 @@ public:
 
     /// @brief Sets the related component for this script.
     /// @param InEnityScriptComponent ScriptSpaceComponent : The component related to this script.
-    void SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent);
+    void SetScriptSpaceComponent(ScriptSpaceComponent* inEnityScriptComponent);
 
     /// @brief Called when a component property changes so that a message can be passed to the script if a subscription has been setup.
     /// @param ComponentId int32_t : ID of the component that changed.
     /// @param PropertyKey int32_t : Key of the property that changed.
-    void OnPropertyChanged(int32_t ComponentId, int32_t PropertyKey);
+    void OnPropertyChanged(int32_t componentId, int32_t propertyKey);
 
     // Script Binding Interface
     /// @brief Sets up a subscription where the given message is posted to the script when a change is made to the specified component property.
     /// @param ComponentId int32_t : The ID of the component that the property belongs to.
     /// @param PropertyKey int32_t : The key of the component property to subscribe to changes of.
     /// @param Message csp::common::String : The message that will be posted to the script when a change occurs to the property.
-    CSP_NO_EXPORT void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, csp::common::String Message);
+    CSP_NO_EXPORT void SubscribeToPropertyChange(int32_t componentId, int32_t propertyKey, csp::common::String message);
 
     /// @brief Sets up a subscription where the given callback in the script will be run when given message is posted to the script.
     /// @param Message csp::common::String : The message to subscribe to.
     /// @param OnMessageCallback csp::common::String : The callback that will be run in the script.
-    CSP_NO_EXPORT void SubscribeToMessage(const csp::common::String Message, const csp::common::String OnMessageCallback);
+    CSP_NO_EXPORT void SubscribeToMessage(const csp::common::String message, const csp::common::String onMessageCallback);
 
     /// @brief Runs the callback associated with the given message, if a subscription has been setup, and passes the given params.
     /// @param Message csp::common::String : The message to use.
     /// @param MessageParamsJson csp::common::String : A JSON formatted string of parameters to be passed to the callback.
-    void PostMessageToScript(const csp::common::String Message, const csp::common::String MessageParamsJson = "");
+    void PostMessageToScript(const csp::common::String message, const csp::common::String messageParamsJson = "");
 
     /// @brief Resets binding, context and subscriptions when the source is changed for the script.
     /// @param InScriptSource csp::common::String : The new source for the script.
-    void OnSourceChanged(const csp::common::String& InScriptSource);
+    void OnSourceChanged(const csp::common::String& inScriptSource);
 
     /// @brief Registers the script source for the related entity in the script system.
     void RegisterSourceAsModule();
@@ -125,7 +125,7 @@ public:
 
     /// @brief Sets the owner of the script.
     /// @param ClientId uint64_t : The ID of the client to be set as owner.
-    void SetOwnerId(uint64_t ClientId);
+    void SetOwnerId(uint64_t clientId);
 
     /// @brief Get the owner of the script.
     /// @return The client ID of the owner.
@@ -139,28 +139,28 @@ private:
 
     void CheckBinding();
 
-    SpaceEntity* Entity;
-    ScriptSpaceComponent* EntityScriptComponent;
+    SpaceEntity* m_entity;
+    ScriptSpaceComponent* m_entityScriptComponent;
 
-    bool HasLastError;
-    csp::common::String LastError;
+    bool m_hasLastError;
+    csp::common::String m_lastError;
 
     using PropertyChangeKey = std::pair<int32_t, int32_t>;
     using PropertyChangeMap = std::map<PropertyChangeKey, csp::common::String>;
-    PropertyChangeMap PropertyMap;
+    PropertyChangeMap m_propertyMap;
 
     using SubscribedMessageMap = std::map<csp::common::String, csp::common::String>;
-    SubscribedMessageMap MessageMap;
+    SubscribedMessageMap m_messageMap;
 
-    bool HasBinding;
+    bool m_hasBinding;
 
-    csp::common::IRealtimeEngine* RealtimeEnginePtr;
+    csp::common::IRealtimeEngine* m_realtimeEnginePtr;
 
     // may be null
-    csp::common::LogSystem* LogSystem = nullptr;
+    csp::common::LogSystem* m_logSystem = nullptr;
 
     // may not be null
-    csp::common::IJSScriptRunner* ScriptRunner;
+    csp::common::IJSScriptRunner* m_scriptRunner;
 };
 
 } // namespace csp::multiplayer

@@ -52,7 +52,7 @@ class CSP_API AIChatbotSpaceComponent : public ComponentBase, public IPositionCo
 public:
     CSP_NO_EXPORT static const ComponentSchema& GetSchema();
 
-    AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AIChatbotSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the voice name of the TTS model associated with this AI chatbot.
     /// @return The name of the TTS voice associated with this AI chatbot.
@@ -60,7 +60,7 @@ public:
 
     /// @brief Sets the voice name of the TTS model associated with this AI chatbot.
     /// @param Value The name of the TTS voice associated with this AI chatbot.
-    void SetVoice(const csp::common::String& Value);
+    void SetVoice(const csp::common::String& value);
 
     /// @brief Gets the ID of the guardrail asset associated with this AI chatbot.
     /// @return The ID of the guardrail asset collection associated with this AI chatbot.
@@ -68,7 +68,7 @@ public:
 
     /// @brief Sets the ID of the guardrail asset associated with this AI chatbot.
     /// @param Value The ID of the guardrail asset collection associated with this AI chatbot.
-    void SetGuardrailAssetCollectionId(const csp::common::String& Value);
+    void SetGuardrailAssetCollectionId(const csp::common::String& value);
 
     /// @brief Retrieves the visual state of the AI chatbot for this component.
     /// @return The visual state of the AI chatbot.
@@ -76,14 +76,14 @@ public:
 
     /// @brief Sets the visual state of the AI chatbot for this component.
     /// @param Value The visual state of the AI chatbot.
-    void SetVisualState(AIChatbotVisualState Value);
+    void SetVisualState(AIChatbotVisualState value);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 };
 

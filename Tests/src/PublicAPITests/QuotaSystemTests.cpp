@@ -34,7 +34,7 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
@@ -84,14 +84,14 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
@@ -106,107 +106,107 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierTest)
         GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
     }
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::String BasicUserId;
-    const auto BasicUser = CreateTestUser();
-    LogIn(UserSystem, BasicUserId, BasicUser.Email, GeneratedTestAccountPassword);
+    csp::common::String basicUserId;
+    const auto basicUser = CreateTestUser();
+    LogIn(userSystem, basicUserId, basicUser.Email, GeneratedTestAccountPassword);
 
     // All users on the test tenant are pro
     {
-        std::promise<TierNames> UserTierCheckPromise;
-        std::future<TierNames> UserTierCheckFuture = UserTierCheckPromise.get_future();
-        QuotaSystem->GetCurrentUserTier(
-            [&UserTierCheckPromise](const UserTierResult& Result)
+        std::promise<TierNames> userTierCheckPromise;
+        std::future<TierNames> userTierCheckFuture = userTierCheckPromise.get_future();
+        quotaSystem->GetCurrentUserTier(
+            [&userTierCheckPromise](const UserTierResult& result)
             {
-                if (Result.GetResultCode() == EResultCode::Success)
+                if (result.GetResultCode() == EResultCode::Success)
                 {
-                    UserTierCheckPromise.set_value(Result.GetUserTierInfo().TierName);
+                    userTierCheckPromise.set_value(result.GetUserTierInfo().TierName);
                 }
             });
 
-        ASSERT_EQ(UserTierCheckFuture.get(), TierNames::Pro);
+        ASSERT_EQ(userTierCheckFuture.get(), TierNames::Pro);
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 
     // Login to an admin user to change the user type to basic. Only admin users can do this.
-    csp::common::String AdminUserId;
+    csp::common::String adminUserId;
     // Have to be an admin use to change user tier
-    LogInAsAdminUser(UserSystem, AdminUserId);
+    LogInAsAdminUser(userSystem, adminUserId);
 
     {
-        std::promise<csp::systems::UserTierInfo> UserTierChangePromise;
-        std::future<csp::systems::UserTierInfo> UserTierChangeFuture = UserTierChangePromise.get_future();
+        std::promise<csp::systems::UserTierInfo> userTierChangePromise;
+        std::future<csp::systems::UserTierInfo> userTierChangeFuture = userTierChangePromise.get_future();
 
-        QuotaSystem->SetUserTier(TierNames::Basic, BasicUserId,
-            [&UserTierChangePromise](const UserTierResult& Result)
+        quotaSystem->SetUserTier(TierNames::Basic, basicUserId,
+            [&userTierChangePromise](const UserTierResult& result)
             {
-                if (Result.GetResultCode() == EResultCode::Success)
+                if (result.GetResultCode() == EResultCode::Success)
                 {
-                    UserTierChangePromise.set_value(Result.GetUserTierInfo());
+                    userTierChangePromise.set_value(result.GetUserTierInfo());
                 }
             });
 
-        ASSERT_EQ(UserTierChangeFuture.get().TierName, TierNames::Basic);
+        ASSERT_EQ(userTierChangeFuture.get().TierName, TierNames::Basic);
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWhenNotAdminTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::String BasicUserId;
-    const auto BasicUser = CreateTestUser();
-    LogIn(UserSystem, BasicUserId, BasicUser.Email, GeneratedTestAccountPassword);
+    csp::common::String basicUserId;
+    const auto basicUser = CreateTestUser();
+    LogIn(userSystem, basicUserId, basicUser.Email, GeneratedTestAccountPassword);
 
     // All users on the test tenant are pro
     {
-        std::promise<TierNames> UserTierCheckPromise;
-        std::future<TierNames> UserTierCheckFuture = UserTierCheckPromise.get_future();
-        QuotaSystem->GetCurrentUserTier(
-            [&UserTierCheckPromise](const UserTierResult& Result)
+        std::promise<TierNames> userTierCheckPromise;
+        std::future<TierNames> userTierCheckFuture = userTierCheckPromise.get_future();
+        quotaSystem->GetCurrentUserTier(
+            [&userTierCheckPromise](const UserTierResult& result)
             {
-                if (Result.GetResultCode() == EResultCode::Success)
+                if (result.GetResultCode() == EResultCode::Success)
                 {
-                    UserTierCheckPromise.set_value(Result.GetUserTierInfo().TierName);
+                    userTierCheckPromise.set_value(result.GetUserTierInfo().TierName);
                 }
             });
 
-        ASSERT_EQ(UserTierCheckFuture.get(), TierNames::Pro);
+        ASSERT_EQ(userTierCheckFuture.get(), TierNames::Pro);
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 
     // Non admin users should not be able to change tier assignments
-    csp::common::String OtherUserId;
-    LogInAsNewTestUser(UserSystem, OtherUserId);
+    csp::common::String otherUserId;
+    LogInAsNewTestUser(userSystem, otherUserId);
 
     {
-        std::promise<std::pair<EResultCode, uint16_t>> UserTierChangePromise;
-        std::future<std::pair<EResultCode, uint16_t>> UserTierChangeFuture = UserTierChangePromise.get_future();
+        std::promise<std::pair<EResultCode, uint16_t>> userTierChangePromise;
+        std::future<std::pair<EResultCode, uint16_t>> userTierChangeFuture = userTierChangePromise.get_future();
 
-        QuotaSystem->SetUserTier(TierNames::Basic, BasicUserId,
-            [&UserTierChangePromise](const UserTierResult& Result)
+        quotaSystem->SetUserTier(TierNames::Basic, basicUserId,
+            [&userTierChangePromise](const UserTierResult& result)
             {
-                if (Result.GetResultCode() != EResultCode::InProgress)
+                if (result.GetResultCode() != EResultCode::InProgress)
                 {
-                    UserTierChangePromise.set_value({ Result.GetResultCode(), Result.GetHttpResultCode() });
+                    userTierChangePromise.set_value({ result.GetResultCode(), result.GetHttpResultCode() });
                 }
             });
 
-        const auto UserTierChangeResult = UserTierChangeFuture.get();
-        ASSERT_EQ(UserTierChangeResult.first, EResultCode::Failed);
-        ASSERT_EQ(UserTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
+        const auto userTierChangeResult = userTierChangeFuture.get();
+        ASSERT_EQ(userTierChangeResult.first, EResultCode::Failed);
+        ASSERT_EQ(userTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
     }
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWithInvalidUserTest)
@@ -216,70 +216,70 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWithInvalidUserTest)
         GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
     }
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
     // Login to an admin user to change the user type to basic. Only admin users can do this.
-    csp::common::String AdminUserId;
+    csp::common::String adminUserId;
     // Have to be an admin use to change user tier
-    LogInAsAdminUser(UserSystem, AdminUserId);
+    LogInAsAdminUser(userSystem, adminUserId);
 
-    std::promise<std::pair<EResultCode, uint16_t>> UserTierChangePromise;
-    std::future<std::pair<EResultCode, uint16_t>> UserTierChangeFuture = UserTierChangePromise.get_future();
+    std::promise<std::pair<EResultCode, uint16_t>> userTierChangePromise;
+    std::future<std::pair<EResultCode, uint16_t>> userTierChangeFuture = userTierChangePromise.get_future();
 
-    QuotaSystem->SetUserTier(TierNames::Basic, "InvalidUserId",
-        [&UserTierChangePromise](const UserTierResult& Result)
+    quotaSystem->SetUserTier(TierNames::Basic, "InvalidUserId",
+        [&userTierChangePromise](const UserTierResult& result)
         {
-            if (Result.GetResultCode() != EResultCode::InProgress)
+            if (result.GetResultCode() != EResultCode::InProgress)
             {
-                UserTierChangePromise.set_value({ Result.GetResultCode(), Result.GetHttpResultCode() });
+                userTierChangePromise.set_value({ result.GetResultCode(), result.GetHttpResultCode() });
             }
         });
 
-    const auto UserTierChangeResult = UserTierChangeFuture.get();
-    ASSERT_EQ(UserTierChangeResult.first, EResultCode::Failed);
-    ASSERT_EQ(UserTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+    const auto userTierChangeResult = userTierChangeFuture.get();
+    ASSERT_EQ(userTierChangeResult.first, EResultCode::Failed);
+    ASSERT_EQ(userTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetCurrentUserTier, RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetUserTierInfo().TierName, TierNames::Pro);
-    EXPECT_EQ(Result.GetUserTierInfo().AssignToId, UserId);
+    EXPECT_EQ(Result.GetUserTierInfo().AssignToId, userId);
     EXPECT_EQ(Result.GetUserTierInfo().AssignToType, "user");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
+    csp::common::Array<TierFeatures> tierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
         TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, TierFeaturesArray);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeatureProgressForUser, RequestPredicate, tierFeaturesArray);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
+    EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), tierFeaturesArray.Size());
 
-    for (size_t i = 0; i < TierFeaturesArray.Size(); i++)
+    for (size_t i = 0; i < tierFeaturesArray.Size(); i++)
     {
-        EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
+        EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, tierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
     }
@@ -287,57 +287,57 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
+    auto spaceSystem = systemsManager.GetSpaceSystem();
 
-    csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
+    csp::common::Array<TierFeatures> tierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
         TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    ::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    ::Space space;
+    CreateSpace(spaceSystem, uniqueSpaceName, testSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForSpace, RequestPredicate, Space.Id, TierFeaturesArray);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeatureProgressForSpace, RequestPredicate, space.Id, tierFeaturesArray);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
+    EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), tierFeaturesArray.Size());
 
-    for (size_t i = 0; i < TierFeaturesArray.Size(); i++)
+    for (size_t i = 0; i < tierFeaturesArray.Size(); i++)
     {
-        EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
+        EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, tierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
     }
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // test quota queries for basic tier
     {
-        auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
+        auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
@@ -346,7 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 
     // test quota queries for pro tier
     {
-        auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
+        auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::SpaceOwner);
@@ -356,52 +356,52 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
-    csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ScopeConcurrentUsers,
+    csp::common::Array<TierFeatures> tierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ScopeConcurrentUsers,
         TierFeatures::ObjectCaptureUpload, TierFeatures::AudioVideoUpload, TierFeatures::TotalUploadSizeInKilobytes, TierFeatures::Agora,
         TierFeatures::OpenAI, TierFeatures::GoogleGenAI, TierFeatures::Shopify, TierFeatures::TicketedSpace };
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), TierFeaturesArray.Size());
+    EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), tierFeaturesArray.Size());
 
     for (size_t i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
     {
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, TierFeaturesArray[i]);
+        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, tierFeaturesArray[i]);
     }
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
+    auto spaceSystem = systemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    ::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    ::Space space;
+    CreateSpace(spaceSystem, uniqueSpaceName, testSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetConcurrentUsersInSpace, RequestPredicate, space.Id);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -409,15 +409,15 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 50);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> realtimeEngine { systemsManager.MakeOnlineRealtimeEngine() };
+    realtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    auto [EnterResult] = AWAIT_PRE(spaceSystem, EnterSpace, RequestPredicate, space.Id, realtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    auto [Result1] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
+    auto [Result1] = AWAIT_PRE(quotaSystem, GetConcurrentUsersInSpace, RequestPredicate, space.Id);
 
     EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -425,47 +425,47 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 0);
     EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
 
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(spaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto UserSystem = SystemsManager.GetUserSystem();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto AssetSystem = SystemsManager.GetAssetSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto userSystem = systemsManager.GetUserSystem();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
+    auto spaceSystem = systemsManager.GetSpaceSystem();
+    auto assetSystem = systemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-CSP";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-CSP";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-CSP";
-    const char* TestAssetName = "CSP-UNITTEST-ASSET-CSP";
+    const char* testSpaceName = "CSP-UNITTEST-SPACE-CSP";
+    const char* testSpaceDescription = "CSP-UNITTEST-SPACEDESC-CSP";
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-CSP";
+    const char* testAssetName = "CSP-UNITTEST-ASSET-CSP";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char uniqueSpaceName[256];
+    SPRINTF(uniqueSpaceName, "%s-%s", testSpaceName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
     // Create space
-    ::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    ::Space space;
+    CreateSpace(spaceSystem, uniqueSpaceName, testSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, space);
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, Space.Id.c_str());
+    char uniqueAssetCollectionName[256];
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, space.Id.c_str());
 
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, Space.Id.c_str());
+    char uniqueAssetName[256];
+    SPRINTF(uniqueAssetName, "%s-%s", testAssetName, space.Id.c_str());
 
-    auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
+    auto [Result] = AWAIT_PRE(quotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, space.Id);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
@@ -473,78 +473,78 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 10000000);
 
     // Create asset collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+    csp::systems::AssetCollection assetCollection;
+    CreateAssetCollection(assetSystem, space.Id, nullptr, uniqueAssetCollectionName, nullptr, nullptr, assetCollection);
 
     // Create asset
-    csp::systems::Asset Asset;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    auto& InitialAssetId = Asset.Id;
+    csp::systems::Asset asset;
+    CreateAsset(assetSystem, assetCollection, uniqueAssetName, nullptr, nullptr, asset);
+    auto& initialAssetId = asset.Id;
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/testkb.json");
-    uintmax_t UpdateFileSize = std::filesystem::file_size(FilePath);
-    csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    auto filePath = std::filesystem::absolute("assets/testkb.json");
+    uintmax_t updateFileSize = std::filesystem::file_size(filePath);
+    csp::systems::FileAssetDataSource source;
+    source.FilePath = filePath.u8string().c_str();
 
-    Source.SetMimeType("application/json");
+    source.SetMimeType("application/json");
 
     printf("Uploading asset data...\n");
 
-    csp::common::String Uri;
-    UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
+    csp::common::String uri;
+    UploadAssetData(assetSystem, assetCollection, asset, source, uri);
 
-    csp::systems::Asset RemoteAsset;
-    GetAssetById(AssetSystem, AssetCollection.Id, Asset.Id, RemoteAsset);
+    csp::systems::Asset remoteAsset;
+    GetAssetById(assetSystem, assetCollection.Id, asset.Id, remoteAsset);
 
-    EXPECT_EQ(InitialAssetId, RemoteAsset.Id);
+    EXPECT_EQ(initialAssetId, remoteAsset.Id);
 
-    Asset.Uri = Uri;
+    asset.Uri = uri;
 
-    auto [DownloadedResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
+    auto [DownloadedResult] = AWAIT_PRE(assetSystem, DownloadAssetData, RequestPredicate, asset);
 
     EXPECT_EQ(DownloadedResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EXPECT_EQ(DownloadedResult.GetDataLength(), UpdateFileSize);
+    EXPECT_EQ(DownloadedResult.GetDataLength(), updateFileSize);
 
-    auto [UpdatedSizeResult] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
+    auto [UpdatedSizeResult] = AWAIT_PRE(quotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, space.Id);
 
     EXPECT_EQ(UpdatedSizeResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
-    EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, UpdateFileSize / 1000);
+    EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, updateFileSize / 1000);
     EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().Limit, 10000000);
 
     // Delete asset
-    DeleteAsset(AssetSystem, AssetCollection, Asset);
+    DeleteAsset(assetSystem, assetCollection, asset);
 
     // Delete asset collection
-    DeleteAssetCollection(AssetSystem, AssetCollection);
+    DeleteAssetCollection(assetSystem, assetCollection);
 
     // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, FailWhenNotLoggedInTest)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto quotaSystem = systemsManager.GetQuotaSystem();
 
     {
-        auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
+        auto [Result] = AWAIT_PRE(quotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
         EXPECT_EQ(Result.GetHttpResultCode(), 0);
     }
 
     {
-        auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, {});
+        auto [Result] = AWAIT_PRE(quotaSystem, GetTierFeatureProgressForUser, RequestPredicate, {});
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
         EXPECT_EQ(Result.GetHttpResultCode(), 0);
     }
 
     {
-        auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
+        auto [Result] = AWAIT_PRE(quotaSystem, GetCurrentUserTier, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
         EXPECT_EQ(Result.GetHttpResultCode(), 0);

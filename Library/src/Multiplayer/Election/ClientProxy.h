@@ -77,54 +77,54 @@ using ClientMap = std::map<ClientId, class ClientProxy*>;
 class ClientProxy
 {
 public:
-    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem,
-        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner);
+    ClientProxy(ClientId id, ClientElectionManager* electionManager, csp::common::LogSystem& logSystem,
+        csp::multiplayer::NetworkEventBus& networkEventBus, csp::common::IJSScriptRunner& scriptRunner);
 
     void UpdateState();
 
     [[nodiscard]] ClientId GetId() const;
 
-    void StartLeaderElection(const ClientMap& Clients);
+    void StartLeaderElection(const ClientMap& clients);
 
-    void HandleEvent(int64_t EventType, int64_t ClientId);
+    void HandleEvent(int64_t eventType, int64_t clientId);
 
-    void NotifyLeader(int64_t TargetClientId, int64_t LeaderClientId);
+    void NotifyLeader(int64_t targetClientId, int64_t leaderClientId);
 
-    void RunScript(int64_t ContextId, const csp::common::String& ScriptText);
+    void RunScript(int64_t contextId, const csp::common::String& scriptText);
 
 private:
     void HandleIdleState();
     void HandleElectingState();
 
-    void SendElectionEvent(int64_t TargetClientId);
-    void SendElectionResponseEvent(int64_t TargetClientId);
-    void SendElectionLeaderEvent(int64_t TargetClientId);
+    void SendElectionEvent(int64_t targetClientId);
+    void SendElectionResponseEvent(int64_t targetClientId);
+    void SendElectionLeaderEvent(int64_t targetClientId);
 
-    void SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId);
+    void SendEvent(int64_t targetClientId, int64_t eventType, int64_t clientId);
 
-    void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
+    void SendRemoteRunScriptEvent(int64_t targetClientId, int64_t contextId, const csp::common::String& scriptText);
 
-    void HandleElectionEvent(int64_t ClientId);
-    void HandleElectionResponseEvent(int64_t ClientId);
-    void HandleElectionLeaderEvent(int64_t ClientId);
-    void HandleElectionNotifyLeaderEvent(int64_t ClientId);
+    void HandleElectionEvent(int64_t clientId);
+    void HandleElectionResponseEvent(int64_t clientId);
+    void HandleElectionLeaderEvent(int64_t clientId);
+    void HandleElectionNotifyLeaderEvent(int64_t clientId);
 
-    bool IsThisClientLeader(const ClientMap& Clients) const;
+    bool IsThisClientLeader(const ClientMap& clients) const;
 
-    ClientElectionManager* ElectionManagerPtr;
+    ClientElectionManager* m_electionManagerPtr;
 
-    ClientElectionState State;
-    ClientId Id;
-    ClientId HighestResponseId;
-    EventId Eid;
+    ClientElectionState m_state;
+    ClientId m_id;
+    ClientId m_highestResponseId;
+    EventId m_eid;
 
-    std::atomic_int PendingElections;
+    std::atomic_int m_pendingElections;
 
-    std::chrono::system_clock::time_point ElectionStartTime;
+    std::chrono::system_clock::time_point m_electionStartTime;
 
-    csp::common::LogSystem& LogSystem;
-    csp::common::IJSScriptRunner& ScriptRunner;
-    csp::multiplayer::NetworkEventBus& NetworkEventBus;
+    csp::common::LogSystem& m_logSystem;
+    csp::common::IJSScriptRunner& m_scriptRunner;
+    csp::multiplayer::NetworkEventBus& m_networkEventBus;
 };
 
 } // namespace csp::multiplayer

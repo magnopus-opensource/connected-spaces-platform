@@ -99,16 +99,16 @@ public:
 
     /// @brief Sets a callback for a disconnection event.
     /// @param Callback DisconnectionCallbackHandler : The callback for disconnection, contains a string with a reason for disconnection.
-    CSP_EVENT void SetDisconnectionCallback(DisconnectionCallbackHandler Callback);
+    CSP_EVENT void SetDisconnectionCallback(DisconnectionCallbackHandler callback);
 
     /// @brief Sets a callback for a connection event
     /// @param Callback ConnectionCallbackHandler : The callback for connection, contains a string with a status of connection (Success, Failure etc).
-    CSP_EVENT void SetConnectionCallback(ConnectionCallbackHandler Callback);
+    CSP_EVENT void SetConnectionCallback(ConnectionCallbackHandler callback);
 
     /// @brief Sets a callback for a network interruption event.
     /// Connection isn't recoverable after this point and Disconnect should be called.
     /// @param Callback NetworkInterruptionCallbackHandler : The callback for network interruption, contains a string showing failure.
-    CSP_EVENT void SetNetworkInterruptionCallback(NetworkInterruptionCallbackHandler Callback);
+    CSP_EVENT void SetNetworkInterruptionCallback(NetworkInterruptionCallbackHandler callback);
 
     /// @brief Requests the ClientID.
     /// @return uint64_t the ClientID for this connection.
@@ -123,7 +123,7 @@ public:
     /// @warning Don't use this function if you aren't sure of the consequences, it's very unlikely that a client would want to use this!
     /// @param AllowSelfMessaging bool : True to allow and false to disallow.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_ASYNC_RESULT void SetAllowSelfMessagingFlag(const bool AllowSelfMessaging, ErrorCodeCallbackHandler Callback);
+    CSP_ASYNC_RESULT void SetAllowSelfMessagingFlag(const bool allowSelfMessaging, ErrorCodeCallbackHandler callback);
 
     /// @brief Gets the bool representing if we're using self-messaging or not.
     /// @return True if self messaging is allowed, false otherwise.
@@ -132,43 +132,43 @@ public:
     /// @brief Parse a SignalR multiplayer error. Unpacks the exception and forwards to @ref ParseMultiplayerError
     /// @param std::exception_ptr Exception : Pointer to the exception to parse.
     /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
-    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerErrorFromExceptionPtr(std::exception_ptr Exception);
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerErrorFromExceptionPtr(std::exception_ptr exception);
 
     /// @brief Parse a SignalR multiplayer error.
     /// @param const std::exception& Exception : The exception to parse
     /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
-    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerError(const std::exception& Exception);
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerError(const std::exception& exception);
 
     /// @brief Create a default SignalRConnection configured to the configured MultiplayerServiceURI
     /// @return ISignalRConnection* Pointer to SignalR connection. The caller should take ownership of the pointer.
-    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection(csp::common::IAuthContext& AuthContext);
+    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection(csp::common::IAuthContext& authContext);
 
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
-        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler callback, [[maybe_unused]] const csp::common::String& multiplayerUri,
+        const csp::common::String& accessToken, const csp::common::String& deviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
-    CSP_NO_EXPORT bool IsConnected() const { return Connected; }
+    CSP_NO_EXPORT bool IsConnected() const { return m_connected; }
 
     /// @brief Getter for the signalR connection
     /// @return ISignalRConnection* : pointer to the signalR connection
-    CSP_NO_EXPORT csp::multiplayer::ISignalRConnection* GetSignalRConnection() { return Connection; };
+    CSP_NO_EXPORT csp::multiplayer::ISignalRConnection* GetSignalRConnection() { return m_connection; };
 
     /// @brief Getter for the NetworkEventManager
     /// @return NetworkEventManagerImpl* : pointer to the NetworkEventManager
-    CSP_NO_EXPORT csp::multiplayer::NetworkEventManagerImpl* GetNetworkEventManager() { return NetworkEventManager; }
+    CSP_NO_EXPORT csp::multiplayer::NetworkEventManagerImpl* GetNetworkEventManager() { return m_networkEventManager; }
 
     /// @brief Getter for the NetworkEventBus
     /// @return NetworkEventBus& : reference to the NetworkEventBus
-    CSP_NO_EXPORT NetworkEventBus& GetEventBus() { return *EventBus; }
+    CSP_NO_EXPORT NetworkEventBus& GetEventBus() { return *m_eventBus; }
 
     /// @brief Disconnect the multiplayer and provide a reason
     /// @param Reason csp::common::String& : the reason to disconnect
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state
-    CSP_NO_EXPORT void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT void DisconnectWithReason(const csp::common::String& reason, ErrorCodeCallbackHandler callback);
 
     CSP_START_IGNORE
     // Invoke "StartListening" on already created Connection
@@ -179,7 +179,7 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     /// @return async::task<std::tuple<signalr::value, std::exception_ptr>> : The async task containing the result which will be passed to the next
     /// continuation.
-    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> SetScopes(csp::common::String InSpaceId);
+    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> SetScopes(csp::common::String inSpaceId);
 
     /// @brief Stop listening to the multiplayer
     /// @return async::task<std::tuple<signalr::value, std::exception_ptr>> : The async task containing the result which will be passed to the next
@@ -195,24 +195,24 @@ public:
     /// @param LogSystem csp::common::LogSystem& LogSystem injection.
     /// @param Connection csp::multiplayer::ISignalRConnection& Connection injection. Multiplayer connection allows connection/disconnection, and
     /// tracks that with a boolean flag, but the connection object itself is invariant, always set.
-    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection);
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& logSystem, csp::multiplayer::ISignalRConnection& connection);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
 
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler callback);
 
     /// @brief Getter for the MultiplayerHubMethodMap
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
-    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return m_multiplayerHubMethods; }
 
     /// @brief Sets the internal reference to the OnlineRealtimeEngine. Should be called when entering a space.
     /// @param OnlineRealtimeEngine OnlineRealtimeEngine* : Non-owning pointer. Ideally this would be an owned structure, but we can't due to the
     /// wrapper generator. Remember to null this when exiting a space as object dispatch depends on that, until clients are capable of managing this
     /// themselves. Unfortunate manual state management.
-    CSP_NO_EXPORT void SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine);
+    CSP_NO_EXPORT void SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* onlineRealtimeEngine);
 
     /// @brief Get the currently set realtime engine.
     /// @return Non-owning pointer to currently set realtime engine. This should be non-null when in a space, and null before entering, or after
@@ -225,23 +225,23 @@ public:
     void __CauseFailure();
 
 private:
-    MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
+    MultiplayerConnection(const MultiplayerConnection& inBoundConnection);
 
     typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
 
-    void Start(ExceptionCallbackHandler Callback) const;
+    void Start(ExceptionCallbackHandler callback) const;
 
     //<void> template tags not supported in wrapper generator. (Why we're even wrapping private methods is a mystery to me though)
     CSP_START_IGNORE
     async::task<void> Start() const;
     /* Connect Continuations */
     // Delete the entity specified by the EntityId. std::numeric_limits<uint64_t>::max() means ALL_ENTITIES_ID, and deletes everything.
-    auto DeleteEntities(uint64_t EntityId) const;
+    auto DeleteEntities(uint64_t entityId) const;
     // Get the client ID and return it (does not set it locally)
     auto RequestClientId();
     CSP_END_IGNORE
 
-    void Stop(ExceptionCallbackHandler Callback) const;
+    void Stop(ExceptionCallbackHandler callback) const;
 
     /*
      * Bind the SignalR messages that are recieved from MCS to facilitate realtime communication.
@@ -259,32 +259,32 @@ private:
     void BindOnVacatedScopeLeaderCallback();
 
     // May not be null
-    class csp::multiplayer::ISignalRConnection* Connection;
+    class csp::multiplayer::ISignalRConnection* m_connection;
 
-    class csp::multiplayer::IWebSocketClient* WebSocketClient;
-    class NetworkEventManagerImpl* NetworkEventManager;
-    class NetworkEventBus* EventBus;
+    class csp::multiplayer::IWebSocketClient* m_webSocketClient;
+    class NetworkEventManagerImpl* m_networkEventManager;
+    class NetworkEventBus* m_eventBus;
 
-    csp::common::LogSystem& LogSystem;
+    csp::common::LogSystem& m_logSystem;
 
-    uint64_t ClientId;
+    uint64_t m_clientId;
 
-    DisconnectionCallbackHandler DisconnectionCallback;
-    ConnectionCallbackHandler ConnectionCallback;
-    NetworkInterruptionCallbackHandler NetworkInterruptionCallback;
+    DisconnectionCallbackHandler m_disconnectionCallback;
+    ConnectionCallbackHandler m_connectionCallback;
+    NetworkInterruptionCallbackHandler m_networkInterruptionCallback;
 
-    std::atomic_bool Connected;
-    uint32_t KeepAliveSeconds = 120;
+    std::atomic_bool m_connected;
+    uint32_t m_keepAliveSeconds = 120;
 
-    bool AllowSelfMessaging = false;
+    bool m_allowSelfMessaging = false;
 
-    MultiplayerHubMethodMap MultiplayerHubMethods;
+    MultiplayerHubMethodMap m_multiplayerHubMethods;
 
     /*  We currently have a circular dependency between the MultiplayerConnection and OnlineRealtimeEngine.
         This could easily be resolved by exposing an event registration from the MultiplayerConnection,
         so the OnlineRealtimeEngine can receieve events agnostically from the MultiplayerConnection (Similar to what we did with the event bus).
     */
-    OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
+    OnlineRealtimeEngine* m_multiplayerRealtimeEngine = nullptr;
 };
 
 } // namespace csp::multiplayer

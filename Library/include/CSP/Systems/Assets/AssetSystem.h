@@ -81,26 +81,26 @@ public:
     /// @param Type EAssetCollectionType : type of the new asset collection
     /// @param Tags csp::common::Array<csp::common::String> : optional array of strings to add to the asset collection as tags
     /// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateAssetCollection(const csp::common::Optional<csp::common::String>& SpaceId,
-        const csp::common::Optional<csp::common::String>& ParentAssetCollectionId, const csp::common::String& AssetCollectionName,
-        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, const EAssetCollectionType Type,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AssetCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateAssetCollection(const csp::common::Optional<csp::common::String>& spaceId,
+        const csp::common::Optional<csp::common::String>& parentAssetCollectionId, const csp::common::String& assetCollectionName,
+        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& metadata, const EAssetCollectionType type,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, AssetCollectionResultCallback callback);
 
-    CSP_NO_EXPORT async::task<AssetCollectionResult> CreateAssetCollection(const csp::common::Optional<csp::common::String>& SpaceId,
-        const csp::common::Optional<csp::common::String>& ParentAssetCollectionId, const csp::common::String& AssetCollectionName,
-        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, const EAssetCollectionType Type,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    CSP_NO_EXPORT async::task<AssetCollectionResult> CreateAssetCollection(const csp::common::Optional<csp::common::String>& spaceId,
+        const csp::common::Optional<csp::common::String>& parentAssetCollectionId, const csp::common::String& assetCollectionName,
+        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& metadata, const EAssetCollectionType type,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags);
 
     /// @brief Deletes a given asset collection.
     /// @param AssetCollection AssectCollection : asset collection to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
-    CSP_NO_EXPORT async::task<NullResult> DeleteAssetCollection(const AssetCollection& AssetCollection);
+    CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& assetCollection, NullResultCallback callback);
+    CSP_NO_EXPORT async::task<NullResult> DeleteAssetCollection(const AssetCollection& assetCollection);
 
     /// @brief Deletes a given array of asset collections.
     /// @param AssetCollections csp::common::Array<AssetCollection> : The array of asset collections to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& AssetCollections, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& assetCollections, NullResultCallback callback);
 
     /// @brief Copies an array of asset collections to another space. Note that all source asset collections must belong to the same space.
     /// @param SourceAssetCollections csp::common::Array<AssetCollection> : The array of asset collections to copy. They must all belong to the same
@@ -109,19 +109,19 @@ public:
     /// @param CopyAsync const csp::common::Optional<bool> : Whether to instruct the services to perform the copy of the asset collections
     /// asynchronously.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections,
-        const csp::common::String& DestSpaceId, bool CopyAsync, AssetCollectionsResultCallback Callback);
+    CSP_ASYNC_RESULT void CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& sourceAssetCollections,
+        const csp::common::String& destSpaceId, bool copyAsync, AssetCollectionsResultCallback callback);
 
     /// @brief Finds an asset collection by its Id.
     /// @param AssetCollectionId csp::common::String : asset collection to delete
     /// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetCollectionById(const csp::common::String& AssetCollectionId, AssetCollectionResultCallback Callback);
-    CSP_NO_EXPORT async::task<AssetCollectionResult> GetAssetCollectionById(const csp::common::String& AssetCollectionId);
+    CSP_ASYNC_RESULT void GetAssetCollectionById(const csp::common::String& assetCollectionId, AssetCollectionResultCallback callback);
+    CSP_NO_EXPORT async::task<AssetCollectionResult> GetAssetCollectionById(const csp::common::String& assetCollectionId);
 
     /// @brief Finds an asset collection by its Name.
     /// @param AssetCollectionName csp::common::String : name of the asset collection to be retrieved
     /// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetCollectionByName(const csp::common::String& assetCollectionName, AssetCollectionResultCallback callback);
 
     /// @brief Retrieves asset collections based on the specified search criteria.
     /// These parameters filter the search criteria using the intersection of the provided parameters.
@@ -136,32 +136,32 @@ public:
     /// nullptr.
     /// @param ResultsMaxNumber : The maximum number of result entries to be retrieved. For all available results pass nullptr.
     /// @param Callback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionIds,
-        const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
-        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,
-        const csp::common::Optional<int>& ResultsMaxNumber, AssetCollectionsResultCallback Callback);
+    CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& assetCollectionIds,
+        const csp::common::Optional<csp::common::String>& parentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& names,
+        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& types,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, const csp::common::Optional<int>& resultsSkipNumber,
+        const csp::common::Optional<int>& resultsMaxNumber, AssetCollectionsResultCallback callback);
 
-    CSP_NO_EXPORT async::task<AssetCollectionsResult> FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
-        const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
-        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,
-        const csp::common::Optional<int>& ResultsMaxNumber);
+    CSP_NO_EXPORT async::task<AssetCollectionsResult> FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& ids,
+        const csp::common::Optional<csp::common::String>& parentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& names,
+        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& types,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, const csp::common::Optional<int>& resultsSkipNumber,
+        const csp::common::Optional<int>& resultsMaxNumber);
 
     /// @brief Updates the Metadata field of an Asset Collection
     /// @param AssetCollection AssetCollection : asset collection to be updated
     /// @param NewMetadata csp::common::StringMap : the new metadata information that will replace the previous
     /// @param Tags csp::common::Array<csp::common::String : optional array of strings to replace the tags
     /// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AssetCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateAssetCollectionMetadata(const AssetCollection& assetCollection,
+        const csp::common::Map<csp::common::String, csp::common::String>& newMetadata,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, AssetCollectionResultCallback callback);
 
-    CSP_NO_EXPORT async::task<AssetCollectionResult> UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    CSP_NO_EXPORT async::task<AssetCollectionResult> UpdateAssetCollectionMetadata(const AssetCollection& assetCollection,
+        const csp::common::Map<csp::common::String, csp::common::String>& newMetadata,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags);
 
     /// @brief Retrieves the number asset collections based on the specified search criteria.
     /// @param ParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
@@ -171,11 +171,11 @@ public:
     /// collection names
     /// @param SpaceIds csp::common::Array<csp::common::String> : optional space ids to get asset collections associated with them
     /// @param Callback AssetCollectionCountResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
-        const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
-        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, csp::systems::AssetCollectionCountResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& ids,
+        const csp::common::Optional<csp::common::String>& parentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& names,
+        const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& types,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, csp::systems::AssetCollectionCountResultCallback callback);
 
     /// @brief Creates a new asset.
     /// @param AssetCollection AssetCollection : the parent collection for the asset to be associated with
@@ -184,42 +184,42 @@ public:
     /// @param ThirdPartyPlatform EThirdPartyPlatform : optional enum class for Third Part Platform
     /// @param Type csp::systems::EAssetType : type of the asset
     /// @param Callback AssetResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateAsset(const AssetCollection& AssetCollection, const csp::common::String& Name,
-        const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
-        const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type, AssetResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateAsset(const AssetCollection& assetCollection, const csp::common::String& name,
+        const csp::common::Optional<csp::common::String>& thirdPartyPackagedAssetIdentifier,
+        const csp::common::Optional<csp::systems::EThirdPartyPlatform>& thirdPartyPlatform, EAssetType type, AssetResultCallback callback);
 
-    CSP_NO_EXPORT async::task<AssetResult> CreateAsset(const AssetCollection& AssetCollection, const csp::common::String& Name,
-        const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
-        const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type);
+    CSP_NO_EXPORT async::task<AssetResult> CreateAsset(const AssetCollection& assetCollection, const csp::common::String& name,
+        const csp::common::Optional<csp::common::String>& thirdPartyPackagedAssetIdentifier,
+        const csp::common::Optional<csp::systems::EThirdPartyPlatform>& thirdPartyPlatform, EAssetType type);
 
     /// @brief Update a given asset.
     /// @param Asset Asset : asset to update
     /// @param Callback AssetResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpdateAsset(const Asset& Asset, AssetResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateAsset(const Asset& asset, AssetResultCallback callback);
 
     /// @brief Deletes a given asset.
     /// @param AssetCollection AssetCollection : the parent collection that the asset is associated with
     /// @param Asset Asset : asset to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset, NullResultCallback Callback);
-    CSP_NO_EXPORT async::task<NullResult> DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset);
+    CSP_ASYNC_RESULT void DeleteAsset(const AssetCollection& assetCollection, const Asset& asset, NullResultCallback callback);
+    CSP_NO_EXPORT async::task<NullResult> DeleteAsset(const AssetCollection& assetCollection, const Asset& asset);
 
     /// @brief Retrieves all assets in a given asset collection.
     /// @param AssetCollection AssetCollection : collection to get all assets from
     /// @param Callback AssetsResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetsInCollection(const AssetCollection& AssetCollection, AssetsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetsInCollection(const AssetCollection& assetCollection, AssetsResultCallback callback);
 
     /// @brief Retrieves the asset specified by the Id
     /// @param AssetCollectionId csp::common::String : the Id of the asset collection containing the asset
     /// @param AssetId csp::common::String : the Id of the asset to retrieve
     /// @param Callback AssetResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetAssetById(
-        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, AssetResultCallback Callback);
+        const csp::common::String& assetCollectionId, const csp::common::String& assetId, AssetResultCallback callback);
 
     /// @brief Retrieves all assets that belong to the asset collections with the give Ids.
     /// @param AssetCollectionIds csp::common::Array<csp::common::String> : collection of asset collection Ids get all assets from
     /// @param Callback AssetsResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetsByCollectionIds(const csp::common::Array<csp::common::String>& AssetCollectionIds, AssetsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetsByCollectionIds(const csp::common::Array<csp::common::String>& assetCollectionIds, AssetsResultCallback callback);
 
     /// @brief Retrieves assets based on the specified search criteria.
     /// @param AssetCollectionIds csp::common::Array<csp::common::String> : the asset collection Ids that will be used as search criteria. Note that
@@ -228,15 +228,15 @@ public:
     /// @param AssetNames csp::common::Array<csp::common::String> : optional array of strings representing asset names
     /// @param AssetTypes csp::common::Array<EAssetType> : optional array of asset types
     /// @param Callback AssetsResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
-        const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes, AssetsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetsByCriteria(const csp::common::Array<csp::common::String>& assetCollectionIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& assetIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& assetNames,
+        const csp::common::Optional<csp::common::Array<EAssetType>>& assetTypes, AssetsResultCallback callback);
 
-    CSP_NO_EXPORT async::task<AssetsResult> GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
-        const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes);
+    CSP_NO_EXPORT async::task<AssetsResult> GetAssetsByCriteria(const csp::common::Array<csp::common::String>& assetCollectionIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& assetIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& assetNames,
+        const csp::common::Optional<csp::common::Array<EAssetType>>& assetTypes);
 
     /// @brief Uploads data for the given asset to CHS from the given source.
     /// @param AssetCollection AssetCollection : collection the asset is associated to
@@ -245,7 +245,7 @@ public:
     /// AssetDataSource is an interface. A derived class must be passed.
     /// @param Callback UriResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT_WITH_PROGRESS void UploadAssetData(
-        const AssetCollection& AssetCollection, const Asset& Asset, const AssetDataSource& AssetDataSource, UriResultCallback Callback);
+        const AssetCollection& assetCollection, const Asset& asset, const AssetDataSource& assetDataSource, UriResultCallback callback);
 
     /// @brief Uploads data for the given asset to CHS from the given source, taking a CancellationToken to allow cancelling the request.
     /// @param AssetCollection AssetCollection : collection the asset is associated to
@@ -254,33 +254,33 @@ public:
     /// AssetDataSource is an interface. A derived class must be passed.
     /// @param CancellationToken csp::common::CancellationToken : token for cancelling upload
     /// @param Callback UriResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT_WITH_PROGRESS void UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset,
-        const AssetDataSource& AssetDataSource, csp::common::CancellationToken& CancellationToken, UriResultCallback Callback);
+    CSP_ASYNC_RESULT_WITH_PROGRESS void UploadAssetDataEx(const AssetCollection& assetCollection, const Asset& asset,
+        const AssetDataSource& assetDataSource, csp::common::CancellationToken& cancellationToken, UriResultCallback callback);
 
-    CSP_NO_EXPORT async::task<UriResult> UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset,
-        const AssetDataSource& AssetDataSource, csp::common::CancellationToken& CancellationToken);
+    CSP_NO_EXPORT async::task<UriResult> UploadAssetDataEx(const AssetCollection& assetCollection, const Asset& asset,
+        const AssetDataSource& assetDataSource, csp::common::CancellationToken& cancellationToken);
 
     /// @brief Downloads data for a given Asset from CHS.
     /// @param Asset Asset : asset to download data for
     /// @param Callback DataResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DownloadAssetData(const Asset& Asset, AssetDataResultCallback Callback);
+    CSP_ASYNC_RESULT void DownloadAssetData(const Asset& asset, AssetDataResultCallback callback);
 
     /// @brief Downloads data for a given Asset from CHS, taking a CancellationToken to allow cancelling the request.
     /// @param Asset Asset : asset to download data for
     /// @param CancellationToken csp::common::CancellationToken : token for cancelling download
     /// @param Callback AssetDataResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DownloadAssetDataEx(
-        const Asset& Asset, csp::common::CancellationToken& CancellationToken, AssetDataResultCallback Callback);
+        const Asset& asset, csp::common::CancellationToken& cancellationToken, AssetDataResultCallback callback);
 
     /// @brief Get the size of the data associated with an Asset.
     /// @param Asset Asset : asset to get data size for
     /// @param Callback UInt64ResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAssetDataSize(const Asset& asset, UInt64ResultCallback callback);
 
     /// @brief Gets a LOD chain within the given AssetCollection.
     /// @param AssetCollection AssetCollection : AssetCollection which contains the LOD chain.
     /// @param Callback LODChainResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetLODChain(const AssetCollection& AssetCollection, LODChainResultCallback Callback);
+    CSP_ASYNC_RESULT void GetLODChain(const AssetCollection& assetCollection, LODChainResultCallback callback);
 
     /// @brief Registers an asset to the LOD chain
     /// @param AssetCollection AssetCollection : AssetCollection which contains the LOD chain.
@@ -288,7 +288,7 @@ public:
     /// @param Asset int : LOD level for Asset to be registered to
     /// @param Callback AssetResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT_WITH_PROGRESS void RegisterAssetToLODChain(
-        const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
+        const AssetCollection& assetCollection, const Asset& asset, int lodLevel, AssetResultCallback callback);
 
     /// @brief Creates a new material backed by an AssetCollection/Asset.
     /// @param Name const csp::common::String& : The name of the new material.
@@ -297,9 +297,9 @@ public:
     /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created material.
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType,
-        const csp::common::String& SpaceId, csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-        const csp::common::Array<csp::common::String>& AssetTags, MaterialResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& name, const csp::systems::EShaderType shaderType,
+        const csp::common::String& spaceId, csp::common::Map<csp::common::String, csp::common::String>& metadata,
+        const csp::common::Array<csp::common::String>& assetTags, MaterialResultCallback callback);
 
     /// @brief Updates an existing material's properties.
     /// The material should be retrieved through GetMaterials or GetMaterial.
@@ -307,18 +307,18 @@ public:
     /// If the material hasn't changed, EResultCode::Success will still be returned.
     /// @param Material const Material& : The material to update
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void UpdateMaterial(const Material& Material, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateMaterial(const Material& material, NullResultCallback callback);
 
     /// @brief Deletes a given material.
     /// The material should be retrieved through GetMaterials or GetMaterial.
     /// @param Material const Material& : The material to delete
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void DeleteMaterial(const Material& Material, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteMaterial(const Material& material, NullResultCallback callback);
 
     /// @brief Gets all materials associated with the given space.
     /// @param SpaceId const csp::common::String& : The space id the material is associated with.
     /// @param Callback MaterialsResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& spaceId, MaterialsResultCallback callback);
 
     /// @brief Gets a material using its AssetCollection and Asset Id.
     /// @details This is slower than GetMaterialFromUri, as it needs to first retrieve the internal AssetCollection and Asset.
@@ -326,7 +326,7 @@ public:
     /// @param AssetId const csp::common::String& : The asset id this material is associated with.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetMaterial(
-        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback);
+        const csp::common::String& assetCollectionId, const csp::common::String& assetId, MaterialResultCallback callback);
 
     /// @brief Gets a material using it's Uri.
     /// @details This function does not retrieve the AssetCollection or Asset remotely. It downloads the material directly from the uri.
@@ -335,8 +335,8 @@ public:
     /// @param AssetId const csp::common::String& : The asset id this material is associated with.
     /// @param Uri const csp::common::String& : The uri this material was uploaded to.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
-        const csp::common::String& Uri, MaterialResultCallback Callback);
+    CSP_ASYNC_RESULT void GetMaterialFromUri(const csp::systems::AssetCollection& assetCollection, const csp::common::String& assetId,
+        const csp::common::String& uri, MaterialResultCallback callback);
 
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
     typedef std::function<void(const csp::common::AssetDetailBlobChangedNetworkEventData&)> AssetDetailBlobChangedCallbackHandler;
@@ -346,41 +346,41 @@ public:
 
     /// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified
     /// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
-    CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
+    CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler callback);
 
     /// @brief Sets a callback for a material changed event.
     /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
-    CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
+    CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& networkEventData);
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus,
-        const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* webClient, csp::multiplayer::NetworkEventBus& eventBus,
+        const csp::common::IAuthContext& inAuthContext, common::LogSystem& logSystem);
     ~AssetSystem();
 
-    CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& assetCollectionId, NullResultCallback callback);
     CSP_ASYNC_RESULT void DeleteAssetById(
-        const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
+        const csp::common::String& asseCollectiontId, const csp::common::String& assetId, NullResultCallback callback);
 
     async::task<MaterialResult> DownloadMaterial(
-        const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+        const AssetCollection& assetCollection, const csp::common::String& assetId, const csp::common::String& uri);
 
     std::function<async::task<MaterialsResult>(const AssetsResult&)> DownloadAllMaterials(
-        const csp::common::Array<AssetCollection>& AssetCollections);
+        const csp::common::Array<AssetCollection>& assetCollections);
 
-    csp::services::ApiBase* PrototypeAPI;
-    csp::services::ApiBase* AssetDetailAPI;
+    csp::services::ApiBase* m_prototypeApi;
+    csp::services::ApiBase* m_assetDetailApi;
 
-    csp::web::RemoteFileManager* FileManager;
+    csp::web::RemoteFileManager* m_fileManager;
 
-    AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
-    MaterialChangedCallbackHandler MaterialChangedCallback;
+    AssetDetailBlobChangedCallbackHandler m_assetDetailBlobChangedCallback;
+    MaterialChangedCallbackHandler m_materialChangedCallback;
 };
 
 } // namespace csp::systems

@@ -31,28 +31,28 @@ public:
     using HeadersMap = std::map<std::string, std::string>;
 
     HttpPayload();
-    HttpPayload(const char* InContent);
-    HttpPayload(const csp::common::String& InContent);
+    HttpPayload(const char* inContent);
+    HttpPayload(const csp::common::String& inContent);
     ~HttpPayload();
 
-    void SetContent(const rapidjson::Document& InJson);
-    void SetContent(const csp::common::String& InContent);
+    void SetContent(const rapidjson::Document& inJson);
+    void SetContent(const csp::common::String& inContent);
 
-    void AddContent(const csp::common::String& InContent);
+    void AddContent(const csp::common::String& inContent);
 
     const csp::common::String& GetContent() const;
     const csp::common::String& ToJson() const;
 
-    void SetContent(const char* Data, size_t DataLength);
+    void SetContent(const char* data, size_t dataLength);
 
-    void AllocateContent(size_t DataLength);
-    void WriteContent(size_t Offset, const char* Data, size_t DataLength);
-    size_t ReadContent(size_t Offset, void* Data, size_t DataLength) const;
+    void AllocateContent(size_t dataLength);
+    void WriteContent(size_t offset, const char* data, size_t dataLength);
+    size_t ReadContent(size_t offset, void* data, size_t dataLength) const;
 
-    void AddHeader(const csp::common::String& Key, const csp::common::String& Value);
+    void AddHeader(const csp::common::String& key, const csp::common::String& value);
 
-    void AddFormParam(const char* Name, const std::shared_ptr<csp::web::HttpPayload>& formFile);
-    void AddFormParam(const char* Name, const csp::common::String& param);
+    void AddFormParam(const char* name, const std::shared_ptr<csp::web::HttpPayload>& formFile);
+    void AddFormParam(const char* name, const csp::common::String& param);
 
     const HeadersMap& GetHeaders() const;
 
@@ -66,16 +66,16 @@ public:
     /// Reset the Payload, clearing all content and headers
     void Reset();
 
-    void SetBoundary(const csp::common::String& InBoundary);
+    void SetBoundary(const csp::common::String& inBoundary);
 
     bool IsJsonPayload() const;
 
 private:
-    HeadersMap Headers;
-    csp::common::String Content;
-    csp::common::String Boundary;
+    HeadersMap m_headers;
+    csp::common::String m_content;
+    csp::common::String m_boundary;
 
-    bool RequiresBearerToken = false;
+    bool m_requiresBearerToken = false;
 };
 
 } // namespace csp::web

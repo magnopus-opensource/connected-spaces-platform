@@ -21,10 +21,10 @@
 namespace csp::systems
 {
 
-ScriptContext::ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId)
-    : ContextId(InContextId)
-    , TheScriptSystem(InScriptSystem)
-    , Runtime(InRuntime)
+ScriptContext::ScriptContext(ScriptSystem* inScriptSystem, qjs::Runtime* inRuntime, uint64_t inContextId)
+    : m_contextId(inContextId)
+    , m_theScriptSystem(inScriptSystem)
+    , m_runtime(inRuntime)
 {
     Initialise();
 }
@@ -33,119 +33,119 @@ ScriptContext::~ScriptContext() { Shutdown(); }
 
 void ScriptContext::Initialise()
 {
-    Context = new qjs::Context(*Runtime);
+    m_context = new qjs::Context(*m_runtime);
 
-    Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
+    m_context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
     {
-        csp::common::String Url = csp::common::String(filename.data(), filename.length());
+        csp::common::String url = csp::common::String(filename.data(), filename.length());
 
-        csp::common::String Alias;
-        if (TheScriptSystem->GetModuleUrlAlias(Url, Alias))
+        csp::common::String alias;
+        if (m_theScriptSystem->GetModuleUrlAlias(url, alias))
         {
-            return qjs::Context::ModuleData { std::nullopt, std::nullopt, Alias.c_str() };
+            return qjs::Context::ModuleData { std::nullopt, std::nullopt, alias.c_str() };
         }
 
-        csp::common::String Source = TheScriptSystem->GetModuleSource(Url);
+        csp::common::String source = m_theScriptSystem->GetModuleSource(url);
 
-        AddImport(Url);
+        AddImport(url);
 
-        qjs::Context::ModuleData Data;
+        qjs::Context::ModuleData data;
 
-        if (Source.IsEmpty())
+        if (source.IsEmpty())
         {
-            CSP_LOG_ERROR_FORMAT("Module %s not found\n", Url.c_str());
+            CSP_LOG_ERROR_FORMAT("Module %s not found\n", url.c_str());
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, std::nullopt };
         }
 
-        CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
+        CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Loaded Module: %s\n", url.c_str());
 
-        return qjs::Context::ModuleData { Url.c_str(), Source.c_str(), std::nullopt };
+        return qjs::Context::ModuleData { url.c_str(), source.c_str(), std::nullopt };
     };
 }
 
 void ScriptContext::Shutdown()
 {
-    for (auto Module : Modules)
+    for (auto module : m_modules)
     {
-        delete (Module.second);
+        delete (module.second);
     }
 
-    Modules.clear();
-    Imports.clear();
+    m_modules.clear();
+    m_imports.clear();
 
-    delete (Context);
+    delete (m_context);
 }
 
-ScriptModule* ScriptContext::GetModule(const csp::common::String& ModuleName)
+ScriptModule* ScriptContext::GetModule(const csp::common::String& moduleName)
 {
-    ModuleMap::iterator It = Modules.find(ModuleName.c_str());
+    ModuleMap::iterator it = m_modules.find(moduleName.c_str());
 
-    if (It != Modules.end())
+    if (it != m_modules.end())
     {
-        return It->second;
+        return it->second;
     }
 
-    AddModule(ModuleName);
-    return GetModule(ModuleName);
+    AddModule(moduleName);
+    return GetModule(moduleName);
 }
 
-void ScriptContext::AddModule(const csp::common::String& ModuleName)
+void ScriptContext::AddModule(const csp::common::String& moduleName)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModule: %s\n", moduleName.c_str());
 
-    ModuleMap::iterator It = Modules.find(ModuleName.c_str());
+    ModuleMap::iterator it = m_modules.find(moduleName.c_str());
 
-    if (It == Modules.end())
+    if (it == m_modules.end())
     {
-        ScriptModule* TheScriptModule = new ScriptModule();
-        TheScriptModule->ModuleName = ModuleName;
-        TheScriptModule->Module = &Context->addModule(ModuleName.c_str());
-        Modules.insert(ModuleMap::value_type(ModuleName.c_str(), TheScriptModule));
+        ScriptModule* theScriptModule = new ScriptModule();
+        theScriptModule->ModuleName = moduleName;
+        theScriptModule->Module = &m_context->addModule(moduleName.c_str());
+        m_modules.insert(ModuleMap::value_type(moduleName.c_str(), theScriptModule));
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Module %s already exists\n", ModuleName.c_str());
+        CSP_LOG_ERROR_FORMAT("Module %s already exists\n", moduleName.c_str());
     }
 }
 
-uint64_t ScriptContext::GetId() const { return ContextId; }
+uint64_t ScriptContext::GetId() const { return m_contextId; }
 
-bool ScriptContext::ExistsInContext(const csp::common::String& ObjectName)
+bool ScriptContext::ExistsInContext(const csp::common::String& objectName)
 {
-    qjs::Value Result = Context->eval(ObjectName.c_str());
-    bool isExcept = Result.isException();
+    qjs::Value result = m_context->eval(objectName.c_str());
+    bool isExcept = result.isException();
     return !isExcept;
 }
 
-void ScriptContext::AddImport(const csp::common::String& Url)
+void ScriptContext::AddImport(const csp::common::String& url)
 {
-    bool Exists = false;
+    bool exists = false;
 
-    for (const auto& Import : Imports)
+    for (const auto& import : m_imports)
     {
-        if (Import == Url.c_str())
+        if (import == url.c_str())
         {
-            Exists = true;
+            exists = true;
             break;
         }
     }
 
-    if (Exists)
+    if (exists)
     {
-        Imports.push_back(Url.c_str());
+        m_imports.push_back(url.c_str());
     }
 }
 
-size_t ScriptContext::GetNumImportedModules() const { return Imports.size(); }
+size_t ScriptContext::GetNumImportedModules() const { return m_imports.size(); }
 
-const char* ScriptContext::GetImportedModule(size_t Index) const
+const char* ScriptContext::GetImportedModule(size_t index) const
 {
-    if (Index >= Imports.size())
+    if (index >= m_imports.size())
     {
         return nullptr;
     }
 
-    return Imports[Index].c_str();
+    return m_imports[index].c_str();
 }
 
 void ScriptContext::Reset()

@@ -29,14 +29,14 @@ class CustomSpaceComponent;
 class CustomSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent = nullptr);
+    CustomSpaceComponentScriptInterface(CustomSpaceComponent* inComponent = nullptr);
 
-    uint32_t GetCustomPropertySubscriptionKey(const std::string& Key);
-    bool HasCustomProperty(const std::string& Key) const;
-    void RemoveCustomProperty(const std::string& Key);
-    const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetCustomProperty(const std::string& Key);
+    uint32_t GetCustomPropertySubscriptionKey(const std::string& key);
+    bool HasCustomProperty(const std::string& key) const;
+    void RemoveCustomProperty(const std::string& key);
+    const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetCustomProperty(const std::string& key);
     std::vector<std::string> GetCustomPropertyKeys();
-    void SetCustomProperty(const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value);
+    void SetCustomProperty(const std::string& key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& value);
 };
 
 } // namespace csp::multiplayer

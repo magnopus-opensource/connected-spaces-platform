@@ -27,312 +27,312 @@ namespace csp::systems
 
 AnchorSystem::AnchorSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , AnchorsAPI(nullptr)
+    , m_anchorsApi(nullptr)
 {
 }
 
-AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+AnchorSystem::AnchorSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
 {
-    AnchorsAPI = new chs::AnchorsApi(InWebClient);
+    m_anchorsApi = new chs::AnchorsApi(inWebClient);
 }
 
-AnchorSystem::~AnchorSystem() { delete (AnchorsAPI); }
+AnchorSystem::~AnchorSystem() { delete (m_anchorsApi); }
 
-void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorProvider, const csp::common::String& ThirdPartyAnchorId,
-    const csp::common::String& AssetCollectionId, const csp::systems::GeoLocation& Location, const csp::systems::OlyAnchorPosition& Position,
-    const csp::systems::OlyRotation& Rotation,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AnchorResultCallback Callback)
+void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider thirdPartyAnchorProvider, const csp::common::String& thirdPartyAnchorId,
+    const csp::common::String& assetCollectionId, const csp::systems::GeoLocation& location, const csp::systems::OlyAnchorPosition& position,
+    const csp::systems::OlyRotation& rotation,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spatialKeyValue,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, AnchorResultCallback callback)
 {
-    auto AnchorInfo = std::make_shared<chs::AnchorDto>();
+    auto anchorInfo = std::make_shared<chs::AnchorDto>();
 
-    switch (ThirdPartyAnchorProvider)
+    switch (thirdPartyAnchorProvider)
     {
     case AnchorProvider::GoogleCloudAnchors:
-        AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
+        anchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
         break;
     default:
         CSP_LOG_WARN_MSG("Unknown third party anchor provider");
         break;
     }
 
-    AnchorInfo->SetThirdPartyAnchorId(ThirdPartyAnchorId);
-    AnchorInfo->SetAnchoredPrototypeId(AssetCollectionId);
+    anchorInfo->SetThirdPartyAnchorId(thirdPartyAnchorId);
+    anchorInfo->SetAnchoredPrototypeId(assetCollectionId);
 
-    auto DTOLocation = std::make_shared<chs::GeoCoord>();
-    DTOLocation->SetLatitude(Location.Latitude);
-    DTOLocation->SetLongitude(Location.Longitude);
-    AnchorInfo->SetLocation(DTOLocation);
+    auto dtoLocation = std::make_shared<chs::GeoCoord>();
+    dtoLocation->SetLatitude(location.Latitude);
+    dtoLocation->SetLongitude(location.Longitude);
+    anchorInfo->SetLocation(dtoLocation);
 
-    auto DTOPosition = std::make_shared<chs::AnchorPosition>();
-    DTOPosition->SetX(Position.X);
-    DTOPosition->SetY(Position.Y);
-    DTOPosition->SetZ(Position.Z);
-    AnchorInfo->SetPosition(DTOPosition);
+    auto dtoPosition = std::make_shared<chs::AnchorPosition>();
+    dtoPosition->SetX(position.X);
+    dtoPosition->SetY(position.Y);
+    dtoPosition->SetZ(position.Z);
+    anchorInfo->SetPosition(dtoPosition);
 
-    auto DTORotation = std::make_shared<chs::AnchorRotation>();
-    DTORotation->SetX(Rotation.X);
-    DTORotation->SetY(Rotation.Y);
-    DTORotation->SetZ(Rotation.Z);
-    DTORotation->SetW(Rotation.W);
-    AnchorInfo->SetRotation(DTORotation);
+    auto dtoRotation = std::make_shared<chs::AnchorRotation>();
+    dtoRotation->SetX(rotation.X);
+    dtoRotation->SetY(rotation.Y);
+    dtoRotation->SetZ(rotation.Z);
+    dtoRotation->SetW(rotation.W);
+    anchorInfo->SetRotation(dtoRotation);
 
     // SpatialData must be set with or without data
-    std::map<csp::common::String, csp::common::String> SpatialData;
+    std::map<csp::common::String, csp::common::String> spatialData;
 
-    if (SpatialKeyValue.HasValue())
+    if (spatialKeyValue.HasValue())
     {
-        auto* Keys = SpatialKeyValue->Keys();
+        auto* keys = spatialKeyValue->Keys();
 
-        for (size_t idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < keys->Size(); ++idx)
         {
-            auto Key = Keys->operator[](idx);
-            auto Value = SpatialKeyValue->operator[](Key);
-            SpatialData.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
+            auto key = keys->operator[](idx);
+            auto value = spatialKeyValue->operator[](key);
+            spatialData.insert(std::pair<csp::common::String, csp::common::String>(key, value));
         }
     }
 
-    AnchorInfo->SetSpatialKeyValue(SpatialData);
+    anchorInfo->SetSpatialKeyValue(spatialData);
 
-    if (Tags.HasValue())
+    if (tags.HasValue())
     {
-        std::vector<csp::common::String> TagsVector;
-        TagsVector.reserve(Tags->Size());
+        std::vector<csp::common::String> tagsVector;
+        tagsVector.reserve(tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        for (size_t idx = 0; idx < tags->Size(); ++idx)
         {
-            TagsVector.push_back((*Tags)[idx]);
+            tagsVector.push_back((*tags)[idx]);
         }
 
-        AnchorInfo->SetTags(TagsVector);
+        anchorInfo->SetTags(tagsVector);
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr responseHandler = m_anchorsApi->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)->anchorsPost({ anchorInfo }, responseHandler);
 }
 
-void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAnchorProvider, const csp::common::String& ThirdPartyAnchorId,
-    const csp::common::String& SpaceId, uint64_t SpaceEntityId, const csp::common::String& AssetCollectionId,
-    const csp::systems::GeoLocation& Location, const csp::systems::OlyAnchorPosition& Position, const csp::systems::OlyRotation& Rotation,
-    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AnchorResultCallback Callback)
+void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider thirdPartyAnchorProvider, const csp::common::String& thirdPartyAnchorId,
+    const csp::common::String& spaceId, uint64_t spaceEntityId, const csp::common::String& assetCollectionId,
+    const csp::systems::GeoLocation& location, const csp::systems::OlyAnchorPosition& position, const csp::systems::OlyRotation& rotation,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& spatialKeyValue,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, AnchorResultCallback callback)
 {
-    auto AnchorInfo = std::make_shared<chs::AnchorDto>();
+    auto anchorInfo = std::make_shared<chs::AnchorDto>();
 
-    switch (ThirdPartyAnchorProvider)
+    switch (thirdPartyAnchorProvider)
     {
     case AnchorProvider::GoogleCloudAnchors:
-        AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
+        anchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
         break;
     default:
         CSP_LOG_WARN_MSG("Unknown third party anchor provider");
         break;
     }
 
-    AnchorInfo->SetThirdPartyAnchorId(ThirdPartyAnchorId);
-    AnchorInfo->SetReferenceId(SpaceId);
-    AnchorInfo->SetAnchoredMultiplayerObjectId(static_cast<int32_t>(SpaceEntityId));
-    AnchorInfo->SetAnchoredPrototypeId(AssetCollectionId);
+    anchorInfo->SetThirdPartyAnchorId(thirdPartyAnchorId);
+    anchorInfo->SetReferenceId(spaceId);
+    anchorInfo->SetAnchoredMultiplayerObjectId(static_cast<int32_t>(spaceEntityId));
+    anchorInfo->SetAnchoredPrototypeId(assetCollectionId);
 
-    auto DTOLocation = std::make_shared<chs::GeoCoord>();
-    DTOLocation->SetLatitude(Location.Latitude);
-    DTOLocation->SetLongitude(Location.Longitude);
-    AnchorInfo->SetLocation(DTOLocation);
+    auto dtoLocation = std::make_shared<chs::GeoCoord>();
+    dtoLocation->SetLatitude(location.Latitude);
+    dtoLocation->SetLongitude(location.Longitude);
+    anchorInfo->SetLocation(dtoLocation);
 
-    auto DTOPosition = std::make_shared<chs::AnchorPosition>();
-    DTOPosition->SetX(Position.X);
-    DTOPosition->SetY(Position.Y);
-    DTOPosition->SetZ(Position.Z);
-    AnchorInfo->SetPosition(DTOPosition);
+    auto dtoPosition = std::make_shared<chs::AnchorPosition>();
+    dtoPosition->SetX(position.X);
+    dtoPosition->SetY(position.Y);
+    dtoPosition->SetZ(position.Z);
+    anchorInfo->SetPosition(dtoPosition);
 
-    auto DTORotation = std::make_shared<chs::AnchorRotation>();
-    DTORotation->SetX(Rotation.X);
-    DTORotation->SetY(Rotation.Y);
-    DTORotation->SetZ(Rotation.Z);
-    DTORotation->SetW(Rotation.W);
-    AnchorInfo->SetRotation(DTORotation);
+    auto dtoRotation = std::make_shared<chs::AnchorRotation>();
+    dtoRotation->SetX(rotation.X);
+    dtoRotation->SetY(rotation.Y);
+    dtoRotation->SetZ(rotation.Z);
+    dtoRotation->SetW(rotation.W);
+    anchorInfo->SetRotation(dtoRotation);
 
     // SpatialData must be set with or without data
-    std::map<csp::common::String, csp::common::String> SpatialData;
+    std::map<csp::common::String, csp::common::String> spatialData;
 
-    if (SpatialKeyValue.HasValue())
+    if (spatialKeyValue.HasValue())
     {
-        auto* Keys = SpatialKeyValue->Keys();
+        auto* keys = spatialKeyValue->Keys();
 
-        for (size_t idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < keys->Size(); ++idx)
         {
-            auto Key = Keys->operator[](idx);
-            auto Value = SpatialKeyValue->operator[](Key);
-            SpatialData.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
+            auto key = keys->operator[](idx);
+            auto value = spatialKeyValue->operator[](key);
+            spatialData.insert(std::pair<csp::common::String, csp::common::String>(key, value));
         }
     }
 
-    AnchorInfo->SetSpatialKeyValue(SpatialData);
+    anchorInfo->SetSpatialKeyValue(spatialData);
 
-    if (Tags.HasValue())
+    if (tags.HasValue())
     {
-        std::vector<csp::common::String> TagsVector;
-        TagsVector.reserve(Tags->Size());
+        std::vector<csp::common::String> tagsVector;
+        tagsVector.reserve(tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        for (size_t idx = 0; idx < tags->Size(); ++idx)
         {
-            TagsVector.push_back((*Tags)[idx]);
+            tagsVector.push_back((*tags)[idx]);
         }
 
-        AnchorInfo->SetTags(TagsVector);
+        anchorInfo->SetTags(tagsVector);
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr responseHandler = m_anchorsApi->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)->anchorsPost({ anchorInfo }, responseHandler);
 }
 
-void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& AnchorIds, NullResultCallback Callback)
+void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& anchorIds, NullResultCallback callback)
 {
-    std::vector<csp::common::String> IdsToBeDeleted;
-    IdsToBeDeleted.reserve(AnchorIds.Size());
+    std::vector<csp::common::String> idsToBeDeleted;
+    idsToBeDeleted.reserve(anchorIds.Size());
 
-    for (size_t idx = 0; idx < AnchorIds.Size(); idx++)
+    for (size_t idx = 0; idx < anchorIds.Size(); idx++)
     {
-        IdsToBeDeleted.push_back(AnchorIds[idx]);
+        idsToBeDeleted.push_back(anchorIds[idx]);
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+    csp::services::ResponseHandlerPtr responseHandler = m_anchorsApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsDelete({ IdsToBeDeleted }, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)->anchorsDelete({ idsToBeDeleted }, responseHandler);
 }
 
-void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpatialKeys,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpatialValues,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, const csp::common::Optional<bool>& AllTags,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& Skip,
-    const csp::common::Optional<int>& Limit, AnchorCollectionResultCallback Callback)
+void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& originLocation, const double areaRadius,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& spatialKeys,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& spatialValues,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, const csp::common::Optional<bool>& allTags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& spaceIds, const csp::common::Optional<int>& skip,
+    const csp::common::Optional<int>& limit, AnchorCollectionResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_anchorsApi->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    std::optional<std::vector<csp::common::String>> AnchorTags;
+    std::optional<std::vector<csp::common::String>> anchorTags;
 
-    if (Tags.HasValue())
+    if (tags.HasValue())
     {
-        AnchorTags.emplace(std::vector<csp::common::String>());
-        AnchorTags->reserve(Tags->Size());
+        anchorTags.emplace(std::vector<csp::common::String>());
+        anchorTags->reserve(tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        for (size_t idx = 0; idx < tags->Size(); ++idx)
         {
-            AnchorTags->push_back({ (*Tags)[idx] });
+            anchorTags->push_back({ (*tags)[idx] });
         }
     }
 
-    std::optional<std::vector<csp::common::String>> AnchorSpatialKeys;
+    std::optional<std::vector<csp::common::String>> anchorSpatialKeys;
 
-    if (SpatialKeys.HasValue())
+    if (spatialKeys.HasValue())
     {
-        AnchorSpatialKeys.emplace(std::vector<csp::common::String>());
-        AnchorSpatialKeys->reserve(SpatialKeys->Size());
+        anchorSpatialKeys.emplace(std::vector<csp::common::String>());
+        anchorSpatialKeys->reserve(spatialKeys->Size());
 
-        for (size_t idx = 0; idx < SpatialKeys->Size(); ++idx)
+        for (size_t idx = 0; idx < spatialKeys->Size(); ++idx)
         {
-            AnchorSpatialKeys->push_back({ (*SpatialKeys)[idx] });
+            anchorSpatialKeys->push_back({ (*spatialKeys)[idx] });
         }
     }
 
-    std::optional<std::vector<csp::common::String>> AnchorSpatialValues;
+    std::optional<std::vector<csp::common::String>> anchorSpatialValues;
 
-    if (SpatialValues.HasValue())
+    if (spatialValues.HasValue())
     {
-        AnchorSpatialValues.emplace(std::vector<csp::common::String>());
-        AnchorSpatialValues->reserve(SpatialValues->Size());
+        anchorSpatialValues.emplace(std::vector<csp::common::String>());
+        anchorSpatialValues->reserve(spatialValues->Size());
 
-        for (size_t idx = 0; idx < SpatialValues->Size(); ++idx)
+        for (size_t idx = 0; idx < spatialValues->Size(); ++idx)
         {
-            AnchorSpatialValues->push_back({ (*SpatialValues)[idx] });
+            anchorSpatialValues->push_back({ (*spatialValues)[idx] });
         }
     }
 
-    std::optional<std::vector<csp::common::String>> ReferenceIds;
+    std::optional<std::vector<csp::common::String>> referenceIds;
 
-    if (SpaceIds.HasValue())
+    if (spaceIds.HasValue())
     {
-        ReferenceIds.emplace(std::vector<csp::common::String>());
-        ReferenceIds->reserve(SpaceIds->Size());
+        referenceIds.emplace(std::vector<csp::common::String>());
+        referenceIds->reserve(spaceIds->Size());
 
-        for (size_t idx = 0; idx < SpaceIds->Size(); ++idx)
+        for (size_t idx = 0; idx < spaceIds->Size(); ++idx)
         {
-            ReferenceIds->push_back({ (*SpaceIds)[idx] });
+            referenceIds->push_back({ (*spaceIds)[idx] });
         }
     }
 
-    auto AnchorTagsAll = AllTags.HasValue() ? *AllTags : std::optional<bool>(std::nullopt);
-    auto AnchorLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
-    auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
+    auto anchorTagsAll = allTags.HasValue() ? *allTags : std::optional<bool>(std::nullopt);
+    auto anchorLimit = limit.HasValue() ? *limit : std::optional<int>(std::nullopt);
+    auto anchorSkip = skip.HasValue() ? *skip : std::optional<int>(std::nullopt);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)
-        ->anchorsGet({ AnchorSpatialKeys, AnchorSpatialValues, OriginLocation.Longitude, OriginLocation.Latitude, AreaRadius, AnchorTags,
-                         AnchorTagsAll, std::nullopt, std::nullopt, ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit },
-            ResponseHandler, csp::common::CancellationToken::Dummy());
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)
+        ->anchorsGet({ anchorSpatialKeys, anchorSpatialValues, originLocation.Longitude, originLocation.Latitude, areaRadius, anchorTags,
+                         anchorTagsAll, std::nullopt, std::nullopt, referenceIds, std::nullopt, anchorSkip, anchorLimit },
+            responseHandler, csp::common::CancellationToken::Dummy());
 }
 
-void AnchorSystem::GetAnchorsInSpace(const csp::common::String& SpaceId, const csp::common::Optional<int>& Skip,
-    const csp::common::Optional<int>& Limit, AnchorCollectionResultCallback Callback)
+void AnchorSystem::GetAnchorsInSpace(const csp::common::String& spaceId, const csp::common::Optional<int>& skip,
+    const csp::common::Optional<int>& limit, AnchorCollectionResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_anchorsApi->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    std::vector<csp::common::String> ReferenceIds(1);
-    ReferenceIds[0] = SpaceId;
+    std::vector<csp::common::String> referenceIds(1);
+    referenceIds[0] = spaceId;
 
-    auto AnchorLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
-    auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
+    auto anchorLimit = limit.HasValue() ? *limit : std::optional<int>(std::nullopt);
+    auto anchorSkip = skip.HasValue() ? *skip : std::optional<int>(std::nullopt);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)
         ->anchorsGet({ std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-                         ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit },
-            ResponseHandler, csp::common::CancellationToken::Dummy());
+                         referenceIds, std::nullopt, anchorSkip, anchorLimit },
+            responseHandler, csp::common::CancellationToken::Dummy());
 }
 
-void AnchorSystem::GetAnchorsByAssetCollectionId(const csp::common::String& AssetCollectionId, const csp::common::Optional<int>& Skip,
-    const csp::common::Optional<int>& Limit, AnchorCollectionResultCallback Callback)
+void AnchorSystem::GetAnchorsByAssetCollectionId(const csp::common::String& assetCollectionId, const csp::common::Optional<int>& skip,
+    const csp::common::Optional<int>& limit, AnchorCollectionResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_anchorsApi->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    std::vector<csp::common::String> AssetCollectionIds(1);
-    AssetCollectionIds[0] = AssetCollectionId;
+    std::vector<csp::common::String> assetCollectionIds(1);
+    assetCollectionIds[0] = assetCollectionId;
 
-    auto AnchorLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
-    auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
+    auto anchorLimit = limit.HasValue() ? *limit : std::optional<int>(std::nullopt);
+    auto anchorSkip = skip.HasValue() ? *skip : std::optional<int>(std::nullopt);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)
         ->anchorsGet({ std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-                         std::nullopt, AssetCollectionIds, AnchorSkip, AnchorLimit },
-            ResponseHandler, csp::common::CancellationToken::Dummy());
+                         std::nullopt, assetCollectionIds, anchorSkip, anchorLimit },
+            responseHandler, csp::common::CancellationToken::Dummy());
 }
 
-void AnchorSystem::CreateAnchorResolution(const csp::common::String& AnchorId, bool SuccessfullyResolved, int ResolveAttempted, double ResolveTime,
-    const csp::common::Array<csp::common::String>& Tags, AnchorResolutionResultCallback Callback)
+void AnchorSystem::CreateAnchorResolution(const csp::common::String& anchorId, bool successfullyResolved, int resolveAttempted, double resolveTime,
+    const csp::common::Array<csp::common::String>& tags, AnchorResolutionResultCallback callback)
 {
-    auto AnchorResolutionInfo = std::make_shared<chs::AnchorResolutionDto>();
+    auto anchorResolutionInfo = std::make_shared<chs::AnchorResolutionDto>();
 
-    AnchorResolutionInfo->SetAnchorId(AnchorId);
-    AnchorResolutionInfo->SetSuccessfullyResolved(SuccessfullyResolved);
-    AnchorResolutionInfo->SetResolveAttempted(ResolveAttempted);
-    AnchorResolutionInfo->SetResolveTime(ResolveTime);
-    AnchorResolutionInfo->SetTags(csp::common::Convert(Tags));
+    anchorResolutionInfo->SetAnchorId(anchorId);
+    anchorResolutionInfo->SetSuccessfullyResolved(successfullyResolved);
+    anchorResolutionInfo->SetResolveAttempted(resolveAttempted);
+    anchorResolutionInfo->SetResolveTime(resolveTime);
+    anchorResolutionInfo->SetTags(csp::common::Convert(tags));
 
-    csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<csp::systems::AnchorResolutionResultCallback,
-        csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr responseHandler = m_anchorsApi->CreateHandler<csp::systems::AnchorResolutionResultCallback,
+        csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(callback, nullptr);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchor_resolutionsPost({ AnchorResolutionInfo }, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(m_anchorsApi)->anchor_resolutionsPost({ anchorResolutionInfo }, responseHandler);
 }
 
 } // namespace csp::systems

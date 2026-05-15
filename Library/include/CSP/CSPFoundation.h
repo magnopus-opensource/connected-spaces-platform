@@ -66,25 +66,25 @@ public:
     FeatureFlag() = default;
 
     // Constructor for client usage where no description is needed
-    FeatureFlag(EFeatureFlag Type, bool IsEnabled)
-        : Type(Type)
-        , Enabled(IsEnabled)
-        , Description("")
+    FeatureFlag(EFeatureFlag type, bool isEnabled)
+        : Type(type)
+        , Enabled(isEnabled)
+        , m_description("")
     {
     }
 
     // Constructor for internal library usage with description
-    CSP_NO_EXPORT FeatureFlag(EFeatureFlag Type, bool IsEnabled, const csp::common::String& Description)
-        : Type(Type)
-        , Enabled(IsEnabled)
-        , Description(Description)
+    CSP_NO_EXPORT FeatureFlag(EFeatureFlag type, bool isEnabled, const csp::common::String& description)
+        : Type(type)
+        , Enabled(isEnabled)
+        , m_description(description)
     {
     }
 
-    const csp::common::String& GetDescription() { return Description; };
+    const csp::common::String& GetDescription() { return m_description; };
 
 private:
-    csp::common::String Description;
+    csp::common::String m_description;
 };
 
 /// @brief Represents definition for identifying and versioning an external service endpoint.
@@ -92,30 +92,30 @@ class CSP_API ServiceDefinition
 {
 public:
     ServiceDefinition()
-        : URI("")
-        , Version(0)
+        : m_uri("")
+        , m_version(0)
     {
     }
 
-    ServiceDefinition(const csp::common::String& InURI, const uint32_t InVersion)
-        : URI(InURI)
-        , Version(InVersion)
+    ServiceDefinition(const csp::common::String& inUri, const uint32_t inVersion)
+        : m_uri(inUri)
+        , m_version(inVersion)
     {
     }
 
     /// @brief Gets the URI for the service endpoint.
     /// @return csp::common::String : URI of the service endpoint.
-    csp::common::String GetURI() const { return URI; }
+    csp::common::String GetURI() const { return m_uri; }
     /// @brief Sets the URI for the service endpoint.
     /// @param InURI const csp::common::String& : URI for service endpoint.
-    void SetURI(const csp::common::String& InURI) { URI = InURI; }
+    void SetURI(const csp::common::String& inUri) { m_uri = inUri; }
 
     /// @brief Gets the current version of the service endpoint.
     /// @return int32_t : Representing the current version of the service endpoint.
-    int32_t GetVersion() const { return Version; }
+    int32_t GetVersion() const { return m_version; }
     /// @brief Sets the current Version for the service endpoint.
     /// @param InVersion const uint32_t : Version for service endpoint.
-    CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
+    CSP_NO_EXPORT void SetVersion(const uint32_t inVersion) { m_version = inVersion; }
 
     /// @brief Compares the service definition against services deployment status to evaluate state differences.
     /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
@@ -124,11 +124,11 @@ public:
     /// @param ServicesDeploymentStatus const csp::systems::ServicesDeploymentStatus& : The current status information against which the service
     /// definition is compared.
     /// @return bool : true if all services are available, false otherwise
-    CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const;
+    CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& servicesDeploymentStatus) const;
 
 private:
-    csp::common::String URI;
-    uint32_t Version;
+    csp::common::String m_uri;
+    uint32_t m_version;
 };
 
 /// @brief Holds supported endpoint uris used by Foundation.
@@ -198,15 +198,15 @@ public:
     /// enabled state is to be overriden. The FeatureFlag.Description property can be ignored when passing in feature flags here as this is defined by
     /// the developer who creates the flag.
     /// @return bool : True for successful initialisation.
-    static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
-        const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides);
+    static bool Initialise(const csp::common::String& endpointRootUri, const csp::common::String& tenant,
+        const csp::ClientUserAgent& clientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& featureFlagOverrides);
 
     // Hidden function for testing. Lets us pass in state that would otherwise be injected in a set way in the SystemsManager.
     // In a different, perhaps better api, this wouldn't be necessary as constructors would inject this at client level and the configurability would
     // be there by default
-    CSP_NO_EXPORT static bool InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
-        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject,
-        const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides);
+    CSP_NO_EXPORT static bool InitialiseWithInject(const csp::common::String& endpointRootUri, const csp::common::String& tenant,
+        const csp::ClientUserAgent& clientUserAgentHeader, csp::multiplayer::ISignalRConnection* signalRInject, csp::web::WebClient* webClientInject,
+        const csp::common::Optional<csp::common::Array<FeatureFlag>>& featureFlagOverrides);
 
     /// @brief This should be used at the end of the application lifecycle.
     /// Clears event queues and destroys foundation systems.
@@ -248,7 +248,7 @@ public:
     /// @brief Create an EndpointsURIs object containing URIs to the various services needed by CSP.
     /// @param EndpointRootURI const csp::common::String&: URI to the root of the cloud services.
     /// @return EndpointURIs class with deduced endpoint URIs.
-    static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI);
+    static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& endpointRootUri);
 
     /// @brief Gets a class containing all relevant Client info currently set for Foundation.
     /// @return const ClientUserAgent& : The Client Info class with current Client Info data
@@ -266,7 +266,7 @@ public:
     /// @brief Checks if a given feature flag is enabled.
     /// @param Flag EFeatureFlag : The feature flag to check
     /// @return bool : true if the feature flag is enabled, false otherwise
-    static bool IsFeatureEnabled(EFeatureFlag Flag);
+    static bool IsFeatureEnabled(EFeatureFlag flag);
 
     /// @brief Returns an array of feature flags.
     /// @return const csp::common::Array<FeatureFlag>& : An array of the defined feature flags
@@ -275,10 +275,10 @@ public:
     /// @brief Get the description of a feature flag.
     /// @param Flag EFeatureFlag : The feature flag whose description is to be retrieved
     /// @return csp::common::String : The description of the feature flag
-    static csp::common::String GetFeatureFlagDescription(EFeatureFlag Flag);
+    static csp::common::String GetFeatureFlagDescription(EFeatureFlag flag);
 
     // This is a utility function that allows flags to be added for testing purposes
-    CSP_NO_EXPORT static void __AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled, const csp::common::String Description);
+    CSP_NO_EXPORT static void __AddFeatureFlagForTesting(EFeatureFlag type, bool isEnabled, const csp::common::String description);
 
     // This is a utility function that allows clears the registered feature flags for testing purposes
     CSP_NO_EXPORT static void __ResetFeatureFlagsForTesting();
@@ -286,7 +286,7 @@ public:
 private:
     // Populates ClientUserAgentInfo data object with the relevant Client info set during initialisation
     // and generates the ClientUserAgentString which is sent as part of the Http payload.
-    static void SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader);
+    static void SetClientUserAgentInfo(const csp::ClientUserAgent& clientUserAgentHeader);
 
     static bool IsInitialised;
     static EndpointURIs* Endpoints;
@@ -300,9 +300,9 @@ private:
 };
 
 // Helper function to get function address for templates from wrappers
-CSP_API void* GetFunctionAddress(const csp::common::String& Name);
+CSP_API void* GetFunctionAddress(const csp::common::String& name);
 
 // Helper function to free allocated memory from wrappers
-CSP_API void Free(void* Pointer);
+CSP_API void Free(void* pointer);
 
 } // namespace csp

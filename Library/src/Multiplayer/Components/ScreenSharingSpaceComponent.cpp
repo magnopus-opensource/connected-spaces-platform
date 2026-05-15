@@ -90,8 +90,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema; }
 
-ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -100,9 +100,9 @@ const csp::common::String& ScreenSharingSpaceComponent::GetUserId() const
     return GetStringProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::UserId));
 }
 
-void ScreenSharingSpaceComponent::SetUserId(const csp::common::String& Value)
+void ScreenSharingSpaceComponent::SetUserId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::UserId), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::UserId), value);
 }
 
 const csp::common::String& ScreenSharingSpaceComponent::GetDefaultImageCollectionId() const
@@ -110,9 +110,9 @@ const csp::common::String& ScreenSharingSpaceComponent::GetDefaultImageCollectio
     return GetStringProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId));
 }
 
-void ScreenSharingSpaceComponent::SetDefaultImageCollectionId(const csp::common::String& Value)
+void ScreenSharingSpaceComponent::SetDefaultImageCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId), value);
 }
 
 const csp::common::String& ScreenSharingSpaceComponent::GetDefaultImageAssetId() const
@@ -120,9 +120,9 @@ const csp::common::String& ScreenSharingSpaceComponent::GetDefaultImageAssetId()
     return GetStringProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId));
 }
 
-void ScreenSharingSpaceComponent::SetDefaultImageAssetId(const csp::common::String& Value)
+void ScreenSharingSpaceComponent::SetDefaultImageAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId), value);
 }
 
 float ScreenSharingSpaceComponent::GetAttenuationRadius() const
@@ -130,9 +130,9 @@ float ScreenSharingSpaceComponent::GetAttenuationRadius() const
     return GetFloatProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::AttenuationRadius));
 }
 
-void ScreenSharingSpaceComponent::SetAttenuationRadius(float Value)
+void ScreenSharingSpaceComponent::SetAttenuationRadius(float value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::AttenuationRadius), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::AttenuationRadius), value);
 }
 
 /* ITransformComponent */
@@ -142,9 +142,9 @@ const csp::common::Vector3& ScreenSharingSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(ScreenSharingPropertyKeys::Position));
 }
 
-void ScreenSharingSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void ScreenSharingSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& ScreenSharingSpaceComponent::GetRotation() const
@@ -152,9 +152,9 @@ const csp::common::Vector4& ScreenSharingSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(ScreenSharingPropertyKeys::Rotation));
 }
 
-void ScreenSharingSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void ScreenSharingSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& ScreenSharingSpaceComponent::GetScale() const
@@ -162,46 +162,46 @@ const csp::common::Vector3& ScreenSharingSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(ScreenSharingPropertyKeys::Scale));
 }
 
-void ScreenSharingSpaceComponent::SetScale(const csp::common::Vector3& Value)
+void ScreenSharingSpaceComponent::SetScale(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::Scale), value);
 }
 
 SpaceTransform ScreenSharingSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void ScreenSharingSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void ScreenSharingSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 /* IVisibleComponent */
 
 bool ScreenSharingSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVisible)); }
 
-void ScreenSharingSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVisible), Value); }
+void ScreenSharingSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVisible), value); }
 
 bool ScreenSharingSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible)); }
 
-void ScreenSharingSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible), Value); }
+void ScreenSharingSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible), value); }
 
 bool ScreenSharingSpaceComponent::GetIsVirtualVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible));
 }
 
-void ScreenSharingSpaceComponent::SetIsVirtualVisible(bool Value)
+void ScreenSharingSpaceComponent::SetIsVirtualVisible(bool value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible), value);
 }
 
 /* IShadowCaster */
@@ -211,9 +211,9 @@ bool ScreenSharingSpaceComponent::GetIsShadowCaster() const
     return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster));
 }
 
-void ScreenSharingSpaceComponent::SetIsShadowCaster(bool Value)
+void ScreenSharingSpaceComponent::SetIsShadowCaster(bool value)
 {
-    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster), Value);
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster), value);
 }
 
 } // namespace csp::multiplayer

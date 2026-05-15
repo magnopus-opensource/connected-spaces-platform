@@ -39,13 +39,13 @@ namespace csp::multiplayer
 {
 
 CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(
-    const std::string& MultiplayerUri, const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept
-    : PocoWebSocket(nullptr)
-    , StopFlag(false)
-    , MultiplayerUri { MultiplayerUri }
-    , AccessToken { AccessToken }
-    , DeviceId { DeviceId }
-    , LogSystem(LogSystem)
+    const std::string& multiplayerUri, const std::string& accessToken, const std::string& deviceId, csp::common::LogSystem& logSystem) noexcept
+    : m_pocoWebSocket(nullptr)
+    , m_stopFlag(false)
+    , m_multiplayerUri { multiplayerUri }
+    , m_accessToken { accessToken }
+    , m_deviceId { deviceId }
+    , m_logSystem(logSystem)
 {
 }
 
@@ -55,39 +55,39 @@ CSPWebSocketClientPOCO::~CSPWebSocketClientPOCO()
     Stop(nullptr);
 }
 
-CSPWebSocketClientPOCO::ParsedURIInfo CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(const std::string& MultiplayerServiceUriEndpoint)
+CSPWebSocketClientPOCO::ParsedURIInfo CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(const std::string& multiplayerServiceUriEndpoint)
 {
-    Poco::URI EndpointURI { MultiplayerServiceUriEndpoint.c_str() };
+    Poco::URI endpointUri { multiplayerServiceUriEndpoint.c_str() };
 
     // It's common folk may provide a "localhost:port/path/path" sort of string, with omits the protocol, just make sure one's there.
-    if ((EndpointURI.getScheme() != "https") && (EndpointURI.getScheme() != "http"))
+    if ((endpointUri.getScheme() != "https") && (endpointUri.getScheme() != "http"))
     {
         throw std::runtime_error("CSPWebSocketclientPOCO::ParsedURIInfo, Expected `https` or `http` scheme, found neither.");
     }
 
-    CSPWebSocketClientPOCO::ParsedURIInfo Out;
-    Out.Endpoint = EndpointURI.toString();
-    Out.Protocol = EndpointURI.getScheme();
-    Out.Domain = EndpointURI.getHost();
-    Out.Path = EndpointURI.getPath();
-    Out.Port = EndpointURI.getPort();
+    CSPWebSocketClientPOCO::ParsedURIInfo out;
+    out.Endpoint = endpointUri.toString();
+    out.Protocol = endpointUri.getScheme();
+    out.Domain = endpointUri.getHost();
+    out.Path = endpointUri.getPath();
+    out.Port = endpointUri.getPort();
 
-    return Out;
+    return out;
 }
 
-void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler Callback)
+void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler callback)
 {
     CSP_PROFILE_SCOPED();
 
     try
     {
-        CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint = ParseMultiplayerServiceUriEndPoint(MultiplayerUri);
+        CSPWebSocketClientPOCO::ParsedURIInfo parsedEndpoint = ParseMultiplayerServiceUriEndPoint(m_multiplayerUri);
 
-        auto domain = ParsedEndpoint.Domain;
-        auto protocol = ParsedEndpoint.Protocol;
-        auto path = ParsedEndpoint.Path;
-        auto endpoint = ParsedEndpoint.Endpoint;
-        auto port = ParsedEndpoint.Port;
+        auto domain = parsedEndpoint.Domain;
+        auto protocol = parsedEndpoint.Protocol;
+        auto path = parsedEndpoint.Path;
+        auto endpoint = parsedEndpoint.Endpoint;
+        auto port = parsedEndpoint.Port;
 
         std::unique_ptr<Poco::Net::HTTPClientSession> cs;
 
@@ -103,124 +103,124 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         Poco::Net::HTTPResponse response;
 
-        char Str[1024];
-        snprintf(Str, 1024, "Bearer %s", AccessToken.c_str());
-        request.set("Authorization", Str);
+        char str[1024];
+        snprintf(str, 1024, "Bearer %s", m_accessToken.c_str());
+        request.set("Authorization", str);
 
-        StopFlag = false;
+        m_stopFlag = false;
 
-        PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
+        m_pocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
         // Receive worker thread
-        ReceiveThread = std::thread([this]() { ReceiveThreadFunc(); });
+        m_receiveThread = std::thread([this]() { ReceiveThreadFunc(); });
 
-        Callback(true);
+        callback(true);
     }
     catch (std::exception& e)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, e.what());
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, e.what());
 
-        Callback(false);
+        callback(false);
     }
 }
 
-void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
+void CSPWebSocketClientPOCO::Stop(CallbackHandler callback)
 {
     CSP_PROFILE_SCOPED();
 
     // Stop can be called from multiple threads
-    Mutex.lock();
+    m_mutex.lock();
 
-    if (PocoWebSocket && !StopFlag)
+    if (m_pocoWebSocket && !m_stopFlag)
     {
-        StopFlag = true;
+        m_stopFlag = true;
 
         // We need to unlock here to prevent a deadlock
         // If the ReceiveThread is locked then the other thread will never finish because itd will be waiting for the ReceiveThread to join
-        Mutex.unlock();
+        m_mutex.unlock();
 
         // POCO doesn't like close being called in the middle of
         // receiveFrame, so wait for receive thread to close
-        if (std::this_thread::get_id() != ReceiveThread.get_id())
+        if (std::this_thread::get_id() != m_receiveThread.get_id())
         {
-            ReceiveThread.join();
+            m_receiveThread.join();
         }
         else
         {
             // Safe to detach here as we know no socket polling will be done if we get here, as this is being called from the callback that was passed
             // to Receive
-            ReceiveThread.detach();
+            m_receiveThread.detach();
         }
 
         try
         {
-            PocoWebSocket->close();
+            m_pocoWebSocket->close();
         }
         catch (const std::exception&)
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to close socket.");
+            m_logSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to close socket.");
         }
 
-        delete (PocoWebSocket);
-        PocoWebSocket = nullptr;
+        delete (m_pocoWebSocket);
+        m_pocoWebSocket = nullptr;
     }
     else
     {
-        Mutex.unlock();
+        m_mutex.unlock();
     }
 
-    if (Callback)
+    if (callback)
     {
-        Callback(true);
+        callback(true);
     }
 }
 
-void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Callback)
+void CSPWebSocketClientPOCO::Send(const std::string& message, CallbackHandler callback)
 {
     CSP_PROFILE_SCOPED();
 
-    assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Send().");
+    assert(m_pocoWebSocket && "Web socket not created! Please call Start() before calling Send().");
 
-    int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
-    auto Remaining = Message.size();
-    auto Succeeded = true;
+    int flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
+    auto remaining = message.size();
+    auto succeeded = true;
 
     try
     {
-        while (Remaining > 0)
+        while (remaining > 0)
         {
-            auto SentCount = PocoWebSocket->sendFrame(Message.data(), static_cast<int>(Message.size()), Flags);
+            auto sentCount = m_pocoWebSocket->sendFrame(message.data(), static_cast<int>(message.size()), flags);
 
-            Remaining -= SentCount;
+            remaining -= sentCount;
 
-            if (SentCount <= 0)
+            if (sentCount <= 0)
             {
-                Succeeded = false;
+                succeeded = false;
                 break;
             }
         }
     }
     catch (const std::exception&)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to send data to socket.");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to send data to socket.");
     }
 
-    Callback(Succeeded);
+    callback(succeeded);
 }
 
-void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
+void CSPWebSocketClientPOCO::Receive(ReceiveHandler callback)
 {
     CSP_PROFILE_SCOPED();
 
-    if (!StopFlag)
+    if (!m_stopFlag)
     {
-        assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Receive().");
+        assert(m_pocoWebSocket && "Web socket not created! Please call Start() before calling Receive().");
 
-        ReceiveCallback = Callback;
-        ReceiveReady = true;
+        m_receiveCallback = callback;
+        m_receiveReady = true;
     }
-    else if (Callback)
+    else if (callback)
     {
-        Callback("", false);
+        callback("", false);
     }
 }
 
@@ -228,56 +228,56 @@ void CSPWebSocketClientPOCO::__CauseFailure() { HandleReceiveError("__CauseFailu
 
 void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 {
-    bool HandshakeReceived = false;
-    auto* Buffer = (char*)std::malloc(INITIAL_BUFFER_SIZE);
-    auto CurrentBufferSize = INITIAL_BUFFER_SIZE;
-    auto CurrentBufferIndex = 0;
-    auto SkipWait = false;
-    auto SocketPollTimeout = Poco::Timespan(1000);
-    auto ShouldRead = true;
+    bool handshakeReceived = false;
+    auto* buffer = (char*)std::malloc(INITIAL_BUFFER_SIZE);
+    auto currentBufferSize = INITIAL_BUFFER_SIZE;
+    auto currentBufferIndex = 0;
+    auto skipWait = false;
+    auto socketPollTimeout = Poco::Timespan(1000);
+    auto shouldRead = true;
 
     for (;;)
     {
         CSP_PROFILE_SCOPED();
 
-        if (StopFlag)
+        if (m_stopFlag)
         {
             return;
         }
 
-        if (!SkipWait)
+        if (!skipWait)
         {
-            while (!ReceiveReady)
+            while (!m_receiveReady)
             {
                 std::this_thread::sleep_for(500ns);
 
-                if (StopFlag)
+                if (m_stopFlag)
                 {
                     return;
                 }
             }
         }
 
-        SkipWait = false;
+        skipWait = false;
 
-        if (ShouldRead)
+        if (shouldRead)
         {
             // Resize buffer if needed
-            if (CurrentBufferIndex + RECEIVE_BLOCK_SIZE > CurrentBufferSize)
+            if (currentBufferIndex + RECEIVE_BLOCK_SIZE > currentBufferSize)
             {
-                auto* NewBuffer = std::realloc(Buffer, CurrentBufferSize * 2);
-                Buffer = static_cast<char*>(NewBuffer);
-                CurrentBufferSize = CurrentBufferSize * 2;
-                LogSystem.LogMsg(csp::common::LogLevel::Log, fmt::format("Resizing receive buffer to {}", CurrentBufferSize).c_str());
+                auto* newBuffer = std::realloc(buffer, currentBufferSize * 2);
+                buffer = static_cast<char*>(newBuffer);
+                currentBufferSize = currentBufferSize * 2;
+                m_logSystem.LogMsg(csp::common::LogLevel::Log, fmt::format("Resizing receive buffer to {}", currentBufferSize).c_str());
             }
 
             try
             {
-                while (!PocoWebSocket->poll(SocketPollTimeout, Poco::Net::WebSocket::SELECT_READ))
+                while (!m_pocoWebSocket->poll(socketPollTimeout, Poco::Net::WebSocket::SELECT_READ))
                 {
                     std::this_thread::sleep_for(500ns);
 
-                    if (StopFlag)
+                    if (m_stopFlag)
                     {
                         return;
                     }
@@ -285,93 +285,93 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             }
             catch (const std::exception& e)
             {
-                std::free(Buffer);
+                std::free(buffer);
                 HandleReceiveError(e.what());
 
                 return;
             }
 
-            int Flags;
-            int Received = 0;
+            int flags;
+            int received = 0;
 
             try
             {
-                Received = PocoWebSocket->receiveFrame(Buffer + CurrentBufferIndex, RECEIVE_BLOCK_SIZE, Flags);
+                received = m_pocoWebSocket->receiveFrame(buffer + currentBufferIndex, RECEIVE_BLOCK_SIZE, flags);
             }
             catch (const std::exception& e)
             {
-                std::free(Buffer);
+                std::free(buffer);
                 HandleReceiveError(e.what());
 
                 return;
             }
 
-            if (Received == 0)
+            if (received == 0)
             {
-                std::free(Buffer);
+                std::free(buffer);
                 HandleReceiveError("Error: Socket closed by remote host.");
 
                 return;
             }
 
-            assert(!(Flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_TEXT) && "The JSON hub protocol is currently not supported!");
+            assert(!(flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_TEXT) && "The JSON hub protocol is currently not supported!");
 
-            if (Flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_CLOSE)
+            if (flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_CLOSE)
             {
-                std::free(Buffer);
+                std::free(buffer);
                 HandleReceiveError("Error: Socket closed.");
 
                 return;
             }
 
-            CurrentBufferIndex += Received;
+            currentBufferIndex += received;
         }
 
-        if (StopFlag)
+        if (m_stopFlag)
         {
             return;
         }
 
         // Handshake needs to be handled differently as it is in JSON format
-        if (!HandshakeReceived)
+        if (!handshakeReceived)
         {
             int i;
 
-            for (i = 0; i < CurrentBufferIndex; ++i)
+            for (i = 0; i < currentBufferIndex; ++i)
             {
                 // JSON messages are terminated with the 0x1E character
-                if (Buffer[i] == 0x1E)
+                if (buffer[i] == 0x1E)
                 {
                     break;
                 }
             }
 
             // Read more data if we haven't found the message terminator yet
-            if (i == CurrentBufferIndex)
+            if (i == currentBufferIndex)
             {
-                SkipWait = true;
-                ShouldRead = true;
+                skipWait = true;
+                shouldRead = true;
                 continue;
             }
 
-            std::string CallbackMessage(Buffer, i + 1);
+            std::string callbackMessage(buffer, i + 1);
 
-            if (i < (CurrentBufferIndex - (i + 1)))
+            if (i < (currentBufferIndex - (i + 1)))
             {
-                auto Remaining = CurrentBufferIndex - (i + 1);
-                memmove(Buffer, Buffer + i + 1, Remaining);
-                CurrentBufferIndex = Remaining;
-                ShouldRead = false;
+                auto remaining = currentBufferIndex - (i + 1);
+                memmove(buffer, buffer + i + 1, remaining);
+                currentBufferIndex = remaining;
+                shouldRead = false;
             }
             else
             {
-                CurrentBufferIndex = 0;
-                ShouldRead = true;
+                currentBufferIndex = 0;
+                shouldRead = true;
             }
 
-            HandshakeReceived = true;
-            ReceiveReady = false;
-            ReceiveCallback(CallbackMessage, true);
+            handshakeReceived = true;
+            m_receiveReady = false;
+            m_receiveCallback(callbackMessage, true);
 
             continue;
         }
@@ -381,14 +381,14 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
          * Max number of bytes for message length is 5. Let's ensure we have at least 5 before we try to read length.
          */
 
-        auto Length = 0;
+        auto length = 0;
         int i;
 
         for (i = 0; i < 5; ++i)
         {
-            Length |= (Buffer[i] & 0x7F) << (i * 7);
+            length |= (buffer[i] & 0x7F) << (i * 7);
 
-            if ((Buffer[i] & 0x80) == 0)
+            if ((buffer[i] & 0x80) == 0)
             {
                 ++i;
                 break;
@@ -396,10 +396,10 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
         }
 
         // Continue reading if we don't have the entire message yet
-        if (Length > CurrentBufferIndex - i)
+        if (length > currentBufferIndex - i)
         {
-            SkipWait = true;
-            ShouldRead = true;
+            skipWait = true;
+            shouldRead = true;
             continue;
         }
 
@@ -407,37 +407,37 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
          * TODO: Look into modifying SignalR to process byte arrays instead of strings, and re-use a buffer for holding the
          *  message to be processed
          */
-        std::string CallbackMessage(Buffer, Length + i);
-        ReceiveReady = false;
+        std::string callbackMessage(buffer, length + i);
+        m_receiveReady = false;
 
         // Move remaining data to beginning of buffer
-        if (Length < CurrentBufferIndex - i)
+        if (length < currentBufferIndex - i)
         {
-            auto Remaining = (CurrentBufferIndex - i) - Length;
-            memmove(Buffer, Buffer + Length + i, Remaining);
-            CurrentBufferIndex = Remaining;
+            auto remaining = (currentBufferIndex - i) - length;
+            memmove(buffer, buffer + length + i, remaining);
+            currentBufferIndex = remaining;
             // If we have remaining data, we should try to process it the next time Receive is called without reading from the socket
-            ShouldRead = false;
+            shouldRead = false;
         }
         else
         {
-            CurrentBufferIndex = 0;
-            ShouldRead = true;
+            currentBufferIndex = 0;
+            shouldRead = true;
         }
 
-        auto Callback = ReceiveCallback;
-        Callback(CallbackMessage, true);
+        auto callback = m_receiveCallback;
+        callback(callbackMessage, true);
     }
 }
 
-void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)
+void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& message)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::Error, Message.c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::Error, message.c_str());
 
-    if (ReceiveCallback)
+    if (m_receiveCallback)
     {
-        ReceiveCallback("", false);
-        ReceiveCallback = nullptr;
+        m_receiveCallback("", false);
+        m_receiveCallback = nullptr;
     }
 }
 

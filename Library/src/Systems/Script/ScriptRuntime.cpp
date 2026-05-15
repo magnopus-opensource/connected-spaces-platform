@@ -43,170 +43,170 @@ inline std::optional<std::string> ReadScriptModuleFile(std::filesystem::path con
 }
 #endif
 
-ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
-    : TheScriptSystem(InScriptSystem)
+ScriptRuntime::ScriptRuntime(ScriptSystem* inScriptSystem)
+    : TheScriptSystem(inScriptSystem)
     , Runtime(new qjs::Runtime())
 {
 }
 
 ScriptRuntime::~ScriptRuntime()
 {
-    for (auto Context : Contexts)
+    for (auto context : Contexts)
     {
-        delete (Context.second);
+        delete (context.second);
     }
 
     delete (Runtime);
 }
 
-bool ScriptRuntime::AddContext(int64_t ContextId)
+bool ScriptRuntime::AddContext(int64_t contextId)
 {
-    ContextMap::iterator It = Contexts.find(ContextId);
+    ContextMap::iterator it = Contexts.find(contextId);
 
-    if (It == Contexts.end())
+    if (it == Contexts.end())
     {
-        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId);
-        Contexts.insert(ContextMap::value_type(ContextId, TheScriptContext));
+        ScriptContext* theScriptContext = new ScriptContext(TheScriptSystem, Runtime, contextId);
+        Contexts.insert(ContextMap::value_type(contextId, theScriptContext));
         return true;
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Context %lld already exists\n", ContextId);
+        CSP_LOG_ERROR_FORMAT("Context %lld already exists\n", contextId);
     }
 
     return false;
 }
 
-bool ScriptRuntime::RemoveContext(int64_t ContextId)
+bool ScriptRuntime::RemoveContext(int64_t contextId)
 {
-    ContextMap::iterator It = Contexts.find(ContextId);
+    ContextMap::iterator it = Contexts.find(contextId);
 
-    if (It != Contexts.end())
+    if (it != Contexts.end())
     {
-        delete (It->second);
-        Contexts.erase(It);
+        delete (it->second);
+        Contexts.erase(it);
         return true;
     }
 
     return false;
 }
 
-ScriptContext* ScriptRuntime::GetContext(int64_t ContextId)
+ScriptContext* ScriptRuntime::GetContext(int64_t contextId)
 {
-    ContextMap::iterator It = Contexts.find(ContextId);
+    ContextMap::iterator it = Contexts.find(contextId);
 
-    if (It != Contexts.end())
+    if (it != Contexts.end())
     {
-        return It->second;
+        return it->second;
     }
 
     return nullptr;
 }
 
-bool ScriptRuntime::BindContext(int64_t ContextId)
+bool ScriptRuntime::BindContext(int64_t contextId)
 {
-    ScriptContext* Context = GetContext(ContextId);
-    if (Context)
+    ScriptContext* context = GetContext(contextId);
+    if (context)
     {
-        BindContext(Context);
+        BindContext(context);
         return true;
     }
 
     return false;
 }
 
-bool ScriptRuntime::ResetContext(int64_t ContextId)
+bool ScriptRuntime::ResetContext(int64_t contextId)
 {
-    ScriptContext* Context = GetContext(ContextId);
-    if (Context)
+    ScriptContext* context = GetContext(contextId);
+    if (context)
     {
-        ResetContext(Context);
+        ResetContext(context);
         return true;
     }
 
     return false;
 }
 
-bool ScriptRuntime::ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName)
+bool ScriptRuntime::ExistsInContext(int64_t contextId, const csp::common::String& objectName)
 {
-    ScriptContext* Context = GetContext(ContextId);
-    if (Context)
+    ScriptContext* context = GetContext(contextId);
+    if (context)
     {
-        return Context->ExistsInContext(ObjectName);
+        return context->ExistsInContext(objectName);
     }
 
     return false;
 }
 
-void ScriptRuntime::RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.push_back(ScriptBinding); }
+void ScriptRuntime::RegisterScriptBinding(csp::common::IScriptBinding* scriptBinding) { Bindings.push_back(scriptBinding); }
 
-void ScriptRuntime::UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.remove(ScriptBinding); }
+void ScriptRuntime::UnregisterScriptBinding(csp::common::IScriptBinding* scriptBinding) { Bindings.remove(scriptBinding); }
 
-void ScriptRuntime::BindContext(ScriptContext* Context)
+void ScriptRuntime::BindContext(ScriptContext* context)
 {
-    for (auto Binding : Bindings)
+    for (auto binding : Bindings)
     {
-        Binding->Bind(Context->GetId(), *TheScriptSystem);
+        binding->Bind(context->GetId(), *TheScriptSystem);
     }
 }
 
-void ScriptRuntime::ResetContext(ScriptContext* Context) { Context->Reset(); }
+void ScriptRuntime::ResetContext(ScriptContext* context) { context->Reset(); }
 
-void ScriptRuntime::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
+void ScriptRuntime::SetModuleSource(csp::common::String moduleUrl, csp::common::String source)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
-    Modules[ModuleUrl.c_str()] = Source.c_str();
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", moduleUrl.c_str());
+    Modules[moduleUrl.c_str()] = source.c_str();
 }
 
-void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
+void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& moduleUrl, const csp::common::String& moduleUrlAlias)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", moduleUrl.c_str(), moduleUrlAlias.c_str());
 
-    UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
+    UrlAliasMap::iterator it = UrlAliases.find(moduleUrl.c_str());
 
-    if (It == UrlAliases.end())
+    if (it == UrlAliases.end())
     {
-        UrlAliases.insert(UrlAliasMap::value_type(ModuleUrl.c_str(), ModuleUrlAlias.c_str()));
+        UrlAliases.insert(UrlAliasMap::value_type(moduleUrl.c_str(), moduleUrlAlias.c_str()));
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Module alias %s-%s already exists\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+        CSP_LOG_ERROR_FORMAT("Module alias %s-%s already exists\n", moduleUrl.c_str(), moduleUrlAlias.c_str());
     }
 }
 
-bool ScriptRuntime::GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias)
+bool ScriptRuntime::GetModuleUrlAlias(const csp::common::String& moduleUrl, csp::common::String& outModuleUrlAlias)
 {
-    bool FoundAlias = false;
+    bool foundAlias = false;
 
-    UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
+    UrlAliasMap::iterator it = UrlAliases.find(moduleUrl.c_str());
 
-    if (It == UrlAliases.end())
+    if (it == UrlAliases.end())
     {
-        OutModuleUrlAlias = ModuleUrl;
+        outModuleUrlAlias = moduleUrl;
     }
     else
     {
-        OutModuleUrlAlias = It->second.c_str();
-        FoundAlias = true;
+        outModuleUrlAlias = it->second.c_str();
+        foundAlias = true;
     }
 
-    return FoundAlias;
+    return foundAlias;
 }
 
-void ScriptRuntime::ClearModuleSource(csp::common::String ModuleUrl) { Modules.erase(ModuleUrl.c_str()); }
+void ScriptRuntime::ClearModuleSource(csp::common::String moduleUrl) { Modules.erase(moduleUrl.c_str()); }
 
-csp::common::String ScriptRuntime::GetModuleSource(csp::common::String ModuleUrl)
+csp::common::String ScriptRuntime::GetModuleSource(csp::common::String moduleUrl)
 {
-    ModuleSourceMap::const_iterator ModuleIt = Modules.find(ModuleUrl.c_str());
+    ModuleSourceMap::const_iterator moduleIt = Modules.find(moduleUrl.c_str());
 
-    if (ModuleIt != Modules.end())
+    if (moduleIt != Modules.end())
     {
-        return csp::common::String(ModuleIt->second.c_str());
+        return csp::common::String(moduleIt->second.c_str());
     }
 #if defined(CSP_SCRIPT_ALLOW_FILE_MODULES)
     else
     {
-        std::optional<std::string> ModuleSource = ReadScriptModuleFile(ModuleUrl.c_str());
+        std::optional<std::string> ModuleSource = ReadScriptModuleFile(moduleUrl.c_str());
 
         if (ModuleSource.has_value())
         {

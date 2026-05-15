@@ -24,7 +24,7 @@ class AudioSpaceComponent;
 class AudioSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent = nullptr);
+    AudioSpaceComponentScriptInterface(AudioSpaceComponent* inComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(float, Volume);
 };

@@ -27,11 +27,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringFormatTests, StringFormatTest)
 {
     try
     {
-        String Instance = StringFormat("%c %d %i %.1f %s", '1', 2, 3, 4.0f, "five");
+        String instance = StringFormat("%c %d %i %.1f %s", '1', 2, 3, 4.0f, "five");
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_NE(Instance.c_str(), nullptr);
-        EXPECT_EQ(Instance, "1 2 3 4.0 five");
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_NE(instance.c_str(), nullptr);
+        EXPECT_EQ(instance, "1 2 3 4.0 five");
     }
     catch (...)
     {

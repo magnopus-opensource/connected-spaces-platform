@@ -49,17 +49,17 @@ CSP_START_IGNORE
 class AuthContext : public csp::common::IAuthContext
 {
 public:
-    AuthContext(csp::services::ApiBase* AuthenticationAPI, csp::common::LoginState& LoginState);
+    AuthContext(csp::services::ApiBase* authenticationApi, csp::common::LoginState& loginState);
 
     const csp::common::LoginState& GetLoginState() const override;
 
     /// @brief Refreshes the sessions RefreshToken.
     /// This is currently used internally by the web client.
-    void RefreshToken(std::function<void(bool)> Callback) override;
+    void RefreshToken(std::function<void(bool)> callback) override;
 
 private:
-    csp::services::ApiBase* AuthenticationAPI;
-    csp::common::LoginState* LoginState;
+    csp::services::ApiBase* m_authenticationApi;
+    csp::common::LoginState* m_loginState;
 };
 CSP_END_IGNORE
 
@@ -87,7 +87,7 @@ public:
     /// The expiration time is in OSI format {Year}-{Month}-{Date}T{Hour}:{Min}:{Sec}
     /// For C#: register a callback to the OnNewLoginTokenReceived event
     /// @param Callback LoginTokenInfoResultCallback : callback that gets called as described above
-    CSP_EVENT void SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback);
+    CSP_EVENT void SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback callback);
 
     /// @brief Log in to Magnopus Cloud Services services using an email-password combination.
     /// @param Email csp::common::String
@@ -102,9 +102,9 @@ public:
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
     /// @pre Email must not be empty.
     /// @pre Password must not be empty.
-    CSP_ASYNC_RESULT void Login(const csp::common::String& Email, const csp::common::String& Password, bool CreateMultiplayerConnection,
-        const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
-        LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void Login(const csp::common::String& email, const csp::common::String& password, bool createMultiplayerConnection,
+        const csp::common::Optional<bool>& userHasVerifiedAge, const csp::common::Optional<TokenOptions>& tokenOptions,
+        LoginStateResultCallback callback);
 
     /// @brief Resume a previous session for the associated user ID using a refresh token
     /// The refresh token can be obtained after registering a callback with `SetNewLoginTokenReceivedCallback` and logging in regularly.
@@ -118,8 +118,8 @@ public:
     /// be ignored.
     /// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
     /// @pre UserId must not be empty.
-    CSP_ASYNC_RESULT void LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken,
-        bool CreateMultiplayerConnection, const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void LoginWithRefreshToken(const csp::common::String& userId, const csp::common::String& refreshToken,
+        bool createMultiplayerConnection, const csp::common::Optional<TokenOptions>& tokenOptions, LoginStateResultCallback callback);
 
     /// @brief Log in to Magnopus Cloud Services as a guest.
     /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
@@ -130,8 +130,8 @@ public:
     /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void LoginAsGuest(bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
-        const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void LoginAsGuest(bool createMultiplayerConnection, const csp::common::Optional<bool>& userHasVerifiedAge,
+        const csp::common::Optional<TokenOptions>& tokenOptions, LoginStateResultCallback callback);
 
     /// @brief Log in to Magnopus Cloud Services as a guest, allowing the backend to defer profile creation and perform other optimizations.
     /// This login method is intended only for use with offline realtime engines, and as such does not start a multiplayer connection.
@@ -143,7 +143,7 @@ public:
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void LoginAsGuestWithDeferredProfileCreation(
-        const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
+        const csp::common::Optional<bool>& userHasVerifiedAge, LoginStateResultCallback callback);
 
     /// @brief API to retrieve the Connected Spaces Platform supported 3rd party authentication providers
     /// @return Array of Connected Spaces Platform supported 3rd party authentication providers
@@ -163,8 +163,8 @@ public:
     /// @param ClientType : An optional parameter that allows the client to specify their platform for the
     /// third party authentication flow. This is used for some providers to determine the format of the Authorize URL.
     /// @param Callback : callback that contains the Authorize URL that the Client should be navigating to for step 2.
-    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL,
-        const csp::common::Optional<EThirdPartyPlatform>& ClientType, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders authProvider, const csp::common::String& redirectUrl,
+        const csp::common::Optional<EThirdPartyPlatform>& clientType, StringResultCallback callback);
 
     /// @brief Part two of the 3rd party authentication flow
     /// Note: The steps are as follows:
@@ -184,13 +184,13 @@ public:
     /// The default token expiry length is configured by MCS and defaults to 30 minutes. The value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback : callback that contains the result of the 3rd party authentication operation.
-    CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
-        const csp::common::String& ThirdPartyStateId, bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
-        const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& thirdPartyToken,
+        const csp::common::String& thirdPartyStateId, bool createMultiplayerConnection, const csp::common::Optional<bool>& userHasVerifiedAge,
+        const csp::common::Optional<TokenOptions>& tokenOptions, LoginStateResultCallback callback);
 
     /// @brief Logout from Magnopus Cloud Services.
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void Logout(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void Logout(NullResultCallback callback);
 
     // Profile
 
@@ -203,22 +203,22 @@ public:
     /// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
     /// @param InviteToken csp::common::Optional<csp::common::String> : A token provided to the user that can be used to auto-confirm their account
     /// @param Callback ProfileResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateUser(const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email,
-        const csp::common::String& Password, bool ReceiveNewsletter, bool UserHasVerifiedAge,
-        const csp::common::Optional<csp::common::String>& RedirectUrl, const csp::common::Optional<csp::common::String>& InviteToken,
-        ProfileResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateUser(const csp::common::Optional<csp::common::String>& displayName, const csp::common::String& email,
+        const csp::common::String& password, bool receiveNewsletter, bool userHasVerifiedAge,
+        const csp::common::Optional<csp::common::String>& redirectUrl, const csp::common::Optional<csp::common::String>& inviteToken,
+        ProfileResultCallback callback);
 
     /// @brief Upgrade guest user to full user profile.
     /// @param DisplayName csp::common::String : user display name associated with the new profile
     /// @param Email csp::common::String : email address associated with the new profile
     /// @param Password csp::common::String : password associated with the new profile
     /// @param Callback ProfileResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpgradeGuestAccount(const csp::common::String& DisplayName, const csp::common::String& Email,
-        const csp::common::String& Password, ProfileResultCallback Callback);
+    CSP_ASYNC_RESULT void UpgradeGuestAccount(const csp::common::String& displayName, const csp::common::String& email,
+        const csp::common::String& password, ProfileResultCallback callback);
 
     /// @brief Send a confirmation email.
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void ConfirmUserEmail(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void ConfirmUserEmail(NullResultCallback callback);
 
     /// @brief Reset the users password.
     /// @param Token csp::common::String : Token received through email by user
@@ -226,19 +226,19 @@ public:
     /// @param NewPassword csp::common::String : The new password for the associated account
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void ResetUserPassword(
-        const csp::common::String& Token, const csp::common::String& UserId, const csp::common::String& NewPassword, NullResultCallback Callback);
+        const csp::common::String& token, const csp::common::String& userId, const csp::common::String& newPassword, NullResultCallback callback);
 
     /// @brief Updates the user display name information.
     /// @param UserId csp::common::String : id of the user that will be updated
     /// @param NewUserDisplayName csp::common::String : new display name that will replace the previous value
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateUserDisplayName(
-        const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback);
+        const csp::common::String& userId, const csp::common::String& newUserDisplayName, NullResultCallback callback);
 
     /// @brief Delete the user. Note that you need permission to be able to delete the user (You can delete the user you are logged in as).
     /// @param UserId csp::common::String : id of the user that will be deleted
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteUser(const csp::common::String& UserId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteUser(const csp::common::String& userId, NullResultCallback callback);
 
     /// @brief Allow a user to reset their password if forgotten by providing an email address.
     /// @param Email csp::common::String : account to recover password for
@@ -246,42 +246,42 @@ public:
     /// @param EmailLinkUrl csp::common::Optional<csp::common::String> : the URL inside the reset email sent to the user
     /// @Param UseTokenChangePasswordUrl bool : if true the link in the email will direct the user to the Token Change URL
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void ForgotPassword(const csp::common::String& Email, const csp::common::Optional<csp::common::String>& RedirectUrl,
-        const csp::common::Optional<csp::common::String>& EmailLinkUrl, bool UseTokenChangePasswordUrl, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void ForgotPassword(const csp::common::String& email, const csp::common::Optional<csp::common::String>& redirectUrl,
+        const csp::common::Optional<csp::common::String>& emailLinkUrl, bool useTokenChangePasswordUrl, NullResultCallback callback);
 
     /// @brief Get a user profile by user ID.
     /// @param InUserId csp::common::String : the ID of the user to get
     /// @param Callback ProfileResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetProfileByUserId(const csp::common::String& InUserId, ProfileResultCallback Callback);
+    CSP_ASYNC_RESULT void GetProfileByUserId(const csp::common::String& inUserId, ProfileResultCallback callback);
 
     [[deprecated("Deprecated in favour of GetBasicProfilesByUserId")]] CSP_ASYNC_RESULT void GetProfilesByUserId(
-        const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
+        const csp::common::Array<csp::common::String>& inUserIds, BasicProfilesResultCallback callback);
 
     /// @brief Get a list of minimal profiles (avatarId, personalityType, and platform) by user IDs.
     /// @param InUserIds csp::common::Array<csp::common::String> : an array of user IDs to search for users by
     /// @param Callback BasicProfilesResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
+    CSP_ASYNC_RESULT void GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& inUserIds, BasicProfilesResultCallback callback);
 
     /// @brief Ping Magnopus Cloud Services
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void Ping(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void Ping(NullResultCallback callback);
 
     /// @brief Re-send user verification email
     /// @param InEmail csp::common::String : User's email address
     /// @param InRedirectUrl csp::common::Optional<csp::common::String> : URL to redirect user to after they have registered
     /// @param Callback NullResultCallback : Callback to call when response is received
     CSP_ASYNC_RESULT void ResendVerificationEmail(
-        const csp::common::String& InEmail, const csp::common::Optional<csp::common::String>& InRedirectUrl, NullResultCallback Callback);
+        const csp::common::String& inEmail, const csp::common::Optional<csp::common::String>& inRedirectUrl, NullResultCallback callback);
 
     /// @brief Get the Customer Portal Url for a user from Stripe
     /// @param UserId csp::common::String : the id of the user associated with the customer portal
     /// @param Callback StringResultCallback : callback that contains the customer portal URL of the User
-    CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& UserId, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& userId, StringResultCallback callback);
 
     /// @brief Get the checkout session Url for a user from Stripe
     /// @param Tier csp::systems::TierNames : the tier of the checkout session needed
     /// @param Callback StringResultCallback : callback that contains the checkout session URL of the tier
-    CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames tier, StringResultCallback callback);
 
     // Callback to receive access permission changes Data when a message is sent.
     typedef std::function<void(const csp::common::AccessControlChangedNetworkEventData&)> UserPermissionsChangedCallbackHandler;
@@ -292,49 +292,49 @@ public:
     /// Clients can use this event to reflect access levels in real time.
     ///
     /// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
-    CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
+    CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& networkEventData);
 
     /// The IAuthContext object is owned by the UserSystem, and will be destroyed when the UserSystem is destroyed.
     CSP_NO_EXPORT csp::common::IAuthContext& GetAuthContext();
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+    UserSystem(csp::web::WebClient* inWebClient, csp::multiplayer::NetworkEventBus* inEventBus, csp::common::LogSystem& logSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call this method to set it after the NetworkEventBus has been
     // constructed.
-    void SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus);
+    void SetNetworkEventBus(csp::multiplayer::NetworkEventBus& eventBus);
 
-    [[nodiscard]] bool EmailCheck(const std::string& Email) const;
+    [[nodiscard]] bool EmailCheck(const std::string& email) const;
 
     void NotifyRefreshTokenHasChanged();
     void ResetThirdPartyAuthState();
 
-    csp::services::ApiBase* AuthenticationAPI;
-    csp::services::ApiBase* ProfileAPI;
-    csp::services::ApiBase* PingAPI;
-    csp::services::ApiBase* StripeAPI;
+    csp::services::ApiBase* m_authenticationApi;
+    csp::services::ApiBase* m_profileApi;
+    csp::services::ApiBase* m_pingApi;
+    csp::services::ApiBase* m_stripeApi;
 
-    csp::common::LoginState CurrentLoginState;
+    csp::common::LoginState m_currentLoginState;
 
-    LoginTokenInfoResultCallback RefreshTokenChangedCallback;
+    LoginTokenInfoResultCallback m_refreshTokenChangedCallback;
 
-    csp::common::String ThirdPartyAuthStateId;
-    csp::common::String ThirdPartyClientType;
-    csp::common::String ThirdPartyAuthRedirectURL;
-    EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+    csp::common::String m_thirdPartyAuthStateId;
+    csp::common::String m_thirdPartyClientType;
+    csp::common::String m_thirdPartyAuthRedirectUrl;
+    EThirdPartyAuthenticationProviders m_thirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
 
-    UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
+    UserPermissionsChangedCallbackHandler m_userPermissionsChangedCallback;
 
-    AuthContext Auth;
+    AuthContext m_auth;
 };
 
 } // namespace csp::systems

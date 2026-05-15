@@ -64,91 +64,91 @@ public:
 
     /// @brief Constructs a list with 0 elements.
     List()
-        : CurrentSize(0)
-        , MaximumSize(0)
-        , ObjectArray(nullptr)
+        : m_currentSize(0)
+        , m_maximumSize(0)
+        , m_objectArray(nullptr)
     {
         AllocList(LIST_DEFAULT_SIZE);
     }
 
     /// @brief Constructs a list with the given number of elements.
     /// @param Size size_t : Number of elements in the array
-    List(size_t MinimumSize)
-        : CurrentSize(0)
-        , MaximumSize(0)
-        , ObjectArray(nullptr)
+    List(size_t minimumSize)
+        : m_currentSize(0)
+        , m_maximumSize(0)
+        , m_objectArray(nullptr)
     {
-        auto Size = next_pow2(MinimumSize);
-        AllocList(Size);
+        auto size = next_pow2(minimumSize);
+        AllocList(size);
     }
 
     /// @brief Copy constructor.
     /// @param Other const List<T>&
-    List(const List<T>& Other)
-        : CurrentSize(0)
-        , MaximumSize(0)
-        , ObjectArray(nullptr)
+    List(const List<T>& other)
+        : m_currentSize(0)
+        , m_maximumSize(0)
+        , m_objectArray(nullptr)
     {
-        if (Other.CurrentSize == 0)
+        if (other.m_currentSize == 0)
         {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
         }
 
-        AllocList(Other.MaximumSize);
-        CurrentSize = Other.CurrentSize;
+        AllocList(other.m_maximumSize);
+        m_currentSize = other.m_currentSize;
 
-        for (size_t i = 0; i < CurrentSize; ++i)
+        for (size_t i = 0; i < m_currentSize; ++i)
         {
-            T* ObjectPtr = &ObjectArray[i];
-            new (ObjectPtr) T;
-            ObjectArray[i] = Other.ObjectArray[i];
+            T* objectPtr = &m_objectArray[i];
+            new (objectPtr) T;
+            m_objectArray[i] = other.m_objectArray[i];
         }
     }
 
-    CSP_NO_EXPORT List(List<T>&& Other)
-        : CurrentSize(0)
-        , MaximumSize(0)
-        , ObjectArray(nullptr)
+    CSP_NO_EXPORT List(List<T>&& other)
+        : m_currentSize(0)
+        , m_maximumSize(0)
+        , m_objectArray(nullptr)
     {
-        if (Other.CurrentSize == 0)
+        if (other.m_currentSize == 0)
         {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
         }
 
-        CurrentSize = Other.CurrentSize;
-        MaximumSize = Other.MaximumSize;
-        ObjectArray = Other.ObjectArray;
+        m_currentSize = other.m_currentSize;
+        m_maximumSize = other.m_maximumSize;
+        m_objectArray = other.m_objectArray;
 
-        Other.ObjectArray = nullptr;
+        other.m_objectArray = nullptr;
     }
 
     /// @brief Constructs a list from an initializer_list.
     /// @param List std::initializer_list : Elements to construct the list from
-    CSP_NO_EXPORT List(std::initializer_list<T> List)
-        : CurrentSize(0)
-        , MaximumSize(0)
-        , ObjectArray(nullptr)
+    CSP_NO_EXPORT List(std::initializer_list<T> list)
+        : m_currentSize(0)
+        , m_maximumSize(0)
+        , m_objectArray(nullptr)
     {
-        if (List.size() == 0)
+        if (list.size() == 0)
         {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
         }
 
-        auto Size = next_pow2(List.size());
-        AllocList(Size);
-        CurrentSize = List.size();
+        auto size = next_pow2(list.size());
+        AllocList(size);
+        m_currentSize = list.size();
 
-        for (size_t i = 0; i < CurrentSize; ++i)
+        for (size_t i = 0; i < m_currentSize; ++i)
         {
-            T* ObjectPtr = &ObjectArray[i];
-            new (ObjectPtr) T;
-            ObjectArray[i] = *(List.begin() + i);
+            T* objectPtr = &m_objectArray[i];
+            new (objectPtr) T;
+            m_objectArray[i] = *(list.begin() + i);
         }
     }
 
@@ -158,11 +158,11 @@ public:
 
     /// @brief Returns a pointer to the start of the list.
     /// @return T*
-    CSP_NO_EXPORT T* Data() { return CurrentSize > 0 ? &ObjectArray[0] : nullptr; }
+    CSP_NO_EXPORT T* Data() { return m_currentSize > 0 ? &m_objectArray[0] : nullptr; }
 
     /// @brief Returns a const pointer to the start of the list.
     /// @return const T*
-    CSP_NO_EXPORT const T* Data() const { return CurrentSize > 0 ? &ObjectArray[0] : nullptr; }
+    CSP_NO_EXPORT const T* Data() const { return m_currentSize > 0 ? &m_objectArray[0] : nullptr; }
 
     // Iterators
     CSP_NO_EXPORT T* begin() { return Data(); }
@@ -184,29 +184,29 @@ public:
     /// @brief Copy assignment.
     /// @param Other const List<T>&
     /// @return List<T>&
-    List<T>& operator=(const List<T>& Other)
+    List<T>& operator=(const List<T>& other)
     {
-        if (this == &Other)
+        if (this == &other)
         {
             return *this;
         }
 
-        CurrentSize = Other.CurrentSize;
-        MaximumSize = 0;
-        ObjectArray = nullptr;
+        m_currentSize = other.m_currentSize;
+        m_maximumSize = 0;
+        m_objectArray = nullptr;
 
-        if (CurrentSize == 0)
+        if (m_currentSize == 0)
         {
             AllocList(LIST_DEFAULT_SIZE);
 
             return *this;
         }
 
-        AllocList(Other.MaximumSize);
+        AllocList(other.m_maximumSize);
 
-        for (size_t i = 0; i < CurrentSize; i++)
+        for (size_t i = 0; i < m_currentSize; i++)
         {
-            ObjectArray[i] = Other.ObjectArray[i];
+            m_objectArray[i] = other.m_objectArray[i];
         }
 
         return *this;
@@ -215,89 +215,89 @@ public:
     /// @brief Returns an element at the given index of the list.
     /// @param Index size_t : Element index to access
     /// @return T& : List element
-    T& operator[](size_t Index)
+    T& operator[](size_t index)
     {
-        assert(Index < CurrentSize);
+        assert(index < m_currentSize);
 
-        return ObjectArray[Index];
+        return m_objectArray[index];
     }
 
     /// @brief Returns a const element at the given index of the list.
     /// @param Index size_t : Element index to access
     /// @return const T& : List element
-    const T& operator[](size_t Index) const
+    const T& operator[](size_t index) const
     {
-        assert(Index < CurrentSize);
+        assert(index < m_currentSize);
 
-        return ObjectArray[Index];
+        return m_objectArray[index];
     }
 
     /// @brief Appends an element to the end of the list.
     /// @param Item const T&
-    void Append(const T& Item)
+    void Append(const T& item)
     {
-        if (CurrentSize == MaximumSize)
+        if (m_currentSize == m_maximumSize)
         {
-            auto Size = next_pow2(MaximumSize + 1);
-            ReallocList(Size);
+            auto size = next_pow2(m_maximumSize + 1);
+            ReallocList(size);
         }
 
         // Instantiate element first to allow copy assignment
-        T* ObjectPtr = &ObjectArray[CurrentSize];
-        new (ObjectPtr) T;
-        ObjectArray[CurrentSize++] = Item;
+        T* objectPtr = &m_objectArray[m_currentSize];
+        new (objectPtr) T;
+        m_objectArray[m_currentSize++] = item;
     }
 
     /// @brief Appends an element to the end of the list.
     /// @param Item T&&
-    CSP_NO_EXPORT void Append(T&& Item)
+    CSP_NO_EXPORT void Append(T&& item)
     {
-        if (CurrentSize == MaximumSize)
+        if (m_currentSize == m_maximumSize)
         {
-            auto Size = next_pow2(MaximumSize + 1);
-            ReallocList(Size);
+            auto size = next_pow2(m_maximumSize + 1);
+            ReallocList(size);
         }
 
         // Instantiate element first to allow move assignment
-        T* ObjectPtr = &ObjectArray[CurrentSize];
-        new (ObjectPtr) T;
-        ObjectArray[CurrentSize++] = std::move(Item);
+        T* objectPtr = &m_objectArray[m_currentSize];
+        new (objectPtr) T;
+        m_objectArray[m_currentSize++] = std::move(item);
     }
 
     /// @brief Appends an element at the given index of the list.
     /// @param Index size_t
     /// @param Item const T&
-    void Insert(size_t Index, const T& Item)
+    void Insert(size_t index, const T& item)
     {
-        if (CurrentSize == MaximumSize)
+        if (m_currentSize == m_maximumSize)
         {
-            auto Size = next_pow2(MaximumSize + 1);
-            ReallocList(Size);
+            auto size = next_pow2(m_maximumSize + 1);
+            ReallocList(size);
         }
 
-        auto After = CurrentSize - Index;
+        auto after = m_currentSize - index;
 // This is a real problem, don't ignore this, it needs fixed. (Or this entire type needs deleted)
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
 #endif
-        std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
+        std::memmove(m_objectArray + (index + 1), m_objectArray + index, sizeof(T) * after);
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
-        ++CurrentSize;
+        ++m_currentSize;
 
-        T* ObjectPtr = &ObjectArray[Index];
-        new (ObjectPtr) T;
-        ObjectArray[Index] = Item;
+        T* objectPtr = &m_objectArray[index];
+        new (objectPtr) T;
+        m_objectArray[index] = item;
     }
 
     /// @brief Removes an element to a specific index of the list.
     /// @param Index size_t
-    void Remove(size_t Index)
+    void Remove(size_t index)
     {
-        assert(Index < CurrentSize);
+        assert(index < m_currentSize);
 
         if constexpr (std::is_pointer<T>::value)
         {
@@ -306,25 +306,25 @@ public:
             // the shift.
 
             // delete ObjectArray[Index]; <-- What we should be doing ... (although actually, we should just have this type backed by std::list)
-            T* ObjectPtr = &ObjectArray[Index];
-            ObjectPtr->~T();
+            T* objectPtr = &m_objectArray[index];
+            objectPtr->~T();
         }
 
         // Shift everything left
-        for (size_t i = Index; i < CurrentSize - 1; ++i)
+        for (size_t i = index; i < m_currentSize - 1; ++i)
         {
-            ObjectArray[i] = ObjectArray[i + 1];
+            m_objectArray[i] = m_objectArray[i + 1];
         }
-        --CurrentSize;
+        --m_currentSize;
     }
 
     /// @brief Removes the given element from the list.
     /// @param Item const T& : Element to remove from the list
-    void RemoveItem(const T& Item)
+    void RemoveItem(const T& item)
     {
-        for (size_t i = 0; i < CurrentSize; ++i)
+        for (size_t i = 0; i < m_currentSize; ++i)
         {
-            if (ObjectArray[i] == Item)
+            if (m_objectArray[i] == item)
             {
                 Remove(i);
                 return;
@@ -334,7 +334,7 @@ public:
 
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
-    const size_t Size() const { return CurrentSize; }
+    const size_t Size() const { return m_currentSize; }
 
     /// @brief Removes all elements in the list.
     void Clear()
@@ -346,11 +346,11 @@ public:
     /// @brief Checks if the list contains the given element.
     /// @param Item const T& : Element to check if the list contains
     /// @return bool
-    bool Contains(const T& Item) const
+    bool Contains(const T& item) const
     {
-        for (size_t i = 0; i < CurrentSize; ++i)
+        for (size_t i = 0; i < m_currentSize; ++i)
         {
-            if (ObjectArray[i] == Item)
+            if (m_objectArray[i] == item)
             {
                 return true;
             }
@@ -363,49 +363,49 @@ public:
     /// @return Array<T>
     CSP_NO_EXPORT Array<T> ToArray() const
     {
-        Array<T> Result(CurrentSize);
+        Array<T> result(m_currentSize);
 
-        for (size_t i = 0; i < CurrentSize; ++i)
+        for (size_t i = 0; i < m_currentSize; ++i)
         {
-            Result[i] = ObjectArray[i];
+            result[i] = m_objectArray[i];
         }
 
-        return std::move(Result);
+        return std::move(result);
     }
 
 private:
     /// @brief Allocates memory for the list.
     /// @param Size size_t : Number of elements in the list
-    void AllocList(const size_t Size)
+    void AllocList(const size_t size)
     {
-        ObjectArray = new T[Size];
-        MaximumSize = Size;
+        m_objectArray = new T[size];
+        m_maximumSize = size;
     }
 
-    void ReallocList(const size_t Size)
+    void ReallocList(const size_t size)
     {
-        T* NewArray = new T[Size];
-        if (ObjectArray)
+        T* newArray = new T[size];
+        if (m_objectArray)
         {
-            std::copy(ObjectArray, ObjectArray + std::min(MaximumSize, Size), NewArray);
-            delete[] ObjectArray;
+            std::copy(m_objectArray, m_objectArray + std::min(m_maximumSize, size), newArray);
+            delete[] m_objectArray;
         }
-        ObjectArray = NewArray;
-        MaximumSize = Size;
+        m_objectArray = newArray;
+        m_maximumSize = size;
     }
 
     /// @brief Frees memory for the list.
     void FreeList()
     {
-        delete[] ObjectArray;
-        ObjectArray = nullptr;
-        CurrentSize = 0;
-        MaximumSize = 0;
+        delete[] m_objectArray;
+        m_objectArray = nullptr;
+        m_currentSize = 0;
+        m_maximumSize = 0;
     }
 
-    size_t CurrentSize;
-    size_t MaximumSize;
-    T* ObjectArray;
+    size_t m_currentSize;
+    size_t m_maximumSize;
+    T* m_objectArray;
 };
 
 } // namespace csp::common

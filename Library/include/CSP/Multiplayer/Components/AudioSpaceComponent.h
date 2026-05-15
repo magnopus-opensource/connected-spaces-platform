@@ -66,14 +66,14 @@ public:
 
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AudioSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @}
 
     /// @brief Gets the current playback state of the audio of this audio component.
@@ -82,7 +82,7 @@ public:
 
     /// @brief Sets the new playback state of the audio of this audio component.
     /// @param Value The new playback state of the audio of this audio component.
-    void SetPlaybackState(AudioPlaybackState Value);
+    void SetPlaybackState(AudioPlaybackState value);
 
     /// @brief Gets the asset ID for this audio asset.
     /// @return The ID of this audio asset.
@@ -90,7 +90,7 @@ public:
 
     /// @brief Sets the asset ID for this audio asset.
     /// @param Value The ID for this audio asset.
-    void SetAudioAssetId(const csp::common::String& Value);
+    void SetAudioAssetId(const csp::common::String& value);
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's audio asset, both the Asset ID and the Asset Collection ID are required.
@@ -100,7 +100,7 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's audio asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetAssetCollectionId(const csp::common::String& Value);
+    void SetAssetCollectionId(const csp::common::String& value);
 
     /// @brief Checks if the audio playback is looping.
     /// @return True if the audio loops (i.e. starts from the beginning when ended), false otherwise.
@@ -108,7 +108,7 @@ public:
 
     /// @brief Sets if the audio playback is looping.
     /// @param Value True if the audio loops (i.e. starts from the beginning when ended), false otherwise.
-    void SetIsLoopPlayback(bool Value);
+    void SetIsLoopPlayback(bool value);
 
     /// @brief Gets the timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
     /// @return The timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
@@ -116,22 +116,22 @@ public:
 
     /// @brief Sets the timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
     /// @param Value The timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
-    void SetTimeSincePlay(float Value);
+    void SetTimeSincePlay(float value);
 
     /// \addtogroup IAudioControlComponent
     /// @{
     /// @copydoc IAudioControlComponent::GetAudioType()
     AudioType GetAudioType() const override;
     /// @copydoc IAudioControlComponent::SetAudioType()
-    void SetAudioType(AudioType Value) override;
+    void SetAudioType(AudioType value) override;
     /// @copydoc IAudioControlComponent::GetAttenuationRadius()
     float GetAttenuationRadius() const override;
     /// @copydoc IAudioControlComponent::SetAttenuationRadius()
-    void SetAttenuationRadius(float Value) override;
+    void SetAttenuationRadius(float value) override;
     /// @copydoc IAudioControlComponent::GetVolume()
     float GetVolume() const override;
     /// @copydoc IAudioControlComponent::SetVolume()
-    void SetVolume(float Value) override;
+    void SetVolume(float value) override;
     /// @}
  
     /// \addtogroup IEnableableComponent
@@ -139,7 +139,7 @@ public:
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -147,7 +147,7 @@ public:
     /// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-    void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    void SetThirdPartyComponentRef(const csp::common::String& inValue) override;
     /// @}
 };
 

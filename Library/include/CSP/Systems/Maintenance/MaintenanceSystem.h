@@ -53,15 +53,15 @@ class CSP_API MaintenanceSystem : public SystemBase
 public:
     /// @brief Receives information on planned maintenances outages schedules for the future
     /// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback);
+    CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& maintenanceUrl, MaintenanceInfoCallback callback);
 
 private:
     MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem);
     ~MaintenanceSystem();
 
-    csp::services::ApiBase* MaintenanceAPI;
-    bool AllowMaintenanceInfoRequests;
+    csp::services::ApiBase* m_maintenanceApi;
+    bool m_allowMaintenanceInfoRequests;
 };
 
 } // namespace csp::systems

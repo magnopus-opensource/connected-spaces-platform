@@ -32,413 +32,413 @@ namespace csp::systems
 
 namespace
 {
-    csp::common::String CreateKey(const csp::common::String& Key, const csp::common::String& SpaceId) { return "Hotspots:" + SpaceId + ":" + Key; }
+    csp::common::String CreateKey(const csp::common::String& key, const csp::common::String& spaceId) { return "Hotspots:" + spaceId + ":" + key; }
 
-    csp::common::Optional<csp::common::String> DeconstructKey(const csp::common::String& Key, const csp::common::String& SpaceId)
+    csp::common::Optional<csp::common::String> DeconstructKey(const csp::common::String& key, const csp::common::String& spaceId)
     {
-        const csp::common::String ExpectedPrefix = "Hotspots:" + SpaceId + ":";
+        const csp::common::String expectedPrefix = "Hotspots:" + spaceId + ":";
 
-        if (Key.Length() <= ExpectedPrefix.Length() || !Key.StartsWith(ExpectedPrefix))
+        if (key.Length() <= expectedPrefix.Length() || !key.StartsWith(expectedPrefix))
         {
             return nullptr;
         }
 
-        return csp::common::String(Key.c_str() + ExpectedPrefix.Length(), Key.Length() - ExpectedPrefix.Length());
+        return csp::common::String(key.c_str() + expectedPrefix.Length(), key.Length() - expectedPrefix.Length());
     }
 
-    void DeleteSequences(const std::vector<systems::Sequence>& Sequences, csp::systems::NullResultCallback Callback)
+    void DeleteSequences(const std::vector<systems::Sequence>& sequences, csp::systems::NullResultCallback callback)
     {
-        systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
+        systems::SequenceSystem* sequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
 
         // Remove necessary sequences
-        common::Array<common::String> DeletionKeys(Sequences.size());
+        common::Array<common::String> deletionKeys(sequences.size());
 
-        for (size_t i = 0; i < Sequences.size(); ++i)
+        for (size_t i = 0; i < sequences.size(); ++i)
         {
-            DeletionKeys[i] = Sequences[i].Key;
+            deletionKeys[i] = sequences[i].Key;
         }
 
-        auto DeleteCallback = [Callback](const csp::systems::NullResult& DeleteResult)
+        auto deleteCallback = [callback](const csp::systems::NullResult& deleteResult)
         {
-            if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress)
+            if (deleteResult.GetResultCode() == systems::EResultCode::InProgress)
             {
                 return;
             }
 
-            Callback(DeleteResult);
+            callback(deleteResult);
         };
 
-        SequenceSystem->DeleteSequences(DeletionKeys, DeleteCallback);
+        sequenceSystem->DeleteSequences(deletionKeys, deleteCallback);
     }
 
     void UpdateSequences(
-        const std::vector<systems::Sequence>& Sequences, const csp::common::String& ItemToRemove, csp::systems::NullResultCallback Callback)
+        const std::vector<systems::Sequence>& sequences, const csp::common::String& itemToRemove, csp::systems::NullResultCallback callback)
     {
-        systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
+        systems::SequenceSystem* sequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
 
-        for (const auto& Sequence : Sequences)
+        for (const auto& sequence : sequences)
         {
             // Remove key from items array
-            common::Array<common::String> Items = Sequence.Items;
-            auto ItemsList = Items.ToList();
-            ItemsList.RemoveItem(ItemToRemove);
-            Items = ItemsList.ToArray();
+            common::Array<common::String> items = sequence.Items;
+            auto itemsList = items.ToList();
+            itemsList.RemoveItem(itemToRemove);
+            items = itemsList.ToArray();
 
-            auto UpdateCB = [Callback](const systems::SequenceResult& Result)
+            auto updateCb = [callback](const systems::SequenceResult& result)
             {
-                if (Result.GetResultCode() == systems::EResultCode::InProgress)
+                if (result.GetResultCode() == systems::EResultCode::InProgress)
                 {
                     return;
                 }
 
-                Callback(systems::NullResult(Result.GetResultCode(), Result.GetHttpResultCode()));
+                callback(systems::NullResult(result.GetResultCode(), result.GetHttpResultCode()));
             };
 
-            SequenceSystem->UpdateSequence(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Items, Sequence.MetaData, UpdateCB);
+            sequenceSystem->UpdateSequence(sequence.Key, sequence.ReferenceType, sequence.ReferenceId, items, sequence.MetaData, updateCb);
         }
     }
 
 } // namespace
 
-HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
-    csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(&EventBus, &LogSystem)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* sequenceSystem, csp::systems::SpaceSystem* spaceSystem,
+    csp::multiplayer::NetworkEventBus& eventBus, csp::common::LogSystem& logSystem)
+    : SystemBase(&eventBus, &logSystem)
 {
-    this->SequenceSystem = SequenceSystem;
-    this->SpaceSystem = SpaceSystem;
+    this->m_sequenceSystem = sequenceSystem;
+    this->m_spaceSystem = spaceSystem;
 
     RegisterSystemCallback();
 }
 
 void HotspotSequenceSystem::CreateHotspotGroup(
-    const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
+    const csp::common::String& groupName, const csp::common::Array<csp::common::String>& hotspotIds, HotspotGroupResultCallback callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto cb = [callback, spaceId](const SequenceResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ReturnValue);
+            HotspotGroupResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+            callback(returnValue);
 
             return;
         }
 
-        const auto Data = Result.GetSequence();
-        HotspotGroup Group;
-        Group.Items = Data.Items;
+        const auto data = result.GetSequence();
+        HotspotGroup group;
+        group.Items = data.Items;
 
-        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        if (auto deconstructedKey = DeconstructKey(data.Key, spaceId); deconstructedKey.HasValue())
         {
-            Group.Name = *DeconstructedKey;
+            group.Name = *deconstructedKey;
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::CreateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::CreateHotspotGroup - Failed to deconstruct key: %s", data.Key.c_str());
 
-            Callback(MakeInvalid<HotspotGroupResult>());
+            callback(MakeInvalid<HotspotGroupResult>());
 
             return;
         }
 
-        HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+        HotspotGroupResult returnValue(group, result.GetResultCode(), result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
-        Callback(ReturnValue);
+        callback(returnValue);
     };
 
-    const auto Key = CreateKey(GroupName, SpaceId);
-    SequenceSystem->CreateSequence(Key, "GroupId", SpaceId, HotspotIds, {}, CB);
+    const auto key = CreateKey(groupName, spaceId);
+    m_sequenceSystem->CreateSequence(key, "GroupId", spaceId, hotspotIds, {}, cb);
 }
 
 void HotspotSequenceSystem::RenameHotspotGroup(
-    const csp::common::String& GroupName, const csp::common::String& NewGroupName, HotspotGroupResultCallback Callback)
+    const csp::common::String& groupName, const csp::common::String& newGroupName, HotspotGroupResultCallback callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
-    const auto Key = CreateKey(GroupName, SpaceId);
-    const auto NewKey = CreateKey(NewGroupName, SpaceId);
+    const auto key = CreateKey(groupName, spaceId);
+    const auto newKey = CreateKey(newGroupName, spaceId);
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto cb = [callback, spaceId](const SequenceResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ReturnValue);
+            HotspotGroupResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+            callback(returnValue);
 
             return;
         }
 
-        const auto Data = Result.GetSequence();
-        HotspotGroup Group;
-        Group.Items = Data.Items;
+        const auto data = result.GetSequence();
+        HotspotGroup group;
+        group.Items = data.Items;
 
-        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        if (auto deconstructedKey = DeconstructKey(data.Key, spaceId); deconstructedKey.HasValue())
         {
-            Group.Name = *DeconstructedKey;
+            group.Name = *deconstructedKey;
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::RenameHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::RenameHotspotGroup - Failed to deconstruct key: %s", data.Key.c_str());
 
-            Callback(MakeInvalid<HotspotGroupResult>());
+            callback(MakeInvalid<HotspotGroupResult>());
 
             return;
         }
 
-        HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+        HotspotGroupResult returnValue(group, result.GetResultCode(), result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
-        Callback(ReturnValue);
+        callback(returnValue);
     };
 
-    SequenceSystem->RenameSequence(Key, NewKey, CB);
+    m_sequenceSystem->RenameSequence(key, newKey, cb);
 }
 
 void HotspotSequenceSystem::UpdateHotspotGroup(
-    const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
+    const csp::common::String& groupName, const csp::common::Array<csp::common::String>& hotspotIds, HotspotGroupResultCallback callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto cb = [callback, spaceId](const SequenceResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ReturnValue);
+            HotspotGroupResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+            callback(returnValue);
 
             return;
         }
 
-        const auto Data = Result.GetSequence();
-        HotspotGroup Group;
-        Group.Items = Data.Items;
+        const auto data = result.GetSequence();
+        HotspotGroup group;
+        group.Items = data.Items;
 
-        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        if (auto deconstructedKey = DeconstructKey(data.Key, spaceId); deconstructedKey.HasValue())
         {
-            Group.Name = *DeconstructedKey;
+            group.Name = *deconstructedKey;
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::UpdateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::UpdateHotspotGroup - Failed to deconstruct key: %s", data.Key.c_str());
 
-            Callback(MakeInvalid<HotspotGroupResult>());
+            callback(MakeInvalid<HotspotGroupResult>());
 
             return;
         }
 
-        HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+        HotspotGroupResult returnValue(group, result.GetResultCode(), result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
-        Callback(ReturnValue);
+        callback(returnValue);
     };
 
-    const auto Key = CreateKey(GroupName, SpaceId);
-    SequenceSystem->UpdateSequence(Key, "GroupId", SpaceId, HotspotIds, {}, CB);
+    const auto key = CreateKey(groupName, spaceId);
+    m_sequenceSystem->UpdateSequence(key, "GroupId", spaceId, hotspotIds, {}, cb);
 }
 
-void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback)
+void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& groupName, HotspotGroupResultCallback callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto cb = [callback, spaceId](const SequenceResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ReturnValue);
+            HotspotGroupResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+            callback(returnValue);
 
             return;
         }
 
-        const auto Data = Result.GetSequence();
-        HotspotGroup Group;
-        Group.Items = Data.Items;
+        const auto data = result.GetSequence();
+        HotspotGroup group;
+        group.Items = data.Items;
 
-        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        if (auto deconstructedKey = DeconstructKey(data.Key, spaceId); deconstructedKey.HasValue())
         {
-            Group.Name = *DeconstructedKey;
+            group.Name = *deconstructedKey;
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroup - Failed to deconstruct key: %s", data.Key.c_str());
 
-            Callback(MakeInvalid<HotspotGroupResult>());
+            callback(MakeInvalid<HotspotGroupResult>());
 
             return;
         }
 
-        HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+        HotspotGroupResult returnValue(group, result.GetResultCode(), result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
-        Callback(ReturnValue);
+        callback(returnValue);
     };
-    const auto Key = CreateKey(GroupName, SpaceId);
-    SequenceSystem->GetSequence(Key, CB);
+    const auto key = CreateKey(groupName, spaceId);
+    m_sequenceSystem->GetSequence(key, cb);
 }
 
-void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callback)
+void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequencesResult& Result)
+    auto cb = [callback, spaceId](const SequencesResult& result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed)
+        if (result.GetResultCode() == EResultCode::Failed)
         {
-            HotspotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ReturnValue);
+            HotspotGroupsResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+            callback(returnValue);
 
             return;
         }
 
-        const auto Data = Result.GetSequences();
+        const auto data = result.GetSequences();
 
-        csp::common::Array<HotspotGroup> Groups(Data.Size());
+        csp::common::Array<HotspotGroup> groups(data.Size());
 
-        for (size_t i = 0; i < Data.Size(); i++)
+        for (size_t i = 0; i < data.Size(); i++)
         {
-            Groups[i].Items = Data[i].Items;
+            groups[i].Items = data[i].Items;
 
-            if (auto DeconstructedKey = DeconstructKey(Data[i].Key, SpaceId); DeconstructedKey.HasValue())
+            if (auto deconstructedKey = DeconstructKey(data[i].Key, spaceId); deconstructedKey.HasValue())
             {
-                Groups[i].Name = *DeconstructedKey;
+                groups[i].Name = *deconstructedKey;
             }
             else
             {
-                CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroups - Failed to deconstruct key: %s", Data[i].Key.c_str());
+                CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroups - Failed to deconstruct key: %s", data[i].Key.c_str());
             }
         }
 
-        HotspotGroupsResult ReturnValue(Groups, Result.GetResultCode(), Result.GetHttpResultCode());
+        HotspotGroupsResult returnValue(groups, result.GetResultCode(), result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
-        Callback(ReturnValue);
+        callback(returnValue);
     };
 
-    SequenceSystem->GetSequencesByCriteria({}, SpaceId, "GroupId", { SpaceId }, {}, CB);
+    m_sequenceSystem->GetSequencesByCriteria({}, spaceId, "GroupId", { spaceId }, {}, cb);
 }
 
-void HotspotSequenceSystem::DeleteHotspotGroup(const csp::common::String& GroupName, NullResultCallback Callback)
+void HotspotSequenceSystem::DeleteHotspotGroup(const csp::common::String& groupName, NullResultCallback callback)
 {
-    auto CB = [Callback](const NullResult& Result) { Callback(Result); };
+    auto cb = [callback](const NullResult& result) { callback(result); };
 
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
-    const auto Key = CreateKey(GroupName, SpaceId);
-    SequenceSystem->DeleteSequences({ Key }, CB);
+    const auto spaceId = m_spaceSystem->GetCurrentSpace().Id;
+    const auto key = CreateKey(groupName, spaceId);
+    m_sequenceSystem->DeleteSequences({ key }, cb);
 }
 
 HotspotSequenceSystem::~HotspotSequenceSystem()
 {
-    SpaceSystem = nullptr;
-    SequenceSystem = nullptr;
+    m_spaceSystem = nullptr;
+    m_sequenceSystem = nullptr;
 }
 
-void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback /*Callback*/)
+void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& itemId, csp::systems::NullResultCallback /*Callback*/)
 {
     // E.M: It's very easy to get the argument you need to pass into this method wrong.
     // The type provides no help, and you have to actually call GetUniqueComponentId on HotspotComponent
     // to get a `parentId:componentId` pattern.
 
-    systems::SpaceSystem* MySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
+    systems::SpaceSystem* mySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
-    csp::common::String ItemCopy = ItemID;
+    csp::common::String itemCopy = itemId;
 
-    auto GetSequencesCallback = [ItemCopy](const systems::SequencesResult& SequencesResult)
+    auto getSequencesCallback = [itemCopy](const systems::SequencesResult& sequencesResult)
     {
-        if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
+        if (sequencesResult.GetResultCode() == systems::EResultCode::InProgress)
         {
             return;
         }
 
-        const auto& Sequences = SequencesResult.GetSequences();
+        const auto& sequences = sequencesResult.GetSequences();
 
-        std::vector<systems::Sequence> SequencesToDelete;
-        std::vector<systems::Sequence> SequencesToUpdate;
-        SequencesToDelete.reserve(Sequences.Size());
-        SequencesToUpdate.reserve(Sequences.Size());
+        std::vector<systems::Sequence> sequencesToDelete;
+        std::vector<systems::Sequence> sequencesToUpdate;
+        sequencesToDelete.reserve(sequences.Size());
+        sequencesToUpdate.reserve(sequences.Size());
 
-        for (size_t i = 0; i < Sequences.Size(); ++i)
+        for (size_t i = 0; i < sequences.Size(); ++i)
         {
-            if (Sequences[i].Items.Size() == 1)
+            if (sequences[i].Items.Size() == 1)
             {
                 // This is the only item in the sequence, so delete the sequence
-                SequencesToDelete.push_back(Sequences[i]);
+                sequencesToDelete.push_back(sequences[i]);
             }
             else
             {
                 // There are other items in this sequence, so only remove this item
-                SequencesToUpdate.push_back(Sequences[i]);
+                sequencesToUpdate.push_back(sequences[i]);
             }
         }
 
-        auto CB = [](const systems::NullResult& /*Res*/) {
+        auto cb = [](const systems::NullResult& /*Res*/) {
 
         };
 
-        DeleteSequences(SequencesToDelete, CB);
-        UpdateSequences(SequencesToUpdate, ItemCopy, CB);
+        DeleteSequences(sequencesToDelete, cb);
+        UpdateSequences(sequencesToUpdate, itemCopy, cb);
     };
 
     // Find all sequences containing this name
-    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { MySpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
+    m_sequenceSystem->GetAllSequencesContainingItems({ itemCopy }, "GroupId", { mySpaceSystem->GetCurrentSpace().Id }, getSequencesCallback);
 }
 
-HotspotSequenceSystem::HotspotSequenceSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, &LogSystem)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::common::LogSystem& logSystem)
+    : SystemBase(nullptr, nullptr, &logSystem)
 {
-    SpaceSystem = nullptr;
-    SequenceSystem = nullptr;
+    m_spaceSystem = nullptr;
+    m_sequenceSystem = nullptr;
 }
 
-void HotspotSequenceSystem::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback)
+void HotspotSequenceSystem::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler callback)
 {
-    HotspotSequenceChangedCallback = Callback;
+    m_hotspotSequenceChangedCallback = callback;
     RegisterSystemCallback();
 }
 
 void HotspotSequenceSystem::RegisterSystemCallback()
 {
-    if (!HotspotSequenceChangedCallback)
+    if (!m_hotspotSequenceChangedCallback)
     {
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
+    m_eventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& networkEventData) { this->OnSequenceChangedEvent(networkEventData); });
 }
 
-void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
+void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& networkEventData)
 {
     // This event may either represent a default sequence or a hotspot sequence. Here we are only concerned with hotspot sequences.
-    const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
+    const auto& sequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(networkEventData);
 
-    if (SequenceEvent.SequenceType == csp::common::ESequenceType::Hotspot && HotspotSequenceChangedCallback)
+    if (sequenceEvent.SequenceType == csp::common::ESequenceType::Hotspot && m_hotspotSequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
-        HotspotSequenceChangedCallback(SequenceEvent);
+        m_hotspotSequenceChangedCallback(sequenceEvent);
     }
 }
 

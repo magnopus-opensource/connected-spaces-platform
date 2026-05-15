@@ -28,23 +28,23 @@ namespace ECommerceSystemHelpers
 {
     std::shared_ptr<chs::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo()
     {
-        auto DefaultStoreInfo = std::make_shared<chs::ShopifyStorefrontDto>();
+        auto defaultStoreInfo = std::make_shared<chs::ShopifyStorefrontDto>();
 
-        DefaultStoreInfo->SetStoreName("ShopifyStore");
-        DefaultStoreInfo->SetIsEcommerceActive(false);
-        DefaultStoreInfo->SetPrivateAccessToken("");
+        defaultStoreInfo->SetStoreName("ShopifyStore");
+        defaultStoreInfo->SetIsEcommerceActive(false);
+        defaultStoreInfo->SetPrivateAccessToken("");
 
-        return DefaultStoreInfo;
+        return defaultStoreInfo;
     }
 
     std::shared_ptr<chs::ShopifyStorefrontValidationRequest> DefaultShopifyStorefrontValidationRequest()
     {
-        auto DefaultShopifyStorefrontValidationInfo = std::make_shared<chs::ShopifyStorefrontValidationRequest>();
+        auto defaultShopifyStorefrontValidationInfo = std::make_shared<chs::ShopifyStorefrontValidationRequest>();
 
-        DefaultShopifyStorefrontValidationInfo->SetStoreName("");
-        DefaultShopifyStorefrontValidationInfo->SetPrivateAccessToken("");
+        defaultShopifyStorefrontValidationInfo->SetStoreName("");
+        defaultShopifyStorefrontValidationInfo->SetPrivateAccessToken("");
 
-        return DefaultShopifyStorefrontValidationInfo;
+        return defaultShopifyStorefrontValidationInfo;
     }
 
 } // namespace ECommerceSystemHelpers

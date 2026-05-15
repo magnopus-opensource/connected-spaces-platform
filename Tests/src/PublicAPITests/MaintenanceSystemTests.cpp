@@ -35,34 +35,34 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
 csp::common::String CreateTimeString(system_clock::time_point tp)
 {
-    std::time_t now_c = std::chrono::system_clock::to_time_t(tp);
-    std::tm* Gmtm = std::gmtime(&now_c);
+    std::time_t nowC = std::chrono::system_clock::to_time_t(tp);
+    std::tm* gmtm = std::gmtime(&nowC);
 
-    if (Gmtm != nullptr)
+    if (gmtm != nullptr)
     {
-        std::string TimeString;
-        TimeString = std::to_string(1900 + Gmtm->tm_year);
-        TimeString += "-";
-        TimeString += std::to_string(Gmtm->tm_mon + 1);
-        TimeString += "-";
-        TimeString += std::to_string(Gmtm->tm_mday);
-        TimeString += "T";
-        TimeString += std::to_string(Gmtm->tm_hour);
-        TimeString += ":";
-        TimeString += std::to_string(Gmtm->tm_min);
-        TimeString += ":";
-        TimeString += std::to_string(Gmtm->tm_sec);
-        TimeString += ".";
-        TimeString += "0+";
-        TimeString += "00:00";
+        std::string timeString;
+        timeString = std::to_string(1900 + gmtm->tm_year);
+        timeString += "-";
+        timeString += std::to_string(gmtm->tm_mon + 1);
+        timeString += "-";
+        timeString += std::to_string(gmtm->tm_mday);
+        timeString += "T";
+        timeString += std::to_string(gmtm->tm_hour);
+        timeString += ":";
+        timeString += std::to_string(gmtm->tm_min);
+        timeString += ":";
+        timeString += std::to_string(gmtm->tm_sec);
+        timeString += ".";
+        timeString += "0+";
+        timeString += "00:00";
 
-        return csp::common::String(TimeString.c_str());
+        return csp::common::String(timeString.c_str());
     }
 
     return "";
@@ -71,77 +71,77 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
+    auto& systemsManager = SystemsManager::Get();
+    auto* maintenanceSystem = systemsManager.GetMaintenanceSystem();
 
-    auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
+    auto [Result] = AWAIT(maintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfoTest)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
+    auto& systemsManager = SystemsManager::Get();
+    auto* maintenanceSystem = systemsManager.GetMaintenanceSystem();
 
-    auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
+    auto [Result] = AWAIT(maintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
+    const MaintenanceInfo& latestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
 
-    EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
+    EXPECT_FALSE(latestMaintenanceInfo.IsInsideWindow());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInfoTest)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
+    auto& systemsManager = SystemsManager::Get();
+    auto* maintenanceSystem = systemsManager.GetMaintenanceSystem();
 
-    auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
+    auto [Result] = AWAIT(maintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
+    const MaintenanceInfo& latestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
     if (Result.HasAnyMaintenanceWindows())
     {
         // if any windows were retrieved, then we should expect these fields to all be filled
-        EXPECT_NE(LatestMaintenanceInfo.Description, "");
-        EXPECT_NE(LatestMaintenanceInfo.StartDateTimestamp, "");
-        EXPECT_NE(LatestMaintenanceInfo.EndDateTimestamp, "");
+        EXPECT_NE(latestMaintenanceInfo.Description, "");
+        EXPECT_NE(latestMaintenanceInfo.StartDateTimestamp, "");
+        EXPECT_NE(latestMaintenanceInfo.EndDateTimestamp, "");
     }
     else
     {
         // if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
-        EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
-        EXPECT_EQ(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
-        EXPECT_EQ(LatestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
-        EXPECT_EQ(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
+        EXPECT_FALSE(latestMaintenanceInfo.IsInsideWindow());
+        EXPECT_EQ(latestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
+        EXPECT_EQ(latestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
+        EXPECT_EQ(latestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
     }
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 {
-    csp::common::DateTime CurrentTime = csp::common::DateTime::UtcTimeNow();
+    csp::common::DateTime currentTime = csp::common::DateTime::UtcTimeNow();
 
-    system_clock::time_point Info1Timepoint = CurrentTime.GetTimePoint() + system_clock::duration(120min);
+    system_clock::time_point info1Timepoint = currentTime.GetTimePoint() + system_clock::duration(120min);
 
-    MaintenanceInfo Info1;
-    Info1.Description = "Info1";
-    Info1.EndDateTimestamp = CreateTimeString(Info1Timepoint);
+    MaintenanceInfo info1;
+    info1.Description = "Info1";
+    info1.EndDateTimestamp = CreateTimeString(info1Timepoint);
 
-    system_clock::time_point Info2Timepoint = CurrentTime.GetTimePoint() + system_clock::duration(60min);
-    MaintenanceInfo Info2;
-    Info2.Description = "Info2";
-    Info2.EndDateTimestamp = CreateTimeString(Info2Timepoint);
+    system_clock::time_point info2Timepoint = currentTime.GetTimePoint() + system_clock::duration(60min);
+    MaintenanceInfo info2;
+    info2.Description = "Info2";
+    info2.EndDateTimestamp = CreateTimeString(info2Timepoint);
 
-    csp::common::Array<MaintenanceInfo> MaintenanceInfos { Info1, Info2 };
+    csp::common::Array<MaintenanceInfo> maintenanceInfos { info1, info2 };
 
-    SortMaintenanceInfos(MaintenanceInfos);
+    SortMaintenanceInfos(maintenanceInfos);
 
-    EXPECT_EQ(MaintenanceInfos[0].Description, "Info2");
+    EXPECT_EQ(maintenanceInfos[0].Description, "Info2");
 
-    csp::common::Array<MaintenanceInfo> MaintenanceInfos2 { Info2, Info1 };
+    csp::common::Array<MaintenanceInfo> maintenanceInfos2 { info2, info1 };
 
-    SortMaintenanceInfos(MaintenanceInfos2);
+    SortMaintenanceInfos(maintenanceInfos2);
 
-    EXPECT_EQ(MaintenanceInfos2[0].Description, "Info2");
+    EXPECT_EQ(maintenanceInfos2[0].Description, "Info2");
 }

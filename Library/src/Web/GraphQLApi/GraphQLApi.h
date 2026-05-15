@@ -38,10 +38,10 @@ namespace csp::systems::graphqlservice
 class GraphQLApi : public csp::services::ApiBase
 {
 public:
-    GraphQLApi(csp::web::WebClient* InWebClient);
+    GraphQLApi(csp::web::WebClient* inWebClient);
     ~GraphQLApi();
 
-    void Query(csp::common::String QueryText, csp::services::ApiResponseHandlerBase* ResponseHandler,
-        csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
+    void Query(csp::common::String queryText, csp::services::ApiResponseHandlerBase* responseHandler,
+        csp::common::CancellationToken& cancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
 } // namespace csp::systems::graphqlservice

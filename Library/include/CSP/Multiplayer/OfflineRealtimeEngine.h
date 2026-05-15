@@ -62,16 +62,16 @@ public:
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
     OfflineRealtimeEngine(
-        const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+        const CSPSceneDescription& sceneDescription, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner);
 
     /// @brief OfflineRealtimeEngine constructor
     /// Creates an empty realtime engine.
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
-    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    OfflineRealtimeEngine(csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner);
 
-    CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
-        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+    CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& additionalComponents);
 
     /// @brief OfflineRealtimeEngine destructor
     /// Removes entity script bindings and deregisters tick event listeners
@@ -98,10 +98,10 @@ public:
     /// @param LocomotionModel csp::multiplayer::LocomotionModel : The Initial LocomotionModel to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-        const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, csp::multiplayer::AvatarState State, const csp::common::String& AvatarId,
-        csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
-        csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& name, const csp::common::String& userId,
+        const csp::multiplayer::SpaceTransform& transform, bool isVisible, csp::multiplayer::AvatarState state, const csp::common::String& avatarId,
+        csp::multiplayer::AvatarPlayMode avatarPlayMode, csp::multiplayer::LocomotionModel locomotionModel,
+        csp::multiplayer::EntityCreatedCallback callback) override;
 
     /// @brief Create and add a SpaceEntity, with relevant default values.
     /// @param Name csp::common::String : The name of the newly created SpaceEntity.
@@ -110,63 +110,63 @@ public:
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& name, const csp::multiplayer::SpaceTransform& transform,
+        const csp::common::Optional<uint64_t>& parentId, csp::multiplayer::EntityCreatedCallback callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
-    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
+    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* entity, csp::multiplayer::CallbackHandler callback) override;
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false if the entity already existed in the selection and thus could not be added.
-    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* entity) override;
 
     /// @brief Removes an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully removed, false if the entity did not exist in the selection and thus could not be removed.
-    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* entity) override;
 
     /***** ENTITY ACCESS *****************************************************/
 
     /// @brief Finds the first found SpaceEntity of a matching Name.
     /// @param Name csp::common::String : The name to search.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& name) override;
 
     /// @brief Finds the first found SpaceEntity that has the ID EntityId.
     /// @param EntityId uint64_t : The Id to look for.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t EntityId) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t entityId) override;
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& name) override;
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will not contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& name) override;
 
     /// @brief Get an Entity by its index.
     ///
     /// @param EntityIndex size_t : The index of the entity to get.
     /// @return A non-owning pointer to the entity at the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t EntityIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t entityIndex) override;
 
     /// @brief Get an Avatar by its index. The returned pointer will be an entity that contains an AvatarSpaceComponent.
     ///
     /// @param AvatarIndex size_t : The index of the avatar entity to get.
     /// @return A non-owning pointer to the avatar entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t AvatarIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t avatarIndex) override;
 
     /// @brief Get an Object by its index. The returned pointer will be an entity that does not contain an AvatarSpaceComponent.
     ///
     /// @param ObjectIndex size_t : The index of the object entity to get.
     /// @return A non-owning pointer to the object entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t ObjectIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t objectIndex) override;
 
     /// @brief Get the number of total entities in the system.
     /// @return The total number of entities.
@@ -192,7 +192,7 @@ public:
     /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
     /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
     /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
-    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* entity) override;
 
     /***** ENTITY PROCESSING *************************************************/
 
@@ -208,7 +208,7 @@ public:
      * @post FetchStartedCallback and the csp::common::EntityFetchCompleteCallback passed in the constructor will be called .
      */
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
-        const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
+        const csp::common::String& spaceId, csp::common::EntityFetchStartedCallback fetchStartedCallback) override;
 
     /// @brief Lock a mutex that guards against any changes to the entity list.
     /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
@@ -225,13 +225,13 @@ public:
     /// Offline realtime engine syncronously sets data, rather than use a patch flow, so this returns null.
     /// @param SpaceEntity csp::multiplayer::SpaceEntity& : The SpaceEntity to create the patcher for.
     /// @return nullptr
-    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& spaceEntity) const override;
 
     /// @brief Returns a ModifiableStatus enum containing ModifiableStatus::Modifiable if the entity can be modified.
     /// @details This result will contain ModifiableStatus::EntityLocked if the given entities LockType is equal to UserAgnostic.
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
-    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
+    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* spaceEntity) const override;
 
     /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
     /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
@@ -250,25 +250,25 @@ private:
     /// This can be called at any time from any thread and internally add the entity to the entities list.
     ///
     /// @param EntityToAdd SpaceEntity : Pointer to the entity to be added.
-    void AddEntity(SpaceEntity* EntityToAdd);
+    void AddEntity(SpaceEntity* entityToAdd);
 
     // Should not be null
-    csp::common::LogSystem* LogSystem;
+    csp::common::LogSystem* m_logSystem;
 
     // May not be null
-    csp::common::IJSScriptRunner* ScriptRunner;
+    csp::common::IJSScriptRunner* m_scriptRunner;
 
-    csp::common::List<SpaceEntity*> Entities;
-    csp::common::List<SpaceEntity*> Avatars;
-    csp::common::List<SpaceEntity*> Objects;
-    csp::common::List<SpaceEntity*> SelectedEntities;
-    csp::common::List<SpaceEntity*> RootHierarchyEntities;
+    csp::common::List<SpaceEntity*> m_entities;
+    csp::common::List<SpaceEntity*> m_avatars;
+    csp::common::List<SpaceEntity*> m_objects;
+    csp::common::List<SpaceEntity*> m_selectedEntities;
+    csp::common::List<SpaceEntity*> m_rootHierarchyEntities;
 
-    std::recursive_mutex EntitiesLock;
+    std::recursive_mutex m_entitiesLock;
 
-    std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
-    std::unique_ptr<EntityScriptBinding> ScriptBinding;
+    std::unique_ptr<class OfflineSpaceEntityEventHandler> m_eventHandler;
+    std::unique_ptr<EntityScriptBinding> m_scriptBinding;
 
-    csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
+    csp::multiplayer::ComponentSchemaRegistry m_componentRegistry;
 };
 }

@@ -35,7 +35,7 @@ public:
 
     /// @brief Refreshes the current refresh token for the authentication session.
     /// @Paramm Callback std::function<void(bool)> : Function that is called when the token refreshes. True = success.
-    CSP_NO_EXPORT virtual void RefreshToken(std::function<void(bool)> Callback) = 0;
+    CSP_NO_EXPORT virtual void RefreshToken(std::function<void(bool)> callback) = 0;
 
     virtual ~IAuthContext() = default;
 };

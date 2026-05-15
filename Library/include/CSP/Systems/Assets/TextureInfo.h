@@ -31,8 +31,8 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::TextureInfo& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::TextureInfo& Obj);
+void ToJson(csp::json::JsonSerializer& serializer, const csp::systems::TextureInfo& obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::TextureInfo& obj);
 
 namespace csp::systems
 {
@@ -57,17 +57,17 @@ public:
     /// @brief Constructor which associates a texture with an asset, using ETextureResourceType::ImageAsset as it's source type
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the texture info is stored
     /// @param AssetId const csp::common::String& : The asset where the texture info is stored
-    TextureInfo(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+    TextureInfo(const csp::common::String& assetCollectionId, const csp::common::String& assetId);
 
     /// @brief Constructor which associates a texture with a media component, using ETextureResourceType::Component as it's source type
     /// @param ComponentId const csp::common::String& : The component id used as the texture data source
-    TextureInfo(const csp::common::String& ComponentId);
+    TextureInfo(const csp::common::String& componentId);
 
     /// @brief Sets the textures asset collection id and asset id
     /// Uses ETextureResourceType::ImageAsset as it's source type
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the texture info is stored
     /// @param AssetId const csp::common::String& : The asset where the texture info is stored
-    void SetCollectionAndAssetId(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+    void SetCollectionAndAssetId(const csp::common::String& assetCollectionId, const csp::common::String& assetId);
 
     /// @brief Gets the asset collection id for the texture
     /// @return csp::common::String&
@@ -81,7 +81,7 @@ public:
     /// Format: {entity.id}-{component.id}
     /// This can be obtained from ComponentBase::GetUniqueComponentId
     /// @param ComponentId const csp::common::String&
-    void SetEntityComponentId(const csp::common::String& ComponentId);
+    void SetEntityComponentId(const csp::common::String& componentId);
 
     /// @brief Gets the entity component id
     /// @return csp::common::String&
@@ -94,7 +94,7 @@ public:
 
     /// @brief Sets the uv offset of the texture
     /// @param Offset csp::common::Vector2
-    void SetUVOffset(csp::common::Vector2 Offset);
+    void SetUVOffset(csp::common::Vector2 offset);
 
     /// @brief Gets the uv offset of the texture
     /// @return csp::common::Vector2
@@ -102,7 +102,7 @@ public:
 
     /// @brief Gets the uv rotation of the texture
     /// @param Rotation float
-    void SetUVRotation(float Rotation);
+    void SetUVRotation(float rotation);
 
     /// @brief Gets the uv rotation of the texture
     /// @return float
@@ -110,7 +110,7 @@ public:
 
     /// @brief Sets the uv scale of the texture
     /// @param Scale csp::common::Vector2
-    void SetUVScale(csp::common::Vector2 Scale);
+    void SetUVScale(csp::common::Vector2 scale);
 
     /// @brief Gets the uv scale of the texture
     /// @return csp::common::Vector2
@@ -119,7 +119,7 @@ public:
     /// @brief Sets The set index of texture's TEXCOORD attribute
     /// used for texture coordinate mapping.
     /// @param Coord int
-    void SetTexCoord(int Coord);
+    void SetTexCoord(int coord);
 
     /// @brief Gets the index of texture's TEXCOORD attribute
     /// @return int
@@ -132,7 +132,7 @@ public:
     /// @brief Sets if this texture is active for the current material
     /// This is true by default when a new texture is created
     /// @param Value bool
-    void SetTexture(bool Value);
+    void SetTexture(bool value);
 
     /// @brief Gets the type of stereo the texture uses.
     /// @return The type of stereo used by this texture.
@@ -140,35 +140,35 @@ public:
 
     /// @brief Sets the type of stereo the texture uses.
     /// @param Value The type of stereo used by this texture.
-    void SetStereoVideoType(csp::multiplayer::StereoVideoType Value);
+    void SetStereoVideoType(csp::multiplayer::StereoVideoType value);
     /// @brief Gets whether the stereo video left and right are flipped.
     /// @return True if the stereo frames are flipped, false for default.
     bool GetIsStereoFlipped() const;
 
     /// @brief Sets whether the stereo video left and right are flipped.
     /// @param Value True if the stereo frames are flipped, false for default.
-    void SetIsStereoFlipped(bool Value);
+    void SetIsStereoFlipped(bool value);
 
 private:
-    csp::common::String AssetCollectionId;
-    csp::common::String AssetId;
-    csp::common::String EntityComponentId;
+    csp::common::String m_assetCollectionId;
+    csp::common::String m_assetId;
+    csp::common::String m_entityComponentId;
 
-    ETextureResourceType SourceType;
+    ETextureResourceType m_sourceType;
     
-    csp::common::Vector2 UVOffset;
-    float UVRotation;
-    csp::common::Vector2 UVScale;
+    csp::common::Vector2 m_uvOffset;
+    float m_uvRotation;
+    csp::common::Vector2 m_uvScale;
 
-    csp::multiplayer::StereoVideoType StereoVideoType;
-    bool IsStereoFlipped;
+    csp::multiplayer::StereoVideoType m_stereoVideoType;
+    bool m_isStereoFlipped;
 
-    int TexCoord;
+    int m_texCoord;
 
-    bool Set;
+    bool m_set;
 
-    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::TextureInfo& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::TextureInfo& Obj);
+    friend void ::ToJson(csp::json::JsonSerializer& serializer, const csp::systems::TextureInfo& obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::TextureInfo& obj);
 };
 
 } // namespace csp::systems

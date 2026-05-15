@@ -24,16 +24,16 @@
 namespace csp::multiplayer
 {
 
-bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::common::String>& MethodNames) const
+bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::common::String>& methodNames) const
 {
-    for (const auto& Method : *this)
+    for (const auto& method : *this)
     {
         // Validate that the current method is in the available method names array
-        if (const auto itt = std::find(MethodNames.begin(), MethodNames.end(), Method.second.c_str()); itt == MethodNames.end())
+        if (const auto itt = std::find(methodNames.begin(), methodNames.end(), method.second.c_str()); itt == methodNames.end())
         {
-            const auto Message = fmt::format("Failed to resolve the Multiplayer Hub Method: {0}", Method.second);
+            const auto message = fmt::format("Failed to resolve the Multiplayer Hub Method: {0}", method.second);
 
-            CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+            CSP_LOG_MSG(csp::common::LogLevel::Fatal, message.c_str());
             return false;
         }
     }

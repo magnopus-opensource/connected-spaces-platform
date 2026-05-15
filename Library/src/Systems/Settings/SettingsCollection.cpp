@@ -24,25 +24,25 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::common::SettingsCollection& SettingsCollection)
+void SettingsDtoToSettingsCollection(const chs::SettingsDto& dto, csp::common::SettingsCollection& settingsCollection)
 {
-    if (Dto.HasUserId())
+    if (dto.HasUserId())
     {
-        SettingsCollection.UserId = Dto.GetUserId();
+        settingsCollection.UserId = dto.GetUserId();
     }
 
-    if (Dto.HasContext())
+    if (dto.HasContext())
     {
-        SettingsCollection.Context = Dto.GetContext();
+        settingsCollection.Context = dto.GetContext();
     }
 
-    if (Dto.HasSettings())
+    if (dto.HasSettings())
     {
-        const auto& Settings = Dto.GetSettings();
+        const auto& settings = dto.GetSettings();
 
-        for (auto& Pair : Settings)
+        for (auto& pair : settings)
         {
-            SettingsCollection.Settings[Pair.first] = Pair.second;
+            settingsCollection.Settings[pair.first] = pair.second;
         }
     }
 }
@@ -52,35 +52,35 @@ void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::common::S
 namespace csp::systems
 {
 
-AvatarType AvatarInfoResult::GetAvatarType() const { return Type; }
+AvatarType AvatarInfoResult::GetAvatarType() const { return m_type; }
 
-const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const { return Identifier; }
+const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const { return m_identifier; }
 
-bool AvatarInfoResult::GetAvatarVisible() const { return AvatarVisible; }
+bool AvatarInfoResult::GetAvatarVisible() const { return m_avatarVisible; }
 
-void AvatarInfoResult::SetAvatarType(AvatarType InValue) { Type = InValue; }
+void AvatarInfoResult::SetAvatarType(AvatarType inValue) { m_type = inValue; }
 
-void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue) { Identifier = InValue; }
+void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& inValue) { m_identifier = inValue; }
 
-void AvatarInfoResult::SetAvatarVisible(bool InValue) { AvatarVisible = InValue; }
+void AvatarInfoResult::SetAvatarVisible(bool inValue) { m_avatarVisible = inValue; }
 
-const csp::common::SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return SettingsCollection; }
+const csp::common::SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return m_settingsCollection; }
 
-void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* SettingsResponse = static_cast<chs::SettingsDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* settingsResponse = static_cast<chs::SettingsDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        if (Response->GetPayload().GetContent().Length() > 0)
+        if (response->GetPayload().GetContent().Length() > 0)
         {
             // Build the Dto from the response Json
-            SettingsResponse->FromJson(Response->GetPayload().GetContent());
+            settingsResponse->FromJson(response->GetPayload().GetContent());
 
-            SettingsDtoToSettingsCollection(*SettingsResponse, SettingsCollection);
+            SettingsDtoToSettingsCollection(*settingsResponse, m_settingsCollection);
         }
     }
 }

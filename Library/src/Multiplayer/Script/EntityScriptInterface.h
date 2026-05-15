@@ -32,28 +32,28 @@ class VideoPlayerSpaceComponentScriptInterface;
 class EntityScriptInterface
 {
 public:
-    EntityScriptInterface(SpaceEntity* InEntity = nullptr);
+    EntityScriptInterface(SpaceEntity* inEntity = nullptr);
 
     using Vector3 = std::vector<float>;
     using Vector4 = std::vector<float>;
 
     Vector3 GetPosition() const;
-    void SetPosition(Vector3 Pos);
+    void SetPosition(Vector3 pos);
 
     Vector3 GetGlobalPosition() const;
 
     Vector3 GetScale() const;
-    void SetScale(Vector3 Scale);
+    void SetScale(Vector3 scale);
 
     Vector3 GetGlobalScale() const;
 
     Vector4 GetRotation() const;
-    void SetRotation(Vector4 Rot);
+    void SetRotation(Vector4 rot);
 
     Vector4 GetGlobalRotation() const;
 
     int64_t GetParentId();
-    void SetParentId(int64_t ParentId);
+    void SetParentId(int64_t parentId);
 
     void RemoveParentEntity();
 
@@ -62,47 +62,47 @@ public:
     const std::string GetName() const;
     int64_t GetId() const;
 
-    void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
+    void SubscribeToPropertyChange(int32_t componentId, int32_t propertyKey, std::string message);
 
-    void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
-    void PostMessageToScript(std::string Message, std::string MessageParamsJson);
+    void SubscribeToMessage(std::string message, std::string onMessageCallback);
+    void PostMessageToScript(std::string message, std::string messageParamsJson);
 
     void ClaimScriptOwnership();
 
     std::vector<ComponentScriptInterface*> GetComponents();
 
-    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType Type);
+    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType type);
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
 private:
-    SpaceEntity* Entity;
+    SpaceEntity* m_entity;
 };
 
-template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType type)
 {
-    std::vector<ScriptInterface*> Components;
+    std::vector<ScriptInterface*> components;
 
-    if (Entity)
+    if (m_entity)
     {
-        const ComponentType ThisType = Type;
+        const ComponentType thisType = type;
 
-        const auto& ComponentMap = *Entity->GetComponents();
-        const auto ComponentKeys = ComponentMap.Keys();
+        const auto& componentMap = *m_entity->GetComponents();
+        const auto componentKeys = componentMap.Keys();
 
-        for (size_t i = 0; i < ComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < componentKeys->Size(); ++i)
         {
-            ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
+            ComponentBase* component = componentMap[componentKeys->operator[](i)];
 
-            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
+            if ((component != nullptr) && (component->GetComponentType() == thisType) && (component->GetScriptInterface() != nullptr))
             {
-                Components.push_back((ScriptInterface*)Component->GetScriptInterface());
+                components.push_back((ScriptInterface*)component->GetScriptInterface());
             }
         }
 
-        delete (ComponentKeys);
+        delete (componentKeys);
     }
 
-    return Components;
+    return components;
 }
 
 template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()

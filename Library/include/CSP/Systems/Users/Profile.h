@@ -40,8 +40,8 @@ public:
     csp::common::String DisplayName;
     csp::common::String AvatarId;
 
-    bool operator==(const BasicProfile& Other) const;
-    bool operator!=(const BasicProfile& Other) const;
+    bool operator==(const BasicProfile& other) const;
+    bool operator!=(const BasicProfile& other) const;
 };
 
 /// @brief Data structure for a full user profile, which incudes user email, roles, and data for creation and update history.
@@ -59,8 +59,8 @@ public:
     csp::common::String UpdatedBy;
     csp::common::String UpdatedAt;
 
-    bool operator==(const Profile& Other) const;
-    bool operator!=(const Profile& Other) const;
+    bool operator==(const Profile& other) const;
+    bool operator!=(const Profile& other) const;
 };
 
 /// @brief Result structure for a Profile request
@@ -79,9 +79,9 @@ public:
 private:
     ProfileResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Profile Profile;
+    Profile m_profile;
 };
 
 /// @brief Result structure for a BasicProfile request
@@ -100,12 +100,12 @@ public:
 private:
     BasicProfilesResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<BasicProfile> Profiles;
+    csp::common::Array<BasicProfile> m_profiles;
 };
 
-typedef std::function<void(const ProfileResult& Result)> ProfileResultCallback;
-typedef std::function<void(const BasicProfilesResult& Result)> BasicProfilesResultCallback;
+typedef std::function<void(const ProfileResult& result)> ProfileResultCallback;
+typedef std::function<void(const BasicProfilesResult& result)> BasicProfilesResultCallback;
 
 } // namespace csp::systems

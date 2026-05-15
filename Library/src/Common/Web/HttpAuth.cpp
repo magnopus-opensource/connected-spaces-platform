@@ -28,8 +28,8 @@ csp::common::String* HttpAuth::RefreshTokenExpiry = nullptr;
 
 HttpAuth::HttpAuth() { }
 
-void HttpAuth::SetAccessToken(const AccessToken& InToken, const csp::common::String& InTokenExpiry, const AccessToken& InRefreshToken,
-    const csp::common::String& InRefreshTokenExpiry)
+void HttpAuth::SetAccessToken(const AccessToken& inToken, const csp::common::String& inTokenExpiry, const AccessToken& inRefreshToken,
+    const csp::common::String& inRefreshTokenExpiry)
 {
     if (Token == nullptr)
     {
@@ -52,10 +52,10 @@ void HttpAuth::SetAccessToken(const AccessToken& InToken, const csp::common::Str
     }
 
     // @Todo Need to be cautious about multi-threading here
-    *Token = InToken;
-    *RefreshToken = InRefreshToken;
-    *TokenExpiry = InTokenExpiry;
-    *RefreshTokenExpiry = InRefreshTokenExpiry;
+    *Token = inToken;
+    *RefreshToken = inRefreshToken;
+    *TokenExpiry = inTokenExpiry;
+    *RefreshTokenExpiry = inRefreshTokenExpiry;
 }
 
 const HttpAuth::AccessToken& HttpAuth::GetAccessToken()
@@ -100,9 +100,9 @@ const HttpAuth::AccessToken& HttpAuth::GetRefreshToken()
 
 bool HttpAuth::HasTokenExpired()
 {
-    csp::common::DateTime Expiry(*TokenExpiry);
-    bool Expired = Expiry >= csp::common::DateTime::TimeNow();
-    return Expired;
+    csp::common::DateTime expiry(*TokenExpiry);
+    bool expired = expiry >= csp::common::DateTime::TimeNow();
+    return expired;
 }
 
 } // namespace csp::web

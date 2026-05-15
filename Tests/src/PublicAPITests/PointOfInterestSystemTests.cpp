@@ -32,114 +32,114 @@
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+bool RequestPredicate(const csp::systems::ResultBase& result) { return result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
 namespace
 {
 
-void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-    const csp::common::Optional<csp::systems::GeoLocation>& Location, const csp::common::Optional<csp::systems::AssetCollection>& AssetCollection,
-    csp::systems::PointOfInterest& OutPOI)
+void CreatePointOfInterest(csp::systems::PointOfInterestSystem* poiSystem, const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+    const csp::common::Optional<csp::systems::GeoLocation>& location, const csp::common::Optional<csp::systems::AssetCollection>& assetCollection,
+    csp::systems::PointOfInterest& outPoi)
 {
-    const char* POITitle = "CSP-UNITTEST-POI-TITLE";
-    const char* POIDescription = "CSP-UNITTEST-POI-DESC-MAG";
-    const char* POIOwner = "CSP-UNITTEST-OWNER";
-    const auto POIType = csp::systems::EPointOfInterestType::DEFAULT;
+    const char* poiTitle = "CSP-UNITTEST-POI-TITLE";
+    const char* poiDescription = "CSP-UNITTEST-POI-DESC-MAG";
+    const char* poiOwner = "CSP-UNITTEST-OWNER";
+    const auto poiType = csp::systems::EPointOfInterestType::DEFAULT;
 
-    csp::systems::GeoLocation POILocation;
+    csp::systems::GeoLocation poiLocation;
 
-    if (Location.HasValue())
+    if (location.HasValue())
     {
-        POILocation = *Location;
+        poiLocation = *location;
     }
     else
     {
-        POILocation.Latitude = 90.0; // default values for the tests
-        POILocation.Longitude = 180.0;
+        poiLocation.Latitude = 90.0; // default values for the tests
+        poiLocation.Longitude = 180.0;
     }
 
-    csp::systems::AssetCollection POIAssetCollection;
+    csp::systems::AssetCollection poiAssetCollection;
 
-    if (AssetCollection.HasValue())
+    if (assetCollection.HasValue())
     {
-        POIAssetCollection = *AssetCollection;
+        poiAssetCollection = *assetCollection;
     }
     else
     {
         // for the POI creation only the ID is relevant
-        POIAssetCollection.Id = "CSP-UNITTEST-ASSET-COLLECTION-ID";
+        poiAssetCollection.Id = "CSP-UNITTEST-ASSET-COLLECTION-ID";
     }
 
-    char UniquePOIName[256];
-    SPRINTF(UniquePOIName, "%s-%s", POITitle, GetUniqueString().c_str());
+    char uniquePoiName[256];
+    SPRINTF(uniquePoiName, "%s-%s", poiTitle, GetUniqueString().c_str());
 
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::CreatePOI, POISystem, POITitle, POIDescription, UniquePOIName, Tags, POIType,
-        POIOwner, POILocation, POIAssetCollection)
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::CreatePOI, poiSystem, poiTitle, poiDescription, uniquePoiName, tags, poiType,
+        poiOwner, poiLocation, poiAssetCollection)
                         .Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutPOI = Result.GetPointOfInterest();
-        std::cerr << "POI Created: Name=" << OutPOI.Name << " Id=" << OutPOI.Id << std::endl;
+        outPoi = Result.GetPointOfInterest();
+        std::cerr << "POI Created: Name=" << outPoi.Name << " Id=" << outPoi.Id << std::endl;
     }
 }
 
-void DeletePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const csp::systems::PointOfInterest& POI)
+void DeletePointOfInterest(csp::systems::PointOfInterestSystem* poiSystem, const csp::systems::PointOfInterest& poi)
 {
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, POISystem, POI).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, poiSystem, poi).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        std::cerr << "POI Deleted: Name=" << POI.Name << " Id=" << POI.Id << std::endl;
+        std::cerr << "POI Deleted: Name=" << poi.Name << " Id=" << poi.Id << std::endl;
     }
 }
 
 void GetAssetCollectionFromPOI(
-    csp::systems::AssetSystem* AssetSystem, const csp::systems::PointOfInterest& POI, csp::systems::AssetCollection& OutAssetCollection)
+    csp::systems::AssetSystem* assetSystem, const csp::systems::PointOfInterest& poi, csp::systems::AssetCollection& outAssetCollection)
 {
-    auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionById, AssetSystem, POI.AssetCollectionId).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionById, assetSystem, poi.AssetCollectionId).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutAssetCollection = Result.GetAssetCollection();
+        outAssetCollection = Result.GetAssetCollection();
     }
 }
 
 void CreateAssetCollection(
-    csp::systems::AssetSystem* AssetSystem, csp::systems::Space& Space, const char* Name, csp::systems::AssetCollection& OutAssetCollection)
+    csp::systems::AssetSystem* assetSystem, csp::systems::Space& space, const char* name, csp::systems::AssetCollection& outAssetCollection)
 {
-    auto [Result] = Awaitable(&csp::systems::AssetSystem::CreateAssetCollection, AssetSystem, Space.Id, nullptr, Name, nullptr,
+    auto [Result] = Awaitable(&csp::systems::AssetSystem::CreateAssetCollection, assetSystem, space.Id, nullptr, name, nullptr,
         csp::systems::EAssetCollectionType::DEFAULT, nullptr)
                         .Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutAssetCollection = Result.GetAssetCollection();
+        outAssetCollection = Result.GetAssetCollection();
     }
 }
 
-void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection)
+void DeleteAssetCollection(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection)
 {
-    auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, assetSystem, assetCollection).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-bool AreTestAssetCollectionsEqual(const csp::systems::AssetCollection& Lhs, const csp::systems::AssetCollection& Rhs)
+bool AreTestAssetCollectionsEqual(const csp::systems::AssetCollection& lhs, const csp::systems::AssetCollection& rhs)
 {
     // checking only the fields that have been used in these tests
-    bool AreEqual = true;
+    bool areEqual = true;
 
-    AreEqual &= (Lhs.Id == Rhs.Id);
-    AreEqual &= (Lhs.Name == Rhs.Name);
-    AreEqual &= (Lhs.SpaceId == Rhs.SpaceId);
+    areEqual &= (lhs.Id == rhs.Id);
+    areEqual &= (lhs.Name == rhs.Name);
+    areEqual &= (lhs.SpaceId == rhs.SpaceId);
 
-    return AreEqual;
+    return areEqual;
 }
 
 } // namespace
@@ -148,386 +148,386 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, nullptr, nullptr, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, nullptr, nullptr, pointOfInterest);
 
-    DeletePointOfInterest(POISystem, PointOfInterest);
+    DeletePointOfInterest(poiSystem, pointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::common::Optional<csp::common::Array<csp::common::String>> Tags(2);
-    (*Tags)[0] = "POITag1";
-    (*Tags)[1] = "POITag2";
+    csp::common::Optional<csp::common::Array<csp::common::String>> tags(2);
+    (*tags)[0] = "POITag1";
+    (*tags)[1] = "POITag2";
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, Tags, nullptr, nullptr, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, tags, nullptr, nullptr, pointOfInterest);
 
-    DeletePointOfInterest(POISystem, PointOfInterest);
+    DeletePointOfInterest(poiSystem, pointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::GeoLocation POILocation;
-    POILocation.Latitude = 45.0;
-    POILocation.Longitude = 160.0;
+    csp::systems::GeoLocation poiLocation;
+    poiLocation.Latitude = 45.0;
+    poiLocation.Longitude = 160.0;
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, poiLocation, nullptr, pointOfInterest);
 
     // Search for the newly created POI inside a circular area
-    csp::systems::GeoLocation SearchLocationOrigin;
-    SearchLocationOrigin.Latitude = 44.0;
-    SearchLocationOrigin.Longitude = 160.0;
-    double SearchRadius = 130000;
+    csp::systems::GeoLocation searchLocationOrigin;
+    searchLocationOrigin.Latitude = 44.0;
+    searchLocationOrigin.Longitude = 160.0;
+    double searchRadius = 130000;
 
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, poiSystem, searchLocationOrigin, searchRadius,
         csp::systems::EPointOfInterestType::DEFAULT)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
+    const csp::common::Array<csp::systems::PointOfInterest>& poiCollection = Result.GetPOIs();
 
     // we should have at least the POI we've created
-    EXPECT_TRUE(POICollection.Size() > 0);
+    EXPECT_TRUE(poiCollection.Size() > 0);
 
-    bool POIFound = false;
+    bool poiFound = false;
 
-    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
+    for (size_t idx = 0; idx < poiCollection.Size(); ++idx)
     {
-        if (POICollection[idx].Name == PointOfInterest.Name)
+        if (poiCollection[idx].Name == pointOfInterest.Name)
         {
-            POIFound = true;
+            poiFound = true;
             break;
         }
     }
 
-    EXPECT_TRUE(POIFound);
+    EXPECT_TRUE(poiFound);
 
-    DeletePointOfInterest(POISystem, PointOfInterest);
+    DeletePointOfInterest(poiSystem, pointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIOutsideCircularAreaTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::GeoLocation POILocation;
-    POILocation.Latitude = 45.0;
-    POILocation.Longitude = 160.0;
+    csp::systems::GeoLocation poiLocation;
+    poiLocation.Latitude = 45.0;
+    poiLocation.Longitude = 160.0;
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, poiLocation, nullptr, pointOfInterest);
 
-    csp::systems::GeoLocation SearchLocationOrigin;
-    SearchLocationOrigin.Latitude = 0;
-    SearchLocationOrigin.Longitude = 0;
-    double SearchRadius = 1000;
+    csp::systems::GeoLocation searchLocationOrigin;
+    searchLocationOrigin.Latitude = 0;
+    searchLocationOrigin.Longitude = 0;
+    double searchRadius = 1000;
 
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, poiSystem, searchLocationOrigin, searchRadius,
         csp::systems::EPointOfInterestType::DEFAULT)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetPOIs().Size(), 0);
 
-    DeletePointOfInterest(POISystem, PointOfInterest);
+    DeletePointOfInterest(poiSystem, pointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaExcludeOtherTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::GeoLocation InsidePOILocation;
-    InsidePOILocation.Latitude = 45.0;
-    InsidePOILocation.Longitude = 160.0;
+    csp::systems::GeoLocation insidePoiLocation;
+    insidePoiLocation.Latitude = 45.0;
+    insidePoiLocation.Longitude = 160.0;
 
-    csp::systems::PointOfInterest InsidePointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, InsidePOILocation, nullptr, InsidePointOfInterest);
+    csp::systems::PointOfInterest insidePointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, insidePoiLocation, nullptr, insidePointOfInterest);
 
-    csp::systems::GeoLocation OutsidePOILocation;
-    OutsidePOILocation.Latitude = -45.0;
-    OutsidePOILocation.Longitude = -160.0;
+    csp::systems::GeoLocation outsidePoiLocation;
+    outsidePoiLocation.Latitude = -45.0;
+    outsidePoiLocation.Longitude = -160.0;
 
-    csp::systems::PointOfInterest OutsidePointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, OutsidePOILocation, nullptr, OutsidePointOfInterest);
+    csp::systems::PointOfInterest outsidePointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, outsidePoiLocation, nullptr, outsidePointOfInterest);
 
     // Search for the newly created POI inside a circular area
-    csp::systems::GeoLocation SearchLocationOrigin;
-    SearchLocationOrigin.Latitude = 44.0;
-    SearchLocationOrigin.Longitude = 160.0;
-    double SearchRadius = 130000;
+    csp::systems::GeoLocation searchLocationOrigin;
+    searchLocationOrigin.Latitude = 44.0;
+    searchLocationOrigin.Longitude = 160.0;
+    double searchRadius = 130000;
 
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, poiSystem, searchLocationOrigin, searchRadius,
         csp::systems::EPointOfInterestType::DEFAULT)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
+    const csp::common::Array<csp::systems::PointOfInterest>& poiCollection = Result.GetPOIs();
 
-    EXPECT_EQ(POICollection.Size(), 1);
-    EXPECT_EQ(POICollection[0].Name, InsidePointOfInterest.Name);
+    EXPECT_EQ(poiCollection.Size(), 1);
+    EXPECT_EQ(poiCollection[0].Name, insidePointOfInterest.Name);
 
-    DeletePointOfInterest(POISystem, InsidePointOfInterest);
-    DeletePointOfInterest(POISystem, OutsidePointOfInterest);
+    DeletePointOfInterest(poiSystem, insidePointOfInterest);
+    DeletePointOfInterest(poiSystem, outsidePointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* assetSystem = systemsManager.GetAssetSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
-    char UniqueAssetCollectionName[256];
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char uniqueAssetCollectionName[256];
+    const char* testAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    SPRINTF(uniqueAssetCollectionName, "%s-%s", testAssetCollectionName, GetUniqueString().c_str());
 
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space, UniqueAssetCollectionName, AssetCollection);
+    csp::systems::AssetCollection assetCollection;
+    CreateAssetCollection(assetSystem, space, uniqueAssetCollectionName, assetCollection);
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, nullptr, AssetCollection, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, nullptr, assetCollection, pointOfInterest);
 
-    csp::systems::AssetCollection RetrievedAssetCollection;
-    GetAssetCollectionFromPOI(AssetSystem, PointOfInterest, RetrievedAssetCollection);
+    csp::systems::AssetCollection retrievedAssetCollection;
+    GetAssetCollectionFromPOI(assetSystem, pointOfInterest, retrievedAssetCollection);
 
-    EXPECT_TRUE(AreTestAssetCollectionsEqual(RetrievedAssetCollection, AssetCollection));
+    EXPECT_TRUE(AreTestAssetCollectionsEqual(retrievedAssetCollection, assetCollection));
 
-    DeleteAssetCollection(AssetSystem, AssetCollection);
+    DeleteAssetCollection(assetSystem, assetCollection);
 
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
-    DeletePointOfInterest(POISystem, PointOfInterest);
+    DeletePointOfInterest(poiSystem, pointOfInterest);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* spaceSystem = systemsManager.GetSpaceSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    csp::systems::Space space;
+    CreateDefaultTestSpace(spaceSystem, space);
 
     // The default POI we will be using during the test.
-    csp::systems::PointOfInterest DefaultPOI;
+    csp::systems::PointOfInterest defaultPoi;
 
-    csp::systems::GeoLocation SpaceGeolocation;
+    csp::systems::GeoLocation spaceGeolocation;
 
     // Create a space POI and a default POI.
     {
-        SpaceGeolocation.Latitude = RandomRangeDouble(-90.0f, 90.0f);
-        SpaceGeolocation.Longitude = RandomRangeDouble(-180.0f, 180.0f);
+        spaceGeolocation.Latitude = RandomRangeDouble(-90.0f, 90.0f);
+        spaceGeolocation.Longitude = RandomRangeDouble(-180.0f, 180.0f);
 
-        float SpaceOrientation = 90.0f;
+        float spaceOrientation = 90.0f;
 
-        csp::common::Array<csp::systems::GeoLocation> SpaceGeofence(4);
+        csp::common::Array<csp::systems::GeoLocation> spaceGeofence(4);
 
-        csp::systems::GeoLocation GeoFence0;
-        GeoFence0.Latitude = 5.5;
-        GeoFence0.Longitude = 6.6;
-        SpaceGeofence[0] = GeoFence0;
-        SpaceGeofence[3] = GeoFence0;
+        csp::systems::GeoLocation geoFence0;
+        geoFence0.Latitude = 5.5;
+        geoFence0.Longitude = 6.6;
+        spaceGeofence[0] = geoFence0;
+        spaceGeofence[3] = geoFence0;
 
-        csp::systems::GeoLocation GeoFence1;
-        GeoFence1.Latitude = 7.7;
-        GeoFence1.Longitude = 8.8;
-        SpaceGeofence[1] = GeoFence1;
+        csp::systems::GeoLocation geoFence1;
+        geoFence1.Latitude = 7.7;
+        geoFence1.Longitude = 8.8;
+        spaceGeofence[1] = geoFence1;
 
-        csp::systems::GeoLocation GeoFence2;
-        GeoFence2.Latitude = 9.9;
-        GeoFence2.Longitude = 10.0;
-        SpaceGeofence[2] = GeoFence2;
+        csp::systems::GeoLocation geoFence2;
+        geoFence2.Latitude = 9.9;
+        geoFence2.Longitude = 10.0;
+        spaceGeofence[2] = geoFence2;
 
         // Create space POI via the space system.
         auto [AddSpacePOIGeoResult]
-            = AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SpaceGeolocation, SpaceOrientation, SpaceGeofence);
+            = AWAIT_PRE(spaceSystem, UpdateSpaceGeoLocation, RequestPredicate, space.Id, spaceGeolocation, spaceOrientation, spaceGeofence);
         EXPECT_EQ(AddSpacePOIGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Create default POI through the POI system at the same location.
-        CreatePointOfInterest(POISystem, nullptr, SpaceGeolocation, nullptr, DefaultPOI);
+        CreatePointOfInterest(poiSystem, nullptr, spaceGeolocation, nullptr, defaultPoi);
     }
 
     // Test retrieving the space POI only.
     {
         auto [GetPOIsResult]
-            = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::SPACE);
+            = AWAIT_PRE(poiSystem, GetPOIsInArea, RequestPredicate, spaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::SPACE);
         EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
-        EXPECT_GE(POIs.Size(), 1);
+        const csp::common::Array<csp::systems::PointOfInterest>& poIs = GetPOIsResult.GetPOIs();
+        EXPECT_GE(poIs.Size(), 1);
 
         // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
-        bool FoundSpacePOI = false;
-        for (uint32_t i = 0; i < POIs.Size(); i++)
+        bool foundSpacePoi = false;
+        for (uint32_t i = 0; i < poIs.Size(); i++)
         {
             // All the returned POIs should be of type SPACE, since that is what we searched for.
-            EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::SPACE);
-            if (POIs[i].SpaceId == Space.Id)
+            EXPECT_EQ(poIs[i].Type, csp::systems::EPointOfInterestType::SPACE);
+            if (poIs[i].SpaceId == space.Id)
             {
-                FoundSpacePOI = true;
+                foundSpacePoi = true;
                 break;
             }
         }
-        EXPECT_TRUE(FoundSpacePOI);
+        EXPECT_TRUE(foundSpacePoi);
     }
 
     // Test retrieving the default POI only.
     {
         auto [GetPOIsResult]
-            = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::DEFAULT);
+            = AWAIT_PRE(poiSystem, GetPOIsInArea, RequestPredicate, spaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::DEFAULT);
         EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
-        EXPECT_GE(POIs.Size(), 1);
+        const csp::common::Array<csp::systems::PointOfInterest>& poIs = GetPOIsResult.GetPOIs();
+        EXPECT_GE(poIs.Size(), 1);
 
         // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
-        bool FoundDefaultPOI = false;
-        for (uint32_t i = 0; i < POIs.Size(); i++)
+        bool foundDefaultPoi = false;
+        for (uint32_t i = 0; i < poIs.Size(); i++)
         {
             // All the returned POIs should be of type DEFAULT, since that is what we searched for.
-            EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::DEFAULT);
-            if (POIs[i].Id == DefaultPOI.Id)
+            EXPECT_EQ(poIs[i].Type, csp::systems::EPointOfInterestType::DEFAULT);
+            if (poIs[i].Id == defaultPoi.Id)
             {
-                FoundDefaultPOI = true;
+                foundDefaultPoi = true;
                 break;
             }
         }
-        EXPECT_TRUE(FoundDefaultPOI);
+        EXPECT_TRUE(foundDefaultPoi);
     }
 
     // Test retrieving the space POI _and_ the default POI, by not specifying the type of POI we want returned.
     {
-        auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, nullptr);
+        auto [GetPOIsResult] = AWAIT_PRE(poiSystem, GetPOIsInArea, RequestPredicate, spaceGeolocation, 5.0f, nullptr);
         EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
-        EXPECT_GE(POIs.Size(), 1);
+        const csp::common::Array<csp::systems::PointOfInterest>& poIs = GetPOIsResult.GetPOIs();
+        EXPECT_GE(poIs.Size(), 1);
 
         // Multiple POIs have been created at the same location, so we need to validate that the expected POIs are found.
-        csp::systems::PointOfInterest POITypeDefault;
-        csp::systems::PointOfInterest POITypeSpace;
+        csp::systems::PointOfInterest poiTypeDefault;
+        csp::systems::PointOfInterest poiTypeSpace;
 
-        for (uint32_t i = 0; i < POIs.Size(); i++)
+        for (uint32_t i = 0; i < poIs.Size(); i++)
         {
-            if (POIs[i].Id == DefaultPOI.Id)
+            if (poIs[i].Id == defaultPoi.Id)
             {
-                POITypeDefault = POIs[i];
+                poiTypeDefault = poIs[i];
             }
 
-            if (POIs[i].SpaceId == Space.Id)
+            if (poIs[i].SpaceId == space.Id)
             {
-                POITypeSpace = POIs[i];
+                poiTypeSpace = poIs[i];
             }
         }
 
-        EXPECT_NE(POITypeDefault.Id, "");
-        DeletePointOfInterest(POISystem, POITypeDefault);
+        EXPECT_NE(poiTypeDefault.Id, "");
+        DeletePointOfInterest(poiSystem, poiTypeDefault);
 
-        EXPECT_NE(POITypeSpace.Id, "");
-        DeletePointOfInterest(POISystem, POITypeSpace);
+        EXPECT_NE(poiTypeSpace.Id, "");
+        DeletePointOfInterest(poiSystem, poiTypeSpace);
     }
 
-    DeleteSpace(SpaceSystem, Space.Id);
+    DeleteSpace(spaceSystem, space.Id);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, DeletePOITest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* poiSystem = systemsManager.GetPointOfInterestSystem();
 
-    csp::common::String UserId;
+    csp::common::String userId;
 
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(userSystem, userId);
 
-    csp::systems::GeoLocation POILocation;
-    POILocation.Latitude = 45.0;
-    POILocation.Longitude = 160.0;
+    csp::systems::GeoLocation poiLocation;
+    poiLocation.Latitude = 45.0;
+    poiLocation.Longitude = 160.0;
 
-    csp::systems::PointOfInterest PointOfInterest;
-    CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
+    csp::systems::PointOfInterest pointOfInterest;
+    CreatePointOfInterest(poiSystem, nullptr, poiLocation, nullptr, pointOfInterest);
 
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, POISystem, PointOfInterest).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, poiSystem, pointOfInterest).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }

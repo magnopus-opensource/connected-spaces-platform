@@ -70,265 +70,265 @@ using namespace std::chrono;
 namespace csp::multiplayer
 {
 
-glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
+glm::mat4 computeParentMat4(const SpaceTransform& parentSpaceTransform)
 {
-    glm::mat4 ParentTranslate = glm::translate(
-        glm::mat4(1.0f), glm::vec3(ParentSpaceTransform.Position.X, ParentSpaceTransform.Position.Y, ParentSpaceTransform.Position.Z));
-    glm::quat ParentOrientation { ParentSpaceTransform.Rotation.W, ParentSpaceTransform.Rotation.X, ParentSpaceTransform.Rotation.Y,
-        ParentSpaceTransform.Rotation.Z };
+    glm::mat4 parentTranslate = glm::translate(
+        glm::mat4(1.0f), glm::vec3(parentSpaceTransform.Position.X, parentSpaceTransform.Position.Y, parentSpaceTransform.Position.Z));
+    glm::quat parentOrientation { parentSpaceTransform.Rotation.W, parentSpaceTransform.Rotation.X, parentSpaceTransform.Rotation.Y,
+        parentSpaceTransform.Rotation.Z };
 
-    glm::mat4 ParentRotation(ParentOrientation);
-    glm::mat4 ParentScale
-        = glm::scale(glm::mat4(1.0f), glm::vec3(ParentSpaceTransform.Scale.X, ParentSpaceTransform.Scale.Y, ParentSpaceTransform.Scale.Z));
-    glm::mat4 ParentTransform = ParentTranslate * ParentRotation * ParentScale;
-    return ParentTransform;
+    glm::mat4 parentRotation(parentOrientation);
+    glm::mat4 parentScale
+        = glm::scale(glm::mat4(1.0f), glm::vec3(parentSpaceTransform.Scale.X, parentSpaceTransform.Scale.Y, parentSpaceTransform.Scale.Z));
+    glm::mat4 parentTransform = parentTranslate * parentRotation * parentScale;
+    return parentTransform;
 }
 
-inline uint32_t CheckedUInt64ToUint32(uint64_t Value)
+inline uint32_t CheckedUInt64ToUint32(uint64_t value)
 {
-    assert(Value <= UINT32_MAX);
-    uint32_t ValueAsUInt32 = static_cast<uint32_t>(Value);
-    return ValueAsUInt32;
+    assert(value <= UINT32_MAX);
+    uint32_t valueAsUInt32 = static_cast<uint32_t>(value);
+    return valueAsUInt32;
 }
 
 SpaceEntity::SpaceEntity()
-    : EntitySystem(nullptr)
-    , Type(SpaceEntityType::Avatar)
-    , Id(0)
-    , IsTransferable(true)
-    , IsPersistent(true)
-    , OwnerId(0)
-    , ParentId(nullptr)
-    , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyRef("")
-    , SelectedId(0)
-    , Parent(nullptr)
-    , EntityLock(LockType::None)
-    , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, nullptr, nullptr, nullptr)
-    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
-    , LogSystem(nullptr)
-    , StatePatcher(nullptr)
+    : m_entitySystem(nullptr)
+    , m_type(SpaceEntityType::Avatar)
+    , m_id(0)
+    , m_isTransferable(true)
+    , m_isPersistent(true)
+    , m_ownerId(0)
+    , m_parentId(nullptr)
+    , m_transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
+    , m_thirdPartyRef("")
+    , m_selectedId(0)
+    , m_parent(nullptr)
+    , m_entityLock(LockType::None)
+    , m_nextComponentId(COMPONENT_KEY_START_COMPONENTS)
+    , m_script(this, nullptr, nullptr, nullptr)
+    , m_scriptInterface(std::make_unique<EntityScriptInterface>(this))
+    , m_logSystem(nullptr)
+    , m_statePatcher(nullptr)
 {
 }
 
-SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
-    : EntitySystem(InEntitySystem)
-    , Type(SpaceEntityType::Avatar)
-    , Id(0)
-    , IsTransferable(true)
-    , IsPersistent(true)
-    , OwnerId(0)
-    , ParentId(nullptr)
-    , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyRef("")
-    , SelectedId(0)
-    , Parent(nullptr)
-    , EntityLock(LockType::None)
-    , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, InEntitySystem, &ScriptRunner, LogSystem)
-    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
-    , LogSystem(LogSystem)
-    , StatePatcher(nullptr)
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* inEntitySystem, csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem* logSystem)
+    : m_entitySystem(inEntitySystem)
+    , m_type(SpaceEntityType::Avatar)
+    , m_id(0)
+    , m_isTransferable(true)
+    , m_isPersistent(true)
+    , m_ownerId(0)
+    , m_parentId(nullptr)
+    , m_transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
+    , m_thirdPartyRef("")
+    , m_selectedId(0)
+    , m_parent(nullptr)
+    , m_entityLock(LockType::None)
+    , m_nextComponentId(COMPONENT_KEY_START_COMPONENTS)
+    , m_script(this, inEntitySystem, &scriptRunner, logSystem)
+    , m_scriptInterface(std::make_unique<EntityScriptInterface>(this))
+    , m_logSystem(logSystem)
+    , m_statePatcher(nullptr)
 {
-    if (EntitySystem == nullptr)
+    if (m_entitySystem == nullptr)
     {
-        if (LogSystem)
+        if (logSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning, "Constructing a SpaceEntity with a null EntitySystem. This is generally inadvisable");
+            logSystem->LogMsg(csp::common::LogLevel::Warning, "Constructing a SpaceEntity with a null EntitySystem. This is generally inadvisable");
         }
     }
     else
     {
         // This is how we branch between doing deferred patch logic or just direct sets. The engine tells us if it uses a patch model or not, by
         // either returning a patcher, or not.
-        StatePatcher = std::unique_ptr<SpaceEntityStatePatcher>(EntitySystem->MakeStatePatcher(*this));
+        m_statePatcher = std::unique_ptr<SpaceEntityStatePatcher>(m_entitySystem->MakeStatePatcher(*this));
 
-        if (StatePatcher)
+        if (m_statePatcher)
         {
-            StatePatcher->RegisterProperties(CreateReplicatedProperties());
+            m_statePatcher->RegisterProperties(CreateReplicatedProperties());
         }
     }
 }
 
-SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
-    SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
-    csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent)
-    : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* entitySystem, csp::common::IJSScriptRunner& scriptRunner, csp::common::LogSystem* logSystem,
+    SpaceEntityType type, uint64_t id, const csp::common::String& name, const csp::multiplayer::SpaceTransform& transform, uint64_t ownerId,
+    csp::common::Optional<uint64_t> parentId, bool isTransferable, bool isPersistent)
+    : SpaceEntity(entitySystem, scriptRunner, logSystem)
 {
-    this->Id = Id;
-    this->Type = Type;
-    this->Name = Name;
-    this->Transform = Transform;
-    this->OwnerId = OwnerId;
-    this->IsTransferable = IsTransferable;
-    this->IsPersistent = IsPersistent;
-    this->ParentId = ParentId;
+    this->m_id = id;
+    this->m_type = type;
+    this->m_name = name;
+    this->m_transform = transform;
+    this->m_ownerId = ownerId;
+    this->m_isTransferable = isTransferable;
+    this->m_isPersistent = isPersistent;
+    this->m_parentId = parentId;
 }
 
 SpaceEntity::~SpaceEntity() { }
 
-uint64_t SpaceEntity::GetId() const { return Id; }
+uint64_t SpaceEntity::GetId() const { return m_id; }
 
-uint64_t SpaceEntity::GetOwnerId() const { return OwnerId; }
+uint64_t SpaceEntity::GetOwnerId() const { return m_ownerId; }
 
-const csp::common::String& SpaceEntity::GetName() const { return Name; }
+const csp::common::String& SpaceEntity::GetName() const { return m_name; }
 
-bool SpaceEntity::SetName(const csp::common::String& Value)
+bool SpaceEntity::SetName(const csp::common::String& value)
 {
-    return SetProperty(*this, Name, Value, SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, LogSystem);
+    return SetProperty(*this, m_name, value, SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, m_logSystem);
 }
 
-const SpaceTransform& SpaceEntity::GetTransform() const { return Transform; }
+const SpaceTransform& SpaceEntity::GetTransform() const { return m_transform; }
 
 SpaceTransform SpaceEntity::GetGlobalTransform() const
 {
-    if (Parent != nullptr)
+    if (m_parent != nullptr)
     {
-        SpaceTransform GlobalTransform;
-        GlobalTransform.Position = GetGlobalPosition();
-        GlobalTransform.Rotation = GetGlobalRotation();
-        GlobalTransform.Scale = GetGlobalScale();
-        return GlobalTransform;
+        SpaceTransform globalTransform;
+        globalTransform.Position = GetGlobalPosition();
+        globalTransform.Rotation = GetGlobalRotation();
+        globalTransform.Scale = GetGlobalScale();
+        return globalTransform;
     }
-    return Transform;
+    return m_transform;
 }
 
-const csp::common::Vector3& SpaceEntity::GetPosition() const { return Transform.Position; }
+const csp::common::Vector3& SpaceEntity::GetPosition() const { return m_transform.Position; }
 
 csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
 {
-    if (Parent != nullptr)
+    if (m_parent != nullptr)
     {
-        glm::mat4 ParentTransform = computeParentMat4(Parent->GetGlobalTransform());
+        glm::mat4 parentTransform = computeParentMat4(m_parent->GetGlobalTransform());
 
-        glm::vec3 GlobalEntityPosition = ParentTransform * glm::vec4(Transform.Position.X, Transform.Position.Y, Transform.Position.Z, 1.0f);
+        glm::vec3 globalEntityPosition = parentTransform * glm::vec4(m_transform.Position.X, m_transform.Position.Y, m_transform.Position.Z, 1.0f);
 
-        return { GlobalEntityPosition.x, GlobalEntityPosition.y, GlobalEntityPosition.z };
+        return { globalEntityPosition.x, globalEntityPosition.y, globalEntityPosition.z };
     }
     else
-        return Transform.Position;
+        return m_transform.Position;
 }
 
-bool SpaceEntity::SetPosition(const csp::common::Vector3& Value)
+bool SpaceEntity::SetPosition(const csp::common::Vector3& value)
 {
-    return SetProperty(*this, Transform.Position, Value, SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION, LogSystem);
+    return SetProperty(*this, m_transform.Position, value, SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION, m_logSystem);
 }
 
-const csp::common::Vector4& SpaceEntity::GetRotation() const { return Transform.Rotation; }
+const csp::common::Vector4& SpaceEntity::GetRotation() const { return m_transform.Rotation; }
 
 csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
 {
-    if (Parent != nullptr)
+    if (m_parent != nullptr)
     {
-        csp::common::Vector4 GlobalRotation = Parent->GetGlobalRotation();
-        glm::quat Orientation { Transform.Rotation.W, Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z };
-        glm::quat GlobalOrientation(GlobalRotation.W, GlobalRotation.X, GlobalRotation.Y, GlobalRotation.Z);
+        csp::common::Vector4 globalRotation = m_parent->GetGlobalRotation();
+        glm::quat orientation { m_transform.Rotation.W, m_transform.Rotation.X, m_transform.Rotation.Y, m_transform.Rotation.Z };
+        glm::quat globalOrientation(globalRotation.W, globalRotation.X, globalRotation.Y, globalRotation.Z);
 
-        glm::quat FinalOrientation = GlobalOrientation * Orientation;
-        return csp::common::Vector4 { FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w };
+        glm::quat finalOrientation = globalOrientation * orientation;
+        return csp::common::Vector4 { finalOrientation.x, finalOrientation.y, finalOrientation.z, finalOrientation.w };
     }
     else
-        return Transform.Rotation;
+        return m_transform.Rotation;
 }
 
-bool SpaceEntity::SetRotation(const csp::common::Vector4& Value)
+bool SpaceEntity::SetRotation(const csp::common::Vector4& value)
 {
-    return SetProperty(*this, Transform.Rotation, Value, SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION, LogSystem);
+    return SetProperty(*this, m_transform.Rotation, value, SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION, m_logSystem);
 }
 
-const csp::common::Vector3& SpaceEntity::GetScale() const { return Transform.Scale; }
+const csp::common::Vector3& SpaceEntity::GetScale() const { return m_transform.Scale; }
 
 csp::common::Vector3 SpaceEntity::GetGlobalScale() const
 {
-    if (Parent != nullptr)
-        return Parent->GetGlobalScale() * Transform.Scale;
-    return Transform.Scale;
+    if (m_parent != nullptr)
+        return m_parent->GetGlobalScale() * m_transform.Scale;
+    return m_transform.Scale;
 }
 
-bool SpaceEntity::SetScale(const csp::common::Vector3& Value)
+bool SpaceEntity::SetScale(const csp::common::Vector3& value)
 {
-    return SetProperty(*this, Transform.Scale, Value, SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE, LogSystem);
+    return SetProperty(*this, m_transform.Scale, value, SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE, m_logSystem);
 }
 
-bool SpaceEntity::GetIsTransient() const { return !IsPersistent; }
+bool SpaceEntity::GetIsTransient() const { return !m_isPersistent; }
 
-const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdPartyRef; }
+const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return m_thirdPartyRef; }
 
-bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
+bool SpaceEntity::SetThirdPartyRef(const csp::common::String& inThirdPartyRef)
 {
-    return SetProperty(*this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
+    return SetProperty(*this, m_thirdPartyRef, inThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, m_logSystem);
 }
 
-SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
+SpaceEntityType SpaceEntity::GetEntityType() const { return m_type; }
 
-void SpaceEntity::SetParentId(uint64_t InParentId)
+void SpaceEntity::SetParentId(uint64_t inParentId)
 {
     // No lock, parents may always be changed. (Seems odd)
-    return StatePatcher != nullptr ? StatePatcher->SetNewParentId(InParentId) : SetParentIdDirect(InParentId, true);
+    return m_statePatcher != nullptr ? m_statePatcher->SetNewParentId(inParentId) : SetParentIdDirect(inParentId, true);
 }
 
 void SpaceEntity::RemoveParentEntity()
 {
-    if (ParentId.HasValue())
+    if (m_parentId.HasValue())
     {
         // Need to send a full optional containing an empty optional to mean "There's a new ID, but it's to no-parent"
-        StatePatcher != nullptr ? StatePatcher->SetNewParentId(csp::common::Optional<uint64_t> { csp::common::Optional<uint64_t> {} })
+        m_statePatcher != nullptr ? m_statePatcher->SetNewParentId(csp::common::Optional<uint64_t> { csp::common::Optional<uint64_t> {} })
                                 : SetParentIdDirect({}, true);
     }
 }
 
-csp::common::Optional<uint64_t> SpaceEntity::GetParentId() const { return ParentId; }
+csp::common::Optional<uint64_t> SpaceEntity::GetParentId() const { return m_parentId; }
 
-bool SpaceEntity::GetIsTransferable() const { return IsTransferable; }
+bool SpaceEntity::GetIsTransferable() const { return m_isTransferable; }
 
-bool SpaceEntity::GetIsPersistent() const { return IsPersistent; }
+bool SpaceEntity::GetIsPersistent() const { return m_isPersistent; }
 
-SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
+SpaceEntity* SpaceEntity::GetParentEntity() const { return m_parent; }
 
-void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void SpaceEntity::CreateChildEntity(const csp::common::String& inName, const SpaceTransform& inSpaceTransform, EntityCreatedCallback callback)
 {
-    EntitySystem->CreateEntity(InName, InSpaceTransform, GetId(), Callback);
+    m_entitySystem->CreateEntity(inName, inSpaceTransform, GetId(), callback);
 }
 
-const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
+const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &m_childEntities; }
 
-void SpaceEntity::Destroy(CallbackHandler Callback)
+void SpaceEntity::Destroy(CallbackHandler callback)
 {
-    if (EntitySystem)
+    if (m_entitySystem)
     {
-        EntitySystem->DestroyEntity(this, Callback);
+        m_entitySystem->DestroyEntity(this, callback);
     }
 }
 
-void SpaceEntity::SetUpdateCallback(UpdateCallback Callback) { EntityUpdateCallback = Callback; }
+void SpaceEntity::SetUpdateCallback(UpdateCallback callback) { m_entityUpdateCallback = callback; }
 
-void SpaceEntity::SetDestroyCallback(DestroyCallback Callback) { EntityDestroyCallback = Callback; }
+void SpaceEntity::SetDestroyCallback(DestroyCallback callback) { m_entityDestroyCallback = callback; }
 
-void SpaceEntity::SetPatchSentCallback(CallbackHandler Callback)
+void SpaceEntity::SetPatchSentCallback(CallbackHandler callback)
 {
-    if (StatePatcher == nullptr)
+    if (m_statePatcher == nullptr)
     {
-        if (LogSystem)
+        if (m_logSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                 "Attempting to register a patch callback to a SpaceEntity without a StatePatcher. This is an operation that should only be performed "
                 "in an online context. Taking no action.");
         }
         return;
     }
 
-    StatePatcher->SetPatchSentCallback(Callback);
+    m_statePatcher->SetPatchSentCallback(callback);
 }
 
-const csp::common::Map<uint16_t, ComponentBase*>* SpaceEntity::GetComponents() const { return &Components; }
+const csp::common::Map<uint16_t, ComponentBase*>* SpaceEntity::GetComponents() const { return &m_components; }
 
-ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
+ComponentBase* SpaceEntity::GetComponent(uint16_t key)
 {
-    std::scoped_lock ScopedComponentsLock { ComponentsLock };
-    if (Components.HasKey(Key))
+    std::scoped_lock scopedComponentsLock { m_componentsLock };
+    if (m_components.HasKey(key))
     {
-        return Components[Key];
+        return m_components[key];
     }
     else
     {
@@ -336,118 +336,118 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
+ComponentBase* SpaceEntity::AddComponent(ComponentType addType)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = IsModifiable();
-    if (Modifiable != ModifiableStatus::Modifiable)
+    ModifiableStatus modifiable = IsModifiable();
+    if (modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to add component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(modifiable), GetName())
                     .c_str());
         }
 
         return nullptr;
     }
 
-    std::scoped_lock ScopedComponentsLock { ComponentsLock };
+    std::scoped_lock scopedComponentsLock { m_componentsLock };
 
     // Only allow one script component
-    if (AddType == ComponentType::ScriptData)
+    if (addType == ComponentType::ScriptData)
     {
-        ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData);
+        ComponentBase* scriptComponent = FindFirstComponentOfType(ComponentType::ScriptData);
 
-        if (ScriptComponent)
+        if (scriptComponent)
         {
-            if (LogSystem != nullptr)
+            if (m_logSystem != nullptr)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+                m_logSystem->LogMsg(csp::common::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
             }
 
             // Return the existing script component
-            return ScriptComponent;
+            return scriptComponent;
         }
     }
 
-    auto ComponentId = GenerateComponentId();
-    auto* Component = InstantiateComponent(ComponentId, AddType);
+    auto componentId = GenerateComponentId();
+    auto* component = InstantiateComponent(componentId, addType);
 
     // If Component is null, component has not been instantiated, so is skipped. (Can this ever be null... seems a bit of a footgun not to just
     // assert)
-    if (Component != nullptr)
+    if (component != nullptr)
     {
         // Either add the component to the patch, or just directly insert it.
-        StatePatcher != nullptr
-            ? StatePatcher->SetDirtyComponent(ComponentId, SpaceEntityStatePatcher::DirtyComponent { Component, ComponentUpdateType::Add })
-            : AddComponentDirect(ComponentId, Component, true);
+        m_statePatcher != nullptr
+            ? m_statePatcher->SetDirtyComponent(componentId, SpaceEntityStatePatcher::DirtyComponent { component, ComponentUpdateType::Add })
+            : AddComponentDirect(componentId, component, true);
 
-        Component->OnCreated();
+        component->OnCreated();
     }
 
-    return Component;
+    return component;
 }
 
-bool SpaceEntity::UpdateComponent(ComponentBase* Component)
+bool SpaceEntity::UpdateComponent(ComponentBase* component)
 {
     // You'd think there would be an IsModifiable check here, but component property updates are notification only as far as SpaceEntity is concerned,
     // as the data is set directly on components. This is done in ComponentBase.h instead. Seems confused and inconsistent to me.
 
-    return StatePatcher != nullptr
-        ? StatePatcher->SetDirtyComponent(Component->GetId(), SpaceEntityStatePatcher::DirtyComponent { Component, ComponentUpdateType::Update })
-        : UpdateComponentDirect(Component->GetId(), Component, true);
+    return m_statePatcher != nullptr
+        ? m_statePatcher->SetDirtyComponent(component->GetId(), SpaceEntityStatePatcher::DirtyComponent { component, ComponentUpdateType::Update })
+        : UpdateComponentDirect(component->GetId(), component, true);
 }
 
-bool SpaceEntity::RemoveComponent(uint16_t Key)
+bool SpaceEntity::RemoveComponent(uint16_t key)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = IsModifiable();
-    if (Modifiable != ModifiableStatus::Modifiable)
+    ModifiableStatus modifiable = IsModifiable();
+    if (modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to remove component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(modifiable), GetName())
                     .c_str());
         }
 
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->RemoveDirtyComponent(Key, *GetComponents()) : RemoveComponentDirect(Key, true);
+    return m_statePatcher != nullptr ? m_statePatcher->RemoveDirtyComponent(key, *GetComponents()) : RemoveComponentDirect(key, true);
 }
 
 void SpaceEntity::RemoveAsChildFromParent()
 {
     // Pretty naff way to do this, entity heirarchy must be fragile. Wouldn't be hard to redesign and make solid.
-    if (Parent != nullptr)
+    if (m_parent != nullptr)
     {
-        Parent->ChildEntities.RemoveItem(this);
-        Parent = nullptr;
+        m_parent->m_childEntities.RemoveItem(this);
+        m_parent = nullptr;
     }
 }
 
-void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
+void SpaceEntity::RemoveParentFromChildEntity(size_t index)
 {
-    if (Index < ChildEntities.Size())
+    if (index < m_childEntities.Size())
     {
-        ChildEntities[Index]->RemoveParentEntity();
-        ChildEntities[Index]->Parent = nullptr;
+        m_childEntities[index]->RemoveParentEntity();
+        m_childEntities[index]->m_parent = nullptr;
     }
 }
 
-void SpaceEntity::RemoveParentId() { ParentId = nullptr; }
+void SpaceEntity::RemoveParentId() { m_parentId = nullptr; }
 
-void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessaging)
+void SpaceEntity::ApplyLocalPatch(bool invokeUpdateCallback, bool allowSelfMessaging)
 {
-    if (StatePatcher == nullptr)
+    if (m_statePatcher == nullptr)
     {
-        if (LogSystem)
+        if (m_logSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            m_logSystem->LogMsg(csp::common::LogLevel::Warning,
                 "Attempting to apply a patch to a SpaceEntity without a StatePatcher. This is an operation that should only be performed in "
                 "an online context. Taking no action.");
         }
@@ -455,274 +455,274 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessa
     }
 
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-    if (!AllowSelfMessaging)
+    if (!allowSelfMessaging)
     {
-        auto [UpdateFlags, ComponentUpdates] = StatePatcher->ApplyLocalPatch();
+        auto [UpdateFlags, ComponentUpdates] = m_statePatcher->ApplyLocalPatch();
 
-        if (InvokeUpdateCallback && EntityUpdateCallback != nullptr)
+        if (invokeUpdateCallback && m_entityUpdateCallback != nullptr)
         {
-            EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
+            m_entityUpdateCallback(this, UpdateFlags, ComponentUpdates);
         }
     }
 }
 
-SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return EntityUpdateCallback; }
+SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return m_entityUpdateCallback; }
 
-SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return EntityDestroyCallback; }
+SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return m_entityDestroyCallback; }
 
-SpaceEntity* SpaceEntity::GetParent() { return Parent; }
+SpaceEntity* SpaceEntity::GetParent() { return m_parent; }
 
-void SpaceEntity::SetParent(SpaceEntity* InParent) { Parent = InParent; }
+void SpaceEntity::SetParent(SpaceEntity* inParent) { m_parent = inParent; }
 
 uint16_t SpaceEntity::GenerateComponentId()
 {
-    auto NextId = NextComponentId;
+    auto nextId = m_nextComponentId;
 
     // We want to also account for dirty components. If we're in a context that has them (online, patching), account for them, otherwise we can just
     // use an empty container (ie, ignore it)
-    const auto& DirtyComponents
-        = StatePatcher != nullptr ? StatePatcher->GetDirtyComponents() : std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> {};
+    const auto& dirtyComponents
+        = m_statePatcher != nullptr ? m_statePatcher->GetDirtyComponents() : std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> {};
 
     for (;;)
     {
-        if (!Components.HasKey(NextId) && !(DirtyComponents.count(NextId) > 0))
+        if (!m_components.HasKey(nextId) && !(dirtyComponents.count(nextId) > 0))
         {
-            NextComponentId = NextId + 1;
+            m_nextComponentId = nextId + 1;
 
-            return NextId;
+            return nextId;
         }
 
-        ++NextId;
+        ++nextId;
 
-        if (NextId == COMPONENT_KEY_END_COMPONENTS)
+        if (nextId == COMPONENT_KEY_END_COMPONENTS)
         {
-            NextId = COMPONENT_KEY_START_COMPONENTS;
+            nextId = COMPONENT_KEY_START_COMPONENTS;
         }
     }
 }
 
-ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, ComponentType InstantiateType)
+ComponentBase* SpaceEntity::InstantiateComponent(uint16_t instantiateId, ComponentType instantiateType)
 {
-    ComponentBase* Component;
+    ComponentBase* component;
 
-    switch (InstantiateType)
+    switch (instantiateType)
     {
     case ComponentType::StaticModel:
-        Component = new StaticModelSpaceComponent(LogSystem, this);
+        component = new StaticModelSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::AnimatedModel:
-        Component = new AnimatedModelSpaceComponent(LogSystem, this);
+        component = new AnimatedModelSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::VideoPlayer:
-        Component = new VideoPlayerSpaceComponent(LogSystem, this);
+        component = new VideoPlayerSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Image:
-        Component = new ImageSpaceComponent(LogSystem, this);
+        component = new ImageSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::ExternalLink:
-        Component = new ExternalLinkSpaceComponent(LogSystem, this);
+        component = new ExternalLinkSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::AvatarData:
-        Component = new AvatarSpaceComponent(LogSystem, this);
+        component = new AvatarSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Light:
-        Component = new LightSpaceComponent(LogSystem, this);
+        component = new LightSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::ScriptData:
-        Component = new ScriptSpaceComponent(LogSystem, this);
+        component = new ScriptSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Button:
-        Component = new ButtonSpaceComponent(LogSystem, this);
+        component = new ButtonSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Custom:
-        Component = new CustomSpaceComponent(LogSystem, this);
+        component = new CustomSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Portal:
-        Component = new PortalSpaceComponent(LogSystem, this);
+        component = new PortalSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Conversation:
-        Component = new ConversationSpaceComponent(LogSystem, this);
+        component = new ConversationSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Audio:
-        Component = new AudioSpaceComponent(LogSystem, this);
+        component = new AudioSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Spline:
-        Component = new SplineSpaceComponent(LogSystem, this);
+        component = new SplineSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Collision:
-        Component = new CollisionSpaceComponent(LogSystem, this);
+        component = new CollisionSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Reflection:
-        Component = new ReflectionSpaceComponent(LogSystem, this);
+        component = new ReflectionSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Fog:
-        Component = new FogSpaceComponent(LogSystem, this);
+        component = new FogSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::ECommerce:
-        Component = new ECommerceSpaceComponent(LogSystem, this);
+        component = new ECommerceSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::CinematicCamera:
-        Component = new CinematicCameraSpaceComponent(LogSystem, this);
+        component = new CinematicCameraSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::FiducialMarker:
-        Component = new FiducialMarkerSpaceComponent(LogSystem, this);
+        component = new FiducialMarkerSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::GaussianSplat:
-        Component = new GaussianSplatSpaceComponent(LogSystem, this);
+        component = new GaussianSplatSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Text:
-        Component = new TextSpaceComponent(LogSystem, this);
+        component = new TextSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::Hotspot:
-        Component = new HotspotSpaceComponent(LogSystem, this);
+        component = new HotspotSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::ScreenSharing:
-        Component = new ScreenSharingSpaceComponent(LogSystem, this);
+        component = new ScreenSharingSpaceComponent(m_logSystem, this);
         break;
     case ComponentType::AIChatbot:
-        Component = new AIChatbotSpaceComponent(LogSystem, this);
+        component = new AIChatbotSpaceComponent(m_logSystem, this);
         break;
     default:
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(
-                csp::common::LogLevel::Warning, fmt::format("Unknown Component type of value: {}", static_cast<uint32_t>(InstantiateType)).c_str());
+            m_logSystem->LogMsg(
+                csp::common::LogLevel::Warning, fmt::format("Unknown Component type of value: {}", static_cast<uint32_t>(instantiateType)).c_str());
         }
         return nullptr;
     }
     }
 
-    Component->Id = InstantiateId;
+    component->m_id = instantiateId;
 
-    return Component;
+    return component;
 }
 
-EntityScript& SpaceEntity::GetScript() { return Script; }
+EntityScript& SpaceEntity::GetScript() { return m_script; }
 
-bool SpaceEntity::IsSelected() const { return SelectedId != 0; }
+bool SpaceEntity::IsSelected() const { return m_selectedId != 0; }
 
-uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
+uint64_t SpaceEntity::GetSelectingClientID() const { return m_selectedId; }
 
 bool SpaceEntity::Select()
 {
-    std::scoped_lock EntitiesLocker(EntityMutexLock);
+    std::scoped_lock entitiesLocker(m_entityMutexLock);
     return InternalSetSelectionStateOfEntity(true);
 }
 
 bool SpaceEntity::Deselect()
 {
-    std::scoped_lock EntitiesLocker(EntityMutexLock);
+    std::scoped_lock entitiesLocker(m_entityMutexLock);
     return InternalSetSelectionStateOfEntity(false);
 }
 
 ModifiableStatus SpaceEntity::IsModifiable() const
 {
-    if (EntitySystem == nullptr)
+    if (m_entitySystem == nullptr)
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
         return ModifiableStatus::Modifiable;
     }
 
-    return EntitySystem->IsEntityModifiable(this);
+    return m_entitySystem->IsEntityModifiable(this);
 }
 
 bool SpaceEntity::Lock()
 {
     if (IsLocked())
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is already locked.");
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, "Entity is already locked.");
         }
         return false;
     }
 
     return SetProperty(
-        *this, EntityLock, static_cast<int64_t>(LockType::UserAgnostic), SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE, LogSystem);
+        *this, m_entityLock, static_cast<int64_t>(LockType::UserAgnostic), SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE, m_logSystem);
 }
 
 bool SpaceEntity::Unlock()
 {
     if (IsLocked() == false)
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is not currently locked.");
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, "Entity is not currently locked.");
         }
         return false;
     }
 
     // We don't call "SetProperty" here, because the internal IsModifiable check will always fail due to the entity being locked.
-    if (StatePatcher)
+    if (m_statePatcher)
     {
-        return StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::LockType, EntityLock, static_cast<int64_t>(LockType::None));
+        return m_statePatcher->SetDirtyProperty(SpaceEntityComponentKey::LockType, m_entityLock, static_cast<int64_t>(LockType::None));
     }
     else
     {
-        SetPropertyDirect(EntityLock, LockType::None, UPDATE_FLAGS_LOCK_TYPE, true);
+        SetPropertyDirect(m_entityLock, LockType::None, UPDATE_FLAGS_LOCK_TYPE, true);
         return true;
     }
 }
 
-csp::multiplayer::LockType SpaceEntity::GetLockType() const { return EntityLock; }
+csp::multiplayer::LockType SpaceEntity::GetLockType() const { return m_entityLock; }
 
-bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
+bool SpaceEntity::IsLocked() const { return m_entityLock != LockType::None; }
 
 void SpaceEntity::QueueUpdate()
 {
-    if (EntitySystem)
+    if (m_entitySystem)
     {
-        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        if (m_entitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         {
-            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->QueueEntityUpdate(this);
+            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(m_entitySystem)->QueueEntityUpdate(this);
         }
     }
 }
 
-bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
+bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool selectedState)
 {
-    uint64_t LocalClientId = (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
-        ? static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->GetMultiplayerConnectionInstance()->GetClientId()
+    uint64_t localClientId = (m_entitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        ? static_cast<csp::multiplayer::OnlineRealtimeEngine*>(m_entitySystem)->GetMultiplayerConnectionInstance()->GetClientId()
         : csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
 
-    if (SelectedState)
+    if (selectedState)
     {
         if (!IsSelected())
         {
             // Set a pending selection property
-            if (StatePatcher != nullptr)
+            if (m_statePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(LocalClientId));
+                m_statePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, m_selectedId, static_cast<int64_t>(localClientId));
             }
 
-            bool Added = EntitySystem->AddEntityToSelectedEntities(this);
-            if (Added)
+            bool added = m_entitySystem->AddEntityToSelectedEntities(this);
+            if (added)
             {
-                SetPropertyDirect(SelectedId, LocalClientId, UPDATE_FLAGS_SELECTION_ID, true);
+                SetPropertyDirect(m_selectedId, localClientId, UPDATE_FLAGS_SELECTION_ID, true);
                 return true;
             }
         }
         return false;
     }
 
-    if (LocalClientId == GetSelectingClientID())
+    if (localClientId == GetSelectingClientID())
     {
         if (IsSelected())
         {
             // Set a pending selection property (deselection I'm guessing, being zero)
-            if (StatePatcher != nullptr)
+            if (m_statePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(0));
+                m_statePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, m_selectedId, static_cast<int64_t>(0));
             }
 
-            bool Removed = EntitySystem->RemoveEntityFromSelectedEntities(this);
-            if (Removed)
+            bool removed = m_entitySystem->RemoveEntityFromSelectedEntities(this);
+            if (removed)
             {
-                SetPropertyDirect(SelectedId, 0, UPDATE_FLAGS_SELECTION_ID, true);
+                SetPropertyDirect(m_selectedId, 0, UPDATE_FLAGS_SELECTION_ID, true);
                 return true;
             }
         }
@@ -733,158 +733,158 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
     return false;
 }
 
-std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return StatePatcher != nullptr ? StatePatcher->GetTimeOfLastPatch() : 0ms; }
+std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return m_statePatcher != nullptr ? m_statePatcher->GetTimeOfLastPatch() : 0ms; }
 
 // Not dirtyable because it is a mandatory type in ObjectMessage. It's sent no matter what.
 // It may still be nicer to make this in-pattern and do loopbacks like the dirtyable props, but no formal need.
-void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
+void SpaceEntity::SetOwnerId(uint64_t inOwnerId) { m_ownerId = inOwnerId; }
 
-void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback)
+void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> value, bool callNotifyingCallback)
 {
-    ParentId = Value;
-    EntitySystem->ResolveEntityHierarchy(this);
+    m_parentId = value;
+    m_entitySystem->ResolveEntityHierarchy(this);
 
-    if (EntityUpdateCallback && CallNotifyingCallback)
+    if (m_entityUpdateCallback && callNotifyingCallback)
     {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_PARENT, Empty);
+        csp::common::Array<ComponentUpdateInfo> empty;
+        m_entityUpdateCallback(this, UPDATE_FLAGS_PARENT, empty);
     }
 }
 
-bool SpaceEntity::AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
+bool SpaceEntity::AddComponentDirect(uint16_t componentKey, ComponentBase* component, bool callNotifyingCallback)
 {
-    std::scoped_lock ComponentsLocker(ComponentsLock);
-    Components[ComponentKey] = Component;
+    std::scoped_lock componentsLocker(m_componentsLock);
+    m_components[componentKey] = component;
 
-    if (CallNotifyingCallback && EntityUpdateCallback)
+    if (callNotifyingCallback && m_entityUpdateCallback)
     {
-        csp::common::Array<ComponentUpdateInfo> UpdateInfo(1);
-        UpdateInfo[0] = ComponentUpdateInfo { ComponentKey, ComponentUpdateType::Add };
-        EntityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, UpdateInfo);
+        csp::common::Array<ComponentUpdateInfo> updateInfo(1);
+        updateInfo[0] = ComponentUpdateInfo { componentKey, ComponentUpdateType::Add };
+        m_entityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, updateInfo);
     }
 
     return true;
 }
 
-bool SpaceEntity::UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
+bool SpaceEntity::UpdateComponentDirect(uint16_t componentKey, ComponentBase* component, bool callNotifyingCallback)
 {
-    std::scoped_lock ComponentsLocker(ComponentsLock); // Still lock, friendly to the pattern, and to scripting updates
+    std::scoped_lock componentsLocker(m_componentsLock); // Still lock, friendly to the pattern, and to scripting updates
 
     // You're probably wondering why this sets no data? It's a bit of an unfortunate break from the pattern this one. Think of this more as a
     // "NotifySomethingAboutComponentHasChanged", as the actual property updates happen on the component itself.
-    if (CallNotifyingCallback)
+    if (callNotifyingCallback)
     {
-        if (EntityUpdateCallback)
+        if (m_entityUpdateCallback)
         {
-            csp::common::Array<ComponentUpdateInfo> UpdateInfo(1);
-            UpdateInfo[0] = ComponentUpdateInfo { ComponentKey, ComponentUpdateType::Update };
-            EntityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, UpdateInfo);
+            csp::common::Array<ComponentUpdateInfo> updateInfo(1);
+            updateInfo[0] = ComponentUpdateInfo { componentKey, ComponentUpdateType::Update };
+            m_entityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, updateInfo);
         }
 
         // Todo, rename so it is known this is about script properties
-        OnPropertyChanged(Component, ComponentKey);
+        OnPropertyChanged(component, componentKey);
     }
 
     return true;
 }
 
-bool SpaceEntity::RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback)
+bool SpaceEntity::RemoveComponentDirect(uint16_t componentKey, bool callNotifyingCallback)
 {
-    std::scoped_lock ComponentsLocker(ComponentsLock);
+    std::scoped_lock componentsLocker(m_componentsLock);
 
-    if (Components.HasKey(ComponentKey))
+    if (m_components.HasKey(componentKey))
     {
-        Components[ComponentKey]->OnRemove();
-        Components.Remove(ComponentKey);
+        m_components[componentKey]->OnRemove();
+        m_components.Remove(componentKey);
 
-        if (CallNotifyingCallback && EntityUpdateCallback)
+        if (callNotifyingCallback && m_entityUpdateCallback)
         {
-            csp::common::Array<ComponentUpdateInfo> UpdateInfo(1);
-            UpdateInfo[0] = ComponentUpdateInfo { ComponentKey, ComponentUpdateType::Delete };
-            EntityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, UpdateInfo);
+            csp::common::Array<ComponentUpdateInfo> updateInfo(1);
+            updateInfo[0] = ComponentUpdateInfo { componentKey, ComponentUpdateType::Delete };
+            m_entityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, updateInfo);
         }
         return true;
     }
     else
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "DestroyComponent: Key Does Not Exist");
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, "DestroyComponent: Key Does Not Exist");
         }
         return false;
     }
 }
 
-ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) const
+ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType findType) const
 {
-    ComponentBase* LocatedComponent = nullptr;
+    ComponentBase* locatedComponent = nullptr;
 
-    for (const std::pair<const uint16_t, ComponentBase*>& Component : Components.GetUnderlying())
+    for (const std::pair<const uint16_t, ComponentBase*>& component : m_components.GetUnderlying())
     {
 
-        if (Component.second->GetComponentType() == FindType)
+        if (component.second->GetComponentType() == findType)
         {
-            LocatedComponent = Component.second;
+            locatedComponent = component.second;
             break;
         }
     }
 
     // If we're in an online context, we also want to check any pending (dirty) components
-    if (LocatedComponent == nullptr && StatePatcher != nullptr)
+    if (locatedComponent == nullptr && m_statePatcher != nullptr)
     {
         // Not interested in deletes, as they're going away anyhow.
-        LocatedComponent = StatePatcher->GetFirstPendingComponentOfType(FindType, { ComponentUpdateType::Add, ComponentUpdateType::Update });
+        locatedComponent = m_statePatcher->GetFirstPendingComponentOfType(findType, { ComponentUpdateType::Add, ComponentUpdateType::Update });
     }
 
-    return LocatedComponent;
+    return locatedComponent;
 }
 
-void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
+void SpaceEntity::AddChildEntity(SpaceEntity* childEntity) { m_childEntities.Append(childEntity); }
 
 void SpaceEntity::ResolveParentChildRelationship()
 {
     // Entity has been re-parented
-    if (ParentId.HasValue())
+    if (m_parentId.HasValue())
     {
         // Entity was previously parented to another object, so cleanup
-        if (Parent != nullptr)
+        if (m_parent != nullptr)
         {
-            Parent->ChildEntities.RemoveItem(this);
+            m_parent->m_childEntities.RemoveItem(this);
         }
 
         // Set our new parent
-        Parent = EntitySystem->FindSpaceEntityById(*ParentId);
+        m_parent = m_entitySystem->FindSpaceEntityById(*m_parentId);
 
-        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        if (m_entitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         {
-            if (Parent == nullptr)
+            if (m_parent == nullptr)
             {
                 // For the OnlineRealtimeSystem, it's possible for parents to exist within the PendingAdds array,
                 // so we also need to check here.
-                auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+                auto* onlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(m_entitySystem);
 
                 // Parent may not have been added yet
                 // so check pending entities
-                for (const auto& PendingParent : *OnlineRealtimeEngine->GetPendingAdds())
+                for (const auto& pendingParent : *onlineRealtimeEngine->GetPendingAdds())
                 {
-                    if (PendingParent->Id == *ParentId)
+                    if (pendingParent->m_id == *m_parentId)
                     {
-                        Parent = PendingParent;
+                        m_parent = pendingParent;
                         break;
                     }
                 }
             }
         }
 
-        if (Parent != nullptr)
+        if (m_parent != nullptr)
         {
-            Parent->ChildEntities.Append(this);
+            m_parent->m_childEntities.Append(this);
         }
         else
         {
-            if (LogSystem != nullptr)
+            if (m_logSystem != nullptr)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                m_logSystem->LogMsg(csp::common::LogLevel::Error,
                     fmt::format("SpaceEntity unable to find parent for entity: {}. Please report if this issue is encountered.", GetId()).c_str());
             }
             return;
@@ -892,126 +892,126 @@ void SpaceEntity::ResolveParentChildRelationship()
     }
     else
     {
-        if (Parent != nullptr)
+        if (m_parent != nullptr)
         {
-            Parent->ChildEntities.RemoveItem(this);
-            Parent = nullptr;
+            m_parent->m_childEntities.RemoveItem(this);
+            m_parent = nullptr;
         }
     }
 }
 
-const std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() const { return StatePatcher; }
+const std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() const { return m_statePatcher; }
 
-std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() { return StatePatcher; }
+std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() { return m_statePatcher; }
 
-void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
+void SpaceEntity::AddComponentFromItemComponentData(uint16_t componentId, const mcs::ItemComponentData& componentData)
 {
-    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType MessageComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    auto componentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(componentData.GetValue());
+    ComponentType messageComponentType = static_cast<ComponentType>(std::get<uint64_t>(componentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
 
-    if (MessageComponentType != ComponentType::Invalid)
+    if (messageComponentType != ComponentType::Invalid)
     {
-        auto* Component = InstantiateComponent(ComponentId, MessageComponentType);
+        auto* component = InstantiateComponent(componentId, messageComponentType);
 
         // if Component == nullptr component has not been instantiated, so is skipped.
-        if (Component != nullptr)
+        if (component != nullptr)
         {
-            for (const auto& PatchComponentPair : ComponentDataMap)
+            for (const auto& patchComponentPair : componentDataMap)
             {
-                if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+                if (patchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
                 {
                     // We don't store the type inside our component properties
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
+                csp::common::ReplicatedValue property = ToReplicatedValue(patchComponentPair.second);
 
-                Component->Properties[PatchComponentPair.first] = Property;
-                Component->OnCreated();
+                component->m_properties[patchComponentPair.first] = property;
+                component->OnCreated();
             }
-            std::scoped_lock ComponentsLocker(ComponentsLock);
-            Components[ComponentId] = Component;
+            std::scoped_lock componentsLocker(m_componentsLock);
+            m_components[componentId] = component;
         }
     }
 }
 
-ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
+ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t componentId, const mcs::ItemComponentData& componentData)
 {
-    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType PatchComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    auto componentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(componentData.GetValue());
+    ComponentType patchComponentType = static_cast<ComponentType>(std::get<uint64_t>(componentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
 
-    auto UpdateType = ComponentUpdateType::Update;
+    auto updateType = ComponentUpdateType::Update;
 
-    if (!Components.HasKey(ComponentId))
+    if (!m_components.HasKey(componentId))
     {
-        UpdateType = ComponentUpdateType::Add;
+        updateType = ComponentUpdateType::Add;
     }
-    else if (Components[ComponentId]->GetComponentType() != PatchComponentType)
+    else if (m_components[componentId]->GetComponentType() != patchComponentType)
     {
-        UpdateType = ComponentUpdateType::Delete;
+        updateType = ComponentUpdateType::Delete;
     }
 
-    std::scoped_lock ComponentsLocker(ComponentsLock);
+    std::scoped_lock componentsLocker(m_componentsLock);
 
-    switch (UpdateType)
+    switch (updateType)
     {
     case ComponentUpdateType::Update:
     {
-        auto* Component = Components[ComponentId];
+        auto* component = m_components[componentId];
 
-        for (const auto& PatchComponentPair : ComponentDataMap)
+        for (const auto& patchComponentPair : componentDataMap)
         {
-            if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+            if (patchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
             {
                 // We don't store the type inside our component properties
                 continue;
             }
 
-            csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
+            csp::common::ReplicatedValue property = ToReplicatedValue(patchComponentPair.second);
 
             // UpdateComponentDirect(false);
-            Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
+            component->SetPropertyFromPatch(patchComponentPair.first, property);
         }
 
         break;
     }
     case ComponentUpdateType::Add:
     {
-        auto* Component = InstantiateComponent(ComponentId, PatchComponentType);
+        auto* component = InstantiateComponent(componentId, patchComponentType);
         // if Component != nullptr component has not been Instantiate, so is skipped.
-        if (Component != nullptr)
+        if (component != nullptr)
         {
-            for (const auto& PatchComponentPair : ComponentDataMap)
+            for (const auto& patchComponentPair : componentDataMap)
             {
-                if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+                if (patchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
                 {
                     // We don't store the type inside our component properties
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
+                csp::common::ReplicatedValue property = ToReplicatedValue(patchComponentPair.second);
 
                 // UpdateComponentDirect(false);?
-                Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
+                component->SetPropertyFromPatch(patchComponentPair.first, property);
             }
 
-            AddComponentDirect(ComponentId, Component, false);
-            Component->OnCreated();
+            AddComponentDirect(componentId, component, false);
+            component->OnCreated();
         }
         break;
     }
     case ComponentUpdateType::Delete:
-        RemoveComponentDirect(ComponentId);
+        RemoveComponentDirect(componentId);
         break;
     default:
         assert(false && "Unknown component update type!");
         break;
     }
 
-    ComponentUpdateInfo UpdateInfo;
-    UpdateInfo.ComponentId = ComponentId;
-    UpdateInfo.UpdateType = UpdateType;
-    return UpdateInfo;
+    ComponentUpdateInfo updateInfo;
+    updateInfo.ComponentId = componentId;
+    updateInfo.UpdateType = updateType;
+    return updateInfo;
 }
 
 csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
@@ -1020,58 +1020,58 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
     return { 
         { 
             SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, 
-            [&Name = Name]() { return csp::common::ReplicatedValue { Name }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Name, Value.GetString(), UPDATE_FLAGS_NAME); } 
+            [&name = m_name]() { return csp::common::ReplicatedValue { name }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_name, value.GetString(), UPDATE_FLAGS_NAME); } 
         },
         {
             SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION,
-            [&Position = Transform.Position]() { return csp::common::ReplicatedValue { Position }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Transform.Position, Value.GetVector3(), UPDATE_FLAGS_POSITION); }
+            [&position = m_transform.Position]() { return csp::common::ReplicatedValue { position }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_transform.Position, value.GetVector3(), UPDATE_FLAGS_POSITION); }
         },
         { 
             SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION,
-            [&Rotation = Transform.Rotation]() { return csp::common::ReplicatedValue { Rotation }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Transform.Rotation, Value.GetVector4(), UPDATE_FLAGS_ROTATION); }
+            [&rotation = m_transform.Rotation]() { return csp::common::ReplicatedValue { rotation }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_transform.Rotation, value.GetVector4(), UPDATE_FLAGS_ROTATION); }
         },
         {
             SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE,
-            [&Scale = Transform.Scale]() { return csp::common::ReplicatedValue { Scale }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Transform.Scale, Value.GetVector3(), UPDATE_FLAGS_SCALE); }
+            [&scale = m_transform.Scale]() { return csp::common::ReplicatedValue { scale }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_transform.Scale, value.GetVector3(), UPDATE_FLAGS_SCALE); }
         },
         {
             SpaceEntityComponentKey::SelectedClientId, UPDATE_FLAGS_SELECTION_ID,
-            [&SelectedId = SelectedId]() { return csp::common::ReplicatedValue { static_cast<int64_t>(SelectedId) }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(SelectedId, Value.GetInt(), UPDATE_FLAGS_SELECTION_ID); }
+            [&selectedId = m_selectedId]() { return csp::common::ReplicatedValue { static_cast<int64_t>(selectedId) }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_selectedId, value.GetInt(), UPDATE_FLAGS_SELECTION_ID); }
         },
         {
             SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF,
-            [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(ThirdPartyRef, Value.GetString(), UPDATE_FLAGS_THIRD_PARTY_REF); }
+            [&thirdPartyRef = m_thirdPartyRef]() { return csp::common::ReplicatedValue { thirdPartyRef }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_thirdPartyRef, value.GetString(), UPDATE_FLAGS_THIRD_PARTY_REF); }
         },
         {
             SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE,
-            [&EntityLock = EntityLock]() { return csp::common::ReplicatedValue { static_cast<int64_t>(EntityLock) }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(EntityLock, static_cast<LockType>(Value.GetInt()), UPDATE_FLAGS_LOCK_TYPE); }
+            [&entityLock = m_entityLock]() { return csp::common::ReplicatedValue { static_cast<int64_t>(entityLock) }; },
+            [this](const csp::common::ReplicatedValue& value) { SetPropertyDirect(m_entityLock, static_cast<LockType>(value.GetInt()), UPDATE_FLAGS_LOCK_TYPE); }
         }
 
     };
     /* clang-format on */
 }
 
-csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }
+csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return m_scriptInterface.get(); }
 
 void SpaceEntity::ClaimScriptOwnership()
 {
-    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    if (m_entitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
     {
-        auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
-        OnlineRealtimeEngine->ClaimScriptOwnership(this);
+        auto* onlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(m_entitySystem);
+        onlineRealtimeEngine->ClaimScriptOwnership(this);
     }
 }
 
-void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
+void SpaceEntity::OnPropertyChanged(ComponentBase* dirtyComponent, int32_t propertyKey)
 {
-    Script.OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
+    m_script.OnPropertyChanged(dirtyComponent->GetId(), propertyKey);
 }
 
 } // namespace csp::multiplayer

@@ -43,39 +43,39 @@ struct LogCallbacks
 LogSystem::LogSystem()
 {
     // Allocate internally to avoid warning C425 'needs to have dll-interface to be used by clients'
-    Callbacks = new LogCallbacks();
+    m_callbacks = new LogCallbacks();
 }
 
-LogSystem::~LogSystem() { delete Callbacks; }
+LogSystem::~LogSystem() { delete m_callbacks; }
 
-void LogSystem::SetLogCallback(LogCallbackHandler InLogCallback) { Callbacks->LogCallback = std::move(InLogCallback); }
+void LogSystem::SetLogCallback(LogCallbackHandler inLogCallback) { m_callbacks->LogCallback = std::move(inLogCallback); }
 
-void LogSystem::SetEventCallback(EventCallbackHandler InEventCallback) { Callbacks->EventCallback = std::move(InEventCallback); }
+void LogSystem::SetEventCallback(EventCallbackHandler inEventCallback) { m_callbacks->EventCallback = std::move(inEventCallback); }
 
-void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback) { Callbacks->BeginMarkerCallback = std::move(InBeginCallback); }
+void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler inBeginCallback) { m_callbacks->BeginMarkerCallback = std::move(inBeginCallback); }
 
-void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = std::move(InEndCallback); }
+void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler inEndCallback) { m_callbacks->EndMarkerCallback = std::move(inEndCallback); }
 
-void LogSystem::SetSystemLevel(const csp::common::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
+void LogSystem::SetSystemLevel(const csp::common::LogLevel inSystemLevel) { m_systemLevel = inSystemLevel; }
 
-csp::common::LogLevel LogSystem::GetSystemLevel() { return SystemLevel; }
+csp::common::LogLevel LogSystem::GetSystemLevel() { return m_systemLevel; }
 
-bool LogSystem::LoggingEnabled(const csp::common::LogLevel Level) { return Level <= SystemLevel; }
+bool LogSystem::LoggingEnabled(const csp::common::LogLevel level) { return level <= m_systemLevel; }
 
-void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::String& InMessage)
+void LogSystem::LogMsg(const csp::common::LogLevel level, const csp::common::String& inMessage)
 {
-    if (!LoggingEnabled(Level))
+    if (!LoggingEnabled(level))
     {
         return;
     }
 
     // Log to our Connected Spaces Platform file system.
-    LogToFile(Level, InMessage);
+    LogToFile(level, inMessage);
 
-    if (Callbacks->LogCallback != nullptr)
+    if (m_callbacks->LogCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->LogCallback(Level, InMessage);
+        m_callbacks->LogCallback(level, inMessage);
     }
     else
     {
@@ -89,35 +89,35 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
     }
 }
 
-void LogSystem::LogEvent(const csp::common::String& InEvent)
+void LogSystem::LogEvent(const csp::common::String& inEvent)
 {
-    if (Callbacks->EventCallback != nullptr)
+    if (m_callbacks->EventCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->EventCallback(InEvent);
+        m_callbacks->EventCallback(inEvent);
     }
 }
 
-void LogSystem::BeginMarker(const csp::common::String& InMarker)
+void LogSystem::BeginMarker(const csp::common::String& inMarker)
 {
-    if (Callbacks->BeginMarkerCallback != nullptr)
+    if (m_callbacks->BeginMarkerCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->BeginMarkerCallback(InMarker);
+        m_callbacks->BeginMarkerCallback(inMarker);
     }
 }
 
 void LogSystem::EndMarker()
 {
-    if (Callbacks->EndMarkerCallback != nullptr)
+    if (m_callbacks->EndMarkerCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->EndMarkerCallback(nullptr);
+        m_callbacks->EndMarkerCallback(nullptr);
     }
 }
 
-void LogSystem::LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage) { CSP_LOG(Level, InMessage.c_str()); }
+void LogSystem::LogToFile(const csp::common::LogLevel level, const csp::common::String& inMessage) { CSP_LOG(level, inMessage.c_str()); }
 
-void LogSystem::ClearAllCallbacks() { Callbacks->Clear(); }
+void LogSystem::ClearAllCallbacks() { m_callbacks->Clear(); }
 
 } // namespace csp::systems

@@ -40,224 +40,224 @@ namespace csp::systems
 {
 
 LoginStateResult::LoginStateResult()
-    : State(nullptr)
+    : m_state(nullptr)
 {
 }
 
-LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
-    : State(InStatePtr)
+LoginStateResult::LoginStateResult(csp::common::LoginState* inStatePtr)
+    : m_state(inStatePtr)
 {
 }
 
-const csp::common::LoginState& LoginStateResult::GetLoginState() const { return *State; }
+const csp::common::LoginState& LoginStateResult::GetLoginState() const { return *m_state; }
 
 namespace
 {
-    csp::common::ApplicationSettings MakeApplicationSetting(const csp::services::generated::userservice::ApplicationSettingsDto& Setting)
+    csp::common::ApplicationSettings MakeApplicationSetting(const csp::services::generated::userservice::ApplicationSettingsDto& setting)
     {
-        csp::common::ApplicationSettings ApplicationSetting;
-        ApplicationSetting.ApplicationName = Setting.HasApplicationName() ? Setting.GetApplicationName() : services::utility::string_t { "" };
-        ApplicationSetting.Context = Setting.HasContext() ? Setting.GetContext() : services::utility::string_t { "" };
-        ApplicationSetting.AllowAnonymous = Setting.HasAllowAnonymous() ? Setting.GetAllowAnonymous() : false;
-        ApplicationSetting.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(ApplicationSetting.Settings) {};
-        return ApplicationSetting;
+        csp::common::ApplicationSettings applicationSetting;
+        applicationSetting.ApplicationName = setting.HasApplicationName() ? setting.GetApplicationName() : services::utility::string_t { "" };
+        applicationSetting.Context = setting.HasContext() ? setting.GetContext() : services::utility::string_t { "" };
+        applicationSetting.AllowAnonymous = setting.HasAllowAnonymous() ? setting.GetAllowAnonymous() : false;
+        applicationSetting.Settings = setting.HasSettings() ? csp::common::Convert(setting.GetSettings()) : decltype(applicationSetting.Settings) {};
+        return applicationSetting;
     }
 
     // Otherwise known as a UserSetting
-    csp::common::SettingsCollection MakeSettingsCollection(const csp::services::generated::userservice::SettingsDto& Setting)
+    csp::common::SettingsCollection MakeSettingsCollection(const csp::services::generated::userservice::SettingsDto& setting)
     {
-        csp::common::SettingsCollection SettingsCollection;
-        SettingsCollection.UserId = Setting.HasUserId() ? Setting.GetUserId() : services::utility::string_t { "" };
-        SettingsCollection.Context = Setting.HasContext() ? Setting.GetContext() : services::utility::string_t { "" };
-        SettingsCollection.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(SettingsCollection.Settings) {};
-        return SettingsCollection;
+        csp::common::SettingsCollection settingsCollection;
+        settingsCollection.UserId = setting.HasUserId() ? setting.GetUserId() : services::utility::string_t { "" };
+        settingsCollection.Context = setting.HasContext() ? setting.GetContext() : services::utility::string_t { "" };
+        settingsCollection.Settings = setting.HasSettings() ? csp::common::Convert(setting.GetSettings()) : decltype(settingsCollection.Settings) {};
+        return settingsCollection;
     }
 }
 
-void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+void LoginStateResult::OnResponse(const services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto AuthResponse = static_cast<chs::AuthDto*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto authResponse = static_cast<chs::AuthDto*>(apiResponse->GetDto());
+    const web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
+        authResponse->FromJson(response->GetPayload().GetContent());
 
-        if (State)
+        if (m_state)
         {
-            State->State = ELoginState::LoggedIn;
-            State->AccessToken = AuthResponse->GetAccessToken();
-            State->RefreshToken = AuthResponse->GetRefreshToken();
-            State->UserId = AuthResponse->GetUserId();
-            State->DeviceId = AuthResponse->GetDeviceId();
+            m_state->State = ELoginState::LoggedIn;
+            m_state->AccessToken = authResponse->GetAccessToken();
+            m_state->RefreshToken = authResponse->GetRefreshToken();
+            m_state->UserId = authResponse->GetUserId();
+            m_state->DeviceId = authResponse->GetDeviceId();
 
-            if (AuthResponse->HasDefaultSettings())
+            if (authResponse->HasDefaultSettings())
             {
-                const auto& DefaultSettings = AuthResponse->GetDefaultSettings();
-                if (DefaultSettings->HasDefaultUserSettings())
+                const auto& defaultSettings = authResponse->GetDefaultSettings();
+                if (defaultSettings->HasDefaultUserSettings())
                 {
-                    const auto& UserSettingsDto = DefaultSettings->GetDefaultUserSettings();
-                    for (const auto& SettingDto : UserSettingsDto)
+                    const auto& userSettingsDto = defaultSettings->GetDefaultUserSettings();
+                    for (const auto& settingDto : userSettingsDto)
                     {
-                        State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
+                        m_state->DefaultSettings.Append(MakeSettingsCollection(*settingDto));
                     }
                 }
-                if (DefaultSettings->HasDefaultApplicationSettings())
+                if (defaultSettings->HasDefaultApplicationSettings())
                 {
-                    const auto& ApplicationSettingsDto = DefaultSettings->GetDefaultApplicationSettings();
-                    for (const auto& SettingDto : ApplicationSettingsDto)
+                    const auto& applicationSettingsDto = defaultSettings->GetDefaultApplicationSettings();
+                    for (const auto& settingDto : applicationSettingsDto)
                     {
-                        State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
+                        m_state->DefaultApplicationSettings.Append(MakeApplicationSetting(*settingDto));
                     }
                 }
             }
 
-            const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
-            const DateTime CurrentTime(DateTime::UtcTimeNow());
+            const DateTime expiry(authResponse->GetAccessTokenExpiresAt());
+            const DateTime currentTime(DateTime::UtcTimeNow());
 
-            if (CurrentTime >= Expiry)
+            if (currentTime >= expiry)
             {
-                CSP_LOG_FORMAT(LogLevel::Error, "AccessToken Expired: %s %s", AuthResponse->GetAccessToken().c_str(),
-                    AuthResponse->GetAccessTokenExpiresAt().c_str());
+                CSP_LOG_FORMAT(LogLevel::Error, "AccessToken Expired: %s %s", authResponse->GetAccessToken().c_str(),
+                    authResponse->GetAccessTokenExpiresAt().c_str());
 
                 return;
             }
 
-            web::HttpAuth::SetAccessToken(AuthResponse->GetAccessToken(), AuthResponse->GetAccessTokenExpiresAt(), AuthResponse->GetRefreshToken(),
-                AuthResponse->GetRefreshTokenExpiresAt());
+            web::HttpAuth::SetAccessToken(authResponse->GetAccessToken(), authResponse->GetAccessTokenExpiresAt(), authResponse->GetRefreshToken(),
+                authResponse->GetRefreshTokenExpiresAt());
 
             // Schedule a Refresh of the Token 5 minutes before it expires
-            system_clock::time_point RefreshTimepoint = Expiry.GetTimePoint() - system_clock::duration(5min);
-            DateTime RefreshTime(RefreshTimepoint);
+            system_clock::time_point refreshTimepoint = expiry.GetTimePoint() - system_clock::duration(5min);
+            DateTime refreshTime(refreshTimepoint);
 
-            if (RefreshTime >= Expiry)
+            if (refreshTime >= expiry)
             {
-                CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", AuthResponse->GetRefreshToken().c_str(),
-                    AuthResponse->GetRefreshTokenExpiresAt().c_str());
+                CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", authResponse->GetRefreshToken().c_str(),
+                    authResponse->GetRefreshTokenExpiresAt().c_str());
 
                 return;
             }
 
-            State->SetAccessTokenRefreshTime(RefreshTime);
+            m_state->SetAccessTokenRefreshTime(refreshTime);
 
             // Signal login to anyone interested
-            events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
-            LoginEvent->AddString("UserId", AuthResponse->GetUserId());
-            events::EventSystem::Get().EnqueueEvent(LoginEvent);
+            events::Event* loginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
+            loginEvent->AddString("UserId", authResponse->GetUserId());
+            events::EventSystem::Get().EnqueueEvent(loginEvent);
 
             SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
         }
     }
     else
     {
-        if (State)
+        if (m_state)
         {
             web::HttpAuth::SetAccessToken("", "", "", "");
 
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            m_state->State = ELoginState::Error;
+            m_state->AccessToken = "InvalidAccessToken";
+            m_state->RefreshToken = "InvalidRefreshToken";
+            m_state->UserId = "InvalidUserId";
+            m_state->DeviceId = "InvalidDeviceId";
         }
     }
 }
 
 LogoutResult::LogoutResult()
-    : State(nullptr)
+    : m_state(nullptr)
 {
 }
 
-LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
-    : NullResult(InStatePtr)
-    , State(InStatePtr)
+LogoutResult::LogoutResult(csp::common::LoginState* inStatePtr)
+    : NullResult(inStatePtr)
+    , m_state(inStatePtr)
 {
 }
 
-void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+void LogoutResult::OnResponse(const services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        if (State)
+        if (m_state)
         {
-            State->State = ELoginState::LoggedOut;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            m_state->State = ELoginState::LoggedOut;
+            m_state->AccessToken = "InvalidAccessToken";
+            m_state->RefreshToken = "InvalidRefreshToken";
+            m_state->UserId = "InvalidUserId";
+            m_state->DeviceId = "InvalidDeviceId";
 
             web::HttpAuth::SetAccessToken("", "", "", "");
 
             // Send logout event
-            events::Event* LogoutEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGOUT_EVENT_ID);
-            events::EventSystem::Get().EnqueueEvent(LogoutEvent);
+            events::Event* logoutEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGOUT_EVENT_ID);
+            events::EventSystem::Get().EnqueueEvent(logoutEvent);
         }
     }
     else
     {
-        if (State)
+        if (m_state)
         {
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            m_state->State = ELoginState::Error;
+            m_state->AccessToken = "InvalidAccessToken";
+            m_state->RefreshToken = "InvalidRefreshToken";
+            m_state->UserId = "InvalidUserId";
+            m_state->DeviceId = "InvalidDeviceId";
 
             web::HttpAuth::SetAccessToken("", "", "", "");
         }
     }
 }
 
-const LoginTokenInfo& LoginTokenInfoResult::GetLoginTokenInfo() const { return TokenInfo; }
+const LoginTokenInfo& LoginTokenInfoResult::GetLoginTokenInfo() const { return m_tokenInfo; }
 
 void LoginTokenInfoResult::FillLoginTokenInfo(
-    const String& AccessToken, const String& AccessTokenExpiry, const String& RefreshToken, const String& RefreshTokenExpiry)
+    const String& accessToken, const String& accessTokenExpiry, const String& refreshToken, const String& refreshTokenExpiry)
 {
     SetResult(EResultCode::Success, static_cast<uint16_t>(web::EResponseCodes::ResponseOK));
 
-    TokenInfo.AccessToken = AccessToken;
-    TokenInfo.AccessExpiryTime = AccessTokenExpiry;
-    TokenInfo.RefreshToken = RefreshToken;
-    TokenInfo.RefreshExpiryTime = RefreshTokenExpiry;
+    m_tokenInfo.AccessToken = accessToken;
+    m_tokenInfo.AccessExpiryTime = accessTokenExpiry;
+    m_tokenInfo.RefreshToken = refreshToken;
+    m_tokenInfo.RefreshExpiryTime = refreshTokenExpiry;
 }
 
-void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto CheckoutSessionResponse = static_cast<chs::StripeCheckoutSessionDto*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto checkoutSessionResponse = static_cast<chs::StripeCheckoutSessionDto*>(apiResponse->GetDto());
+    const web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
+        checkoutSessionResponse->FromJson(response->GetPayload().GetContent());
 
-        if (CheckoutSessionResponse->HasCheckoutUrl())
+        if (checkoutSessionResponse->HasCheckoutUrl())
         {
-            SetValue(CheckoutSessionResponse->GetCheckoutUrl());
+            SetValue(checkoutSessionResponse->GetCheckoutUrl());
         }
     }
 }
 
-void CustomerPortalUrlResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+void CustomerPortalUrlResult::OnResponse(const services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto CustomerPortalResponse = static_cast<chs::StripeCustomerPortalDto*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto customerPortalResponse = static_cast<chs::StripeCustomerPortalDto*>(apiResponse->GetDto());
+    const web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
+        customerPortalResponse->FromJson(response->GetPayload().GetContent());
 
-        if (CustomerPortalResponse->HasCustomerPortalUrl())
+        if (customerPortalResponse->HasCustomerPortalUrl())
         {
-            SetValue(CustomerPortalResponse->GetCustomerPortalUrl());
+            SetValue(customerPortalResponse->GetCustomerPortalUrl());
         }
     }
 }

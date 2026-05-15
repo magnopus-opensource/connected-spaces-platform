@@ -2,75 +2,75 @@
 
 namespace csp::multiplayer
 {
-void SignalRSerializer::StartWriteArray() { Stack.push(std::vector<signalr::value> {}); }
+void SignalRSerializer::StartWriteArray() { m_stack.push(std::vector<signalr::value> {}); }
 
 void SignalRSerializer::EndWriteArray()
 {
-    if (Stack.size() == 0 || std::holds_alternative<std::vector<signalr::value>>(Stack.top()) == false)
+    if (m_stack.size() == 0 || std::holds_alternative<std::vector<signalr::value>>(m_stack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Serializer was not in an array");
     }
 
-    auto ArrayObject = std::move(Stack.top());
-    Stack.pop();
-    FinalizeContainerSerialization(signalr::value { std::get<std::vector<signalr::value>>(ArrayObject) });
+    auto arrayObject = std::move(m_stack.top());
+    m_stack.pop();
+    FinalizeContainerSerialization(signalr::value { std::get<std::vector<signalr::value>>(arrayObject) });
 }
 
-void SignalRSerializer::StartWriteStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
+void SignalRSerializer::StartWriteStringMap() { m_stack.push(std::map<std::string, signalr::value> {}); }
 
 void SignalRSerializer::EndWriteStringMap()
 {
-    if (Stack.size() == 0 || std::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
+    if (m_stack.size() == 0 || std::holds_alternative<std::map<std::string, signalr::value>>(m_stack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Serializer was not in a string map");
     }
 
-    auto StringMapObject = std::move(Stack.top());
-    Stack.pop();
-    FinalizeContainerSerialization(signalr::value { std::get<std::map<std::string, signalr::value>>(StringMapObject) });
+    auto stringMapObject = std::move(m_stack.top());
+    m_stack.pop();
+    FinalizeContainerSerialization(signalr::value { std::get<std::map<std::string, signalr::value>>(stringMapObject) });
 }
 
-void SignalRSerializer::StartWriteUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
+void SignalRSerializer::StartWriteUintMap() { m_stack.push(std::map<uint64_t, signalr::value> {}); }
 
 void SignalRSerializer::EndWriteUintMap()
 {
-    if (Stack.size() == 0 || std::holds_alternative<std::map<std::uint64_t, signalr::value>>(Stack.top()) == false)
+    if (m_stack.size() == 0 || std::holds_alternative<std::map<std::uint64_t, signalr::value>>(m_stack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Serializer was not in a uint map");
     }
 
-    auto UintMapObject = std::move(Stack.top());
-    Stack.pop();
-    FinalizeContainerSerialization(signalr::value { std::get<std::map<uint64_t, signalr::value>>(UintMapObject) });
+    auto uintMapObject = std::move(m_stack.top());
+    m_stack.pop();
+    FinalizeContainerSerialization(signalr::value { std::get<std::map<uint64_t, signalr::value>>(uintMapObject) });
 }
 
 signalr::value SignalRSerializer::Get() const
 {
-    if (Stack.size() == 0)
+    if (m_stack.size() == 0)
     {
         return signalr::value();
     }
 
-    if (Stack.size() > 1)
+    if (m_stack.size() > 1)
     {
         throw std::runtime_error("Invalid call: Serializer is not at the root");
     }
 
-    if (std::holds_alternative<signalr::value>(Stack.top()))
+    if (std::holds_alternative<signalr::value>(m_stack.top()))
     {
-        return std::get<signalr::value>(Stack.top());
+        return std::get<signalr::value>(m_stack.top());
     }
-    else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
+    else if (std::holds_alternative<std::vector<signalr::value>>(m_stack.top()))
     {
-        return signalr::value { std::get<std::vector<signalr::value>>(Stack.top()) };
+        return signalr::value { std::get<std::vector<signalr::value>>(m_stack.top()) };
     }
-    else if (std::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()))
+    else if (std::holds_alternative<std::map<uint64_t, signalr::value>>(m_stack.top()))
     {
-        return signalr::value { std::get<std::map<uint64_t, signalr::value>>(Stack.top()) };
+        return signalr::value { std::get<std::map<uint64_t, signalr::value>>(m_stack.top()) };
     }
-    else if (std::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()))
+    else if (std::holds_alternative<std::map<std::string, signalr::value>>(m_stack.top()))
     {
-        return signalr::value { std::get<std::map<std::string, signalr::value>>(Stack.top()) };
+        return signalr::value { std::get<std::map<std::string, signalr::value>>(m_stack.top()) };
     }
     else
     {
@@ -78,50 +78,50 @@ signalr::value SignalRSerializer::Get() const
     }
 }
 
-void SignalRSerializer::FinalizeContainerSerialization(signalr::value&& SerializedContainer)
+void SignalRSerializer::FinalizeContainerSerialization(signalr::value&& serializedContainer)
 {
     // We dont check for maps in this function because key-values are handled separately.
-    if (Stack.size() == 0)
+    if (m_stack.size() == 0)
     {
         // If the last element has been popped, push back a root value.
-        Stack.push(SerializedContainer);
+        m_stack.push(serializedContainer);
         return;
     }
 
     // Dispatch internal variant type to the correct FinalizeContainerSerializationInternal call.
-    std::visit([this, &SerializedContainer](auto& ValType) { this->FinalizeContainerSerializationInternal(ValType, std::move(SerializedContainer)); },
-        Stack.top());
+    std::visit([this, &serializedContainer](auto& valType) { this->FinalizeContainerSerializationInternal(valType, std::move(serializedContainer)); },
+        m_stack.top());
 }
 
-void SignalRSerializer::FinalizeContainerSerializationInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer)
+void SignalRSerializer::FinalizeContainerSerializationInternal(std::vector<signalr::value>& container, signalr::value&& serializedContainer)
 {
-    Container.push_back(SerializedContainer);
+    container.push_back(serializedContainer);
 }
 
-SignalRDeserializer::SignalRDeserializer(const signalr::value& Object)
-    : Root { Object }
+SignalRDeserializer::SignalRDeserializer(const signalr::value& object)
+    : m_root { object }
 {
-    ObjectStack.push(nullptr);
+    m_objectStack.push(nullptr);
 }
 
-SignalRDeserializer::SignalRDeserializer(signalr::value&& Object)
-    : Root { std::move(Object) }
+SignalRDeserializer::SignalRDeserializer(signalr::value&& object)
+    : m_root { std::move(object) }
 {
-    ObjectStack.push(nullptr);
+    m_objectStack.push(nullptr);
 }
 
-void SignalRDeserializer::StartReadArray(size_t& Size)
+void SignalRDeserializer::StartReadArray(size_t& size)
 {
-    const signalr::value& ArrayObject = ReadNextValue();
+    const signalr::value& arrayObject = ReadNextValue();
 
-    if (ArrayObject.is_array() == false)
+    if (arrayObject.is_array() == false)
     {
         throw std::runtime_error("Unexpected value: Value isn't an array");
     }
 
-    ObjectStack.push(ArrayObject.as_array().begin());
+    m_objectStack.push(arrayObject.as_array().begin());
 
-    Size = ArrayObject.as_array().size();
+    size = arrayObject.as_array().size();
 }
 
 void SignalRDeserializer::EndReadArray()
@@ -130,18 +130,18 @@ void SignalRDeserializer::EndReadArray()
     IncrementIterator();
 }
 
-void SignalRDeserializer::StartReadUintMap(size_t& Size)
+void SignalRDeserializer::StartReadUintMap(size_t& size)
 {
-    const signalr::value& MapObject = ReadNextValue();
+    const signalr::value& mapObject = ReadNextValue();
 
-    if (MapObject.is_uint_map() == false)
+    if (mapObject.is_uint_map() == false)
     {
         throw std::runtime_error("Unexpected value: Value isn't a uint map");
     }
 
-    ObjectStack.push(MapObject.as_uint_map().begin());
+    m_objectStack.push(mapObject.as_uint_map().begin());
 
-    Size = MapObject.as_uint_map().size();
+    size = mapObject.as_uint_map().size();
 }
 void SignalRDeserializer::EndReadUintMap()
 {
@@ -149,18 +149,18 @@ void SignalRDeserializer::EndReadUintMap()
     IncrementIterator();
 }
 
-void SignalRDeserializer::StartReadStringMap(size_t& Size)
+void SignalRDeserializer::StartReadStringMap(size_t& size)
 {
-    const signalr::value& MapObject = ReadNextValue();
+    const signalr::value& mapObject = ReadNextValue();
 
-    if (MapObject.is_string_map() == false)
+    if (mapObject.is_string_map() == false)
     {
         throw std::runtime_error("Unexpected value: Value isn't a string map");
     }
 
-    ObjectStack.push(MapObject.as_string_map().begin());
+    m_objectStack.push(mapObject.as_string_map().begin());
 
-    Size = MapObject.as_string_map().size();
+    size = mapObject.as_string_map().size();
 }
 
 void SignalRDeserializer::EndReadStringMap()
@@ -173,31 +173,31 @@ void SignalRDeserializer::Skip() { IncrementIterator(); }
 
 bool SignalRDeserializer::NextValueIsInt() const
 {
-    const signalr::value& Next = ReadNextValue();
-    return Next.is_integer();
+    const signalr::value& next = ReadNextValue();
+    return next.is_integer();
 }
 
 bool SignalRDeserializer::NextValueIsUint() const
 {
-    const signalr::value& Next = ReadNextValue();
-    return Next.is_uinteger();
+    const signalr::value& next = ReadNextValue();
+    return next.is_uinteger();
 }
 
 bool SignalRDeserializer::NextValueIsNull() const
 {
-    const signalr::value& Next = ReadNextValue();
-    return Next.is_null();
+    const signalr::value& next = ReadNextValue();
+    return next.is_null();
 }
 
 const signalr::value& SignalRDeserializer::ReadNextValue() const
 {
-    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()))
+    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(m_objectStack.top()))
     {
-        return *std::get<std::vector<signalr::value>::const_iterator>(ObjectStack.top());
+        return *std::get<std::vector<signalr::value>::const_iterator>(m_objectStack.top());
     }
-    else if (std::holds_alternative<std::nullptr_t>(ObjectStack.top()))
+    else if (std::holds_alternative<std::nullptr_t>(m_objectStack.top()))
     {
-        return Root;
+        return m_root;
     }
     else
     {
@@ -207,97 +207,97 @@ const signalr::value& SignalRDeserializer::ReadNextValue() const
 
 void SignalRDeserializer::EndReadArrayInternal()
 {
-    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(m_objectStack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Deserializer was not in an array");
     }
 
-    ObjectStack.pop();
+    m_objectStack.pop();
 }
 
 void SignalRDeserializer::EndReadUintMapInternal()
 {
-    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(m_objectStack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Deserializer was not in a uint map");
     }
 
-    ObjectStack.pop();
+    m_objectStack.pop();
 }
 
 void SignalRDeserializer::EndReadStringMapInternal()
 {
-    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(m_objectStack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Deserializer was not in a string map");
     }
 
-    ObjectStack.pop();
+    m_objectStack.pop();
 }
 
 const std::pair<std::uint64_t, signalr::value> SignalRDeserializer::ReadNextUintKeyValue() const
 {
-    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(m_objectStack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Deserializer was not in a uint map");
     }
 
-    return *std::get<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top());
+    return *std::get<std::map<uint64_t, signalr::value>::const_iterator>(m_objectStack.top());
 }
 
 const std::pair<std::string, signalr::value> SignalRDeserializer::ReadNextStringKeyValue() const
 {
-    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(m_objectStack.top()) == false)
     {
         throw std::runtime_error("Invalid call: Deserializer was not in a string map");
     }
 
-    return *std::get<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top());
+    return *std::get<std::map<std::string, signalr::value>::const_iterator>(m_objectStack.top());
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& object, double& outVal)
 {
-    if (Object.is_double() == false)
+    if (object.is_double() == false)
     {
         throw std::runtime_error("Invalid call: Value was not a double");
     }
 
-    OutVal = Object.as_double();
+    outVal = object.as_double();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, float& OutVal)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& object, float& outVal)
 {
-    if (Object.is_double() == false)
+    if (object.is_double() == false)
     {
         throw std::runtime_error("Invalid call: Value was not a double");
     }
 
-    OutVal = static_cast<float>(Object.as_double());
+    outVal = static_cast<float>(object.as_double());
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& object, bool& outVal)
 {
-    if (Object.is_bool() == false)
+    if (object.is_bool() == false)
     {
         throw std::runtime_error("Invalid call: Value was not a bool");
     }
 
-    OutVal = Object.as_bool();
+    outVal = object.as_bool();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& object, std::string& outVal)
 {
-    if (Object.is_string() == false)
+    if (object.is_string() == false)
     {
         throw std::runtime_error("Invalid call: Value was not a string");
     }
 
-    OutVal = Object.as_string();
+    outVal = object.as_string();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::nullptr_t)
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& object, std::nullptr_t)
 {
-    if (Object.is_null() == false)
+    if (object.is_null() == false)
     {
         throw std::runtime_error("Invalid call: Value was not null");
     }
@@ -305,17 +305,17 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
 
 void SignalRDeserializer::IncrementIterator()
 {
-    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()))
+    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(m_objectStack.top()))
     {
-        std::get<std::vector<signalr::value>::const_iterator>(ObjectStack.top())++;
+        std::get<std::vector<signalr::value>::const_iterator>(m_objectStack.top())++;
     }
-    else if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()))
+    else if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(m_objectStack.top()))
     {
-        std::get<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top())++;
+        std::get<std::map<uint64_t, signalr::value>::const_iterator>(m_objectStack.top())++;
     }
-    else if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()))
+    else if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(m_objectStack.top()))
     {
-        std::get<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top())++;
+        std::get<std::map<std::string, signalr::value>::const_iterator>(m_objectStack.top())++;
     }
 }
 }

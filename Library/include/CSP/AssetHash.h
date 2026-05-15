@@ -25,6 +25,6 @@ namespace csp
 /// Can be used to create a unique integer for an Asset for fast comparison or containers which require hashing.
 /// @param AssetId const csp::common::String&
 /// @return uint32_t : Asset hash
-CSP_API uint32_t GenerateAssetHash(const csp::common::String& AssetId);
+CSP_API uint32_t GenerateAssetHash(const csp::common::String& assetId);
 
 } // namespace csp

@@ -24,74 +24,74 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-void ProfileLiteDtoToBasicProfile(const chs::ProfileLiteDto& Dto, csp::systems::BasicProfile& Profile)
+void ProfileLiteDtoToBasicProfile(const chs::ProfileLiteDto& dto, csp::systems::BasicProfile& profile)
 {
-    Profile.UserId = Dto.GetId();
-    Profile.AvatarId = Dto.GetAvatarId();
+    profile.UserId = dto.GetId();
+    profile.AvatarId = dto.GetAvatarId();
 
-    if (Dto.HasDisplayName())
+    if (dto.HasDisplayName())
     {
-        Profile.DisplayName = Dto.GetDisplayName();
+        profile.DisplayName = dto.GetDisplayName();
     }
 }
 
-void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Profile)
+void ProfileDtoToProfile(const chs::ProfileDto& dto, csp::systems::Profile& profile)
 {
-    Profile.UserId = Dto.GetId();
+    profile.UserId = dto.GetId();
 
-    if (Dto.HasEmail())
+    if (dto.HasEmail())
     {
-        Profile.Email = Dto.GetEmail();
+        profile.Email = dto.GetEmail();
     }
 
-    if (Dto.HasLastDeviceId())
+    if (dto.HasLastDeviceId())
     {
-        Profile.LastDeviceId = Dto.GetLastDeviceId();
+        profile.LastDeviceId = dto.GetLastDeviceId();
     }
 
-    Profile.AvatarId = Dto.GetAvatarId();
+    profile.AvatarId = dto.GetAvatarId();
 
-    if (Dto.HasDisplayName())
+    if (dto.HasDisplayName())
     {
-        Profile.DisplayName = Dto.GetDisplayName();
+        profile.DisplayName = dto.GetDisplayName();
     }
 
     // TODO: Add PersonalityType and PersonalityValuesType if Mag requests it. They are currently ignored as they seem to be Parasol-specific
 
-    if (Dto.HasIsEmailConfirmed())
+    if (dto.HasIsEmailConfirmed())
     {
-        Profile.IsEmailConfirmed = Dto.GetIsEmailConfirmed();
+        profile.IsEmailConfirmed = dto.GetIsEmailConfirmed();
     }
 
-    if (Dto.HasRoles())
+    if (dto.HasRoles())
     {
-        auto ResponseRoles = Dto.GetRoles();
-        Profile.Roles = csp::common::Array<csp::common::String>(ResponseRoles.size());
+        auto responseRoles = dto.GetRoles();
+        profile.Roles = csp::common::Array<csp::common::String>(responseRoles.size());
 
-        for (size_t i = 0; i < ResponseRoles.size(); ++i)
+        for (size_t i = 0; i < responseRoles.size(); ++i)
         {
-            Profile.Roles[i] = ResponseRoles[i];
+            profile.Roles[i] = responseRoles[i];
         }
     }
 
-    if (Dto.HasCreatedBy())
+    if (dto.HasCreatedBy())
     {
-        Profile.CreatedBy = Dto.GetCreatedBy();
+        profile.CreatedBy = dto.GetCreatedBy();
     }
 
-    if (Dto.HasCreatedAt())
+    if (dto.HasCreatedAt())
     {
-        Profile.CreatedAt = Dto.GetCreatedAt();
+        profile.CreatedAt = dto.GetCreatedAt();
     }
 
-    if (Dto.HasUpdatedBy())
+    if (dto.HasUpdatedBy())
     {
-        Profile.UpdatedBy = Dto.GetUpdatedBy();
+        profile.UpdatedBy = dto.GetUpdatedBy();
     }
 
-    if (Dto.HasUpdatedAt())
+    if (dto.HasUpdatedAt())
     {
-        Profile.UpdatedAt = Dto.GetUpdatedAt();
+        profile.UpdatedAt = dto.GetUpdatedAt();
     }
 }
 
@@ -100,70 +100,70 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
 namespace csp::systems
 {
 
-bool BasicProfile::operator==(const BasicProfile& Other) const
+bool BasicProfile::operator==(const BasicProfile& other) const
 {
-    return UserId == Other.UserId && DisplayName == Other.DisplayName && AvatarId == Other.AvatarId;
+    return UserId == other.UserId && DisplayName == other.DisplayName && AvatarId == other.AvatarId;
 }
 
-bool BasicProfile::operator!=(const BasicProfile& Other) const { return !(*this == Other); }
+bool BasicProfile::operator!=(const BasicProfile& other) const { return !(*this == other); }
 
 Profile::Profile()
     : IsEmailConfirmed(false)
 {
 }
 
-bool Profile::operator==(const Profile& Other) const
+bool Profile::operator==(const Profile& other) const
 {
-    return BasicProfile::operator==(Other) && Email == Other.Email && IsEmailConfirmed == Other.IsEmailConfirmed && Roles == Other.Roles
-        && LastDeviceId == Other.LastDeviceId && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && UpdatedBy == Other.UpdatedBy
-        && UpdatedAt == Other.UpdatedAt;
+    return BasicProfile::operator==(other) && Email == other.Email && IsEmailConfirmed == other.IsEmailConfirmed && Roles == other.Roles
+        && LastDeviceId == other.LastDeviceId && CreatedBy == other.CreatedBy && CreatedAt == other.CreatedAt && UpdatedBy == other.UpdatedBy
+        && UpdatedAt == other.UpdatedAt;
 }
 
-bool Profile::operator!=(const Profile& Other) const { return !(*this == Other); }
+bool Profile::operator!=(const Profile& other) const { return !(*this == other); }
 
-void ProfileResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ProfileResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto ProfileResponse = static_cast<chs::ProfileDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto profileResponse = static_cast<chs::ProfileDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProfileResponse->FromJson(Response->GetPayload().GetContent());
+        profileResponse->FromJson(response->GetPayload().GetContent());
 
-        ProfileDtoToProfile(*ProfileResponse, Profile);
+        ProfileDtoToProfile(*profileResponse, m_profile);
     }
 }
 
-Profile& ProfileResult::GetProfile() { return Profile; }
+Profile& ProfileResult::GetProfile() { return m_profile; }
 
-const Profile& ProfileResult::GetProfile() const { return Profile; }
+const Profile& ProfileResult::GetProfile() const { return m_profile; }
 
-void BasicProfilesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicProfilesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* ProfileDataResponse = static_cast<csp::services::DtoArray<chs::ProfileLiteDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* profileDataResponse = static_cast<csp::services::DtoArray<chs::ProfileLiteDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProfileDataResponse->FromJson(Response->GetPayload().GetContent());
+        profileDataResponse->FromJson(response->GetPayload().GetContent());
 
-        const std::vector<chs::ProfileLiteDto>& ProfileArray = ProfileDataResponse->GetArray();
-        Profiles = csp::common::Array<csp::systems::BasicProfile>(ProfileArray.size());
+        const std::vector<chs::ProfileLiteDto>& profileArray = profileDataResponse->GetArray();
+        m_profiles = csp::common::Array<csp::systems::BasicProfile>(profileArray.size());
 
-        for (size_t i = 0; i < ProfileArray.size(); ++i)
+        for (size_t i = 0; i < profileArray.size(); ++i)
         {
-            ProfileLiteDtoToBasicProfile(ProfileArray[i], Profiles[i]);
+            ProfileLiteDtoToBasicProfile(profileArray[i], m_profiles[i]);
         }
     }
 }
 
-csp::common::Array<BasicProfile>& BasicProfilesResult::GetProfiles() { return Profiles; }
+csp::common::Array<BasicProfile>& BasicProfilesResult::GetProfiles() { return m_profiles; }
 
-const csp::common::Array<BasicProfile>& BasicProfilesResult::GetProfiles() const { return Profiles; }
+const csp::common::Array<BasicProfile>& BasicProfilesResult::GetProfiles() const { return m_profiles; }
 } // namespace csp::systems

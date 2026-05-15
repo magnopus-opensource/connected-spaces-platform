@@ -72,22 +72,22 @@ public:
     /// @brief Retreives the LODChain from the result.
     const LODChain& GetLODChain() const;
 
-    CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     LODChainResult(void*) {};
 
-    void SetLODChain(const LODChain& Chain);
-    void SetLODChain(LODChain&& Chain);
+    void SetLODChain(const LODChain& chain);
+    void SetLODChain(LODChain&& chain);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    LODChain Chain;
+    LODChain m_chain;
 };
 
 /// @brief Callback containing LOD chain data.
 /// @param Result LODChainResult : result class
-typedef std::function<void(const LODChainResult& Result)> LODChainResultCallback;
+typedef std::function<void(const LODChainResult& result)> LODChainResultCallback;
 
 } // namespace csp::systems

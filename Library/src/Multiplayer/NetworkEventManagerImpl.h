@@ -37,18 +37,18 @@ enum class ErrorCode;
 class NetworkEventManagerImpl
 {
 public:
-    NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection);
+    NetworkEventManagerImpl(MultiplayerConnection* inMultiplayerConnection);
 
     typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
 
-    void SetConnection(csp::multiplayer::ISignalRConnection& InConnection);
+    void SetConnection(csp::multiplayer::ISignalRConnection& inConnection);
 
-    CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Arguments,
-        uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& eventName, const csp::common::Array<csp::common::ReplicatedValue>& arguments,
+        uint64_t targetClientId, ErrorCodeCallbackHandler callback);
 
 private:
-    MultiplayerConnection* MultiplayerConnectionInst;
-    csp::multiplayer::ISignalRConnection* Connection;
+    MultiplayerConnection* m_multiplayerConnectionInst;
+    csp::multiplayer::ISignalRConnection* m_connection;
 };
 
 } // namespace csp::multiplayer

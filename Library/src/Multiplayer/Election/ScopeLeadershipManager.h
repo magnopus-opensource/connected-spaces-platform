@@ -42,38 +42,38 @@ class MultiplayerConnection;
 class ScopeLeadershipManager
 {
 public:
-    ScopeLeadershipManager(MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem);
+    ScopeLeadershipManager(MultiplayerConnection& connection, csp::common::LogSystem& logSystem);
 
     // Adds a scope to the ScopeLeadershipManager to track events for.
     // Scopes should be registered on space entry and when new scopes are created.
     // If a scope is accessed for a scope that hasn't been registered, an error will be logged to the log system.
-    void RegisterScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId);
+    void RegisterScope(const std::string& scopeId, const std::optional<uint64_t>& leaderId);
 
-    void DeregisterScope(const std::string& ScopeId);
+    void DeregisterScope(const std::string& scopeId);
 
     // Called when we receive a leader election event for a scope.
     // This will happen after a server-side election is completed.
-    void OnElectedScopeLeader(const std::string& ScopeId, uint64_t ClientId);
+    void OnElectedScopeLeader(const std::string& scopeId, uint64_t clientId);
     // Called when we receive a leader vacated event.
     // This will happen if an election is manually triggered for a scope that already has a leader,
     // or the current leader becomes unavailable (heartbeat not sent within a time, or the client disconnects).
-    void OnVacatedAsScopeLeader(const std::string& ScopeId);
+    void OnVacatedAsScopeLeader(const std::string& scopeId);
 
     // Loop Scopes and calls SendLeaderHeartbeat if the local client is the leader of the scope
     // and LeaderElectionHeartbeatInterval has passed since the last heartbeat.
     void SendHeartbeatIfElectedScopeLeader();
 
     // Returns std::nullopt if not valid
-    std::optional<uint64_t> GetLeaderClientId(const std::string& ScopeId) const;
-    bool IsLocalClientLeader(const std::string& ScopeId) const;
+    std::optional<uint64_t> GetLeaderClientId(const std::string& scopeId) const;
+    bool IsLocalClientLeader(const std::string& scopeId) const;
 
 private:
     // Notifies the server that the leader of the given scope is still available.
     // If x time has passed since the last heartbeat, a re-election will happen server-side.
-    void SendLeaderHeartbeat(const std::string& ScopeId);
+    void SendLeaderHeartbeat(const std::string& scopeId);
 
-    MultiplayerConnection& Connection;
-    csp::common::LogSystem& LogSystem;
+    MultiplayerConnection& m_connection;
+    csp::common::LogSystem& m_logSystem;
 
     struct ScopeLeaderData
     {
@@ -87,10 +87,10 @@ private:
     // Used for getting leader data about each registered scope.
     // Key is the Scope id.
     // std::nullopt represents a scope which doesn't have a leader, meaning an election is currently in progress.
-    std::unordered_map<std::string, std::optional<ScopeLeaderData>> Scopes;
+    std::unordered_map<std::string, std::optional<ScopeLeaderData>> m_scopes;
 
      // Represents the lifetime of the ScopeLeadershipManager. Used to ensure async callbacks don't operate on this object after it is destroyed.
-    std::shared_ptr<int> LifetimeToken = std::make_shared<int>(0);
+    std::shared_ptr<int> m_lifetimeToken = std::make_shared<int>(0);
 };
 
 CSP_START_IGNORE

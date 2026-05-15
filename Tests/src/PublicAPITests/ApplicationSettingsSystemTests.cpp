@@ -36,21 +36,21 @@ using namespace csp::systems;
 namespace
 {
 
-ApplicationSettings GetApplicationSettingsTestData(const csp::common::String& Context, const bool AllowAnonymous)
+ApplicationSettings GetApplicationSettingsTestData(const csp::common::String& context, const bool allowAnonymous)
 {
-    auto Settings = csp::common::Map<csp::common::String, csp::common::String>();
-    Settings["TestSettings_1"] = "TestData_1";
-    Settings["TestSettings_2"] = "TestData_2";
-    Settings["TestSettings_3"] = "TestData_3";
-    Settings["TestSettings_4"] = "TestData_4";
+    auto settings = csp::common::Map<csp::common::String, csp::common::String>();
+    settings["TestSettings_1"] = "TestData_1";
+    settings["TestSettings_2"] = "TestData_2";
+    settings["TestSettings_3"] = "TestData_3";
+    settings["TestSettings_4"] = "TestData_4";
 
-    auto ApplicationSettings = ::ApplicationSettings();
-    ApplicationSettings.ApplicationName = "MAG_APPLICATION_SETTINGS_TESTS";
-    ApplicationSettings.Context = Context;
-    ApplicationSettings.AllowAnonymous = AllowAnonymous;
-    ApplicationSettings.Settings = Settings;
+    auto applicationSettings = ::ApplicationSettings();
+    applicationSettings.ApplicationName = "MAG_APPLICATION_SETTINGS_TESTS";
+    applicationSettings.Context = context;
+    applicationSettings.AllowAnonymous = allowAnonymous;
+    applicationSettings.Settings = settings;
 
-    return ApplicationSettings;
+    return applicationSettings;
 }
 
 }
@@ -64,39 +64,39 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Login
-    csp::common::String UserId;
-    LogInAsAdminUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsAdminUser(userSystem, userId);
 
-    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+    auto applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
 
     // Create Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful creation of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettingsTestData);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings, ApplicationSettingsTestData.Settings);
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings, applicationSettingsTestData.Settings);
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettingsByContextTest)
@@ -108,39 +108,39 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettin
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Login
-    csp::common::String UserId;
-    LogInAsAdminUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsAdminUser(userSystem, userId);
 
-    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+    auto applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Create Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful creation of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettingsTestData);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings, ApplicationSettingsTestData.Settings);
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings, applicationSettingsTestData.Settings);
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextTest)
@@ -152,54 +152,54 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Seed application settings test data
     {
-        csp::common::String UserId;
-        LogInAsAdminUser(UserSystem, UserId);
+        csp::common::String userId;
+        LogInAsAdminUser(userSystem, userId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+        auto applicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
     }
 
     // Login
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+    auto const applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, ApplicationSettingsTestData.ApplicationName,
-            ApplicationSettingsTestData.Context, nullptr);
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContext, applicationSettingsTestData.ApplicationName,
+            applicationSettingsTestData.Context, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings, ApplicationSettingsTestData.Settings);
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings, applicationSettingsTestData.Settings);
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextWithKeysTest)
@@ -211,81 +211,81 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextW
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Seed application settings test data
     {
-        csp::common::String UserId;
-        LogInAsAdminUser(UserSystem, UserId);
+        csp::common::String userId;
+        LogInAsAdminUser(userSystem, userId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+        auto applicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
     }
 
     // Login
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+    auto const applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto Keys = csp::common::Array<csp::common::String>(1);
-        Keys[0] = "TestSettings_3";
+        auto keys = csp::common::Array<csp::common::String>(1);
+        keys[0] = "TestSettings_3";
 
         auto [Result] = AWAIT(
-            ApplicationSettingsSystem, GetSettingsByContext, ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, Keys);
+            applicationSettingsSystem, GetSettingsByContext, applicationSettingsTestData.ApplicationName, applicationSettingsTestData.Context, keys);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings.Size(), Keys.Size());
-        EXPECT_EQ(ApplicationSettings.Settings[Keys[0]], "TestData_3");
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings.Size(), keys.Size());
+        EXPECT_EQ(applicationSettings.Settings[keys[0]], "TestData_3");
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByContextTest)
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Login
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    csp::common::String userId;
+    LogInAsNewTestUser(userSystem, userId);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
-        const String ResponseMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ResponseMsg)).Times(1);
+        const String responseMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, responseMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, GetUniqueString().c_str(), GetUniqueString().c_str(), nullptr);
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContext, GetUniqueString().c_str(), GetUniqueString().c_str(), nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNoContent));
@@ -293,7 +293,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
     }
 
     // Log out
-    LogOut(UserSystem);
+    LogOut(userSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousTest)
@@ -305,46 +305,46 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Seed application settings test data
     {
-        csp::common::String UserId;
-        LogInAsAdminUser(UserSystem, UserId);
+        csp::common::String userId;
+        LogInAsAdminUser(userSystem, userId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+        auto applicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
     }
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+    auto const applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
-            ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
+            applicationSettingsTestData.ApplicationName, applicationSettingsTestData.Context, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings, ApplicationSettingsTestData.Settings);
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings, applicationSettingsTestData.Settings);
     }
 }
 
@@ -357,50 +357,50 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* userSystem = systemsManager.GetUserSystem();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Seed application settings test data
     {
-        csp::common::String UserId;
-        LogInAsAdminUser(UserSystem, UserId);
+        csp::common::String userId;
+        LogInAsAdminUser(userSystem, userId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+        auto applicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+        auto [Result] = AWAIT(applicationSettingsSystem, CreateSettingsByContext, applicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Log out
-        LogOut(UserSystem);
+        LogOut(userSystem);
     }
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+    auto const applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
-        const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, GetSettingsByContextMsg)).Times(1);
+        const String getSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, getSettingsByContextMsg)).Times(1);
 
-        auto Keys = csp::common::Array<csp::common::String>(1);
-        Keys[0] = "TestSettings_3";
+        auto keys = csp::common::Array<csp::common::String>(1);
+        keys[0] = "TestSettings_3";
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
-            ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, Keys);
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
+            applicationSettingsTestData.ApplicationName, applicationSettingsTestData.Context, keys);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto ApplicationSettings = Result.GetApplicationSettings();
+        const auto applicationSettings = Result.GetApplicationSettings();
 
-        EXPECT_EQ(ApplicationSettings.AllowAnonymous, ApplicationSettingsTestData.AllowAnonymous);
-        EXPECT_EQ(ApplicationSettings.ApplicationName, ApplicationSettingsTestData.ApplicationName);
-        EXPECT_EQ(ApplicationSettings.Context, ApplicationSettingsTestData.Context);
-        EXPECT_EQ(ApplicationSettings.Settings.Size(), Keys.Size());
-        EXPECT_EQ(ApplicationSettings.Settings[Keys[0]], "TestData_3");
+        EXPECT_EQ(applicationSettings.AllowAnonymous, applicationSettingsTestData.AllowAnonymous);
+        EXPECT_EQ(applicationSettings.ApplicationName, applicationSettingsTestData.ApplicationName);
+        EXPECT_EQ(applicationSettings.Context, applicationSettingsTestData.Context);
+        EXPECT_EQ(applicationSettings.Settings.Size(), keys.Size());
+        EXPECT_EQ(applicationSettings.Settings[keys[0]], "TestData_3");
     }
 }
 
@@ -408,22 +408,22 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
-        const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+        const String getRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(getRequestErrorMsg))).Times(1);
 
-        const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
+        const String errorMsg = "Failed to get application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, errorMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(), GetUniqueString().c_str(),
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(), GetUniqueString().c_str(),
             GetUniqueString().c_str(), nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
@@ -436,25 +436,25 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSett
 {
     SetRandSeed();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+    auto& systemsManager = csp::systems::SystemsManager::Get();
+    auto* applicationSettingsSystem = systemsManager.GetApplicationSettingsSystem();
 
-    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
+    auto applicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger mockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
         // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
-        const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+        const String getRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(getRequestErrorMsg))).Times(1);
 
-        const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
+        const String errorMsg = "Failed to get application settings";
+        EXPECT_CALL(mockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, errorMsg)).Times(1);
 
-        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, GetUniqueString().c_str(),
-            ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);
+        auto [Result] = AWAIT(applicationSettingsSystem, GetSettingsByContextAnonymous, GetUniqueString().c_str(),
+            applicationSettingsTestData.ApplicationName, applicationSettingsTestData.Context, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
         EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
@@ -466,279 +466,279 @@ namespace chs = csp::services::generated::userservice;
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsPutResponseCreatedThenRecieveSuccessResponseTests)
 {
-    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+    const auto applicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
 
-    std::promise<ApplicationSettingsResult> ResultPromise;
-    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+    std::promise<ApplicationSettingsResult> resultPromise;
+    std::future<ApplicationSettingsResult> resultFuture = resultPromise.get_future();
 
     // Create default application settings expected data, use to validate and construct the return response for mock.
-    auto ApplicationSettings = csp::common::ApplicationSettings();
-    ApplicationSettings.ApplicationName = "MockApplicationName";
-    ApplicationSettings.Context = "MockContext";
-    ApplicationSettings.AllowAnonymous = false;
-    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+    auto applicationSettings = csp::common::ApplicationSettings();
+    applicationSettings.ApplicationName = "MockApplicationName";
+    applicationSettings.Context = "MockContext";
+    applicationSettings.AllowAnonymous = false;
+    applicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
 
     // Sets the expectation that a specific method on a mock object will be called, and will fail the test if these conditions are not met.
-    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextPut)
+    EXPECT_CALL(*applicationSettingsMock, applicationsApplicationNameSettingsContextPut)
         .WillOnce(
-            [&](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams& Params,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            [&](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams& params,
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
                 // Basic validation that the information provided matches expectations.
-                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
-                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+                EXPECT_EQ(applicationSettings.ApplicationName, params.applicationName);
+                EXPECT_EQ(applicationSettings.Context, params.context);
 
                 // Construct the payload using the ApplicationSettings to populate the request body for the response.
-                csp::web::HttpPayload Payload;
-                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
-                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-                Payload.SetContent(json);
+                csp::web::HttpPayload payload;
+                auto json = csp::json::JsonSerializer::Serialize(applicationSettings);
+                payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                payload.SetContent(json);
 
                 // Construct the response with the expected HTTP response code and payload.
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseCreated);
-                Response.GetMutablePayload() = Payload;
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseCreated);
+                response.GetMutablePayload() = payload;
 
                 // Invoke the response on the handler to emulate the RESTful call.
-                ResponseHandler->OnHttpResponse(Response);
+                responseHandler->OnHttpResponse(response);
             });
 
     // Create a callback to capture the response to fulfill the promise.
-    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const ApplicationSettingsResult& result) { resultPromise.set_value(result); };
 
     // Create a handler for the current mock function, which will allow emulation of the RESTful response in the EXPECT_CALL.
-    auto ResponseHandler
-        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    auto responseHandler
+        = applicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    auto Request = std::make_shared<chs::ApplicationSettingsDto>();
-    Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
-    Request->SetSettings(Convert(ApplicationSettings.Settings));
+    auto request = std::make_shared<chs::ApplicationSettingsDto>();
+    request->SetAllowAnonymous(applicationSettings.AllowAnonymous);
+    request->SetSettings(Convert(applicationSettings.Settings));
 
-    auto Params
-        = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "MockApplicationName", "MockContext", Request };
+    auto params
+        = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "MockApplicationName", "MockContext", request };
 
     // Call the expected mock function to trigger the expected call and fulfill the promise.
-    ApplicationSettingsMock->applicationsApplicationNameSettingsContextPut(Params, ResponseHandler, CancellationToken::Dummy());
+    applicationSettingsMock->applicationsApplicationNameSettingsContextPut(params, responseHandler, CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseCreated));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseCreated));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
-    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
-    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
-    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
-    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+    const auto applicationSettingsResult = result.GetApplicationSettings();
+    EXPECT_EQ(applicationSettingsResult.ApplicationName, applicationSettings.ApplicationName);
+    EXPECT_EQ(applicationSettingsResult.Context, applicationSettings.Context);
+    EXPECT_EQ(applicationSettingsResult.AllowAnonymous, applicationSettings.AllowAnonymous);
+    EXPECT_EQ(applicationSettingsResult.Settings.Size(), applicationSettings.Settings.Size());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsPutResponseBadRequestThenRecieveFailedResponseTests)
 {
-    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+    const auto applicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
 
-    std::promise<ApplicationSettingsResult> ResultPromise;
-    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+    std::promise<ApplicationSettingsResult> resultPromise;
+    std::future<ApplicationSettingsResult> resultFuture = resultPromise.get_future();
 
-    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextPut)
+    EXPECT_CALL(*applicationSettingsMock, applicationsApplicationNameSettingsContextPut)
         .WillOnce(
             [&](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams& /*Params*/,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                csp::web::HttpPayload Payload;
-                Payload.SetContent("}{ Invalid JSON ...");
+                csp::web::HttpPayload payload;
+                payload.SetContent("}{ Invalid JSON ...");
 
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseBadRequest);
-                Response.GetMutablePayload() = Payload;
-                ResponseHandler->OnHttpResponse(Response);
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseBadRequest);
+                response.GetMutablePayload() = payload;
+                responseHandler->OnHttpResponse(response);
             });
 
-    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const ApplicationSettingsResult& result) { resultPromise.set_value(result); };
 
-    auto ResponseHandler
-        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    auto responseHandler
+        = applicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "", "", {} };
+    auto params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "", "", {} };
 
-    ApplicationSettingsMock->applicationsApplicationNameSettingsContextPut(Params, ResponseHandler, CancellationToken::Dummy());
+    applicationSettingsMock->applicationsApplicationNameSettingsContextPut(params, responseHandler, CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Failed);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsGetResponseOkThenRecieveSuccessResponseTests)
 {
-    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+    const auto applicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
 
-    std::promise<ApplicationSettingsResult> ResultPromise;
-    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+    std::promise<ApplicationSettingsResult> resultPromise;
+    std::future<ApplicationSettingsResult> resultFuture = resultPromise.get_future();
 
-    auto ApplicationSettings = csp::common::ApplicationSettings();
-    ApplicationSettings.ApplicationName = "MockApplicationName";
-    ApplicationSettings.Context = "MockContext";
-    ApplicationSettings.AllowAnonymous = false;
-    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+    auto applicationSettings = csp::common::ApplicationSettings();
+    applicationSettings.ApplicationName = "MockApplicationName";
+    applicationSettings.Context = "MockContext";
+    applicationSettings.AllowAnonymous = false;
+    applicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
 
-    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextGet)
+    EXPECT_CALL(*applicationSettingsMock, applicationsApplicationNameSettingsContextGet)
         .WillOnce(
-            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams& Params,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            [&applicationSettings](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams& params,
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
-                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+                EXPECT_EQ(applicationSettings.ApplicationName, params.applicationName);
+                EXPECT_EQ(applicationSettings.Context, params.context);
 
-                csp::web::HttpPayload Payload;
-                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
-                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-                Payload.SetContent(json);
+                csp::web::HttpPayload payload;
+                auto json = csp::json::JsonSerializer::Serialize(applicationSettings);
+                payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                payload.SetContent(json);
 
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
-                Response.GetMutablePayload() = Payload;
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                response.GetMutablePayload() = payload;
 
-                ResponseHandler->OnHttpResponse(Response);
+                responseHandler->OnHttpResponse(response);
             });
 
-    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const ApplicationSettingsResult& result) { resultPromise.set_value(result); };
 
-    auto ResponseHandler
-        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    auto responseHandler
+        = applicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams { ApplicationSettings.ApplicationName,
-        ApplicationSettings.Context, {} };
+    auto params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams { applicationSettings.ApplicationName,
+        applicationSettings.Context, {} };
 
-    ApplicationSettingsMock->applicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+    applicationSettingsMock->applicationsApplicationNameSettingsContextGet(params, responseHandler, CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
-    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
-    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
-    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
-    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+    const auto applicationSettingsResult = result.GetApplicationSettings();
+    EXPECT_EQ(applicationSettingsResult.ApplicationName, applicationSettings.ApplicationName);
+    EXPECT_EQ(applicationSettingsResult.Context, applicationSettings.Context);
+    EXPECT_EQ(applicationSettingsResult.AllowAnonymous, applicationSettings.AllowAnonymous);
+    EXPECT_EQ(applicationSettingsResult.Settings.Size(), applicationSettings.Settings.Size());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsAnonymousGetResponseOkThenRecieveSuccessResponseTests)
 {
-    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+    const auto applicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
 
-    std::promise<ApplicationSettingsResult> ResultPromise;
-    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+    std::promise<ApplicationSettingsResult> resultPromise;
+    std::future<ApplicationSettingsResult> resultFuture = resultPromise.get_future();
 
-    auto ApplicationSettings = csp::common::ApplicationSettings();
-    ApplicationSettings.ApplicationName = "MockApplicationName";
-    ApplicationSettings.Context = "MockContext";
-    ApplicationSettings.AllowAnonymous = true;
-    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+    auto applicationSettings = csp::common::ApplicationSettings();
+    applicationSettings.ApplicationName = "MockApplicationName";
+    applicationSettings.Context = "MockContext";
+    applicationSettings.AllowAnonymous = true;
+    applicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
 
-    EXPECT_CALL(*ApplicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
+    EXPECT_CALL(*applicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
         .WillOnce(
-            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& Params,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            [&applicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& params,
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
-                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+                EXPECT_EQ(applicationSettings.ApplicationName, params.applicationName);
+                EXPECT_EQ(applicationSettings.Context, params.context);
 
-                csp::web::HttpPayload Payload;
-                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
-                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-                Payload.SetContent(json);
+                csp::web::HttpPayload payload;
+                auto json = csp::json::JsonSerializer::Serialize(applicationSettings);
+                payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                payload.SetContent(json);
 
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
-                Response.GetMutablePayload() = Payload;
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                response.GetMutablePayload() = payload;
 
-                ResponseHandler->OnHttpResponse(Response);
+                responseHandler->OnHttpResponse(response);
             });
 
-    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const ApplicationSettingsResult& result) { resultPromise.set_value(result); };
 
-    auto ResponseHandler
-        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    auto responseHandler
+        = applicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
-        ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };
+    auto params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
+        applicationSettings.ApplicationName, applicationSettings.Context, {} };
 
-    ApplicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+    applicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(params, responseHandler, CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
-    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
-    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
-    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
-    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+    const auto applicationSettingsResult = result.GetApplicationSettings();
+    EXPECT_EQ(applicationSettingsResult.ApplicationName, applicationSettings.ApplicationName);
+    EXPECT_EQ(applicationSettingsResult.Context, applicationSettings.Context);
+    EXPECT_EQ(applicationSettingsResult.AllowAnonymous, applicationSettings.AllowAnonymous);
+    EXPECT_EQ(applicationSettingsResult.Settings.Size(), applicationSettings.Settings.Size());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsAnonymousGetResponseNotFoundThenRecieveNotFoundResponseTests)
 {
-    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+    const auto applicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
 
-    std::promise<ApplicationSettingsResult> ResultPromise;
-    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+    std::promise<ApplicationSettingsResult> resultPromise;
+    std::future<ApplicationSettingsResult> resultFuture = resultPromise.get_future();
 
-    auto ApplicationSettings = csp::common::ApplicationSettings();
-    ApplicationSettings.ApplicationName = "MockApplicationName";
-    ApplicationSettings.Context = "MockContext";
-    ApplicationSettings.AllowAnonymous = true;
-    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+    auto applicationSettings = csp::common::ApplicationSettings();
+    applicationSettings.ApplicationName = "MockApplicationName";
+    applicationSettings.Context = "MockContext";
+    applicationSettings.AllowAnonymous = true;
+    applicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
 
-    EXPECT_CALL(*ApplicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
+    EXPECT_CALL(*applicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
         .WillOnce(
-            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& Params,
-                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            [&applicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& params,
+                csp::services::ApiResponseHandlerBase* responseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
-                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+                EXPECT_EQ(applicationSettings.ApplicationName, params.applicationName);
+                EXPECT_EQ(applicationSettings.Context, params.context);
 
-                csp::web::HttpPayload Payload;
-                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
-                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
-                Payload.SetContent(json);
+                csp::web::HttpPayload payload;
+                auto json = csp::json::JsonSerializer::Serialize(applicationSettings);
+                payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                payload.SetContent(json);
 
-                auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
-                Response.GetMutablePayload() = Payload;
+                auto response = csp::web::HttpResponse();
+                response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+                response.GetMutablePayload() = payload;
 
-                ResponseHandler->OnHttpResponse(Response);
+                responseHandler->OnHttpResponse(response);
             });
 
-    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+    auto callback = [&resultPromise](const ApplicationSettingsResult& result) { resultPromise.set_value(result); };
 
-    auto ResponseHandler
-        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseNotFound);
+    auto responseHandler
+        = applicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseNotFound);
 
-    auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
-        ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };
+    auto params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
+        applicationSettings.ApplicationName, applicationSettings.Context, {} };
 
-    ApplicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+    applicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(params, responseHandler, CancellationToken::Dummy());
 
-    auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
-    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    auto result = resultFuture.get();
+    EXPECT_EQ(result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+    EXPECT_EQ(result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
-    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
-    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
-    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
-    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+    const auto applicationSettingsResult = result.GetApplicationSettings();
+    EXPECT_EQ(applicationSettingsResult.ApplicationName, applicationSettings.ApplicationName);
+    EXPECT_EQ(applicationSettingsResult.Context, applicationSettings.Context);
+    EXPECT_EQ(applicationSettingsResult.AllowAnonymous, applicationSettings.AllowAnonymous);
+    EXPECT_EQ(applicationSettingsResult.Settings.Size(), applicationSettings.Settings.Size());
 }

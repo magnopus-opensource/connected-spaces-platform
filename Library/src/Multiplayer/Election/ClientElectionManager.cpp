@@ -33,254 +33,254 @@ namespace csp::multiplayer
 class ClientElectionEventHandler : public csp::events::EventListener
 {
 public:
-    ClientElectionEventHandler(ClientElectionManager* ElectionManager);
+    ClientElectionEventHandler(ClientElectionManager* electionManager);
 
-    void OnEvent(const csp::events::Event& InEvent) override;
+    void OnEvent(const csp::events::Event& inEvent) override;
 
 private:
-    ClientElectionManager* ElectionManager;
+    ClientElectionManager* m_electionManager;
 };
 
-ClientElectionEventHandler::ClientElectionEventHandler(ClientElectionManager* ElectionManager)
-    : ElectionManager(ElectionManager)
+ClientElectionEventHandler::ClientElectionEventHandler(ClientElectionManager* electionManager)
+    : m_electionManager(electionManager)
 {
 }
 
-void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
+void ClientElectionEventHandler::OnEvent(const csp::events::Event& inEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && ElectionManager->IsConnected())
+    if (inEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && m_electionManager->IsConnected())
     {
-        ElectionManager->Update();
+        m_electionManager->Update();
     }
 }
 
 ClientElectionManager::ClientElectionManager(
-    OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
-    : OnlineRealtimeEnginePtr(InOnlineRealtimeEngine)
-    , LogSystem(LogSystem)
-    , EventHandler(new ClientElectionEventHandler(this))
-    , TheConnectionState(ConnectionState::Disconnected)
-    , TheElectionState(ElectionState::Idle)
-    , LocalClient(nullptr)
-    , Leader(nullptr)
-    , RemoteScriptRunner(JSScriptRunner)
+    OnlineRealtimeEngine* inOnlineRealtimeEngine, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& jsScriptRunner)
+    : m_onlineRealtimeEnginePtr(inOnlineRealtimeEngine)
+    , m_logSystem(logSystem)
+    , m_eventHandler(new ClientElectionEventHandler(this))
+    , m_theConnectionState(ConnectionState::Disconnected)
+    , m_theElectionState(ElectionState::Idle)
+    , m_localClient(nullptr)
+    , m_leader(nullptr)
+    , m_remoteScriptRunner(jsScriptRunner)
 {
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler);
 
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager Created");
+    logSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager Created");
 }
 
 ClientElectionManager::~ClientElectionManager()
 {
     UnBindNetworkEvents();
 
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    delete (EventHandler);
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler);
+    delete (m_eventHandler);
 
-    for (const auto& Client : Clients)
+    for (const auto& client : m_clients)
     {
-        ClientProxy* Proxy = Client.second;
-        delete (Proxy);
+        ClientProxy* proxy = client.second;
+        delete (proxy);
     }
 }
 
-void ClientElectionManager::OnConnect(const csp::common::List<SpaceEntity*>& Avatars, const csp::common::List<SpaceEntity*>& /*Objects*/)
+void ClientElectionManager::OnConnect(const csp::common::List<SpaceEntity*>& avatars, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
+    m_logSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
 
     BindNetworkEvents();
 
-    if (Avatars.Size() > 0)
+    if (avatars.Size() > 0)
     {
         // On connect, the first client to enter a space is set as leader
 
         // @note we also assume first client to enter is the last avatar in the array.
         // This seems to be consistent currently, but can we rely on this long term?
-        const SpaceEntity* ClientAvatar = Avatars[Avatars.Size() - 1];
-        ClientProxy* Client = FindClientUsingAvatar(ClientAvatar);
-        SetLeader(Client);
+        const SpaceEntity* clientAvatar = avatars[avatars.Size() - 1];
+        ClientProxy* client = FindClientUsingAvatar(clientAvatar);
+        SetLeader(client);
     }
 
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("Number of clients={}", Avatars.Size()).c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("Number of clients={}", avatars.Size()).c_str());
 }
 
 void ClientElectionManager::OnDisconnect()
 {
-    for (const auto& Client : Clients)
+    for (const auto& client : m_clients)
     {
-        ClientProxy* Proxy = Client.second;
-        delete (Proxy);
+        ClientProxy* proxy = client.second;
+        delete (proxy);
     }
 
     UnBindNetworkEvents();
 }
 
 void ClientElectionManager::OnLocalClientAdd(
-    const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& avatars, NetworkEventBus& networkEventBus)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", clientAvatar->GetOwnerId()).c_str());
 
-    bool IsFirstClient = false;
+    bool isFirstClient = false;
 
-    if (Avatars.Size() == 1)
+    if (avatars.Size() == 1)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "IsFirstClient=true");
+        m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "IsFirstClient=true");
 
         // If there is just one avatar, then it should be us,
         // So we we'll will assume the leadership role for now
         // pending negotiation if/when other clients connect
-        IsFirstClient = true;
+        isFirstClient = true;
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("IsFirstClient=false : Num Avatars {}", Avatars.Size()).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("IsFirstClient=false : Num Avatars {}", avatars.Size()).c_str());
     }
 
-    ClientProxy* Client = AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
-    LocalClient = Client;
+    ClientProxy* client = AddClientUsingAvatar(clientAvatar, networkEventBus);
+    m_localClient = client;
 
-    if (IsFirstClient)
+    if (isFirstClient)
     {
         // We are the first (and currently only client), so just start acting as leader
-        SetLeader(LocalClient);
+        SetLeader(m_localClient);
     }
 }
 
 void ClientElectionManager::OnClientAdd(
-    const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/, NetworkEventBus& networkEventBus)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
-    AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", clientAvatar->GetOwnerId()).c_str());
+    AddClientUsingAvatar(clientAvatar, networkEventBus);
 }
 
-void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/)
+void ClientElectionManager::OnClientRemove(const SpaceEntity* clientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
-    RemoveClientUsingAvatar(ClientAvatar);
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", clientAvatar->GetOwnerId()).c_str());
+    RemoveClientUsingAvatar(clientAvatar);
 }
 
 void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
     // @Todo - This event allows us to track individual object ownership
 }
 
 void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
     // @Todo - This event allows us to track individual object ownership
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar, NetworkEventBus& NetworkEventBus)
+ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* clientAvatar, NetworkEventBus& networkEventBus)
 {
-    if (ClientAvatar == nullptr)
+    if (clientAvatar == nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
         return nullptr;
     }
 
-    const int64_t ClientId = static_cast<int64_t>(ClientAvatar->GetOwnerId());
-    return AddClientUsingId(ClientId, NetworkEventBus);
+    const int64_t clientId = static_cast<int64_t>(clientAvatar->GetOwnerId());
+    return AddClientUsingId(clientId, networkEventBus);
 }
 
-void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar)
+void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* clientAvatar)
 {
-    if (ClientAvatar == nullptr)
+    if (clientAvatar == nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
         return;
     }
 
-    const int64_t ClientId = static_cast<int64_t>(ClientAvatar->GetOwnerId());
+    const int64_t clientId = static_cast<int64_t>(clientAvatar->GetOwnerId());
 
-    RemoveClientUsingId(ClientId);
+    RemoveClientUsingId(clientId);
 }
 
-ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* ClientAvatar)
+ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* clientAvatar)
 {
-    if (ClientAvatar == nullptr)
+    if (clientAvatar == nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "Invalid entity pointer");
         return nullptr;
     }
 
-    const int64_t ClientId = static_cast<int64_t>(ClientAvatar->GetOwnerId());
-    return FindClientUsingId(ClientId);
+    const int64_t clientId = static_cast<int64_t>(clientAvatar->GetOwnerId());
+    return FindClientUsingId(clientId);
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId, NetworkEventBus& NetworkEventBus)
+ClientProxy* ClientElectionManager::AddClientUsingId(int64_t clientId, NetworkEventBus& networkEventBus)
 {
-    LogSystem.LogMsg(
-        csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", ClientId).c_str());
+    m_logSystem.LogMsg(
+        csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", clientId).c_str());
 
-    ClientProxy* Client = nullptr;
+    ClientProxy* client = nullptr;
 
-    if (Clients.find(ClientId) == Clients.end())
+    if (m_clients.find(clientId) == m_clients.end())
     {
-        Client = new ClientProxy(ClientId, this, LogSystem, NetworkEventBus, RemoteScriptRunner);
-        Clients.insert(ClientMap::value_type(ClientId, Client));
+        client = new ClientProxy(clientId, this, m_logSystem, networkEventBus, m_remoteScriptRunner);
+        m_clients.insert(ClientMap::value_type(clientId, client));
 
-        if ((LocalClient != nullptr) && (Leader != nullptr))
+        if ((m_localClient != nullptr) && (m_leader != nullptr))
         {
             // If a new client connects when we have a valid leader then notify them who it is
             // If it receives conflicting information then it will trigger a re-negotiation
-            LocalClient->NotifyLeader(ClientId, Leader->GetId());
+            m_localClient->NotifyLeader(clientId, m_leader->GetId());
         }
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "Client already exists");
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning, "Client already exists");
     }
 
-    return Client;
+    return client;
 }
 
-void ClientElectionManager::RemoveClientUsingId(int64_t ClientId)
+void ClientElectionManager::RemoveClientUsingId(int64_t clientId)
 {
-    LogSystem.LogMsg(
-        csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::RemoveClientUsingId called : ClientId={}", ClientId).c_str());
+    m_logSystem.LogMsg(
+        csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::RemoveClientUsingId called : ClientId={}", clientId).c_str());
 
-    const auto ClientIt = Clients.find(ClientId);
+    const auto clientIt = m_clients.find(clientId);
 
-    if (ClientIt != Clients.end())
+    if (clientIt != m_clients.end())
     {
-        ClientProxy* Client = ClientIt->second;
+        ClientProxy* client = clientIt->second;
 
-        if ((Client == Leader) && (Client != LocalClient))
+        if ((client == m_leader) && (client != m_localClient))
         {
             // Handle the current leader being removed
             OnLeaderRemoved();
         }
-        else if (Client == LocalClient)
+        else if (client == m_localClient)
         {
-            LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("Local Client {} removed", ClientId).c_str());
-            LocalClient = nullptr;
+            m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("Local Client {} removed", clientId).c_str());
+            m_localClient = nullptr;
         }
 
-        delete (Client);
-        Clients.erase(ClientId);
+        delete (client);
+        m_clients.erase(clientId);
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "Client not found");
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning, "Client not found");
     }
 }
 
-ClientProxy* ClientElectionManager::FindClientUsingId(int64_t ClientId)
+ClientProxy* ClientElectionManager::FindClientUsingId(int64_t clientId)
 {
-    const auto ClientIt = Clients.find(ClientId);
+    const auto clientIt = m_clients.find(clientId);
 
-    if (ClientIt != Clients.end())
+    if (clientIt != m_clients.end())
     {
-        ClientProxy* Client = ClientIt->second;
-        return Client;
+        ClientProxy* client = clientIt->second;
+        return client;
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, fmt::format("ClientElectionManager::FindClientById Client {} not found", ClientId).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning, fmt::format("ClientElectionManager::FindClientById Client {} not found", clientId).c_str());
     }
 
     return nullptr;
@@ -288,7 +288,7 @@ ClientProxy* ClientElectionManager::FindClientUsingId(int64_t ClientId)
 
 void ClientElectionManager::Update()
 {
-    switch (TheElectionState)
+    switch (m_theElectionState)
     {
     case ElectionState::Idle:
         HandleElectionStateIdle();
@@ -303,47 +303,47 @@ void ClientElectionManager::Update()
         break;
     }
 
-    if (LocalClient)
+    if (m_localClient)
     {
-        LocalClient->UpdateState();
+        m_localClient->UpdateState();
     }
 
     CheckLeaderIsValid();
 
-    static ClientProxy* LastLeader = nullptr;
+    static ClientProxy* lastLeader = nullptr;
 
-    if (Leader != LastLeader)
+    if (m_leader != lastLeader)
     {
         // Leader has changed
-        if (Leader != nullptr)
+        if (m_leader != nullptr)
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Log, fmt::format("ClientElectionManager::Update - Leader is {}", Leader->GetId()).c_str());
+            m_logSystem.LogMsg(csp::common::LogLevel::Log, fmt::format("ClientElectionManager::Update - Leader is {}", m_leader->GetId()).c_str());
         }
-        LastLeader = Leader;
+        lastLeader = m_leader;
     }
 }
 
-bool ClientElectionManager::IsLocalClientLeader() const { return (LocalClient && (LocalClient == Leader)); }
+bool ClientElectionManager::IsLocalClientLeader() const { return (m_localClient && (m_localClient == m_leader)); }
 
-ClientProxy* ClientElectionManager::GetLeader() const { return Leader; }
+ClientProxy* ClientElectionManager::GetLeader() const { return m_leader; }
 
-void ClientElectionManager::SetLeader(ClientProxy* Client)
+void ClientElectionManager::SetLeader(ClientProxy* client)
 {
-    if (Client != nullptr)
+    if (client != nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::SetLeader ClientId={}", Client->GetId()).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::SetLeader ClientId={}", client->GetId()).c_str());
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "ClientElectionManager::SetLeader Client is null");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "ClientElectionManager::SetLeader Client is null");
     }
 
-    Leader = Client;
+    m_leader = client;
 
     // Notify Scripts ready callback now we have a valid leader
-    if (LeaderReadyCallback)
+    if (m_leaderReadyCallback)
     {
-        LeaderReadyCallback(true);
+        m_leaderReadyCallback(true);
     }
 }
 
@@ -354,9 +354,9 @@ void ClientElectionManager::CheckLeaderIsValid()
 
 void ClientElectionManager::OnLeaderRemoved()
 {
-    Leader = nullptr;
+    m_leader = nullptr;
 
-    if (LocalClient != nullptr)
+    if (m_localClient != nullptr)
     {
         // The current leader has left, so we may need to find a new one
         AsyncNegotiateLeader();
@@ -365,21 +365,21 @@ void ClientElectionManager::OnLeaderRemoved()
 
 void ClientElectionManager::AsyncNegotiateLeader()
 {
-    if (Clients.size() < 2)
+    if (m_clients.size() < 2)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "AsyncNegotiateLeader called when no other clients");
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning, "AsyncNegotiateLeader called when no other clients");
         return;
     }
 
-    if (LocalClient == nullptr)
+    if (m_localClient == nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "AsyncNegotiateLeader called when no local client");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "AsyncNegotiateLeader called when no local client");
         return;
     }
 
-    if (TheElectionState != ElectionState::Idle)
+    if (m_theElectionState != ElectionState::Idle)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "AsyncNegotiateLeader called when election already in progress");
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, "AsyncNegotiateLeader called when election already in progress");
         return;
     }
 
@@ -387,17 +387,17 @@ void ClientElectionManager::AsyncNegotiateLeader()
     SetElectionState(ElectionState::Requested);
 }
 
-void ClientElectionManager::SetElectionState(ElectionState NewState)
+void ClientElectionManager::SetElectionState(ElectionState newState)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::SetElectionState From {0} to {1}", static_cast<int>(TheElectionState.load()), static_cast<int>(NewState))
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::SetElectionState From {0} to {1}", static_cast<int>(m_theElectionState.load()), static_cast<int>(newState))
             .c_str());
-    TheElectionState = NewState;
+    m_theElectionState = newState;
 }
 
-void ClientElectionManager::SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback)
+void ClientElectionManager::SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback scriptLeaderReadyCallback)
 {
-    LeaderReadyCallback = ScriptLeaderReadyCallback;
+    m_leaderReadyCallback = scriptLeaderReadyCallback;
 }
 
 void ClientElectionManager::HandleElectionStateIdle()
@@ -408,11 +408,11 @@ void ClientElectionManager::HandleElectionStateIdle()
 void ClientElectionManager::HandleElectionStateRequested()
 {
     // Start negotiating with other clients on who should be leader
-    if (LocalClient != nullptr)
+    if (m_localClient != nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "HandleElectionStateRequested");
+        m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "HandleElectionStateRequested");
         SetElectionState(ElectionState::Electing);
-        LocalClient->StartLeaderElection(Clients);
+        m_localClient->StartLeaderElection(m_clients);
     }
 }
 
@@ -421,37 +421,37 @@ void ClientElectionManager::HandleElectionStateElecting()
     // Nothing needed currently
 }
 
-void ClientElectionManager::OnElectionComplete(int64_t LeaderId)
+void ClientElectionManager::OnElectionComplete(int64_t leaderId)
 {
-    if (TheElectionState != ElectionState::Electing)
+    if (m_theElectionState != ElectionState::Electing)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning,
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning,
             fmt::format(
-                "ClientElectionManager::OnElectionComplete called when no election in progress (State={})", static_cast<int>(TheElectionState.load()))
+                "ClientElectionManager::OnElectionComplete called when no election in progress (State={})", static_cast<int>(m_theElectionState.load()))
                 .c_str());
     }
 
     SetElectionState(ElectionState::Idle);
 
-    if (Clients.find(LeaderId) != Clients.end())
+    if (m_clients.find(leaderId) != m_clients.end())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("OnElectionComplete: Elected Leader is {}", LeaderId).c_str());
-        SetLeader(Clients[LeaderId]);
+        m_logSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("OnElectionComplete: Elected Leader is {}", leaderId).c_str());
+        SetLeader(m_clients[leaderId]);
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("OnElectionComplete: Unknown leader {}", LeaderId).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("OnElectionComplete: Unknown leader {}", leaderId).c_str());
     }
 }
 
-void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
+void ClientElectionManager::OnLeaderNotification(int64_t leaderId)
 {
-    if (Leader)
+    if (m_leader)
     {
-        if (Leader->GetId() != LeaderId)
+        if (m_leader->GetId() != leaderId)
         {
-            LogSystem.LogMsg(
-                csp::common::LogLevel::Error, fmt::format("ClientElectionManager::OnLeaderNotification - Unexpected LeaderId {}", LeaderId).c_str());
+            m_logSystem.LogMsg(
+                csp::common::LogLevel::Error, fmt::format("ClientElectionManager::OnLeaderNotification - Unexpected LeaderId {}", leaderId).c_str());
 
             // Leader Id was not what we were expecting
             // Resolve the conflict by re-negotiating
@@ -459,82 +459,82 @@ void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
         }
         else
         {
-            LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-                fmt::format("ClientElectionManager::OnLeaderNotification ClientId={} is as expected", LeaderId).c_str());
+            m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+                fmt::format("ClientElectionManager::OnLeaderNotification ClientId={} is as expected", leaderId).c_str());
         }
     }
     else
     {
-        ClientProxy* Client = FindClientUsingId(LeaderId);
-        SetLeader(Client);
+        ClientProxy* client = FindClientUsingId(leaderId);
+        SetLeader(client);
     }
 }
 
 bool ClientElectionManager::IsConnected() const
 {
-    MultiplayerConnection* Connection = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance();
+    MultiplayerConnection* connection = m_onlineRealtimeEnginePtr->GetMultiplayerConnectionInstance();
 
-    if (Connection == nullptr)
+    if (connection == nullptr)
     {
         return false;
     }
 
-    return Connection->IsConnected();
+    return connection->IsConnected();
 }
 
 void ClientElectionManager::BindNetworkEvents()
 {
-    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
+    NetworkEventBus& networkEventBus = m_onlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
+    networkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
+        [this](const csp::common::NetworkEventData& networkEventData) { this->OnClientElectionEvent(networkEventData.EventValues); });
 
-    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
+    networkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
+        [this](const csp::common::NetworkEventData& networkEventData) { this->OnRemoteRunScriptEvent(networkEventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
+    NetworkEventBus& networkEventBus = m_onlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
-    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
+    networkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
+    networkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 }
 
-void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
+void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& data)
 {
     // @Note This needs to be kept in sync with any changes to message format
-    const int64_t EventType = static_cast<int64_t>(Data[0].GetInt());
-    const int64_t ClientId = static_cast<int64_t>(Data[1].GetInt());
+    const int64_t eventType = static_cast<int64_t>(data[0].GetInt());
+    const int64_t clientId = static_cast<int64_t>(data[1].GetInt());
 
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnClientElectionEvent called. Event={0}, Id={1}", EventType, ClientId).c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnClientElectionEvent called. Event={0}, Id={1}", eventType, clientId).c_str());
 
-    if (LocalClient != nullptr)
+    if (m_localClient != nullptr)
     {
-        LocalClient->HandleEvent(EventType, ClientId);
+        m_localClient->HandleEvent(eventType, clientId);
     }
 }
 
-void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
+void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& data)
 {
     // @Note This needs to be kept in sync with any changes to message format
-    const int64_t ContextId = static_cast<int64_t>(Data[0].GetInt());
-    const csp::common::String& ScriptText = Data[1].GetString();
+    const int64_t contextId = static_cast<int64_t>(data[0].GetInt());
+    const csp::common::String& scriptText = data[1].GetString();
 
-    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-        fmt::format("ClientElectionManager::OnRemoteRunScriptEvent called. ContextId={0}, Script={1}", ContextId, ScriptText.c_str()).c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnRemoteRunScriptEvent called. ContextId={0}, Script={1}", contextId, scriptText.c_str()).c_str());
 
-    if (LocalClient != nullptr)
+    if (m_localClient != nullptr)
     {
         if (IsLocalClientLeader())
         {
-            RemoteScriptRunner.RunScript(ContextId, ScriptText);
+            m_remoteScriptRunner.RunScript(contextId, scriptText);
         }
         else
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Client {} has received remote script event but is not the Leader", LocalClient->GetId()).c_str());
+            m_logSystem.LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Client {} has received remote script event but is not the Leader", m_localClient->GetId()).c_str());
         }
     }
 }

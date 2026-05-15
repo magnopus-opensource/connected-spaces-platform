@@ -32,20 +32,20 @@ public:
     /// @param Position csp::common::Vector3 : The position value for the transform.
     /// @param Rotation csp::common::Vector4 : The rotation value for the transform, will be normalized during multiplication operations.
     /// @param Scale csp::common::Vector3 : The scale value for the transform.
-    SpaceTransform(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation, const csp::common::Vector3& Scale);
+    SpaceTransform(const csp::common::Vector3& position, const csp::common::Vector4& rotation, const csp::common::Vector3& scale);
 
     /// @brief Equality operator
     /// @param SpaceTransform Transform
-    bool operator==(const SpaceTransform& Transform) const;
+    bool operator==(const SpaceTransform& transform) const;
 
     /// @brief Inequality operator
     /// @param SpaceTransform Transform
-    bool operator!=(const SpaceTransform& Transform) const;
+    bool operator!=(const SpaceTransform& transform) const;
 
     /// @brief Multiplication operator
     /// @param SpaceTransform Transform
     /// @note This performs TRS matrix composition, then decomposes back to Pos, Rot, Scale.
-    SpaceTransform operator*(const SpaceTransform& Transform) const;
+    SpaceTransform operator*(const SpaceTransform& transform) const;
     /// @brief The position value for the transform.
     csp::common::Vector3 Position;
 

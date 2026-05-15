@@ -27,11 +27,11 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayDefaultInitialisationTest)
 {
     try
     {
-        Array<int> Instance;
+        Array<int> instance;
 
-        EXPECT_TRUE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), 0);
-        EXPECT_EQ(Instance.Data(), nullptr);
+        EXPECT_TRUE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), 0);
+        EXPECT_EQ(instance.Data(), nullptr);
     }
     catch (...)
     {
@@ -50,20 +50,20 @@ public:
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 {
-    constexpr int ARRAY_SIZE = 5;
+    constexpr int arraySize = 5;
 
     try
     {
-        Array<ArrayTestClass> Instance(ARRAY_SIZE);
+        Array<ArrayTestClass> instance(arraySize);
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), arraySize);
+        EXPECT_NE(instance.Data(), nullptr);
 
         // All elements should be default-initialised
-        for (int i = 0; i < ARRAY_SIZE; ++i)
+        for (int i = 0; i < arraySize; ++i)
         {
-            EXPECT_EQ(Instance[i].SomeField, 42);
+            EXPECT_EQ(instance[i].SomeField, 42);
         }
     }
     catch (...)
@@ -74,12 +74,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTest)
 {
-    constexpr size_t ARRAY_SIZE = SIZE_MAX;
+    constexpr size_t arraySize = SIZE_MAX;
 
     try
     {
         // This should throw an overflow exception because `sizeof(T) * ARRAY_SIZE` is greater than `SIZE_MAX`
-        Array<ArrayTestClass> Instance(ARRAY_SIZE);
+        Array<ArrayTestClass> instance(arraySize);
     }
     catch (...)
     {
@@ -91,25 +91,25 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTe
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyInitialisationTest)
 {
-    constexpr int ARRAY_SIZE = 2;
+    constexpr int arraySize = 2;
 
     try
     {
-        Array<int> OtherInstance(ARRAY_SIZE);
-        OtherInstance[0] = 1337;
-        OtherInstance[1] = 1338;
+        Array<int> otherInstance(arraySize);
+        otherInstance[0] = 1337;
+        otherInstance[1] = 1338;
 
-        Array<int> Instance(OtherInstance);
+        Array<int> instance(otherInstance);
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), arraySize);
+        EXPECT_NE(instance.Data(), nullptr);
 
         // All elements should match those in the other array, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i)
+        for (int i = 0; i < arraySize; ++i)
         {
-            EXPECT_EQ(Instance[i], OtherInstance[i]);
-            EXPECT_NE(&Instance[i], &OtherInstance[i]);
+            EXPECT_EQ(instance[i], otherInstance[i]);
+            EXPECT_NE(&instance[i], &otherInstance[i]);
         }
     }
     catch (...)
@@ -120,21 +120,21 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyInitialisationTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayInitializerListInitialisationTest)
 {
-    constexpr int ARRAY_SIZE = 5;
+    constexpr int arraySize = 5;
 
     try
     {
-        int Values[] = { 1, 2, 3, 4, 5 };
-        Array<int> Instance = { 1, 2, 3, 4, 5 };
+        int values[] = { 1, 2, 3, 4, 5 };
+        Array<int> instance = { 1, 2, 3, 4, 5 };
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), arraySize);
+        EXPECT_NE(instance.Data(), nullptr);
 
         // All elements should match those in the previously-declared array
-        for (int i = 0; i < ARRAY_SIZE; ++i)
+        for (int i = 0; i < arraySize; ++i)
         {
-            EXPECT_EQ(Instance[i], Values[i]);
+            EXPECT_EQ(instance[i], values[i]);
         }
     }
     catch (...)
@@ -145,26 +145,26 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayInitializerListInitialisatio
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyAssignmentTest)
 {
-    constexpr int ARRAY_SIZE = 2;
+    constexpr int arraySize = 2;
 
     try
     {
-        Array<int> OtherInstance(ARRAY_SIZE);
-        OtherInstance[0] = 1337;
-        OtherInstance[1] = 1338;
+        Array<int> otherInstance(arraySize);
+        otherInstance[0] = 1337;
+        otherInstance[1] = 1338;
 
-        Array<int> Instance;
-        Instance = OtherInstance;
+        Array<int> instance;
+        instance = otherInstance;
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), arraySize);
+        EXPECT_NE(instance.Data(), nullptr);
 
         // All elements should match those in the other array, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i)
+        for (int i = 0; i < arraySize; ++i)
         {
-            EXPECT_EQ(Instance[i], OtherInstance[i]);
-            EXPECT_NE(&Instance[i], &OtherInstance[i]);
+            EXPECT_EQ(instance[i], otherInstance[i]);
+            EXPECT_NE(&instance[i], &otherInstance[i]);
         }
     }
     catch (...)
@@ -175,21 +175,21 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyAssignmentTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOfOptionalTest)
 {
-    constexpr int ARRAY_SIZE = 2;
+    constexpr int arraySize = 2;
 
     try
     {
-        Array<Optional<int>> Instance(ARRAY_SIZE);
-        Instance[0] = nullptr;
-        Instance[1] = 1337;
+        Array<Optional<int>> instance(arraySize);
+        instance[0] = nullptr;
+        instance[1] = 1337;
 
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
+        EXPECT_FALSE(instance.IsEmpty());
+        EXPECT_EQ(instance.Size(), arraySize);
+        EXPECT_NE(instance.Data(), nullptr);
 
-        EXPECT_FALSE(Instance[0].HasValue());
-        EXPECT_TRUE(Instance[1].HasValue());
-        EXPECT_EQ(*Instance[1], 1337);
+        EXPECT_FALSE(instance[0].HasValue());
+        EXPECT_TRUE(instance[1].HasValue());
+        EXPECT_EQ(*instance[1], 1337);
     }
     catch (...)
     {
@@ -199,12 +199,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOfOptionalTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOutOfBoundsTest)
 {
-    constexpr int ARRAY_SIZE = 5;
+    constexpr int arraySize = 5;
 
     try
     {
-        Array<Optional<int>> Instance(ARRAY_SIZE);
-        [[maybe_unused]] auto& Element = Instance[ARRAY_SIZE];
+        Array<Optional<int>> instance(arraySize);
+        [[maybe_unused]] auto& element = instance[arraySize];
     }
     catch (const std::out_of_range&)
     {
@@ -218,17 +218,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
 {
     try
     {
-        Array<String> Instance = { "asd", "fgh", "jkl", "123" };
+        Array<String> instance = { "asd", "fgh", "jkl", "123" };
 
-        auto ConvertedList = Instance.ToList();
+        auto convertedList = instance.ToList();
 
-        EXPECT_EQ(ConvertedList.Size(), Instance.Size());
+        EXPECT_EQ(convertedList.Size(), instance.Size());
 
         // All elements should match those in the array, but should not have the same address
-        for (size_t i = 0; i < Instance.Size(); ++i)
+        for (size_t i = 0; i < instance.Size(); ++i)
         {
-            EXPECT_EQ(ConvertedList[i], Instance[i]);
-            EXPECT_NE(&ConvertedList[i], &Instance[i]);
+            EXPECT_EQ(convertedList[i], instance[i]);
+            EXPECT_NE(&convertedList[i], &instance[i]);
         }
     }
     catch (...)
@@ -239,30 +239,30 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, EqualityTest)
 {
-    Array<String> Empty1 = {};
-    Array<String> Empty2 = {};
+    Array<String> empty1 = {};
+    Array<String> empty2 = {};
 
-    ASSERT_EQ(Empty1, Empty1);
-    ASSERT_EQ(Empty1, Empty2);
+    ASSERT_EQ(empty1, empty1);
+    ASSERT_EQ(empty1, empty2);
 
-    Array<String> SingleInstance1 = { "Hello" };
-    Array<String> SingleInstance2 = { "Hello" };
+    Array<String> singleInstance1 = { "Hello" };
+    Array<String> singleInstance2 = { "Hello" };
 
-    ASSERT_EQ(SingleInstance1, SingleInstance1);
-    ASSERT_EQ(SingleInstance1, SingleInstance2);
-    ASSERT_NE(Empty1, SingleInstance1);
+    ASSERT_EQ(singleInstance1, singleInstance1);
+    ASSERT_EQ(singleInstance1, singleInstance2);
+    ASSERT_NE(empty1, singleInstance1);
 
-    Array<String> SingleInstanceDifferent = { "Goodbye" };
-    ASSERT_NE(SingleInstance1, SingleInstanceDifferent);
+    Array<String> singleInstanceDifferent = { "Goodbye" };
+    ASSERT_NE(singleInstance1, singleInstanceDifferent);
 
-    Array<String> MultiInstance1 = { "Is", "it", "me", "you're", "looking", "for" };
-    Array<String> MultiInstance2 = { "Is", "it", "me", "you're", "looking", "for" };
+    Array<String> multiInstance1 = { "Is", "it", "me", "you're", "looking", "for" };
+    Array<String> multiInstance2 = { "Is", "it", "me", "you're", "looking", "for" };
 
-    ASSERT_EQ(MultiInstance1, MultiInstance1);
-    ASSERT_EQ(MultiInstance1, MultiInstance2);
-    ASSERT_NE(SingleInstance1, MultiInstance1);
-    ASSERT_NE(Empty1, MultiInstance1);
+    ASSERT_EQ(multiInstance1, multiInstance1);
+    ASSERT_EQ(multiInstance1, multiInstance2);
+    ASSERT_NE(singleInstance1, multiInstance1);
+    ASSERT_NE(empty1, multiInstance1);
 
-    Array<String> MultiInstanceDifferent = { "I", "can", "see", "it", "in", "your", "eyes" };
-    ASSERT_NE(MultiInstance1, MultiInstanceDifferent);
+    Array<String> multiInstanceDifferent = { "I", "can", "see", "it", "in", "your", "eyes" };
+    ASSERT_NE(multiInstance1, multiInstanceDifferent);
 }

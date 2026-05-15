@@ -45,11 +45,11 @@ public:
         std::vector<float>
     >;
 
-    ComponentScriptInterface(ComponentBase* InComponent = nullptr);
+    ComponentScriptInterface(ComponentBase* inComponent = nullptr);
     virtual ~ComponentScriptInterface() = default;
 
-    void SubscribeToPropertyChange(int32_t PropertyKey, std::string Message);
-    void InvokeAction(std::string ActionId, std::string ActionParams);
+    void SubscribeToPropertyChange(int32_t propertyKey, std::string message);
+    void InvokeAction(std::string actionId, std::string actionParams);
 
     int64_t GetComponentId() const;
     int64_t GetComponentType() const;
@@ -59,11 +59,11 @@ public:
 
     void SendPropertyUpdate();
 
-    std::optional<Value> GetProperty(uint16_t Key) const;
-    void SetProperty(uint16_t Key, Value);
+    std::optional<Value> GetProperty(uint16_t key) const;
+    void SetProperty(uint16_t key, Value);
     
 protected:
-    ComponentBase* Component;
+    ComponentBase* m_component;
 };
 
 } // namespace csp::multiplayer

@@ -24,164 +24,164 @@ static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
 static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
 static const csp::common::Map<csp::common::String, ReplicatedValue> InvalidStringMap = csp::common::Map<csp::common::String, ReplicatedValue>();
 
-ReplicatedValue::ReplicatedValue() { ReplicatedType = ReplicatedValueType::InvalidType; }
+ReplicatedValue::ReplicatedValue() { m_replicatedType = ReplicatedValueType::InvalidType; }
 
 ReplicatedValue::~ReplicatedValue() { }
 
-ReplicatedValue::ReplicatedValue(bool InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Boolean)
+ReplicatedValue::ReplicatedValue(bool inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Boolean)
 
 {
 }
 
-ReplicatedValue::ReplicatedValue(float InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Float)
+ReplicatedValue::ReplicatedValue(float inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Float)
 {
 }
 
-ReplicatedValue::ReplicatedValue(int64_t InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Integer)
+ReplicatedValue::ReplicatedValue(int64_t inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Integer)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const char* InValue)
-    : Value { csp::common::String { InValue } }
-    , ReplicatedType(ReplicatedValueType::String)
+ReplicatedValue::ReplicatedValue(const char* inValue)
+    : m_value { csp::common::String { inValue } }
+    , m_replicatedType(ReplicatedValueType::String)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const csp::common::String& InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::String)
+ReplicatedValue::ReplicatedValue(const csp::common::String& inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::String)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const csp::common::Vector2& InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Vector2)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector2& inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Vector2)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Vector3)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector3& inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Vector3)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const csp::common::Vector4& InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::Vector4)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector4& inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::Vector4)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue)
-    : Value { InValue }
-    , ReplicatedType(ReplicatedValueType::StringMap)
+ReplicatedValue::ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& inValue)
+    : m_value { inValue }
+    , m_replicatedType(ReplicatedValueType::StringMap)
 {
 }
 
-ReplicatedValue::ReplicatedValue(const ReplicatedValue& Other)
+ReplicatedValue::ReplicatedValue(const ReplicatedValue& other)
 {
-    Value = Other.Value;
-    this->ReplicatedType = Other.ReplicatedType;
+    m_value = other.m_value;
+    this->m_replicatedType = other.m_replicatedType;
 }
 
-ReplicatedValue::ReplicatedValue(ReplicatedValue&& Other)
+ReplicatedValue::ReplicatedValue(ReplicatedValue&& other)
 {
-    this->Value = std::move(Other.Value);
+    this->m_value = std::move(other.m_value);
 
-    this->ReplicatedType = std::move(Other.ReplicatedType);
-    Other.ReplicatedType = ReplicatedValueType::InvalidType;
+    this->m_replicatedType = std::move(other.m_replicatedType);
+    other.m_replicatedType = ReplicatedValueType::InvalidType;
 }
 
-ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& Other)
+ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& other)
 {
-    this->Value = Other.Value;
-    this->ReplicatedType = Other.ReplicatedType;
+    this->m_value = other.m_value;
+    this->m_replicatedType = other.m_replicatedType;
     return *this;
 }
 
-ReplicatedValue& ReplicatedValue::operator=(ReplicatedValue&& Other)
+ReplicatedValue& ReplicatedValue::operator=(ReplicatedValue&& other)
 {
-    this->Value = std::move(Other.Value);
+    this->m_value = std::move(other.m_value);
 
-    this->ReplicatedType = std::move(Other.ReplicatedType);
-    Other.ReplicatedType = ReplicatedValueType::InvalidType;
+    this->m_replicatedType = std::move(other.m_replicatedType);
+    other.m_replicatedType = ReplicatedValueType::InvalidType;
 
     return *this;
 }
 
-bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const { return (Value) == OtherValue.Value; }
-bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const { return (*this == OtherValue) == false; }
+bool ReplicatedValue::operator==(const ReplicatedValue& otherValue) const { return (m_value) == otherValue.m_value; }
+bool ReplicatedValue::operator!=(const ReplicatedValue& otherValue) const { return (*this == otherValue) == false; }
 
-void ReplicatedValue::SetBool(bool InValue)
+void ReplicatedValue::SetBool(bool inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Boolean;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Boolean;
 }
 
 bool ReplicatedValue::GetBool() const
 {
-    if (ReplicatedType != ReplicatedValueType::Boolean)
+    if (m_replicatedType != ReplicatedValueType::Boolean)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Boolean, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Boolean, m_replicatedType);
     }
 
     return Get<bool>();
 }
 
-void ReplicatedValue::SetFloat(float InValue)
+void ReplicatedValue::SetFloat(float inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Float;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Float;
 }
 
 float ReplicatedValue::GetFloat() const
 {
-    if (ReplicatedType != ReplicatedValueType::Float)
+    if (m_replicatedType != ReplicatedValueType::Float)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Float, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Float, m_replicatedType);
     }
 
     return Get<float>();
 }
 
-void ReplicatedValue::SetInt(int64_t InValue)
+void ReplicatedValue::SetInt(int64_t inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Integer;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Integer;
 }
 
 int64_t ReplicatedValue::GetInt() const
 {
-    if (ReplicatedType != ReplicatedValueType::Integer)
+    if (m_replicatedType != ReplicatedValueType::Integer)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Integer, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Integer, m_replicatedType);
     }
 
     return Get<int64_t>();
 }
 
-void ReplicatedValue::SetString(const char* InValue)
+void ReplicatedValue::SetString(const char* inValue)
 {
-    Value = csp::common::String { InValue };
-    ReplicatedType = ReplicatedValueType::String;
+    m_value = csp::common::String { inValue };
+    m_replicatedType = ReplicatedValueType::String;
 }
 
-void ReplicatedValue::SetString(const csp::common::String& InValue)
+void ReplicatedValue::SetString(const csp::common::String& inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::String;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::String;
 }
 
 const csp::common::String& ReplicatedValue::GetString() const
 {
-    if (ReplicatedType != ReplicatedValueType::String)
+    if (m_replicatedType != ReplicatedValueType::String)
     {
-        throw ReplicatedValueException(ReplicatedValueType::String, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::String, m_replicatedType);
     }
 
     return Get<csp::common::String>();
@@ -189,21 +189,21 @@ const csp::common::String& ReplicatedValue::GetString() const
 
 const csp::common::String& ReplicatedValue::GetDefaultString()
 {
-    static const csp::common::String InvalidString = csp::common::String();
-    return InvalidString;
+    static const csp::common::String invalidString = csp::common::String();
+    return invalidString;
 }
 
-void ReplicatedValue::SetVector2(const csp::common::Vector2& InValue)
+void ReplicatedValue::SetVector2(const csp::common::Vector2& inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Vector2;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Vector2;
 }
 
 const csp::common::Vector2& ReplicatedValue::GetVector2() const
 {
-    if (ReplicatedType != ReplicatedValueType::Vector2)
+    if (m_replicatedType != ReplicatedValueType::Vector2)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Vector2, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Vector2, m_replicatedType);
     }
 
     return Get<csp::common::Vector2>();
@@ -211,17 +211,17 @@ const csp::common::Vector2& ReplicatedValue::GetVector2() const
 
 const csp::common::Vector2& ReplicatedValue::GetDefaultVector2() { return InvalidVector2; }
 
-void ReplicatedValue::SetVector3(const csp::common::Vector3& InValue)
+void ReplicatedValue::SetVector3(const csp::common::Vector3& inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Vector3;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Vector3;
 }
 
 const csp::common::Vector3& ReplicatedValue::GetVector3() const
 {
-    if (ReplicatedType != ReplicatedValueType::Vector3)
+    if (m_replicatedType != ReplicatedValueType::Vector3)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Vector3, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Vector3, m_replicatedType);
     }
 
     return Get<csp::common::Vector3>();
@@ -229,17 +229,17 @@ const csp::common::Vector3& ReplicatedValue::GetVector3() const
 
 const csp::common::Vector3& ReplicatedValue::GetDefaultVector3() { return InvalidVector3; }
 
-void ReplicatedValue::SetVector4(const csp::common::Vector4& InValue)
+void ReplicatedValue::SetVector4(const csp::common::Vector4& inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::Vector4;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::Vector4;
 }
 
 const csp::common::Vector4& ReplicatedValue::GetVector4() const
 {
-    if (ReplicatedType != ReplicatedValueType::Vector4)
+    if (m_replicatedType != ReplicatedValueType::Vector4)
     {
-        throw ReplicatedValueException(ReplicatedValueType::Vector4, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::Vector4, m_replicatedType);
     }
 
     return Get<csp::common::Vector4>();
@@ -249,18 +249,18 @@ const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return Invali
 
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {
-    if (ReplicatedType != ReplicatedValueType::StringMap)
+    if (m_replicatedType != ReplicatedValueType::StringMap)
     {
-        throw ReplicatedValueException(ReplicatedValueType::StringMap, ReplicatedType);
+        throw ReplicatedValueException(ReplicatedValueType::StringMap, m_replicatedType);
     }
 
     return Get<csp::common::Map<csp::common::String, ReplicatedValue>>();
 }
 
-void ReplicatedValue::SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue)
+void ReplicatedValue::SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& inValue)
 {
-    Value = InValue;
-    ReplicatedType = ReplicatedValueType::StringMap;
+    m_value = inValue;
+    m_replicatedType = ReplicatedValueType::StringMap;
 }
 
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetDefaultStringMap() { return InvalidStringMap; }

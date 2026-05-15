@@ -73,9 +73,9 @@ class WebClient
     friend class HttpRequest;
 
 public:
-    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem,
-        bool AutoRefresh = true);
+    WebClient(const Port inPort, const ETransferProtocol tp, csp::common::LogSystem* logSystem, bool autoRefresh = true);
+    WebClient(const Port inPort, const ETransferProtocol tp, csp::common::IAuthContext& authContext, csp::common::LogSystem* logSystem,
+        bool autoRefresh = true);
     virtual ~WebClient();
 
     /// @brief Main method for sending a Http Request
@@ -84,65 +84,65 @@ public:
     /// @param Payload Headers and body content
     /// @param ResponseCallback Pointer to callback for the response
     /// @param AsyncResponse Flag to indicate if the response should be issued asynchronously as soon as it's received
-    virtual void SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
-        csp::common::CancellationToken& CancellationToken, bool AsyncResponse = true);
+    virtual void SendRequest(ERequestVerb verb, const csp::web::Uri& inUri, HttpPayload& payload, IHttpResponseHandler* responseCallback,
+        csp::common::CancellationToken& cancellationToken, bool asyncResponse = true);
 
 #ifndef CSP_WASM
     /// @brief Manually poll for responses that have been flagged as non-async
     /// @param MaxNumResponses Maximum number of responses to process in this call
-    void ProcessResponses(const uint32_t MaxNumResponses = 64);
+    void ProcessResponses(const uint32_t maxNumResponses = 64);
 #endif
 
-    virtual std::string MD5Hash(const void* Data, const size_t Size) = 0;
-    virtual void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
+    virtual std::string MD5Hash(const void* data, const size_t size) = 0;
+    virtual void SetFileUploadContentFromFile(HttpPayload* payload, const char* filePath, const char* version, const csp::common::String& mediaType)
         = 0;
-    virtual void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType)
+    virtual void SetFileUploadContentFromString(HttpPayload* payload, const csp::common::String& stringSource, const csp::common::String& fileName,
+        const char* version, const csp::common::String& mediaType)
         = 0;
-    virtual void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType)
+    virtual void SetFileUploadContentFromBuffer(HttpPayload* payload, const char* buffer, size_t bufferLength, const csp::common::String& fileName,
+        const char* version, const csp::common::String& mediaType)
         = 0;
 
     /// @brief Sets the authentication object to reason about authentication information, and refresh the authentication token.
     /// @details This setter needs to exist due to order of initialization. At the time of writing, the AuthContext has a WebClient dependency,
     /// and the WebClient has an IAuthContext dependency.
     /// @param AuthContext csp::common::IAuthContext& : The AuthContext for this object.
-    virtual void SetAuthContext(csp::common::IAuthContext& AuthContext);
+    virtual void SetAuthContext(csp::common::IAuthContext& authContext);
 
 protected:
     /// @brief Send a http request
     /// @param Request Details of the web request headers and payload
     /// @return Response code and payload
-    virtual void Send(HttpRequest& Request) = 0;
+    virtual void Send(HttpRequest& request) = 0;
 
-    const Port RootPort;
+    const Port m_rootPort;
 
 private:
-    void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));
+    void AddRequest(HttpRequest* request, std::chrono::milliseconds sendDelay = std::chrono::milliseconds(0));
     void RefreshIfExpired();
-    void PrintClientErrorResponseMessages(const HttpResponse& Response);
-    csp::common::IAuthContext* AuthContext;
+    void PrintClientErrorResponseMessages(const HttpResponse& response);
+    csp::common::IAuthContext* m_authContext;
     // The RealtimeEngine SignalR connection uses the same POCO/Emscripten web client as our MCS RESTApi.
     // For the SignalR connection null be will passed to the ctor for the LogSystem to avoid logging high frequency multiplayer API exchange.
 protected:
-    csp::common::LogSystem* LogSystem = nullptr;
+    csp::common::LogSystem* m_logSystem = nullptr;
 
 private:
-    std::atomic_bool RefreshNeeded, RefreshStarted;
-    bool AutoRefreshEnabled;
+    std::atomic_bool m_refreshNeeded, m_refreshStarted;
+    bool m_autoRefreshEnabled;
 
 #ifdef CSP_WASM
     csp::Queue<HttpRequest*> WasmRequests;
     std::mutex WasmRequestsMutex;
 #else
-    void ProcessRequest(HttpRequest* Request);
-    void DestroyRequest(HttpRequest* Request);
+    void ProcessRequest(HttpRequest* request);
+    void DestroyRequest(HttpRequest* request);
 
-    std::atomic_uint32_t RequestCount;
-    csp::ThreadPool ThreadPool;
-    csp::Queue<HttpRequest*> PollRequests;
-    std::unordered_set<HttpRequest*> Requests;
-    std::mutex RequestsMutex;
+    std::atomic_uint32_t m_requestCount;
+    csp::ThreadPool m_threadPool;
+    csp::Queue<HttpRequest*> m_pollRequests;
+    std::unordered_set<HttpRequest*> m_requests;
+    std::mutex m_requestsMutex;
 #endif
 };
 

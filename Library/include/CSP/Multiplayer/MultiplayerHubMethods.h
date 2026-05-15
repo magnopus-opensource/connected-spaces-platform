@@ -83,9 +83,9 @@ struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod,
 
     ~MultiplayerHubMethodMap() { }
 
-    std::string Get(const MultiplayerHubMethod& Method) const
+    std::string Get(const MultiplayerHubMethod& method) const
     {
-        if (auto search = this->find(Method); search != this->end())
+        if (auto search = this->find(method); search != this->end())
             return search->second;
 
         return "";
@@ -96,7 +96,7 @@ struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod,
     /// It ensures that every method in the input array exists in the available set.
     /// @param MethodNames An array of method names that are expected to be present.
     /// @return bool : true if all available in-use multiplayer hub methods match, false otherwise.
-    bool CheckPrerequisites(const csp::common::Array<csp::common::String>& MethodNames) const;
+    bool CheckPrerequisites(const csp::common::Array<csp::common::String>& methodNames) const;
 };
 
 } // namespace csp::multiplayer

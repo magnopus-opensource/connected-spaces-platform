@@ -23,53 +23,53 @@ namespace csp::common
 
 LoginState::LoginState()
     : State(ELoginState::LoggedOut)
-    , AccessTokenRefreshTime(new DateTime())
+    , m_accessTokenRefreshTime(new DateTime())
 {
 }
 
-LoginState::LoginState(const LoginState& OtherState) { CopyStateFrom(OtherState); }
+LoginState::LoginState(const LoginState& otherState) { CopyStateFrom(otherState); }
 
-LoginState& LoginState::operator=(const LoginState& OtherState)
+LoginState& LoginState::operator=(const LoginState& otherState)
 {
-    CopyStateFrom(OtherState);
+    CopyStateFrom(otherState);
 
     return *this;
 }
 
-void LoginState::SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateTime)
+void LoginState::SetAccessTokenRefreshTime(const csp::common::DateTime& newDateTime)
 {
     // Why this data member is a pointer is beyond me, but it's too bedded in to change right this second ... invoke the copy assignment operator.
-    *AccessTokenRefreshTime = NewDateTime;
+    *m_accessTokenRefreshTime = newDateTime;
 }
 
-void LoginState::CopyStateFrom(const LoginState& OtherState)
+void LoginState::CopyStateFrom(const LoginState& otherState)
 {
-    State = OtherState.State;
-    AccessToken = OtherState.AccessToken;
-    AccessTokenExpiryLength = OtherState.AccessTokenExpiryLength;
-    RefreshToken = OtherState.RefreshToken;
-    RefreshTokenExpiryLength = OtherState.RefreshTokenExpiryLength;
-    UserId = OtherState.UserId;
-    DeviceId = OtherState.DeviceId;
-    DefaultApplicationSettings = OtherState.DefaultApplicationSettings;
-    DefaultSettings = OtherState.DefaultSettings;
+    State = otherState.State;
+    AccessToken = otherState.AccessToken;
+    AccessTokenExpiryLength = otherState.AccessTokenExpiryLength;
+    RefreshToken = otherState.RefreshToken;
+    RefreshTokenExpiryLength = otherState.RefreshTokenExpiryLength;
+    UserId = otherState.UserId;
+    DeviceId = otherState.DeviceId;
+    DefaultApplicationSettings = otherState.DefaultApplicationSettings;
+    DefaultSettings = otherState.DefaultSettings;
 
     // Must reallocate the access token when copying otherwise destructor of
     // copied state will delete the original memory pointer potentially causing corruption
-    AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
+    m_accessTokenRefreshTime = new DateTime(otherState.m_accessTokenRefreshTime->GetTimePoint());
 }
 
-LoginState::~LoginState() { delete (AccessTokenRefreshTime); }
+LoginState::~LoginState() { delete (m_accessTokenRefreshTime); }
 
 bool LoginState::RefreshNeeded() const
 {
-    if (AccessTokenRefreshTime->IsEpoch())
+    if (m_accessTokenRefreshTime->IsEpoch())
     {
         return false;
     }
 
-    const auto CurrentTime = DateTime::UtcTimeNow();
+    const auto currentTime = DateTime::UtcTimeNow();
 
-    return CurrentTime >= (*AccessTokenRefreshTime);
+    return currentTime >= (*m_accessTokenRefreshTime);
 }
 } // namespace csp::common

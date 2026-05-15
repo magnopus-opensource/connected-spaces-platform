@@ -89,8 +89,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& ImageSpaceComponent::GetSchema() { return Schema; }
 
-ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -99,9 +99,9 @@ const csp::common::String& ImageSpaceComponent::GetImageAssetId() const
     return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId));
 }
 
-void ImageSpaceComponent::SetImageAssetId(const csp::common::String& Value)
+void ImageSpaceComponent::SetImageAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId), Value);
+    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId), value);
 }
 
 const csp::common::String& ImageSpaceComponent::GetAssetCollectionId() const
@@ -109,9 +109,9 @@ const csp::common::String& ImageSpaceComponent::GetAssetCollectionId() const
     return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId));
 }
 
-void ImageSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void ImageSpaceComponent::SetAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId), value);
 }
 
 const csp::common::String& ImageSpaceComponent::GetName() const
@@ -119,7 +119,7 @@ const csp::common::String& ImageSpaceComponent::GetName() const
     return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED));
 }
 
-void ImageSpaceComponent::SetName(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED), Value); }
+void ImageSpaceComponent::SetName(const csp::common::String& value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED), value); }
 
 /* ITransformComponent */
 
@@ -128,62 +128,62 @@ const csp::common::Vector3& ImageSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(ImagePropertyKeys::Position));
 }
 
-void ImageSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Position), Value); }
+void ImageSpaceComponent::SetPosition(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Position), value); }
 
 const csp::common::Vector4& ImageSpaceComponent::GetRotation() const
 {
     return GetVector4Property(static_cast<uint32_t>(ImagePropertyKeys::Rotation));
 }
 
-void ImageSpaceComponent::SetRotation(const csp::common::Vector4& Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Rotation), Value); }
+void ImageSpaceComponent::SetRotation(const csp::common::Vector4& value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Rotation), value); }
 
 const csp::common::Vector3& ImageSpaceComponent::GetScale() const { return GetVector3Property(static_cast<uint32_t>(ImagePropertyKeys::Scale)); }
 
-void ImageSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Scale), Value); }
+void ImageSpaceComponent::SetScale(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Scale), value); }
 
 SpaceTransform ImageSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void ImageSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void ImageSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 bool ImageSpaceComponent::GetIsEmissive() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsEmissive)); }
 
-void ImageSpaceComponent::SetIsEmissive(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsEmissive), Value); }
+void ImageSpaceComponent::SetIsEmissive(bool value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsEmissive), value); }
 
 /* IVisibleComponent */
 
 bool ImageSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVisible)); }
 
-void ImageSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVisible), Value); }
+void ImageSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVisible), value); }
 
 bool ImageSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible)); }
 
-void ImageSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible), Value); }
+void ImageSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible), value); }
 
 bool ImageSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible)); }
 
-void ImageSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible), Value); }
+void ImageSpaceComponent::SetIsVirtualVisible(bool value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible), value); }
 
 BillboardMode ImageSpaceComponent::GetBillboardMode() const
 {
     return static_cast<BillboardMode>(GetIntegerProperty(static_cast<uint32_t>(ImagePropertyKeys::BillboardMode)));
 }
 
-void ImageSpaceComponent::SetBillboardMode(BillboardMode Value)
+void ImageSpaceComponent::SetBillboardMode(BillboardMode value)
 {
-    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::BillboardMode), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::BillboardMode), static_cast<int64_t>(value));
 }
 
 DisplayMode ImageSpaceComponent::GetDisplayMode() const
@@ -191,8 +191,8 @@ DisplayMode ImageSpaceComponent::GetDisplayMode() const
     return static_cast<DisplayMode>(GetIntegerProperty(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode)));
 }
 
-void ImageSpaceComponent::SetDisplayMode(DisplayMode Value)
+void ImageSpaceComponent::SetDisplayMode(DisplayMode value)
 {
-    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode), static_cast<int64_t>(value));
 }
 } // namespace csp::multiplayer

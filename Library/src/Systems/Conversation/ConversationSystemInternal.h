@@ -49,65 +49,65 @@ public:
     /** @endcond */
     CSP_END_IGNORE
 
-    ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
-        csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
+    ConversationSystemInternal(csp::systems::AssetSystem* assetSystem, csp::systems::SpaceSystem* spaceSystem, csp::systems::UserSystem* userSystem,
+        csp::multiplayer::NetworkEventBus& eventBus, csp::common::LogSystem& logSystem);
 
     ~ConversationSystemInternal();
 
     ConversationSystemInternal(const ConversationSystemInternal& other) = delete;
     ConversationSystemInternal& operator=(const ConversationSystemInternal& other) = delete;
 
-    void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
+    void CreateConversation(const csp::common::String& message, csp::systems::StringResultCallback callback);
 
-    void DeleteConversation(const csp::common::String& ConversationId, csp::systems::NullResultCallback Callback);
+    void DeleteConversation(const csp::common::String& conversationId, csp::systems::NullResultCallback callback);
 
-    void AddMessage(const csp::common::String& ConversationId, const csp::common::String& Message, multiplayer::MessageResultCallback Callback);
+    void AddMessage(const csp::common::String& conversationId, const csp::common::String& message, multiplayer::MessageResultCallback callback);
 
-    void DeleteMessage(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
+    void DeleteMessage(const csp::common::String& conversationId, const csp::common::String& messageId, systems::NullResultCallback callback);
 
-    void GetMessagesFromConversation(const csp::common::String& ConversationId, const csp::common::Optional<int>& ResultsSkipNumber,
-        const csp::common::Optional<int>& ResultsMaxNumber, multiplayer::MessageCollectionResultCallback Callback);
+    void GetMessagesFromConversation(const csp::common::String& conversationId, const csp::common::Optional<int>& resultsSkipNumber,
+        const csp::common::Optional<int>& resultsMaxNumber, multiplayer::MessageCollectionResultCallback callback);
 
-    void GetConversationInfo(const csp::common::String& ConversationId, multiplayer::ConversationResultCallback Callback);
+    void GetConversationInfo(const csp::common::String& conversationId, multiplayer::ConversationResultCallback callback);
 
     void UpdateConversation(
-        const csp::common::String& ConversationId, const multiplayer::MessageUpdateParams& NewData, multiplayer::ConversationResultCallback Callback);
+        const csp::common::String& conversationId, const multiplayer::MessageUpdateParams& newData, multiplayer::ConversationResultCallback callback);
 
-    void GetMessageInfo(const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::MessageResultCallback Callback);
+    void GetMessageInfo(const csp::common::String& conversationId, const csp::common::String& messageId, multiplayer::MessageResultCallback callback);
 
-    void UpdateMessage(const csp::common::String& ConversationId, const csp::common::String& MessageId,
-        const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback);
+    void UpdateMessage(const csp::common::String& conversationId, const csp::common::String& messageId,
+        const multiplayer::MessageUpdateParams& newData, multiplayer::MessageResultCallback callback);
 
     void StoreConversationMessage(
-        const multiplayer::MessageInfo& Info, const csp::systems::Space& Space, multiplayer::MessageResultCallback Callback) const;
+        const multiplayer::MessageInfo& info, const csp::systems::Space& space, multiplayer::MessageResultCallback callback) const;
 
-    void DeleteMessages(const csp::common::String& ConversationId, csp::common::Array<csp::systems::AssetCollection>& Messages,
-        csp::systems::NullResultCallback Callback);
+    void DeleteMessages(const csp::common::String& conversationId, csp::common::Array<csp::systems::AssetCollection>& messages,
+        csp::systems::NullResultCallback callback);
 
-    void GetNumberOfReplies(const common::String& ConversationId, csp::multiplayer::NumberOfRepliesResultCallback Callback);
+    void GetNumberOfReplies(const common::String& conversationId, csp::multiplayer::NumberOfRepliesResultCallback callback);
 
-    void GetConversationAnnotation(const csp::common::String& ConversationId, multiplayer::AnnotationResultCallback Callback);
+    void GetConversationAnnotation(const csp::common::String& conversationId, multiplayer::AnnotationResultCallback callback);
 
-    void SetConversationAnnotation(const csp::common::String& ConversationId, const multiplayer::AnnotationUpdateParams& AnnotationParams,
-        const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
-        multiplayer::AnnotationResultCallback Callback);
+    void SetConversationAnnotation(const csp::common::String& conversationId, const multiplayer::AnnotationUpdateParams& annotationParams,
+        const systems::BufferAssetDataSource& annotation, const systems::BufferAssetDataSource& annotationThumbnail,
+        multiplayer::AnnotationResultCallback callback);
 
-    void DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback);
+    void DeleteConversationAnnotation(const csp::common::String& conversationId, systems::NullResultCallback callback);
 
     void GetAnnotation(
-        const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::AnnotationResultCallback Callback);
+        const csp::common::String& conversationId, const csp::common::String& messageId, multiplayer::AnnotationResultCallback callback);
 
-    void SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
-        const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-        const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback);
+    void SetAnnotation(const csp::common::String& conversationId, const csp::common::String& messageId,
+        const multiplayer::AnnotationUpdateParams& annotationParams, const systems::BufferAssetDataSource& annotation,
+        const systems::BufferAssetDataSource& annotationThumbnail, multiplayer::AnnotationResultCallback callback);
 
-    void DeleteAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
+    void DeleteAnnotation(const csp::common::String& conversationId, const csp::common::String& messageId, systems::NullResultCallback callback);
 
     void GetAnnotationThumbnailsForConversation(
-        const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+        const csp::common::String& conversationId, multiplayer::AnnotationThumbnailCollectionResultCallback callback);
 
-    void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
-    void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
+    void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* component);
+    void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* component);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
@@ -117,14 +117,14 @@ public:
     void FlushEvents();
 
 private:
-    bool TrySendEvent(const csp::common::ConversationNetworkEventData& Params);
+    bool TrySendEvent(const csp::common::ConversationNetworkEventData& params);
 
-    csp::systems::AssetSystem* AssetSystem;
-    csp::systems::SpaceSystem* SpaceSystem;
-    csp::systems::UserSystem* UserSystem;
+    csp::systems::AssetSystem* m_assetSystem;
+    csp::systems::SpaceSystem* m_spaceSystem;
+    csp::systems::UserSystem* m_userSystem;
 
-    std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
-    std::vector<std::unique_ptr<csp::common::ConversationNetworkEventData>> Events;
+    std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> m_components;
+    std::vector<std::unique_ptr<csp::common::ConversationNetworkEventData>> m_events;
 };
 
 }

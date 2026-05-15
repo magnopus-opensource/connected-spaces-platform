@@ -40,8 +40,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
 
-ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -52,9 +52,9 @@ const csp::common::Vector3& ECommerceSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(ECommercePropertyKeys::Position));
 }
 
-void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), value);
 }
 
 csp::common::String ECommerceSpaceComponent::GetProductId() const
@@ -62,6 +62,6 @@ csp::common::String ECommerceSpaceComponent::GetProductId() const
     return GetStringProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
 }
 
-void ECommerceSpaceComponent::SetProductId(csp::common::String Value) { SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), Value); }
+void ECommerceSpaceComponent::SetProductId(csp::common::String value) { SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), value); }
 
 } // namespace csp::multiplayer

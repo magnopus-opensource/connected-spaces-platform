@@ -18,43 +18,43 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 
-void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem, const csp::common::Optional<csp::common::String>& SpaceId,
-    const csp::common::Optional<csp::common::String>& ParentId, const csp::common::String& Name,
-    const csp::common::Optional<csp::systems::EAssetCollectionType>& AssetCollectionType,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, csp::systems::AssetCollection& OutAssetCollection);
+void CreateAssetCollection(csp::systems::AssetSystem* assetSystem, const csp::common::Optional<csp::common::String>& spaceId,
+    const csp::common::Optional<csp::common::String>& parentId, const csp::common::String& name,
+    const csp::common::Optional<csp::systems::EAssetCollectionType>& assetCollectionType,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, csp::systems::AssetCollection& outAssetCollection);
 
-void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection);
+void DeleteAssetCollection(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection);
 
 void GetAssetCollections(
-    csp::systems::AssetSystem* AssetSystem, csp::systems::Space& Space, csp::common::Array<csp::systems::AssetCollection>& OutAssetCollections);
+    csp::systems::AssetSystem* assetSystem, csp::systems::Space& space, csp::common::Array<csp::systems::AssetCollection>& outAssetCollections);
 
-void GetAssetCollectionsByIds(csp::systems::AssetSystem* AssetSystem, const csp::common::Array<csp::common::String>& Ids,
-    csp::common::Array<csp::systems::AssetCollection>& OutAssetCollections);
+void GetAssetCollectionsByIds(csp::systems::AssetSystem* assetSystem, const csp::common::Array<csp::common::String>& ids,
+    csp::common::Array<csp::systems::AssetCollection>& outAssetCollections);
 
-void CreateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, const csp::common::String& Name,
-    const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
-    const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, csp::systems::Asset& OutAsset);
+void CreateAsset(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection, const csp::common::String& name,
+    const csp::common::Optional<csp::common::String>& thirdPartyPackagedAssetIdentifier,
+    const csp::common::Optional<csp::systems::EThirdPartyPlatform>& thirdPartyPlatform, csp::systems::Asset& outAsset);
 
-void UploadAssetData(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, const csp::systems::Asset& Asset,
-    const csp::systems::FileAssetDataSource& Source, csp::common::String& OutUri);
+void UploadAssetData(csp::systems::AssetSystem* assetSystem, const csp::systems::AssetCollection& assetCollection, const csp::systems::Asset& asset,
+    const csp::systems::FileAssetDataSource& source, csp::common::String& outUri);
 
-void UploadAssetData(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, const csp::systems::Asset& Asset,
-    const csp::systems::BufferAssetDataSource& Source, csp::common::String& OutUri);
+void UploadAssetData(csp::systems::AssetSystem* assetSystem, const csp::systems::AssetCollection& assetCollection, const csp::systems::Asset& asset,
+    const csp::systems::BufferAssetDataSource& source, csp::common::String& outUri);
 
-void GetAssetById(csp::systems::AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId,
-    csp::systems::Asset& OutAsset);
+void GetAssetById(csp::systems::AssetSystem* assetSystem, const csp::common::String& assetCollectionId, const csp::common::String& assetId,
+    csp::systems::Asset& outAsset);
 
-void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset);
+void DeleteAsset(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection, csp::systems::Asset& asset);
 
-void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset);
+void UpdateAsset(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection, csp::systems::Asset& asset);
 
 void GetAssetsInCollection(
-    csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::common::Array<csp::systems::Asset>& OutAssets);
+    csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection, csp::common::Array<csp::systems::Asset>& outAssets);
 
 void GetAssetsByCollectionIds(
-    csp::systems::AssetSystem* AssetSystem, const csp::common::Array<csp::common::String>& Ids, csp::common::Array<csp::systems::Asset>& OutAssets);
+    csp::systems::AssetSystem* assetSystem, const csp::common::Array<csp::common::String>& ids, csp::common::Array<csp::systems::Asset>& outAssets);
 
-void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection,
-    const csp::common::Map<csp::common::String, csp::common::String>& InMetaData,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-    csp::common::Map<csp::common::String, csp::common::String>& OutMetaData);
+void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* assetSystem, csp::systems::AssetCollection& assetCollection,
+    const csp::common::Map<csp::common::String, csp::common::String>& inMetaData,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& tags,
+    csp::common::Map<csp::common::String, csp::common::String>& outMetaData);

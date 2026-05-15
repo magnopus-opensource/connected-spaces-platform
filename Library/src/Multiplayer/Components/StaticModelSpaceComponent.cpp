@@ -97,8 +97,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& StaticModelSpaceComponent::GetSchema() { return Schema; }
 
-StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
 }
 
@@ -109,9 +109,9 @@ const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetId
     return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId));
 }
 
-void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), value);
 }
 
 const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCollectionId() const
@@ -119,46 +119,46 @@ const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCo
     return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId));
 }
 
-void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), value);
 }
 
 csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceComponent::GetMaterialOverrides() const
 {
     // Convert replicated values map to string values
-    common::Map<common::String, common::ReplicatedValue> ReplicatedOverrides
+    common::Map<common::String, common::ReplicatedValue> replicatedOverrides
         = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
-    csp::common::Map<csp::common::String, csp::common::String> Overrides;
+    csp::common::Map<csp::common::String, csp::common::String> overrides;
 
-    std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()));
+    std::unique_ptr<common::Array<common::String>> keys(const_cast<common::Array<common::String>*>(replicatedOverrides.Keys()));
 
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (size_t i = 0; i < keys->Size(); ++i)
     {
-        const auto& CurrentKey = (*Keys)[i];
-        Overrides[CurrentKey] = ReplicatedOverrides[CurrentKey].GetString();
+        const auto& currentKey = (*keys)[i];
+        overrides[currentKey] = replicatedOverrides[currentKey].GetString();
     }
 
-    return Overrides;
+    return overrides;
 }
 
-void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
+void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& modelPath, const csp::common::String& materialId)
 {
-    common::Map<common::String, common::ReplicatedValue> ReplicatedOverrides
+    common::Map<common::String, common::ReplicatedValue> replicatedOverrides
         = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
-    ReplicatedOverrides[ModelPath] = MaterialId;
+    replicatedOverrides[modelPath] = materialId;
 
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), replicatedOverrides);
 }
 
-void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
+void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& modelPath)
 {
-    auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
-    ReplicatedOverrides.Remove(ModelPath);
+    auto replicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+    replicatedOverrides.Remove(modelPath);
 
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), replicatedOverrides);
 }
 
 /* ITransformComponent */
@@ -168,9 +168,9 @@ const csp::common::Vector3& StaticModelSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(StaticModelPropertyKeys::Position));
 }
 
-void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
@@ -178,9 +178,9 @@ const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation));
 }
 
-void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
@@ -188,46 +188,46 @@ const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(StaticModelPropertyKeys::Scale));
 }
 
-void StaticModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
+void StaticModelSpaceComponent::SetScale(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), value);
 }
 
 SpaceTransform StaticModelSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void StaticModelSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void StaticModelSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 /* IVisibleComponent */
 
 bool StaticModelSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)); }
 
-void StaticModelSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), InValue); }
+void StaticModelSpaceComponent::SetIsVisible(bool inValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), inValue); }
 
 bool StaticModelSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)); }
 
-void StaticModelSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue); }
+void StaticModelSpaceComponent::SetIsARVisible(bool inValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), inValue); }
 
 bool StaticModelSpaceComponent::GetIsVirtualVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible));
 }
 
-void StaticModelSpaceComponent::SetIsVirtualVisible(bool InValue)
+void StaticModelSpaceComponent::SetIsVirtualVisible(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), InValue);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), inValue);
 }
 
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
@@ -235,9 +235,9 @@ const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef(
     return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
 }
 
-void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& inValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), inValue);
 }
 
 bool StaticModelSpaceComponent::GetIsShadowCaster() const
@@ -245,7 +245,7 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
     return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster));
 }
 
-void StaticModelSpaceComponent::SetIsShadowCaster(bool Value) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value); }
+void StaticModelSpaceComponent::SetIsShadowCaster(bool value) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), value); }
 
 /* IRenderBehaviourComponent */
 
@@ -254,9 +254,9 @@ bool StaticModelSpaceComponent::GetShowAsHoldoutInAR() const
     return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR));
 }
 
-void StaticModelSpaceComponent::SetShowAsHoldoutInAR(bool InValue)
+void StaticModelSpaceComponent::SetShowAsHoldoutInAR(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR), InValue);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR), inValue);
 }
 
 bool StaticModelSpaceComponent::GetShowAsHoldoutInVirtual() const
@@ -264,9 +264,9 @@ bool StaticModelSpaceComponent::GetShowAsHoldoutInVirtual() const
     return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual));
 }
 
-void StaticModelSpaceComponent::SetShowAsHoldoutInVirtual(bool InValue)
+void StaticModelSpaceComponent::SetShowAsHoldoutInVirtual(bool inValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual), InValue);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual), inValue);
 }
 
 } // namespace csp::multiplayer

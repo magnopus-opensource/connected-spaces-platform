@@ -8,196 +8,196 @@
 
 namespace csp::multiplayer
 {
-ScopeLeadershipManager::ScopeLeadershipManager(MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem)
-    : Connection { Connection }
-    , LogSystem { LogSystem }
+ScopeLeadershipManager::ScopeLeadershipManager(MultiplayerConnection& connection, csp::common::LogSystem& logSystem)
+    : m_connection { connection }
+    , m_logSystem { logSystem }
 {
 }
 
-void ScopeLeadershipManager::RegisterScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
+void ScopeLeadershipManager::RegisterScope(const std::string& scopeId, const std::optional<uint64_t>& leaderId)
 {
-    if (LeaderId.has_value())
+    if (leaderId.has_value())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Log,
-            fmt::format("ScopeLeadershipManager::RegisterScope Called for scope {0} with leader: {1}.", ScopeId, *LeaderId).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::Log,
+            fmt::format("ScopeLeadershipManager::RegisterScope Called for scope {0} with leader: {1}.", scopeId, *leaderId).c_str());
 
-        Scopes[ScopeId] = ScopeLeaderData {};
-        Scopes[ScopeId]->LeaderClientId = *LeaderId;
+        m_scopes[scopeId] = ScopeLeaderData {};
+        m_scopes[scopeId]->LeaderClientId = *leaderId;
     }
     else
     {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Log, fmt::format("ScopeLeadershipManager::RegisterScope Called for scope {0} with no leader.", ScopeId).c_str());
+        m_logSystem.LogMsg(
+            csp::common::LogLevel::Log, fmt::format("ScopeLeadershipManager::RegisterScope Called for scope {0} with no leader.", scopeId).c_str());
 
-        Scopes[ScopeId] = std::nullopt;
+        m_scopes[scopeId] = std::nullopt;
     }
 }
 
-void ScopeLeadershipManager::DeregisterScope(const std::string& ScopeId) { Scopes.erase(ScopeId); }
+void ScopeLeadershipManager::DeregisterScope(const std::string& scopeId) { m_scopes.erase(scopeId); }
 
-void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& ScopeId, uint64_t ClientId)
+void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& scopeId, uint64_t clientId)
 {
-    auto ScopeIt = Scopes.find(ScopeId);
+    auto scopeIt = m_scopes.find(scopeId);
 
-    if (ScopeIt == Scopes.end())
+    if (scopeIt == m_scopes.end())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
+        m_logSystem.LogMsg(csp::common::LogLevel::Error,
             fmt::format("ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0} that isn't registered, for new "
                         "leader: {1}.",
-                ScopeId, ClientId)
+                scopeId, clientId)
                 .c_str());
         return;
     }
 
-    std::optional<ScopeLeaderData>& Data = ScopeIt->second;
+    std::optional<ScopeLeaderData>& data = scopeIt->second;
 
-    if (Data.has_value())
+    if (data.has_value())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning,
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning,
             fmt::format("ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has the leader: {1}, for new leader: "
                         "{2}. Overwriting old value.",
-                ScopeId, Data->LeaderClientId, ClientId)
+                scopeId, data->LeaderClientId, clientId)
                 .c_str());
     }
 
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        fmt::format("ScopeLeadershipManager::OnElectedScopeLeader New leader: {0}, for scope: {1}.", ClientId, ScopeId).c_str());
+    m_logSystem.LogMsg(csp::common::LogLevel::Log,
+        fmt::format("ScopeLeadershipManager::OnElectedScopeLeader New leader: {0}, for scope: {1}.", clientId, scopeId).c_str());
 
-    Scopes[ScopeId] = { ClientId, std::chrono::steady_clock::time_point {} };
+    m_scopes[scopeId] = { clientId, std::chrono::steady_clock::time_point {} };
 }
 
-void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId)
+void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& scopeId)
 {
-    auto ScopeIt = Scopes.find(ScopeId);
+    auto scopeIt = m_scopes.find(scopeId);
 
-    if (ScopeIt == Scopes.end())
+    if (scopeIt == m_scopes.end())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {0} that isn't registered.", ScopeId).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {0} that isn't registered.", scopeId).c_str());
         return;
     }
 
-    std::optional<ScopeLeaderData>& Data = ScopeIt->second;
+    std::optional<ScopeLeaderData>& data = scopeIt->second;
 
-    if (Data.has_value())
+    if (data.has_value())
     {
         // Leader has been vacated, so null the data.
-        Data = std::nullopt;
+        data = std::nullopt;
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning,
-            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for the scope: {0} that doesn't have a leader.", ScopeId)
+        m_logSystem.LogMsg(csp::common::LogLevel::Warning,
+            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for the scope: {0} that doesn't have a leader.", scopeId)
                 .c_str());
     }
 
-    LogSystem.LogMsg(
-        csp::common::LogLevel::Log, fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {}.", ScopeId).c_str());
+    m_logSystem.LogMsg(
+        csp::common::LogLevel::Log, fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {}.", scopeId).c_str());
 }
 
 void ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader()
 {
-    const auto CurrentTime = std::chrono::steady_clock::now();
+    const auto currentTime = std::chrono::steady_clock::now();
 
-    for (auto& LeaderDataPair : Scopes)
+    for (auto& leaderDataPair : m_scopes)
     {
-        const std::string& ScopeId = LeaderDataPair.first;
-        std::optional<ScopeLeaderData>& LeaderData = LeaderDataPair.second;
+        const std::string& scopeId = leaderDataPair.first;
+        std::optional<ScopeLeaderData>& leaderData = leaderDataPair.second;
 
         // We should only send a heartbeat if the local client is the leader of the scope.
-        if (IsLocalClientLeader(ScopeId))
+        if (IsLocalClientLeader(scopeId))
         {
             // Ensure the correct amount of time has passed.
-            if (CurrentTime - LeaderData->LastHeartbeatTime > LeaderElectionHeartbeatInterval)
+            if (currentTime - leaderData->LastHeartbeatTime > LeaderElectionHeartbeatInterval)
             {
                 // Send heartbeat.
-                LeaderData->LastHeartbeatTime = CurrentTime;
-                SendLeaderHeartbeat(ScopeId);
+                leaderData->LastHeartbeatTime = currentTime;
+                SendLeaderHeartbeat(scopeId);
             }
         }
     }
 }
 
-std::optional<uint64_t> ScopeLeadershipManager::GetLeaderClientId(const std::string& ScopeId) const
+std::optional<uint64_t> ScopeLeadershipManager::GetLeaderClientId(const std::string& scopeId) const
 {
-    auto ScopeIt = Scopes.find(ScopeId);
+    auto scopeIt = m_scopes.find(scopeId);
 
-    if (ScopeIt == Scopes.end())
+    if (scopeIt == m_scopes.end())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("ScopeLeadershipManager::GetLeaderClientId Event called for the scope: {} that isn't registered.", ScopeId).c_str());
+        m_logSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("ScopeLeadershipManager::GetLeaderClientId Event called for the scope: {} that isn't registered.", scopeId).c_str());
         return std::nullopt;
     }
 
-    const std::optional<ScopeLeaderData>& LeaderData = ScopeIt->second;
+    const std::optional<ScopeLeaderData>& leaderData = scopeIt->second;
 
-    if (LeaderData.has_value() == false)
+    if (leaderData.has_value() == false)
     {
         // Scope doesn't have a leader.
         return std::nullopt;
     }
 
-    return LeaderData->LeaderClientId;
+    return leaderData->LeaderClientId;
 }
 
-bool ScopeLeadershipManager::IsLocalClientLeader(const std::string& ScopeId) const
+bool ScopeLeadershipManager::IsLocalClientLeader(const std::string& scopeId) const
 {
-    auto LeaderClientId = GetLeaderClientId(ScopeId);
+    auto leaderClientId = GetLeaderClientId(scopeId);
 
-    if (LeaderClientId.has_value() == false)
+    if (leaderClientId.has_value() == false)
     {
         return false;
     }
 
-    return *LeaderClientId == Connection.GetClientId();
+    return *leaderClientId == m_connection.GetClientId();
 }
 
-void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
+void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& scopeId)
 {
-    const signalr::value Params { std::vector { signalr::value { ScopeId } } };
+    const signalr::value params { std::vector { signalr::value { scopeId } } };
 
     // We will use this to check that our object is still valid when the callback is executed, as the callback could be executed after this object is
     // destroyed. If the weak pointer can't be accessed via `lock`, then we know the object has been destroyed and we won't execute the body of the callback.
-    std::weak_ptr<int> WeakToken = LifetimeToken;
+    std::weak_ptr<int> weakToken = m_lifetimeToken;
 
-    Connection.GetSignalRConnection()->Invoke(Connection.GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT), Params,
-        [this, WeakToken, ScopeId](signalr::value, std::exception_ptr Exception)
+    m_connection.GetSignalRConnection()->Invoke(m_connection.GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT), params,
+        [this, weakToken, scopeId](signalr::value, std::exception_ptr exception)
         {
             // Bail if the weak token is not valid. Indicates that the ScopeLeadershipManager has been destroyed.
-            std::shared_ptr<int> SharedToken = WeakToken.lock();
-            if (!SharedToken)
+            std::shared_ptr<int> sharedToken = weakToken.lock();
+            if (!sharedToken)
             {
                 return;
             }
 
-            if (Exception)
+            if (exception)
             {
                 // An exception was thrown. In this case, we just log an error to notify clients.
                 // There isn't anything else we can do, as this all happens server-side.
                 try
                 {
-                    std::rethrow_exception(Exception);
+                    std::rethrow_exception(exception);
                 }
-                catch (const std::exception& Exception)
+                catch (const std::exception& exception)
                 {
-                    LogSystem.LogMsg(csp::common::LogLevel::Error,
-                        fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {0} with error: {1}", ScopeId,
-                            Exception.what())
+                    m_logSystem.LogMsg(csp::common::LogLevel::Error,
+                        fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {0} with error: {1}", scopeId,
+                            exception.what())
                             .c_str());
                 }
                 catch (...)
                 {
-                    LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    m_logSystem.LogMsg(csp::common::LogLevel::Error,
                         fmt::format(
-                            "ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {} with an unknown error.", ScopeId)
+                            "ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {} with an unknown error.", scopeId)
                             .c_str());
                 }
             }
             else
             {
                 // Successfuly sent the heartbeat.
-                LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
-                    fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Heartbeat was successfuly sent for scope: {}", ScopeId).c_str());
+                m_logSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+                    fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Heartbeat was successfuly sent for scope: {}", scopeId).c_str());
             }
         });
     }

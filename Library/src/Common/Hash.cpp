@@ -61,10 +61,10 @@ size_t std::hash<csp::common::String>::operator()(const csp::common::String& s) 
 
 size_t std::hash<csp::common::ReplicatedValue>::operator()(const csp::common::ReplicatedValue& v) const noexcept
 {
-    size_t TypeHash = std::hash<int> {}(static_cast<int>(v.GetReplicatedValueType()));
-    size_t ValueHash = std::visit([](const auto& val) -> size_t { return std::hash<std::decay_t<decltype(val)>> {}(val); }, v.GetValue());
+    size_t typeHash = std::hash<int> {}(static_cast<int>(v.GetReplicatedValueType()));
+    size_t valueHash = std::visit([](const auto& val) -> size_t { return std::hash<std::decay_t<decltype(val)>> {}(val); }, v.GetValue());
 
-    return TypeHash ^ (ValueHash << 1);
+    return typeHash ^ (valueHash << 1);
 }
 
 size_t std::hash<csp::common::ApplicationSettings>::operator()(const csp::common::ApplicationSettings& s) const noexcept

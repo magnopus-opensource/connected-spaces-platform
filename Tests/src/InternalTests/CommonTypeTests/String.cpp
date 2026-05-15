@@ -25,501 +25,501 @@ using namespace csp::common;
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringDefaultInitialisationTest)
 {
-    String Instance;
+    String instance;
 
-    EXPECT_TRUE(Instance.IsEmpty());
-    EXPECT_EQ(Instance, "");
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_TRUE(instance.IsEmpty());
+    EXPECT_EQ(instance, "");
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthInitialisationTest)
 {
-    const char Buffer[] = "abcdefg";
-    auto Length = strlen(Buffer);
+    const char buffer[] = "abcdefg";
+    auto length = strlen(buffer);
 
-    String Instance(Buffer, Length);
+    String instance(buffer, length);
 
-    EXPECT_FALSE(Instance.IsEmpty());
+    EXPECT_FALSE(instance.IsEmpty());
 
     // String contents should be equal, but buffer pointer should not
-    EXPECT_EQ(Instance.Length(), Length);
-    EXPECT_EQ(Instance, Buffer);
-    EXPECT_NE(Instance.c_str(), nullptr);
-    EXPECT_NE(Instance.c_str(), &Buffer[0]);
+    EXPECT_EQ(instance.Length(), length);
+    EXPECT_EQ(instance, buffer);
+    EXPECT_NE(instance.c_str(), nullptr);
+    EXPECT_NE(instance.c_str(), &buffer[0]);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthNullptrInitialisationTest)
 {
-    String Instance(nullptr, 5);
+    String instance(nullptr, 5);
 
-    EXPECT_TRUE(Instance.IsEmpty());
-    EXPECT_EQ(Instance.Length(), 0);
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_TRUE(instance.IsEmpty());
+    EXPECT_EQ(instance.Length(), 0);
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthInitialisationTest)
 {
-    constexpr size_t Length = 5;
+    constexpr size_t length = 5;
 
-    String Instance(Length);
+    String instance(length);
 
-    EXPECT_FALSE(Instance.IsEmpty());
-    EXPECT_EQ(Instance.Length(), Length);
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_FALSE(instance.IsEmpty());
+    EXPECT_EQ(instance.Length(), length);
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthZeroInitialisationTest)
 {
-    String Instance(static_cast<size_t>(0ULL));
+    String instance(static_cast<size_t>(0ULL));
 
-    EXPECT_TRUE(Instance.IsEmpty());
-    EXPECT_EQ(Instance.Length(), 0);
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_TRUE(instance.IsEmpty());
+    EXPECT_EQ(instance.Length(), 0);
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferInitialisationTest)
 {
-    const char Buffer[] = "abcdefg";
-    auto Length = strlen(Buffer);
+    const char buffer[] = "abcdefg";
+    auto length = strlen(buffer);
 
-    String Instance(Buffer);
+    String instance(buffer);
 
-    EXPECT_FALSE(Instance.IsEmpty());
+    EXPECT_FALSE(instance.IsEmpty());
 
     // String contents should be equal, but buffer pointer should not
-    EXPECT_EQ(Instance.Length(), Length);
-    EXPECT_EQ(Instance, Buffer);
-    EXPECT_NE(Instance.c_str(), nullptr);
-    EXPECT_NE(Instance.c_str(), &Buffer[0]);
+    EXPECT_EQ(instance.Length(), length);
+    EXPECT_EQ(instance, buffer);
+    EXPECT_NE(instance.c_str(), nullptr);
+    EXPECT_NE(instance.c_str(), &buffer[0]);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNullptrInitialisationTest)
 {
-    String Instance((char*)nullptr);
+    String instance((char*)nullptr);
 
-    EXPECT_TRUE(Instance.IsEmpty());
-    EXPECT_EQ(Instance.Length(), 0);
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_TRUE(instance.IsEmpty());
+    EXPECT_EQ(instance.Length(), 0);
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyInitialisationTest)
 {
-    String OtherInstance = "abcdefg";
-    String Instance(OtherInstance);
+    String otherInstance = "abcdefg";
+    String instance(otherInstance);
 
-    EXPECT_FALSE(Instance.IsEmpty());
+    EXPECT_FALSE(instance.IsEmpty());
 
     // Strings should be equal but not point to the same buffer
-    EXPECT_EQ(Instance.Length(), OtherInstance.Length());
-    EXPECT_EQ(Instance, OtherInstance);
-    EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
-    EXPECT_NE(Instance.c_str(), nullptr);
+    EXPECT_EQ(instance.Length(), otherInstance.Length());
+    EXPECT_EQ(instance, otherInstance);
+    EXPECT_NE(instance.c_str(), otherInstance.c_str());
+    EXPECT_NE(instance.c_str(), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyAssignmentTest)
 {
-    String OtherInstance = "abcdefg";
-    String Instance;
-    Instance = OtherInstance;
+    String otherInstance = "abcdefg";
+    String instance;
+    instance = otherInstance;
 
-    EXPECT_FALSE(Instance.IsEmpty());
+    EXPECT_FALSE(instance.IsEmpty());
 
     // Strings should be equal but not point to the same buffer
-    EXPECT_EQ(Instance.Length(), OtherInstance.Length());
-    EXPECT_EQ(Instance, OtherInstance);
-    EXPECT_NE(Instance.c_str(), nullptr);
-    EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
+    EXPECT_EQ(instance.Length(), otherInstance.Length());
+    EXPECT_EQ(instance, otherInstance);
+    EXPECT_NE(instance.c_str(), nullptr);
+    EXPECT_NE(instance.c_str(), otherInstance.c_str());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferAssignmentTest)
 {
-    const char Buffer[] = "abcdefg";
-    String Instance;
-    Instance = Buffer;
+    const char buffer[] = "abcdefg";
+    String instance;
+    instance = buffer;
 
-    EXPECT_FALSE(Instance.IsEmpty());
+    EXPECT_FALSE(instance.IsEmpty());
 
     // String contents should be equal, but buffer pointer should not
-    EXPECT_EQ(Instance.Length(), strlen(Buffer));
-    EXPECT_EQ(Instance, Buffer);
-    EXPECT_NE(Instance.c_str(), nullptr);
-    EXPECT_NE(Instance.c_str(), &Buffer[0]);
+    EXPECT_EQ(instance.Length(), strlen(buffer));
+    EXPECT_EQ(instance, buffer);
+    EXPECT_NE(instance.c_str(), nullptr);
+    EXPECT_NE(instance.c_str(), &buffer[0]);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSplitTest)
 {
-    String Instance = "abc;;def;";
-    auto Parts = Instance.Split(';');
+    String instance = "abc;;def;";
+    auto parts = instance.Split(';');
 
     // String::Split should keep empty parts
-    EXPECT_EQ(Parts.Size(), 4);
-    EXPECT_EQ(Parts[0], "abc");
-    EXPECT_EQ(Parts[1], "");
-    EXPECT_EQ(Parts[2], "def");
-    EXPECT_EQ(Parts[3], "");
+    EXPECT_EQ(parts.Size(), 4);
+    EXPECT_EQ(parts[0], "abc");
+    EXPECT_EQ(parts[1], "");
+    EXPECT_EQ(parts[2], "def");
+    EXPECT_EQ(parts[3], "");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSwapTest)
 {
-    String OtherInstance = "abcdefg";
-    String Instance = "gfecdba";
-    Instance.swap(OtherInstance);
+    String otherInstance = "abcdefg";
+    String instance = "gfecdba";
+    instance.swap(otherInstance);
 
-    EXPECT_EQ(Instance, "abcdefg");
-    EXPECT_EQ(OtherInstance, "gfecdba");
+    EXPECT_EQ(instance, "abcdefg");
+    EXPECT_EQ(otherInstance, "gfecdba");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEqualityTest)
 {
-    String OtherInstance = "abcdefg";
-    String Instance = "abcdefg";
+    String otherInstance = "abcdefg";
+    String instance = "abcdefg";
 
-    EXPECT_EQ(Instance, OtherInstance);
+    EXPECT_EQ(instance, otherInstance);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringNonEqualityTest)
 {
-    String OtherInstance = "abcdefg";
-    String Instance = "abcdefh";
+    String otherInstance = "abcdefg";
+    String instance = "abcdefh";
 
-    EXPECT_NE(Instance, OtherInstance);
+    EXPECT_NE(instance, otherInstance);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferEqualityTest)
 {
-    const char Buffer[] = "abcdefg";
-    String Instance = "abcdefg";
+    const char buffer[] = "abcdefg";
+    String instance = "abcdefg";
 
-    EXPECT_EQ(Instance, Buffer);
+    EXPECT_EQ(instance, buffer);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNonEqualityTest)
 {
-    const char Buffer[] = "abcdefg";
-    String Instance = "abcdefh";
+    const char buffer[] = "abcdefg";
+    String instance = "abcdefh";
 
-    EXPECT_NE(Instance, Buffer);
+    EXPECT_NE(instance, buffer);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLessThanTest)
 {
     // The less than operator is used for ordering of String instances
-    String OtherInstance = "abcdefh";
-    String Instance = "abcdefg";
+    String otherInstance = "abcdefh";
+    String instance = "abcdefg";
 
-    EXPECT_LT(Instance, OtherInstance);
+    EXPECT_LT(instance, otherInstance);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendTest)
 {
-    String OtherInstance = "defg";
-    String Instance = "abc";
-    Instance.Append(OtherInstance);
+    String otherInstance = "defg";
+    String instance = "abc";
+    instance.Append(otherInstance);
 
     // The appended String instance should not be modified
-    EXPECT_EQ(OtherInstance, "defg");
-    EXPECT_EQ(Instance, "abcdefg");
+    EXPECT_EQ(otherInstance, "defg");
+    EXPECT_EQ(instance, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendEmptyTest)
 {
-    String OtherInstance;
-    String Instance = "abc";
-    Instance.Append(OtherInstance);
+    String otherInstance;
+    String instance = "abc";
+    instance.Append(otherInstance);
 
     // The appended String instance should not be modified
-    EXPECT_EQ(OtherInstance, "");
-    EXPECT_EQ(Instance, "abc");
+    EXPECT_EQ(otherInstance, "");
+    EXPECT_EQ(instance, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferTest)
 {
-    const char Buffer[] = "defg";
-    String Instance = "abc";
-    Instance.Append(Buffer);
+    const char buffer[] = "defg";
+    String instance = "abc";
+    instance.Append(buffer);
 
-    EXPECT_EQ(Instance, "abcdefg");
+    EXPECT_EQ(instance, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferNullptrTest)
 {
-    String Instance = "abc";
-    Instance.Append((char*)nullptr);
+    String instance = "abc";
+    instance.Append((char*)nullptr);
 
     // Appending a null buffer should not throw
-    EXPECT_EQ(Instance, "abc");
+    EXPECT_EQ(instance, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddTest)
 {
-    String Instance = "abc";
-    String OtherInstance = "defg";
-    String Combined = Instance + OtherInstance;
+    String instance = "abc";
+    String otherInstance = "defg";
+    String combined = instance + otherInstance;
 
     // Neither of the original String instances should be modified
-    EXPECT_EQ(Instance, "abc");
-    EXPECT_EQ(OtherInstance, "defg");
-    EXPECT_EQ(Combined, "abcdefg");
+    EXPECT_EQ(instance, "abc");
+    EXPECT_EQ(otherInstance, "defg");
+    EXPECT_EQ(combined, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddEmptyTest)
 {
-    String Instance = "abc";
-    String OtherInstance;
-    String Combined = Instance + OtherInstance;
+    String instance = "abc";
+    String otherInstance;
+    String combined = instance + otherInstance;
 
     // Neither of the original String instances should be modified and the result should not be the LHS String
     //  instance
-    EXPECT_EQ(Instance, "abc");
-    EXPECT_EQ(OtherInstance, "");
-    EXPECT_EQ(Combined, "abc");
-    EXPECT_NE(Instance.c_str(), Combined.c_str());
+    EXPECT_EQ(instance, "abc");
+    EXPECT_EQ(otherInstance, "");
+    EXPECT_EQ(combined, "abc");
+    EXPECT_NE(instance.c_str(), combined.c_str());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferTest)
 {
-    String Instance = "abc";
-    String Combined = Instance + "defg";
+    String instance = "abc";
+    String combined = instance + "defg";
 
     // The original String instance should not be modified
-    EXPECT_EQ(Instance, "abc");
-    EXPECT_EQ(Combined, "abcdefg");
+    EXPECT_EQ(instance, "abc");
+    EXPECT_EQ(combined, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferNullptrTest)
 {
-    String Instance = "abc";
-    String Combined = Instance + (char*)nullptr;
+    String instance = "abc";
+    String combined = instance + (char*)nullptr;
 
     // Adding a null buffer should not throw and the result should not be the original String instance
-    EXPECT_EQ(Instance, "abc");
-    EXPECT_EQ(Combined, "abc");
-    EXPECT_NE(Instance.c_str(), Combined.c_str());
+    EXPECT_EQ(instance, "abc");
+    EXPECT_EQ(combined, "abc");
+    EXPECT_NE(instance.c_str(), combined.c_str());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentTest)
 {
-    String OtherInstance = "defg";
-    String Instance = "abc";
-    Instance += OtherInstance;
+    String otherInstance = "defg";
+    String instance = "abc";
+    instance += otherInstance;
 
     // The appended String instance should not be modified
-    EXPECT_EQ(OtherInstance, "defg");
-    EXPECT_EQ(Instance, "abcdefg");
+    EXPECT_EQ(otherInstance, "defg");
+    EXPECT_EQ(instance, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentEmptyTest)
 {
-    String OtherInstance;
-    String Instance = "abc";
-    Instance += OtherInstance;
+    String otherInstance;
+    String instance = "abc";
+    instance += otherInstance;
 
     // The appended String instance should not be modified
-    EXPECT_EQ(OtherInstance, "");
-    EXPECT_EQ(Instance, "abc");
+    EXPECT_EQ(otherInstance, "");
+    EXPECT_EQ(instance, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferTest)
 {
-    const char Buffer[] = "defg";
-    String Instance = "abc";
-    Instance += Buffer;
+    const char buffer[] = "defg";
+    String instance = "abc";
+    instance += buffer;
 
-    EXPECT_EQ(Instance, "abcdefg");
+    EXPECT_EQ(instance, "abcdefg");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferNullptrTest)
 {
-    String Instance = "abc";
-    Instance += (char*)nullptr;
+    String instance = "abc";
+    instance += (char*)nullptr;
 
     // Appending a null buffer should not throw
-    EXPECT_EQ(Instance, "abc");
+    EXPECT_EQ(instance, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimTest)
 {
-    String Instance = " \rabc\t\n  ";
-    String Trimmed = Instance.Trim();
+    String instance = " \rabc\t\n  ";
+    String trimmed = instance.Trim();
 
     // The original String instance should not be modified
-    EXPECT_EQ(Instance, " \rabc\t\n  ");
-    EXPECT_EQ(Trimmed, "abc");
+    EXPECT_EQ(instance, " \rabc\t\n  ");
+    EXPECT_EQ(trimmed, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimNoWhitespaceTest)
 {
-    String Instance = "abc";
-    String Trimmed = Instance.Trim();
+    String instance = "abc";
+    String trimmed = instance.Trim();
 
     // The original String buffer should not be the same as the trimmed String buffer
-    EXPECT_EQ(Instance, "abc");
-    EXPECT_EQ(Trimmed, "abc");
-    EXPECT_NE(Instance.c_str(), Trimmed.c_str());
+    EXPECT_EQ(instance, "abc");
+    EXPECT_EQ(trimmed, "abc");
+    EXPECT_NE(instance.c_str(), trimmed.c_str());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimAllWhitespaceTest)
 {
-    String Instance = "  \r\n\r\n\t";
-    String Trimmed = Instance.Trim();
+    String instance = "  \r\n\r\n\t";
+    String trimmed = instance.Trim();
 
     // The original String should not be modified
-    EXPECT_EQ(Instance, "  \r\n\r\n\t");
-    EXPECT_EQ(Trimmed, "");
+    EXPECT_EQ(instance, "  \r\n\r\n\t");
+    EXPECT_EQ(trimmed, "");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringToLowerTest)
 {
-    String Instance = "\nAbC! _76-WHAT-lol";
-    String Transformed = Instance.ToLower();
+    String instance = "\nAbC! _76-WHAT-lol";
+    String transformed = instance.ToLower();
 
     // The original String instance should not be modified
-    EXPECT_EQ(Instance, "\nAbC! _76-WHAT-lol");
-    EXPECT_EQ(Transformed, "\nabc! _76-what-lol");
+    EXPECT_EQ(instance, "\nAbC! _76-WHAT-lol");
+    EXPECT_EQ(transformed, "\nabc! _76-what-lol");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListTest)
 {
-    List<String> Parts = { "abc", "def", "ghi" };
-    String Instance = String::Join(Parts);
+    List<String> parts = { "abc", "def", "ghi" };
+    String instance = String::Join(parts);
 
-    EXPECT_EQ(Instance, "abcdefghi");
+    EXPECT_EQ(instance, "abcdefghi");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListEmptyTest)
 {
-    List<String> Parts(0);
-    String Instance = String::Join(Parts);
+    List<String> parts(0);
+    String instance = String::Join(parts);
 
-    EXPECT_EQ(Instance, "");
+    EXPECT_EQ(instance, "");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListSomeEmptyEntriesTest)
 {
-    List<String> Parts = { "abc", String(), String(static_cast<size_t>(0ULL)) };
-    String Instance = String::Join(Parts);
+    List<String> parts = { "abc", String(), String(static_cast<size_t>(0ULL)) };
+    String instance = String::Join(parts);
 
-    EXPECT_EQ(Instance, "abc");
+    EXPECT_EQ(instance, "abc");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTest)
 {
-    List<String> Parts = { "", String(), String(static_cast<size_t>(0ULL)) };
-    String Instance = String::Join(Parts);
+    List<String> parts = { "", String(), String(static_cast<size_t>(0ULL)) };
+    String instance = String::Join(parts);
 
-    EXPECT_EQ(Instance, "");
+    EXPECT_EQ(instance, "");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsTest)
 {
-    String Instance = "abc_def_ghi_jkl";
-    String Substring = "def_g";
+    String instance = "abc_def_ghi_jkl";
+    String substring = "def_g";
 
-    EXPECT_TRUE(Instance.Contains(Substring));
+    EXPECT_TRUE(instance.Contains(substring));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringNotFoundTest)
 {
-    String Instance = "abc_def_ghi_jkl";
-    String Substring = "xyz";
+    String instance = "abc_def_ghi_jkl";
+    String substring = "xyz";
 
-    EXPECT_FALSE(Instance.Contains(Substring));
+    EXPECT_FALSE(instance.Contains(substring));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringEmptyTest)
 {
-    String Instance = "abc_def_ghi_jkl";
-    String Substring = "";
+    String instance = "abc_def_ghi_jkl";
+    String substring = "";
 
-    EXPECT_FALSE(Instance.Contains(Substring));
+    EXPECT_FALSE(instance.Contains(substring));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringTooLongTest)
 {
-    String Instance = "abc_def_ghi_jkl";
-    String Substring = "abc_def_ghi_jkl_mno";
+    String instance = "abc_def_ghi_jkl";
+    String substring = "abc_def_ghi_jkl_mno";
 
-    EXPECT_FALSE(Instance.StartsWith(Substring));
+    EXPECT_FALSE(instance.StartsWith(substring));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithTest)
 {
-    String Instance = "Hello_World";
-    String Prefix = "Hello";
+    String instance = "Hello_World";
+    String prefix = "Hello";
 
-    EXPECT_TRUE(Instance.StartsWith(Prefix));
+    EXPECT_TRUE(instance.StartsWith(prefix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithEmptyPrefixTest)
 {
-    String Instance = "Hello_World";
-    String Prefix = "";
+    String instance = "Hello_World";
+    String prefix = "";
 
-    EXPECT_FALSE(Instance.StartsWith(Prefix));
+    EXPECT_FALSE(instance.StartsWith(prefix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithPrefixTooLongTest)
 {
-    String Instance = "Hello_World";
-    String Prefix = "Hello_Worldy";
+    String instance = "Hello_World";
+    String prefix = "Hello_Worldy";
 
-    EXPECT_FALSE(Instance.StartsWith(Prefix));
+    EXPECT_FALSE(instance.StartsWith(prefix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithTest)
 {
-    String Instance = "Hello_World";
-    String Postfix = "World";
+    String instance = "Hello_World";
+    String postfix = "World";
 
-    EXPECT_TRUE(Instance.EndsWith(Postfix));
+    EXPECT_TRUE(instance.EndsWith(postfix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithEmptyPostfixTest)
 {
-    String Instance = "Hello_World";
-    String Postfix = "";
+    String instance = "Hello_World";
+    String postfix = "";
 
-    EXPECT_FALSE(Instance.EndsWith(Postfix));
+    EXPECT_FALSE(instance.EndsWith(postfix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithPostfixTooLongTest)
 {
-    String Instance = "Hello_World";
-    String Postfix = "Hello_Worldy";
+    String instance = "Hello_World";
+    String postfix = "Hello_Worldy";
 
-    EXPECT_FALSE(Instance.EndsWith(Postfix));
+    EXPECT_FALSE(instance.EndsWith(postfix));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringTest)
 {
-    String Instance = "Believe you can and you're halfway there.";
-    size_t Offset = 8;
-    size_t Length = 7;
+    String instance = "Believe you can and you're halfway there.";
+    size_t offset = 8;
+    size_t length = 7;
 
-    EXPECT_EQ(Instance.SubString(Offset, Length), "you can");
+    EXPECT_EQ(instance.SubString(offset, length), "you can");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringInvalidOffsetTest)
 {
-    String Instance = "Believe you can and you're halfway there.";
-    size_t Offset = Instance.Length() + 1;
+    String instance = "Believe you can and you're halfway there.";
+    size_t offset = instance.Length() + 1;
 
-    EXPECT_EQ(Instance.SubString(Offset), "");
+    EXPECT_EQ(instance.SubString(offset), "");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringNoLengthTest)
 {
-    String Instance = "Believe you can and you're halfway there.";
-    size_t Offset = 8;
+    String instance = "Believe you can and you're halfway there.";
+    size_t offset = 8;
 
-    EXPECT_EQ(Instance.SubString(Offset), "you can and you're halfway there.");
+    EXPECT_EQ(instance.SubString(offset), "you can and you're halfway there.");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringInvalidLengthTest)
 {
-    String Instance = "Believe you can and you're halfway there.";
-    size_t Offset = 8;
-    size_t Length = Instance.Length() + 1;
+    String instance = "Believe you can and you're halfway there.";
+    size_t offset = 8;
+    size_t length = instance.Length() + 1;
 
-    EXPECT_EQ(Instance.SubString(Offset, Length), "you can and you're halfway there.");
+    EXPECT_EQ(instance.SubString(offset, length), "you can and you're halfway there.");
 }

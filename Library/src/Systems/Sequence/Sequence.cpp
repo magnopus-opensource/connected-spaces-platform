@@ -28,60 +28,60 @@ namespace chs = csp::services::generated::aggregationservice;
 
 namespace csp::systems
 {
-void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Sequence)
+void SequenceDtoToSequence(const chs::SequenceDto& dto, systems::Sequence& sequence)
 {
-    Sequence.Key = csp::common::Decode::URI(Dto.GetKey());
-    Sequence.ReferenceType = Dto.GetReferenceType();
-    Sequence.ReferenceId = Dto.GetReferenceId();
-    Sequence.Items = Convert(Dto.GetItems());
-    Sequence.MetaData = Convert(Dto.GetMetadata());
+    sequence.Key = csp::common::Decode::URI(dto.GetKey());
+    sequence.ReferenceType = dto.GetReferenceType();
+    sequence.ReferenceId = dto.GetReferenceId();
+    sequence.Items = Convert(dto.GetItems());
+    sequence.MetaData = Convert(dto.GetMetadata());
 }
 
-bool Sequence::operator==(const Sequence& Other) const
+bool Sequence::operator==(const Sequence& other) const
 {
-    return Key == Other.Key && ReferenceType == Other.ReferenceType && ReferenceId == Other.ReferenceId && Items == Other.Items
-        && MetaData == Other.MetaData;
+    return Key == other.Key && ReferenceType == other.ReferenceType && ReferenceId == other.ReferenceId && Items == other.Items
+        && MetaData == other.MetaData;
 }
 
-bool Sequence::operator!=(const Sequence& Other) const { return !(*this == Other); }
+bool Sequence::operator!=(const Sequence& other) const { return !(*this == other); }
 
-const Sequence& csp::systems::SequenceResult::GetSequence() const { return Sequence; }
+const Sequence& csp::systems::SequenceResult::GetSequence() const { return m_sequence; }
 
-void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SequenceResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* SequenceResponse = static_cast<chs::SequenceDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* sequenceResponse = static_cast<chs::SequenceDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        SequenceResponse->FromJson(Response->GetPayload().GetContent());
-        SequenceDtoToSequence(*SequenceResponse, Sequence);
+        sequenceResponse->FromJson(response->GetPayload().GetContent());
+        SequenceDtoToSequence(*sequenceResponse, m_sequence);
     }
 }
 
-const csp::common::Array<Sequence>& SequencesResult::GetSequences() const { return Sequences; }
+const csp::common::Array<Sequence>& SequencesResult::GetSequences() const { return m_sequences; }
 
-void SequencesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SequencesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* SequencesResponse = static_cast<csp::services::DtoArray<chs::SequenceDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* sequencesResponse = static_cast<csp::services::DtoArray<chs::SequenceDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        SequencesResponse->FromJson(Response->GetPayload().GetContent());
+        sequencesResponse->FromJson(response->GetPayload().GetContent());
 
-        const std::vector<chs::SequenceDto>& SequenceArray = SequencesResponse->GetArray();
-        Sequences = Array<systems::Sequence>(SequenceArray.size());
+        const std::vector<chs::SequenceDto>& sequenceArray = sequencesResponse->GetArray();
+        m_sequences = Array<systems::Sequence>(sequenceArray.size());
 
-        for (size_t i = 0; i < SequenceArray.size(); ++i)
+        for (size_t i = 0; i < sequenceArray.size(); ++i)
         {
-            SequenceDtoToSequence(SequenceArray[i], Sequences[i]);
+            SequenceDtoToSequence(sequenceArray[i], m_sequences[i]);
         }
     }
 }

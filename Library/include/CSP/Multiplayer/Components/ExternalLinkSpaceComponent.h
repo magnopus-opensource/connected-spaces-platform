@@ -61,52 +61,52 @@ public:
 
     /// @brief Creates an external link component that can be added to an existing space entity.
     /// @param Parent - The space entity to which this new component will belong to.
-    ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ExternalLinkSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the name of this external link component.
     [[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]] const csp::common::String& GetName() const;
     /// @brief Sets the name for this external link component.
     /// @param Value - The new name to assign to this external link componenent.
-    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& Value);
+    [[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]] void SetName(const csp::common::String& value);
 
     /// @brief Gets the URL address to which this external link component redirects the user on trigger.
     const csp::common::String& GetLinkUrl() const;
     /// @brief Sets the URL address to which this external link component redirects the user to on trigger.
     /// @param Value - The URL to be assigned to this external link component.
-    void SetLinkUrl(const csp::common::String& Value);
+    void SetLinkUrl(const csp::common::String& value);
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// @brief Gets the text that will be displayed by the component as hyperlink to the URL it redirects to.
     const csp::common::String& GetDisplayText() const;
     /// @brief Sets the text that will be displayed by the component as hyperlink to the URL it redirects to.
     /// @param Value - The new text to be displayed as hyperlink.
-    void SetDisplayText(const csp::common::String& Value);
+    void SetDisplayText(const csp::common::String& value);
 
     /// \addtogroup IEnableableComponent
     /// @{
     /// @copydoc IEnableableComponent::GetIsEnabled()
     bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -114,15 +114,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     virtual bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    virtual void SetIsVisible(bool InValue) override;
+    virtual void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     virtual bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    virtual void SetIsARVisible(bool InValue) override;
+    virtual void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     virtual bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    virtual void SetIsVirtualVisible(bool InValue) override;
+    virtual void SetIsVirtualVisible(bool inValue) override;
     /// @}
 };
 

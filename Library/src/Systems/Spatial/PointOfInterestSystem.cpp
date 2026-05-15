@@ -31,428 +31,428 @@ namespace csp::systems
 
 const char* ENGLISH_LANGUAGE_CODE = "EN";
 
-PointOfInterestSystem::PointOfInterestSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, &LogSystem)
-    , POIApiPtr(nullptr)
+PointOfInterestSystem::PointOfInterestSystem(csp::common::LogSystem& logSystem)
+    : SystemBase(nullptr, nullptr, &logSystem)
+    , m_poiApiPtr(nullptr)
 {
 }
 
-PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* inWebClient, csp::common::LogSystem& logSystem)
+    : SystemBase(inWebClient, nullptr, &logSystem)
 {
-    POIApiPtr = new chs::PointOfInterestApi(InWebClient);
+    m_poiApiPtr = new chs::PointOfInterestApi(inWebClient);
 }
 
-PointOfInterestSystem::~PointOfInterestSystem() { delete (POIApiPtr); }
+PointOfInterestSystem::~PointOfInterestSystem() { delete (m_poiApiPtr); }
 
-CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String& Title, const csp::common::String& Description,
-    const csp::common::String& Name, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, EPointOfInterestType /*Type*/,
-    const csp::common::String& Owner, const csp::systems::GeoLocation& Location, const AssetCollection& AssetCollection, POIResultCallback Callback)
+CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String& title, const csp::common::String& description,
+    const csp::common::String& name, const csp::common::Optional<csp::common::Array<csp::common::String>>& tags, EPointOfInterestType /*Type*/,
+    const csp::common::String& owner, const csp::systems::GeoLocation& location, const AssetCollection& assetCollection, POIResultCallback callback)
 {
-    auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
+    auto poiInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    chs::LocalizedString POITitle;
-    POITitle.SetValue(Title);
-    POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
-    std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
-    DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
-    POIInfo->SetTitle(DTOTitles);
+    chs::LocalizedString poiTitle;
+    poiTitle.SetValue(title);
+    poiTitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
+    std::vector<std::shared_ptr<chs::LocalizedString>> dtoTitles;
+    dtoTitles.push_back(std::make_shared<chs::LocalizedString>(poiTitle));
+    poiInfo->SetTitle(dtoTitles);
 
-    chs::LocalizedString POIDescription;
-    POIDescription.SetValue(Description);
-    POIDescription.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
-    std::vector<std::shared_ptr<chs::LocalizedString>> DTODescriptions;
-    DTODescriptions.push_back(std::make_shared<chs::LocalizedString>(POIDescription));
-    POIInfo->SetDescription(DTODescriptions);
+    chs::LocalizedString poiDescription;
+    poiDescription.SetValue(description);
+    poiDescription.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
+    std::vector<std::shared_ptr<chs::LocalizedString>> dtoDescriptions;
+    dtoDescriptions.push_back(std::make_shared<chs::LocalizedString>(poiDescription));
+    poiInfo->SetDescription(dtoDescriptions);
 
-    POIInfo->SetName(Name);
+    poiInfo->SetName(name);
 
-    if (Tags.HasValue())
+    if (tags.HasValue())
     {
-        std::vector<csp::common::String> DTOTags;
-        DTOTags.reserve(Tags->Size());
+        std::vector<csp::common::String> dtoTags;
+        dtoTags.reserve(tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); idx++)
+        for (size_t idx = 0; idx < tags->Size(); idx++)
         {
-            DTOTags.push_back((*Tags)[idx]);
+            dtoTags.push_back((*tags)[idx]);
         }
 
-        POIInfo->SetTags(DTOTags);
+        poiInfo->SetTags(dtoTags);
     }
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
-    POIInfo->SetType(TypeString);
+    const csp::common::String typeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    poiInfo->SetType(typeString);
 
-    POIInfo->SetOwner(Owner);
+    poiInfo->SetOwner(owner);
 
-    auto Coordinates = std::make_shared<chs::GeoCoord>();
-    Coordinates->SetLatitude(Location.Latitude);
-    Coordinates->SetLongitude(Location.Longitude);
-    POIInfo->SetLocation(Coordinates);
+    auto coordinates = std::make_shared<chs::GeoCoord>();
+    coordinates->SetLatitude(location.Latitude);
+    coordinates->SetLongitude(location.Longitude);
+    poiInfo->SetLocation(coordinates);
 
-    POIInfo->SetPrototypeName(AssetCollection.Id);
+    poiInfo->SetPrototypeName(assetCollection.Id);
 
-    csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<POIResultCallback, POIResult, void, chs::PointOfInterestDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr responseHandler = m_poiApiPtr->CreateHandler<POIResultCallback, POIResult, void, chs::PointOfInterestDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiPost({ poiInfo }, responseHandler);
 }
 
-void PointOfInterestSystem::DeletePOI(const PointOfInterest& POI, NullResultCallback Callback)
+void PointOfInterestSystem::DeletePOI(const PointOfInterest& poi, NullResultCallback callback)
 {
-    const csp::common::String POIId = POI.Id;
+    const csp::common::String poiId = poi.Id;
 
-    DeletePOIInternal(POIId, Callback);
+    DeletePOIInternal(poiId, callback);
 }
 
-void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius,
-    const csp::common::Optional<EPointOfInterestType>& Type, POICollectionResultCallback Callback)
+void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& originLocation, const double areaRadius,
+    const csp::common::Optional<EPointOfInterestType>& type, POICollectionResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = POIApiPtr->CreateHandler<POICollectionResultCallback, POICollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_poiApiPtr->CreateHandler<POICollectionResultCallback, POICollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     // If the user has provided a type of POI to search for, prepare the corresponding search term string.
     // Otherwise, leave the term as null, to search for all POI types.
-    std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
-    if (Type.HasValue())
+    std::optional<csp::services::utility::string_t> typeOption = std::nullopt;
+    if (type.HasValue())
     {
-        TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
+        typeOption = PointOfInterestHelpers::TypeToString(*type).c_str();
     }
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
-        { std::nullopt, std::nullopt, TypeOption, std::nullopt, std::nullopt, std::nullopt, OriginLocation.Longitude, OriginLocation.Latitude,
-            AreaRadius, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiGet(
+        { std::nullopt, std::nullopt, typeOption, std::nullopt, std::nullopt, std::nullopt, originLocation.Longitude, originLocation.Latitude,
+            areaRadius, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
             std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt },
-        ResponseHandler);
+        responseHandler);
 }
 
-CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteResultCallback Callback)
+CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& site, SiteResultCallback callback)
 {
-    auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
+    auto poiInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    chs::LocalizedString POITitle;
-    POITitle.SetValue(Site.Name);
-    POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
-    std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
-    DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
-    POIInfo->SetTitle(DTOTitles);
+    chs::LocalizedString poiTitle;
+    poiTitle.SetValue(site.Name);
+    poiTitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
+    std::vector<std::shared_ptr<chs::LocalizedString>> dtoTitles;
+    dtoTitles.push_back(std::make_shared<chs::LocalizedString>(poiTitle));
+    poiInfo->SetTitle(dtoTitles);
 
     // the POI Name needs to be unique
-    csp::common::String uniqueName = Site.Name;
+    csp::common::String uniqueName = site.Name;
     uniqueName.Append("_");
-    uniqueName.Append(Site.SpaceId);
-    POIInfo->SetName(uniqueName);
+    uniqueName.Append(site.SpaceId);
+    poiInfo->SetName(uniqueName);
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
-    POIInfo->SetType(TypeString);
+    const csp::common::String typeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    poiInfo->SetType(typeString);
 
-    POIInfo->SetOwner(Site.SpaceId);
+    poiInfo->SetOwner(site.SpaceId);
 
-    auto Coordinates = std::make_shared<chs::GeoCoord>();
-    Coordinates->SetLatitude(Site.Location.Latitude);
-    Coordinates->SetLongitude(Site.Location.Longitude);
-    POIInfo->SetLocation(Coordinates);
+    auto coordinates = std::make_shared<chs::GeoCoord>();
+    coordinates->SetLatitude(site.Location.Latitude);
+    coordinates->SetLongitude(site.Location.Longitude);
+    poiInfo->SetLocation(coordinates);
 
-    auto DTOSiteTransform = std::make_shared<chs::Transform>();
-    auto DTOSiteRotation = std::make_shared<chs::Rotation>();
-    DTOSiteRotation->SetX(static_cast<float>(Site.Rotation.X));
-    DTOSiteRotation->SetY(static_cast<float>(Site.Rotation.Y));
-    DTOSiteRotation->SetZ(static_cast<float>(Site.Rotation.Z));
-    DTOSiteRotation->SetW(static_cast<float>(Site.Rotation.W));
-    DTOSiteTransform->SetRotation(DTOSiteRotation);
-    POIInfo->SetPrototypeTransform(DTOSiteTransform);
+    auto dtoSiteTransform = std::make_shared<chs::Transform>();
+    auto dtoSiteRotation = std::make_shared<chs::Rotation>();
+    dtoSiteRotation->SetX(static_cast<float>(site.Rotation.X));
+    dtoSiteRotation->SetY(static_cast<float>(site.Rotation.Y));
+    dtoSiteRotation->SetZ(static_cast<float>(site.Rotation.Z));
+    dtoSiteRotation->SetW(static_cast<float>(site.Rotation.W));
+    dtoSiteTransform->SetRotation(dtoSiteRotation);
+    poiInfo->SetPrototypeTransform(dtoSiteTransform);
 
-    POIInfo->SetGroupId(Site.SpaceId);
+    poiInfo->SetGroupId(site.SpaceId);
 
-    csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<SiteResultCallback, SiteResult, void, chs::PointOfInterestDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr responseHandler = m_poiApiPtr->CreateHandler<SiteResultCallback, SiteResult, void, chs::PointOfInterestDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiPost({ poiInfo }, responseHandler);
 }
 
-void PointOfInterestSystem::DeleteSite(const Site& Site, NullResultCallback Callback) { DeletePOIInternal(Site.Id, Callback); }
+void PointOfInterestSystem::DeleteSite(const Site& site, NullResultCallback callback) { DeletePOIInternal(site.Id, callback); }
 
-void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback)
+void PointOfInterestSystem::GetSites(const csp::common::String& spaceId, SitesCollectionResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = POIApiPtr->CreateHandler<SitesCollectionResultCallback, SitesCollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_poiApiPtr->CreateHandler<SitesCollectionResultCallback, SitesCollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    std::vector<csp::common::String> SpaceID({ SpaceId });
+    std::vector<csp::common::String> spaceIds({ spaceId });
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiGet(
         { std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
             std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, SpaceID, std::nullopt, std::nullopt },
-        ResponseHandler);
+            std::nullopt, std::nullopt, std::nullopt, spaceIds, std::nullopt, std::nullopt },
+        responseHandler);
 }
 
-void PointOfInterestSystem::DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback)
+void PointOfInterestSystem::DeletePOIInternal(const csp::common::String poiId, NullResultCallback callback)
 {
-    csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+    csp::services::ResponseHandlerPtr responseHandler = m_poiApiPtr->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdDelete({ POIId }, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiIdDelete({ poiId }, responseHandler);
 }
 
-void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
-    const csp::common::Optional<float>& Orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-    SpaceGeoLocationResultCallback Callback)
+void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::Optional<GeoLocation>& location,
+    const csp::common::Optional<float>& orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence,
+    SpaceGeoLocationResultCallback callback)
 {
-    auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
+    auto poiInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
-    POIInfo->SetType(TypeString);
+    const csp::common::String typeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    poiInfo->SetType(typeString);
 
-    chs::LocalizedString POITitle;
-    POITitle.SetValue(TypeString);
-    POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
-    std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
-    DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
-    POIInfo->SetTitle(DTOTitles);
+    chs::LocalizedString poiTitle;
+    poiTitle.SetValue(typeString);
+    poiTitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
+    std::vector<std::shared_ptr<chs::LocalizedString>> dtoTitles;
+    dtoTitles.push_back(std::make_shared<chs::LocalizedString>(poiTitle));
+    poiInfo->SetTitle(dtoTitles);
 
     // the POI Name needs to be unique
-    csp::common::String uniqueName = TypeString;
+    csp::common::String uniqueName = typeString;
     uniqueName.Append("_");
-    uniqueName.Append(SpaceId);
-    POIInfo->SetName(uniqueName);
+    uniqueName.Append(spaceId);
+    poiInfo->SetName(uniqueName);
 
-    POIInfo->SetGroupId(SpaceId);
+    poiInfo->SetGroupId(spaceId);
 
-    if (Location.HasValue())
+    if (location.HasValue())
     {
-        if (!Location->IsValid())
+        if (!location->IsValid())
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
+            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", location->Latitude, location->Longitude);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        auto Coordinates = std::make_shared<chs::GeoCoord>();
-        Coordinates->SetLatitude(Location->Latitude);
-        Coordinates->SetLongitude(Location->Longitude);
-        POIInfo->SetLocation(Coordinates);
+        auto coordinates = std::make_shared<chs::GeoCoord>();
+        coordinates->SetLatitude(location->Latitude);
+        coordinates->SetLongitude(location->Longitude);
+        poiInfo->SetLocation(coordinates);
     }
 
-    if (Orientation.HasValue())
+    if (orientation.HasValue())
     {
-        if (*Orientation < 0.0f || *Orientation > 360.0f)
+        if (*orientation < 0.0f || *orientation > 360.0f)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *orientation);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        POIInfo->SetOrientation(*Orientation);
+        poiInfo->SetOrientation(*orientation);
     }
 
-    if (GeoFence.HasValue())
+    if (geoFence.HasValue())
     {
-        const auto Size = GeoFence->Size();
-        if (Size < 4)
+        const auto size = geoFence->Size();
+        if (size < 4)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", size);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
+        if (geoFence->operator[](0) != geoFence->operator[](size - 1))
         {
             CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        std::vector<std::shared_ptr<chs::GeoCoord>> GeoCoords(GeoFence->Size());
+        std::vector<std::shared_ptr<chs::GeoCoord>> geoCoords(geoFence->Size());
 
-        for (size_t i = 0; i < Size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
-            const auto& GeoFenceLocation = GeoFence->operator[](i);
+            const auto& geoFenceLocation = geoFence->operator[](i);
 
-            if (!GeoFenceLocation.IsValid())
+            if (!geoFenceLocation.IsValid())
             {
-                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
-                    GeoFenceLocation.Longitude);
+                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", geoFenceLocation.Latitude,
+                    geoFenceLocation.Longitude);
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
                 return;
             }
 
-            auto GeoCoord = std::make_shared<chs::GeoCoord>();
-            GeoCoord->SetLatitude(GeoFenceLocation.Latitude);
-            GeoCoord->SetLongitude(GeoFenceLocation.Longitude);
-            GeoCoords[i] = GeoCoord;
+            auto geoCoord = std::make_shared<chs::GeoCoord>();
+            geoCoord->SetLatitude(geoFenceLocation.Latitude);
+            geoCoord->SetLongitude(geoFenceLocation.Longitude);
+            geoCoords[i] = geoCoord;
         }
 
-        POIInfo->SetGeofence(GeoCoords);
+        poiInfo->SetGeofence(geoCoords);
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_poiApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiPost({ poiInfo }, responseHandler);
 }
 
-void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::String& SpaceGeoLocationId,
-    const csp::common::Optional<GeoLocation>& Location, const csp::common::Optional<float>& Orientation,
-    const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence, SpaceGeoLocationResultCallback Callback)
+void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& spaceId, const csp::common::String& spaceGeoLocationId,
+    const csp::common::Optional<GeoLocation>& location, const csp::common::Optional<float>& orientation,
+    const csp::common::Optional<csp::common::Array<GeoLocation>>& geoFence, SpaceGeoLocationResultCallback callback)
 {
-    auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
+    auto poiInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
-    POIInfo->SetType(TypeString);
+    const csp::common::String typeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    poiInfo->SetType(typeString);
 
-    chs::LocalizedString POITitle;
-    POITitle.SetValue(TypeString);
-    POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
-    std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
-    DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
-    POIInfo->SetTitle(DTOTitles);
+    chs::LocalizedString poiTitle;
+    poiTitle.SetValue(typeString);
+    poiTitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
+    std::vector<std::shared_ptr<chs::LocalizedString>> dtoTitles;
+    dtoTitles.push_back(std::make_shared<chs::LocalizedString>(poiTitle));
+    poiInfo->SetTitle(dtoTitles);
 
     // the POI Name needs to be unique
-    csp::common::String uniqueName = TypeString;
+    csp::common::String uniqueName = typeString;
     uniqueName.Append("_");
-    uniqueName.Append(SpaceId);
-    POIInfo->SetName(uniqueName);
+    uniqueName.Append(spaceId);
+    poiInfo->SetName(uniqueName);
 
-    POIInfo->SetGroupId(SpaceId);
+    poiInfo->SetGroupId(spaceId);
 
-    if (Location.HasValue())
+    if (location.HasValue())
     {
-        if (!Location->IsValid())
+        if (!location->IsValid())
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
+            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", location->Latitude, location->Longitude);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        auto Coordinates = std::make_shared<chs::GeoCoord>();
-        Coordinates->SetLatitude(Location->Latitude);
-        Coordinates->SetLongitude(Location->Longitude);
-        POIInfo->SetLocation(Coordinates);
+        auto coordinates = std::make_shared<chs::GeoCoord>();
+        coordinates->SetLatitude(location->Latitude);
+        coordinates->SetLongitude(location->Longitude);
+        poiInfo->SetLocation(coordinates);
     }
 
-    if (Orientation.HasValue())
+    if (orientation.HasValue())
     {
-        if (*Orientation < 0.0f || *Orientation > 360.0f)
+        if (*orientation < 0.0f || *orientation > 360.0f)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *orientation);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        POIInfo->SetOrientation(*Orientation);
+        poiInfo->SetOrientation(*orientation);
     }
 
-    if (GeoFence.HasValue())
+    if (geoFence.HasValue())
     {
-        const auto Size = GeoFence->Size();
+        const auto size = geoFence->Size();
 
-        if (Size < 4)
+        if (size < 4)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", size);
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
+        if (geoFence->operator[](0) != geoFence->operator[](size - 1))
         {
             CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+            INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
             return;
         }
 
-        std::vector<std::shared_ptr<chs::GeoCoord>> GeoCoords(GeoFence->Size());
+        std::vector<std::shared_ptr<chs::GeoCoord>> geoCoords(geoFence->Size());
 
-        for (size_t i = 0; i < GeoFence->Size(); ++i)
+        for (size_t i = 0; i < geoFence->Size(); ++i)
         {
-            const auto GeoFenceLocation = GeoFence->operator[](i);
+            const auto geoFenceLocation = geoFence->operator[](i);
 
-            if (!GeoFenceLocation.IsValid())
+            if (!geoFenceLocation.IsValid())
             {
-                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
-                    GeoFenceLocation.Longitude);
+                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", geoFenceLocation.Latitude,
+                    geoFenceLocation.Longitude);
 
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
+                INVOKE_IF_NOT_NULL(callback, MakeInvalid<SpaceGeoLocationResult>());
 
                 return;
             }
 
-            auto GeoCoord = std::make_shared<chs::GeoCoord>();
-            GeoCoord->SetLatitude(GeoFenceLocation.Latitude);
-            GeoCoord->SetLongitude(GeoFenceLocation.Longitude);
-            GeoCoords[i] = GeoCoord;
+            auto geoCoord = std::make_shared<chs::GeoCoord>();
+            geoCoord->SetLatitude(geoFenceLocation.Latitude);
+            geoCoord->SetLongitude(geoFenceLocation.Longitude);
+            geoCoords[i] = geoCoord;
         }
 
-        POIInfo->SetGeofence(GeoCoords);
+        poiInfo->SetGeofence(geoCoords);
     }
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_poiApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
+            callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdPut({ SpaceGeoLocationId, POIInfo }, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiIdPut({ spaceGeoLocationId, poiInfo }, responseHandler);
 }
 
-void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
+void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& spaceId, SpaceGeoLocationResultCallback callback)
 {
-    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String spacePoiType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
 
-    std::vector<csp::common::String> SpaceIds({ SpaceId });
+    std::vector<csp::common::String> spaceIds({ spaceId });
 
-    auto Limit = 1;
+    auto limit = 1;
 
-    SpaceGeoLocationCollectionResultCallback CollectionCallback = [=](const SpaceGeoLocationCollectionResult Result)
+    SpaceGeoLocationCollectionResultCallback collectionCallback = [=](const SpaceGeoLocationCollectionResult result)
     {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        if (result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        SpaceGeoLocationResult GeoLocationResult(Result.GetResultCode(), Result.GetHttpResultCode());
+        SpaceGeoLocationResult geoLocationResult(result.GetResultCode(), result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success && !Result.GeoLocations.IsEmpty())
+        if (result.GetResultCode() == csp::systems::EResultCode::Success && !result.m_geoLocations.IsEmpty())
         {
-            GeoLocationResult.GeoLocation = Result.GeoLocations[0];
-            GeoLocationResult.HasGeoLocation = true;
+            geoLocationResult.m_geoLocation = result.m_geoLocations[0];
+            geoLocationResult.m_hasGeoLocation = true;
         }
 
-        INVOKE_IF_NOT_NULL(Callback, GeoLocationResult);
+        INVOKE_IF_NOT_NULL(callback, geoLocationResult);
     };
 
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = POIApiPtr->CreateHandler<SpaceGeoLocationCollectionResultCallback, SpaceGeoLocationCollectionResult, void,
-            csp::services::DtoArray<chs::PointOfInterestDto>>(CollectionCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
+    csp::services::ResponseHandlerPtr responseHandler
+        = m_poiApiPtr->CreateHandler<SpaceGeoLocationCollectionResultCallback, SpaceGeoLocationCollectionResult, void,
+            csp::services::DtoArray<chs::PointOfInterestDto>>(collectionCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
-        { std::nullopt, std::nullopt, SpacePOIType, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+    static_cast<chs::PointOfInterestApi*>(m_poiApiPtr)->poiGet(
+        { std::nullopt, std::nullopt, spacePoiType, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
             std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, SpaceIds, std::nullopt, Limit },
-        ResponseHandler);
+            std::nullopt, std::nullopt, std::nullopt, spaceIds, std::nullopt, limit },
+        responseHandler);
 }
 
-void PointOfInterestSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceGeoLocationId, NullResultCallback Callback)
+void PointOfInterestSystem::DeleteSpaceGeoLocation(const csp::common::String& spaceGeoLocationId, NullResultCallback callback)
 {
-    DeletePOIInternal(SpaceGeoLocationId, Callback);
+    DeletePOIInternal(spaceGeoLocationId, callback);
 }
 
 } // namespace csp::systems

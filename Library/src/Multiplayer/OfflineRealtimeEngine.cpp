@@ -40,27 +40,27 @@ namespace csp::multiplayer
 class OfflineSpaceEntityEventHandler : public csp::events::EventListener
 {
 public:
-    OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* EntitySystem);
+    OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* entitySystem);
 
-    void OnEvent(const csp::events::Event& InEvent) override;
+    void OnEvent(const csp::events::Event& inEvent) override;
 
 private:
-    OfflineRealtimeEngine* EntitySystem;
-    std::chrono::system_clock::time_point LastTickTime;
+    OfflineRealtimeEngine* m_entitySystem;
+    std::chrono::system_clock::time_point m_lastTickTime;
 };
 
-OfflineSpaceEntityEventHandler::OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* EntitySystem)
-    : EntitySystem(EntitySystem)
-    , LastTickTime(std::chrono::system_clock::now())
+OfflineSpaceEntityEventHandler::OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* entitySystem)
+    : m_entitySystem(entitySystem)
+    , m_lastTickTime(std::chrono::system_clock::now())
 {
 }
 
-void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
+void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& inEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
+    if (inEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
-            EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(), *EntitySystem->GetAllEntities(), LastTickTime, nullptr);
+        m_lastTickTime = RealtimeEngineUtils::TickEntityScripts(
+            m_entitySystem->GetEntitiesLock(), m_entitySystem->GetRealtimeEngineType(), *m_entitySystem->GetAllEntities(), m_lastTickTime, nullptr);
     }
 }
 
@@ -85,240 +85,240 @@ namespace
 }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
-    const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
+    const CSPSceneDescription& sceneDescription, csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner)
+    : OfflineRealtimeEngine(logSystem, remoteScriptRunner)
 {
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(m_entitiesLock);
 
-    auto DeserializedEntities = SceneDescription.CreateEntities(*this, LogSystem, RemoteScriptRunner);
+    auto deserializedEntities = sceneDescription.CreateEntities(*this, logSystem, remoteScriptRunner);
 
-    for (size_t i = 0; i < DeserializedEntities.Size(); ++i)
+    for (size_t i = 0; i < deserializedEntities.Size(); ++i)
     {
-        AddEntity(DeserializedEntities[i]);
+        AddEntity(deserializedEntities[i]);
     }
 
     // Needs to be after all the adds, we normally assume any entity add must parent to an existing entity,
     // but because we load all at once, not here.
     // This smells a bit, why must this be different compared to loading Online state?
-    for (SpaceEntity* Entity : *GetAllEntities())
+    for (SpaceEntity* entity : *GetAllEntities())
     {
-        ResolveEntityHierarchy(Entity);
+        ResolveEntityHierarchy(entity);
     }
 }
 
-OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, {})
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner)
+    : OfflineRealtimeEngine(logSystem, remoteScriptRunner, {})
 {
 }
 
-OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
-    const csp::common::Array<ComponentSchema>& AdditionalComponents)
-    : LogSystem { &LogSystem }
-    , ScriptRunner { &RemoteScriptRunner }
-    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& logSystem, csp::common::IJSScriptRunner& remoteScriptRunner,
+    const csp::common::Array<ComponentSchema>& additionalComponents)
+    : m_logSystem { &logSystem }
+    , m_scriptRunner { &remoteScriptRunner }
+    , m_componentRegistry { MergeWithLegacyComponents(additionalComponents) }
 {
-    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
+    m_scriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->m_logSystem, *this->m_scriptRunner));
 
     // Is this undefined behaviour? Probably only if we actually use the pointer during construction
-    EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
+    m_eventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
 
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler.get());
 }
 
 OfflineRealtimeEngine::~OfflineRealtimeEngine()
 {
-    EntityScriptBinding::RemoveBinding(ScriptBinding.get(), *ScriptRunner);
+    EntityScriptBinding::RemoveBinding(m_scriptBinding.get(), *m_scriptRunner);
 
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, m_eventHandler.get());
 }
 
-void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-    const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, csp::multiplayer::AvatarState State, const csp::common::String& AvatarId,
-    csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
-    csp::multiplayer::EntityCreatedCallback Callback)
+void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::String& name, const csp::common::String& userId,
+    const csp::multiplayer::SpaceTransform& transform, bool isVisible, csp::multiplayer::AvatarState state, const csp::common::String& avatarId,
+    csp::multiplayer::AvatarPlayMode avatarPlayMode, csp::multiplayer::LocomotionModel locomotionModel,
+    csp::multiplayer::EntityCreatedCallback callback)
 {
     // Some of our interfaces use int64_t ... real bugs here.
-    const uint64_t Id = NextId();
+    const uint64_t id = NextId();
 
-    auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(
-        UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode, LocomotionModel);
+    auto newAvatar = RealtimeEngineUtils::BuildNewAvatar(
+        userId, *this, *m_scriptRunner, *m_logSystem, id, name, transform, isVisible, 0, false, false, avatarId, state, avatarPlayMode, locomotionModel);
 
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(m_entitiesLock);
 
-    Entities.Append(NewAvatar.get());
-    Avatars.Append(NewAvatar.get());
+    m_entities.Append(newAvatar.get());
+    m_avatars.Append(newAvatar.get());
 
-    Callback(NewAvatar.release());
+    callback(newAvatar.release());
 }
 
-void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+void OfflineRealtimeEngine::CreateEntity(const csp::common::String& name, const csp::multiplayer::SpaceTransform& transform,
+    const csp::common::Optional<uint64_t>& parentId, csp::multiplayer::EntityCreatedCallback callback)
 {
     // Some of our interfaces use int64_t ... real bugs here.
-    uint64_t Id = NextId();
+    uint64_t id = NextId();
 
-    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
-        OfflineRealtimeEngine::LocalClientId(), ParentID, false, false };
+    auto* newEntity = new SpaceEntity { this, *m_scriptRunner, m_logSystem, SpaceEntityType::Object, id, name, transform,
+        OfflineRealtimeEngine::LocalClientId(), parentId, false, false };
 
-    std::scoped_lock EntitiesLocker { EntitiesLock };
+    std::scoped_lock entitiesLocker { m_entitiesLock };
 
-    ResolveEntityHierarchy(NewEntity);
+    ResolveEntityHierarchy(newEntity);
 
-    Entities.Append(NewEntity);
-    Objects.Append(NewEntity);
+    m_entities.Append(newEntity);
+    m_objects.Append(newEntity);
 
-    Callback(NewEntity);
+    callback(newEntity);
 }
 
-void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
+void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* entity, csp::multiplayer::CallbackHandler callback)
 {
-    if (!Entities.Contains(Entity))
+    if (!m_entities.Contains(entity))
     {
-        LogSystem->LogMsg(
-            csp::common::LogLevel::Warning, fmt::format("Attempting to delete unknown Entity `{}`. Aborting operation.", Entity->GetName()).c_str());
-        Callback(false);
+        m_logSystem->LogMsg(
+            csp::common::LogLevel::Warning, fmt::format("Attempting to delete unknown Entity `{}`. Aborting operation.", entity->GetName()).c_str());
+        callback(false);
         return;
     }
 
-    csp::common::List<csp::multiplayer::SpaceEntity*>& AvatarOrObjectList = Entity->GetEntityType() == SpaceEntityType::Avatar ? Avatars : Objects;
-    if (!AvatarOrObjectList.Contains(Entity))
+    csp::common::List<csp::multiplayer::SpaceEntity*>& avatarOrObjectList = entity->GetEntityType() == SpaceEntityType::Avatar ? m_avatars : m_objects;
+    if (!avatarOrObjectList.Contains(entity))
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Fatal,
-            fmt::format("Entity `{}` is not in the expected Avatar/Object container. Aborting operation.", Entity->GetName()).c_str());
-        Callback(false);
+        m_logSystem->LogMsg(csp::common::LogLevel::Fatal,
+            fmt::format("Entity `{}` is not in the expected Avatar/Object container. Aborting operation.", entity->GetName()).c_str());
+        callback(false);
         return;
     }
 
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(m_entitiesLock);
 
     // At time of writing, the only reason to do this is to call cleanup behaviour in ConversationSpaceComponent.
     // This feels like an unfortunate pattern break and an unnecesary concept (OnLocalDelete). An opportunity to
     // refactor. This also happens in OnlineRealtimeEngine.
-    auto EntityComponents = Entity->GetComponents();
+    auto entityComponents = entity->GetComponents();
 
-    using KeysType = std::remove_pointer_t<decltype(EntityComponents)>::MapType::key_type;
-    std::unique_ptr<const csp::common::Array<KeysType>> Keys(EntityComponents->Keys());
+    using KeysType = std::remove_pointer_t<decltype(entityComponents)>::MapType::key_type;
+    std::unique_ptr<const csp::common::Array<KeysType>> keys(entityComponents->Keys());
 
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (size_t i = 0; i < keys->Size(); ++i)
     {
-        auto EntityComponent = Entity->GetComponent((*Keys)[i]);
-        EntityComponent->OnLocalDelete();
+        auto entityComponent = entity->GetComponent((*keys)[i]);
+        entityComponent->OnLocalDelete();
     }
 
     // We want to do heirarchy changes before destroy notification, there _seems_ to be some assertion that this is a platform requirement, although
     // I'm personally dubious. Nonetheless, we have tests that assert this ordering.
-    RootHierarchyEntities.RemoveItem(Entity);
-    RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
+    m_rootHierarchyEntities.RemoveItem(entity);
+    RealtimeEngineUtils::LocalProcessChildUpdates(*this, m_rootHierarchyEntities, entity);
 
-    if (Entity->GetEntityDestroyCallback() != nullptr)
+    if (entity->GetEntityDestroyCallback() != nullptr)
     {
-        Entity->GetEntityDestroyCallback()(true);
+        entity->GetEntityDestroyCallback()(true);
     }
 
-    AvatarOrObjectList.RemoveItem(Entity);
-    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, Entity);
-    Entities.RemoveItem(Entity);
+    avatarOrObjectList.RemoveItem(entity);
+    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, m_rootHierarchyEntities, entity);
+    m_entities.RemoveItem(entity);
 
-    delete (Entity);
+    delete (entity);
 
-    Callback(true);
+    callback(true);
 }
 
-bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* entity)
 {
-    if (Entity == nullptr)
+    if (entity == nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity to selected entities. Aborting operation.");
+        m_logSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity to selected entities. Aborting operation.");
         return false;
     }
 
-    if (!SelectedEntities.Contains(Entity))
+    if (!m_selectedEntities.Contains(entity))
     {
-        SelectedEntities.Append(Entity);
+        m_selectedEntities.Append(entity);
         return true;
     }
     return false;
 }
 
-bool OfflineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+bool OfflineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* entity)
 {
-    if (Entity == nullptr)
+    if (entity == nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to remove null entity from selected entities. Aborting operation.");
+        m_logSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to remove null entity from selected entities. Aborting operation.");
         return false;
     }
 
-    if (SelectedEntities.Contains(Entity))
+    if (m_selectedEntities.Contains(entity))
     {
-        SelectedEntities.RemoveItem(Entity);
+        m_selectedEntities.RemoveItem(entity);
         return true;
     }
     return false;
 }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntity(const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntity(const csp::common::String& name)
 {
-    return RealtimeEngineUtils::FindSpaceEntity(*this, Name);
+    return RealtimeEngineUtils::FindSpaceEntity(*this, name);
 }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntityById(uint64_t entityId)
 {
-    return RealtimeEngineUtils::FindSpaceEntityById(*this, EntityId);
+    return RealtimeEngineUtils::FindSpaceEntityById(*this, entityId);
 }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceAvatar(const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceAvatar(const csp::common::String& name)
 {
-    return RealtimeEngineUtils::FindSpaceAvatar(*this, Name);
+    return RealtimeEngineUtils::FindSpaceAvatar(*this, name);
 }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceObject(const csp::common::String& Name)
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceObject(const csp::common::String& name)
 {
-    return RealtimeEngineUtils::FindSpaceObject(*this, Name);
+    return RealtimeEngineUtils::FindSpaceObject(*this, name);
 }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetEntityByIndex(size_t EntityIndex) { return Entities[EntityIndex]; }
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetEntityByIndex(size_t entityIndex) { return m_entities[entityIndex]; }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetAvatarByIndex(size_t AvatarIndex) { return Avatars[AvatarIndex]; }
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetAvatarByIndex(size_t avatarIndex) { return m_avatars[avatarIndex]; }
 
-csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetObjectByIndex(size_t ObjectIndex) { return Objects[ObjectIndex]; }
+csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetObjectByIndex(size_t objectIndex) { return m_objects[objectIndex]; }
 
-const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetAllEntities() const { return &Entities; }
+const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetAllEntities() const { return &m_entities; }
 
-size_t OfflineRealtimeEngine::GetNumEntities() const { return Entities.Size(); }
+size_t OfflineRealtimeEngine::GetNumEntities() const { return m_entities.Size(); }
 
-size_t OfflineRealtimeEngine::GetNumAvatars() const { return Avatars.Size(); }
+size_t OfflineRealtimeEngine::GetNumAvatars() const { return m_avatars.Size(); }
 
-size_t OfflineRealtimeEngine::GetNumObjects() const { return Objects.Size(); }
+size_t OfflineRealtimeEngine::GetNumObjects() const { return m_objects.Size(); }
 
-const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetRootHierarchyEntities() const { return &m_rootHierarchyEntities; }
 
-void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* entity)
 {
-    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+    RealtimeEngineUtils::ResolveEntityHierarchy(*this, m_rootHierarchyEntities, entity);
 }
 
-void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback Callback)
+void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback callback)
 {
     // Entities are populated in the constructor, so can immediately call back.
-    Callback();
+    callback();
 
-    RealtimeEngineUtils::InitialiseEntityScripts(Entities);
-    RealtimeEngineUtils::DetermineScriptOwners(Entities, OfflineRealtimeEngine::LocalClientId());
+    RealtimeEngineUtils::InitialiseEntityScripts(m_entities);
+    RealtimeEngineUtils::DetermineScriptOwners(m_entities, OfflineRealtimeEngine::LocalClientId());
 
-    EntityFetchCompleteCallback(static_cast<uint32_t>(Entities.Size()));
+    m_entityFetchCompleteCallback(static_cast<uint32_t>(m_entities.Size()));
 }
 
-void OfflineRealtimeEngine::LockEntityUpdate() { return EntitiesLock.lock(); }
+void OfflineRealtimeEngine::LockEntityUpdate() { return m_entitiesLock.lock(); }
 
-bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock(); }
+bool OfflineRealtimeEngine::TryLockEntityUpdate() { return m_entitiesLock.try_lock(); }
 
-void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
+void OfflineRealtimeEngine::UnlockEntityUpdate() { m_entitiesLock.unlock(); }
 
 SpaceEntityStatePatcher* OfflineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& /*SpaceEntity*/) const { return nullptr; }
 
-ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* spaceEntity) const
 {
-    if (SpaceEntity->GetLockType() == LockType::UserAgnostic)
+    if (spaceEntity->GetLockType() == LockType::UserAgnostic)
     {
         return ModifiableStatus::EntityLocked;
     }
@@ -328,40 +328,40 @@ ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
     }
 }
 
-const csp::multiplayer::ComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
+const csp::multiplayer::ComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return &m_componentRegistry; }
 
-std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
+std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return m_entitiesLock; }
 
 uint64_t OfflineRealtimeEngine::LocalClientId() { return csp::common::LocalClientID; }
 
-void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
+void OfflineRealtimeEngine::AddEntity(SpaceEntity* entityToAdd)
 {
-    if (EntityToAdd == nullptr)
+    if (entityToAdd == nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity. Aborting operation.");
+        m_logSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity. Aborting operation.");
         return;
     }
 
-    std::scoped_lock EntitiesLocker(EntitiesLock);
+    std::scoped_lock entitiesLocker(m_entitiesLock);
 
-    if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
+    if (FindSpaceEntityById(entityToAdd->GetId()) == nullptr)
     {
-        Entities.Append(EntityToAdd);
+        m_entities.Append(entityToAdd);
 
-        switch (EntityToAdd->GetEntityType())
+        switch (entityToAdd->GetEntityType())
         {
         case SpaceEntityType::Avatar:
-            Avatars.Append(EntityToAdd);
+            m_avatars.Append(entityToAdd);
             break;
 
         case SpaceEntityType::Object:
-            Objects.Append(EntityToAdd);
+            m_objects.Append(entityToAdd);
             break;
         }
     }
     else
     {
-        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add an entity already known to the RealtimeEngine. Aborting operation.");
+        m_logSystem->LogMsg(common::LogLevel::Error, "Attempted to add an entity already known to the RealtimeEngine. Aborting operation.");
     }
 }
 }

@@ -20,20 +20,20 @@ namespace csp::services
 
 utility::string_t DtoBase::ToJson() const
 {
-    utility::string_t Empty;
-    return Empty;
+    utility::string_t empty;
+    return empty;
 }
 
 utility::string_t EnumBase::ToJson() const
 {
-    utility::string_t Empty;
-    return Empty;
+    utility::string_t empty;
+    return empty;
 }
 
 utility::string_t NullDto::ToJson() const
 {
-    utility::string_t Empty;
-    return Empty;
+    utility::string_t empty;
+    return empty;
 }
 
 } // namespace csp::services

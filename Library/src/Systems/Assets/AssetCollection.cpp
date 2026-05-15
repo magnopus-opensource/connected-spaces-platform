@@ -28,22 +28,22 @@ namespace chs = csp::services::generated::prototypeservice;
 namespace
 {
 
-csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& DTOPrototypeType)
+csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& dtoPrototypeType)
 {
-    if (DTOPrototypeType == "Default")
+    if (dtoPrototypeType == "Default")
         return csp::systems::EAssetCollectionType::DEFAULT;
-    else if (DTOPrototypeType == "FoundationInternal")
+    else if (dtoPrototypeType == "FoundationInternal")
         return csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL;
-    else if (DTOPrototypeType == "CommentContainer")
+    else if (dtoPrototypeType == "CommentContainer")
         return csp::systems::EAssetCollectionType::COMMENT_CONTAINER;
-    else if (DTOPrototypeType == "Comment")
+    else if (dtoPrototypeType == "Comment")
         return csp::systems::EAssetCollectionType::COMMENT;
-    else if (DTOPrototypeType == "SpaceThumbnail")
+    else if (dtoPrototypeType == "SpaceThumbnail")
         return csp::systems::EAssetCollectionType::SPACE_THUMBNAIL;
     else
     {
         CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Encountered unknown prototype type whilst processing an asset collection DTO: %s",
-            DTOPrototypeType.c_str());
+            dtoPrototypeType.c_str());
         return csp::systems::EAssetCollectionType::DEFAULT;
     }
 }
@@ -54,244 +54,244 @@ namespace csp::systems
 
 // Templated function capable of handling different PrototypeDto types whose schema match.
 // Currently known to be compatible with both chs::PrototypeDto and chs::CopiedPrototypeDto.
-template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& dto, csp::systems::AssetCollection& assetCollection)
 {
-    if (Dto.HasId())
+    if (dto.HasId())
     {
-        AssetCollection.Id = Dto.GetId();
+        assetCollection.Id = dto.GetId();
     }
 
-    if (Dto.HasName())
+    if (dto.HasName())
     {
-        AssetCollection.Name = Dto.GetName();
+        assetCollection.Name = dto.GetName();
     }
 
-    if (Dto.HasType())
+    if (dto.HasType())
     {
-        AssetCollection.Type = ConvertDTOPrototypeType(Dto.GetType());
+        assetCollection.Type = ConvertDTOPrototypeType(dto.GetType());
     }
 
-    if (Dto.HasTags())
+    if (dto.HasTags())
     {
-        auto& Tags = Dto.GetTags();
-        AssetCollection.Tags = csp::common::Array<csp::common::String>(Tags.size());
+        auto& tags = dto.GetTags();
+        assetCollection.Tags = csp::common::Array<csp::common::String>(tags.size());
 
-        for (size_t i = 0; i < Tags.size(); ++i)
+        for (size_t i = 0; i < tags.size(); ++i)
         {
-            AssetCollection.Tags[i] = Tags[i];
+            assetCollection.Tags[i] = tags[i];
         }
     }
 
-    if (Dto.HasMetadata())
+    if (dto.HasMetadata())
     {
-        auto& Metadata = Dto.GetMetadata();
+        auto& metadata = dto.GetMetadata();
 
-        for (auto& Pair : Metadata)
+        for (auto& pair : metadata)
         {
-            auto& MetadataMutable = AssetCollection.GetMetadataMutable();
-            MetadataMutable[Pair.first] = Pair.second;
+            auto& metadataMutable = assetCollection.GetMetadataMutable();
+            metadataMutable[pair.first] = pair.second;
         }
     }
 
-    if (Dto.HasPointOfInterestId())
+    if (dto.HasPointOfInterestId())
     {
-        AssetCollection.PointOfInterestId = Dto.GetPointOfInterestId();
+        assetCollection.PointOfInterestId = dto.GetPointOfInterestId();
     }
 
-    if (Dto.HasParentId())
+    if (dto.HasParentId())
     {
-        AssetCollection.ParentId = Dto.GetParentId();
+        assetCollection.ParentId = dto.GetParentId();
     }
 
-    if (Dto.HasGroupIds())
+    if (dto.HasGroupIds())
     {
-        auto& GroupIds = Dto.GetGroupIds();
+        auto& groupIds = dto.GetGroupIds();
 
-        if (GroupIds.size() > 0)
+        if (groupIds.size() > 0)
         {
-            AssetCollection.SpaceId = GroupIds[0];
+            assetCollection.SpaceId = groupIds[0];
         }
     }
 
-    if (Dto.HasCreatedBy())
+    if (dto.HasCreatedBy())
     {
-        AssetCollection.CreatedBy = Dto.GetCreatedBy();
+        assetCollection.CreatedBy = dto.GetCreatedBy();
     }
 
-    if (Dto.HasCreatedAt())
+    if (dto.HasCreatedAt())
     {
-        AssetCollection.CreatedAt = Dto.GetCreatedAt();
+        assetCollection.CreatedAt = dto.GetCreatedAt();
     }
 
-    if (Dto.HasUpdatedBy())
+    if (dto.HasUpdatedBy())
     {
-        AssetCollection.UpdatedBy = Dto.GetUpdatedBy();
+        assetCollection.UpdatedBy = dto.GetUpdatedBy();
     }
 
-    if (Dto.HasUpdatedAt())
+    if (dto.HasUpdatedAt())
     {
-        AssetCollection.UpdatedAt = Dto.GetUpdatedAt();
+        assetCollection.UpdatedAt = dto.GetUpdatedAt();
     }
 
-    if (Dto.HasHighlander())
+    if (dto.HasHighlander())
     {
-        AssetCollection.IsUnique = Dto.GetHighlander();
+        assetCollection.IsUnique = dto.GetHighlander();
     }
 }
 
-void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+void PrototypeDtoToAssetCollection(const chs::PrototypeDto& dto, csp::systems::AssetCollection& assetCollection)
 {
-    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection);
+    AssetCollectionFromDtoOfType<chs::PrototypeDto>(dto, assetCollection);
 }
 
 AssetCollection::AssetCollection()
     : Type(EAssetCollectionType::DEFAULT)
     , IsUnique(false)
 {
-    Metadata = new csp::common::Map<csp::common::String, csp::common::String>();
+    m_metadata = new csp::common::Map<csp::common::String, csp::common::String>();
 }
 
-AssetCollection::AssetCollection(const AssetCollection& Other)
+AssetCollection::AssetCollection(const AssetCollection& other)
     : AssetCollection()
 {
-    *this = Other;
+    *this = other;
 }
 
-AssetCollection::~AssetCollection() { delete (Metadata); }
+AssetCollection::~AssetCollection() { delete (m_metadata); }
 
-AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
+AssetCollection& AssetCollection::operator=(const AssetCollection& other)
 {
-    Id = Other.Id;
-    Name = Other.Name;
-    Type = Other.Type;
-    Tags = Other.Tags;
-    PointOfInterestId = Other.PointOfInterestId;
-    ParentId = Other.ParentId;
-    SpaceId = Other.SpaceId;
-    CreatedBy = Other.CreatedBy;
-    CreatedAt = Other.CreatedAt;
-    UpdatedBy = Other.UpdatedBy;
-    UpdatedAt = Other.UpdatedAt;
-    IsUnique = Other.IsUnique;
-    Version = Other.Version;
+    Id = other.Id;
+    Name = other.Name;
+    Type = other.Type;
+    Tags = other.Tags;
+    PointOfInterestId = other.PointOfInterestId;
+    ParentId = other.ParentId;
+    SpaceId = other.SpaceId;
+    CreatedBy = other.CreatedBy;
+    CreatedAt = other.CreatedAt;
+    UpdatedBy = other.UpdatedBy;
+    UpdatedAt = other.UpdatedAt;
+    IsUnique = other.IsUnique;
+    Version = other.Version;
 
-    *Metadata = *Other.Metadata;
+    *m_metadata = *other.m_metadata;
 
     return *this;
 }
 
-bool AssetCollection::operator==(const AssetCollection& Other) const
+bool AssetCollection::operator==(const AssetCollection& other) const
 {
-    return Id == Other.Id && Name == Other.Name && Type == Other.Type && Tags == Other.Tags && PointOfInterestId == Other.PointOfInterestId
-        && ParentId == Other.ParentId && SpaceId == Other.SpaceId && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt
-        && UpdatedBy == Other.UpdatedBy && UpdatedAt == Other.UpdatedAt && IsUnique == Other.IsUnique && Version == Other.Version
-        && *Metadata == *Other.Metadata;
+    return Id == other.Id && Name == other.Name && Type == other.Type && Tags == other.Tags && PointOfInterestId == other.PointOfInterestId
+        && ParentId == other.ParentId && SpaceId == other.SpaceId && CreatedBy == other.CreatedBy && CreatedAt == other.CreatedAt
+        && UpdatedBy == other.UpdatedBy && UpdatedAt == other.UpdatedAt && IsUnique == other.IsUnique && Version == other.Version
+        && *m_metadata == *other.m_metadata;
 }
 
-bool AssetCollection::operator!=(const AssetCollection& Other) const { return !(*this == Other); }
+bool AssetCollection::operator!=(const AssetCollection& other) const { return !(*this == other); }
 
-csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataMutable() { return *Metadata; }
+csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataMutable() { return *m_metadata; }
 
-const csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataImmutable() const { return *Metadata; }
+const csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataImmutable() const { return *m_metadata; }
 
-AssetCollection& AssetCollectionResult::GetAssetCollection() { return AssetCollection; }
+AssetCollection& AssetCollectionResult::GetAssetCollection() { return m_assetCollection; }
 
-const AssetCollection& AssetCollectionResult::GetAssetCollection() const { return AssetCollection; }
+const AssetCollection& AssetCollectionResult::GetAssetCollection() const { return m_assetCollection; }
 
-void AssetCollectionResult::SetAssetCollection(const systems::AssetCollection& Collection) { AssetCollection = Collection; }
+void AssetCollectionResult::SetAssetCollection(const systems::AssetCollection& collection) { m_assetCollection = collection; }
 
-void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* PrototypeResponse = static_cast<chs::PrototypeDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* prototypeResponse = static_cast<chs::PrototypeDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeResponse->FromJson(Response->GetPayload().GetContent());
+        prototypeResponse->FromJson(response->GetPayload().GetContent());
 
-        PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection);
+        PrototypeDtoToAssetCollection(*prototypeResponse, m_assetCollection);
     }
 }
 
-csp::common::Array<AssetCollection>& AssetCollectionsResult::GetAssetCollections() { return AssetCollections; }
+csp::common::Array<AssetCollection>& AssetCollectionsResult::GetAssetCollections() { return m_assetCollections; }
 
-const csp::common::Array<AssetCollection>& AssetCollectionsResult::GetAssetCollections() const { return AssetCollections; }
+const csp::common::Array<AssetCollection>& AssetCollectionsResult::GetAssetCollections() const { return m_assetCollections; }
 
-uint64_t AssetCollectionsResult::GetTotalCount() const { return ResultTotalCount; }
+uint64_t AssetCollectionsResult::GetTotalCount() const { return m_resultTotalCount; }
 
-void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* PrototypeDto = static_cast<csp::services::DtoArray<chs::PrototypeDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* prototypeDto = static_cast<csp::services::DtoArray<chs::PrototypeDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeDto->FromJson(Response->GetPayload().GetContent());
-        FillResultTotalCount(Response->GetPayload().GetContent());
+        prototypeDto->FromJson(response->GetPayload().GetContent());
+        FillResultTotalCount(response->GetPayload().GetContent());
 
-        const std::vector<chs::PrototypeDto>& PrototypeArray = PrototypeDto->GetArray();
-        AssetCollections = csp::common::Array<csp::systems::AssetCollection>(PrototypeArray.size());
+        const std::vector<chs::PrototypeDto>& prototypeArray = prototypeDto->GetArray();
+        m_assetCollections = csp::common::Array<csp::systems::AssetCollection>(prototypeArray.size());
 
-        for (size_t i = 0; i < PrototypeArray.size(); ++i)
+        for (size_t i = 0; i < prototypeArray.size(); ++i)
         {
-            PrototypeDtoToAssetCollection(PrototypeArray[i], AssetCollections[i]);
+            PrototypeDtoToAssetCollection(prototypeArray[i], m_assetCollections[i]);
         }
     }
 }
 
-void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent)
+void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& jsonContent)
 {
-    assert(JsonContent.c_str());
+    assert(jsonContent.c_str());
 
-    rapidjson::Document JsonDoc;
-    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "AssetCollectionsResult::FillResultTotalCount");
+    rapidjson::Document jsonDoc;
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(jsonDoc, jsonContent, "AssetCollectionsResult::FillResultTotalCount");
     if (!ok)
     {
         return;
     }
     
-    ResultTotalCount = 0;
-    if (JsonDoc.IsArray())
+    m_resultTotalCount = 0;
+    if (jsonDoc.IsArray())
     {
-        ResultTotalCount = JsonDoc.GetArray().Size();
+        m_resultTotalCount = jsonDoc.GetArray().Size();
     }
-    else if (JsonDoc.HasMember("itemTotalCount"))
+    else if (jsonDoc.HasMember("itemTotalCount"))
     {
-        rapidjson::Value& Val = JsonDoc["itemTotalCount"];
-        const auto TotalCountStr = csp::web::JsonObjectToString(Val);
+        rapidjson::Value& val = jsonDoc["itemTotalCount"];
+        const auto totalCountStr = csp::web::JsonObjectToString(val);
 
-        uint64_t ConvertedTotalCount = 0;
-        const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+        uint64_t convertedTotalCount = 0;
+        const auto result = std::from_chars(totalCountStr.c_str(), totalCountStr.c_str() + totalCountStr.Length(), convertedTotalCount);
 
         if (result.ec == std::errc())
         {
-            ResultTotalCount = ConvertedTotalCount;
+            m_resultTotalCount = convertedTotalCount;
         }
     }
 }
 
-uint64_t AssetCollectionCountResult::GetCount() const { return Count; }
-void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+uint64_t AssetCollectionCountResult::GetCount() const { return m_count; }
+void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    const auto* Response = ApiResponse->GetResponse();
+    const auto* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Count = std::stoull(Response->GetPayload().GetContent().c_str());
+        m_count = std::stoull(response->GetPayload().GetContent().c_str());
     }
 }
 
-void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
     // Copy-prototype operation results come back in the form of an array of prototypes.
     // The payload for this is _nearly_ identical in form to what is returned from a standard
@@ -300,22 +300,22 @@ void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase
     // So we specialize AssetCollectionsResult::OnResponse, and populate
     // the array of returned asset collections using this other set of DTO types.
 
-    auto* CopyResultDto = static_cast<chs::CopyPrototypesResult*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* copyResultDto = static_cast<chs::CopyPrototypesResult*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        CopyResultDto->FromJson(Response->GetPayload().GetContent());
+        copyResultDto->FromJson(response->GetPayload().GetContent());
 
-        const std::vector<std::shared_ptr<chs::CopiedPrototypeDto>>& CopiedPrototypesArray = CopyResultDto->GetPrototypes();
-        AssetCollections = csp::common::Array<csp::systems::AssetCollection>(CopiedPrototypesArray.size());
+        const std::vector<std::shared_ptr<chs::CopiedPrototypeDto>>& copiedPrototypesArray = copyResultDto->GetPrototypes();
+        m_assetCollections = csp::common::Array<csp::systems::AssetCollection>(copiedPrototypesArray.size());
 
         // Prototype duplication results aren't paginated, so the total count is just the number of copied prototypes.
-        ResultTotalCount = CopiedPrototypesArray.size();
+        m_resultTotalCount = copiedPrototypesArray.size();
 
-        for (size_t i = 0; i < CopiedPrototypesArray.size(); ++i)
+        for (size_t i = 0; i < copiedPrototypesArray.size(); ++i)
         {
-            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i]);
+            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*copiedPrototypesArray[i], m_assetCollections[i]);
         }
     }
 }

@@ -19,60 +19,60 @@
 namespace csp::json
 {
 
-void JsonSerializer::SerializeValue(int32_t Value) { Writer.Int(Value); }
+void JsonSerializer::SerializeValue(int32_t value) { m_writer.Int(value); }
 
-void JsonSerializer::SerializeValue(uint32_t Value) { Writer.Uint(Value); }
+void JsonSerializer::SerializeValue(uint32_t value) { m_writer.Uint(value); }
 
-void JsonSerializer::SerializeValue(int64_t Value) { Writer.Int64(Value); }
+void JsonSerializer::SerializeValue(int64_t value) { m_writer.Int64(value); }
 
-void JsonSerializer::SerializeValue(uint64_t Value) { Writer.Uint64(Value); }
+void JsonSerializer::SerializeValue(uint64_t value) { m_writer.Uint64(value); }
 
-void JsonSerializer::SerializeValue(bool Value) { Writer.Bool(Value); }
+void JsonSerializer::SerializeValue(bool value) { m_writer.Bool(value); }
 
-void JsonSerializer::SerializeValue(float Value) { Writer.Double(Value); }
+void JsonSerializer::SerializeValue(float value) { m_writer.Double(value); }
 
-void JsonSerializer::SerializeValue(double Value) { Writer.Double(Value); }
+void JsonSerializer::SerializeValue(double value) { m_writer.Double(value); }
 
-void JsonSerializer::SerializeValue(const char* Value) { Writer.String(Value); }
+void JsonSerializer::SerializeValue(const char* value) { m_writer.String(value); }
 
-void JsonSerializer::SerializeValue(const csp::common::String& Value) { Writer.String(Value); }
+void JsonSerializer::SerializeValue(const csp::common::String& value) { m_writer.String(value); }
 
-void JsonSerializer::SerializeValue(std::nullptr_t /*Value*/) { Writer.Null(); }
+void JsonSerializer::SerializeValue(std::nullptr_t /*Value*/) { m_writer.Null(); }
 
-void JsonSerializer::SerializeValue(const std::string& Value) { Writer.String(Value.c_str()); }
+void JsonSerializer::SerializeValue(const std::string& value) { m_writer.String(value.c_str()); }
 
-std::string JsonDeserializer::GetMemberAsString(const char* Key) const
+std::string JsonDeserializer::GetMemberAsString(const char* key) const
 {
-    auto JsonValue = &(*ValueStack.top())[Key];
+    auto jsonValue = &(*m_valueStack.top())[key];
 
-    rapidjson::StringBuffer Buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
-    JsonValue->Accept(Writer);
-    return Buffer.GetString();
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    jsonValue->Accept(writer);
+    return buffer.GetString();
 }
 
-void JsonDeserializer::EnterMember(const char* Key) const
+void JsonDeserializer::EnterMember(const char* key) const
 {
-    auto JsonValue = &(*ValueStack.top())[Key];
-    ValueStack.push(JsonValue);
+    auto jsonValue = &(*m_valueStack.top())[key];
+    m_valueStack.push(jsonValue);
 }
 
-void JsonDeserializer::ExitMember() const { ValueStack.pop(); }
+void JsonDeserializer::ExitMember() const { m_valueStack.pop(); }
 
-void JsonDeserializer::DeserializeValue(int32_t& Value) const { Value = ValueStack.top()->GetInt(); }
+void JsonDeserializer::DeserializeValue(int32_t& value) const { value = m_valueStack.top()->GetInt(); }
 
-void JsonDeserializer::DeserializeValue(uint32_t& Value) const { Value = ValueStack.top()->GetUint(); }
+void JsonDeserializer::DeserializeValue(uint32_t& value) const { value = m_valueStack.top()->GetUint(); }
 
-void JsonDeserializer::DeserializeValue(int64_t& Value) const { Value = ValueStack.top()->GetInt64(); }
+void JsonDeserializer::DeserializeValue(int64_t& value) const { value = m_valueStack.top()->GetInt64(); }
 
-void JsonDeserializer::DeserializeValue(uint64_t& Value) const { Value = ValueStack.top()->GetUint64(); }
+void JsonDeserializer::DeserializeValue(uint64_t& value) const { value = m_valueStack.top()->GetUint64(); }
 
-void JsonDeserializer::DeserializeValue(bool& Value) const { Value = ValueStack.top()->GetBool(); }
+void JsonDeserializer::DeserializeValue(bool& value) const { value = m_valueStack.top()->GetBool(); }
 
-void JsonDeserializer::DeserializeValue(float& Value) const { Value = static_cast<float>(ValueStack.top()->GetDouble()); }
+void JsonDeserializer::DeserializeValue(float& value) const { value = static_cast<float>(m_valueStack.top()->GetDouble()); }
 
-void JsonDeserializer::DeserializeValue(double& Value) const { Value = ValueStack.top()->GetDouble(); }
+void JsonDeserializer::DeserializeValue(double& value) const { value = m_valueStack.top()->GetDouble(); }
 
-void JsonDeserializer::DeserializeValue(csp::common::String& Value) const { Value = ValueStack.top()->GetString(); }
-void JsonDeserializer::DeserializeValue(std::string& Value) const { Value = ValueStack.top()->GetString(); }
+void JsonDeserializer::DeserializeValue(csp::common::String& value) const { value = m_valueStack.top()->GetString(); }
+void JsonDeserializer::DeserializeValue(std::string& value) const { value = m_valueStack.top()->GetString(); }
 } // namespace csp::json

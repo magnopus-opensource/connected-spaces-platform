@@ -49,14 +49,14 @@ class CSP_API UserRoleInfo
 {
 public:
     UserRoleInfo() = default;
-    UserRoleInfo(const UserRoleInfo& Other) = default;
+    UserRoleInfo(const UserRoleInfo& other) = default;
     UserRoleInfo& operator=(const UserRoleInfo& other) = default;
 
     csp::common::String UserId;
     SpaceUserRole UserRole;
 
-    bool operator==(const UserRoleInfo& Other) const;
-    bool operator!=(const UserRoleInfo& Other) const;
+    bool operator==(const UserRoleInfo& other) const;
+    bool operator!=(const UserRoleInfo& other) const;
 };
 
 /// @ingroup Space System
@@ -65,14 +65,14 @@ class CSP_API InviteUserRoleInfo
 {
 public:
     InviteUserRoleInfo() = default;
-    InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
-    InviteUserRoleInfo& operator=(const InviteUserRoleInfo& Other) = default;
+    InviteUserRoleInfo(const InviteUserRoleInfo& other) = default;
+    InviteUserRoleInfo& operator=(const InviteUserRoleInfo& other) = default;
 
     csp::common::String UserEmail;
     SpaceUserRole UserRole;
 
-    bool operator==(const InviteUserRoleInfo& Other) const;
-    bool operator!=(const InviteUserRoleInfo& Other) const;
+    bool operator==(const InviteUserRoleInfo& other) const;
+    bool operator!=(const InviteUserRoleInfo& other) const;
 };
 
 /// @ingroup Space System
@@ -81,15 +81,15 @@ class CSP_API InviteUserRoleInfoCollection
 {
 public:
     InviteUserRoleInfoCollection() = default;
-    InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
-    InviteUserRoleInfoCollection& operator=(const InviteUserRoleInfoCollection& Other) = default;
+    InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& other) = default;
+    InviteUserRoleInfoCollection& operator=(const InviteUserRoleInfoCollection& other) = default;
 
     csp::common::String EmailLinkUrl;
     csp::common::String SignupUrl;
     csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
 
-    bool operator==(const InviteUserRoleInfoCollection& Other) const;
-    bool operator!=(const InviteUserRoleInfoCollection& Other) const;
+    bool operator==(const InviteUserRoleInfoCollection& other) const;
+    bool operator!=(const InviteUserRoleInfoCollection& other) const;
 };
 
 /// @ingroup Space System
@@ -110,15 +110,15 @@ public:
 
 private:
     UserRoleCollectionResult(void*) {};
-    UserRoleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    UserRoleCollectionResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
     UserRoleCollectionResult() {};
 
-    void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);
+    void FillUsersRoles(const Space& space, const csp::common::Array<csp::common::String> requestedUserIds);
 
-    csp::common::Array<UserRoleInfo> UserRoles;
+    csp::common::Array<UserRoleInfo> m_userRoles;
 };
 
-typedef std::function<void(const UserRoleCollectionResult& Result)> UserRoleCollectionCallback;
+typedef std::function<void(const UserRoleCollectionResult& result)> UserRoleCollectionCallback;
 
 } // namespace csp::systems

@@ -107,12 +107,12 @@ public:
     /// @param NetworkEventBus csp::multiplayer::NetworkEventBus& : Reference the the network event bus, used for leadership election messaging.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
-    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    OnlineRealtimeEngine(MultiplayerConnection& inMultiplayerConnection, csp::common::LogSystem& logSystem,
+        csp::multiplayer::NetworkEventBus& networkEventBus, csp::common::IJSScriptRunner& remoteScriptRunner);
 
-    CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
-        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+    CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& inMultiplayerConnection, csp::common::LogSystem& logSystem,
+        csp::multiplayer::NetworkEventBus& networkEventBus, csp::common::IJSScriptRunner& remoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& additionalComponents);
 
     /// @brief OnlineRealtimeEngine destructor
     CSP_NO_EXPORT ~OnlineRealtimeEngine();
@@ -135,10 +135,10 @@ public:
     /// @param LocomotionModel csp::multiplayer::LocomotionModel : The Initial LocomotionModel to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-        const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState State,
-        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
-        csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& name, const csp::common::String& userId,
+        const csp::multiplayer::SpaceTransform& spaceTransform, bool isVisible, csp::multiplayer::AvatarState state,
+        const csp::common::String& avatarId, csp::multiplayer::AvatarPlayMode avatarPlayMode, csp::multiplayer::LocomotionModel locomotionModel,
+        csp::multiplayer::EntityCreatedCallback callback) override;
 
     /// @brief Create and add a SpaceEntity, with relevant default values.
     /// @param Name csp::common::String : The name of the newly created SpaceEntity.
@@ -147,63 +147,63 @@ public:
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& name, const csp::multiplayer::SpaceTransform& spaceTransform,
+        const csp::common::Optional<uint64_t>& parentId, csp::multiplayer::EntityCreatedCallback callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
-    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
+    CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* entity, csp::multiplayer::CallbackHandler callback) override;
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false if the entity already existed in the selection and thus could not be added.
-    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* entity) override;
 
     /// @brief Removes an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully removed, false if the entity did not exist in the selection and thus could not be removed.
-    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* entity) override;
 
     /***** ENTITY ACCESS *****************************************************/
 
     /// @brief Finds the first found SpaceEntity of a matching Name.
     /// @param Name csp::common::String : The name to search.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& name) override;
 
     /// @brief Finds the first found SpaceEntity that has the ID EntityId.
     /// @param EntityId uint64_t : The Id to look for.
     /// @return A non-owning pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t EntityId) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t entityId) override;
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& name) override;
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will not contain an AvatarSpaceComponent.
     /// @param Name The name to search for.
     /// @return A pointer to the first found matching SpaceEntity.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& Name) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& name) override;
 
     /// @brief Get an Entity by its index.
     ///
     /// @param EntityIndex size_t : The index of the entity to get.
     /// @return A non-owning pointer to the entity at the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t EntityIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t entityIndex) override;
 
     /// @brief Get an Avatar by its index. The returned pointer will be an entity that contains an AvatarSpaceComponent.
     ///
     /// @param AvatarIndex size_t : The index of the avatar entity to get.
     /// @return A non-owning pointer to the avatar entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t AvatarIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t avatarIndex) override;
 
     /// @brief Get an Object by its index. The returned pointer will be an entity that does not contain an AvatarSpaceComponent.
     ///
     /// @param ObjectIndex size_t : The index of the object entity to get.
     /// @return A non-owning pointer to the object entity with the given index.
-    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t ObjectIndex) override;
+    [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t objectIndex) override;
 
     /// @brief Get the number of total entities in the system.
     /// @return The total number of entities.
@@ -229,7 +229,7 @@ public:
     /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
     /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
     /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
-    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* entity) override;
 
     /***** ENTITY PROCESSING *************************************************/
 
@@ -248,7 +248,7 @@ public:
      * once all the entities are fetched.
      */
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
-        const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
+        const csp::common::String& spaceId, csp::common::EntityFetchStartedCallback fetchStartedCallback) override;
 
     /// @brief Lock a mutex that guards against any changes to the entity list.
     /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
@@ -264,7 +264,7 @@ public:
     /// @brief Creates the state patcher to use for space entities created with this engine
     /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
     /// @return A pointer to a new statepatcher. Pointer ownership is transferred to the caller.
-    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& spaceEntity) const override;
 
     /// @brief Returns a ModifiableStatus enum containing ModifiableStatus::Modifiable if the entity can be modified.
     /// @detail This entity is considered non-modifiable in the following circumstances:
@@ -272,7 +272,7 @@ public:
     /// - The entities owner id doesn't match this clients id, and the entity is not transferable.
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
-    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
+    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* spaceEntity) const override;
 
     /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
     /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
@@ -283,7 +283,7 @@ public:
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
     /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
     /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity);
+    void QueueEntityUpdate(csp::multiplayer::SpaceEntity* entity);
 
     /// @brief Applies any pending changes to entities that have been marked for update.
     void ProcessPendingEntityOperations();
@@ -294,24 +294,24 @@ public:
     /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback);
+    CSP_EVENT void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback callback);
 
     /// @brief Sets a callback to be executed when the script system is ready to run scripts.
     /// @param Callback CallbackHandler : the callback to execute.
-    CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler Callback);
+    CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler callback);
 
-    typedef std::function<void(const csp::common::String& ScopeId, const csp::common::String& UserId)> ScopeLeaderCallback;
+    typedef std::function<void(const csp::common::String& scopeId, const csp::common::String& userId)> ScopeLeaderCallback;
 
     /// @brief Binds the provided callback to receive events when a new scope leader has been elected.
     /// @param Callback ScopeLeaderCallback : Fired when a new scope leader is elected.
-    CSP_EVENT void SetOnElectedScopeLeaderCallback(ScopeLeaderCallback Callback);
+    CSP_EVENT void SetOnElectedScopeLeaderCallback(ScopeLeaderCallback callback);
     /// @brief Binds the provided callback to receive events when a scope leader has been vacated.
     /// @param Callback ScopeLeaderCallback : Fired when a scope leader is vacated.
-    CSP_EVENT void SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback Callback);
+    CSP_EVENT void SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback callback);
 
     /// @brief Sets the script owner for the given entity to the current client
     /// @param Entity SpaceEntity : A pointer to the entity
-    void ClaimScriptOwnership(SpaceEntity* Entity) const;
+    void ClaimScriptOwnership(SpaceEntity* entity) const;
 
     /// @brief Enable Leader Election feature.
     void EnableLeaderElection();
@@ -343,7 +343,7 @@ public:
     ///   If disabling this feature, more requests will be made to Magnopus Connected Services,
     ///   and consequently more patch merges may occur on the server as a result.
     /// \endrst
-    void SetEntityPatchRateLimitEnabled(bool Enabled);
+    void SetEntityPatchRateLimitEnabled(bool enabled);
 
     /// @brief "Refreshes" (ie, turns on an off again), the multiplayer connection, in order to refresh scopes.
     /// This shouldn't be neccesary, we should devote some effort to checking if it still is at some point
@@ -352,7 +352,7 @@ public:
     /// continuation.
     /// that populates an optional error code on failure. Error is empty on success.
     CSP_START_IGNORE
-    CSP_NO_EXPORT async::task<void> RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId);
+    CSP_NO_EXPORT async::task<void> RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String spaceId);
     CSP_END_IGNORE
 
     /// @brief Checks whether we should run scripts locally
@@ -362,7 +362,7 @@ public:
     /// @brief Runs the provided script remotely
     /// @param ContextId int64_t : the ID of the context on which to run the script
     /// @param ScriptText csp::common::String& : the text of the script to run
-    CSP_NO_EXPORT void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
+    CSP_NO_EXPORT void RunScriptRemotely(int64_t contextId, const csp::common::String& scriptText);
 
     /// @brief Getter for the pending adds
     /// @return: SpaceEntityQueue*
@@ -377,147 +377,147 @@ public:
     CSP_NO_EXPORT void TickEntities();
 
     CSP_START_IGNORE
-    CSP_NO_EXPORT void RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId);
+    CSP_NO_EXPORT void RegisterDefaultScope(const std::string& scopeId, const std::optional<uint64_t>& leaderId);
 
     // Updates server-side leader election to make this client the leader of the specified scope.
     // This should only be used in testing.
-    CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback);
+    CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& scopeId, std::function<void(bool)> callback);
     CSP_END_IGNORE
 
     // We should remove this in OF-1785
-    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
+    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool value);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
      */
-    CSP_NO_EXPORT void OnObjectMessage(const signalr::value& Params);
-    CSP_NO_EXPORT void OnObjectPatch(const signalr::value& Params);
-    CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
-    CSP_NO_EXPORT void OnElectedScopeLeader(const signalr::value& Params);
-    CSP_NO_EXPORT void OnVacatedAsScopeLeader(const signalr::value& Params);
+    CSP_NO_EXPORT void OnObjectMessage(const signalr::value& params);
+    CSP_NO_EXPORT void OnObjectPatch(const signalr::value& params);
+    CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& params);
+    CSP_NO_EXPORT void OnElectedScopeLeader(const signalr::value& params);
+    CSP_NO_EXPORT void OnVacatedAsScopeLeader(const signalr::value& params);
 
 protected:
-    csp::common::List<SpaceEntity*> Entities;
-    csp::common::List<SpaceEntity*> Avatars;
-    csp::common::List<SpaceEntity*> Objects;
-    csp::common::List<SpaceEntity*> SelectedEntities;
-    csp::common::List<SpaceEntity*> RootHierarchyEntities;
+    csp::common::List<SpaceEntity*> m_entities;
+    csp::common::List<SpaceEntity*> m_avatars;
+    csp::common::List<SpaceEntity*> m_objects;
+    csp::common::List<SpaceEntity*> m_selectedEntities;
+    csp::common::List<SpaceEntity*> m_rootHierarchyEntities;
 
-    std::recursive_mutex* EntitiesLock;
+    std::recursive_mutex* m_entitiesLock;
 
 private:
     OnlineRealtimeEngine(); // needed for the wrapper generator
 
     // Should not be null
-    MultiplayerConnection* MultiplayerConnectionInst;
+    MultiplayerConnection* m_multiplayerConnectionInst;
 
     // Should not be null
-    csp::common::LogSystem* LogSystem;
+    csp::common::LogSystem* m_logSystem;
 
     /// @brief Destroys the local client's view of the specified entity.
     /// @param Entity SpaceEntity : The entity to be destroyed locally.
-    void LocalDestroyEntity(SpaceEntity* Entity);
+    void LocalDestroyEntity(SpaceEntity* entity);
 
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
 
-    EntityCreatedCallback RemoteSpaceEntityCreatedCallback;
-    CallbackHandler ScriptSystemReadyCallback;
+    EntityCreatedCallback m_remoteSpaceEntityCreatedCallback;
+    CallbackHandler m_scriptSystemReadyCallback;
 
-    void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
+    void GetEntitiesPaged(int skip, int limit, const std::function<void(const signalr::value&, std::exception_ptr)>& callback);
     std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(
-        int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback);
+        int skip, csp::common::EntityFetchCompleteCallback fetchCompleteCallback);
 
     // Calls GetEntitiesPaged to start off a paged recursive fetch of all the entities in the space
-    void RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback);
+    void RetrieveAllEntities(csp::common::EntityFetchCompleteCallback fetchCompleteCallback);
 
     /// Destroy all the entities locally, only used in destruction
     void LocalDestroyAllEntities();
 
-    void RemoveEntity(SpaceEntity* EntityToRemove);
+    void RemoveEntity(SpaceEntity* entityToRemove);
 
-    void AddPendingEntity(SpaceEntity* EntityToAdd);
-    void RemovePendingEntity(SpaceEntity* EntityToRemove);
+    void AddPendingEntity(SpaceEntity* entityToAdd);
+    void RemovePendingEntity(SpaceEntity* entityToRemove);
     void ApplyIncomingPatch(const signalr::value*);
-    void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
+    void HandleException(const std::exception_ptr& except, const std::string& exceptionDescription);
 
-    bool EntityIsInRootHierarchy(SpaceEntity* Entity);
+    bool EntityIsInRootHierarchy(SpaceEntity* entity);
 
     // Called when another client sends us this event.
     // This will happen when a client wants to run a script for a scope that this client is the leader of.
-    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
-    void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
+    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& data);
+    void SendRemoteRunScriptEvent(int64_t targetClientId, int64_t contextId, const csp::common::String& scriptText);
 
-    void ClaimScriptOwnershipFromClient(uint64_t ClientId);
+    void ClaimScriptOwnershipFromClient(uint64_t clientId);
 
     bool IsLocalClientLeader() const;
 
     // These are used for client-side leader eleciton and can be removed as part of OF-1785.
-    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
+    void OnAvatarAdd(const SpaceEntity* avatar, const csp::common::List<SpaceEntity*>& avatars);
+    void OnAvatarRemove(const SpaceEntity* avatar, const csp::common::List<SpaceEntity*>& avatars);
+    void OnObjectAdd(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& entities);
+    void OnObjectRemove(const SpaceEntity* object, const csp::common::List<SpaceEntity*>& entities);
 
-    void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
+    void SendPatches(const csp::common::List<SpaceEntity*> pendingEntities);
 
     // Used in OnObjectMessage as well as in the initial entity fetch. Uses CreateEntity to make entities when instructed to from the server, via
     // signalR message.
-    SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage);
+    SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& entityMessage);
 
     // CreateAvatar Continuations
     CSP_START_IGNORE
     async::task<uint64_t> RemoteGenerateNewAvatarId();
-    std::function<async::task<uint64_t>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name, const csp::common::String& UserId,
-        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
-        LocomotionModel LocomotionModel);
-    std::function<void(uint64_t)> CreateNewLocalAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
-        LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
+    std::function<async::task<uint64_t>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& name, const csp::common::String& userId,
+        const SpaceTransform& transform, bool isVisible, const csp::common::String& avatarId, AvatarState avatarState, AvatarPlayMode avatarPlayMode,
+        LocomotionModel locomotionModel);
+    std::function<void(uint64_t)> CreateNewLocalAvatar(const csp::common::String& name, const csp::common::String& userId,
+        const SpaceTransform& transform, bool isVisible, const csp::common::String& avatarId, AvatarState avatarState, AvatarPlayMode avatarPlayMode,
+        LocomotionModel locomotionModel, EntityCreatedCallback callback);
     CSP_END_IGNORE
 
-    std::unique_ptr<class EntityScriptBinding> ScriptBinding;
-    class SpaceEntityEventHandler* EventHandler;
+    std::unique_ptr<class EntityScriptBinding> m_scriptBinding;
+    class SpaceEntityEventHandler* m_eventHandler;
 
     // Leader election ---------------------------------------------------------
 
     // Client-side election manager. Should be removed as part of OF-1785.
-    class ClientElectionManager* ElectionManager;
+    class ClientElectionManager* m_electionManager;
 
     // Server-side election data.
     CSP_START_IGNORE
-    std::unique_ptr<ScopeLeadershipManager> LeaderElectionManager;
+    std::unique_ptr<ScopeLeadershipManager> m_leaderElectionManager;
     CSP_END_IGNORE
 
-    ScopeLeaderCallback OnElectedScopeLeaderCallback;
-    ScopeLeaderCallback OnVacatedAsScopeLeaderCallback;
+    ScopeLeaderCallback m_onElectedScopeLeaderCallback;
+    ScopeLeaderCallback m_onVacatedAsScopeLeaderCallback;
 
-    csp::common::String DefaultScopeId;
+    csp::common::String m_defaultScopeId;
     // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
-    bool ServerSideElectionEnabled = false;
+    bool m_serverSideElectionEnabled = false;
     // --------------------------------------------------------------------------
 
-    std::recursive_mutex* TickEntitiesLock;
-    std::mutex LeadershipElectionLock;
+    std::recursive_mutex* m_tickEntitiesLock;
+    std::mutex m_leadershipElectionLock;
 
-    std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
-    std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;
-    std::set<csp::multiplayer::SpaceEntity*>* PendingOutgoingUpdateUniqueSet;
-    PatchMessageQueue* PendingIncomingUpdates;
+    std::deque<csp::multiplayer::SpaceEntity*>* m_pendingAdds;
+    std::deque<csp::multiplayer::SpaceEntity*>* m_pendingRemoves;
+    std::set<csp::multiplayer::SpaceEntity*>* m_pendingOutgoingUpdateUniqueSet;
+    PatchMessageQueue* m_pendingIncomingUpdates;
 
-    bool EnableEntityTick;
-    std::list<SpaceEntity*> TickUpdateEntities;
+    bool m_enableEntityTick;
+    std::list<SpaceEntity*> m_tickUpdateEntities;
 
-    std::chrono::system_clock::time_point LastTickTime;
-    std::chrono::milliseconds EntityPatchRate;
+    std::chrono::system_clock::time_point m_lastTickTime;
+    std::chrono::milliseconds m_entityPatchRate;
 
-    bool EntityPatchRateLimitEnabled = true;
+    bool m_entityPatchRateLimitEnabled = true;
 
     // May not be null
-    csp::common::IJSScriptRunner* ScriptRunner;
+    csp::common::IJSScriptRunner* m_scriptRunner;
     // May not be null
-    csp::multiplayer::NetworkEventBus* NetworkEventBus;
+    csp::multiplayer::NetworkEventBus* m_networkEventBus;
 
-    csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
+    csp::multiplayer::ComponentSchemaRegistry m_componentRegistry;
 };
 
 } // namespace csp::multiplayer

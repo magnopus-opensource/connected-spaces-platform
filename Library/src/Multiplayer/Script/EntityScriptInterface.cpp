@@ -23,135 +23,135 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity)
-    : Entity(InEntity)
+EntityScriptInterface::EntityScriptInterface(SpaceEntity* inEntity)
+    : m_entity(inEntity)
 {
 }
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetPosition() const
 {
-    EntityScriptInterface::Vector3 Pos = { 0, 0, 0 };
+    EntityScriptInterface::Vector3 pos = { 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        const csp::common::Vector3& Position = Entity->GetPosition();
+        const csp::common::Vector3& position = m_entity->GetPosition();
 
-        Pos[0] = Position.X;
-        Pos[1] = Position.Y;
-        Pos[2] = Position.Z;
+        pos[0] = position.X;
+        pos[1] = position.Y;
+        pos[2] = position.Z;
     }
 
-    return Pos;
+    return pos;
 }
 
-void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
+void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 pos)
 {
     // CSP_LOG_FORMAT(LogLevel::VeryVerbose, "EntityScriptWrapper::SetPosition { %.2f, %.2f, %.2f }\n", Pos[0], Pos[1], Pos[2]);
 
-    const csp::common::Vector3 NewPosition(Pos[0], Pos[1], Pos[2]);
-    const csp::common::Vector3& CurrentPosition = Entity->GetPosition();
+    const csp::common::Vector3 newPosition(pos[0], pos[1], pos[2]);
+    const csp::common::Vector3& currentPosition = m_entity->GetPosition();
 
-    if (CurrentPosition != NewPosition)
+    if (currentPosition != newPosition)
     {
-        Entity->SetPosition(NewPosition);
-        Entity->QueueUpdate();
+        m_entity->SetPosition(newPosition);
+        m_entity->QueueUpdate();
     }
 }
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalPosition() const
 {
-    EntityScriptInterface::Vector3 GlobalPos = { 0, 0, 0 };
+    EntityScriptInterface::Vector3 globalPos = { 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        const csp::common::Vector3& Position = Entity->GetGlobalPosition();
+        const csp::common::Vector3& position = m_entity->GetGlobalPosition();
 
-        GlobalPos[0] = Position.X;
-        GlobalPos[1] = Position.Y;
-        GlobalPos[2] = Position.Z;
+        globalPos[0] = position.X;
+        globalPos[1] = position.Y;
+        globalPos[2] = position.Z;
     }
 
-    return GlobalPos;
+    return globalPos;
 }
 
 EntityScriptInterface::Vector4 EntityScriptInterface::GetRotation() const
 {
-    EntityScriptInterface::Vector4 Rot = { 0, 0, 0, 0 };
+    EntityScriptInterface::Vector4 rot = { 0, 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        csp::common::Vector4 Rotation = Entity->GetRotation();
+        csp::common::Vector4 rotation = m_entity->GetRotation();
 
-        Rot[0] = Rotation.X;
-        Rot[1] = Rotation.Y;
-        Rot[2] = Rotation.Z;
-        Rot[3] = Rotation.W;
+        rot[0] = rotation.X;
+        rot[1] = rotation.Y;
+        rot[2] = rotation.Z;
+        rot[3] = rotation.W;
     }
 
-    return Rot;
+    return rot;
 }
 
-void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 Rot)
+void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 rot)
 {
 
-    const csp::common::Vector4 NewRotation(Rot[0], Rot[1], Rot[2], Rot[3]);
-    const csp::common::Vector4& CurrentRotation = Entity->GetRotation();
+    const csp::common::Vector4 newRotation(rot[0], rot[1], rot[2], rot[3]);
+    const csp::common::Vector4& currentRotation = m_entity->GetRotation();
 
-    if (CurrentRotation != NewRotation)
+    if (currentRotation != newRotation)
     {
-        Entity->SetRotation(NewRotation);
-        Entity->QueueUpdate();
+        m_entity->SetRotation(newRotation);
+        m_entity->QueueUpdate();
     }
 }
 
 EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
 {
-    EntityScriptInterface::Vector4 GlobalRot = { 0, 0, 0, 0 };
+    EntityScriptInterface::Vector4 globalRot = { 0, 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        csp::common::Vector4 Rotation = Entity->GetGlobalRotation();
+        csp::common::Vector4 rotation = m_entity->GetGlobalRotation();
 
-        GlobalRot[0] = Rotation.X;
-        GlobalRot[1] = Rotation.Y;
-        GlobalRot[2] = Rotation.Z;
-        GlobalRot[3] = Rotation.W;
+        globalRot[0] = rotation.X;
+        globalRot[1] = rotation.Y;
+        globalRot[2] = rotation.Z;
+        globalRot[3] = rotation.W;
     }
 
-    return GlobalRot;
+    return globalRot;
 }
 
 int64_t EntityScriptInterface::GetParentId()
 {
-    if (const auto Parent = Entity->GetParentEntity())
+    if (const auto parent = m_entity->GetParentEntity())
     {
-        return Parent->GetId();
+        return parent->GetId();
     }
 
     return 0;
 }
 
-void EntityScriptInterface::SetParentId(int64_t ParentId)
+void EntityScriptInterface::SetParentId(int64_t parentId)
 {
-    if (Entity)
+    if (m_entity)
     {
-        Entity->SetParentId(ParentId);
+        m_entity->SetParentId(parentId);
     }
 }
 
 void EntityScriptInterface::RemoveParentEntity()
 {
-    if (Entity)
+    if (m_entity)
     {
-        Entity->RemoveParentEntity();
+        m_entity->RemoveParentEntity();
     }
 }
 
 SpaceEntity* EntityScriptInterface::GetParentEntity() const
 {
-    if (Entity)
+    if (m_entity)
     {
-        return Entity->GetParentEntity();
+        return m_entity->GetParentEntity();
     }
 
     return nullptr;
@@ -159,92 +159,92 @@ SpaceEntity* EntityScriptInterface::GetParentEntity() const
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetScale() const
 {
-    EntityScriptInterface::Vector3 Scale = { 0, 0, 0 };
+    EntityScriptInterface::Vector3 scale = { 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        csp::common::Vector3 EntityScale = Entity->GetScale();
+        csp::common::Vector3 entityScale = m_entity->GetScale();
 
-        Scale[0] = EntityScale.X;
-        Scale[1] = EntityScale.Y;
-        Scale[2] = EntityScale.Z;
+        scale[0] = entityScale.X;
+        scale[1] = entityScale.Y;
+        scale[2] = entityScale.Z;
     }
 
-    return Scale;
+    return scale;
 }
 
-void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 Scale)
+void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 scale)
 {
-    const csp::common::Vector3 NewScale(Scale[0], Scale[1], Scale[2]);
-    const csp::common::Vector3& CurrentScale = Entity->GetScale();
+    const csp::common::Vector3 newScale(scale[0], scale[1], scale[2]);
+    const csp::common::Vector3& currentScale = m_entity->GetScale();
 
-    if (CurrentScale != NewScale)
+    if (currentScale != newScale)
     {
-        Entity->SetScale(NewScale);
-        Entity->QueueUpdate();
+        m_entity->SetScale(newScale);
+        m_entity->QueueUpdate();
     }
 }
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalScale() const
 {
-    EntityScriptInterface::Vector3 GlobalScale = { 0, 0, 0 };
+    EntityScriptInterface::Vector3 globalScale = { 0, 0, 0 };
 
-    if (Entity)
+    if (m_entity)
     {
-        csp::common::Vector3 EntityScale = Entity->GetGlobalScale();
+        csp::common::Vector3 entityScale = m_entity->GetGlobalScale();
 
-        GlobalScale[0] = EntityScale.X;
-        GlobalScale[1] = EntityScale.Y;
-        GlobalScale[2] = EntityScale.Z;
+        globalScale[0] = entityScale.X;
+        globalScale[1] = entityScale.Y;
+        globalScale[2] = entityScale.Z;
     }
 
-    return GlobalScale;
+    return globalScale;
 }
 
-const std::string EntityScriptInterface::GetName() const { return Entity->GetName().c_str(); }
+const std::string EntityScriptInterface::GetName() const { return m_entity->GetName().c_str(); }
 
-int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
+int64_t EntityScriptInterface::GetId() const { return m_entity->GetId(); }
 
-void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
+void EntityScriptInterface::SubscribeToPropertyChange(int32_t componentId, int32_t propertyKey, std::string message)
 {
-    Entity->GetScript().SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());
+    m_entity->GetScript().SubscribeToPropertyChange(componentId, propertyKey, message.c_str());
 }
 
-void EntityScriptInterface::SubscribeToMessage(std::string Message, std::string MessageParamsJson)
+void EntityScriptInterface::SubscribeToMessage(std::string message, std::string messageParamsJson)
 {
-    Entity->GetScript().SubscribeToMessage(Message.c_str(), MessageParamsJson.c_str());
+    m_entity->GetScript().SubscribeToMessage(message.c_str(), messageParamsJson.c_str());
 }
 
-void EntityScriptInterface::PostMessageToScript(std::string Message, std::string MessageParamsJson)
+void EntityScriptInterface::PostMessageToScript(std::string message, std::string messageParamsJson)
 {
-    Entity->GetScript().PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
+    m_entity->GetScript().PostMessageToScript(message.c_str(), messageParamsJson.c_str());
 }
 
-void EntityScriptInterface::ClaimScriptOwnership() { Entity->ClaimScriptOwnership(); }
+void EntityScriptInterface::ClaimScriptOwnership() { m_entity->ClaimScriptOwnership(); }
 
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 {
-    std::vector<ComponentScriptInterface*> Components;
+    std::vector<ComponentScriptInterface*> components;
 
-    if (Entity)
+    if (m_entity)
     {
-        const csp::common::Map<uint16_t, ComponentBase*>& ComponentMap = *Entity->GetComponents();
-        const auto ComponentKeys = ComponentMap.Keys();
+        const csp::common::Map<uint16_t, ComponentBase*>& componentMap = *m_entity->GetComponents();
+        const auto componentKeys = componentMap.Keys();
 
-        for (size_t i = 0; i < ComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < componentKeys->Size(); ++i)
         {
-            ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
+            ComponentBase* component = componentMap[componentKeys->operator[](i)];
 
-            if (Component->GetScriptInterface() != nullptr)
+            if (component->GetScriptInterface() != nullptr)
             {
-                Components.push_back(Component->GetScriptInterface());
+                components.push_back(component->GetScriptInterface());
             }
         }
 
-        delete (ComponentKeys);
+        delete (componentKeys);
     }
 
-    return Components;
+    return components;
 }
 
 } // namespace csp::multiplayer

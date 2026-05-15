@@ -65,7 +65,7 @@ public:
 
     /// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    GaussianSplatSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent);
 
     /// @brief Gets the ID of the asset associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
@@ -75,7 +75,7 @@ public:
     /// @brief Sets the ID of the asset associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset associated with this component.
-    void SetExternalResourceAssetId(const csp::common::String& Value) override;
+    void SetExternalResourceAssetId(const csp::common::String& value) override;
 
     /// @brief Gets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
@@ -85,26 +85,26 @@ public:
     /// @brief Sets the ID of the asset collection associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
-    void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
+    void SetExternalResourceAssetCollectionId(const csp::common::String& value) override;
 
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
-    void SetPosition(const csp::common::Vector3& InValue) override;
+    void SetPosition(const csp::common::Vector3& inValue) override;
     /// @copydoc IRotationComponent::GetRotation()
     const csp::common::Vector4& GetRotation() const override;
     /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
+    void SetRotation(const csp::common::Vector4& inValue) override;
     /// @copydoc IScaleComponent::GetScale()
     const csp::common::Vector3& GetScale() const override;
     /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
+    void SetScale(const csp::common::Vector3& inValue) override;
     /// @copydoc ITransformComponent::GetTransform()
     SpaceTransform GetTransform() const override;
     /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
+    void SetTransform(const SpaceTransform& inValue) override;
     /// @}
 
     /// \addtogroup IVisibleComponent
@@ -112,15 +112,15 @@ public:
     /// @copydoc IVisibleComponent::GetIsVisible()
     bool GetIsVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVisible()
-    void SetIsVisible(bool InValue) override;
+    void SetIsVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsARVisible()
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
-    void SetIsARVisible(bool InValue) override;
+    void SetIsARVisible(bool inValue) override;
     /// @copydoc IVisibleComponent::GetIsVirtualVisible()
     bool GetIsVirtualVisible() const override;
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    void SetIsVirtualVisible(bool inValue) override;
     /// @}
 
     /// \addtogroup IShadowCasterComponent
@@ -128,7 +128,7 @@ public:
     /// @copydoc IShadowCasterComponent::GetIsShadowCaster()
     [[deprecated]] bool GetIsShadowCaster() const override;
     /// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-    [[deprecated]] void SetIsShadowCaster(bool Value) override;
+    [[deprecated]] void SetIsShadowCaster(bool value) override;
     /// @}
 
     /// @brief Gets the tint that should be globally applied to the Gaussian Splat associated with this component.
@@ -138,7 +138,7 @@ public:
     /// @brief Sets the tint that should be globally applied to the Gaussian Splat.
     /// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
     /// Defaults to 1,1,1.
-    void SetTint(const csp::common::Vector3& TintValue);
+    void SetTint(const csp::common::Vector3& tintValue);
 };
 
 } // namespace csp::multiplayer

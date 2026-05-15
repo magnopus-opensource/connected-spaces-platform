@@ -32,124 +32,124 @@ namespace csp::multiplayer
 
 constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
-NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
-    : MultiplayerConnectionInst(InMultiplayerConnection)
-    , Connection(nullptr)
+NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* inMultiplayerConnection)
+    : m_multiplayerConnectionInst(inMultiplayerConnection)
+    , m_connection(nullptr)
 {
 }
 
-void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection& InConnection) { Connection = &InConnection; }
+void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection& inConnection) { m_connection = &inConnection; }
 
-void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName,
-    const csp::common::Array<csp::common::ReplicatedValue>& Arguments, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
+void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& eventName,
+    const csp::common::Array<csp::common::ReplicatedValue>& arguments, uint64_t targetClientId, ErrorCodeCallbackHandler callback)
 {
-    if (Connection == nullptr)
+    if (m_connection == nullptr)
     {
-        if (Callback)
+        if (callback)
         {
-            Callback(ErrorCode::NotConnected);
+            callback(ErrorCode::NotConnected);
         }
 
         return;
     }
 
-    csp::multiplayer::ISignalRConnection* ISignalRConnectionPtr = static_cast<csp::multiplayer::ISignalRConnection*>(Connection);
+    csp::multiplayer::ISignalRConnection* iSignalRConnectionPtr = static_cast<csp::multiplayer::ISignalRConnection*>(m_connection);
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> localCallback = [callback](signalr::value /*Result*/, std::exception_ptr except)
     {
-        if (Except != nullptr)
+        if (except != nullptr)
         {
-            auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(Except);
-            if (Callback)
+            auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(except);
+            if (callback)
             {
-                Callback(Error);
+                callback(Error);
             }
 
             return;
         }
 
-        if (Callback)
+        if (callback)
         {
-            Callback(ErrorCode::None);
+            callback(ErrorCode::None);
         }
     };
 
-    std::map<uint64_t, signalr::value> Components;
+    std::map<uint64_t, signalr::value> components;
 
-    for (size_t i = 0; i < Arguments.Size(); ++i)
+    for (size_t i = 0; i < arguments.Size(); ++i)
     {
-        switch (Arguments[i].GetReplicatedValueType())
+        switch (arguments[i].GetReplicatedValueType())
         {
         case csp::common::ReplicatedValueType::Boolean:
         {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetBool());
+            std::vector<signalr::value> fields;
+            fields.push_back(arguments[i].GetBool());
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::Integer:
         {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetInt());
+            std::vector<signalr::value> fields;
+            fields.push_back(arguments[i].GetInt());
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::Float:
         {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetFloat());
+            std::vector<signalr::value> fields;
+            fields.push_back(arguments[i].GetFloat());
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::String:
         {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetString().c_str());
+            std::vector<signalr::value> fields;
+            fields.push_back(arguments[i].GetString().c_str());
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::Vector2:
         {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector2();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y });
+            std::vector<signalr::value> fields;
+            auto vector = arguments[i].GetVector2();
+            fields.push_back(std::vector<signalr::value> { vector.X, vector.Y });
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::Vector3:
         {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector3();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z });
+            std::vector<signalr::value> fields;
+            auto vector = arguments[i].GetVector3();
+            fields.push_back(std::vector<signalr::value> { vector.X, vector.Y, vector.Z });
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), fields };
+            components.insert({ i, component });
 
             break;
         }
         case csp::common::ReplicatedValueType::Vector4:
         {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector4();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W });
+            std::vector<signalr::value> fields;
+            auto vector = arguments[i].GetVector4();
+            fields.push_back(std::vector<signalr::value> { vector.X, vector.Y, vector.Z, vector.W });
 
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
+            std::vector<signalr::value> component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), fields };
+            components.insert({ i, component });
 
             break;
         }
@@ -166,14 +166,14 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
      * [2] uint? RecipientClientId
      * [3] map<uint, vec> Components
      */
-    std::vector<signalr::value> EventMessage { EventName.c_str(), (uint64_t)MultiplayerConnectionInst->GetClientId(),
-        (TargetClientId == ALL_CLIENTS_ID) ? signalr::value_type::null : signalr::value(TargetClientId), Components };
+    std::vector<signalr::value> eventMessage { eventName.c_str(), (uint64_t)m_multiplayerConnectionInst->GetClientId(),
+        (targetClientId == ALL_CLIENTS_ID) ? signalr::value_type::null : signalr::value(targetClientId), components };
 
-    std::vector<signalr::value> InvokeArguments;
-    InvokeArguments.push_back(EventMessage);
+    std::vector<signalr::value> invokeArguments;
+    invokeArguments.push_back(eventMessage);
 
-    ISignalRConnectionPtr->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), InvokeArguments, LocalCallback);
+    iSignalRConnectionPtr->Invoke(
+        m_multiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), invokeArguments, localCallback);
 }
 
 } // namespace csp::multiplayer

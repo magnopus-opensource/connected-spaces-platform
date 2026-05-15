@@ -65,8 +65,8 @@ public:
     csp::common::String SpaceId;
     /** @} */
 
-    bool operator==(const PointOfInterest& Other) const;
-    bool operator!=(const PointOfInterest& Other) const;
+    bool operator==(const PointOfInterest& other) const;
+    bool operator!=(const PointOfInterest& other) const;
 };
 
 /// @ingroup Point Of Interest System
@@ -86,9 +86,9 @@ public:
 private:
     POIResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    PointOfInterest POI;
+    PointOfInterest m_poi;
 };
 
 /// @ingroup Point Of Interest System
@@ -113,16 +113,16 @@ public:
 private:
     POICollectionResult(void*) {};
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<PointOfInterest> POIs;
+    csp::common::Array<PointOfInterest> m_poIs;
 };
 
 /// @brief Callback containing a Point Of Interest and enum result used when creating or retrieving a POI.
 /// @param Result POIResult : data class containing information on task result/progress
-typedef std::function<void(const POIResult& Result)> POIResultCallback;
+typedef std::function<void(const POIResult& result)> POIResultCallback;
 
 /// @brief Callback containing an array of Points Of Interest and enum result used when retrieving a POI collection.
 /// @param Result POIResult : data class containing information on task result/progress
-typedef std::function<void(const POICollectionResult& Result)> POICollectionResultCallback;
+typedef std::function<void(const POICollectionResult& result)> POICollectionResultCallback;
 } // namespace csp::systems

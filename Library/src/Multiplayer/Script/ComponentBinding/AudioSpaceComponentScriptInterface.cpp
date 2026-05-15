@@ -19,8 +19,8 @@
 
 namespace csp::multiplayer
 {
-csp::multiplayer::AudioSpaceComponentScriptInterface::AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent)
-    : ComponentScriptInterface(InComponent)
+csp::multiplayer::AudioSpaceComponentScriptInterface::AudioSpaceComponentScriptInterface(AudioSpaceComponent* inComponent)
+    : ComponentScriptInterface(inComponent)
 {
 }
 

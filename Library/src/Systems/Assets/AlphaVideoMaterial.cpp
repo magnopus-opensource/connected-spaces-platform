@@ -43,86 +43,86 @@ static constexpr const char* AlphaFactor = "alphaFactor";
 static constexpr const char* AlphaMask = "alphaMask";
 }
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj)
+void ToJson(csp::json::JsonSerializer& serializer, const csp::systems::AlphaVideoMaterial& obj)
 {
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::Name, Obj.Name);
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::ShaderType, static_cast<uint32_t>(Obj.Type));
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::Version, Obj.Version);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::Name, obj.m_name);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::ShaderType, static_cast<uint32_t>(obj.m_type));
+    serializer.SerializeMember(AlphaVideoMaterialProperties::Version, obj.m_version);
 
-    if (Obj.ColorTexture.IsSet())
+    if (obj.m_colorTexture.IsSet())
     {
-        Serializer.SerializeMember(AlphaVideoMaterialProperties::ColorTexture, Obj.ColorTexture);
+        serializer.SerializeMember(AlphaVideoMaterialProperties::ColorTexture, obj.m_colorTexture);
     }
 
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.IsDoubleSided);
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::IsEmissive, Obj.IsEmissive);
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::ReadAlphaFromChannel, static_cast<uint32_t>(Obj.ReadAlphaFromChannel));
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::BlendMode, static_cast<uint32_t>(Obj.BlendMode));
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::FresnelFactor, Obj.FresnelFactor);
-    Serializer.SerializeMember(
-        AlphaVideoMaterialProperties::Tint, csp::common::Array<float> { Obj.MaterialTint.X, Obj.MaterialTint.Y, Obj.MaterialTint.Z });
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::EmissiveIntensity, Obj.EmissiveIntensity);
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::AlphaFactor, Obj.AlphaFactor);
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::AlphaMask, Obj.AlphaMask);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::DoubleSided, obj.m_isDoubleSided);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::IsEmissive, obj.m_isEmissive);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::ReadAlphaFromChannel, static_cast<uint32_t>(obj.m_readAlphaFromChannel));
+    serializer.SerializeMember(AlphaVideoMaterialProperties::BlendMode, static_cast<uint32_t>(obj.m_blendMode));
+    serializer.SerializeMember(AlphaVideoMaterialProperties::FresnelFactor, obj.m_fresnelFactor);
+    serializer.SerializeMember(
+        AlphaVideoMaterialProperties::Tint, csp::common::Array<float> { obj.m_materialTint.X, obj.m_materialTint.Y, obj.m_materialTint.Z });
+    serializer.SerializeMember(AlphaVideoMaterialProperties::EmissiveIntensity, obj.m_emissiveIntensity);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::AlphaFactor, obj.m_alphaFactor);
+    serializer.SerializeMember(AlphaVideoMaterialProperties::AlphaMask, obj.m_alphaMask);
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj)
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::AlphaVideoMaterial& obj)
 {
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Name, Obj.Name);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Name, obj.m_name);
 
-    uint32_t ShaderType;
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ShaderType, ShaderType);
-    Obj.Type = static_cast<csp::systems::EShaderType>(ShaderType);
+    uint32_t shaderType;
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ShaderType, shaderType);
+    obj.m_type = static_cast<csp::systems::EShaderType>(shaderType);
 
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Version, Obj.Version);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Version, obj.m_version);
 
-    if (Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ColorTexture, Obj.ColorTexture))
+    if (deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ColorTexture, obj.m_colorTexture))
     {
-        Obj.ColorTexture.SetTexture(true);
+        obj.m_colorTexture.SetTexture(true);
     }
 
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.IsDoubleSided);
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::IsEmissive, Obj.IsEmissive);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::DoubleSided, obj.m_isDoubleSided);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::IsEmissive, obj.m_isEmissive);
 
-    uint32_t ReadAlphaFromChannel;
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ReadAlphaFromChannel, ReadAlphaFromChannel);
-    Obj.ReadAlphaFromChannel = static_cast<csp::systems::EColorChannel>(ReadAlphaFromChannel);
+    uint32_t readAlphaFromChannel;
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::ReadAlphaFromChannel, readAlphaFromChannel);
+    obj.m_readAlphaFromChannel = static_cast<csp::systems::EColorChannel>(readAlphaFromChannel);
 
-    uint32_t BlendMode;
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::BlendMode, BlendMode);
-    Obj.BlendMode = static_cast<csp::systems::EBlendMode>(BlendMode);
+    uint32_t blendMode;
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::BlendMode, blendMode);
+    obj.m_blendMode = static_cast<csp::systems::EBlendMode>(blendMode);
 
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::FresnelFactor, Obj.FresnelFactor);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::FresnelFactor, obj.m_fresnelFactor);
 
-    csp::common::Array<float> TintArray;
-    if (Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Tint, TintArray))
+    csp::common::Array<float> tintArray;
+    if (deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::Tint, tintArray))
     {
-        Obj.MaterialTint = csp::common::Vector3(TintArray[0], TintArray[1], TintArray[2]);
+        obj.m_materialTint = csp::common::Vector3(tintArray[0], tintArray[1], tintArray[2]);
     }
 
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::EmissiveIntensity, Obj.EmissiveIntensity);
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::AlphaFactor, Obj.AlphaFactor);
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::AlphaMask, Obj.AlphaMask);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::EmissiveIntensity, obj.m_emissiveIntensity);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::AlphaFactor, obj.m_alphaFactor);
+    deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::AlphaMask, obj.m_alphaMask);
 }
 
 namespace csp::systems
 {
 
 AlphaVideoMaterial::AlphaVideoMaterial(
-    const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-    : Material(Name, AssetCollectionId, AssetId, EShaderType::AlphaVideo, InitialMaterialVersion)
-    , ColorTexture()
-    , IsDoubleSided(false)
-    , IsEmissive(true)
-    , ReadAlphaFromChannel(EColorChannel::A)
-    , BlendMode(EBlendMode::Normal)
-    , FresnelFactor(0.0f)
-    , MaterialTint(1.0f, 1.0f, 1.0f)
-    , AlphaFactor(1.0f)
-    , EmissiveIntensity(1.0f)
-    , AlphaMask(0.02f)
+    const csp::common::String& name, const csp::common::String& assetCollectionId, const csp::common::String& assetId)
+    : Material(name, assetCollectionId, assetId, EShaderType::AlphaVideo, InitialMaterialVersion)
+    , m_colorTexture()
+    , m_isDoubleSided(false)
+    , m_isEmissive(true)
+    , m_readAlphaFromChannel(EColorChannel::A)
+    , m_blendMode(EBlendMode::Normal)
+    , m_fresnelFactor(0.0f)
+    , m_materialTint(1.0f, 1.0f, 1.0f)
+    , m_alphaFactor(1.0f)
+    , m_emissiveIntensity(1.0f)
+    , m_alphaMask(0.02f)
 {
-    ColorTexture.SetTexture(false);
+    m_colorTexture.SetTexture(false);
 }
 
 AlphaVideoMaterial::AlphaVideoMaterial()
@@ -130,44 +130,44 @@ AlphaVideoMaterial::AlphaVideoMaterial()
 {
 }
 
-void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorTexture = Texture; }
+void AlphaVideoMaterial::SetColorTexture(const TextureInfo& texture) { m_colorTexture = texture; }
 
-const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
+const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return m_colorTexture; }
 
-void AlphaVideoMaterial::SetDoubleSided(bool DoubleSided) { IsDoubleSided = DoubleSided; }
+void AlphaVideoMaterial::SetDoubleSided(bool doubleSided) { m_isDoubleSided = doubleSided; }
 
-bool AlphaVideoMaterial::GetDoubleSided() const { return IsDoubleSided; }
+bool AlphaVideoMaterial::GetDoubleSided() const { return m_isDoubleSided; }
 
-void AlphaVideoMaterial::SetIsEmissive(bool Emissive) { IsEmissive = Emissive; }
+void AlphaVideoMaterial::SetIsEmissive(bool emissive) { m_isEmissive = emissive; }
 
-bool AlphaVideoMaterial::GetIsEmissive() const { return IsEmissive; }
+bool AlphaVideoMaterial::GetIsEmissive() const { return m_isEmissive; }
 
-void AlphaVideoMaterial::SetReadAlphaFromChannel(EColorChannel ColorChannel) { ReadAlphaFromChannel = ColorChannel; }
+void AlphaVideoMaterial::SetReadAlphaFromChannel(EColorChannel colorChannel) { m_readAlphaFromChannel = colorChannel; }
 
-EColorChannel AlphaVideoMaterial::GetReadAlphaFromChannel() const { return ReadAlphaFromChannel; }
+EColorChannel AlphaVideoMaterial::GetReadAlphaFromChannel() const { return m_readAlphaFromChannel; }
 
-void AlphaVideoMaterial::SetBlendMode(EBlendMode Mode) { BlendMode = Mode; }
+void AlphaVideoMaterial::SetBlendMode(EBlendMode mode) { m_blendMode = mode; }
 
-EBlendMode AlphaVideoMaterial::GetBlendMode() const { return BlendMode; }
+EBlendMode AlphaVideoMaterial::GetBlendMode() const { return m_blendMode; }
 
-void AlphaVideoMaterial::SetFresnelFactor(float Factor) { FresnelFactor = Factor; }
+void AlphaVideoMaterial::SetFresnelFactor(float factor) { m_fresnelFactor = factor; }
 
-float AlphaVideoMaterial::GetFresnelFactor() const { return FresnelFactor; }
+float AlphaVideoMaterial::GetFresnelFactor() const { return m_fresnelFactor; }
 
-void AlphaVideoMaterial::SetTint(const csp::common::Vector3& Tint) { MaterialTint = Tint; }
+void AlphaVideoMaterial::SetTint(const csp::common::Vector3& tint) { m_materialTint = tint; }
 
-const csp::common::Vector3& AlphaVideoMaterial::GetTint() const { return MaterialTint; }
+const csp::common::Vector3& AlphaVideoMaterial::GetTint() const { return m_materialTint; }
 
-void AlphaVideoMaterial::SetAlphaFactor(float Factor) { AlphaFactor = Factor; }
+void AlphaVideoMaterial::SetAlphaFactor(float factor) { m_alphaFactor = factor; }
 
-float AlphaVideoMaterial::GetAlphaFactor() const { return AlphaFactor; }
+float AlphaVideoMaterial::GetAlphaFactor() const { return m_alphaFactor; }
 
-void AlphaVideoMaterial::SetEmissiveIntensity(float Intensity) { EmissiveIntensity = Intensity; }
+void AlphaVideoMaterial::SetEmissiveIntensity(float intensity) { m_emissiveIntensity = intensity; }
 
-float AlphaVideoMaterial::GetEmissiveIntensity() const { return EmissiveIntensity; }
+float AlphaVideoMaterial::GetEmissiveIntensity() const { return m_emissiveIntensity; }
 
-void AlphaVideoMaterial::SetAlphaMask(float Mask) { AlphaMask = Mask; }
+void AlphaVideoMaterial::SetAlphaMask(float mask) { m_alphaMask = mask; }
 
-float AlphaVideoMaterial::GetAlphaMask() const { return AlphaMask; }
+float AlphaVideoMaterial::GetAlphaMask() const { return m_alphaMask; }
 
 } // namespace csp::systems

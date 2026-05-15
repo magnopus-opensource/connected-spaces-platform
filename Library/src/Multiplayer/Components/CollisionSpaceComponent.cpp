@@ -85,8 +85,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }
 
-CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
     SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }
@@ -98,9 +98,9 @@ const csp::common::Vector3& CollisionSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(CollisionPropertyKeys::Position));
 }
 
-void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
@@ -108,9 +108,9 @@ const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(CollisionPropertyKeys::Rotation));
 }
 
-void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
@@ -118,23 +118,23 @@ const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(CollisionPropertyKeys::Scale));
 }
 
-void CollisionSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale), Value); }
+void CollisionSpaceComponent::SetScale(const csp::common::Vector3& value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale), value); }
 
 SpaceTransform CollisionSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void CollisionSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void CollisionSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 CollisionShape CollisionSpaceComponent::GetCollisionShape() const
@@ -162,9 +162,9 @@ const csp::common::String& CollisionSpaceComponent::GetCollisionAssetId() const
     return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId));
 }
 
-void CollisionSpaceComponent::SetCollisionAssetId(const csp::common::String& Value)
+void CollisionSpaceComponent::SetCollisionAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId), Value);
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId), value);
 }
 
 const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
@@ -172,9 +172,9 @@ const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
     return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId));
 }
 
-void CollisionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void CollisionSpaceComponent::SetAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId), value);
 }
 
 const csp::common::Vector3 CollisionSpaceComponent::GetUnscaledBoundingBoxMin() { return csp::common::Vector3(-0.5f, -0.5f, -0.5f); }
@@ -202,13 +202,13 @@ const csp::common::String& CollisionSpaceComponent::GetThirdPartyComponentRef() 
     return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef));
 }
 
-void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& inValue)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), inValue);
 }
 
 bool CollisionSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled)); }
 
-void CollisionSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), Value); }
+void CollisionSpaceComponent::SetIsEnabled(bool value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), value); }
 
 } // namespace csp::multiplayer

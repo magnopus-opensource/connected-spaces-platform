@@ -27,35 +27,35 @@ namespace chs = csp::services::generated::prototypeservice;
 namespace csp::systems
 {
 
-csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType)
+csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& dtoAssetDetailType)
 {
-    if (DTOAssetDetailType == "Image")
+    if (dtoAssetDetailType == "Image")
         return csp::systems::EAssetType::IMAGE;
-    else if (DTOAssetDetailType == "Thumbnail")
+    else if (dtoAssetDetailType == "Thumbnail")
         return csp::systems::EAssetType::THUMBNAIL;
-    else if (DTOAssetDetailType == "Simulation")
+    else if (dtoAssetDetailType == "Simulation")
         return csp::systems::EAssetType::SIMULATION;
-    else if (DTOAssetDetailType == "Model")
+    else if (dtoAssetDetailType == "Model")
         return csp::systems::EAssetType::MODEL;
-    else if (DTOAssetDetailType == "Video")
+    else if (dtoAssetDetailType == "Video")
         return csp::systems::EAssetType::VIDEO;
-    else if (DTOAssetDetailType == "ScriptLibrary")
+    else if (dtoAssetDetailType == "ScriptLibrary")
         return csp::systems::EAssetType::SCRIPT_LIBRARY;
-    else if (DTOAssetDetailType == "HolocapVideo")
+    else if (dtoAssetDetailType == "HolocapVideo")
         return csp::systems::EAssetType::HOLOCAP_VIDEO;
-    else if (DTOAssetDetailType == "HolocapAudio")
+    else if (dtoAssetDetailType == "HolocapAudio")
         return csp::systems::EAssetType::HOLOCAP_AUDIO;
-    else if (DTOAssetDetailType == "Audio")
+    else if (dtoAssetDetailType == "Audio")
         return csp::systems::EAssetType::AUDIO;
-    else if (DTOAssetDetailType == "GaussianSplat")
+    else if (dtoAssetDetailType == "GaussianSplat")
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
-    else if (DTOAssetDetailType == "Material")
+    else if (dtoAssetDetailType == "Material")
         return csp::systems::EAssetType::MATERIAL;
-    else if (DTOAssetDetailType == "Annotation")
+    else if (dtoAssetDetailType == "Annotation")
         return csp::systems::EAssetType::ANNOTATION;
-    else if (DTOAssetDetailType == "AnnotationThumbnail")
+    else if (dtoAssetDetailType == "AnnotationThumbnail")
         return csp::systems::EAssetType::ANNOTATION_THUMBNAIL;
-    else if (DTOAssetDetailType == "Text")
+    else if (dtoAssetDetailType == "Text")
         return csp::systems::EAssetType::TEXT;
     else
     {
@@ -64,9 +64,9 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
     }
 }
 
-csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
+csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& platform)
 {
-    if (Platform == "Default")
+    if (platform == "Default")
     {
         return EAssetPlatform::DEFAULT;
     }
@@ -77,9 +77,9 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
     }
 }
 
-csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
+csp::common::String ConvertAssetPlatformToString(EAssetPlatform platform)
 {
-    switch (Platform)
+    switch (platform)
     {
     case EAssetPlatform::DEFAULT:
         return "Default";
@@ -94,94 +94,94 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 namespace csp::systems
 {
 
-void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset)
+void AssetDetailDtoToAsset(const chs::AssetDetailDto& dto, csp::systems::Asset& asset)
 {
-    if (Dto.HasPrototypeId())
+    if (dto.HasPrototypeId())
     {
-        Asset.AssetCollectionId = Dto.GetPrototypeId();
+        asset.AssetCollectionId = dto.GetPrototypeId();
     }
 
-    if (Dto.HasId())
+    if (dto.HasId())
     {
-        Asset.Id = Dto.GetId();
+        asset.Id = dto.GetId();
     }
 
-    if (Dto.HasFileName())
+    if (dto.HasFileName())
     {
-        Asset.FileName = Dto.GetFileName();
+        asset.FileName = dto.GetFileName();
     }
 
-    if (Dto.HasName())
+    if (dto.HasName())
     {
-        Asset.Name = Dto.GetName();
+        asset.Name = dto.GetName();
     }
 
-    if (Dto.HasLanguageCode())
+    if (dto.HasLanguageCode())
     {
-        Asset.LanguageCode = Dto.GetLanguageCode();
+        asset.LanguageCode = dto.GetLanguageCode();
     }
 
-    if (Dto.HasAssetType())
+    if (dto.HasAssetType())
     {
-        Asset.Type = ConvertDTOAssetDetailType(Dto.GetAssetType());
+        asset.Type = ConvertDTOAssetDetailType(dto.GetAssetType());
     }
 
-    if (Dto.HasSupportedPlatforms())
+    if (dto.HasSupportedPlatforms())
     {
-        const auto& Platforms = Dto.GetSupportedPlatforms();
-        Asset.Platforms = csp::common::Array<csp::systems::EAssetPlatform>(Platforms.size());
+        const auto& platforms = dto.GetSupportedPlatforms();
+        asset.Platforms = csp::common::Array<csp::systems::EAssetPlatform>(platforms.size());
 
-        for (size_t i = 0; i < Platforms.size(); ++i)
+        for (size_t i = 0; i < platforms.size(); ++i)
         {
             // TODO Move this to a separate function when we have some different values than DEFAULT
-            Asset.Platforms[i] = ConvertStringToAssetPlatform(Platforms[i]);
+            asset.Platforms[i] = ConvertStringToAssetPlatform(platforms[i]);
         }
     }
 
-    if (Dto.HasStyle())
+    if (dto.HasStyle())
     {
-        Asset.Styles = csp::common::Convert(Dto.GetStyle());
+        asset.Styles = csp::common::Convert(dto.GetStyle());
     }
 
-    if (Dto.HasAddressableId())
+    if (dto.HasAddressableId())
     {
         // TODO CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
-        const auto& InAddressableId = Dto.GetAddressableId().Split('|');
-        if (InAddressableId.Size() == 2)
+        const auto& inAddressableId = dto.GetAddressableId().Split('|');
+        if (inAddressableId.Size() == 2)
         {
-            Asset.ThirdPartyPlatformType = static_cast<EThirdPartyPlatform>(std::stoi(InAddressableId[1].c_str()));
-            Asset.ThirdPartyPackagedAssetIdentifier = InAddressableId[0];
+            asset.ThirdPartyPlatformType = static_cast<EThirdPartyPlatform>(std::stoi(inAddressableId[1].c_str()));
+            asset.ThirdPartyPackagedAssetIdentifier = inAddressableId[0];
         }
         else
         {
-            Asset.ThirdPartyPackagedAssetIdentifier = Dto.GetAddressableId();
-            Asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
+            asset.ThirdPartyPackagedAssetIdentifier = dto.GetAddressableId();
+            asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
         }
     }
     else
     {
-        Asset.ThirdPartyPackagedAssetIdentifier = "";
-        Asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
+        asset.ThirdPartyPackagedAssetIdentifier = "";
+        asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
     }
 
-    if (Dto.HasUri())
+    if (dto.HasUri())
     {
-        Asset.Uri = Dto.GetUri();
+        asset.Uri = dto.GetUri();
     }
 
-    if (Dto.HasChecksum())
+    if (dto.HasChecksum())
     {
-        Asset.Checksum = Dto.GetChecksum();
+        asset.Checksum = dto.GetChecksum();
     }
 
-    if (Dto.HasVersion())
+    if (dto.HasVersion())
     {
-        Asset.Version = std::stoi(Dto.GetVersion().c_str());
+        asset.Version = std::stoi(dto.GetVersion().c_str());
     }
 
-    if (Dto.HasMimeType())
+    if (dto.HasMimeType())
     {
-        Asset.MimeType = Dto.GetMimeType();
+        asset.MimeType = dto.GetMimeType();
     }
 }
 
@@ -193,28 +193,28 @@ Asset::Asset()
 {
 }
 
-bool Asset::operator==(const Asset& Other) const
+bool Asset::operator==(const Asset& other) const
 {
-    return AssetCollectionId == Other.AssetCollectionId && Id == Other.Id && FileName == Other.FileName && Name == Other.Name
-        && LanguageCode == Other.LanguageCode && Type == Other.Type && Platforms == Other.Platforms && Styles == Other.Styles
-        && ExternalUri == Other.ExternalUri && Uri == Other.Uri && Checksum == Other.Checksum && Version == Other.Version
-        && MimeType == Other.MimeType && ExternalMimeType == Other.ExternalMimeType
-        && ThirdPartyPackagedAssetIdentifier == Other.ThirdPartyPackagedAssetIdentifier && ThirdPartyPlatformType == Other.ThirdPartyPlatformType;
+    return AssetCollectionId == other.AssetCollectionId && Id == other.Id && FileName == other.FileName && Name == other.Name
+        && LanguageCode == other.LanguageCode && Type == other.Type && Platforms == other.Platforms && Styles == other.Styles
+        && ExternalUri == other.ExternalUri && Uri == other.Uri && Checksum == other.Checksum && Version == other.Version
+        && MimeType == other.MimeType && ExternalMimeType == other.ExternalMimeType
+        && ThirdPartyPackagedAssetIdentifier == other.ThirdPartyPackagedAssetIdentifier && ThirdPartyPlatformType == other.ThirdPartyPlatformType;
 }
 
-bool Asset::operator!=(const Asset& Other) const { return !(*this == Other); }
+bool Asset::operator!=(const Asset& other) const { return !(*this == other); }
 
-const csp::common::String& FileAssetDataSource::GetMimeType() const { return MimeType; }
+const csp::common::String& FileAssetDataSource::GetMimeType() const { return m_mimeType; }
 
-void FileAssetDataSource::SetMimeType(const csp::common::String& InMimeType) { MimeType = InMimeType; }
+void FileAssetDataSource::SetMimeType(const csp::common::String& inMimeType) { m_mimeType = inMimeType; }
 
 void FileAssetDataSource::SetUploadContent(
-    csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
+    csp::web::WebClient* inWebClient, csp::web::HttpPayload* inPayload, const csp::systems::Asset& inAsset) const
 {
     assert(!FilePath.IsEmpty());
 
-    auto Version = std::to_string(std::abs(InAsset.Version) /* Version should not be negative */);
-    InWebClient->SetFileUploadContentFromFile(InPayload, FilePath, Version.c_str(), MimeType);
+    auto version = std::to_string(std::abs(inAsset.Version) /* Version should not be negative */);
+    inWebClient->SetFileUploadContentFromFile(inPayload, FilePath, version.c_str(), m_mimeType);
 }
 
 BufferAssetDataSource::BufferAssetDataSource()
@@ -223,108 +223,108 @@ BufferAssetDataSource::BufferAssetDataSource()
 {
 }
 
-const csp::common::String& BufferAssetDataSource::GetMimeType() const { return MimeType; }
+const csp::common::String& BufferAssetDataSource::GetMimeType() const { return m_mimeType; }
 
-void BufferAssetDataSource::SetMimeType(const csp::common::String& InMimeType) { MimeType = InMimeType; }
+void BufferAssetDataSource::SetMimeType(const csp::common::String& inMimeType) { m_mimeType = inMimeType; }
 
 void BufferAssetDataSource::SetUploadContent(
-    csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
+    csp::web::WebClient* inWebClient, csp::web::HttpPayload* inPayload, const csp::systems::Asset& inAsset) const
 {
     assert(Buffer != nullptr);
     assert(BufferLength > 0);
-    assert(!InAsset.FileName.IsEmpty());
+    assert(!inAsset.FileName.IsEmpty());
 
-    auto Version = std::to_string(std::abs(InAsset.Version) /* Version should not be negative */);
-    InWebClient->SetFileUploadContentFromBuffer(
-        InPayload, reinterpret_cast<const char*>(Buffer), BufferLength, InAsset.FileName, Version.c_str(), MimeType);
+    auto version = std::to_string(std::abs(inAsset.Version) /* Version should not be negative */);
+    inWebClient->SetFileUploadContentFromBuffer(
+        inPayload, reinterpret_cast<const char*>(Buffer), BufferLength, inAsset.FileName, version.c_str(), m_mimeType);
 }
 
-Asset& AssetResult::GetAsset() { return Asset; }
+Asset& AssetResult::GetAsset() { return m_asset; }
 
-const Asset& AssetResult::GetAsset() const { return Asset; }
+const Asset& AssetResult::GetAsset() const { return m_asset; }
 
-void AssetResult::SetAsset(const csp::systems::Asset& SetAsset) { this->Asset = SetAsset; }
+void AssetResult::SetAsset(const csp::systems::Asset& setAsset) { this->m_asset = setAsset; }
 
-void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AssetDetailResponse = static_cast<chs::AssetDetailDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* assetDetailResponse = static_cast<chs::AssetDetailDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
+        assetDetailResponse->FromJson(response->GetPayload().GetContent());
 
-        AssetDetailDtoToAsset(*AssetDetailResponse, Asset);
+        AssetDetailDtoToAsset(*assetDetailResponse, m_asset);
     }
 }
 
-csp::common::Array<Asset>& AssetsResult::GetAssets() { return Assets; }
+csp::common::Array<Asset>& AssetsResult::GetAssets() { return m_assets; }
 
-const csp::common::Array<Asset>& AssetsResult::GetAssets() const { return Assets; }
+const csp::common::Array<Asset>& AssetsResult::GetAssets() const { return m_assets; }
 
-void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetsResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AssetsResponse = static_cast<csp::services::DtoArray<chs::AssetDetailDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* assetsResponse = static_cast<csp::services::DtoArray<chs::AssetDetailDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetsResponse->FromJson(Response->GetPayload().GetContent());
+        assetsResponse->FromJson(response->GetPayload().GetContent());
 
-        std::vector<chs::AssetDetailDto>& DetailsArray = AssetsResponse->GetArray();
-        Assets = csp::common::Array<csp::systems::Asset>(DetailsArray.size());
+        std::vector<chs::AssetDetailDto>& detailsArray = assetsResponse->GetArray();
+        m_assets = csp::common::Array<csp::systems::Asset>(detailsArray.size());
 
         // Extract data from response in our Projects array
-        for (size_t i = 0; i < DetailsArray.size(); ++i)
+        for (size_t i = 0; i < detailsArray.size(); ++i)
         {
-            AssetDetailDtoToAsset(DetailsArray[i], Assets[i]);
+            AssetDetailDtoToAsset(detailsArray[i], m_assets[i]);
         }
     }
 }
 
-const csp::common::String& UriResult::GetUri() const { return Uri; }
+const csp::common::String& UriResult::GetUri() const { return m_uri; }
 
-void UriResult::SetUri(const csp::common::String& Value) { Uri = Value; }
+void UriResult::SetUri(const csp::common::String& value) { m_uri = value; }
 
-UriResult::UriResult(const csp::common::String Uri)
-    : Uri(Uri)
+UriResult::UriResult(const csp::common::String uri)
+    : m_uri(uri)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
 
-void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void UriResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    const auto* Response = ApiResponse->GetResponse();
+    const auto* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Uri = Response->GetPayload().GetContent();
+        m_uri = response->GetPayload().GetContent();
     }
 }
 
-void UriResult::SetResponseBody(const csp::common::String& Contents) { ResponseBody = Contents; }
+void UriResult::SetResponseBody(const csp::common::String& contents) { m_responseBody = contents; }
 
 AssetDataResult::AssetDataResult(void*) { }
 
-AssetDataResult::AssetDataResult(const AssetDataResult& Other)
-    : ResultBase(Other)
+AssetDataResult::AssetDataResult(const AssetDataResult& other)
+    : ResultBase(other)
 {
 }
 
 AssetDataResult::~AssetDataResult() { }
 
-const void* AssetDataResult::GetData() const { return ResponseBody.c_str(); }
+const void* AssetDataResult::GetData() const { return m_responseBody.c_str(); }
 
-size_t AssetDataResult::GetDataLength() const { return ResponseBody.Length(); }
+size_t AssetDataResult::GetDataLength() const { return m_responseBody.Length(); }
 
-void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* apiResponse) { ResultBase::OnResponse(apiResponse); }
 
 } // namespace csp::systems

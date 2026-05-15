@@ -47,7 +47,7 @@ public:
     /// File exists within the Build/Logs folder in the following format:
     /// LOG_"%Y-%m-%d_%H-%M-%S.txt
     /// @param : LogMessage const std::string : String to write
-    static void SaveLogToFile(const std::string LogMessage)
+    static void SaveLogToFile(const std::string logMessage)
     {
 #if (defined DEBUG) && (defined _WINDOWS)
         time_t Rawtime;
@@ -72,11 +72,11 @@ public:
 
         std::ofstream OutFileStream;
         OutFileStream.open(LogFilePath, std::ios_base::app);
-        OutFileStream << "[" + CurrentTime + ":" + std::to_string(ChronoMilliseconds) + "] " + LogMessage;
+        OutFileStream << "[" + CurrentTime + ":" + std::to_string(ChronoMilliseconds) + "] " + logMessage;
         OutFileStream.close();
 #else
         // Suppress the unused parameter warning
-        (void)LogMessage;
+        (void)logMessage;
 #endif
     }
 
@@ -87,79 +87,79 @@ public:
     /// @param Message const std::string& : Message to log
     /// @param LogLevel csp::common::LogLevel : Verbosity of the log
     /// @param ShowLineNumber bool : Whether to display the line number in the log
-    static void LogOutput(const char* File, int Line, const std::string& Message, csp::common::LogLevel LogLevel, bool ShowLineNumber)
+    static void LogOutput(const char* file, int line, const std::string& message, csp::common::LogLevel logLevel, bool showLineNumber)
     {
-        std::string CategoryStr = "";
+        std::string categoryStr = "";
 
-        switch (LogLevel)
+        switch (logLevel)
         {
         case csp::common::LogLevel::NoLogging:
         {
-            CategoryStr = "NoLogging";
+            categoryStr = "NoLogging";
             break;
         }
         case csp::common::LogLevel::Fatal:
         {
-            CategoryStr = "WarningLog";
+            categoryStr = "WarningLog";
             break;
         }
         case csp::common::LogLevel::Error:
         {
-            CategoryStr = "WarningLog";
+            categoryStr = "WarningLog";
             break;
         }
         case csp::common::LogLevel::Warning:
         {
-            CategoryStr = "Warning";
+            categoryStr = "Warning";
             break;
         }
         case csp::common::LogLevel::Display:
         {
-            CategoryStr = "Display";
+            categoryStr = "Display";
             break;
         }
         case csp::common::LogLevel::Log:
         {
-            CategoryStr = "Log";
+            categoryStr = "Log";
             break;
         }
         case csp::common::LogLevel::Verbose:
         {
-            CategoryStr = "Verbose";
+            categoryStr = "Verbose";
             break;
         }
         case csp::common::LogLevel::VeryVerbose:
         {
-            CategoryStr = "VeryVerbose";
+            categoryStr = "VeryVerbose";
             break;
         }
         default:
         case csp::common::LogLevel::All:
         {
-            CategoryStr = "All";
+            categoryStr = "All";
             break;
         }
         };
 
-        std::string FileName(File);
-        std::string OutputMessage
-            = ShowLineNumber ? CategoryStr + ": " + FileName + "(" + std::to_string(Line) + "): " + Message : CategoryStr + ": " + Message;
+        std::string fileName(file);
+        std::string outputMessage
+            = showLineNumber ? categoryStr + ": " + fileName + "(" + std::to_string(line) + "): " + message : categoryStr + ": " + message;
 
-        if (OutputMessage.back() != '\n')
+        if (outputMessage.back() != '\n')
         {
-            OutputMessage += '\n';
+            outputMessage += '\n';
         }
 
 #ifdef CSP_WINDOWS
         // Print to VS console (if attached)
-        OutputDebugStringA(OutputMessage.c_str());
+        OutputDebugStringA(outputMessage.c_str());
 #endif
 
 #ifdef CSP_ANDROID
         __android_log_print(ANDROID_LOG_INFO, CategoryStr.c_str(), "%s", OutputMessage.c_str());
 #endif
 
-        SaveLogToFile(OutputMessage);
+        SaveLogToFile(outputMessage);
     }
 };
 

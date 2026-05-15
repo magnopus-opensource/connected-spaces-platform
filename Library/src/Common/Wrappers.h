@@ -24,11 +24,11 @@
 #define STRNCPY(Dest, Len, Src, Count) (strncpy_s(Dest, Len, Src, Count), Dest)
 #define STRCPY(Dest, Len, Src) (strcpy_s(Dest, Len, Src), Dest)
 
-inline FILE* FOPEN(const char* FileName, const char* Mode)
+inline FILE* FOPEN(const char* fileName, const char* mode)
 {
-    FILE* File;
+    FILE* file;
 
-    return (fopen_s(&File, FileName, Mode) == 0) ? File : nullptr;
+    return (fopen_s(&file, fileName, mode) == 0) ? file : nullptr;
 }
 
 #else

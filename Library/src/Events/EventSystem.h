@@ -32,15 +32,15 @@ public:
 
     /// @brief Create a new event instance
     /// @note The event will be deleted after it has been processed in ProcessEvents
-    Event* AllocateEvent(const EventId& Id);
+    Event* AllocateEvent(const EventId& id);
 
     /// @brief Enqueue an event to be sent later
     /// @note This call is thread safe
     /// @param InEvent
-    void EnqueueEvent(const Event* InEvent);
+    void EnqueueEvent(const Event* inEvent);
 
-    void RegisterListener(const EventId& Id, EventListener* InListener);
-    void UnRegisterListener(const EventId& Id, EventListener* InListener);
+    void RegisterListener(const EventId& id, EventListener* inListener);
+    void UnRegisterListener(const EventId& id, EventListener* inListener);
 
     void UnRegisterAllListeners();
 
@@ -49,7 +49,7 @@ public:
 
 private:
     // Internal implementation
-    class EventSystemImpl* Impl;
+    class EventSystemImpl* m_impl;
 };
 
 } // namespace csp::events

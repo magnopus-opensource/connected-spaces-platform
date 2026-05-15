@@ -37,29 +37,29 @@ namespace chs_spatial = csp::services::generated::spatialdataservice;
 namespace
 {
 
-void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::BasicSpace& BasicSpace)
+void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& dto, csp::systems::BasicSpace& basicSpace)
 {
-    BasicSpace.Id = Dto.GetId();
-    BasicSpace.Name = Dto.GetName();
+    basicSpace.Id = dto.GetId();
+    basicSpace.Name = dto.GetName();
 
-    if (Dto.HasDiscoverable() && Dto.GetDiscoverable())
+    if (dto.HasDiscoverable() && dto.GetDiscoverable())
     {
-        BasicSpace.Attributes |= csp::systems::SpaceAttributes::IsDiscoverable;
+        basicSpace.Attributes |= csp::systems::SpaceAttributes::IsDiscoverable;
     }
 
-    if (Dto.HasRequiresInvite() && Dto.GetRequiresInvite())
+    if (dto.HasRequiresInvite() && dto.GetRequiresInvite())
     {
-        BasicSpace.Attributes |= csp::systems::SpaceAttributes::RequiresInvite;
+        basicSpace.Attributes |= csp::systems::SpaceAttributes::RequiresInvite;
     }
 
-    if (Dto.HasDescription())
+    if (dto.HasDescription())
     {
-        BasicSpace.Description = Dto.GetDescription();
+        basicSpace.Description = dto.GetDescription();
     }
 
-    if (Dto.HasTags())
+    if (dto.HasTags())
     {
-        BasicSpace.Tags = csp::common::Convert(Dto.GetTags());
+        basicSpace.Tags = csp::common::Convert(dto.GetTags());
     }
 }
 
@@ -68,348 +68,348 @@ void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::
 namespace csp::systems
 {
 
-void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
+void GroupDtoToSpace(const chs_users::GroupDto& dto, csp::systems::Space& space)
 {
-    Space.Id = Dto.GetId();
-    Space.CreatedBy = Dto.GetCreatedBy();
-    Space.CreatedAt = Dto.GetCreatedAt();
-    Space.OwnerId = Dto.GetGroupOwnerId();
-    Space.Name = Dto.GetName();
+    space.Id = dto.GetId();
+    space.CreatedBy = dto.GetCreatedBy();
+    space.CreatedAt = dto.GetCreatedAt();
+    space.OwnerId = dto.GetGroupOwnerId();
+    space.Name = dto.GetName();
 
-    if (Dto.HasDiscoverable() && Dto.GetDiscoverable())
+    if (dto.HasDiscoverable() && dto.GetDiscoverable())
     {
-        Space.Attributes |= csp::systems::SpaceAttributes::IsDiscoverable;
+        space.Attributes |= csp::systems::SpaceAttributes::IsDiscoverable;
     }
 
-    if (Dto.HasRequiresInvite() && Dto.GetRequiresInvite())
+    if (dto.HasRequiresInvite() && dto.GetRequiresInvite())
     {
-        Space.Attributes |= csp::systems::SpaceAttributes::RequiresInvite;
+        space.Attributes |= csp::systems::SpaceAttributes::RequiresInvite;
     }
 
-    if (Dto.HasDescription())
+    if (dto.HasDescription())
     {
-        Space.Description = Dto.GetDescription();
+        space.Description = dto.GetDescription();
     }
 
-    if (Dto.HasTags())
+    if (dto.HasTags())
     {
-        Space.Tags = csp::common::Convert(Dto.GetTags());
+        space.Tags = csp::common::Convert(dto.GetTags());
     }
 
-    if (Dto.HasUsers())
+    if (dto.HasUsers())
     {
-        Space.UserIds = csp::common::Convert(Dto.GetUsers());
+        space.UserIds = csp::common::Convert(dto.GetUsers());
     }
 
-    if (Dto.HasModerators())
+    if (dto.HasModerators())
     {
-        Space.ModeratorIds = csp::common::Convert(Dto.GetModerators());
+        space.ModeratorIds = csp::common::Convert(dto.GetModerators());
     }
 
-    if (Dto.HasBannedUsers())
+    if (dto.HasBannedUsers())
     {
-        Space.BannedUserIds = csp::common::Convert(Dto.GetBannedUsers());
+        space.BannedUserIds = csp::common::Convert(dto.GetBannedUsers());
     }
 }
 
-bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
+bool Space::UserIsKnownToSpace(const csp::common::String userId) const
 {
-    return std::any_of(UserIds.cbegin(), UserIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
-        || std::any_of(ModeratorIds.cbegin(), ModeratorIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
-        || UserId == OwnerId;
+    return std::any_of(UserIds.cbegin(), UserIds.cend(), [userId](const csp::common::String& id) { return id == userId; })
+        || std::any_of(ModeratorIds.cbegin(), ModeratorIds.cend(), [userId](const csp::common::String& id) { return id == userId; })
+        || userId == OwnerId;
 }
 
-bool BasicSpace::operator==(const BasicSpace& Other) const
+bool BasicSpace::operator==(const BasicSpace& other) const
 {
-    return Id == Other.Id && Name == Other.Name && Description == Other.Description && Attributes == Other.Attributes && Tags == Other.Tags;
+    return Id == other.Id && Name == other.Name && Description == other.Description && Attributes == other.Attributes && Tags == other.Tags;
 }
 
-bool Space::operator==(const Space& Other) const
+bool Space::operator==(const Space& other) const
 {
-    return BasicSpace::operator==(Other) && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && OwnerId == Other.OwnerId
-        && UserIds == Other.UserIds && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
+    return BasicSpace::operator==(other) && CreatedBy == other.CreatedBy && CreatedAt == other.CreatedAt && OwnerId == other.OwnerId
+        && UserIds == other.UserIds && ModeratorIds == other.ModeratorIds && BannedUserIds == other.BannedUserIds;
 }
 
-bool BasicSpace::operator!=(const BasicSpace& Other) const { return !(*this == Other); }
-bool Space::operator!=(const Space& Other) const { return !(*this == Other); }
+bool BasicSpace::operator!=(const BasicSpace& other) const { return !(*this == other); }
+bool Space::operator!=(const Space& other) const { return !(*this == other); }
 
-const Space& SpaceResult::GetSpace() const { return Space; }
+const Space& SpaceResult::GetSpace() const { return m_space; }
 
-const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }
+const csp::common::String& SpaceResult::GetSpaceCode() const { return m_spaceCode; }
 
-void SpaceResult::SetSpace(const csp::systems::Space& InSpace) { Space = InSpace; }
+void SpaceResult::SetSpace(const csp::systems::Space& inSpace) { m_space = inSpace; }
 
-void SpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* GroupResponse = static_cast<chs_users::GroupDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* groupResponse = static_cast<chs_users::GroupDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupResponse->FromJson(Response->GetPayload().GetContent());
-        GroupDtoToSpace(*GroupResponse, Space);
+        groupResponse->FromJson(response->GetPayload().GetContent());
+        GroupDtoToSpace(*groupResponse, m_space);
 
-        if (GroupResponse->HasGroupCode())
+        if (groupResponse->HasGroupCode())
         {
-            SpaceCode = GroupResponse->GetGroupCode();
+            m_spaceCode = groupResponse->GetGroupCode();
         }
     }
 }
 
-Array<Space>& SpacesResult::GetSpaces() { return Spaces; }
+Array<Space>& SpacesResult::GetSpaces() { return m_spaces; }
 
-const Array<Space>& SpacesResult::GetSpaces() const { return Spaces; }
+const Array<Space>& SpacesResult::GetSpaces() const { return m_spaces; }
 
-void SpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpacesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* GroupsResponse = static_cast<csp::services::DtoArray<chs_users::GroupDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* groupsResponse = static_cast<csp::services::DtoArray<chs_users::GroupDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupsResponse->FromJson(Response->GetPayload().GetContent());
+        groupsResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from response in our Groups array
-        std::vector<chs_users::GroupDto>& GroupArray = GroupsResponse->GetArray();
-        Spaces = Array<csp::systems::Space>(GroupArray.size());
+        std::vector<chs_users::GroupDto>& groupArray = groupsResponse->GetArray();
+        m_spaces = Array<csp::systems::Space>(groupArray.size());
 
-        for (size_t i = 0; i < GroupArray.size(); ++i)
+        for (size_t i = 0; i < groupArray.size(); ++i)
         {
-            GroupDtoToSpace(GroupArray[i], Spaces[i]);
+            GroupDtoToSpace(groupArray[i], m_spaces[i]);
         }
     }
 }
 
-BasicSpace& BasicSpaceResult::GetSpace() { return Space; }
+BasicSpace& BasicSpaceResult::GetSpace() { return m_space; }
 
-const BasicSpace& BasicSpaceResult::GetSpace() const { return Space; }
+const BasicSpace& BasicSpaceResult::GetSpace() const { return m_space; }
 
-void BasicSpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicSpaceResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* LiteGroupResponse = static_cast<chs_users::GroupLiteDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* liteGroupResponse = static_cast<chs_users::GroupLiteDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        LiteGroupResponse->FromJson(Response->GetPayload().GetContent());
+        liteGroupResponse->FromJson(response->GetPayload().GetContent());
 
-        GroupLiteDtoToBasicSpace(*LiteGroupResponse, Space);
+        GroupLiteDtoToBasicSpace(*liteGroupResponse, m_space);
     }
 }
 
-Array<BasicSpace>& BasicSpacesResult::GetSpaces() { return Spaces; }
+Array<BasicSpace>& BasicSpacesResult::GetSpaces() { return m_spaces; }
 
-const Array<BasicSpace>& BasicSpacesResult::GetSpaces() const { return Spaces; }
+const Array<BasicSpace>& BasicSpacesResult::GetSpaces() const { return m_spaces; }
 
-uint64_t BasicSpacesResult::GetTotalCount() const { return ResultTotalCount; }
+uint64_t BasicSpacesResult::GetTotalCount() const { return m_resultTotalCount; }
 
-void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* GroupsResponse = static_cast<csp::services::DtoArray<chs_users::GroupLiteDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* groupsResponse = static_cast<csp::services::DtoArray<chs_users::GroupLiteDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupsResponse->FromJson(Response->GetPayload().GetContent());
-        FillResultTotalCount(Response->GetPayload().GetContent());
+        groupsResponse->FromJson(response->GetPayload().GetContent());
+        FillResultTotalCount(response->GetPayload().GetContent());
 
         // Extract data from response in our Groups array
-        std::vector<chs_users::GroupLiteDto>& GroupArray = GroupsResponse->GetArray();
-        Spaces = Array<csp::systems::BasicSpace>(GroupArray.size());
+        std::vector<chs_users::GroupLiteDto>& groupArray = groupsResponse->GetArray();
+        m_spaces = Array<csp::systems::BasicSpace>(groupArray.size());
 
-        for (size_t i = 0; i < GroupArray.size(); ++i)
+        for (size_t i = 0; i < groupArray.size(); ++i)
         {
-            GroupLiteDtoToBasicSpace(GroupArray[i], Spaces[i]);
+            GroupLiteDtoToBasicSpace(groupArray[i], m_spaces[i]);
         }
     }
 }
 
-void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
+void BasicSpacesResult::FillResultTotalCount(const String& jsonContent)
 {
-    assert(JsonContent.c_str());
+    assert(jsonContent.c_str());
 
-    rapidjson::Document JsonDoc;
-    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "BasicSpacesResult::FillResultTotalCount");
+    rapidjson::Document jsonDoc;
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(jsonDoc, jsonContent, "BasicSpacesResult::FillResultTotalCount");
     if (!ok)
     {
         return;
     }
 
-    ResultTotalCount = 0;
-    if (JsonDoc.HasMember("itemTotalCount"))
+    m_resultTotalCount = 0;
+    if (jsonDoc.HasMember("itemTotalCount"))
     {
-        rapidjson::Value& Val = JsonDoc["itemTotalCount"];
-        auto TotalCountStr = csp::web::JsonObjectToString(Val);
+        rapidjson::Value& val = jsonDoc["itemTotalCount"];
+        auto totalCountStr = csp::web::JsonObjectToString(val);
 
-        uint64_t ConvertedTotalCount = 0;
-        const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+        uint64_t convertedTotalCount = 0;
+        const auto result = std::from_chars(totalCountStr.c_str(), totalCountStr.c_str() + totalCountStr.Length(), convertedTotalCount);
         if (result.ec == std::errc())
         {
-            ResultTotalCount = ConvertedTotalCount;
+            m_resultTotalCount = convertedTotalCount;
         }
     }
 }
 
-const Map<String, String>& SpaceMetadataResult::GetMetadata() const { return Metadata; }
+const Map<String, String>& SpaceMetadataResult::GetMetadata() const { return m_metadata; }
 
-void SpaceMetadataResult::SetMetadata(const Map<String, String>& InMetadata) { Metadata = InMetadata; }
+void SpaceMetadataResult::SetMetadata(const Map<String, String>& inMetadata) { m_metadata = inMetadata; }
 
-Array<String>& PendingInvitesResult::GetPendingInvitesEmails() { return PendingInvitesEmailAddresses; }
+Array<String>& PendingInvitesResult::GetPendingInvitesEmails() { return m_pendingInvitesEmailAddresses; }
 
-const Array<String>& PendingInvitesResult::GetPendingInvitesEmails() const { return PendingInvitesEmailAddresses; }
+const Array<String>& PendingInvitesResult::GetPendingInvitesEmails() const { return m_pendingInvitesEmailAddresses; }
 
-void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* PendingInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* pendingInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PendingInvitesResponse->FromJson(Response->GetPayload().GetContent());
+        pendingInvitesResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from response in our pending invites array
-        std::vector<chs_users::GroupInviteDto>& PendingInvitesArray = PendingInvitesResponse->GetArray();
-        PendingInvitesEmailAddresses = Array<String>(PendingInvitesArray.size());
+        std::vector<chs_users::GroupInviteDto>& pendingInvitesArray = pendingInvitesResponse->GetArray();
+        m_pendingInvitesEmailAddresses = Array<String>(pendingInvitesArray.size());
 
-        for (size_t idx = 0; idx < PendingInvitesArray.size(); ++idx)
+        for (size_t idx = 0; idx < pendingInvitesArray.size(); ++idx)
         {
-            PendingInvitesEmailAddresses[idx] = PendingInvitesArray[idx].GetEmail();
+            m_pendingInvitesEmailAddresses[idx] = pendingInvitesArray[idx].GetEmail();
         }
     }
 }
 
-Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() { return AcceptedInvitesUserIds; }
+Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() { return m_acceptedInvitesUserIds; }
 
-const Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() const { return AcceptedInvitesUserIds; }
+const Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() const { return m_acceptedInvitesUserIds; }
 
-void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* AcceptedInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* acceptedInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent());
+        acceptedInvitesResponse->FromJson(response->GetPayload().GetContent());
 
         // Extract data from response in our accepted invites array
-        std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
-        AcceptedInvitesUserIds = Array<String>(AcceptedInvitesArray.size());
+        std::vector<chs_users::GroupInviteDto>& acceptedInvitesArray = acceptedInvitesResponse->GetArray();
+        m_acceptedInvitesUserIds = Array<String>(acceptedInvitesArray.size());
 
-        for (size_t idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
+        for (size_t idx = 0; idx < acceptedInvitesArray.size(); ++idx)
         {
-            if (AcceptedInvitesArray[idx].HasId())
+            if (acceptedInvitesArray[idx].HasId())
             {
-                AcceptedInvitesUserIds[idx] = AcceptedInvitesArray[idx].GetId();
+                m_acceptedInvitesUserIds[idx] = acceptedInvitesArray[idx].GetId();
             }
         }
     }
 }
 
-const Map<String, Map<String, String>>& SpacesMetadataResult::GetMetadata() const { return Metadata; }
+const Map<String, Map<String, String>>& SpacesMetadataResult::GetMetadata() const { return m_metadata; }
 
-const Map<String, Array<String>>& SpacesMetadataResult::GetTags() const { return Tags; }
+const Map<String, Array<String>>& SpacesMetadataResult::GetTags() const { return m_tags; }
 
-void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& InMetadata) { Metadata = InMetadata; }
+void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& inMetadata) { m_metadata = inMetadata; }
 
-void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
+void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& inTags) { m_tags = inTags; }
 
-bool SpaceGeoLocation::operator==(const SpaceGeoLocation& Other) const
+bool SpaceGeoLocation::operator==(const SpaceGeoLocation& other) const
 {
-    return SpaceId == Other.SpaceId && Location == Other.Location && Orientation == Other.Orientation && GeoFence == Other.GeoFence && Id == Other.Id;
+    return SpaceId == other.SpaceId && Location == other.Location && Orientation == other.Orientation && GeoFence == other.GeoFence && m_id == other.m_id;
 }
 
-bool SpaceGeoLocation::operator!=(const SpaceGeoLocation& Other) const { return !(*this == Other); }
+bool SpaceGeoLocation::operator!=(const SpaceGeoLocation& other) const { return !(*this == other); }
 
-bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
+bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return m_hasGeoLocation; }
 
-const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return GeoLocation; }
+const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return m_geoLocation; }
 
-void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, SpaceGeoLocation& GeoLocation)
+void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& dto, SpaceGeoLocation& geoLocation)
 {
-    GeoLocation.SpaceId = Dto.GetGroupId();
+    geoLocation.SpaceId = dto.GetGroupId();
 
-    if (Dto.HasLocation())
+    if (dto.HasLocation())
     {
-        GeoLocation.Location.Latitude = Dto.GetLocation()->GetLatitude();
-        GeoLocation.Location.Longitude = Dto.GetLocation()->GetLongitude();
+        geoLocation.Location.Latitude = dto.GetLocation()->GetLatitude();
+        geoLocation.Location.Longitude = dto.GetLocation()->GetLongitude();
     }
 
-    GeoLocation.Orientation = Dto.HasOrientation() ? Dto.GetOrientation() : 0.0f;
+    geoLocation.Orientation = dto.HasOrientation() ? dto.GetOrientation() : 0.0f;
 
-    if (Dto.HasGeofence())
+    if (dto.HasGeofence())
     {
-        const auto& GeoFence = Dto.GetGeofence();
-        GeoLocation.GeoFence = csp::common::Array<csp::systems::GeoLocation>(GeoFence.size());
+        const auto& geoFence = dto.GetGeofence();
+        geoLocation.GeoFence = csp::common::Array<csp::systems::GeoLocation>(geoFence.size());
 
-        for (size_t idx = 0; idx < GeoFence.size(); ++idx)
+        for (size_t idx = 0; idx < geoFence.size(); ++idx)
         {
-            csp::systems::GeoLocation GeoFenceLocation;
-            GeoFenceLocation.Latitude = GeoFence[idx]->GetLatitude();
-            GeoFenceLocation.Longitude = GeoFence[idx]->GetLongitude();
+            csp::systems::GeoLocation geoFenceLocation;
+            geoFenceLocation.Latitude = geoFence[idx]->GetLatitude();
+            geoFenceLocation.Longitude = geoFence[idx]->GetLongitude();
 
-            GeoLocation.GeoFence[idx] = GeoFenceLocation;
+            geoLocation.GeoFence[idx] = geoFenceLocation;
         }
     }
 }
 
-void SpaceGeoLocationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceGeoLocationResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* GeoLocationPOIResponse = static_cast<chs_spatial::PointOfInterestDto*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* geoLocationPoiResponse = static_cast<chs_spatial::PointOfInterestDto*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GeoLocationPOIResponse->FromJson(Response->GetPayload().GetContent());
+        geoLocationPoiResponse->FromJson(response->GetPayload().GetContent());
 
-        HasGeoLocation = true;
+        m_hasGeoLocation = true;
 
-        GeoLocation.Id = GeoLocationPOIResponse->GetId();
-        PointOfInterestDtoToSpaceGeoLocation(*GeoLocationPOIResponse, GeoLocation);
+        m_geoLocation.m_id = geoLocationPoiResponse->GetId();
+        PointOfInterestDtoToSpaceGeoLocation(*geoLocationPoiResponse, m_geoLocation);
     }
 }
 
-void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiResponseBase* apiResponse)
 {
-    ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(apiResponse);
 
-    auto* GeoLocationPOIsResponse = static_cast<csp::services::DtoArray<chs_spatial::PointOfInterestDto>*>(ApiResponse->GetDto());
-    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* geoLocationPoIsResponse = static_cast<csp::services::DtoArray<chs_spatial::PointOfInterestDto>*>(apiResponse->GetDto());
+    const csp::web::HttpResponse* response = apiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    if (apiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GeoLocationPOIsResponse->FromJson(Response->GetPayload().GetContent());
+        geoLocationPoIsResponse->FromJson(response->GetPayload().GetContent());
 
-        std::vector<chs_spatial::PointOfInterestDto>& POIDtos = GeoLocationPOIsResponse->GetArray();
-        GeoLocations = Array<SpaceGeoLocation>(POIDtos.size());
+        std::vector<chs_spatial::PointOfInterestDto>& poiDtos = geoLocationPoIsResponse->GetArray();
+        m_geoLocations = Array<SpaceGeoLocation>(poiDtos.size());
 
-        for (size_t idx = 0; idx < POIDtos.size(); ++idx)
+        for (size_t idx = 0; idx < poiDtos.size(); ++idx)
         {
-            SpaceGeoLocation GeoLocation;
-            GeoLocation.Id = POIDtos[idx].GetId();
-            PointOfInterestDtoToSpaceGeoLocation(POIDtos[idx], GeoLocation);
-            GeoLocations[idx] = GeoLocation;
+            SpaceGeoLocation geoLocation;
+            geoLocation.m_id = poiDtos[idx].GetId();
+            PointOfInterestDtoToSpaceGeoLocation(poiDtos[idx], geoLocation);
+            m_geoLocations[idx] = geoLocation;
         }
     }
 }

@@ -29,7 +29,7 @@ class Material;
 
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj);
+void FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::Material& obj);
 
 namespace csp::services
 {
@@ -112,7 +112,7 @@ public:
     /// @param Name const csp::common::String& : The name of the material.
     /// @param MaterialCollectionId const csp::common::String& : The asset collection which references the associated material asset.
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
-    Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
+    Material(const csp::common::String& name, const csp::common::String& materialCollectionId, const csp::common::String& materialId);
 
     /// @brief Constructs a versioned material bound to an AssetCollection and Asset.
     /// @param Name const csp::common::String& : The name of the material.
@@ -120,8 +120,8 @@ public:
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
     /// @param Type EShaderType : The material shader type.
     /// @param Version const int : The material version.
-    Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId,
-        EShaderType Type, const int Version);
+    Material(const csp::common::String& name, const csp::common::String& materialCollectionId, const csp::common::String& materialId,
+        EShaderType type, const int version);
 
     virtual ~Material() = default;
 
@@ -138,14 +138,14 @@ protected:
     // Move ctor
     Material(Material&& other) = default;
 
-    csp::common::String Name;
-    EShaderType Type;
-    int Version;
-    csp::common::String CollectionId;
-    csp::common::String Id;
+    csp::common::String m_name;
+    EShaderType m_type;
+    int m_version;
+    csp::common::String m_collectionId;
+    csp::common::String m_id;
 
 private:
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& deserializer, csp::systems::Material& obj);
 };
 
 /// @ingroup Asset System
@@ -169,18 +169,18 @@ public:
     /// @return Material* : Returns a pointer to the Material object. The caller should take ownership of the pointer.
     Material* GetMaterial();
 
-    CSP_NO_EXPORT MaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT MaterialResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     MaterialResult(void*) {};
 
     /// The result object is taking ownership of the pointer to the Material.
-    void SetMaterial(Material* Material);
+    void SetMaterial(Material* material);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    Material* Material;
+    Material* m_material;
 };
 
 /// @ingroup Asset System
@@ -205,26 +205,26 @@ public:
     /// @return Array<Material*>* : Returns a pointer to an Array of Material class pointers. The caller should take ownership of the pointer.
     csp::common::Array<csp::systems::Material*>* GetMaterials();
 
-    CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 private:
     MaterialsResult(void*) {};
 
     /// The result object is taking ownership of the Material pointers in the array.
-    void SetMaterials(const csp::common::Array<csp::systems::Material*>& Materials);
+    void SetMaterials(const csp::common::Array<csp::systems::Material*>& materials);
 
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
-    csp::common::Array<Material*> Materials;
+    csp::common::Array<Material*> m_materials;
 };
 
 /// @brief Callback containing requested material data.
 /// @param Result const MaterialResult& : Material result class.
-typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;
+typedef std::function<void(const MaterialResult& result)> MaterialResultCallback;
 
 /// @brief Callback containing a collection of requested material data.
 /// @param Result const MaterialsResult& : Material result class containing a collection of materials.
-typedef std::function<void(const MaterialsResult& Result)> MaterialsResultCallback;
+typedef std::function<void(const MaterialsResult& result)> MaterialsResultCallback;
 
 } // namespace csp::systems

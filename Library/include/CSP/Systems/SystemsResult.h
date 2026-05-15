@@ -62,18 +62,18 @@ class CSP_API NullResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
-    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode)) {};
-    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode resCode, uint16_t httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, httpResCode, reason) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode)) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode resCode, csp::web::EResponseCodes httpResCode, csp::systems::ERequestFailureReason reason)
+        : csp::systems::ResultBase(resCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(httpResCode), reason) {};
 
 protected:
-    CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& inResult)
+        : csp::systems::ResultBase(inResult.GetResultCode(), inResult.GetHttpResultCode()) {};
     NullResult() = default;
     NullResult(void*) {};
 };
@@ -98,12 +98,12 @@ public:
 private:
     BooleanResult() = default;
     BooleanResult(void*) {};
-    BooleanResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    BooleanResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    void SetValue(bool InValue);
+    void SetValue(bool inValue);
 
-    bool Value = false;
+    bool m_value = false;
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
@@ -124,17 +124,17 @@ public:
     /// @brief A getter which returns the String passed via the result.
     [[nodiscard]] const csp::common::String& GetValue() const;
 
-    CSP_NO_EXPORT StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT StringResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
 protected:
     StringResult() = default;
     StringResult(void*) {};
 
-    void SetValue(const csp::common::String& InValue);
+    void SetValue(const csp::common::String& inValue);
 
 private:
-    csp::common::String Value;
+    csp::common::String m_value;
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
@@ -155,12 +155,12 @@ public:
 private:
     StringArrayResult() = default;
     StringArrayResult(void*) {};
-    StringArrayResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    StringArrayResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    void SetValue(const csp::common::Array<csp::common::String>& InValue);
+    void SetValue(const csp::common::Array<csp::common::String>& inValue);
 
-    csp::common::Array<csp::common::String> Value;
+    csp::common::Array<csp::common::String> m_value;
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
@@ -181,12 +181,12 @@ public:
 private:
     UInt64Result() = default;
     UInt64Result(void*) {};
-    UInt64Result(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    UInt64Result(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    void SetValue(uint64_t InValue);
+    void SetValue(uint64_t inValue);
 
-    uint64_t Value = 0UL;
+    uint64_t m_value = 0UL;
 };
 
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
@@ -204,7 +204,7 @@ class CSP_API HTTPHeadersResult : public csp::systems::ResultBase
 public:
     /// @brief Event function used to act upon a HTTP response.
     /// @param ApiResponse : An ApiResponseBase instance used for translating response calls.
-    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* apiResponse) override;
 
     /// @brief A getter which returns the map of strings representing HTTP responses passed via the result.
     [[nodiscard]] const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
@@ -212,17 +212,17 @@ public:
 private:
     HTTPHeadersResult() = default;
     HTTPHeadersResult(void*) {};
-    HTTPHeadersResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    HTTPHeadersResult(csp::systems::EResultCode resCode, uint16_t httpResCode)
+        : csp::systems::ResultBase(resCode, httpResCode) {};
 
-    csp::common::Map<csp::common::String, csp::common::String> Value;
+    csp::common::Map<csp::common::String, csp::common::String> m_value;
 };
 
-typedef std::function<void(const NullResult& Result)> NullResultCallback;
-typedef std::function<void(const BooleanResult& Result)> BooleanResultCallback;
-typedef std::function<void(const StringResult& Result)> StringResultCallback;
-typedef std::function<void(const StringArrayResult& Result)> StringArrayResultCallback;
-typedef std::function<void(const UInt64Result& Result)> UInt64ResultCallback;
-typedef std::function<void(const HTTPHeadersResult& Result)> HTTPHeadersResultCallback;
+typedef std::function<void(const NullResult& result)> NullResultCallback;
+typedef std::function<void(const BooleanResult& result)> BooleanResultCallback;
+typedef std::function<void(const StringResult& result)> StringResultCallback;
+typedef std::function<void(const StringArrayResult& result)> StringArrayResultCallback;
+typedef std::function<void(const UInt64Result& result)> UInt64ResultCallback;
+typedef std::function<void(const HTTPHeadersResult& result)> HTTPHeadersResultCallback;
 
 } // namespace csp::systems

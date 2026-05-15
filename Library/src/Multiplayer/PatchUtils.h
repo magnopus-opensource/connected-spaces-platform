@@ -11,33 +11,33 @@ namespace csp::multiplayer
 // This needs to live in a private include, as it relies on other non-exported includes.
 template <typename P, typename V>
 static bool SetProperty(
-    SpaceEntity& Entity, P& Property, const V& Value, SpaceEntityComponentKey Key, SpaceEntityUpdateFlags Flag, csp::common::LogSystem* LogSystem)
+    SpaceEntity& entity, P& property, const V& value, SpaceEntityComponentKey key, SpaceEntityUpdateFlags flag, csp::common::LogSystem* logSystem)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = Entity.IsModifiable();
-    if (Modifiable != ModifiableStatus::Modifiable)
+    ModifiableStatus modifiable = entity.IsModifiable();
+    if (modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem != nullptr)
+        if (logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            logSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to set propery on entity: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), Entity.GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(modifiable), entity.GetName())
                     .c_str());
         }
 
         return false;
     }
 
-    if (Entity.GetStatePatcher())
+    if (entity.GetStatePatcher())
     {
-        return Entity.GetStatePatcher()->SetDirtyProperty(Key, Property, Value);
+        return entity.GetStatePatcher()->SetDirtyProperty(key, property, value);
     }
     else
     {
         // We need this logic here and in SetDirtyProperty to prevent callbacks from firing if the values are the same.
-        if (Property != static_cast<P>(Value))
+        if (property != static_cast<P>(value))
         {
-            Entity.SetPropertyDirect(Property, Value, Flag, true);
+            entity.SetPropertyDirect(property, value, flag, true);
             return true;
         }
         return false;

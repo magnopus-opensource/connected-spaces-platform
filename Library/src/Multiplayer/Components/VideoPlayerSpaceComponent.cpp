@@ -166,8 +166,8 @@ const auto Schema = ComponentSchema {
 
 const ComponentSchema& VideoPlayerSpaceComponent::GetSchema() { return Schema; }
 
-VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* logSystem, SpaceEntity* parent)
+    : ComponentBase(Schema, logSystem, parent)
 {
     SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
@@ -177,9 +177,9 @@ const csp::common::String& VideoPlayerSpaceComponent::GetName() const
     return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED));
 }
 
-void VideoPlayerSpaceComponent::SetName(const csp::common::String& Value)
+void VideoPlayerSpaceComponent::SetName(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED), value);
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetId() const
@@ -187,9 +187,9 @@ const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetId() const
     return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId));
 }
 
-void VideoPlayerSpaceComponent::SetVideoAssetId(const csp::common::String& Value)
+void VideoPlayerSpaceComponent::SetVideoAssetId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId), value);
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetURL() const
@@ -197,9 +197,9 @@ const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetURL() const
     return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL));
 }
 
-void VideoPlayerSpaceComponent::SetVideoAssetURL(const csp::common::String& Value)
+void VideoPlayerSpaceComponent::SetVideoAssetURL(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL), value);
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetAssetCollectionId() const
@@ -207,9 +207,9 @@ const csp::common::String& VideoPlayerSpaceComponent::GetAssetCollectionId() con
     return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId));
 }
 
-void VideoPlayerSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void VideoPlayerSpaceComponent::SetAssetCollectionId(const csp::common::String& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId), value);
 }
 
 /* ITransformComponent */
@@ -219,9 +219,9 @@ const csp::common::Vector3& VideoPlayerSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position));
 }
 
-void VideoPlayerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+void VideoPlayerSpaceComponent::SetPosition(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position), value);
 }
 
 const csp::common::Vector4& VideoPlayerSpaceComponent::GetRotation() const
@@ -229,9 +229,9 @@ const csp::common::Vector4& VideoPlayerSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation));
 }
 
-void VideoPlayerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+void VideoPlayerSpaceComponent::SetRotation(const csp::common::Vector4& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation), value);
 }
 
 const csp::common::Vector3& VideoPlayerSpaceComponent::GetScale() const
@@ -239,55 +239,55 @@ const csp::common::Vector3& VideoPlayerSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale));
 }
 
-void VideoPlayerSpaceComponent::SetScale(const csp::common::Vector3& Value)
+void VideoPlayerSpaceComponent::SetScale(const csp::common::Vector3& value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale), value);
 }
 
 SpaceTransform VideoPlayerSpaceComponent::GetTransform() const
 {
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
+    SpaceTransform transform;
+    transform.Position = GetPosition();
+    transform.Rotation = GetRotation();
+    transform.Scale = GetScale();
 
-    return Transform;
+    return transform;
 }
 
-void VideoPlayerSpaceComponent::SetTransform(const SpaceTransform& InValue)
+void VideoPlayerSpaceComponent::SetTransform(const SpaceTransform& inValue)
 {
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
+    SetPosition(inValue.Position);
+    SetRotation(inValue.Rotation);
+    SetScale(inValue.Scale);
 }
 
 bool VideoPlayerSpaceComponent::GetIsStateShared() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStateShared)); }
 
-void VideoPlayerSpaceComponent::SetIsStateShared(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStateShared), Value); }
+void VideoPlayerSpaceComponent::SetIsStateShared(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStateShared), value); }
 
 bool VideoPlayerSpaceComponent::GetIsAutoPlay() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoPlay)); }
 
-void VideoPlayerSpaceComponent::SetIsAutoPlay(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoPlay), Value); }
+void VideoPlayerSpaceComponent::SetIsAutoPlay(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoPlay), value); }
 
 bool VideoPlayerSpaceComponent::GetIsLoopPlayback() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsLoopPlayback));
 }
 
-void VideoPlayerSpaceComponent::SetIsLoopPlayback(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsLoopPlayback), Value); }
+void VideoPlayerSpaceComponent::SetIsLoopPlayback(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsLoopPlayback), value); }
 
 bool VideoPlayerSpaceComponent::GetIsAutoResize() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoResize)); }
 
-void VideoPlayerSpaceComponent::SetIsAutoResize(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoResize), Value); }
+void VideoPlayerSpaceComponent::SetIsAutoResize(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoResize), value); }
 
 VideoPlayerPlaybackState VideoPlayerSpaceComponent::GetPlaybackState() const
 {
     return static_cast<VideoPlayerPlaybackState>(GetIntegerProperty((uint32_t)VideoPlayerPropertyKeys::PlaybackState));
 }
 
-void VideoPlayerSpaceComponent::SetPlaybackState(VideoPlayerPlaybackState Value)
+void VideoPlayerSpaceComponent::SetPlaybackState(VideoPlayerPlaybackState value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::PlaybackState), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::PlaybackState), static_cast<int64_t>(value));
 }
 
 float VideoPlayerSpaceComponent::GetCurrentPlayheadPosition() const
@@ -295,23 +295,23 @@ float VideoPlayerSpaceComponent::GetCurrentPlayheadPosition() const
     return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::CurrentPlayheadPosition));
 }
 
-void VideoPlayerSpaceComponent::SetCurrentPlayheadPosition(float Value)
+void VideoPlayerSpaceComponent::SetCurrentPlayheadPosition(float value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::CurrentPlayheadPosition), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::CurrentPlayheadPosition), value);
 }
 
 float VideoPlayerSpaceComponent::GetTimeSincePlay() const { return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay)); }
 
-void VideoPlayerSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay), Value); }
+void VideoPlayerSpaceComponent::SetTimeSincePlay(float value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay), value); }
 
 VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() const
 {
     return static_cast<VideoPlayerSourceType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)));
 }
 
-void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType Value)
+void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(value));
 }
 
 StereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
@@ -319,33 +319,33 @@ StereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
     return static_cast<StereoVideoType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)));
 }
 
-void VideoPlayerSpaceComponent::SetStereoVideoType(StereoVideoType Value)
+void VideoPlayerSpaceComponent::SetStereoVideoType(StereoVideoType value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType), static_cast<int64_t>(value));
 }
 
 bool VideoPlayerSpaceComponent::GetIsStereoFlipped() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)); }
 
-void VideoPlayerSpaceComponent::SetIsStereoFlipped(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped), Value); }
+void VideoPlayerSpaceComponent::SetIsStereoFlipped(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped), value); }
 
 /* IVisibleComponent */
 
 bool VideoPlayerSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)); }
 
-void VideoPlayerSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible), Value); }
+void VideoPlayerSpaceComponent::SetIsVisible(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible), value); }
 
 bool VideoPlayerSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)); }
 
-void VideoPlayerSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible), Value); }
+void VideoPlayerSpaceComponent::SetIsARVisible(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible), value); }
 
 bool VideoPlayerSpaceComponent::GetIsVirtualVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible));
 }
 
-void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool Value)
+void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), value);
 }
 
 /* IAudioControlComponent */
@@ -355,9 +355,9 @@ float VideoPlayerSpaceComponent::GetAttenuationRadius() const
     return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
 }
 
-void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
+void VideoPlayerSpaceComponent::SetAttenuationRadius(float value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), value);
 }
 
 AudioType VideoPlayerSpaceComponent::GetAudioType() const
@@ -365,24 +365,24 @@ AudioType VideoPlayerSpaceComponent::GetAudioType() const
     return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType)));
 }
 
-void VideoPlayerSpaceComponent::SetAudioType(AudioType Value)
+void VideoPlayerSpaceComponent::SetAudioType(AudioType value)
 {
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType), static_cast<int64_t>(value));
 }
 
 float VideoPlayerSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume)); }
 
-void VideoPlayerSpaceComponent::SetVolume(float Value)
+void VideoPlayerSpaceComponent::SetVolume(float value)
 {
-    if (Value >= 0.f && Value <= 1.f)
+    if (value >= 0.f && value <= 1.f)
     {
-        SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume), Value);
+        SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume), value);
     }
     else
     {
-        if (LogSystem != nullptr)
+        if (m_logSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", Value).c_str());
+            m_logSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", value).c_str());
         }
     }
 }
@@ -391,6 +391,6 @@ void VideoPlayerSpaceComponent::SetVolume(float Value)
 
 bool VideoPlayerSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)); }
 
-void VideoPlayerSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled), Value); }
+void VideoPlayerSpaceComponent::SetIsEnabled(bool value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled), value); }
 
 } // namespace csp::multiplayer

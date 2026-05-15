@@ -27,11 +27,11 @@ namespace csp
 inline uint64_t RandInt()
 {
     // Use this as rand() only offers 15 bits of randomness
-    std::mt19937_64 Rand;
-    auto CurrentTime = std::chrono::high_resolution_clock::now();
-    auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
-    Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-    return Rand();
+    std::mt19937_64 rand;
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto currentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(currentTime);
+    rand.seed(currentNanoseconds.time_since_epoch().count());
+    return rand();
 }
 
 /// @brief Generates a uuid
@@ -39,20 +39,20 @@ inline uint64_t RandInt()
 inline std::string GenerateUUID()
 {
     // Generate a random UUID by combining 2 64-bit unsigned integers
-    uint8_t Uuid[16];
+    uint8_t uuid[16];
 
-    *reinterpret_cast<uint64_t*>(&Uuid[0]) = RandInt();
-    *reinterpret_cast<uint64_t*>(&Uuid[8]) = RandInt();
+    *reinterpret_cast<uint64_t*>(&uuid[0]) = RandInt();
+    *reinterpret_cast<uint64_t*>(&uuid[8]) = RandInt();
 
     // Convert to hex string
-    std::ostringstream UUIDStringStream;
-    UUIDStringStream << std::hex << std::uppercase << std::setfill('0');
+    std::ostringstream uuidStringStream;
+    uuidStringStream << std::hex << std::uppercase << std::setfill('0');
 
-    for (const auto uuid : Uuid)
+    for (const auto byte : uuid)
     {
-        UUIDStringStream << std::setw(2) << static_cast<int>(uuid);
+        uuidStringStream << std::setw(2) << static_cast<int>(byte);
     }
 
-    return UUIDStringStream.str();
+    return uuidStringStream.str();
 }
 }; // namespace csp

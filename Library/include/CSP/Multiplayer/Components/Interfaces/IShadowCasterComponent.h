@@ -34,7 +34,7 @@ public:
 
     /// @brief Sets if the mesh casts shadows.
     /// @param InValue True to set the mesh to casts shadows.
-    virtual void SetIsShadowCaster(bool InValue) = 0;
+    virtual void SetIsShadowCaster(bool inValue) = 0;
 
 protected:
     virtual ~IShadowCasterComponent() = default;

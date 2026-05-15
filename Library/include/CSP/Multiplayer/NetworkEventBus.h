@@ -61,7 +61,7 @@ enum class ErrorCode;
 
 // The callback used to register to listen to events.
 // NetworkEventData lifetime is tied to the callback, do not attempt to store it via reference.
-typedef std::function<void(const csp::common::NetworkEventData& NetworkEventData)> NetworkEventCallback;
+typedef std::function<void(const csp::common::NetworkEventData& networkEventData)> NetworkEventCallback;
 
 /*
  * @brief Details about a network event registrations to serve as a key in the event map.
@@ -78,9 +78,9 @@ public:
     /// register multiple interests in single events. May be any arbitrary unique string. This is distinct from client ID. A single client/application
     /// may register multiple receivers if they choose.
     /// @param EventName csp::common::String : The identifying name for the event. May be any arbitrary string.
-    NetworkEventRegistration(const csp::common::String& EventReceiverId, const csp::common::String& EventName)
-        : EventReceiverId(EventReceiverId)
-        , EventName(EventName)
+    NetworkEventRegistration(const csp::common::String& eventReceiverId, const csp::common::String& eventName)
+        : EventReceiverId(eventReceiverId)
+        , EventName(eventName)
     {
     }
 
@@ -137,9 +137,9 @@ public:
     /// the event payload.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEvent(
-        const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
+        const csp::common::String& eventName, const csp::common::Array<csp::common::ReplicatedValue>& args, ErrorCodeCallbackHandler callback);
     CSP_NO_EXPORT async::task<std::optional<csp::multiplayer::ErrorCode>> SendNetworkEvent(
-        const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args);
+        const csp::common::String& eventName, const csp::common::Array<csp::common::ReplicatedValue>& args);
 
     /// @brief Sends a network event by EventName, to TargetClientId.
     /// @param EventName csp::common::String : The identifying name for the event.
@@ -147,25 +147,25 @@ public:
     /// the event payload.
     /// @param TargetClientId uint64_t : The client ID to send the event to.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
-        uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
+    CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& eventName, const csp::common::Array<csp::common::ReplicatedValue>& args,
+        uint64_t targetClientId, ErrorCodeCallbackHandler callback);
 
     /// @brief Register interest in a network event, such that the NetworkEventBus will call the provided callback when it arrives
     /// @param Registration NetworkEventRegistration : Registration information, containing a ReceiverID and an EventName. Will fail to register if
     /// identical callback registration already registered.
     /// @param Callback NetworkEventCallback : Callback to invoke when specified event is received. Will fail to register if null.
-    void ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback);
+    void ListenNetworkEvent(NetworkEventRegistration registration, NetworkEventCallback callback);
 
     // Here is where a nice method overload would go that lets you pass 2 strings directly as a convenience, however it can't be done at the moment
     // due to the wrapper generator (JS), and having a distinct name seems more confusing than anything.
 
     /// @brief Deregister interest in a network event
     /// @param Registration NetworkEventRegistration : Registration information of already registered event, containing a ReceiverID and an EventName.
-    void StopListenNetworkEvent(NetworkEventRegistration Registration);
+    void StopListenNetworkEvent(NetworkEventRegistration registration);
 
     /// @brief Deregister interest in all network events registered to a particular EventReceiverId
     /// @param EventReceiverId const csp::common::String& : EventReceiverId to deregister.
-    void StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
+    void StopListenAllNetworkEvents(const csp::common::String& eventReceiverId);
 
     /// @brief Get an array of all interests currently registered to the NetworkEventBus
     /// @return csp::common::Array<csp::multiplayer::NetworkEventRegistration> A container of all currently registered registrations.
@@ -177,7 +177,7 @@ public:
 
     /// @brief NetworkEventBus constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
-    CSP_NO_EXPORT NetworkEventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT NetworkEventBus(MultiplayerConnection* inMultiplayerConnection, csp::common::LogSystem& logSystem);
 
     /// @brief NetworkEventBus destructor
     CSP_NO_EXPORT ~NetworkEventBus();
@@ -204,15 +204,15 @@ public:
         AsyncCallCompleted // Unpacks to AsyncCallCompletedEventData
     };
 
-    static NetworkEvent NetworkEventFromString(const csp::common::String& EventString);
-    static csp::common::String StringFromNetworkEvent(NetworkEvent Event);
+    static NetworkEvent NetworkEventFromString(const csp::common::String& eventString);
+    static csp::common::String StringFromNetworkEvent(NetworkEvent event);
     CSP_END_IGNORE
 
 private:
     NetworkEventBus();
 
-    class MultiplayerConnection* MultiplayerConnectionInst;
-    csp::common::LogSystem& LogSystem;
+    class MultiplayerConnection* m_multiplayerConnectionInst;
+    csp::common::LogSystem& m_logSystem;
 
     // Map type-safe enum values to strings that can go across the network
     // The specific spelling of these events is important, they are part of the backend event contract.
@@ -230,9 +230,9 @@ private:
 
     // Map internal event values to the deserializers needed to unpack them
     CSP_NO_EXPORT std::unique_ptr<csp::common::NetworkEventData> DeserialiseForEventType(
-        NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
+        NetworkEvent eventType, const std::vector<signalr::value>& eventValues);
 
-    std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
+    std::unordered_map<NetworkEventRegistration, NetworkEventCallback> m_registeredEvents = {};
 };
 
 } // namespace csp::multiplayer

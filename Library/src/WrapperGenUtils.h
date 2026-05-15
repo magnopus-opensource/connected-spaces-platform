@@ -27,12 +27,12 @@ namespace csp
 
 // Generic callback function which will either call the callback directly, or,
 // if we're on wasm, push to the main thread if we're not on the main thread.
-template <typename... T> static void CallCallback(void (*Callback)(T...), T... Args)
+template <typename... T> static void CallCallback(void (*callback)(T...), T... args)
 {
 #ifdef CSP_WASM
     csp::Emscripten_CallbackOnThread(Callback, Args...);
 #else
-    Callback(Args...);
+    callback(args...);
 #endif
 }
 }
