@@ -36,20 +36,20 @@ public:
         : Text(nullptr)
         , Length(0)
     {
-        const char* _InText = InText;
+        const char* EffectiveText = InText;
 
         if (InText == nullptr)
         {
-            _InText = "";
+            EffectiveText = "";
         }
 
-        const size_t Len = strlen(_InText);
+        const size_t Len = strlen(EffectiveText);
 
         char* NewText = new char[Len + 1];
 
         if (Len > 0)
         {
-            memcpy((void*)NewText, _InText, Len * sizeof(char));
+            memcpy((void*)NewText, EffectiveText, Len * sizeof(char));
         }
 
         NewText[Len] = 0;
@@ -62,11 +62,11 @@ public:
         : Text(nullptr)
         , Length(0)
     {
-        const char* _InText = InText;
+        const char* EffectiveText = InText;
 
         if (InText == nullptr || Len == 0)
         {
-            _InText = "";
+            EffectiveText = "";
             Len = 0;
         }
 
@@ -74,7 +74,7 @@ public:
 
         if (Len > 0)
         {
-            memcpy((void*)NewText, _InText, Len * sizeof(char));
+            memcpy((void*)NewText, EffectiveText, Len * sizeof(char));
         }
 
         NewText[Len] = 0;

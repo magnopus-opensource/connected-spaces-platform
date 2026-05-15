@@ -502,10 +502,10 @@ TEST_P(ObjectAddComponent, ObjectAddComponentTest)
     EXPECT_EQ(Components.Size(), 1);
     EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
 
-    auto* _StaticModelComponent = Object->GetComponent(StaticModelComponentKey);
+    auto* FetchedStaticModelComponent = Object->GetComponent(StaticModelComponentKey);
 
-    EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
-    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)_StaticModelComponent;
+    EXPECT_EQ(FetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
+    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)FetchedStaticModelComponent;
 
     EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 
@@ -530,10 +530,10 @@ TEST_P(ObjectAddComponent, ObjectAddComponentTest)
     EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
     EXPECT_TRUE(Components.HasKey(ImageModelComponentKey));
 
-    auto* _ImageComponent = Object->GetComponent(ImageModelComponentKey);
+    auto* FetchedImageComponent = Object->GetComponent(ImageModelComponentKey);
 
-    EXPECT_EQ(_ImageComponent->GetComponentType(), ComponentType::Image);
-    auto* RealImageComponent = (ImageSpaceComponent*)_ImageComponent;
+    EXPECT_EQ(FetchedImageComponent->GetComponentType(), ComponentType::Image);
+    auto* RealImageComponent = (ImageSpaceComponent*)FetchedImageComponent;
 
     EXPECT_EQ(RealImageComponent->GetImageAssetId(), ImageAssetId);
 
@@ -614,10 +614,10 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     EXPECT_TRUE(Components.HasKey(StaticModelComponentKey));
     EXPECT_TRUE(Components.HasKey(ImageComponentKey));
 
-    auto* _StaticModelComponent = Object->GetComponent(StaticModelComponentKey);
+    auto* FetchedStaticModelComponent = Object->GetComponent(StaticModelComponentKey);
 
-    EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
-    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)_StaticModelComponent;
+    EXPECT_EQ(FetchedStaticModelComponent->GetComponentType(), ComponentType::StaticModel);
+    auto* RealStaticModelComponent = (StaticModelSpaceComponent*)FetchedStaticModelComponent;
 
     EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 

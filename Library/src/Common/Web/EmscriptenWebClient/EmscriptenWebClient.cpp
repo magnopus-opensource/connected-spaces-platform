@@ -41,11 +41,11 @@ void GetResponseHeaders(emscripten_fetch_t* Fetch, csp::common::Map<csp::common:
 
     for (int i = 0; Headers[i] != nullptr; i += 2)
     {
-        csp::common::String _Key = Headers[i];
-        csp::common::String _Val = Headers[i + 1];
+        csp::common::String RawKey = Headers[i];
+        csp::common::String RawVal = Headers[i + 1];
 
-        auto Key = _Key.Trim();
-        auto Val = _Val.Trim();
+        auto Key = RawKey.Trim();
+        auto Val = RawVal.Trim();
 
         OutHeadersMap[Key] = Val;
     }

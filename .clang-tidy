@@ -1,8 +1,7 @@
 ---
 Checks:          'clang-diagnostic-*,clang-analyzer-*,*,-cppcoreguidelines-pro-type-vararg,-hicpp-special-member-functions,-readability-inconsistent-declaration-parameter-name,-llvm-include-order,-clang-diagnostic-deprecated-declarations,-llvmlibc-callee-namespace,-llvmlibc-restrict-system-libc-headers,-fuchsia-*,-clang-diagnostic-error,-llvmlibc-implementation-in-namespace,-modernize-use-trailing-return-type,-hicpp-use-equals-default,-modernize-use-equals-delete,-cppcoreguidelines-owning-memory,-hicpp-vararg'
 WarningsAsErrors: ''
-HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
+HeaderFilterRegex: '.*[\\/](Library[\\/](include|src)|Tests[\\/]src)[\\/].*'
 CheckOptions:
   - key:             abseil-string-find-startswith.AbseilStringsMatchHeader
     value:           'absl/strings/match.h'
@@ -458,6 +457,18 @@ CheckOptions:
     value:           'false'
   - key:             readability-identifier-naming.IgnoreMainLikeFunctions
     value:           'false'
+  - key:             readability-identifier-naming.LocalVariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ParameterCase
+    value:           camelBack
+  - key:             readability-identifier-naming.PrivateMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.PrivateMemberPrefix
+    value:           'm_'
+  - key:             readability-identifier-naming.ProtectedMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ProtectedMemberPrefix
+    value:           'm_'
   - key:             readability-implicit-bool-conversion.AllowIntegerConditions
     value:           'false'
   - key:             readability-implicit-bool-conversion.AllowPointerConditions

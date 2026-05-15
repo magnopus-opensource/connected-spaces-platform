@@ -110,21 +110,21 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Map.HasKey(42));
             EXPECT_TRUE(Map[42] == "asd");
 
-            auto* _Keys = Map.Keys();
-            auto& Keys = *_Keys;
+            auto* RawKeys = Map.Keys();
+            auto& Keys = *RawKeys;
 
             EXPECT_TRUE(Keys.Size() == 1);
             EXPECT_TRUE(Keys[0] == 42);
 
-            delete (_Keys);
+            delete (RawKeys);
 
-            auto* _Values = Map.Values();
-            auto& Values = *_Values;
+            auto* RawValues = Map.Values();
+            auto& Values = *RawValues;
 
             EXPECT_TRUE(Values.Size() == 1);
             EXPECT_TRUE(Values[0] == "asd");
 
-            delete (_Values);
+            delete (RawValues);
         }
         {
             csp::common::Map<csp::common::String, int> Map;
@@ -134,21 +134,21 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Map.HasKey("asd"));
             EXPECT_TRUE(Map["asd"] == 42);
 
-            auto* _Keys = Map.Keys();
-            auto& Keys = *_Keys;
+            auto* RawKeys = Map.Keys();
+            auto& Keys = *RawKeys;
 
             EXPECT_TRUE(Keys.Size() == 1);
             EXPECT_TRUE(Keys[0] == "asd");
 
-            delete (_Keys);
+            delete (RawKeys);
 
-            auto* _Values = Map.Values();
-            auto& Values = *_Values;
+            auto* RawValues = Map.Values();
+            auto& Values = *RawValues;
 
             EXPECT_TRUE(Values.Size() == 1);
             EXPECT_TRUE(Values[0] == 42);
 
-            delete (_Values);
+            delete (RawValues);
         }
         {
             csp::common::Map<int, csp::common::String> Map;
@@ -160,8 +160,8 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
 
             EXPECT_TRUE(Map.Size() == 2);
 
-            auto* _Keys = Map.Keys();
-            auto& Keys = *_Keys;
+            auto* RawKeys = Map.Keys();
+            auto& Keys = *RawKeys;
 
             EXPECT_TRUE(Keys.Size() == 2);
             EXPECT_TRUE(Keys[0] == 1 && Keys[1] == 43);
