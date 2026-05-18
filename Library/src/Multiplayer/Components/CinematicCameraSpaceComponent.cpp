@@ -86,6 +86,16 @@ const auto Schema = ComponentSchema {
             4.0f,
         },
         {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
+            "focusDistance",
+            5.0f,
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::DepthOfFieldEnabled),
+            "depthOfFieldEnabled",
+            false,
+        },
+        {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsViewerCamera),
             "isViewerCamera",
             false,
@@ -200,6 +210,28 @@ void CinematicCameraSpaceComponent::SetShutterSpeed(float Value)
 float CinematicCameraSpaceComponent::GetAperture() const { return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Aperture)); }
 
 void CinematicCameraSpaceComponent::SetAperture(float Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Aperture), Value); }
+
+// Focus Distance
+float CinematicCameraSpaceComponent::GetFocusDistance() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocusDistance));
+}
+
+void CinematicCameraSpaceComponent::SetFocusDistance(float Value)
+{
+    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocusDistance), Value);
+}
+
+// Depth of Field Enabled
+bool CinematicCameraSpaceComponent::GetDepthOfFieldEnabled() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::DepthOfFieldEnabled));
+}
+
+void CinematicCameraSpaceComponent::SetDepthOfFieldEnabled(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::DepthOfFieldEnabled), Value);
+}
 
 // Is Viewer Camera
 bool CinematicCameraSpaceComponent::GetIsViewerCamera() const

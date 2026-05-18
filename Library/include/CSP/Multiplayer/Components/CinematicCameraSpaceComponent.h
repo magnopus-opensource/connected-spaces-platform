@@ -44,6 +44,8 @@ enum class CinematicCameraPropertyKeys : uint16_t
     Aperture,
     IsViewerCamera,
     ThirdPartyComponentRef,
+    FocusDistance,
+    DepthOfFieldEnabled,
     Num
 };
 
@@ -153,8 +155,24 @@ public:
 
     /// @brief Set aperture
     /// Note: reserved for future use, do not implement on clients
-    /// @param Value float : aperture Flag
+    /// @param Value float : aperture
     void SetAperture(float Value);
+
+    /// @brief Get focus distance.
+    /// @param Value float : focus distance
+    float GetFocusDistance() const;
+
+    /// @brief Set focus distance
+    /// @param Value float : focus distance
+    void SetFocusDistance(float Value);
+
+    /// @brief Get depth of field enabled flag
+    /// @return Current depth of field enabled flag
+    bool GetDepthOfFieldEnabled() const;
+
+    /// @brief Set depth of field enabled flag
+    /// @param Value boolean : Depth of field enabled flag
+    void SetDepthOfFieldEnabled(bool Value);
 
     /// @brief Get IsViewerCamera.
     /// Note: reserved for future use, do not implement on clients
