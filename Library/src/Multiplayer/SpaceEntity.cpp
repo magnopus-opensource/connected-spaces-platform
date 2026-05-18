@@ -359,7 +359,7 @@ ComponentBase* SpaceEntity::AddComponentByTypeId(uint64_t TypeId)
     std::scoped_lock ScopedComponentsLock { ComponentsLock };
 
     // Only allow one script component
-    if (static_cast<ComponentType>(TypeId) == ComponentType::ScriptData)
+    if (ToComponentType(TypeId) == ComponentType::ScriptData)
     {
         ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData);
 
@@ -932,9 +932,8 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
 {
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
     const auto TypeId = std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue());
-    const auto MessageComponentType = static_cast<ComponentType>(TypeId);
 
-    if (MessageComponentType != ComponentType::Invalid)
+    if (TypeId != static_cast<uint64_t>(ComponentType::Invalid))
     {
         auto* Component = InstantiateComponent(ComponentId, TypeId);
 

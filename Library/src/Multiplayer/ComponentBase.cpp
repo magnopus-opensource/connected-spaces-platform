@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
@@ -81,7 +82,7 @@ uint16_t ComponentBase::GetId() const { return Id; }
 
 void ComponentBase::SetId(uint16_t NewId) { this->Id = NewId; }
 
-ComponentType ComponentBase::GetComponentType() const { return static_cast<ComponentType>(Type); }
+ComponentType ComponentBase::GetComponentType() const { return ToComponentType(Type).value_or(ComponentType::Invalid); }
 
 uint64_t ComponentBase::GetTypeId() const { return Type; }
 

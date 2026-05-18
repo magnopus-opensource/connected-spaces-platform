@@ -111,6 +111,32 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetTypeIdPreservesFullUint64)
     EXPECT_EQ(Component->GetTypeId(), LargeTypeId);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetComponentTypeReturnsInvalidForTypeIdAboveLegacyRange)
+{
+    using Underlying = std::underlying_type_t<csp::multiplayer::ComponentType>;
+    constexpr auto WrapOffset = uint64_t { std::numeric_limits<Underlying>::max() } + 1;
+    constexpr auto WrappedTypeId = WrapOffset + static_cast<uint64_t>(csp::multiplayer::ComponentType::Audio);
+    static_assert(static_cast<csp::multiplayer::ComponentType>(WrappedTypeId) == csp::multiplayer::ComponentType::Audio);
+
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { WrappedTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto* Component = Entity->AddComponentByTypeId(WrappedTypeId);
+    ASSERT_NE(Component, nullptr);
+
+    EXPECT_EQ(Component->GetComponentType(), csp::multiplayer::ComponentType::Invalid);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentByTypeIdCreatesComponent)
 {
     auto Fixture = TestFixture({
@@ -365,6 +391,121 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(Value->GetString(), csp::common::String { "OverriddenValue" });
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentWithTypeIdAboveLegacyRangeNotTreatedAsLegacy)
+{
+    using Underlying = std::underlying_type_t<csp::multiplayer::ComponentType>;
+    constexpr auto WrapOffset = uint64_t { std::numeric_limits<Underlying>::max() } + 1;
+    constexpr auto WrappedTypeId = WrapOffset + static_cast<uint64_t>(csp::multiplayer::ComponentType::Audio);
+    static_assert(static_cast<csp::multiplayer::ComponentType>(WrappedTypeId) == csp::multiplayer::ComponentType::Audio);
+
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { WrappedTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto* Component = Entity->AddComponentByTypeId(WrappedTypeId);
+    ASSERT_NE(Component, nullptr);
+
+    EXPECT_EQ(dynamic_cast<const csp::multiplayer::AudioSpaceComponent*>(Component), nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentAboveLegacyRangeNotMisinterpretedAsScript)
+{
+    using Underlying = std::underlying_type_t<csp::multiplayer::ComponentType>;
+    constexpr auto WrapOffset = uint64_t { std::numeric_limits<Underlying>::max() } + 1;
+    constexpr auto WrappedTypeId = WrapOffset + static_cast<uint64_t>(csp::multiplayer::ComponentType::ScriptData);
+    static_assert(static_cast<csp::multiplayer::ComponentType>(WrappedTypeId) == csp::multiplayer::ComponentType::ScriptData);
+
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { WrappedTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto* ScriptComponent = Entity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
+    ASSERT_NE(ScriptComponent, nullptr);
+
+    const auto* Component = Entity->AddComponentByTypeId(WrappedTypeId);
+    ASSERT_NE(Component, nullptr);
+    EXPECT_NE(Component, ScriptComponent);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemDataAboveLegacyRangeNotTreatedAsLegacy)
+{
+    using Underlying = std::underlying_type_t<csp::multiplayer::ComponentType>;
+    constexpr auto WrapOffset = uint64_t { std::numeric_limits<Underlying>::max() } + 1;
+    constexpr auto WrappedTypeId = WrapOffset + static_cast<uint64_t>(csp::multiplayer::ComponentType::Audio);
+    static_assert(static_cast<csp::multiplayer::ComponentType>(WrappedTypeId) == csp::multiplayer::ComponentType::Audio);
+
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { WrappedTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto ComponentData = std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> {
+        { csp::multiplayer::COMPONENT_KEY_COMPONENTTYPE, csp::multiplayer::mcs::ItemComponentData { WrappedTypeId } },
+    };
+
+    Entity->AddComponentFromItemComponentData(0, csp::multiplayer::mcs::ItemComponentData { ComponentData });
+
+    const auto* Component = Entity->GetComponent(0);
+    ASSERT_NE(Component, nullptr);
+
+    EXPECT_EQ(dynamic_cast<const csp::multiplayer::AudioSpaceComponent*>(Component), nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemDataAboveLegacyRangeNotRejectedAsInvalid)
+{
+    using Underlying = std::underlying_type_t<csp::multiplayer::ComponentType>;
+    constexpr auto WrapOffset = uint64_t { std::numeric_limits<Underlying>::max() } + 1;
+    constexpr auto WrappedTypeId = WrapOffset + static_cast<uint64_t>(csp::multiplayer::ComponentType::Invalid);
+    static_assert(static_cast<csp::multiplayer::ComponentType>(WrappedTypeId) == csp::multiplayer::ComponentType::Invalid);
+
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { WrappedTypeId },
+            "Example",
+            {
+                { 0, "stringProperty", "Value" },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    const auto ComponentData = std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> {
+        { csp::multiplayer::COMPONENT_KEY_COMPONENTTYPE, csp::multiplayer::mcs::ItemComponentData { WrappedTypeId } },
+    };
+
+    Entity->AddComponentFromItemComponentData(0, csp::multiplayer::mcs::ItemComponentData { ComponentData });
+
+    EXPECT_NE(Entity->GetComponent(0), nullptr);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsDefaultValue)

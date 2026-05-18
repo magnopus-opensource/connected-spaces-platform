@@ -44,6 +44,9 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 
+#include <limits>
+#include <type_traits>
+
 namespace csp::multiplayer
 {
 
@@ -102,8 +105,16 @@ const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
     return It != SchemaMap.end() ? &It->second : nullptr;
 }
 
-bool IsLegacyComponentTypeId(uint64_t TypeId)
+std::optional<ComponentType> ToComponentType(uint64_t TypeId)
 {
+    using Underlying = std::underlying_type_t<ComponentType>;
+    static_assert(std::is_unsigned_v<Underlying>);
+
+    if (TypeId > static_cast<uint64_t>(std::numeric_limits<Underlying>::max()))
+    {
+        return std::nullopt;
+    }
+
     switch (static_cast<ComponentType>(TypeId))
     {
     case ComponentType::Invalid:
@@ -137,10 +148,12 @@ bool IsLegacyComponentTypeId(uint64_t TypeId)
     case ComponentType::ScreenSharing:
     case ComponentType::AIChatbot:
     case ComponentType::Delete:
-        return true;
+        return static_cast<ComponentType>(TypeId);
     }
 
-    return false;
+    return std::nullopt;
 }
+
+bool IsLegacyComponentTypeId(uint64_t TypeId) { return ToComponentType(TypeId).has_value(); }
 
 } // namespace csp::multiplayer

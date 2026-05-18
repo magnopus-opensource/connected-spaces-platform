@@ -16,12 +16,16 @@
 
 #pragma once
 
+#include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/IComponentSchemaRegistry.h"
 
+#include <optional>
 #include <unordered_map>
 
 namespace csp::multiplayer
 {
+
+std::optional<ComponentType> ToComponentType(uint64_t TypeId);
 
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
