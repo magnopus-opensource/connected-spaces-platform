@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.39.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1866] feat: Add public API for interacting with Components defined in terms of a Schema description. By @mag-lt.
+  This adds the following public methods:
+  - `IRealtimeEngine::GetComponentSchemaRegistry()`: Returns a "registry" instance, a read-only type describing the Components known by the engine. This can be used to interrogate the shape of a Component at runtime. Currently this is populated by CSP with a corresponding Schema for each of the hardcoded Component types in the library. It is still not possible to register a new schema externally, but this will come in a future release.
+  - `SpaceEntity::AddComponentByTypeId(uint64_t TypeId)`: Allows adding a component that corresponds to a Schema with the given TypeId.
+  - `ComponentBase::GetTypeId()`: This returns the unique integer ID representing the component type. For traditional hardcoded components, this corresponds to casting the `ComponentType` to its underlying integer value. This supersedes `GetComponentType` in that it allows for representing an open vs closed set of components. Details of allocating these IDs in a unique fashion is still to be defined.
+  - `ComponentBase::GetSchemaProperty(uint16_t Key)`: Get the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, or null is returned. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+  - `ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)`: Set the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, and the value must match the type declared there or it is ignored. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+
 ## [6.37.0]
 
 ### 🍰 🙌 New Features
