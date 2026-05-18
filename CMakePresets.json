@@ -75,6 +75,34 @@
         "CSP_BUILD_SHARED": "ON",
         "BUILD_TESTING": "OFF"
       }
+    },
+
+    {
+      "name": "relwithdebinfo-static",
+      "displayName": "single-config release with debug info static",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "relwithdebinfo-static-tests",
+      "displayName": "single-config release with debug info static (with tests)",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "relwithdebinfo-shared",
+      "displayName": "single-config release with debug info shared",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -89,6 +117,11 @@
       "configuration": "Release"
     },
     {
+      "name": "multi-relwithdebinfo-static",
+      "configurePreset": "multi-static",
+      "configuration": "RelWithDebInfo"
+    },
+    {
       "name": "multi-debug-shared",
       "configurePreset": "multi-shared",
       "configuration": "Debug"
@@ -97,6 +130,11 @@
       "name": "multi-release-shared",
       "configurePreset": "multi-shared",
       "configuration": "Release"
+    },
+    {
+      "name": "multi-relwithdebinfo-shared",
+      "configurePreset": "multi-shared",
+      "configuration": "RelWithDebInfo"
     },
     {
       "name": "debug-static",
@@ -127,6 +165,22 @@
       "name": "release-shared",
       "configurePreset": "release-shared",
       "configuration": "Release"
+    },
+
+    {
+      "name": "relwithdebinfo-static",
+      "configurePreset": "relwithdebinfo-static",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "relwithdebinfo-static-tests",
+      "configurePreset": "relwithdebinfo-static-tests",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "relwithdebinfo-shared",
+      "configurePreset": "relwithdebinfo-shared",
+      "configuration": "RelWithDebInfo"
     }
   ]
 }
