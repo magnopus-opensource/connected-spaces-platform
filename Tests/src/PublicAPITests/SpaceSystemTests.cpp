@@ -2283,7 +2283,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 
     ::Space Space;
     FileAssetDataSource SpaceThumbnail;
-    const std::string LocalFileName = "test.json";
+    const std::string LocalFileName = "Test.json";
     const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
     SpaceThumbnail.FilePath = FilePath.u8string().c_str();
     SpaceThumbnail.SetMimeType("application/json");
@@ -2343,7 +2343,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 
     ::Space Space;
     FileAssetDataSource SpaceThumbnail;
-    const std::string LocalFileName = "test.json";
+    const std::string LocalFileName = "Test.json";
     auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
     SpaceThumbnail.FilePath = FilePath.u8string().c_str();
     SpaceThumbnail.SetMimeType("application/json");

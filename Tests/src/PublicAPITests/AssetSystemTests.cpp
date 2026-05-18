@@ -1174,7 +1174,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
     const csp::common::String& FileNoMimeType = "";
@@ -1345,7 +1345,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
     const csp::common::String& FileNoMimeType = "";
@@ -1594,9 +1594,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    Asset.FileName = "test.json";
+    Asset.FileName = "Test.json";
 
-    auto UploadFilePath = std::filesystem::absolute("assets/test.json");
+    auto UploadFilePath = std::filesystem::absolute("assets/Test.json");
     FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
     auto* UploadFileData = new unsigned char[UploadFileSize];
@@ -1685,7 +1685,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 
@@ -1703,7 +1703,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
     EXPECT_EQ(Asset.Id, UpdatedAsset.Id);
 
     // Replace data
-    FilePath = std::filesystem::absolute("assets/test2.json");
+    FilePath = std::filesystem::absolute("assets/Test2.json");
     Source.FilePath = FilePath.u8string().c_str();
 
     printf("Uploading new asset data...\n");
@@ -1774,7 +1774,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     auto& InitialAssetId = Asset.Id;
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 
@@ -1786,9 +1786,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
     // Replace data
-    Asset.FileName = "test2.json";
+    Asset.FileName = "Test2.json";
 
-    auto UpdateFilePath = std::filesystem::absolute("assets/test2.json");
+    auto UpdateFilePath = std::filesystem::absolute("assets/Test2.json");
     FILE* UpdateFile = fopen(UpdateFilePath.string().c_str(), "rb");
     uintmax_t UpdateFileSize = std::filesystem::file_size(UpdateFilePath);
     auto* UpdateFileData = new unsigned char[UpdateFileSize];
@@ -2098,7 +2098,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 

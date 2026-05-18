@@ -53,9 +53,14 @@ inline size_t next_pow2(size_t val)
 /// This class is implemented using an array and, as such, removing items is not cheap as it requires
 /// us to move all items after it down one space.
 ///
-/// @tparam T : Object type to store in the list
+/// @tparam T : Object type to store in the list. T is required to be move-assignable.
 template <typename T> class CSP_API List
 {
+    CSP_START_IGNORE
+    // Ensure the type is move assignable due to List::Insert using std::move_backward
+    static_assert(std::is_move_assignable_v<T>);
+    CSP_END_IGNORE
+    
 public:
     using iterator = T*;
     using const_iterator = const T*;
@@ -275,22 +280,16 @@ public:
             ReallocList(Size);
         }
 
-        auto After = CurrentSize - Index;
-// This is a real problem, don't ignore this, it needs fixed. (Or this entire type needs deleted)
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-warning-option"
-#pragma clang diagnostic ignored "-Wnontrivial-memcall"
-#endif
-        std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-        ++CurrentSize;
+        // Shift elements from the new insertion point 1 index to the right.
+        std::move_backward(
+            ObjectArray + Index,
+            ObjectArray + CurrentSize,
+            ObjectArray + CurrentSize + 1
+        );
 
-        T* ObjectPtr = &ObjectArray[Index];
-        new (ObjectPtr) T;
+        // Insert the new item
         ObjectArray[Index] = Item;
+        ++CurrentSize;
     }
 
     /// @brief Removes an element to a specific index of the list.
