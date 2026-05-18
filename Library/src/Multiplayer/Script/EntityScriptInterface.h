@@ -73,19 +73,18 @@ public:
 
     template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType Type);
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
+    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(uint64_t TypeId);
 
 private:
     SpaceEntity* Entity;
 };
 
-template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(uint64_t TypeId)
 {
     std::vector<ScriptInterface*> Components;
 
     if (Entity)
     {
-        const ComponentType ThisType = Type;
-
         const auto& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
@@ -93,7 +92,7 @@ template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptIn
         {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
-            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
+            if ((Component != nullptr) && (Component->GetTypeId() == TypeId) && (Component->GetScriptInterface() != nullptr))
             {
                 Components.push_back((ScriptInterface*)Component->GetScriptInterface());
             }
@@ -103,6 +102,11 @@ template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptIn
     }
 
     return Components;
+}
+
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)
+{
+    return GetComponentsOfType<ScriptInterface>(static_cast<uint64_t>(Type));
 }
 
 template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()

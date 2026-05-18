@@ -129,6 +129,17 @@ public:
     /// @return The type of the component as an enum.
     ComponentType GetComponentType() const;
 
+    /// @brief Get the TypeId of the component.
+    /// @return A unique integer ID representing the component type.
+    ///
+    /// @note This method is conceptually similar to GetComponentType(), but handles an 
+    ///       open set of IDs. For built-in, statically defined components, this ID is 
+    ///       guaranteed to be the exact integer cast of its ComponentType enum value. 
+    ///       For dynamically registered components, it returns the ID specified by its schema.
+    ///
+    /// @see GetComponentType()
+    uint64_t GetTypeId() const;
+
     /// @brief Get a map of the replicated values defined for this component.
     ///
     /// The index of the map represents a unique index for the property,
@@ -172,8 +183,17 @@ public:
     // Used for handling behavior when a client first deletes the component.
     CSP_NO_EXPORT virtual void OnLocalDelete();
 
+    /// @brief Get a property value by schema key.
+    /// @return A pointer to the value, or nullptr if the key is not in this component's schema.
+    const csp::common::ReplicatedValue* GetSchemaProperty(uint16_t Key) const;
+
+    /// @brief Set a property value by schema key.
+    /// Silently ignored if the key is absent from this component's schema or the value type does not match the schema definition.
+    void SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value);
+
 protected:
     ComponentBase();
+    ComponentBase(uint64_t TypeId, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;
@@ -206,7 +226,7 @@ protected:
 
     SpaceEntity* Parent;
     uint16_t Id;
-    ComponentType Type;
+    uint64_t Type;
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> Properties;
     csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyProperties;
 
@@ -216,6 +236,8 @@ protected:
     csp::common::LogSystem* LogSystem = nullptr;
 
     csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
+
+    std::unique_ptr<ComponentSchema> CachedSchema;
 
 private:
     void InitialiseProperties();

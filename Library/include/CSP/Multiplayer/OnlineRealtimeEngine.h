@@ -276,7 +276,7 @@ public:
 
     /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
     /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
-    CSP_NO_EXPORT const csp::multiplayer::ComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
+    const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
@@ -517,7 +517,7 @@ private:
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
-    csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
+    std::unique_ptr<csp::multiplayer::IComponentSchemaRegistry> ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

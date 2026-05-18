@@ -16,29 +16,25 @@
 
 #pragma once
 
-#include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/IComponentSchemaRegistry.h"
-
-#include <optional>
-#include <unordered_map>
+#include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-std::optional<ComponentType> ToComponentType(uint64_t TypeId);
-
-bool IsLegacyComponentTypeId(uint64_t TypeId);
-
-class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
+/// @brief Read-only interface for querying registered component schemas.
+class CSP_API IComponentSchemaRegistry
 {
 public:
-    ComponentSchemaRegistryImpl(const csp::common::Array<ComponentSchema>& AdditionalComponents);
+    virtual ~IComponentSchemaRegistry() = default;
 
-    csp::common::Array<ComponentSchema> GetAll() const override;
-    const ComponentSchema* Find(uint64_t TypeId) const override;
+    /// @brief Returns all registered schemas.
+    virtual csp::common::Array<ComponentSchema> GetAll() const = 0;
 
-private:
-    std::unordered_map<ComponentSchema::TypeIdType, ComponentSchema> SchemaMap;
+    /// @brief Finds the schema for the given TypeId.
+    /// @return A pointer to the schema if found, otherwise nullptr.
+    virtual const ComponentSchema* Find(uint64_t TypeId) const = 0;
 };
 
 } // namespace csp::multiplayer
