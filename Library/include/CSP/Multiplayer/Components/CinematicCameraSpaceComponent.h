@@ -149,12 +149,10 @@ public:
     void SetShutterSpeed(float Value);
 
     /// @brief Get aperture.
-    /// Note: reserved for future use, do not implement on clients
     /// @param Value float : aperture
     float GetAperture() const;
 
     /// @brief Set aperture
-    /// Note: reserved for future use, do not implement on clients
     /// @param Value float : aperture
     void SetAperture(float Value);
 
