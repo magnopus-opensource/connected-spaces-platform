@@ -584,7 +584,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BaseClassFunctio
     Component.SetComponentName("Test Component");
 
     ASSERT_EQ(Component.GetId(), static_cast<Property::KeyType>(0));
-    ASSERT_EQ(static_cast<Schema::TypeIdType>(Component.GetComponentType()), static_cast<Schema::TypeIdType>(123));
+    ASSERT_EQ(Component.GetTypeId(), Schema::TypeIdType { 123 });
 
     constexpr auto ScriptText = R"(
         import { assert } from "CSPTest";
