@@ -21,6 +21,11 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemsResult.h"
 
+CSP_START_IGNORE
+#include <memory>
+#include <mutex>
+CSP_END_IGNORE
+
 namespace csp::common
 {
 
@@ -42,6 +47,9 @@ namespace csp::systems
 
 class UserSystem;
 class LoginStateResult;
+CSP_START_IGNORE
+struct LoginStateLockable;
+CSP_END_IGNORE
 
 /// @brief Data for access and refresh tokens, and their expiry times.
 class CSP_API LoginTokenInfo
@@ -67,15 +75,18 @@ public:
     [[nodiscard]] const csp::common::LoginState& GetLoginState() const;
     CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , State(nullptr) {};
+        , State(nullptr) {}
 
 private:
     LoginStateResult();
-    LoginStateResult(csp::common::LoginState* InStatePtr);
+    CSP_START_IGNORE
+    LoginStateResult(LoginStateLockable* LoginStateLock);
+    CSP_END_IGNORE
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::LoginState* State;
+    std::shared_ptr<csp::common::LoginState> State;
+    std::shared_ptr<std::mutex> StateMutex;
 };
 
 /// @ingroup User System

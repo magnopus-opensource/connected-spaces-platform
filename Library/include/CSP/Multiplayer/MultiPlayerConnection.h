@@ -27,6 +27,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <tuple>
 #include <vector>
 
@@ -285,6 +286,11 @@ private:
         so the OnlineRealtimeEngine can receieve events agnostically from the MultiplayerConnection (Similar to what we did with the event bus).
     */
     OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
+    // Set when the MultiplayerRealtimeEngine is set. Mutex guards against use-after-free race condition that can occur if the
+    // MultiplayerRealtimeEngine is destroyed while either OnElectedScopeLeader or OnVacatedScopeLeader callbacks are in-flight.
+    // Locking the weak_ptr atomically confirms the engine is still alive, and holding the mutex ensures it cannot be destroyed 
+    // while we're inside the OnElectedScopeLeader or OnVacatedScopeLeader callbacks.
+    std::weak_ptr<std::mutex> LeaderElectionGuardWeak;
 };
 
 } // namespace csp::multiplayer

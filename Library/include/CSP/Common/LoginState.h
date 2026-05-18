@@ -27,6 +27,8 @@ namespace csp::common
 class DateTime;
 
 /// @brief Data structure representing the user login state, including detection of access token expiry
+/// @inv All writes to the LoginState happen under a mutex lock. Both LoginState and the mutex are owned by the UserSystem, and any access
+/// to the LoginState object happens while the lock on the mutex is in place.
 class CSP_API LoginState
 {
 public:

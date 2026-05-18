@@ -15,7 +15,9 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Multiplayer/SpaceTransform.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -157,7 +159,7 @@ struct AuthorizeURLTokens
 AuthorizeURLTokens ExtractTokensFromAuthorizeURL(const csp::common::String& AuthorizeURL)
 {
     AuthorizeURLTokens URLTokens;
-    
+
     const char* STATE_ID_URL_PARAM = "state=";
     const char* CLIENT_ID_URL_PARAM = "client_id=";
     const char* SCOPE_URL_PARAM = "scope=";
@@ -551,10 +553,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
     std::future<csp::systems::LoginTokenInfoResult> TokenFuture = TokenPromise.get_future();
 
     UserSystem->SetNewLoginTokenReceivedCallback(
-        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result)
-        {
-            TokenPromise.set_value(Result);
-        });
+        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result) { TokenPromise.set_value(Result); });
 
     // Log in
     csp::common::String UserId;
@@ -1322,4 +1321,158 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     ASSERT_EQ(ApplicationSetting.Settings.Size(), 1);
     ASSERT_TRUE(ApplicationSetting.Settings.HasKey("URL"));
     ASSERT_EQ(ApplicationSetting.Settings["URL"], "https://www.google.com/search?q=why+google");
+}
+
+// Regression test to ensure that the EntityFetchCancellationToken sentinel in the
+// OnlineRealtimeEngine prevents the RetrieveAllEntities callback from accessing a destroyed RealtimeEngine.
+//
+// This issue was occuring under the following conditions:
+//   1. A user enters a space containing many entities.
+//   2. The OnlineRealtimeEngine is destroyed before the RetrieveAllEntitiesCallback has completed.
+//   3. Entities being created in the loop try to access the LogSystem member of the OnlineRealtimeEngine causing a crash.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EnterSpaceTeardownDuringEntityFetchTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Setup: Populate the Space with several SpaceEntities and then exit cleanly.
+    {
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(csp::common::RealtimeEngineType::Online) };
+
+        std::atomic<bool> FetchComplete { false };
+        RealtimeEngine->SetEntityFetchCompleteCallback([&FetchComplete](uint32_t) { FetchComplete = true; });
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EXPECT_TRUE(ResponseWaiter::WaitFor([&FetchComplete] { return FetchComplete.load(); }, 30s));
+
+        const csp::multiplayer::SpaceTransform EntityTransform
+            = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        for (int i = 0; i < 3; ++i)
+        {
+            char EntityName[64];
+            SPRINTF(EntityName, "CSP-UNITTEST-ENTITY-%d", i);
+            auto [Entity] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, EntityTransform, csp::common::Optional<uint64_t> {});
+            EXPECT_NE(Entity, nullptr);
+        }
+
+        auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        EXPECT_EQ(ExitResult.GetResultCode(), csp::systems::EResultCode::Success);
+        RealtimeEngine.reset();
+    }
+
+    // Enter the Space once more and destroy the RealtimeEngine without waiting for the RetrieveAllEntities callback to complete.
+    // Ensure the FetchPromise is not ready and then exit the space.
+    {
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(csp::common::RealtimeEngineType::Online) };
+
+        std::promise<bool> FetchPromise;
+        std::future<bool> FetchFuture = FetchPromise.get_future();
+
+        RealtimeEngine->SetEntityFetchCompleteCallback([&FetchPromise](uint32_t) { FetchPromise.set_value(true); });
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RealtimeEngine.reset();
+
+        EXPECT_EQ(FetchFuture._Is_ready(), false);
+
+        auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        EXPECT_EQ(ExitResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+// Regression test for the LoginStateMutex guard in UserSystem.
+//
+// The crash was occurring under the following conditions:
+//   1. A user calls Logout().
+//   2. Before the logout response is received, Login() is called again.
+//   3. Both OnResponse handlers execute concurrently on different threads and write to
+//      CurrentLoginState without synchronization, causing a data race.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+    csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Call Logout without blocking, then immediately call Login for the same user.
+    // Without the LoginStateMutex, the concurrent OnResponse callbacks would produce a data
+    // race on CurrentLoginState — potentially crashing or corrupting the login state.
+    std::promise<bool> LogoutPromise;
+    std::future<bool> LogoutFuture = LogoutPromise.get_future();
+    std::promise<bool> LoginPromise;
+    std::future<bool> LoginFuture = LoginPromise.get_future();
+
+    csp::systems::EResultCode LogoutResultCode { csp::systems::EResultCode::InProgress };
+    csp::systems::EResultCode LoginResultCode { csp::systems::EResultCode::InProgress };
+
+    UserSystem->Logout(
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LogoutResultCode = Result.GetResultCode();
+                LogoutPromise.set_value(true);
+            }
+        });
+
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        [&](const csp::systems::LoginStateResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LoginResultCode = Result.GetResultCode();
+                LoginPromise.set_value(true);
+            }
+        });
+
+    std::future_status LogoutStatus = LogoutFuture.wait_for(30s);
+    std::future_status LoginStatus = LoginFuture.wait_for(30s);
+
+    if (LogoutStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LogoutFuture.get());
+    }
+    else
+    {
+        FAIL() << "Logout did not complete successfully.";
+    }
+
+    if (LoginStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LoginFuture.get());
+    }
+    else
+    {
+        FAIL() << "Login did not complete successfully.";
+    }
+
+    // Ensure the call to Logout was successful — we were validly logged in when it was dispatched.
+    EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
+
+    // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
+    const csp::common::ELoginState FinalState = UserSystem->GetLoginState().State;
+    EXPECT_TRUE(FinalState == csp::common::ELoginState::LoggedIn || FinalState == csp::common::ELoginState::LoggedOut
+        || FinalState == csp::common::ELoginState::Error);
+
+    if (LoginResultCode == csp::systems::EResultCode::Success)
+    {
+        LogOut(UserSystem);
+    }
 }

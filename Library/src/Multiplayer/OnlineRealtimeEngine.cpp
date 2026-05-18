@@ -169,6 +169,9 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EntityFetchCancellationToken(std::make_shared<std::atomic<bool>>(false))
+    , EntityFetchBodyGuard(std::make_shared<std::mutex>())
+    , LeaderElectionGuard(std::make_shared<std::mutex>())
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
     , PendingOutgoingUpdateUniqueSet(nullptr)
@@ -196,6 +199,9 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EntityFetchCancellationToken(std::make_shared<std::atomic<bool>>(false))
+    , EntityFetchBodyGuard(std::make_shared<std::mutex>())
+    , LeaderElectionGuard(std::make_shared<std::mutex>())
     , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
@@ -214,6 +220,20 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
+    EntityFetchCancellationToken->store(true);
+    {
+        // This attempts to acquire the guard mutex. If the CreateRetrieveAllEntitiesCallback callback body is currently executing (the cancellation
+        // token was valid), it holds this mutex. If so the destructor blocks here until that callback finishes and then releases it. Once the
+        // destructor acquires the lock, it immediately releases it and continues.
+        std::scoped_lock lock(*EntityFetchBodyGuard);
+    }
+
+    {
+        // Wait for any in-flight MultiplayerConnection ON_ELECTED_SCOPE_LEADER / ON_VACATED_AS_SCOPE_LEADER callbacks to finish before tearing down.
+        // Without this the callback may be in flight on a SignalR thread when the engine is destroyed producing a use-after-free race condition.
+        std::scoped_lock leaderLock(*LeaderElectionGuard);
+    }
+
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
@@ -305,8 +325,8 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
-            Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
+            MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
@@ -654,9 +674,13 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However, I
-    // decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // LeadershipElectionLock must be held while using LeaderElectionManager to prevent a use-after-free race condition caused by the
+    // OnlineRealtimeEngine being destroyed and resetting the LeaderElectionManager via a call to DisableLeaderElection().
+    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -678,10 +702,13 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection.
-    // These checks could be removed if the election events were bound inside the ScopeLeadershipManager.
-    // However, I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // LeadershipElectionLock must be held while using LeaderElectionManager to prevent a use-after-free race condition caused by the
+    // OnlineRealtimeEngine being destroyed and resetting the LeaderElectionManager via a call to DisableLeaderElection().
+    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -716,9 +743,24 @@ void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::func
 std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
     int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, FetchCompleteCallback, Cancelled = EntityFetchCancellationToken, Guard = EntityFetchBodyGuard](
+                                       const signalr::value& Result, std::exception_ptr Except)
     {
+        // Check if the OnlineRealtimeEngine has been destroyed while we were waiting for the paged entities to come back. This can happen for example
+        // if the user has entered a large Space with many entities and exits the Space (destroying the OnlineRealtimeEngine) before processing is
+        // completed. The guard is used to stop a race condition whereby the OnlineRealtimeEngine dtor is called after the SignalR thread executing
+        // this callback has checked the cancellation token, but BEFORE it has finished executing the callback.
+        std::scoped_lock lock(*Guard);
+        if (Cancelled->load())
+        {
+            return;
+        }
+
         HandleException(Except, "Failed to retrieve paged entities.");
+        if (Except)
+        {
+            return;
+        }
 
         const auto& Results = Result.as_array();
         const auto& Items = Results[0].as_array();
@@ -798,6 +840,9 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
     const csp::common::String&, csp::common::EntityFetchStartedCallback FetchStartedCallback)
 {
+    // Reset the cancellation token in case this function is called multiple times during the lifespan of the OnlineRealtimeEngine (eg multiple Space
+    // entries)
+    EntityFetchCancellationToken->store(false);
     this->RetrieveAllEntities(EntityFetchCompleteCallback);
     FetchStartedCallback();
 }

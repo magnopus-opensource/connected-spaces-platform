@@ -41,11 +41,13 @@ namespace csp::systems
 
 LoginStateResult::LoginStateResult()
     : State(nullptr)
+    , StateMutex(nullptr)
 {
 }
 
-LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
-    : State(InStatePtr)
+LoginStateResult::LoginStateResult(LoginStateLockable* LoginStateLock)
+    : State(LoginStateLock->State)
+    , StateMutex(LoginStateLock->Mutex)
 {
 }
 
@@ -88,6 +90,8 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
         if (State)
         {
+            std::scoped_lock lock(*StateMutex);
+
             State->State = ELoginState::LoggedIn;
             State->AccessToken = AuthResponse->GetAccessToken();
             State->RefreshToken = AuthResponse->GetRefreshToken();
@@ -147,14 +151,15 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
             LoginEvent->AddString("UserId", AuthResponse->GetUserId());
             events::EventSystem::Get().EnqueueEvent(LoginEvent);
-
-            SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
         }
+
+        SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
     }
     else
     {
         if (State)
         {
+            std::scoped_lock lock(*StateMutex);
             web::HttpAuth::SetAccessToken("", "", "", "");
 
             State->State = ELoginState::Error;
@@ -168,12 +173,14 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
 LogoutResult::LogoutResult()
     : State(nullptr)
+    , StateMutex(nullptr)
 {
 }
 
-LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
-    : NullResult(InStatePtr)
-    , State(InStatePtr)
+LogoutResult::LogoutResult(LoginStateLockable* LoginStateLock)
+    : NullResult(LoginStateLock)
+    , State(LoginStateLock->State)
+    , StateMutex(LoginStateLock->Mutex)
 {
 }
 
@@ -185,6 +192,8 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
+            std::scoped_lock lock(*StateMutex);
+
             State->State = ELoginState::LoggedOut;
             State->AccessToken = "InvalidAccessToken";
             State->RefreshToken = "InvalidRefreshToken";
@@ -202,6 +211,8 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
+            std::scoped_lock lock(*StateMutex);
+
             State->State = ELoginState::Error;
             State->AccessToken = "InvalidAccessToken";
             State->RefreshToken = "InvalidRefreshToken";
