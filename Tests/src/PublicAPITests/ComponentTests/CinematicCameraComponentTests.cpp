@@ -87,6 +87,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
     EXPECT_FLOAT_EQ(CinematicCamera->GetIso(), 400.0f);
     EXPECT_FLOAT_EQ(CinematicCamera->GetShutterSpeed(), 0.0167f);
     EXPECT_FLOAT_EQ(CinematicCamera->GetAperture(), 4.0f);
+    EXPECT_FLOAT_EQ(CinematicCamera->GetFocusDistance(), 5.0f);
+    EXPECT_FALSE(CinematicCamera->GetDepthOfFieldEnabled());
     EXPECT_FALSE(CinematicCamera->GetIsViewerCamera());
 
     // Set the new values
@@ -100,6 +102,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
     CinematicCamera->SetIso(1000.0f);
     CinematicCamera->SetShutterSpeed(0.003f);
     CinematicCamera->SetAperture(10.0f);
+    CinematicCamera->SetFocusDistance(1.0f);
+    CinematicCamera->SetDepthOfFieldEnabled(true);
     CinematicCamera->SetIsViewerCamera(true);
 
     EXPECT_FLOAT_EQ(CinematicCamera->GetFocalLength(), 2.0f);
@@ -112,6 +116,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
     EXPECT_FLOAT_EQ(CinematicCamera->GetIso(), 1000.0f);
     EXPECT_FLOAT_EQ(CinematicCamera->GetShutterSpeed(), 0.003f);
     EXPECT_FLOAT_EQ(CinematicCamera->GetAperture(), 10.0f);
+    EXPECT_FLOAT_EQ(CinematicCamera->GetFocusDistance(), 1.0f);
+    EXPECT_TRUE(CinematicCamera->GetDepthOfFieldEnabled());
     EXPECT_TRUE(CinematicCamera->GetIsViewerCamera());
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -227,20 +233,22 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 
     // Setup script
     const std::string CinematicCameraScriptText = R"xx(
-		const cinematicCamera = ThisEntity.getCinematicCameraComponents()[0];
-		cinematicCamera.position = [3, 2, 1];
-		cinematicCamera.rotation = [1, 2, 3, 1];
-		cinematicCamera.aspectRatio = 1.3;
-		cinematicCamera.sensorSize = [1,2];
-		cinematicCamera.nearClip = 1;
-		cinematicCamera.farClip = 100;
-		cinematicCamera.iso = 1000;
-		cinematicCamera.shutterSpeed = 0.003;
-		cinematicCamera.aperture = 10;
-		cinematicCamera.focalLength = 2;
-		cinematicCamera.isViewerCamera = true;
-		cinematicCamera.isEnabled = false;
-	)xx";
+        const cinematicCamera = ThisEntity.getCinematicCameraComponents()[0];
+        cinematicCamera.position = [3, 2, 1];
+        cinematicCamera.rotation = [1, 2, 3, 1];
+        cinematicCamera.aspectRatio = 1.3;
+        cinematicCamera.sensorSize = [1,2];
+        cinematicCamera.nearClip = 1;
+        cinematicCamera.farClip = 100;
+        cinematicCamera.iso = 1000;
+        cinematicCamera.shutterSpeed = 0.003;
+        cinematicCamera.aperture = 10;
+        cinematicCamera.focalLength = 2;
+        cinematicCamera.isViewerCamera = true;
+        cinematicCamera.isEnabled = false;
+        cinematicCamera.focusDistance = 10.0;
+        cinematicCamera.depthOfFieldEnabled = true;
+    )xx";
 
     CreatedObject->GetScript().SetScriptSource(CinematicCameraScriptText.c_str());
     CreatedObject->GetScript().Invoke();
@@ -259,6 +267,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
     EXPECT_FLOAT_EQ(CinematicCamera->GetFocalLength(), 2.0f);
     EXPECT_TRUE(CinematicCamera->GetIsViewerCamera());
     EXPECT_FALSE(CinematicCamera->GetIsEnabled());
+    EXPECT_FLOAT_EQ(CinematicCamera->GetFocusDistance(), 10.0f);
+    EXPECT_TRUE(CinematicCamera->GetDepthOfFieldEnabled());
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
