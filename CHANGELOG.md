@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [6.37.0]
+## [6.39.0]
+
+### 🍰 🙌 New Features
+
+- [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
+  Adds focus distance and depth of field enabled properties to the cinematic camera space component.
+
+## [6.38.0]
 
 ### 🍰 🙌 New Features
 
@@ -12,8 +19,16 @@ All notable changes to this project will be documented in this file. For compile
   over to this pattern, with only a handful still being registered manually due to some remaining
   edge cases.
 
-- [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
-  Adds focus distance and depth of field enabled properties to the cinematic camera space component.
+- [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
+  At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
+
+- [OF-1850] feat: CSP tests now run on Linux platforms by @MAG-mv.
+  This includes code changes used by the new buld system to run tests on Linux.
+  This still isn't officially public, but noting here due to changes to List::Append.
+
+## [6.37.0]
+
+- Note: Version 6.37.0 was skipped due to a CI deployment issue. All planned changes are included in release 6.38.0.
 
 ## [6.36.0]
 
@@ -34,13 +49,6 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
   This isn't currently a public-facing change. However, it includes internal changes to the internal usage of tinyspline. This should not have any effect on behaviour.
-
-- [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
-  At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
-
-- [OF-1850] feat: CSP tests now run on Linux platforms by @MAG-mv.
-  This includes code changes used by the new buld system to run tests on Linux.
-  This still isn't officially public, but noting here due to changes to List::Append.
 
 ### 🐛 🔨 Bug Fixes
 
