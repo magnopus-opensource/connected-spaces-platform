@@ -245,10 +245,22 @@ void SystemsManager::DestroySystems()
     delete SpaceSystem;
     delete UserSystem;
     delete VoipSystem;
-    delete MultiplayerConnection; // Also deletes NetworkEventBus
     delete ScriptSystem;
     delete MultiplayerSystem;
+
+#ifdef CSP_WASM
+    delete MultiplayerConnection;
     delete WebClient;
+#else
+    // INTENTIONALLY LEAK MultiplayerConnection and WebClient.
+    // SignalR's detached scheduler thread and WebClient's ThreadPool workers may still
+    // reference their members (mutexes, etc.) after destruction. Leaking avoids
+    // "mutex lock failed: Invalid argument" crashes on shutdown.
+    // The OS reclaims all memory when the process exits.
+    MultiplayerConnection = nullptr;
+    WebClient = nullptr;
+#endif
+
     delete LogSystem;
 }
 
