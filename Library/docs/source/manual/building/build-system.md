@@ -22,11 +22,11 @@ Ensure the following tools are installed and available in your `PATH`:
 Before running any commands, decide whether to use a **single-config** or **multi-config** generator:
 
 * **Single-config generators**
-  Build one configuration at a time (e.g. `Debug` *or* `Release`).
+  Build one configuration at a time (e.g. `Debug` *or* `Release` *or* `RelWithDebInfo`).
   Recommended for command-line workflows.
 
 * **Multi-config generators**
-  Support multiple configurations in the same build (e.g. `Debug` *and* `Release`).
+  Support multiple configurations in the same build (e.g. `Debug` *and* `Release` *and* `RelWithDebInfo`).
   Recommended when using an IDE (e.g. Visual Studio, Xcode).
 
 ---
@@ -42,7 +42,7 @@ conan install . -s build_type=<CONFIG> --build=missing --profile:host=profiles/h
 ### Parameters
 
 * `<CONFIG>`
-  Build configuration: `Debug` or `Release`
+  Build configuration: `Debug` or `Release` or `RelWithDebInfo`
 
 * `<PROFILE>`
   Target platform profile (see `profiles/host/`)
@@ -51,7 +51,7 @@ conan install . -s build_type=<CONFIG> --build=missing --profile:host=profiles/h
 
 * When switching between different profiles, delete the generated `ConanPresets.json` file in the repository root.
   Otherwise, you may encounter conflicting preset errors.
-* If using a **multi-config generator**, install dependencies for **both `Debug` and `Release`**.
+* If using a **multi-config generator**, install dependencies for all configurations you intend to build **e.g `Debug` and `Release` and `RelWithDebInfo`**.
 * If using the **Xcode generator**, you must explicitly set it:
 
 ```sh
@@ -161,7 +161,7 @@ cmake --install <BUILD_DIR> --config <CONFIG> --prefix <INSTALL_DIR>
   Path to the build directory
 
 * `<CONFIG>`
-  Build configuration: `Debug` or `Release`
+  Build configuration: `Debug` or `Release` or `RelWithDebInfo`
 
 * `<INSTALL_DIR>`
  Destination directory for the installation
