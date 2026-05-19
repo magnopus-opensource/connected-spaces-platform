@@ -60,6 +60,16 @@ target_link_libraries(csp-signalr
     msgpack-cxx
 )
 
+# CSP and its internal static libraries may be linked into a shared library,
+# so build library targets with PIC on non-Windows platforms.
+if(NOT WIN32)
+  set_target_properties(
+    csp-signalr
+      PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+  )
+endif()
+
 target_compile_definitions(csp-signalr
   PUBLIC
     NO_SIGNALRCLIENT_EXPORTS

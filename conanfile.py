@@ -7,6 +7,14 @@ class CSP(ConanFile):
 
     exports_sources = "CMakeLists.txt", "Library/*", "Tests/*", "cmake/*"
 
+    default_options = {
+        # We currently don't support shared dependencies.
+        "*:shared": False,
+
+        # Our dependencies are always linked statically, so force PIC.
+        "*:fPIC": True,
+    }
+
     def layout(self):
         # Explicitly set the provided generator
         # This fixes a bug with the xcode generator where conan doesn't configure correctly and points to the incorrect directory.
@@ -28,6 +36,11 @@ class CSP(ConanFile):
         # We use the Emscripten WebSockets API for Emscripten
         if self.settings.os != "Emscripten":
             self.requires("poco/1.14.2")
+
+    def config_options(self):
+        # If we're targeting windows, remove fPIC option as this isn't used on Windows.
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         # Disable unnecessary Poco modules as this is a big library with dependecies.

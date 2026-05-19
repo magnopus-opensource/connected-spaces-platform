@@ -39,6 +39,16 @@ target_include_directories(csp-quickjs
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+# CSP and its internal static libraries may be linked into a shared library,
+# so build library targets with PIC on non-Windows platforms.
+if(NOT WIN32)
+  set_target_properties(
+    csp-quickjs
+      PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+  )
+endif()
+
 target_compile_definitions(csp-quickjs
   PRIVATE
     _HAS_EXCEPTIONS=0

@@ -188,6 +188,16 @@ set_target_properties(csp-lib PROPERTIES
   DEBUG_POSTFIX _D
 )
 
+# CSP and its internal static libraries may be linked into a shared library,
+# so build library targets with PIC on non-Windows platforms.
+if(NOT WIN32)
+  set_target_properties(
+    csp-lib
+      PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+  )
+endif()
+
 target_compile_options(csp-lib
   PRIVATE
     # Needed to compile EntityScriptBindings.cpp
