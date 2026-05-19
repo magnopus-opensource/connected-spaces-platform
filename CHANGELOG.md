@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.39.0]
+
+### 🍰 🙌 New Features
+
+- [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
+  Adds focus distance and depth of field enabled properties to the cinematic camera space component.
+
 ## [6.38.0]
 
 ### 🍰 🙌 New Features
@@ -99,9 +106,9 @@ All notable changes to this project will be documented in this file. For compile
   the error handling behaviour which we can just do without. Login with email
   now, you probably already are.
   Removes username as an option from public api:
-    - UserSystem::Login
-    - UserSystem::CreateUser
-    - UserSystem::UpgradeGuestAccount
+  - UserSystem::Login
+  - UserSystem::CreateUser
+  - UserSystem::UpgradeGuestAccount
 
 ### 🐛 🔨 Bug Fixes
 
@@ -145,7 +152,7 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1836] fix: Log errors when parsing malformed JSON by magnopus-swifty
   This is a partial fix to log errors when parsing malformed JSON strings and avoid hitting unwanted assertions.
   A more complete fix will implement error handling logic so calling code can correctly report failures.
-  
+
 ### 🍰 🙌 New Features
 
 - [OF-1818] feat: Update AsyncCompletedEventCallback format by MAG-AdamThorn
@@ -154,7 +161,7 @@ All notable changes to this project will be documented in this file. For compile
 ### 🐛 🔨 Bug Fixes
 
 - [OB-5070] fix: `GetMaterials` no longer bails out after first failure
-  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success. 
+  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success.
 
 ## [6.27.0]
 
@@ -181,40 +188,40 @@ All notable changes to this project will be documented in this file. For compile
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
   all U's need equality. All equality operations are standard memberwise == comparison, of the like a c++20 =default would generate.
   The following types have been given new operators:
-    - MessageInfo
-    - ComponentUpdateInfo
-    - Asset
-    - AssetCollection
-    - CurrencyInfo
-    - ProductMediaInfo
-    - VariantOptionInfo
-    - ProductVariantInfo
-    - ProductInfo
-    - CartLine
-    - ShopifyStoreInfo
-    - TicketedEvent
-    - HotspotGroup
-    - Scope
-    - FeatureLimitInfo
-    - UserTierInfo
-    - FeatureQuotaInfo
-    - Sequence
-    - VersionMetadata
-    - ServiceStatus
-    - ServicesDeploymentStatus
-    - Site
-    - BasicSpace
-    - Space
-    - UserRoleInfo
-    - InviteUserRoleInfo
-    - OlyAnchorPosition
-    - OlyRotation
-    - Anchor
-    - AnchorResolution
-    - PointOfInterest
-    - BasicProfile
-    - Profile
-    - Array<T>
+  - MessageInfo
+  - ComponentUpdateInfo
+  - Asset
+  - AssetCollection
+  - CurrencyInfo
+  - ProductMediaInfo
+  - VariantOptionInfo
+  - ProductVariantInfo
+  - ProductInfo
+  - CartLine
+  - ShopifyStoreInfo
+  - TicketedEvent
+  - HotspotGroup
+  - Scope
+  - FeatureLimitInfo
+  - UserTierInfo
+  - FeatureQuotaInfo
+  - Sequence
+  - VersionMetadata
+  - ServiceStatus
+  - ServicesDeploymentStatus
+  - Site
+  - BasicSpace
+  - Space
+  - UserRoleInfo
+  - InviteUserRoleInfo
+  - OlyAnchorPosition
+  - OlyRotation
+  - Anchor
+  - AnchorResolution
+  - PointOfInterest
+  - BasicProfile
+  - Profile
+  - Array<T>
 
 ## [6.24.0]
 
@@ -227,7 +234,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
-  
+
 ### 🔥 ❗Breaking Changes
 
 - [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
@@ -250,7 +257,7 @@ All notable changes to this project will be documented in this file. For compile
   SpaceEntity::IsModifiable now returns an enum, specifying the reason.
   Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
   Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
-  
+
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
@@ -264,17 +271,17 @@ All notable changes to this project will be documented in this file. For compile
   This method provides a means of changing a users tier (basic, pro, enterprise, etc)
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
-  
+
   This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore
 
 - [OPE-3056] chore: Add exported symbols, equality operators, and hash implementation
-  for types required for the common modules in the C# SWIG wrapper. This will be a 
+  for types required for the common modules in the C# SWIG wrapper. This will be a
   common theme going forward.
-    - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
-    - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
-    - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+  - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
+  - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
+  - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
 
 ### 🐛 🔨 Bug Fixes
 
@@ -291,11 +298,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-4154] fix!: Improve how Hotspot sequence event data is handled by MAG-AdamThorn
   The existing implementation of `HotspotSequenceChangedNetworkEventData` was unnecessarily complex and confusing to developers. This event type has now been removed and new `SpaceId` and `SequenceType` properties have been added to the `SequenceChangedNetworkEventData`.
   This is a breaking change:
-  * `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
-  * `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
-  * When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
-      * SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
-	  * SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
+  - `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
+  - `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
+  - When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
+    - SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
+    - SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
 
 ## [6.19.0]
 
@@ -303,7 +310,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] feat: Exposed equality and inequality operators for `Vector2`, `Vector3`, `Vector4` and `Map` by MAG-ElliotMorris.
   Also added hash functions in the `std` namespace for the Vector types.
-  
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4123] fix: Fix some text rendering as black/unreadable in generated docs.
@@ -332,7 +339,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
   RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
-  
+
 ### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] test: Await exiting spaces in certain realtime engine tests by MAG-ElliotMorris.
