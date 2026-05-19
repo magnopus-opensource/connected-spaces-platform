@@ -7,14 +7,12 @@ class CSP(ConanFile):
 
     exports_sources = "CMakeLists.txt", "Library/*", "Tests/*", "cmake/*"
 
-    options = {
-        "fPIC": [True, False],
-    }
-
     default_options = {
-        # Set fPIC to true by default which is pretty standard.
-        # This isn't always needed but we don't want to shift the responsibility of setting it to callers.
-        "fPIC": True,
+        # We currently don't support shared dependencies.
+        "*:shared": False,
+
+        # Our dependencies are always linked statically, so force PIC.
+        "*:fPIC": True,
     }
 
     def layout(self):
@@ -81,10 +79,6 @@ class CSP(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
-
-        # Ensure our fPIC option is passed to cmake
-        if self.settings.os != "Windows":
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(self.options.fPIC)
 
         # Generate conan presets file
         tc.user_presets_path = 'ConanPresets.json'
