@@ -80,7 +80,6 @@ public:
 
             auto SchemaComponents = std::vector<Component>();
 
-            auto SchemaComponentKey = uint16_t { 0 };
             for (const auto& [TypeId, InstanceCount] : ComponentsToAdd)
             {
                 if (const auto* Schema = FindSchema(TypeId))
