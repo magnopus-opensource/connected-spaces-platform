@@ -22,6 +22,11 @@
 #include <optional>
 #include <unordered_map>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 
@@ -32,7 +37,7 @@ bool IsLegacyComponentTypeId(uint64_t TypeId);
 class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
 {
 public:
-    ComponentSchemaRegistryImpl(const csp::common::Array<ComponentSchema>& AdditionalComponents);
+    ComponentSchemaRegistryImpl(csp::common::LogSystem&, const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
     csp::common::Array<ComponentSchema> GetAll() const override;
     const ComponentSchema* Find(uint64_t TypeId) const override;

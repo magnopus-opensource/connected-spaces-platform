@@ -18,6 +18,7 @@
 
 #include "CSP/Multiplayer/ComponentBase.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
@@ -44,20 +45,33 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 
+#include <fmt/format.h>
+
 #include <limits>
 #include <type_traits>
 
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(const csp::common::Array<ComponentSchema>& AdditionalComponents)
+ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
+    csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
+    const auto AddSchema = [this, &LogSystem](const ComponentSchema& Schema)
+    {
+        const auto Result = SchemaMap.insert_or_assign(Schema.TypeId, Schema);
+        const auto DidReplace = !Result.second;
+
+        if (DidReplace)
+        {
+            LogSystem.LogMsg(
+                csp::common::LogLevel::Warning, fmt::format("Replaced a previously registered schema for TypeId: {}", Schema.TypeId).c_str());
+        }
+    };
+
     for (const auto& Schema : AdditionalComponents)
     {
-        SchemaMap[Schema.TypeId] = Schema;
+        AddSchema(Schema);
     }
-
-    const auto AddSchema = [this](const ComponentSchema& Schema) { SchemaMap[Schema.TypeId] = Schema; };
 
     AddSchema(StaticModelSpaceComponent::GetSchema());
     AddSchema(AnimatedModelSpaceComponent::GetSchema());

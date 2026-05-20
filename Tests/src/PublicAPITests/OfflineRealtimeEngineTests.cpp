@@ -974,3 +974,31 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
 
     EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
 }
+
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchemaBuiltInComponentTakesPrecedence)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    const auto ExampleSchemaId = static_cast<ComponentSchema::TypeIdType>(csp::multiplayer::ComponentType::Audio);
+
+    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+        {
+            ExampleSchemaId,
+            "Example",
+            csp::common::Array<ComponentProperty> {
+                {
+                    ComponentProperty::KeyType { 42 },
+                    "value",
+                    "DefaultValue",
+                },
+            },
+        },
+    };
+
+    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
+
+    const auto* Schema = Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId);
+    ASSERT_NE(Schema, nullptr);
+
+    EXPECT_EQ(Schema->Name, "Audio");
+}

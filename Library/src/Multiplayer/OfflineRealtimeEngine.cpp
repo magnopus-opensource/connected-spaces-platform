@@ -115,7 +115,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
     const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
-    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(AdditionalComponents) }
+    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
 {
     ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
 
