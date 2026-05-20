@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
   Adds focus distance and depth of field enabled properties to the cinematic camera space component.
 
+### 🐛 🔨 Bug Fixes
+
+- [OB-2975] fix!: Fix invalid mutex references causing Unity crashes. By @MAG-SangeetShah
+Set MultiplayerConnection & webClient pointers to null when the connection is closed. This prevents the possibility of callbacks attempting to access these objects after they have been destroyed, which was causing crashes in Unity.
+
 ## [6.38.0]
 
 ### 🍰 🙌 New Features
