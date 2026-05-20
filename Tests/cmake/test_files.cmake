@@ -33,6 +33,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/UniqueStringTest.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/WebClientTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/WebSocketClientTests.cpp
+    ${CSP_TESTS_SOURCE_DIR}/InternalTests/ShutdownTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/XMLTestResultWriter.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/XMLTestResultWriter.h
 
