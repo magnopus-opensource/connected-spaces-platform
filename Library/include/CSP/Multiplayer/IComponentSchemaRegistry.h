@@ -35,6 +35,13 @@ public:
     /// @brief Finds the schema for the given TypeId.
     /// @return A pointer to the schema if found, otherwise nullptr.
     virtual const ComponentSchema* Find(uint64_t TypeId) const = 0;
+
+protected:
+    CSP_NO_EXPORT IComponentSchemaRegistry() = default;
+    IComponentSchemaRegistry(const IComponentSchemaRegistry&) = delete;
+    IComponentSchemaRegistry(IComponentSchemaRegistry&&) = delete;
+    IComponentSchemaRegistry& operator=(const IComponentSchemaRegistry&) = delete;
+    IComponentSchemaRegistry& operator=(IComponentSchemaRegistry&&) = delete;
 };
 
 } // namespace csp::multiplayer
