@@ -378,8 +378,9 @@ ComponentBase* SpaceEntity::AddComponentByTypeId(uint64_t TypeId)
     auto ComponentId = GenerateComponentId();
     auto* Component = InstantiateComponent(ComponentId, TypeId);
 
-    // If Component is null, component has not been instantiated, so is skipped. (Can this ever be null... seems a bit of a footgun not to just
-    // assert)
+    // If Component is null, component has not been instantiated, so is skipped.
+    // This has historically been the case if a new Component type/class is added in a new version of the library,
+    // and an older client receives it. With dynamic schema-based components, this is more likely to happen.
     if (Component != nullptr)
     {
         // Either add the component to the patch, or just directly insert it.
