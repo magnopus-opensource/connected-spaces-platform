@@ -924,11 +924,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 
     // Check the FDN supported providers
     auto SupportedProviders = UserSystem->GetSupportedThirdPartyAuthenticationProviders();
-    EXPECT_EQ(SupportedProviders.Size(), 3L);
+    EXPECT_EQ(SupportedProviders.Size(), 4L);
 
     bool FoundGoogle = false;
     bool FoundDiscord = false;
     bool FoundApple = false;
+    bool FoundNetflix = false;
     for (size_t idx = 0; idx < SupportedProviders.Size(); ++idx)
     {
         if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google)
@@ -943,13 +944,17 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
         {
             FoundApple = true;
         }
+        else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Netflix)
+        {
+            FoundNetflix = true;
+        }
         else
         {
             ASSERT_TRUE(false) << "Please update this test with this new FDN auth provider: " << SupportedProviders[idx];
         }
     }
 
-    EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple);
+    EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple && FoundNetflix);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
@@ -1183,6 +1188,49 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 
 	// Log out
 	LogOut(UserSystem);
+}
+#endif
+
+// This is a manual only test as it requires an SSO token from a third party provider to be stored in a text file in a specific location.
+// Further details below.
+#if 0
+// Requires a SSO token placed in a file named "sso_token.txt" in the parent directory of the repository.
+// The file should contain only the raw token string.
+// Obtain the token from the third party provider before running this test.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, SSOLoginWithTokenTest)
+{
+    // Will look for the token file in the parent directory of the repository.
+    const std::filesystem::path TokenFilePath
+        = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path().parent_path() / "sso_token.txt";
+
+    if (!std::filesystem::exists(TokenFilePath))
+    {
+        GTEST_SKIP() << "sso_token.txt not found at " << TokenFilePath
+                     << ". Place the SSO token in that file to run this test.";
+    }
+
+    std::ifstream TokenFile(TokenFilePath);
+    std::string SSOToken;
+    TokenFile >> SSOToken;
+
+    ASSERT_FALSE(SSOToken.empty()) << "sso_token.txt exists but is empty.";
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProviderWithToken, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Netflix, csp::common::String(SSOToken.c_str()), csp::systems::EThirdPartyPlatform::Unreal, true, true);
+    
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    if (LoginResult.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        const auto UserId = LoginResult.GetLoginState().UserId;
+        auto Profile = GetFullProfileByUserId(UserSystem, UserId);
+        EXPECT_FALSE(Profile.UserId.IsEmpty());
+
+        LogOut(UserSystem);
+    }
 }
 #endif
 
