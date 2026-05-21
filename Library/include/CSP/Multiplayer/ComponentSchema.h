@@ -19,7 +19,6 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
-#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
@@ -48,7 +47,5 @@ public:
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
 };
-
-using ComponentSchemaRegistry = csp::common::Map<csp::multiplayer::ComponentSchema::TypeIdType, csp::multiplayer::ComponentSchema>;
 
 } // namespace csp::multiplayer

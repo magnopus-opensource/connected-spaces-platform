@@ -115,7 +115,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
     const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
-    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
+    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
 {
     ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
 
@@ -328,7 +328,7 @@ ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
     }
 }
 
-const csp::multiplayer::ComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
+const csp::multiplayer::IComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return ComponentRegistry.get(); }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
@@ -358,7 +359,7 @@ class EntityScriptBinding::SchemaCacheImpl
 public:
     std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
     {
-        switch (static_cast<ComponentType>(Schema.TypeId))
+        switch (ToComponentType(Schema.TypeId).value_or(ComponentType::Invalid))
         {
         case ComponentType::VideoPlayer:
             return GetComponents<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
@@ -383,11 +384,9 @@ private:
     {
         const auto Proto = GetOrCreate(Schema.TypeId, [&] { return MakeComponentPrototype<ScriptInterface>(Context, Schema); });
 
-        const auto ComponentType = static_cast<csp::multiplayer::ComponentType>(Schema.TypeId);
-
         auto Wrapped = std::vector<qjs::Value>();
 
-        for (auto* Component : Entity.GetComponentsOfType<ScriptInterface>(ComponentType))
+        for (auto* Component : Entity.GetComponentsOfType<ScriptInterface>(Schema.TypeId))
         {
             auto Instance = qjs::js_traits<ScriptInterface*>::wrap(Proto.ctx, Component);
             JS_SetPrototype(Proto.ctx, Instance, Proto.v); // Overwrite the prototype
@@ -489,7 +488,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     const auto RegisterDynamicComponentGetters = [this, Context, ContextId](auto&& ClassRegistrar) -> decltype(auto)
     {
-        for (const auto& [TypeId, Schema] : EntitySystem->GetComponentSchemaRegistry()->GetUnderlying())
+        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
         {
             if (IsScriptable(Schema))
             {

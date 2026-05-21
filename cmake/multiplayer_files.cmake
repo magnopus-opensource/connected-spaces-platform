@@ -11,6 +11,7 @@ set(CSP_MULTIPLAYER_PUBLIC_INCLUDES
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/CSPSceneDescription.h
+    ${CSP_MULTIPLAYER_INCLUDE_DIR}/IComponentSchemaRegistry.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/MultiPlayerConnection.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/MultiplayerHubMethods.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/NetworkEventBus.h

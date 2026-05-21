@@ -16,6 +16,9 @@
 
 #include "ComponentSchemaRegistry.h"
 
+#include "CSP/Multiplayer/ComponentBase.h"
+
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
@@ -42,49 +45,129 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 
+#include <fmt/format.h>
+
+#include <limits>
+#include <type_traits>
+
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& AdditionalComponents)
+ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
+    csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
-    const auto ToPair = [](const ComponentSchema& Schema) {
-        return std::make_pair(Schema.TypeId, Schema);
-    };
+    const auto AddSchema = [this, &LogSystem](const ComponentSchema& Schema)
+    {
+        const auto Result = SchemaMap.insert_or_assign(Schema.TypeId, Schema);
+        const auto DidReplace = !Result.second;
 
-    auto Registry = ComponentSchemaRegistry {
-        ToPair(StaticModelSpaceComponent::GetSchema()),
-        ToPair(AnimatedModelSpaceComponent::GetSchema()),
-        ToPair(VideoPlayerSpaceComponent::GetSchema()),
-        ToPair(ImageSpaceComponent::GetSchema()),
-        ToPair(ExternalLinkSpaceComponent::GetSchema()),
-        ToPair(AvatarSpaceComponent::GetSchema()),
-        ToPair(LightSpaceComponent::GetSchema()),
-        ToPair(ScriptSpaceComponent::GetSchema()),
-        ToPair(ButtonSpaceComponent::GetSchema()),
-        ToPair(CustomSpaceComponent::GetSchema()),
-        ToPair(PortalSpaceComponent::GetSchema()),
-        ToPair(ConversationSpaceComponent::GetSchema()),
-        ToPair(AudioSpaceComponent::GetSchema()),
-        ToPair(SplineSpaceComponent::GetSchema()),
-        ToPair(CollisionSpaceComponent::GetSchema()),
-        ToPair(ReflectionSpaceComponent::GetSchema()),
-        ToPair(FogSpaceComponent::GetSchema()),
-        ToPair(ECommerceSpaceComponent::GetSchema()),
-        ToPair(CinematicCameraSpaceComponent::GetSchema()),
-        ToPair(FiducialMarkerSpaceComponent::GetSchema()),
-        ToPair(GaussianSplatSpaceComponent::GetSchema()),
-        ToPair(TextSpaceComponent::GetSchema()),
-        ToPair(HotspotSpaceComponent::GetSchema()),
-        ToPair(ScreenSharingSpaceComponent::GetSchema()),
-        ToPair(AIChatbotSpaceComponent::GetSchema()), 
+        if (DidReplace)
+        {
+            LogSystem.LogMsg(
+                csp::common::LogLevel::Warning, fmt::format("Replaced a previously registered schema for TypeId: {}", Schema.TypeId).c_str());
+        }
     };
 
     for (const auto& Schema : AdditionalComponents)
     {
-        Registry[Schema.TypeId] = Schema;
+        AddSchema(Schema);
     }
 
-    return Registry;
+    AddSchema(StaticModelSpaceComponent::GetSchema());
+    AddSchema(AnimatedModelSpaceComponent::GetSchema());
+    AddSchema(VideoPlayerSpaceComponent::GetSchema());
+    AddSchema(ImageSpaceComponent::GetSchema());
+    AddSchema(ExternalLinkSpaceComponent::GetSchema());
+    AddSchema(AvatarSpaceComponent::GetSchema());
+    AddSchema(LightSpaceComponent::GetSchema());
+    AddSchema(ScriptSpaceComponent::GetSchema());
+    AddSchema(ButtonSpaceComponent::GetSchema());
+    AddSchema(CustomSpaceComponent::GetSchema());
+    AddSchema(PortalSpaceComponent::GetSchema());
+    AddSchema(ConversationSpaceComponent::GetSchema());
+    AddSchema(AudioSpaceComponent::GetSchema());
+    AddSchema(SplineSpaceComponent::GetSchema());
+    AddSchema(CollisionSpaceComponent::GetSchema());
+    AddSchema(ReflectionSpaceComponent::GetSchema());
+    AddSchema(FogSpaceComponent::GetSchema());
+    AddSchema(ECommerceSpaceComponent::GetSchema());
+    AddSchema(CinematicCameraSpaceComponent::GetSchema());
+    AddSchema(FiducialMarkerSpaceComponent::GetSchema());
+    AddSchema(GaussianSplatSpaceComponent::GetSchema());
+    AddSchema(TextSpaceComponent::GetSchema());
+    AddSchema(HotspotSpaceComponent::GetSchema());
+    AddSchema(ScreenSharingSpaceComponent::GetSchema());
+    AddSchema(AIChatbotSpaceComponent::GetSchema());
 }
+
+csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
+{
+    csp::common::Array<ComponentSchema> Result(SchemaMap.size());
+    size_t Index = 0;
+
+    for (const auto& [TypeId, Schema] : SchemaMap)
+    {
+        Result[Index++] = Schema;
+    }
+
+    return Result;
+}
+
+const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
+{
+    const auto It = SchemaMap.find(TypeId);
+    return It != SchemaMap.end() ? &It->second : nullptr;
+}
+
+std::optional<ComponentType> ToComponentType(uint64_t TypeId)
+{
+    using Underlying = std::underlying_type_t<ComponentType>;
+    static_assert(std::is_unsigned_v<Underlying>);
+
+    if (TypeId > static_cast<uint64_t>(std::numeric_limits<Underlying>::max()))
+    {
+        return std::nullopt;
+    }
+
+    switch (static_cast<ComponentType>(TypeId))
+    {
+    case ComponentType::Invalid:
+    case ComponentType::Core:
+    case ComponentType::UIController_DEPRECATED:
+    case ComponentType::StaticModel:
+    case ComponentType::AnimatedModel:
+    case ComponentType::MediaSurface_DEPRECATED:
+    case ComponentType::VideoPlayer:
+    case ComponentType::ImageSequencer_DEPRECATED:
+    case ComponentType::ExternalLink:
+    case ComponentType::AvatarData:
+    case ComponentType::Light:
+    case ComponentType::Button:
+    case ComponentType::Image:
+    case ComponentType::ScriptData:
+    case ComponentType::Custom:
+    case ComponentType::Conversation:
+    case ComponentType::Portal:
+    case ComponentType::Audio:
+    case ComponentType::Spline:
+    case ComponentType::Collision:
+    case ComponentType::Reflection:
+    case ComponentType::Fog:
+    case ComponentType::ECommerce:
+    case ComponentType::FiducialMarker:
+    case ComponentType::GaussianSplat:
+    case ComponentType::Text:
+    case ComponentType::Hotspot:
+    case ComponentType::CinematicCamera:
+    case ComponentType::ScreenSharing:
+    case ComponentType::AIChatbot:
+    case ComponentType::Delete:
+        return static_cast<ComponentType>(TypeId);
+    }
+
+    return std::nullopt;
+}
+
+bool IsLegacyComponentTypeId(uint64_t TypeId) { return ToComponentType(TypeId).has_value(); }
 
 } // namespace csp::multiplayer

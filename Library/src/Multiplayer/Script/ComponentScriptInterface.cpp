@@ -55,7 +55,7 @@ int64_t ComponentScriptInterface::GetComponentType() const
 {
     if (Component)
     {
-        return (int64_t)Component->GetComponentType();
+        return static_cast<int64_t>(Component->GetTypeId());
     }
 
     return (int64_t)ComponentType::Invalid;

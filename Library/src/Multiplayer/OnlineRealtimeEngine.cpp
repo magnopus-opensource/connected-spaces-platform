@@ -205,7 +205,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EntityPatchRate(90)
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
-    , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
+    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
 {
     ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
 
@@ -836,7 +836,7 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     return ModifiableStatus::Modifiable;
 }
 
-const csp::multiplayer::ComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return &ComponentRegistry; }
+const csp::multiplayer::IComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return ComponentRegistry.get(); }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {

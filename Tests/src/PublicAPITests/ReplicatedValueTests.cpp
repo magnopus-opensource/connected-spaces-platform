@@ -290,6 +290,8 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, EqualityOperatorTest)
     Value2.SetInt(5);
 
     EXPECT_FALSE(Value == Value2);
+
+    EXPECT_NE(csp::common::ReplicatedValue(), csp::common::ReplicatedValue(false));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, InequalityOperatorTest)

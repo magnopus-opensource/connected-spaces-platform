@@ -48,11 +48,17 @@ public:
 
     struct Entity final
     {
-        struct Component : public csp::multiplayer::ComponentBase
+        struct Component final
         {
-            using ComponentBase::ComponentBase;
-            using ComponentBase::GetProperty;
-            using ComponentBase::SetProperty;
+            void SetProperty(uint16_t Key, csp::common::ReplicatedValue Value) { Ref.SetSchemaProperty(Key, std::move(Value)); }
+
+            std::optional<csp::common::ReplicatedValue> GetProperty(uint16_t Key) const
+            {
+                const auto* MaybeValue = Ref.GetSchemaProperty(Key);
+                return MaybeValue ? *MaybeValue : std::optional<csp::common::ReplicatedValue>();
+            }
+
+            csp::multiplayer::ComponentBase& Ref;
         };
 
         struct ComponentCreationArgs final
@@ -70,34 +76,21 @@ public:
             auto* Entity
                 = std::get<0>(AWAIT(&Fixture.Engine, CreateEntity, Name, csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {}));
 
-            const auto FindSchema = [&](auto TypeId) -> const Schema*
-            {
-                const auto& Registry = Fixture.Engine.GetComponentSchemaRegistry()->GetUnderlying();
-                if (const auto It = Registry.find(TypeId); It != Registry.end())
-                {
-                    return &It->second;
-                }
+            const auto FindSchema = [&](auto TypeId) -> const Schema* { return Fixture.Engine.GetComponentSchemaRegistry()->Find(TypeId); };
 
-                return nullptr;
-            };
+            auto SchemaComponents = std::vector<Component>();
 
-            auto SchemaComponents = std::vector<Component*>();
-
-            auto SchemaComponentKey = uint16_t { 0 };
             for (const auto& [TypeId, InstanceCount] : ComponentsToAdd)
             {
                 if (const auto* Schema = FindSchema(TypeId))
                 {
                     for (uint16_t Count = 0; Count < InstanceCount; ++Count)
                     {
-                        // This (mis)uses what is available via the public API to add a component to an entity with a given schema
-                        // as there isn't currently a way of doing this via the public API.
-                        auto ComponentToAdd = std::make_unique<Component>(*Schema, &Fixture.LogSystem, Entity);
-
-                        SchemaComponents.push_back(ComponentToAdd.get());
-
                         // ownership: SpaceEntity is presumably supposed to take ownership, but it currently leaks all components
-                        Entity->AddComponentDirect(SchemaComponentKey++, ComponentToAdd.release());
+                        if (auto* SchemaComponent = Entity->AddComponentByTypeId(TypeId))
+                        {
+                            SchemaComponents.push_back({ *SchemaComponent });
+                        }
                     }
                 }
             }
@@ -115,7 +108,7 @@ public:
 
         csp::multiplayer::SpaceEntity& Ref;
         csp::multiplayer::ScriptSpaceComponent& ScriptComponent;
-        std::vector<Component*> SchemaComponents;
+        std::vector<Component> SchemaComponents;
     };
 
     Entity MakeEntity(const csp::common::String& Name, std::vector<Entity::ComponentCreationArgs> ComponentsToAdd)
@@ -312,7 +305,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
 
     ASSERT_EQ(Entity.SchemaComponents.size(), 1);
 
-    const auto& Component = *Entity.SchemaComponents.front();
+    const auto& Component = Entity.SchemaComponents.front();
     EXPECT_EQ(Component.GetProperty(0), false);
     EXPECT_EQ(Component.GetProperty(1), 0.5f);
     EXPECT_EQ(Component.GetProperty(2), static_cast<int64_t>(1234));
@@ -456,14 +449,24 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
 
     ASSERT_EQ(Entity.SchemaComponents.size(), 1);
 
-    const auto& Component = *Entity.SchemaComponents.front();
-    EXPECT_EQ(Component.GetProperty(0).GetReplicatedValueType(), csp::common::ReplicatedValueType::Boolean);
-    EXPECT_EQ(Component.GetProperty(1).GetReplicatedValueType(), csp::common::ReplicatedValueType::Float);
-    EXPECT_EQ(Component.GetProperty(2).GetReplicatedValueType(), csp::common::ReplicatedValueType::Integer);
-    EXPECT_EQ(Component.GetProperty(3).GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(Component.GetProperty(4).GetReplicatedValueType(), csp::common::ReplicatedValueType::Vector2);
-    EXPECT_EQ(Component.GetProperty(5).GetReplicatedValueType(), csp::common::ReplicatedValueType::Vector3);
-    EXPECT_EQ(Component.GetProperty(6).GetReplicatedValueType(), csp::common::ReplicatedValueType::Vector4);
+    const auto GetReplicatedValueType = [](const auto& MaybeValue) -> std::optional<csp::common::ReplicatedValueType>
+    {
+        if (MaybeValue)
+        {
+            return MaybeValue->GetReplicatedValueType();
+        }
+
+        return {};
+    };
+
+    const auto& Component = Entity.SchemaComponents.front();
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(0)), csp::common::ReplicatedValueType::Boolean);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(1)), csp::common::ReplicatedValueType::Float);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(2)), csp::common::ReplicatedValueType::Integer);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(3)), csp::common::ReplicatedValueType::String);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(4)), csp::common::ReplicatedValueType::Vector2);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(5)), csp::common::ReplicatedValueType::Vector3);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(6)), csp::common::ReplicatedValueType::Vector4);
 
     // Note: we might consider changing the setters to always prevent setting the value when the type
     // differs, but currently we get the default quickjspp behaviour, which is consistent with our
@@ -589,11 +592,11 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BaseClassFunctio
 
     ASSERT_EQ(Entity.SchemaComponents.size(), 1);
 
-    auto& Component = *Entity.SchemaComponents.front();
-    Component.SetComponentName("Test Component");
+    auto& Component = Entity.SchemaComponents.front();
+    Component.Ref.SetComponentName("Test Component");
 
-    ASSERT_EQ(Component.GetId(), static_cast<Property::KeyType>(0));
-    ASSERT_EQ(static_cast<Schema::TypeIdType>(Component.GetComponentType()), static_cast<Schema::TypeIdType>(123));
+    ASSERT_EQ(Component.Ref.GetId(), static_cast<Property::KeyType>(0));
+    ASSERT_EQ(Component.Ref.GetTypeId(), Schema::TypeIdType { 123 });
 
     constexpr auto ScriptText = R"(
         import { assert } from "CSPTest";
@@ -615,7 +618,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BaseClassFunctio
 
     auto MaybeScriptMessage = std::optional<std::string>();
 
-    Component.RegisterActionHandler("ScriptMessage", [&](auto*, auto&, const auto& Message) { MaybeScriptMessage = std::string(Message.c_str()); });
+    Component.Ref.RegisterActionHandler(
+        "ScriptMessage", [&](auto*, auto&, const auto& Message) { MaybeScriptMessage = std::string(Message.c_str()); });
 
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
 
@@ -650,8 +654,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleComponen
 
     ASSERT_EQ(Entity.SchemaComponents.size(), 2);
 
-    auto& One = *Entity.SchemaComponents[0];
-    auto& Two = *Entity.SchemaComponents[1];
+    auto& One = Entity.SchemaComponents[0];
+    auto& Two = Entity.SchemaComponents[1];
 
     One.SetProperty(0, "One");
     Two.SetProperty(0, "Two");
@@ -708,7 +712,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
         example.stringProperty = "1";
     )"));
 
-    const auto& EntityOneComponent = *EntityOne.SchemaComponents.front();
+    const auto& EntityOneComponent = EntityOne.SchemaComponents.front();
     EXPECT_EQ(EntityOneComponent.GetProperty(0), "1");
 
     auto EntityTwo = Fixture.MakeEntity("Test Entity",
@@ -718,8 +722,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
                 TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
             },
         });
-    
-    const auto& EntityTwoComponent = *EntityTwo.SchemaComponents.front();
+
+    const auto& EntityTwoComponent = EntityTwo.SchemaComponents.front();
 
     ASSERT_EQ(EntityTwoComponent.GetProperty(0), "");
 

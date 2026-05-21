@@ -16,11 +16,34 @@
 
 #pragma once
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/IComponentSchemaRegistry.h"
+
+#include <optional>
+#include <unordered_map>
+
+namespace csp::common
+{
+class LogSystem;
+}
 
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistry MergeWithLegacyComponents(const csp::common::Array<ComponentSchema>& AdditionalComponents);
+std::optional<ComponentType> ToComponentType(uint64_t TypeId);
+
+bool IsLegacyComponentTypeId(uint64_t TypeId);
+
+class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
+{
+public:
+    ComponentSchemaRegistryImpl(csp::common::LogSystem&, const csp::common::Array<ComponentSchema>& AdditionalComponents);
+
+    csp::common::Array<ComponentSchema> GetAll() const override;
+    const ComponentSchema* Find(uint64_t TypeId) const override;
+
+private:
+    std::unordered_map<ComponentSchema::TypeIdType, ComponentSchema> SchemaMap;
+};
 
 } // namespace csp::multiplayer
