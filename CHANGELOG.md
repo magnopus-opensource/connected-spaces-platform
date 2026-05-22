@@ -16,6 +16,9 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
   Adds focus distance and depth of field enabled properties to the cinematic camera space component.
+  
+- [OF-1071] feat: Add support for third party auth with token. By @MAG-AdamThorn.
+  Add support for third party authentication using a token provided by the third party provider. This is an alternate path for SSO to the one already provided, in that it expects the application to request the authorization token from the third party provider directly before passing it to CSP.
 
 ## [6.38.0]
 
