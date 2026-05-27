@@ -178,32 +178,47 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 {
     CSP_PROFILE_SCOPED();
 
-    assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Send().");
+    auto Succeeded = false;
 
-    int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
-    auto Remaining = Message.size();
-    auto Succeeded = true;
-
-    try
     {
-        while (Remaining > 0)
+        std::lock_guard<std::mutex> Lock(Mutex);
+
+        if (StopFlag || !PocoWebSocket)
         {
-            auto SentCount = PocoWebSocket->sendFrame(Message.data(), static_cast<int>(Message.size()), Flags);
+            LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                "CSPWebSocketClientPOCO::Send. Either websocket was never created, or teardown is in process. Aborting Send.");
+            Succeeded = false;
+        }
+        else
+        {
+            int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
+            auto Remaining = Message.size();
+            Succeeded = true;
 
-            Remaining -= SentCount;
+            try
+            {
+                while (Remaining > 0)
+                {
+                    auto SentCount = PocoWebSocket->sendFrame(Message.data(), static_cast<int>(Message.size()), Flags);
 
-            if (SentCount <= 0)
+                    Remaining -= SentCount;
+
+                    if (SentCount <= 0)
+                    {
+                        Succeeded = false;
+                        break;
+                    }
+                }
+            }
+            catch (const std::exception&)
             {
                 Succeeded = false;
-                break;
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to send data to socket.");
             }
         }
     }
-    catch (const std::exception&)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to send data to socket.");
-    }
 
+    // Invoke the callback outside the lock to avoid potential deadlocks.
     Callback(Succeeded);
 }
 
