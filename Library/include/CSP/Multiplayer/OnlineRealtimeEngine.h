@@ -520,6 +520,9 @@ private:
 
     std::recursive_mutex* TickEntitiesLock;
     std::mutex LeadershipElectionLock;
+    // Guards against a race condition whereby the OnlineRealtimeEngine dtor is called after the SignalR thread executing the
+    // CreateRetrieveAllEntitiesCallback callback has checked the cancellation token, but BEFORE it has finished executing the callback.
+    std::shared_ptr<std::mutex> EngineLifetimeGuard;
 
     std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
     std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;

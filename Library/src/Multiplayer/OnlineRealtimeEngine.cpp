@@ -170,6 +170,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EngineLifetimeGuard(std::make_shared<std::mutex>())
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
     , PendingOutgoingUpdateUniqueSet(nullptr)
@@ -204,6 +205,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
+    , EngineLifetimeGuard(std::make_shared<std::mutex>())
     , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
@@ -313,8 +315,8 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
-            Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
+            MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
@@ -662,9 +664,9 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However, I
-    // decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -686,10 +688,9 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection.
-    // These checks could be removed if the election events were bound inside the ScopeLeadershipManager.
-    // However, I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -724,8 +725,15 @@ void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::func
 std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
     int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, EngineLifetimeGuardWeak = std::weak_ptr<std::mutex>(EngineLifetimeGuard), FetchCompleteCallback](
+                                       const signalr::value& Result, std::exception_ptr Except)
     {
+        // Ensure the OnlineEngine is still alive by locking the weak pointer to the guard.
+        if (!EngineLifetimeGuardWeak.lock())
+        {
+            return;
+        }
+
         HandleException(Except, "Failed to retrieve paged entities.");
 
         const auto& Results = Result.as_array();
@@ -734,6 +742,11 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 
         for (const auto& EntityMessage : Items)
         {
+            if (!EngineLifetimeGuardWeak.lock())
+            {
+                return;
+            }
+
             SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
             FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
         }
@@ -746,6 +759,11 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
         }
         else
         {
+            if (!EngineLifetimeGuardWeak.lock())
+            {
+                return;
+            }
+
             std::scoped_lock EntitiesLocker(*EntitiesLock);
             // Ensure entity list is up to date
             ProcessPendingEntityOperations();
@@ -769,7 +787,15 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
                     // We will receive these if we are the leader and another client modifies a script or sends an event.
                     this->NetworkEventBus->ListenNetworkEvent(
                         csp::multiplayer::NetworkEventRegistration { "CSPInternal::ClientElectionManager", RemoteRunScriptMessage },
-                        [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
+                        [EngineLifetimeGuardWeak, this](const csp::common::NetworkEventData& EventData)
+                        {
+                            if (!EngineLifetimeGuardWeak.lock())
+                            {
+                                return;
+                            }
+                            
+                           this->OnRemoteRunScriptEvent(EventData.EventValues);
+                        });
 
                     // To match the behaviour of the client-side leader election, the ScriptSystemReadyCallback should fire here.
                     // We may want to move this to earlier in the initialization in the future.
@@ -826,7 +852,7 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     // This should definitely be true at this point, but be defensive.
     assert(SpaceEntity->GetStatePatcher() != nullptr);
 
-    // In order to unlock an entity, we need to modify it. 
+    // In order to unlock an entity, we need to modify it.
     // So we need to check if we are about to unlock the entity, and treat it as modifiabe if so, otherwise we cannot unlock a locked entity.
     // Note : This will stop working if we ever add another lock type
     const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
@@ -871,7 +897,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) {});
+            DestroyEntity(Entity, [](bool /*Ok*/) { });
         }
         // Otherwise we clear up all all locally represented entities
         else

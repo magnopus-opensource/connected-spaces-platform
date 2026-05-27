@@ -1471,3 +1471,75 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
         LogOut(UserSystem);
     }
 }
+
+// Regression test to ensure that the EntityFetchCancellationToken sentinel in the
+// OnlineRealtimeEngine prevents the RetrieveAllEntities callback from accessing a destroyed RealtimeEngine.
+//
+// This issue was occuring under the following conditions:
+//   1. A user enters a space containing many entities.
+//   2. The OnlineRealtimeEngine is destroyed before the RetrieveAllEntitiesCallback has completed.
+//   3. Entities being created in the loop try to access the LogSystem member of the OnlineRealtimeEngine causing a crash.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EnterSpaceTeardownDuringEntityFetchTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Setup: Populate the Space with several SpaceEntities and then exit cleanly.
+    {
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(csp::common::RealtimeEngineType::Online) };
+
+        std::atomic<bool> FetchComplete { false };
+        RealtimeEngine->SetEntityFetchCompleteCallback([&FetchComplete](uint32_t) { FetchComplete = true; });
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EXPECT_TRUE(ResponseWaiter::WaitFor([&FetchComplete] { return FetchComplete.load(); }, 30s));
+
+        const csp::multiplayer::SpaceTransform EntityTransform
+            = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        for (int i = 0; i < 3; ++i)
+        {
+            char EntityName[64];
+            SPRINTF(EntityName, "CSP-UNITTEST-ENTITY-%d", i);
+            auto [Entity] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, EntityTransform, csp::common::Optional<uint64_t> {});
+            EXPECT_NE(Entity, nullptr);
+        }
+
+        auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        EXPECT_EQ(ExitResult.GetResultCode(), csp::systems::EResultCode::Success);
+        RealtimeEngine.reset();
+    }
+
+    // Enter the Space once more and destroy the RealtimeEngine without waiting for the RetrieveAllEntities callback to complete.
+    // Ensure the FetchPromise is not ready and then exit the space.
+    {
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(csp::common::RealtimeEngineType::Online) };
+
+        std::promise<bool> FetchPromise;
+        std::future<bool> FetchFuture = FetchPromise.get_future();
+
+        RealtimeEngine->SetEntityFetchCompleteCallback([&FetchPromise](uint32_t) { FetchPromise.set_value(true); });
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RealtimeEngine.reset();
+
+        EXPECT_EQ(FetchFuture._Is_ready(), false);
+
+        auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        EXPECT_EQ(ExitResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
