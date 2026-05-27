@@ -886,22 +886,10 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
             CSP_LOG_ERROR_MSG("Whilst avatar info was successfully returned with data, no avatar type was included.");
         }
 
-        // Avatar identifier type (used to identify or locate the actual avatar asset)
+        // Avatar identifier (used to identify or locate the actual avatar asset)
         if (Json.HasMember("identifier"))
         {
-            if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
-            {
-                // Integer type is no longer supported -- convert to string
-                InternalResult.SetAvatarIdentifier(std::to_string(Json["identifier"].GetInt()).c_str());
-            }
-            else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
-            {
                 InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
-            }
-            else
-            {
-                CSP_LOG_ERROR_MSG("Invalid avatar identifier type!");
-            }
         }
         else
         {
