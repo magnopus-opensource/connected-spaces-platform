@@ -224,6 +224,11 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
+    // We currently have a number of potential race conditions caused by callbacks trying to access the OnlineRealtimeEngine after it has been
+    // destroyed. The following does not resolve the race condition for callback logic executed after tear down, but it does reduce the window for
+    // those situations to arise. We have work planned for an upcoming sprint to prototype a proper solution to this issue.
+    MultiplayerConnectionInst->SetOnlineRealtimeEngine(nullptr);
+
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
