@@ -70,8 +70,36 @@ public:
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
     OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
-    CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates an empty realtime engine with additional component schemas.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
         const csp::common::Array<ComponentSchema>& AdditionalComponents);
+
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates an empty realtime engine, registering additional component schemas from JSON.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped with a warning.
+    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::List<csp::common::String>& JsonSchemas);
+
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates a realtime engine pre-populated from a scene description, with additional component schemas from JSON.
+    /// @param SceneDescription The scene description containing entities to populate in the engine.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped with a warning.
+    OfflineRealtimeEngine(const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem,
+        csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas);
 
     /// @brief OfflineRealtimeEngine destructor
     /// Removes entity script bindings and deregisters tick event listeners

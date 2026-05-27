@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Multiplayer/ComponentSchema.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/Convert.h"
 #include "Json/JsonSerializer.h"
 
@@ -378,6 +379,39 @@ csp::common::Optional<ComponentSchema> ComponentSchema::FromJson(const csp::comm
     }
 
     return *Schema;
+}
+
+csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
+    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem)
+{
+    auto Collected = std::vector<ComponentSchema> {};
+
+    for (const auto& JsonDoc : JsonDocuments)
+    {
+        auto Doc = rapidjson::Document {};
+        Doc.Parse(JsonDoc.c_str());
+
+        if (Doc.HasParseError() || !Doc.IsArray())
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping document, expected a JSON array");
+            continue;
+        }
+
+        for (const auto& Element : Doc.GetArray())
+        {
+            const auto Schema = TryParseSchema(Element);
+
+            if (!Schema)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping entry, failed to parse schema");
+                continue;
+            }
+
+            Collected.push_back(*Schema);
+        }
+    }
+
+    return csp::common::Convert(Collected);
 }
 
 bool ComponentSchema::operator==(const ComponentSchema& Other) const

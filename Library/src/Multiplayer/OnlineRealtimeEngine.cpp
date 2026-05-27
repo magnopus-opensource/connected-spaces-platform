@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/LoginState.h"
@@ -183,7 +184,14 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
 
 OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
-    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, {})
+    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, csp::common::Array<ComponentSchema> {})
+{
+}
+
+OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner,
+    const csp::common::List<csp::common::String>& JsonSchemas)
+    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, ComponentSchemasFromJson(JsonSchemas, LogSystem))
 {
 }
 

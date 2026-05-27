@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.43.0]
 
+### 🍰 🙌 New Features
+
+- [OF-1867] feat: Support injecting custom component schemas via JSON at engine construction time. By @mag-lt.
+  Both `OfflineRealtimeEngine` and `OnlineRealtimeEngine` now accept a `List<String>` of JSON documents at
+  construction, allowing custom component schemas to be registered in the engine-wide schema registry alongside
+  the built-in schemas. Each document should be a JSON array of schema objects, invalid entries are skipped with
+  a warning. The `List<String>` parameter is a wrapper generator workaround for passing large strings, in
+  practice a single element containing the full JSON array is expected. Equivalent constructors accepting
+  `Array<ComponentSchema>` directly are also provided.
+
 ### 🔥 ❗Breaking Changes
 
 - [OB-5368] fix!: Guard access to LoginState data with a mutex. By @MAG-AdamThorn.

@@ -19,10 +19,16 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/List.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
+
+namespace csp::common
+{
+class LogSystem;
+}
 
 namespace csp::multiplayer
 {
@@ -54,5 +60,15 @@ public:
     bool operator==(const ComponentSchema& Other) const;
     bool operator!=(const ComponentSchema& Other) const;
 };
+
+/// @brief Parses a list of JSON documents into an array of component schemas.
+/// Each document is expected to be a JSON array of schema objects.
+/// Entries that fail to parse are skipped with a warning; valid entries in the same document are still returned.
+/// @param JsonDocuments One or more JSON documents, each containing an array of schema objects.
+/// The list is a wrapper generator workaround for passing large strings; in practice a single element is expected.
+/// @param LogSystem Logger for reporting skipped entries.
+/// @return An array containing all successfully parsed schemas.
+csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
+    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer
