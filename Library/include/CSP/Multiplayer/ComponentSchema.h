@@ -19,6 +19,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
@@ -33,6 +34,9 @@ class CSP_API ComponentSchema
 {
 public:
     using TypeIdType = uint64_t;
+
+    CSP_NO_EXPORT static csp::common::String ToJson(const ComponentSchema& Schema);
+    CSP_NO_EXPORT static csp::common::Optional<ComponentSchema> FromJson(const csp::common::String& Json);
 
     /// @brief A globally unique ID for identifiying this component type. Will ultimately be
     /// serialized and used in messages sent over the multiplayer connection.
