@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [6.39.0]
+## [6.42.0]
 
 ### 🍰 🙌 New Features
 
@@ -19,6 +19,10 @@ All notable changes to this project will be documented in this file. For compile
   
 - [OF-1071] feat: Add support for third party auth with token. By @MAG-AdamThorn.
   Add support for third party authentication using a token provided by the third party provider. This is an alternate path for SSO to the one already provided, in that it expects the application to request the authorization token from the third party provider directly before passing it to CSP.
+
+## [6.39.0 - 6.41.0]
+
+- Note: Versions 6.39.0 to 6.41.0 were skipped due to a CI deployment issue. All planned changes are included in release 6.42.0.
 
 ## [6.38.0]
 
