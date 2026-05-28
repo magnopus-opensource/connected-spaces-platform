@@ -46,6 +46,9 @@ public:
 
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
+
+    bool operator==(const ComponentSchema& Other) const;
+    bool operator!=(const ComponentSchema& Other) const;
 };
 
 } // namespace csp::multiplayer

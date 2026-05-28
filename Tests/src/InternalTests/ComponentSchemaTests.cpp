@@ -695,3 +695,184 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetSchem
 
     EXPECT_EQ(SchemaValue->GetVector3(), NewPosition);
 }
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
+{
+    using Property = csp::multiplayer::ComponentProperty;
+
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "value",
+        };
+        EXPECT_EQ(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+        };
+        const auto B = Property {
+            1,
+            "name",
+            "value",
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+        };
+        const auto B = Property {
+            0,
+            "other",
+            "value",
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "other",
+        };
+        EXPECT_NE(A, B);
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
+{
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        EXPECT_EQ(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 456 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Other",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "value",
+                },
+            },
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "prop",
+                    "other",
+                },
+            },
+        };
+        EXPECT_NE(A, B);
+    }
+}
