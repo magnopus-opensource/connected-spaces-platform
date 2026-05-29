@@ -26,6 +26,7 @@
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 
+#include <filesystem>
 #include <cstdio>
 #include <fmt/format.h>
 #if defined(CSP_ANDROID)
@@ -108,6 +109,23 @@ bool FileExists(std::string Path)
 
     return (stat(Path.c_str(), &Stat) == 0 && S_ISREG(Stat.st_mode));
 #endif
+}
+
+bool EnsureFolderExists(const std::string& Path)
+{
+    std::error_code Ec;
+
+    if (std::filesystem::exists(Path, Ec))
+    {
+        return std::filesystem::is_directory(Path, Ec);
+    }
+
+    if (!std::filesystem::create_directories(Path, Ec) && Ec)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 // Named "CreateFolder" to avoid conflicts with Win32's CreateDirectory macro
@@ -214,9 +232,9 @@ std::string LoadDeviceId()
 #else
     const std::string CSPDataRoot = DeviceIdPath();
 
-    if (!FolderExists(CSPDataRoot))
+    if (CSPDataRoot.empty() || !EnsureFolderExists(CSPDataRoot))
     {
-        CreateFolder(CSPDataRoot);
+        return {};
     }
 
     auto DeviceIdFilePath = std::string(CSPDataRoot) + "device.id";
