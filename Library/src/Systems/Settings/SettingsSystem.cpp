@@ -887,9 +887,9 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         }
 
         // Avatar identifier (used to identify or locate the actual avatar asset)
-        if (Json.HasMember("identifier"))
+        if (Json.HasMember("identifier") && Json["identifier"].IsString())
         {
-                InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
+            InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
         }
         else
         {
