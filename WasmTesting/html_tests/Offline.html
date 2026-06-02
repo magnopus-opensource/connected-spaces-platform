@@ -51,11 +51,11 @@
 
         const entity = await realtimeEngine.createAvatar(
           'Offline Player',
-          authState.userId,
+          authState.getUserId(),
           playerTransform,
           true,
           Multiplayer.AvatarState.Idle,
-          authState.userId,
+          authState.getUserId(),
           Multiplayer.AvatarPlayMode.Default
         );
 
