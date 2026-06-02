@@ -1,0 +1,25 @@
+[settings]
+os=Linux
+arch=x86_64
+compiler=clang
+compiler.version=18
+compiler.libcxx=libc++
+compiler.cppstd=17
+
+[tool_requires]
+cmake/3.31.6
+ninja/1.11.1
+
+[conf]
+# Force Conan/CMake to use Unreal's toolchain instead of the system default.
+# You will need to override set UE_LINUX_TOOLCHAIN_ROOT from the command line.
+# Unreals toolchain can be found here:
+# https://dev.epicgames.com/documentation/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.7#version-history
+tools.build:sysroot=$env(UE_LINUX_TOOLCHAIN_ROOT)
+tools.build:compiler_executables={"c":"$env(UE_LINUX_TOOLCHAIN_ROOT)/bin/clang","cpp":"$env(UE_LINUX_TOOLCHAIN_ROOT)/bin/clang++"}
+
+tools.cmake.cmaketoolchain:generator=Ninja
+
+# Unreal expects the C++ runtime to be linked statically.
+tools.build:sharedlinkflags=["-static-libstdc++"]
+tools.build:exelinkflags=["-static-libstdc++"]
