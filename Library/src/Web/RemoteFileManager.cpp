@@ -28,7 +28,7 @@ namespace
 {
 csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
 {
-    auto Data = InAuthContext.GetLoginState().GetSnapshot();
+    auto Data = InAuthContext.GetLoginState().GetSnapshotThreadSafe();
 
     csp::common::Optional<csp::common::String> BearerToken;
 

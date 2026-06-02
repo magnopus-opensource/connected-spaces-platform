@@ -1443,7 +1443,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
     EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
 
     // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
-    auto Data = UserSystem->GetLoginState().GetSnapshot();
+    auto Data = UserSystem->GetLoginState().GetSnapshotThreadSafe();
 
     const csp::common::ELoginState FinalState = Data.State;
 

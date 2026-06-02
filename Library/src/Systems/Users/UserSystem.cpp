@@ -59,7 +59,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
     {
         LogSystem.LogMsg(csp::common::LogLevel::Log, "Starting Multiplayer Connection");
 
-        auto Data = LoginStateRes.GetLoginState().GetSnapshot();
+        auto Data = LoginStateRes.GetLoginState().GetSnapshotThreadSafe();
         MultiplayerConnection.Connect(ConnectionCallback, MultiplayerURI, Data.AccessToken, Data.DeviceId);
     }
     else
@@ -231,7 +231,7 @@ const csp::common::LoginState& AuthContext::GetLoginState() const { return *Logi
 
 void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 {
-    auto Data = LoginState->GetSnapshot();
+    auto Data = LoginState->GetSnapshotThreadSafe();
     if (Data.State != csp::common::ELoginState::LoggedIn)
     {
         return;
@@ -820,7 +820,7 @@ void UserSystem::Logout(NullResultCallback Callback)
             CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
         }
 
-        auto Data = CurrentLoginState->GetSnapshot();
+        auto Data = CurrentLoginState->GetSnapshotThreadSafe();
 
         auto Request = std::make_shared<chs_user::LogoutRequest>();
         Request->SetUserId(Data.UserId);

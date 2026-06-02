@@ -53,7 +53,7 @@ QuotaSystem::~QuotaSystem()
 
 void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
 {
-    auto Data = Context->GetLoginState().GetSnapshot();
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
 
     if (Data.State != common::ELoginState::LoggedIn)
     {
@@ -92,7 +92,7 @@ void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceI
 
 void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
 {
-    auto Data = Context->GetLoginState().GetSnapshot();
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
 
     if (Data.State != common::ELoginState::LoggedIn)
     {
@@ -134,7 +134,7 @@ void QuotaSystem::GetTierFeatureProgressForSpace(
 
 void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 {
-    auto Data = Context->GetLoginState().GetSnapshot();
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
 
     if (Data.State != common::ELoginState::LoggedIn)
     {

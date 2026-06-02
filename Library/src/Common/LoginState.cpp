@@ -39,7 +39,7 @@ LoginState& LoginState::operator=(const LoginState& OtherState)
     return *this;
 }
 
-LoginStateData LoginState::GetSnapshot() const
+LoginStateData LoginState::GetSnapshotThreadSafe() const
 {
     std::scoped_lock lock(LoginStateMutex);
 

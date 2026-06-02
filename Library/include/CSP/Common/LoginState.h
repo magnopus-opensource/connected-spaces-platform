@@ -41,10 +41,10 @@ public:
     LoginState(const LoginState& OtherState);
     LoginState& operator=(const LoginState& OtherState);
 
-    /// @brief Get a copy of the current login state data.
+    /// @brief Get a thread-safe copy of the current login state data.
     /// This is a snapshot of the data at the time of the call, and will not update if the underlying state is mutated.
     /// @return A snapshot of the login state data.
-    CSP_NO_EXPORT LoginStateData GetSnapshot() const;
+    CSP_NO_EXPORT LoginStateData GetSnapshotThreadSafe() const;
 
     /// @brief Set the login state data. This will replace all existing data in the login state with the new data provided.
     CSP_NO_EXPORT void SetLoginStateData(csp::common::LoginStateData NewData);
