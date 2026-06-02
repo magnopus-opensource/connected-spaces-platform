@@ -82,27 +82,6 @@
 namespace
 {
 
-bool FileExists(std::string Path)
-{
-#if defined(CSP_WINDOWS)
-    auto Attr = GetFileAttributesA(Path.c_str());
-
-    return (Attr != INVALID_FILE_ATTRIBUTES && ((Attr & FILE_ATTRIBUTE_NORMAL) || (Attr & FILE_ATTRIBUTE_ARCHIVE)));
-#else
-    struct stat Stat;
-
-    return (stat(Path.c_str(), &Stat) == 0 && S_ISREG(Stat.st_mode));
-#endif
-}
-
-bool EnsureFolderExists(const std::string& Path)
-{
-    std::error_code Ec;
-    std::filesystem::create_directories(Path, Ec);
-
-    return !Ec; 
-}
-
 #if defined(CSP_WASM)
 // clang-format off
 EM_JS(char*, get_device_id, (), {
@@ -128,6 +107,36 @@ EM_JS(void, set_device_id, (const char* cDeviceId), {
 #endif
 
 #if !defined(CSP_WASM)
+bool FileExists(std::string Path)
+{
+#if defined(CSP_WINDOWS)
+    auto Attr = GetFileAttributesA(Path.c_str());
+
+    return (Attr != INVALID_FILE_ATTRIBUTES && ((Attr & FILE_ATTRIBUTE_NORMAL) || (Attr & FILE_ATTRIBUTE_ARCHIVE)));
+#else
+    struct stat Stat;
+
+    return (stat(Path.c_str(), &Stat) == 0 && S_ISREG(Stat.st_mode));
+#endif
+}
+
+bool EnsureFolderExists(const std::string& Path)
+{
+#if defined(CSP_ANDROID)
+    if (mkdir(Path.c_str(), 0777) == 0) {
+        return true;
+    }
+
+    return errno == EEXIST;
+#else
+
+    std::error_code Ec;
+    std::filesystem::create_directories(Path, Ec);
+
+    return !Ec; 
+#endif
+}
+
 std::string DeviceIdPath()
 {
     // For all platforms, we want to guarantee the current user has read/write access
