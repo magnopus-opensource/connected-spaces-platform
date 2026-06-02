@@ -129,6 +129,7 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
     const T& /*Value*/, RapidJsonAlloc& /*Allocator*/)
 {
     assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
+    return rapidjson::Value{ };
 }
 
 // Serialisation function for types that derive from DtoBase

@@ -236,6 +236,10 @@ target_compile_options(csp-lib
       -Wno-error=deprecated-declarations
       -Wno-missing-field-initializers
       -Wno-ignored-qualifiers
+
+      # Needed to compile with the Linux Unreal Toolchain
+      -Wno-error=attributes
+
       -fpermissive
     >
 

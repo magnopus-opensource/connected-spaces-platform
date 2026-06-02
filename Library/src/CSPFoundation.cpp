@@ -257,7 +257,9 @@ std::string LoadDeviceId()
         assert(File != nullptr);
 
         char Uuid[33];
-        fread(Uuid, sizeof(char), 32, File);
+        [[maybe_unused]] const size_t ReadSize = fread(Uuid, 1, 32, File);
+        assert(ReadSize != 32);
+
         fclose(File);
         Uuid[32] = '\0';
 
