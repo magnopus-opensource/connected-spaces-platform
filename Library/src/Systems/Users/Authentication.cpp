@@ -153,9 +153,9 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
             LoginEvent->AddString("UserId", AuthResponse->GetUserId());
             events::EventSystem::Get().EnqueueEvent(LoginEvent);
-        }
 
-        SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
+            SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
+        }
     }
     else
     {
