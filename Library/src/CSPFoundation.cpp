@@ -82,22 +82,6 @@
 namespace
 {
 
-// We don't need these 3 functions for WASM, as we use localStorage instead of the filesystem to store the device ID
-#if !defined(CSP_WASM)
-bool FolderExists(std::string Path)
-{
-#if defined(CSP_WINDOWS)
-    auto Attr = GetFileAttributesA(Path.c_str());
-
-    return (Attr != INVALID_FILE_ATTRIBUTES && (Attr & FILE_ATTRIBUTE_DIRECTORY));
-#else
-    // All POSIX platforms should support stat
-    struct stat Stat;
-
-    return (stat(Path.c_str(), &Stat) == 0 && S_ISDIR(Stat.st_mode));
-#endif
-}
-
 bool FileExists(std::string Path)
 {
 #if defined(CSP_WINDOWS)
@@ -114,30 +98,10 @@ bool FileExists(std::string Path)
 bool EnsureFolderExists(const std::string& Path)
 {
     std::error_code Ec;
+    std::filesystem::create_directories(Path, Ec);
 
-    if (std::filesystem::exists(Path, Ec))
-    {
-        return std::filesystem::is_directory(Path, Ec);
-    }
-
-    if (!std::filesystem::create_directories(Path, Ec) && Ec)
-    {
-        return false;
-    }
-
-    return true;
+    return !Ec; 
 }
-
-// Named "CreateFolder" to avoid conflicts with Win32's CreateDirectory macro
-void CreateFolder(std::string Path)
-{
-#if defined(CSP_WINDOWS)
-    ::CreateDirectoryA(Path.c_str(), NULL);
-#else
-    mkdir(Path.c_str(), 0777);
-#endif
-}
-#endif
 
 #if defined(CSP_WASM)
 // clang-format off
@@ -211,7 +175,7 @@ std::string DeviceIdPath()
 }
 #endif
 
-std::string LoadDeviceId()
+std::optional<std::string> LoadDeviceId()
 {
     // Use a unique code path for WASM to avoid using the awful async filesystem API
 #if defined(CSP_WASM)
@@ -232,7 +196,7 @@ std::string LoadDeviceId()
 #else
     const std::string CSPDataRoot = DeviceIdPath();
 
-    if (CSPDataRoot.empty() || !EnsureFolderExists(CSPDataRoot))
+    if (!EnsureFolderExists(CSPDataRoot))
     {
         return {};
     }
@@ -258,7 +222,7 @@ std::string LoadDeviceId()
 
         char Uuid[33];
         [[maybe_unused]] const size_t ReadSize = fread(Uuid, 1, 32, File);
-        assert(ReadSize != 32);
+        assert(ReadSize == 32);
 
         fclose(File);
         Uuid[32] = '\0';
@@ -507,7 +471,16 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
 
     csp::systems::SystemsManager::Instantiate(SignalRInject, WebClientInject);
 
-    *DeviceId = LoadDeviceId().c_str();
+    std::optional<std::string> NewDeviceId = LoadDeviceId();
+    assert(NewDeviceId.has_value());
+
+    if (NewDeviceId.has_value() == false)
+    {
+        IsInitialised = false;
+        return false;
+    }
+
+    *DeviceId = NewDeviceId->c_str();
     IsInitialised = true;
 
     return true;
