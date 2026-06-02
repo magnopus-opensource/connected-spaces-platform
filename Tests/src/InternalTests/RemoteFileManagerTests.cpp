@@ -55,7 +55,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
         csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
         Data.State = std::get<0>(GetParam());
         Data.AccessToken = std::get<1>(GetParam());
-        LoginState.SetLoginStateData(Data);
+        LoginState.SetLoginStateDataThreadSafe(Data);
     }
 
     EXPECT_CALL(MockClient, SendRequest)
@@ -116,7 +116,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
         csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
         Data.State = std::get<0>(GetParam());
         Data.AccessToken = std::get<1>(GetParam());
-        LoginState.SetLoginStateData(Data);
+        LoginState.SetLoginStateDataThreadSafe(Data);
     }
 
     EXPECT_CALL(MockClient, SendRequest)

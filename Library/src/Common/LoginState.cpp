@@ -46,7 +46,7 @@ LoginStateData LoginState::GetSnapshotThreadSafe() const
     return *Data;
 }
 
-void LoginState::SetLoginStateData(LoginStateData NewData)
+void LoginState::SetLoginStateDataThreadSafe(LoginStateData NewData)
 {
     std::scoped_lock lock(LoginStateMutex);
 

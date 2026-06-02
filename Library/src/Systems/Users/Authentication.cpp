@@ -147,7 +147,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
             Data.SetAccessTokenRefreshTime(RefreshTime);
 
-            State->SetLoginStateData(Data);
+            State->SetLoginStateDataThreadSafe(Data);
 
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);

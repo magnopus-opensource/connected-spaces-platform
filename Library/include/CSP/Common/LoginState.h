@@ -37,7 +37,7 @@ class CSP_API LoginState
 public:
     LoginState();
     ~LoginState();
-    
+
     LoginState(const LoginState& OtherState);
     LoginState& operator=(const LoginState& OtherState);
 
@@ -46,8 +46,9 @@ public:
     /// @return A snapshot of the login state data.
     CSP_NO_EXPORT LoginStateData GetSnapshotThreadSafe() const;
 
-    /// @brief Set the login state data. This will replace all existing data in the login state with the new data provided.
-    CSP_NO_EXPORT void SetLoginStateData(csp::common::LoginStateData NewData);
+    /// @brief Set the login state data while guarded by a mutex lock. This will replace all existing data in the login state with the new data
+    /// provided.
+    CSP_NO_EXPORT void SetLoginStateDataThreadSafe(csp::common::LoginStateData NewData);
 
     /// @brief Attempt to set the login state to LoginRequested if the current state is LoggedOut.
     /// This will prevent multiple concurrent login attempts through use of a mutex guard.
@@ -102,7 +103,7 @@ public:
 
 private:
     void CopyStateFrom(const LoginState& OtherState);
-    
+
     std::unique_ptr<LoginStateData> Data;
     CSP_START_IGNORE
     mutable std::mutex LoginStateMutex;
