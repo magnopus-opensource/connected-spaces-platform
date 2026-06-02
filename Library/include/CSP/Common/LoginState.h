@@ -50,12 +50,12 @@ public:
     CSP_NO_EXPORT void SetLoginStateData(csp::common::LoginStateData NewData);
 
     /// @brief Attempt to set the login state to LoginRequested if the current state is LoggedOut.
-    /// This will prevent multiple concurrent login attempts.
+    /// This will prevent multiple concurrent login attempts through use of a mutex guard.
     /// @return If the state was successfully changed to LoginRequested.
     CSP_NO_EXPORT bool TrySetLoginRequested();
 
     /// @brief Attempt to set the login state to LogoutRequested if the current state is LoggedIn.
-    /// This will prevent multiple concurrent logout attempts.
+    /// This will prevent multiple concurrent logout attempts through use of a mutex guard.
     /// @return If the state was successfully changed to LogoutRequested.
     CSP_NO_EXPORT bool TrySetLogoutRequested();
 

@@ -27,6 +27,8 @@
 namespace csp::common
 {
 
+/// @brief Data structure representing the user login state.
+/// This type allows us to extract the data from the LoginState class and control access to it via a mutex lock.
 class LoginStateData
 {
 public:
