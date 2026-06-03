@@ -59,7 +59,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
     {
         LogSystem.LogMsg(csp::common::LogLevel::Log, "Starting Multiplayer Connection");
 
-        auto Data = LoginStateRes.GetLoginState().GetSnapshotThreadSafe();
+        const auto Data = LoginStateRes.GetLoginState().GetSnapshotThreadSafe();
         MultiplayerConnection.Connect(ConnectionCallback, MultiplayerURI, Data.AccessToken, Data.DeviceId);
     }
     else
@@ -123,15 +123,14 @@ std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common:
 
 // Contains shared logic for logging in with a 3rd party provider - used by both LoginToThirdPartyAuthenticationProvider and
 // LoginToThirdPartyAuthenticationProviderWithToken.
-void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> CurrentLoginState, csp::common::LogSystem* LogSystem,
-    const std::shared_ptr<chs_user::LoginSocialRequest>& Request, bool CreateMultiplayerConnection, csp::systems::LoginStateResultCallback Callback)
+void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> CurrentLoginState,
+    csp::common::LogSystem* LogSystem, const std::shared_ptr<chs_user::LoginSocialRequest>& Request, bool CreateMultiplayerConnection,
+    csp::systems::LoginStateResultCallback Callback)
 {
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = CurrentLoginState;
-
     csp::systems::LoginStateResultCallback LoginStateResCallback
-        = [LogSystem, Callback, CreateMultiplayerConnection, LoginStateRef](const csp::systems::LoginStateResult& LoginStateRes)
+        = [LogSystem, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](const csp::systems::LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
@@ -158,7 +157,7 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
     };
 
     csp::services::ResponseHandlerPtr ResponseHandler = AuthenticationAPI->CreateHandler<csp::systems::LoginStateResultCallback,
-        csp::systems::LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(LoginStateResCallback, LoginStateRef.get());
+        csp::systems::LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(LoginStateResCallback, CurrentLoginState.get());
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogin_socialPost({ Request }, ResponseHandler);
 }
@@ -247,11 +246,9 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
     Options->SetRefreshTokenExpiryLength(Data.RefreshTokenExpiryLength);
     Request->SetTokenOptions(Options);
 
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // LoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = LoginState;
-
-    LoginStateResultCallback LoginStateResCallback = [Callback, LoginStateRef](const LoginStateResult& LoginStateRes)
+    LoginStateResultCallback LoginStateResCallback = [Callback, LoginStateRef = LoginState](const LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -271,7 +268,7 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-            LoginStateResCallback, LoginStateRef.get());
+            LoginStateResCallback, LoginState.get());
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost({ Request }, ResponseHandler);
 }
@@ -360,12 +357,10 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
 
     Request->SetTokenOptions(Options);
 
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = CurrentLoginState;
-
     LoginStateResultCallback LoginStateResCallback
-        = [this, Callback, CreateMultiplayerConnection, LoginStateRef](const LoginStateResult& LoginStateRes)
+        = [this, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](const LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
@@ -396,7 +391,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-            LoginStateResCallback, LoginStateRef.get());
+            LoginStateResCallback, CurrentLoginState.get());
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost({ Request }, ResponseHandler);
 }
@@ -430,12 +425,10 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 
     Request->SetTokenOptions(Options);
 
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = CurrentLoginState;
-
     LoginStateResultCallback LoginStateResCallback
-        = [this, Callback, CreateMultiplayerConnection, LoginStateRef](const LoginStateResult& LoginStateRes)
+        = [this, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](const LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
@@ -465,7 +458,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-            LoginStateResCallback, LoginStateRef.get());
+            LoginStateResCallback, CurrentLoginState.get());
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost({ Request }, ResponseHandler);
 }
@@ -496,12 +489,10 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
 
     Request->SetTokenOptions(Options);
 
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = CurrentLoginState;
-
     LoginStateResultCallback LoginStateResCallback
-        = [this, Callback, CreateMultiplayerConnection, LoginStateRef](const LoginStateResult& LoginStateRes)
+        = [this, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](const LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
@@ -531,7 +522,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-            LoginStateResCallback, LoginStateRef.get());
+            LoginStateResCallback, CurrentLoginState.get());
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost({ Request }, ResponseHandler);
 }
@@ -555,11 +546,9 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
         Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
     }
 
-    // Local copy made and captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
-    auto LoginStateRef = CurrentLoginState;
-
-    LoginStateResultCallback LoginStateResCallback = [this, Callback, LoginStateRef](const LoginStateResult& LoginStateRes)
+    LoginStateResultCallback LoginStateResCallback = [this, Callback, LoginStateRef = CurrentLoginState](const LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
@@ -590,7 +579,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-            LoginStateResCallback, LoginStateRef.get());
+            LoginStateResCallback, CurrentLoginState.get());
 
     // Despite the naming, "login-guest" is the deferred, optimized, non-standard guest login.
     // The regular login endpoint that "loginAsGuest" uses is the "real" one.
@@ -826,14 +815,13 @@ void UserSystem::Logout(NullResultCallback Callback)
         Request->SetUserId(Data.UserId);
         Request->SetDeviceId(Data.DeviceId);
 
-        // Local copy made and captured by value in the wrapped callback below. This ensures the shared_ptr stays alive until the callback is executed
+        // CurrentLoginState captured by value in the wrapped callback below. This ensures the shared_ptr stays alive until the callback is executed
         // via the ResponseHandler.
-        auto LoginStateRef = CurrentLoginState;
-        NullResultCallback WrappedCallback = [Callback, LoginStateRef](const NullResult& Result) { Callback(Result); };
+        NullResultCallback WrappedCallback = [Callback, LoginStateRef = CurrentLoginState](const NullResult& Result) { Callback(Result); };
 
         csp::services::ResponseHandlerPtr ResponseHandler
             = AuthenticationAPI->CreateHandler<NullResultCallback, LogoutResult, csp::common::LoginState, csp::services::NullDto>(
-                WrappedCallback, LoginStateRef.get(), csp::web::EResponseCodes::ResponseNoContent);
+                WrappedCallback, CurrentLoginState.get(), csp::web::EResponseCodes::ResponseNoContent);
 
         static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogoutPost({ Request }, ResponseHandler);
     };
