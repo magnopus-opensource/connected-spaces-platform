@@ -60,8 +60,8 @@ public:
     /// @return If the state was successfully changed to LogoutRequested.
     CSP_NO_EXPORT bool TrySetLogoutRequested();
 
-    /// @brief Reset the login state after a failed login/logout attempt.
-    CSP_NO_EXPORT void ResetResponseLoginState(csp::common::ELoginState LoginState);
+    /// @brief Construct a new default login state object after a failed login/logout attempt with the specified ELoginState value.
+    CSP_NO_EXPORT void ReinitializeResponseLoginState(csp::common::ELoginState LoginState);
 
     /// @brief Update the access token expiry time.
     CSP_NO_EXPORT void UpdateAccessTokenExpiry(csp::common::String AccessTokenExpiryLength);

@@ -163,7 +163,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
         {
             web::HttpAuth::SetAccessToken("", "", "", "");
 
-            State->ResetResponseLoginState(ELoginState::Error);
+            State->ReinitializeResponseLoginState(ELoginState::Error);
         }
     }
 }
@@ -187,7 +187,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->ResetResponseLoginState(ELoginState::LoggedOut);
+            State->ReinitializeResponseLoginState(ELoginState::LoggedOut);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
 
@@ -200,7 +200,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->ResetResponseLoginState(ELoginState::Error);
+            State->ReinitializeResponseLoginState(ELoginState::Error);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
         }

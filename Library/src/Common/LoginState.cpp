@@ -81,7 +81,7 @@ bool LoginState::TrySetLogoutRequested()
     return false;
 }
 
-void LoginState::ResetResponseLoginState(ELoginState LoginState)
+void LoginState::ReinitializeResponseLoginState(ELoginState LoginState)
 {
     std::scoped_lock lock(LoginStateMutex);
 
