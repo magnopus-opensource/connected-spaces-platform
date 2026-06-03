@@ -35,6 +35,9 @@ class CSP(ConanFile):
 
         # We use the Emscripten WebSockets API for Emscripten
         if self.settings.os != "Emscripten":
+            # Override Pocos default OpenSSL to use OpenSSL 1.1
+            # This is currently needed for support with Unreals OpenSSL lib.
+            self.requires("openssl/1.1.1t", override=True)
             self.requires("poco/1.14.2")
 
     def config_options(self):

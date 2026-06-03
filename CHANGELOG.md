@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🍰 🙌 New Features
 
+- [OF-1850] feat: Updated initialization process to fail if directories fail to create. By @MAG-mv.
+
 - [OF-1866] feat: Add public API for interacting with Components defined in terms of a Schema description. By @mag-lt.
   This adds the following public methods:
   - `IRealtimeEngine::GetComponentSchemaRegistry()`: Returns a "registry" instance, a read-only type describing the Components known by the engine. This can be used to interrogate the shape of a Component at runtime. Currently this is populated by CSP with a corresponding Schema for each of the hardcoded Component types in the library. It is still not possible to register a new schema externally, but this will come in a future release.
