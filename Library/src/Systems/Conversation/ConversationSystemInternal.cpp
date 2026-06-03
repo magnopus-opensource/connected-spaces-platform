@@ -6,6 +6,9 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
+
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 
@@ -349,7 +352,7 @@ ConversationSystemInternal::~ConversationSystemInternal() { }
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {
     const Space& CurrentSpace = SpaceSystem->GetCurrentSpace();
-    const common::String& UserId = UserSystem->GetLoginState().UserId;
+    const common::String& UserId = UserSystem->GetLoginState().GetUserId();
     const common::String& SpaceId = CurrentSpace.Id;
 
     // 1. Create the comment container asset collection
@@ -446,7 +449,7 @@ void ConversationSystemInternal::AddMessage(
     const common::String& ConversationId, const common::String& Message, multiplayer::MessageResultCallback Callback)
 {
     // 1. Store the conversation message
-    const common::String& UserId = UserSystem->GetLoginState().UserId;
+    const common::String& UserId = UserSystem->GetLoginState().GetUserId();
 
     const multiplayer::MessageResultCallback MessageResultCallback
         = [this, Callback, ConversationId, UserId, Message](const multiplayer::MessageResult& MessageResultCallbackResult)
@@ -495,7 +498,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
         multiplayer::MessageInfo Info
             = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
             return;
@@ -595,7 +598,7 @@ void ConversationSystemInternal::UpdateConversation(
         multiplayer::MessageInfo Info
             = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, true) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, true) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
             return;
@@ -687,7 +690,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
         multiplayer::MessageInfo Info
             = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
             return;
@@ -834,7 +837,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
     const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
 {
     const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+    const csp::common::String UserId = UserSystem->GetLoginState().GetUserId();
 
     const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
@@ -984,7 +987,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
 {
     const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+    const csp::common::String UserId = UserSystem->GetLoginState().GetUserId();
 
     const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);

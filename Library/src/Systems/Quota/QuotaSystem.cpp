@@ -18,6 +18,8 @@
 #include "Systems/ResultHelpers.h"
 
 #include "CSP/Common/Interfaces/IAuthContext.h"
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "Services/TrackingService/Api.h"
 
 namespace chs = csp::services::generated::trackingservice;
@@ -51,7 +53,9 @@ QuotaSystem::~QuotaSystem()
 
 void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data.State != common::ELoginState::LoggedIn)
     {
         LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<FeatureLimitResult>());
@@ -63,8 +67,7 @@ void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
     csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet({ Context->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->usersUserIdQuota_progressGet({ Data.UserId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
@@ -89,7 +92,9 @@ void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceI
 
 void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data.State != common::ELoginState::LoggedIn)
     {
         LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<FeaturesLimitResult>());
@@ -107,8 +112,7 @@ void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFea
         FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
     }
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet({ Context->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->usersUserIdQuota_progressGet({ Data.UserId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetTierFeatureProgressForSpace(
@@ -130,7 +134,9 @@ void QuotaSystem::GetTierFeatureProgressForSpace(
 
 void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 {
-    if (Context->GetLoginState().State != common::ELoginState::LoggedIn)
+    auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data.State != common::ELoginState::LoggedIn)
     {
         LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<UserTierResult>());
@@ -140,8 +146,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
     csp::services::ResponseHandlerPtr ResponseHandler
         = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
 
-    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)
-        ->usersUserIdTier_assignmentGet({ Context->GetLoginState().UserId }, ResponseHandler);
+    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)->usersUserIdTier_assignmentGet({ Data.UserId }, ResponseHandler);
 }
 
 void QuotaSystem::SetUserTier(TierNames TierName, const csp::common::String& UserId, UserTierCallback Callback)

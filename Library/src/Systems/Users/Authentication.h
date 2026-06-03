@@ -19,6 +19,7 @@
 #include "CSP/Common/LoginState.h"
 #include "CSP/Systems/Users/Authentication.h"
 
+
 namespace csp::systems
 {
 
@@ -34,7 +35,7 @@ class CSP_API LogoutResult : public NullResult
 
 private:
     LogoutResult();
-    LogoutResult(csp::common::LoginState* InStatePtr);
+    LogoutResult(csp::common::LoginState* LoginState);
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

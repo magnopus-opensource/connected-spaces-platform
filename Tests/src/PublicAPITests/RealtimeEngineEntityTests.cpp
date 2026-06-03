@@ -191,7 +191,8 @@ TEST_P(CreateAvatar, CreateAvatarTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
@@ -270,7 +271,8 @@ TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
@@ -348,7 +350,8 @@ TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -903,7 +906,8 @@ TEST_P(EntitySelection, EntitySelectionTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 

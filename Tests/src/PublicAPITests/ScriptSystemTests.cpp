@@ -308,7 +308,7 @@ TEST_P(RunScript, RunScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -425,7 +425,8 @@ TEST_P(AvatarScript, AvatarScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -524,7 +525,8 @@ TEST_P(ScriptLog, ScriptLogTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -612,7 +614,7 @@ TEST_P(DeleteScript, DeleteScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -724,7 +726,7 @@ TEST_P(DeleteAndChangeComponent, DeleteAndChangeComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -964,7 +966,7 @@ TEST_P(ScriptDeltaTime, ScriptDeltaTimeTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -1087,7 +1089,7 @@ TEST_P(CustomComponentScriptInterfaceSubscription, CustomComponentScriptInterfac
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
@@ -1208,7 +1210,7 @@ TEST_P(MultipleScriptComponent, MultipleScriptComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 

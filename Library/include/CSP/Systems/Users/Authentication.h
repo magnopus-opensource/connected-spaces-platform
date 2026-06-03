@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemsResult.h"
 
+
 namespace csp::common
 {
 
@@ -67,11 +68,11 @@ public:
     [[nodiscard]] const csp::common::LoginState& GetLoginState() const;
     CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , State(nullptr) {};
+        , State(nullptr) {}
 
 private:
     LoginStateResult();
-    LoginStateResult(csp::common::LoginState* InStatePtr);
+    LoginStateResult(csp::common::LoginState* LoginState);
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

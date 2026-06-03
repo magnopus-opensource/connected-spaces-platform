@@ -29,6 +29,7 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
+
 namespace csp::web
 {
 
@@ -49,7 +50,7 @@ CSP_START_IGNORE
 class AuthContext : public csp::common::IAuthContext
 {
 public:
-    AuthContext(csp::services::ApiBase* AuthenticationAPI, csp::common::LoginState& LoginState);
+    AuthContext(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> LoginState);
 
     const csp::common::LoginState& GetLoginState() const override;
 
@@ -59,7 +60,7 @@ public:
 
 private:
     csp::services::ApiBase* AuthenticationAPI;
-    csp::common::LoginState* LoginState;
+    std::shared_ptr<csp::common::LoginState> LoginState;
 };
 CSP_END_IGNORE
 
@@ -338,7 +339,7 @@ private:
     csp::services::ApiBase* PingAPI;
     csp::services::ApiBase* StripeAPI;
 
-    csp::common::LoginState CurrentLoginState;
+    std::shared_ptr<csp::common::LoginState> CurrentLoginState;
 
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 

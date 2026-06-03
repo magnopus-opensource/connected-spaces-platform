@@ -51,11 +51,11 @@
       // Try and create the avatar
       const entity = await realtimeEngine.createAvatar(
         'Test Player',
-        authState.userId,
+        authState.getUserId(),
         playerTransform,
         true,
         Multiplayer.AvatarState.Idle,
-        authState.userId,
+        authState.getUserId(),
         Multiplayer.AvatarPlayMode.Default
       );
 

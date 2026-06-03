@@ -15,6 +15,7 @@
  */
 
 #include "CSP/CSPFoundation.h"
+#include "Common/LoginStateData.h"
 #include "Mocks/AuthContextMock.h"
 #include "Mocks/WebClientMock.h"
 #include "PlatformTestUtils.h"
@@ -50,8 +51,12 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
 
     // Construct a LoginState object with the correct state.
     csp::common::LoginState LoginState;
-    LoginState.State = std::get<0>(GetParam());
-    LoginState.AccessToken = std::get<1>(GetParam());
+    {
+        csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
+        Data.State = std::get<0>(GetParam());
+        Data.AccessToken = std::get<1>(GetParam());
+        LoginState.SetLoginStateDataThreadSafe(Data);
+    }
 
     EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
@@ -68,7 +73,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
                 ASSERT_NE(ContentTypeIt, Headers.end());
                 EXPECT_EQ(ContentTypeIt->second, "text/json");
 
-                if (LoginState.State == csp::common::ELoginState::LoggedIn)
+                if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
                     // Verify that the Authorization header is present
                     auto AuthIt = Headers.find("Authorization");
@@ -107,8 +112,12 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 
     // Construct a LoginState object with the correct state.
     csp::common::LoginState LoginState;
-    LoginState.State = std::get<0>(GetParam());
-    LoginState.AccessToken = std::get<1>(GetParam());
+    {
+        csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
+        Data.State = std::get<0>(GetParam());
+        Data.AccessToken = std::get<1>(GetParam());
+        LoginState.SetLoginStateDataThreadSafe(Data);
+    }
 
     EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
@@ -119,7 +128,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 
                 EXPECT_STREQ(InUri.GetAsString(), FileUrl.c_str());
 
-                if (LoginState.State == csp::common::ELoginState::LoggedIn)
+                if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
                     // The X-AssetPlatform header is added to all HTTP requests. In addition the Authorization header should have been set
                     const auto& Headers = Payload.GetHeaders();
