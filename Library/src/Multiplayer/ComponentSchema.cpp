@@ -19,6 +19,7 @@
 #include "Common/Convert.h"
 #include "Json/JsonSerializer.h"
 
+#include <fmt/format.h>
 #include <rapidjson/document.h>
 
 #include <algorithm>
@@ -216,30 +217,55 @@ namespace
         return std::nullopt;
     }
 
-    std::optional<ComponentProperty> TryParseProperty(const rapidjson::Value& Value)
+    std::optional<ComponentProperty> TryParseProperty(const rapidjson::Value& Value, csp::common::LogSystem* LogSystem = nullptr)
     {
         if (!Value.IsObject())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: not a JSON object");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("key") || !Value["key"].IsUint())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'key' must be an unsigned integer");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("name") || !Value["name"].IsString())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'name' must be a string");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("type") || !Value["type"].IsString())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'type' must be a string");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("defaultValue"))
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: missing 'defaultValue'");
+            }
+
             return std::nullopt;
         }
 
@@ -250,6 +276,12 @@ namespace
 
         if (!DefaultValue)
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(
+                    csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'defaultValue' is not valid for type '{}'", Type).c_str());
+            }
+
             return std::nullopt;
         }
 
@@ -260,13 +292,14 @@ namespace
         };
     }
 
-    std::optional<csp::common::Array<ComponentProperty>> TryParseProperties(rapidjson::Value::ConstArray JsonProperties)
+    std::optional<csp::common::Array<ComponentProperty>> TryParseProperties(
+        rapidjson::Value::ConstArray JsonProperties, csp::common::LogSystem* LogSystem = nullptr)
     {
         auto Properties = std::vector<ComponentProperty> {};
 
         for (const auto& Element : JsonProperties)
         {
-            const auto Property = TryParseProperty(Element);
+            const auto Property = TryParseProperty(Element, LogSystem);
 
             if (!Property)
             {
@@ -279,29 +312,49 @@ namespace
         return csp::common::Convert(Properties);
     }
 
-    std::optional<ComponentSchema> TryParseSchema(const rapidjson::Value& Value)
+    std::optional<ComponentSchema> TryParseSchema(const rapidjson::Value& Value, csp::common::LogSystem* LogSystem = nullptr)
     {
         if (!Value.IsObject())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: not a JSON object");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("typeId") || !Value["typeId"].IsUint64())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'typeId' must be a uint64");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("name") || !Value["name"].IsString())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'name' must be a string");
+            }
+
             return std::nullopt;
         }
 
         if (!Value.HasMember("properties") || !Value["properties"].IsArray())
         {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'properties' must be an array");
+            }
+
             return std::nullopt;
         }
 
-        const auto Properties = TryParseProperties(Value["properties"].GetArray());
+        const auto Properties = TryParseProperties(Value["properties"].GetArray(), LogSystem);
 
         if (!Properties)
         {
@@ -393,13 +446,13 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 
         if (Doc.HasParseError() || !Doc.IsArray())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping document, expected a JSON array");
+            LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping document, expected a top-level JSON array");
             continue;
         }
 
         for (const auto& Element : Doc.GetArray())
         {
-            const auto Schema = TryParseSchema(Element);
+            const auto Schema = TryParseSchema(Element, &LogSystem);
 
             if (!Schema)
             {
