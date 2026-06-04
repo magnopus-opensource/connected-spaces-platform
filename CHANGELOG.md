@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-5368] fix!: Guard access to LoginState data with a mutex. By @MAG-AdamThorn.
   The Login, Logout and Refresh Token response handlers access the LoginState object on different threads which was resulting in loginstate data race conditions. In addition the LoginState object was being passed to the response handlers by value, which resulted in the LoginState being destroyed when CSP was torn down while callbacks were still in flight. To resolve this issue the LoginState data members have been moved to a new LoginStateData class, and access to it is controlled via a mutex guard. In addition a copy of the LoginState shared_ptr is now captured by the response handler callbacks to ensure it's lifetime persists for the duration of the callback.
 
+### 💫 💥 Code Refactors
+- [NT-0] refac: Move Datetime header from source to public includes directory. By @MAG-AdamThorn
 
 ## [6.42.0]
 
