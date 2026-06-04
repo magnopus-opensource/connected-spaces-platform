@@ -176,7 +176,7 @@ namespace
         };
     }
 
-    std::optional<csp::common::ReplicatedValue> TryParseDefaultValue(const std::string& Type, const rapidjson::Value& Value)
+    std::optional<csp::common::ReplicatedValue> TryParse(const std::string& Type, const rapidjson::Value& Value)
     {
         if (Type == "string")
         {
@@ -246,7 +246,7 @@ namespace
         const auto Key = static_cast<ComponentProperty::KeyType>(Value["key"].GetUint());
         const auto* Name = Value["name"].GetString();
         const auto* Type = Value["type"].GetString();
-        const auto DefaultValue = TryParseDefaultValue(Type, Value["defaultValue"]);
+        const auto DefaultValue = TryParse(Type, Value["defaultValue"]);
 
         if (!DefaultValue)
         {
