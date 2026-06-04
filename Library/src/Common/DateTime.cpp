@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-#include "Common/DateTime.h"
+#include "CSP/Common/DateTime.h"
 
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>
+#include <string>
 
-namespace
-{
-
-#ifdef CSP_WINDOWS
-#define timegm _mkgmtime
-#endif
-
-} // namespace
+PRAGMA_WARNING_PUSH()
+PRAGMA_WARNING_IGNORE_MSVC(4996) // gmtime/localtime unsafe warnings
 
 namespace csp::common
 {
@@ -38,8 +33,7 @@ namespace csp::common
 // Based on https://stackoverflow.com/questions/530519/stdmktime-and-timezone-info.
 // Note - we rely on the `Time` parameter that is passed adhering to the cpp spec
 // https://en.cppreference.com/w/c/chrono/tm.
-
-time_t CSPTimeGM(struct tm* Time)
+static time_t CSPTimeGM(struct tm* Time)
 {
     // note - we use this constant array for calculating days into the year instead of
     // relying on tm::tm_yday, as we expect calling code to more reliably provide values for `tm::tm_mon`
@@ -74,6 +68,13 @@ time_t CSPTimeGM(struct tm* Time)
     }
 
     return Result;
+}
+
+DateTime::DateTime() { }
+
+DateTime::DateTime(Clock::time_point InTimePoint)
+    : TimePoint(InTimePoint)
+{
 }
 
 DateTime::DateTime(const csp::common::String& DateString)
@@ -114,7 +115,67 @@ DateTime::DateTime(const csp::common::String& DateString)
     TimePoint = std::chrono::system_clock::from_time_t(Time);
 }
 
-const DateTime::Clock::time_point& DateTime::GetTimePoint() const { return TimePoint; }
+DateTime DateTime::TimeNow()
+{
+    return DateTime(Clock::now());
+}
+
+DateTime DateTime::UtcTimeNow()
+{
+    DateTime DateTimeNow;
+
+    time_t Now = time(0);
+    tm* Gmtm = gmtime(&Now);
+
+    if (Gmtm != nullptr)
+    {
+        std::string TimeString;
+        TimeString = std::to_string(1900 + Gmtm->tm_year);
+        TimeString += "-";
+        TimeString += std::to_string(Gmtm->tm_mon + 1);
+        TimeString += "-";
+        TimeString += std::to_string(Gmtm->tm_mday);
+        TimeString += "T";
+        TimeString += std::to_string(Gmtm->tm_hour);
+        TimeString += ":";
+        TimeString += std::to_string(Gmtm->tm_min);
+        TimeString += ":";
+        TimeString += std::to_string(Gmtm->tm_sec);
+        TimeString += ".";
+        TimeString += "0+";
+        TimeString += "00:00";
+
+        DateTimeNow = DateTime(String(TimeString.c_str()));
+    }
+
+    return DateTimeNow;
+}
+
+int DateTime::GetTimeZone()
+{
+    time_t Now = time(0);
+    struct tm* Lctm;
+    Lctm = localtime(&Now);
+    struct tm* Gmtm;
+    Gmtm = gmtime(&Now);
+
+    return Lctm->tm_hour - Gmtm->tm_hour;
+}
+
+bool DateTime::IsEpoch() const
+{
+    return TimePoint.time_since_epoch().count() == 0;
+}
+
+bool DateTime::operator>=(const DateTime& Other) const
+{
+    return TimePoint >= Other.TimePoint;
+}
+
+const DateTime::Clock::time_point& DateTime::GetTimePoint() const
+{
+    return TimePoint;
+}
 
 csp::common::String DateTime::GetUtcString() const
 {
@@ -129,3 +190,5 @@ csp::common::String DateTime::GetUtcString() const
 }
 
 } // namespace csp::common
+
+PRAGMA_WARNING_POP()

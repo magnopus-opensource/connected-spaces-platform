@@ -18,7 +18,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Common/DateTime.h"
+#include "CSP/Common/DateTime.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
