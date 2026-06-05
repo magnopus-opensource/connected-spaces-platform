@@ -110,9 +110,31 @@ public:
     OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
-    CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    /// @brief OnlineRealtimeEngine constructor.
+    /// Creates a realtime engine with additional component schemas.
+    /// @param InMultiplayerConnection The multiplayer connection to construct the engine with.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param NetworkEventBus Reference to the network event bus, used for leadership election messaging.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
         const csp::common::Array<ComponentSchema>& AdditionalComponents);
+
+    /// @brief OnlineRealtimeEngine constructor.
+    /// Creates a realtime engine with additional component schemas from JSON.
+    /// @param InMultiplayerConnection The multiplayer connection to construct the engine with.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param NetworkEventBus Reference to the network event bus, used for leadership election messaging.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped
+    /// with a warning.
+    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::List<csp::common::String>& JsonSchemas);
 
     /// @brief OnlineRealtimeEngine destructor
     CSP_NO_EXPORT ~OnlineRealtimeEngine();

@@ -47,6 +47,9 @@ public:
     /// property, which is considered static i.e. if the value is a `float`, it can't be later
     /// changed to hold a `String`.
     csp::common::ReplicatedValue DefaultValue;
+
+    bool operator==(const ComponentProperty& Other) const;
+    bool operator!=(const ComponentProperty& Other) const;
 };
 
 } // namespace csp::multiplayer

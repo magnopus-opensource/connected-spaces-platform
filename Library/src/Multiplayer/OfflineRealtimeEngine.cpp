@@ -19,6 +19,7 @@
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/UUIDGenerator.h"
@@ -86,7 +87,13 @@ namespace
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
+    : OfflineRealtimeEngine(SceneDescription, LogSystem, RemoteScriptRunner, {})
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem,
+    csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, JsonSchemas)
 {
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
@@ -107,7 +114,13 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
 }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, {})
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, csp::common::Array<ComponentSchema> {})
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(
+    csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, ComponentSchemasFromJson(JsonSchemas, LogSystem))
 {
 }
 
