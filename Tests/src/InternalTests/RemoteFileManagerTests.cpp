@@ -52,10 +52,10 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
     // Construct a LoginState object with the correct state.
     csp::common::LoginState LoginState;
     {
-        csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
-        Data.State = std::get<0>(GetParam());
-        Data.AccessToken = std::get<1>(GetParam());
-        LoginState.SetLoginStateDataThreadSafe(Data);
+        const auto Data = LoginState.GetSnapshotThreadSafe();
+        Data->State = std::get<0>(GetParam());
+        Data->AccessToken = std::get<1>(GetParam());
+        LoginState.SetLoginStateDataThreadSafe(*Data);
     }
 
     EXPECT_CALL(MockClient, SendRequest)
@@ -113,10 +113,10 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
     // Construct a LoginState object with the correct state.
     csp::common::LoginState LoginState;
     {
-        csp::common::LoginStateData Data = LoginState.GetSnapshotThreadSafe();
-        Data.State = std::get<0>(GetParam());
-        Data.AccessToken = std::get<1>(GetParam());
-        LoginState.SetLoginStateDataThreadSafe(Data);
+        const auto Data = LoginState.GetSnapshotThreadSafe();
+        Data->State = std::get<0>(GetParam());
+        Data->AccessToken = std::get<1>(GetParam());
+        LoginState.SetLoginStateDataThreadSafe(*Data);
     }
 
     EXPECT_CALL(MockClient, SendRequest)

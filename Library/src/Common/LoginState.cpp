@@ -39,18 +39,25 @@ LoginState& LoginState::operator=(const LoginState& OtherState)
     return *this;
 }
 
-LoginStateData LoginState::GetSnapshotThreadSafe() const
+std::unique_ptr<LoginStateData> LoginState::GetSnapshotThreadSafe() const
 {
     std::scoped_lock lock(LoginStateMutex);
 
-    return *Data;
+    return std::make_unique<LoginStateData>(*Data);
 }
 
-void LoginState::SetLoginStateDataThreadSafe(LoginStateData NewData)
+void LoginState::SetLoginStateDataThreadSafe(const csp::common::LoginStateData& NewData)
 {
     std::scoped_lock lock(LoginStateMutex);
 
-    *Data = std::move(NewData);
+    if (Data == nullptr)
+    {
+        Data = std::make_unique<LoginStateData>(NewData);
+
+        return;
+    }
+    
+    *Data = NewData;
 }
 
 bool LoginState::TrySetLoginRequested()

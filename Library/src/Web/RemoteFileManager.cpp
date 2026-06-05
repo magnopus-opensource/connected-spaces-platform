@@ -28,13 +28,13 @@ namespace
 {
 csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
 {
-    auto Data = InAuthContext.GetLoginState().GetSnapshotThreadSafe();
+    const auto Data = InAuthContext.GetLoginState().GetSnapshotThreadSafe();
 
     csp::common::Optional<csp::common::String> BearerToken;
 
-    if (Data.State == csp::common::ELoginState::LoggedIn)
+    if (Data->State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = Data.AccessToken;
+        csp::common::String AccessToken = Data->AccessToken;
         BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
     }
 
