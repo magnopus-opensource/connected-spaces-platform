@@ -1,0 +1,99 @@
+name: "Build and Install"
+description: "Fetch dependencies with Conan, configure CMake, build, and install"
+
+inputs:
+  host_profile:
+    description: "The name of the Conan host profile to use. See profiles/host"
+    required: true
+
+  build_type:
+    description: "CMake build type [Debug, Release, RelWithDebInfo]"
+    required: true
+
+  configure_preset:
+    description: "CMake configure preset to use. Run cmake --list-presets to list available presets."
+    required: true
+
+  build_preset:
+    description: "CMake build preset to use. Run cmake --build --list-presets to list available presets."
+    required: true
+
+  build_folder:
+    description: "CMake build directory to install from. This can change depending on the generator used."
+    required: true
+
+  output_folder:
+    description: "Conan output folder"
+    required: true
+    default: ""
+
+  install_prefix:
+    description: "The location the CSP library will be installed to"
+    required: false
+    default: "install"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install Conan
+      uses: conan-io/setup-conan@v1
+
+    # Setup Conan cache.
+    # Use a custom cache key instead of setup-conan's default key so matrix jobs do not conflict.
+    #
+    # The cache prefix uses: host_profile  and build_preset, which
+    # separates caches by platform, build type, and linkage.
+    #
+    # We also append a hash of our Conan recipe, host profile, and CMake presets so changes
+    # to these files creates a new cache key.
+    - name: Cache Conan packages
+      uses: actions/cache@v4
+      env:
+        CONAN_CACHE_PREFIX: conan-${{ inputs.host_profile }}-${{ inputs.build_preset }}
+      with:
+        path: ~/.conan2
+        key: ${{ env.CONAN_CACHE_PREFIX }}-${{ hashFiles('conanfile.py', format('profiles/host/{0}', inputs.host_profile)) }}
+        restore-keys: |
+          ${{ env.CONAN_CACHE_PREFIX }}-
+
+    - name: Conan install
+      shell: bash
+      run: |
+        set -eux
+
+        export CMAKE_POLICY_VERSION_MINIMUM="3.5"
+
+        PROFILE_PATH="profiles/host/${{ inputs.host_profile }}"
+
+        if [ ! -f "$PROFILE_PATH" ]; then
+          echo "Host profile not found: $PROFILE_PATH"
+          exit 1
+        fi
+
+        conan install . \
+          -of "${{ inputs.output_folder }}" \
+          -s build_type="${{ inputs.build_type }}" \
+          --build=missing \
+          --profile:host="$PROFILE_PATH"
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        set -eux
+        cmake --preset "${{ inputs.configure_preset }}"
+
+    - name: Build
+      shell: bash
+      run: |
+        set -eux
+        cmake --build --preset "${{ inputs.build_preset }}"
+
+    - name: Install
+      shell: bash
+      run: |
+        set -eux
+        cmake --install \
+          "${{ github.workspace }}/${{ inputs.build_folder }}" \
+          --config "${{ inputs.build_type }}" \
+          --prefix "${{ github.workspace }}/${{ inputs.install_prefix }}"
