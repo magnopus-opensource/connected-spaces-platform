@@ -1,0 +1,90 @@
+name: "Build and Install"
+description: "Fetch dependencies with Conan, configure CMake, build, and install"
+
+inputs:
+  host_profile:
+    description: "The name of the Conan host profile to use. See profiles/host"
+    required: true
+
+  build_type:
+    description: "CMake build type [Debug, Release, RelWithDebInfo]"
+    required: true
+
+  configure_preset:
+    description: "CMake configure preset to use. Run cmake --list-presets to list available presets."
+    required: true
+
+  build_preset:
+    description: "CMake build preset to use. Run cmake --build --list-presets to list available presets."
+    required: true
+
+  build_folder:
+    description: "CMake build directory to install from. This can change depending on the generator used."
+    required: true
+
+  output_folder:
+    description: "Conan output folder"
+    required: false
+    default: ""
+
+  install_prefix:
+    description: "Install prefix"
+    required: false
+    default: "install"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install Conan
+      uses: conan-io/setup-conan@v1
+
+    - name: Conan install
+      shell: bash
+      run: |
+        set -eux
+
+        export CMAKE_POLICY_VERSION_MINIMUM="3.5"
+
+        PROFILE_PATH="profiles/host/${{ inputs.host_profile }}"
+
+        if [ ! -f "$PROFILE_PATH" ]; then
+          echo "Host profile not found: $PROFILE_PATH"
+          exit 1
+        fi
+
+        OUTPUT_FOLDER="${{ inputs.output_folder }}"
+
+        if [ -n "$OUTPUT_FOLDER" ]; then
+          conan install . \
+          -of "$OUTPUT_FOLDER" \
+          -s build_type="${{ inputs.build_type }}" \
+          --build=missing \
+          --profile:host="$PROFILE_PATH"
+        else
+          conan install . \
+            -s build_type="${{ inputs.build_type }}" \
+            --build=missing \
+            --profile:host="$PROFILE_PATH"
+        fi
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        set -eux
+        cmake --preset "${{ inputs.configure_preset }}"
+
+    - name: Build
+      shell: bash
+      run: |
+        set -eux
+        cmake --build --preset "${{ inputs.build_preset }}"
+
+    - name: Install
+      shell: bash
+      run: |
+        set -eux
+        cmake --install \
+          "${{ github.workspace }}/${{ inputs.build_folder }}" \
+          --config "${{ inputs.build_type }}" \
+          --prefix "${{ github.workspace }}/${{ inputs.install_prefix }}"
