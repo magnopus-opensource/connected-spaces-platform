@@ -60,7 +60,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
         LogSystem.LogMsg(csp::common::LogLevel::Log, "Starting Multiplayer Connection");
 
         const auto Data = LoginStateRes.GetLoginState().GetSnapshotThreadSafe();
-        MultiplayerConnection.Connect(ConnectionCallback, MultiplayerURI, Data.AccessToken, Data.DeviceId);
+        MultiplayerConnection.Connect(ConnectionCallback, MultiplayerURI, Data->AccessToken, Data->DeviceId);
     }
     else
     {
@@ -230,20 +230,20 @@ const csp::common::LoginState& AuthContext::GetLoginState() const { return *Logi
 
 void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 {
-    auto Data = LoginState->GetSnapshotThreadSafe();
-    if (Data.State != csp::common::ELoginState::LoggedIn)
+    const auto Data = LoginState->GetSnapshotThreadSafe();
+    if (Data->State != csp::common::ELoginState::LoggedIn)
     {
         return;
     }
 
     auto Request = std::make_shared<chs_user::RefreshRequest>();
     Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-    Request->SetUserId(Data.UserId);
-    Request->SetRefreshToken(Data.RefreshToken);
+    Request->SetUserId(Data->UserId);
+    Request->SetRefreshToken(Data->RefreshToken);
 
     auto Options = std::make_shared<chs_user::TokenOptions>();
-    Options->SetExpiryLength(Data.AccessTokenExpiryLength);
-    Options->SetRefreshTokenExpiryLength(Data.RefreshTokenExpiryLength);
+    Options->SetExpiryLength(Data->AccessTokenExpiryLength);
+    Options->SetRefreshTokenExpiryLength(Data->RefreshTokenExpiryLength);
     Request->SetTokenOptions(Options);
 
     // LoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
@@ -809,11 +809,11 @@ void UserSystem::Logout(NullResultCallback Callback)
             CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
         }
 
-        auto Data = CurrentLoginState->GetSnapshotThreadSafe();
+        const auto Data = CurrentLoginState->GetSnapshotThreadSafe();
 
         auto Request = std::make_shared<chs_user::LogoutRequest>();
-        Request->SetUserId(Data.UserId);
-        Request->SetDeviceId(Data.DeviceId);
+        Request->SetUserId(Data->UserId);
+        Request->SetDeviceId(Data->DeviceId);
 
         // CurrentLoginState captured by value in the wrapped callback below. This ensures the shared_ptr stays alive until the callback is executed
         // via the ResponseHandler.

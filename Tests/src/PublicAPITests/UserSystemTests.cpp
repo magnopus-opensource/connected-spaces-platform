@@ -1443,23 +1443,23 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
     EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
 
     // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
-    auto Data = UserSystem->GetLoginState().GetSnapshotThreadSafe();
+    const auto Data = UserSystem->GetLoginState().GetSnapshotThreadSafe();
 
-    const csp::common::ELoginState FinalState = Data.State;
+    const csp::common::ELoginState FinalState = Data->State;
 
     if (FinalState == csp::common::ELoginState::LoggedIn)
     {
-        EXPECT_NE(Data.AccessToken, "");
-        EXPECT_NE(Data.RefreshToken, "");
-        EXPECT_NE(Data.UserId, "");
-        EXPECT_NE(Data.DeviceId, "");
+        EXPECT_NE(Data->AccessToken, "");
+        EXPECT_NE(Data->RefreshToken, "");
+        EXPECT_NE(Data->UserId, "");
+        EXPECT_NE(Data->DeviceId, "");
     }
     else if (FinalState == csp::common::ELoginState::LoggedOut || FinalState == csp::common::ELoginState::Error)
     {
-        EXPECT_EQ(Data.AccessToken, "");
-        EXPECT_EQ(Data.RefreshToken, "");
-        EXPECT_EQ(Data.UserId, "");
-        EXPECT_EQ(Data.DeviceId, "");
+        EXPECT_EQ(Data->AccessToken, "");
+        EXPECT_EQ(Data->RefreshToken, "");
+        EXPECT_EQ(Data->UserId, "");
+        EXPECT_EQ(Data->DeviceId, "");
     }
     else
     {

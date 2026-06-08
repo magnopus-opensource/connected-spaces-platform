@@ -44,11 +44,12 @@ public:
     /// @brief Get a thread-safe copy of the current login state data.
     /// This is a snapshot of the data at the time of the call, and will not update if the underlying state is mutated.
     /// @return A snapshot of the login state data.
-    CSP_NO_EXPORT LoginStateData GetSnapshotThreadSafe() const;
+    CSP_NO_EXPORT std::unique_ptr<LoginStateData> GetSnapshotThreadSafe() const;
 
     /// @brief Set the login state data while guarded by a mutex lock. This will replace all existing data in the login state with the new data
     /// provided.
-    CSP_NO_EXPORT void SetLoginStateDataThreadSafe(csp::common::LoginStateData NewData);
+    /// @param NewData : The new login state data to set.
+    CSP_NO_EXPORT void SetLoginStateDataThreadSafe(const csp::common::LoginStateData& NewData);
 
     /// @brief Attempt to set the login state to LoginRequested if the current state is LoggedOut.
     /// This will prevent multiple concurrent login attempts through use of a mutex guard.
@@ -61,12 +62,15 @@ public:
     CSP_NO_EXPORT bool TrySetLogoutRequested();
 
     /// @brief Construct a new default login state object after a failed login/logout attempt with the specified ELoginState value.
+    /// @param LoginState : The ELoginState the LoginStateData object should have after reinitialization.
     CSP_NO_EXPORT void ReinitializeResponseLoginState(csp::common::ELoginState LoginState);
 
     /// @brief Update the access token expiry time.
+    /// @param AccessTokenExpiryLength : The new access token expiry time length to set.
     CSP_NO_EXPORT void UpdateAccessTokenExpiry(csp::common::String AccessTokenExpiryLength);
 
     /// @brief Update the refresh token expiry time.
+    /// @param RefreshTokenExpiryLength : The new refresh token expiry time length to set.
     CSP_NO_EXPORT void UpdateRefreshTokenExpiry(csp::common::String RefreshTokenExpiryLength);
 
     /// @brief Check if the access token for the login is expired.
