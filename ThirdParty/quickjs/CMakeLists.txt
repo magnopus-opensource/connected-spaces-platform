@@ -55,6 +55,15 @@ target_compile_definitions(csp-quickjs
     # Needed for glibc to expose sighandler_t in <signal.h>
     $<$<COMPILE_LANG_AND_ID:C,GNU>:_GNU_SOURCE>
     $<$<COMPILE_LANG_AND_ID:C,Clang>:_GNU_SOURCE>
+
+    # This is a CSP macro that was added to our version of the QuickJS library
+    # which prevents QuickJS from defining methods that do stack checking.
+    # This macro only applies to non-Emscripten and non-MSVC builds, although we have only
+    # observed this issue on Linux builds.
+    # The stack checking was causing invalid stack overflow exceptions to be thrown.
+    # Related to this error: https://forum.juce.com/t/stack-overflow-error-with-quickjs/67427/12
+    $<$<CXX_COMPILER_ID:GNU>:CSP_DISABLE_STACK_CHECK_QJS>
+
   PUBLIC
     JS_STRICT_NAN_BOXING
 )
