@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.44.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5368] fix: Guard against race conditions caused by RealtimeEngine destruction. @MAG-AdamThorn.
+  The OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback method returns a callback which is used to process all Entities fetched when joining a Space. While we support paged retrieval of Entities we do not currently use that feature. This means that when entering a Space with many Entities, the callback can take a long time to execute. If during this time the OnlineRealtimeEngine is destroyed, CSP will hit an exception when trying to access it within the callback body. There are a number of potential solutions to this issue, but the situation is complicated by the fact that we:
+    1. Do not own the OnlineRealtimeEngine or manage its lifetime.
+    2. We cannot block the main thread.
+  We have work planned to introduce a task queue to shepherd callbacks to the main thread which will make this issue a lot easier to address. In the meantime this change introduces a sentinel which is checked at key points in the body of the callback. This does not address the potential for a race condition but it does limit the window within which it may occur.
 
 ## [6.43.0]
 
