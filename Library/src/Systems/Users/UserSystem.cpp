@@ -26,6 +26,7 @@
 #include "Common/Convert.h"
 #include "Common/LoginStateData.h"
 #include "Common/UUIDGenerator.h"
+#include "Events/EventSystem.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/UserService/Api.h"
 #include "Systems/ResultHelpers.h"
@@ -787,6 +788,57 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     }
 
     LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, Request, CreateMultiplayerConnection, Callback);
+}
+
+bool UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson)
+{
+    chs_user::AuthDto AuthDetails;
+
+    AuthDetails.FromJson(LoginDetailsJson);
+
+    if (AuthDetails.GetAccessToken().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: AccessToken was not provided.");
+
+        return false;
+    }
+
+    if (AuthDetails.GetRefreshToken().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: RefreshToken was not provided.");
+
+        return false;
+    }
+
+    if (AuthDetails.GetUserId().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: UserId was not provided.");
+
+        return false;
+    }
+
+    if (AuthDetails.GetDeviceId().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: DeviceId was not provided.");
+
+        return false;
+    }
+
+    auto Data = csp::common::AuthDtoToLoginStateData(&AuthDetails);
+
+    CurrentLoginState->SetLoginStateDataThreadSafe(Data);
+
+    web::HttpAuth::SetAccessToken(
+        AuthDetails.GetAccessToken(), AuthDetails.GetAccessTokenExpiresAt(), AuthDetails.GetRefreshToken(), AuthDetails.GetRefreshTokenExpiresAt());
+
+    // Signal login to anyone interested
+    events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
+    LoginEvent->AddString("UserId", AuthDetails.GetUserId());
+    events::EventSystem::Get().EnqueueEvent(LoginEvent);
+
+    SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
+
+    return true;
 }
 
 void UserSystem::Logout(NullResultCallback Callback)

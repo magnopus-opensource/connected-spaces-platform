@@ -24,6 +24,11 @@
 
 #include <memory>
 
+namespace csp::services::generated::userservice
+{
+    class AuthDto;
+}
+
 namespace csp::common
 {
 
@@ -95,5 +100,7 @@ public:
 private:
     csp::common::DateTime AccessTokenRefreshTime;
 };
+
+LoginStateData AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse);
 
 } // namespace csp::common

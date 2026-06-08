@@ -204,6 +204,11 @@ public:
         const csp::common::String& ThirdPartyToken, const csp::common::Optional<EThirdPartyPlatform>& ClientType, bool CreateMultiplayerConnection,
         const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
+    /// @brief Set Login details after using federated login to authenticate with MCS.
+    /// @param LoginDetailsJson : A json string containing the login details returned from the federated login.
+    /// @return bool : true if the login details were successfully set, false if there was an error parsing the json or setting the login details.
+    bool SetLoginDetails(const csp::common::String& LoginDetailsJson);
+
     /// @brief Logout from Magnopus Cloud Services.
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void Logout(NullResultCallback Callback);

@@ -52,6 +52,7 @@ set(CSP_COMMON_SOURCES
     ${CSP_COMMON_SOURCE_DIR}/Encode.cpp
     ${CSP_COMMON_SOURCE_DIR}/Hash.cpp
     ${CSP_COMMON_SOURCE_DIR}/LoginState.cpp
+    ${CSP_COMMON_SOURCE_DIR}/LoginStateData.cpp
     ${CSP_COMMON_SOURCE_DIR}/MimeTypeHelper.cpp
     ${CSP_COMMON_SOURCE_DIR}/ReplicatedValue.cpp
     ${CSP_COMMON_SOURCE_DIR}/Scheduler.cpp
@@ -111,6 +112,7 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     ${CSP_COMMON_SOURCE_DIR}/DateTime.h
     ${CSP_COMMON_SOURCE_DIR}/Encode.h
     ${CSP_COMMON_SOURCE_DIR}/Logger.h
+    ${CSP_COMMON_SOURCE_DIR}/LoginStateData.h
     ${CSP_COMMON_SOURCE_DIR}/NumberFormatter.h
     ${CSP_COMMON_SOURCE_DIR}/Queue.h
     ${CSP_COMMON_SOURCE_DIR}/Scheduler.h
