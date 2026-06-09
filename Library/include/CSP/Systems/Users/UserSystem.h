@@ -206,8 +206,10 @@ public:
 
     /// @brief Set Login details after using federated login to authenticate with MCS.
     /// @param LoginDetailsJson : A json string containing the login details returned from the federated login.
-    /// @param CreateMultiplayerConnection : Whether to create a multiplayer connection. If false, this session will not establish a SignalR.
-    /// @param Callback : callback that contains the result of the 3rd party authentication operation.
+    /// @param CreateMultiplayerConnection : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
+    /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
+    /// @param Callback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void SetLoginDetails(
         const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback);
 
