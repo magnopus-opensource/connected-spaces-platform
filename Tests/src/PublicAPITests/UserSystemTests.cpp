@@ -24,8 +24,10 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
 #include "Common/LoginStateData.h"
+#include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "RAIIMockLogger.h"
+#include "Services/UserService/Dto.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -477,6 +479,46 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+/* The federated login was a last-minute pre release addition
+ * It should probably have more tests than just this. */
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Login to backend services in order to get the information to build an AuthDTO
+    // We're simulating a successful federated login here, it's all the same stuff at the end of the day.
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    // Assemble the AuthDTO
+    csp::services::generated::userservice::AuthDto AuthDetails;
+    AuthDetails.SetUserId(UserId.c_str());
+    AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
+    AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
+    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
+    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+
+    const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
+
+    // Logout so we can login again
+    LogOut(UserSystem);
+
+    // Login with the "federated JSON response"
+    auto [Result] = AWAIT_PRE(UserSystem, FederatedLogin, RequestPredicate, FederatedLoginDetailsJson, true);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    ASSERT_EQ(Result.GetLoginState().GetLoginStateValue(), csp::common::ELoginState::LoggedIn);
+    ASSERT_EQ(Result.GetLoginState().GetUserId(), UserId);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Connected);
 
     // Log out
     LogOut(UserSystem);

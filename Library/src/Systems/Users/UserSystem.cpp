@@ -867,6 +867,7 @@ void UserSystem::FederatedLogin(
     SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
 
     LoginStateResult Result { CurrentLoginState.get() };
+    Result.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
     csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback = [Callback, Result](csp::multiplayer::ErrorCode ErrCode)
     {

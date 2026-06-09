@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1879] chore!: Rename `UserSystem::SetLoginDetails` -> `UserSystem::FederatedLogin` by @MAG-ElliotMorris
 
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix issue where federated login results were not populating success/error values correctly by @MAG-ElliotMorris
+
 ## [6.43.0]
 
 ### 🍰 🙌 New Features
