@@ -790,11 +790,12 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, Request, CreateMultiplayerConnection, Callback);
 }
 
-void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
+void UserSystem::FederatedLogin(
+    const csp::common::String& FederatedLoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
 {
     chs_user::AuthDto AuthDetails;
 
-    AuthDetails.FromJson(LoginDetailsJson);
+    AuthDetails.FromJson(FederatedLoginDetailsJson);
 
     if (AuthDetails.GetAccessToken().IsEmpty())
     {
