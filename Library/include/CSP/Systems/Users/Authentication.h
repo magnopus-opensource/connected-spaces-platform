@@ -70,9 +70,11 @@ public:
         : csp::systems::ResultBase(ResCode, HttpResCode)
         , State(nullptr) {}
 
+    LoginStateResult(csp::common::LoginState* LoginState);
+
 private:
     LoginStateResult();
-    LoginStateResult(csp::common::LoginState* LoginState);
+
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

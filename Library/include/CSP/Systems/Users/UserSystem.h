@@ -206,8 +206,10 @@ public:
 
     /// @brief Set Login details after using federated login to authenticate with MCS.
     /// @param LoginDetailsJson : A json string containing the login details returned from the federated login.
-    /// @return bool : true if the login details were successfully set, false if there was an error parsing the json or setting the login details.
-    bool SetLoginDetails(const csp::common::String& LoginDetailsJson);
+    /// @param CreateMultiplayerConnection : Whether to create a multiplayer connection. If false, this session will not establish a SignalR.
+    /// @param Callback : callback that contains the result of the 3rd party authentication operation.
+    CSP_ASYNC_RESULT void SetLoginDetails(
+        const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback);
 
     /// @brief Logout from Magnopus Cloud Services.
     /// @param Callback NullResultCallback : callback to call when a response is received

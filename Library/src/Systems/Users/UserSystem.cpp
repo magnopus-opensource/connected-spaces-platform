@@ -790,7 +790,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, Request, CreateMultiplayerConnection, Callback);
 }
 
-bool UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson)
+void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
 {
     chs_user::AuthDto AuthDetails;
 
@@ -800,28 +800,44 @@ bool UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson)
     {
         CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: AccessToken was not provided.");
 
-        return false;
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
     }
 
     if (AuthDetails.GetRefreshToken().IsEmpty())
     {
         CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: RefreshToken was not provided.");
 
-        return false;
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
     }
 
     if (AuthDetails.GetUserId().IsEmpty())
     {
         CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: UserId was not provided.");
 
-        return false;
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
     }
 
     if (AuthDetails.GetDeviceId().IsEmpty())
     {
         CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: DeviceId was not provided.");
 
-        return false;
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
     }
 
     auto Data = csp::common::AuthDtoToLoginStateData(&AuthDetails);
@@ -838,7 +854,23 @@ bool UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson)
 
     SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
 
-    return true;
+    LoginStateResult Result { CurrentLoginState.get() };
+
+    csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback = [Callback, Result](csp::multiplayer::ErrorCode ErrCode)
+    {
+        if (ErrCode != csp::multiplayer::ErrorCode::None)
+        {
+            CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+
+            Callback(Result);
+            return;
+        }
+
+        Callback(Result);
+    };
+
+    StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(),
+        ConnectionCallback, Result, *LogSystem, CreateMultiplayerConnection);
 }
 
 void UserSystem::Logout(NullResultCallback Callback)
