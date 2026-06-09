@@ -26,6 +26,7 @@
 #include "Common/Convert.h"
 #include "Common/LoginStateData.h"
 #include "Common/UUIDGenerator.h"
+#include "Events/EventSystem.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/UserService/Api.h"
 #include "Systems/ResultHelpers.h"
@@ -787,6 +788,100 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     }
 
     LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, Request, CreateMultiplayerConnection, Callback);
+}
+
+void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
+{
+    chs_user::AuthDto AuthDetails;
+
+    AuthDetails.FromJson(LoginDetailsJson);
+
+    if (AuthDetails.GetAccessToken().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: AccessToken was not provided.");
+
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    if (AuthDetails.GetRefreshToken().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: RefreshToken was not provided.");
+
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    if (AuthDetails.GetUserId().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: UserId was not provided.");
+
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    if (AuthDetails.GetDeviceId().IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: DeviceId was not provided.");
+
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    auto DataOpt = csp::common::AuthDtoToLoginStateData(&AuthDetails);
+
+    if (DataOpt.has_value() == false)
+    {
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    auto Data = *DataOpt;
+
+    CurrentLoginState->SetLoginStateDataThreadSafe(Data);
+
+    web::HttpAuth::SetAccessToken(
+        AuthDetails.GetAccessToken(), AuthDetails.GetAccessTokenExpiresAt(), AuthDetails.GetRefreshToken(), AuthDetails.GetRefreshTokenExpiresAt());
+
+    // Signal login to anyone interested
+    events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
+    LoginEvent->AddString("UserId", AuthDetails.GetUserId());
+    events::EventSystem::Get().EnqueueEvent(LoginEvent);
+
+    SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
+
+    LoginStateResult Result { CurrentLoginState.get() };
+
+    csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback = [Callback, Result](csp::multiplayer::ErrorCode ErrCode)
+    {
+        if (ErrCode != csp::multiplayer::ErrorCode::None)
+        {
+            CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+
+            Callback(Result);
+            return;
+        }
+
+        Callback(Result);
+    };
+
+    StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(),
+        ConnectionCallback, Result, *LogSystem, CreateMultiplayerConnection);
 }
 
 void UserSystem::Logout(NullResultCallback Callback)
