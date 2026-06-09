@@ -23,6 +23,7 @@
 #include "Common/DateTime.h"
 
 #include <memory>
+#include <optional>
 
 namespace csp::services::generated::userservice
 {
@@ -101,6 +102,6 @@ private:
     csp::common::DateTime AccessTokenRefreshTime;
 };
 
-LoginStateData AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse);
+std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse);
 
 } // namespace csp::common

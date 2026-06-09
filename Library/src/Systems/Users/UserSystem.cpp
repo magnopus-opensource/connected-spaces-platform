@@ -840,7 +840,18 @@ void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bo
         return;
     }
 
-    auto Data = csp::common::AuthDtoToLoginStateData(&AuthDetails);
+    auto DataOpt = csp::common::AuthDtoToLoginStateData(&AuthDetails);
+
+    if (DataOpt.has_value() == false)
+    {
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+
+        return;
+    }
+
+    auto Data = *DataOpt;
 
     CurrentLoginState->SetLoginStateDataThreadSafe(Data);
 

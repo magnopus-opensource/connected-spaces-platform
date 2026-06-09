@@ -49,7 +49,7 @@ csp::common::SettingsCollection MakeSettingsCollection(const csp::services::gene
 namespace csp::common
 {
 
-LoginStateData AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse)
+std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse)
 {
     auto Data = LoginStateData();
 
@@ -88,7 +88,7 @@ LoginStateData AuthDtoToLoginStateData(const csp::services::generated::userservi
         CSP_LOG_FORMAT(
             LogLevel::Error, "AccessToken Expired: %s %s", AuthResponse->GetAccessToken().c_str(), AuthResponse->GetAccessTokenExpiresAt().c_str());
 
-        return Data;
+        return std::nullopt;
     }
 
     // Schedule a Refresh of the Token 5 minutes before it expires
@@ -100,12 +100,12 @@ LoginStateData AuthDtoToLoginStateData(const csp::services::generated::userservi
         CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", AuthResponse->GetRefreshToken().c_str(),
             AuthResponse->GetRefreshTokenExpiresAt().c_str());
 
-        return Data;
+        return std::nullopt;
     }
 
     Data.SetAccessTokenRefreshTime(RefreshTime);
 
-    return Data;
+    return std::make_optional<LoginStateData>(Data);
 }
 
 } // namespace csp::common
