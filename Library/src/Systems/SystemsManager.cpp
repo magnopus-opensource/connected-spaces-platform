@@ -133,7 +133,6 @@ csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::Re
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
     , MultiplayerConnection(nullptr)
-    , RealtimeEngine(nullptr)
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
