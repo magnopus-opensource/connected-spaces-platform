@@ -106,6 +106,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
         char Str[1024];
         snprintf(Str, 1024, "Bearer %s", AccessToken.c_str());
         request.set("Authorization", Str);
+        request.set("x-auth-token", Str);
 
         StopFlag = false;
 

@@ -146,6 +146,7 @@ void HttpPayload::RefreshBearerToken()
         char Str[1024];
         snprintf(Str, 1024, "Bearer %s", HttpAuth::GetAccessToken().c_str());
         AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(Str));
+        AddHeader(CSP_TEXT("x-auth-token"), CSP_TEXT(Str));
     }
 }
 

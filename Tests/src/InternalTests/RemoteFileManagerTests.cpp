@@ -102,6 +102,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
                     EXPECT_TRUE(HasAuthHeader(Headers, "Authorization"));
+                    EXPECT_TRUE(HasAuthHeader(Headers, "x-auth-token"));
                 }
             });
 
@@ -149,6 +150,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
                     EXPECT_TRUE(HasAuthHeader(Headers, "Authorization"));
+                    EXPECT_TRUE(HasAuthHeader(Headers, "x-auth-token"));
                 }
             });
 

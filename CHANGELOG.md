@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.44.0]
+
+- [OF-1880] chore: Add `x-auth-token` header in addition to `Authorization` by @mag-lt.
+  This is a preemptive change for upcoming CHS changes. We conservatively set this auth header in
+  addition to the existing `Authorization` header. This is done in all cases where we currently set
+  the existing header, with no additional refactoring (so this doesn't cover any additional cases
+  that weren't covered before, and deliberately minimises other code churn).
 
 ## [6.43.0]
 
