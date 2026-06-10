@@ -76,7 +76,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
                     // Verify that the Authorization header is present
-                    auto AuthIt = Headers.find("Authorization");
+                    auto AuthIt = Headers.find("x-auth-token");
                     ASSERT_NE(AuthIt, Headers.end()) << "Authorization header should be present when the user is logged in";
 
                     std::string BearerToken = AuthIt->second;
@@ -135,7 +135,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
                     EXPECT_EQ(Headers.size(), 2) << "Expected exactly two headers to be present in the request";
 
                     // Verify that the Authorization header is present
-                    auto AuthIt = Headers.find("Authorization");
+                    auto AuthIt = Headers.find("x-auth-token");
                     ASSERT_NE(AuthIt, Headers.end()) << "Authorization header should be present when the user is logged in";
 
                     std::string BearerToken = AuthIt->second;
