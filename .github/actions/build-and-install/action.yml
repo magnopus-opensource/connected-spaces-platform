@@ -41,12 +41,15 @@ runs:
       with:
         cache_packages: true
 
+    - name: Set CMake compatibility policy
+      shell: bash
+      run: |
+        echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> "$GITHUB_ENV"
+
     - name: Conan install
       shell: bash
       run: |
         set -eux
-
-        export CMAKE_POLICY_VERSION_MINIMUM="3.5"
 
         PROFILE_PATH="profiles/host/${{ inputs.host_profile }}"
 
@@ -59,10 +62,10 @@ runs:
 
         if [ -n "$OUTPUT_FOLDER" ]; then
           conan install . \
-          -of "$OUTPUT_FOLDER" \
-          -s build_type="${{ inputs.build_type }}" \
-          --build=missing \
-          --profile:host="$PROFILE_PATH"
+            -of "$OUTPUT_FOLDER" \
+            -s build_type="${{ inputs.build_type }}" \
+            --build=missing \
+            --profile:host="$PROFILE_PATH"
         else
           conan install . \
             -s build_type="${{ inputs.build_type }}" \
