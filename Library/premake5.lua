@@ -118,7 +118,8 @@ if not Project then
             "POCO_NET_NO_IPv6",
 			"LIBASYNC_STATIC",
             "LIBASYNC_CUSTOM_DEFAULT_SCHEDULER",
-            "FMT_HEADER_ONLY"
+            "FMT_HEADER_ONLY",
+            "USE_LEGACY_WRAPPER_GEN"
         }
 
         filter "platforms:not wasm"
