@@ -790,15 +790,16 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, Request, CreateMultiplayerConnection, Callback);
 }
 
-void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
+void UserSystem::FederatedLogin(
+    const csp::common::String& FederatedLoginDetailsJson, bool CreateMultiplayerConnection, LoginStateResultCallback Callback)
 {
     chs_user::AuthDto AuthDetails;
 
-    AuthDetails.FromJson(LoginDetailsJson);
+    AuthDetails.FromJson(FederatedLoginDetailsJson);
 
-    if (AuthDetails.GetAccessToken().IsEmpty())
+    if (!AuthDetails.HasAccessToken())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: AccessToken was not provided.");
+        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: AccessToken was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -807,9 +808,9 @@ void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bo
         return;
     }
 
-    if (AuthDetails.GetRefreshToken().IsEmpty())
+    if (!AuthDetails.HasRefreshToken())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: RefreshToken was not provided.");
+        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: RefreshToken was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -818,9 +819,9 @@ void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bo
         return;
     }
 
-    if (AuthDetails.GetUserId().IsEmpty())
+    if (!AuthDetails.HasUserId())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: UserId was not provided.");
+        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: UserId was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -829,9 +830,9 @@ void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bo
         return;
     }
 
-    if (AuthDetails.GetDeviceId().IsEmpty())
+    if (!AuthDetails.HasDeviceId())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::SetLoginDetails() - Parsing error: DeviceId was not provided.");
+        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: DeviceId was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -866,18 +867,21 @@ void UserSystem::SetLoginDetails(const csp::common::String& LoginDetailsJson, bo
     SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
 
     LoginStateResult Result { CurrentLoginState.get() };
+    Result.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback = [Callback, Result](csp::multiplayer::ErrorCode ErrCode)
+    csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
+        = [Callback, CurrentLoginState = this->CurrentLoginState](csp::multiplayer::ErrorCode ErrCode)
     {
         if (ErrCode != csp::multiplayer::ErrorCode::None)
         {
             CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
-
-            Callback(Result);
+            Callback(MakeInvalid<LoginStateResult>());
             return;
         }
 
-        Callback(Result);
+        LoginStateResult SuccessResult { CurrentLoginState.get() };
+        SuccessResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+        Callback(SuccessResult);
     };
 
     StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(),
@@ -1093,7 +1097,7 @@ void UserSystem::Ping(NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr PingResponseHandler
         = PingAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs_user::PingApi*>(PingAPI)->pingGet({}, PingResponseHandler);
+    static_cast<chs_user::PingApi*>(PingAPI)->pingGet({ }, PingResponseHandler);
 }
 
 void UserSystem::ResendVerificationEmail(
