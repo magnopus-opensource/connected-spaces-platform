@@ -524,6 +524,39 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTestBadJson)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Login to backend services in order to get the information to build an AuthDTO
+    // We're simulating a successful federated login here, it's all the same stuff at the end of the day.
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    // Assemble the AuthDTO
+    csp::services::generated::userservice::AuthDto AuthDetails;
+    AuthDetails.SetUserId(UserId.c_str());
+    AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
+    // Deliberately don't set the access token to trigger a failure
+    // AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
+    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
+    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+
+    const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
+
+    // Logout so we can login again
+    LogOut(UserSystem);
+
+    // Login with the "federated JSON response" - this will fail
+    auto [Result] = AWAIT_PRE(UserSystem, FederatedLogin, RequestPredicate, FederatedLoginDetailsJson, true);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Disconnected);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -573,7 +606,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTokenFailedTest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
-    RAIIMockLogger MockLogger {};
+    RAIIMockLogger MockLogger { };
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Fatal);
     csp::common::String Msg = "User authentication token refresh failed!";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, Msg)).Times(1);
@@ -626,7 +659,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
 
     SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Warning);
 
-    RAIIMockLogger MockLogger {};
+    RAIIMockLogger MockLogger { };
     csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(2);
 
@@ -1394,7 +1427,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     std::promise<csp::common::LoginState> SettingsPromise;
     std::future<csp::common::LoginState> SettingsFuture = SettingsPromise.get_future();
 
-    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, false, true, {},
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, false, true, { },
         [&SettingsPromise](const csp::systems::LoginStateResult& Result) { SettingsPromise.set_value(Result.GetLoginState()); });
 
     csp::common::LoginState LoginState = SettingsFuture.get();
