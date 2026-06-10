@@ -491,7 +491,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     // Log in
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.AccessTokenExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:10";
 
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
@@ -507,6 +507,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     std::this_thread::sleep_for(10s);
 
+    // Make any api call to cause refresh check to run.
     auto Profile = GetFullProfileByUserId(UserSystem, UserId);
 
     EXPECT_EQ(TokenHasBeenRefreshed, true);
