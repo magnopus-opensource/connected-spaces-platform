@@ -65,7 +65,7 @@ void RemoteFileManager::GetFile(
 
     if (BearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        Payload.AddHeader(CSP_TEXT("x-auth-token"), *BearerToken);
     }
 
     WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
@@ -80,7 +80,7 @@ void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::
 
     if (BearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        Payload.AddHeader(CSP_TEXT("x-auth-token"), *BearerToken);
     }
 
     WebClient->SendRequest(csp::web::ERequestVerb::HEAD, GetUri, Payload, ResponseHandler, csp::common::CancellationToken::Dummy());

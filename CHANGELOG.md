@@ -18,6 +18,12 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1878] feat: Add support for federated login. @MAG-AdamThorn & @MAG-mv
   A new federated login flow is being added that will allow client applications to authenticate directly with MCS. They will not be authenticating through CSP as they currently do. This creates a problem, as with our current login flows we create the LoginState object via `LoginState::OnResponse`. This data is then used to; refresh the token, for secure asset download, when starting the Multiplayer Connection among other things. To support federated login CSP has added a new `UserSystem::FederatedLogin()` method that clients can call to pass the base64 encoded AuthDto json object to CSP.
 
+- [OF-1880] feat: Add `x-auth-token` header to asset download methods by @mag-lt.
+  This ensures we set `x-auth-token` headers for the requests that are sent when calling the asset
+  download related methods on the `AssetSystem` (i.e. `DownloadAssetData`, `DownloadAssetDataEx`).
+  Most of the work for this was done in a prior release (6.34.0 as part of [OF-1844]), this just
+  updates the header set for auth (`x-auth-token` vs `Authorization` that we use for all other requests).
+
 ### 🔥 ❗Breaking Changes
 
 - [OB-5368] fix!: Guard access to LoginState data with a mutex. By @MAG-AdamThorn.
