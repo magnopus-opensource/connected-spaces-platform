@@ -3,16 +3,6 @@
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
 
-## [6.44.0]
-
-### 🔥 ❗Breaking Changes
-
-- [OF-1879] chore!: Rename `UserSystem::SetLoginDetails` -> `UserSystem::FederatedLogin` by @MAG-ElliotMorris
-
-### 🐛 🔨 Bug Fixes
-
-- [NT-0] fix: Fix issue where federated login results were not populating success/error values correctly by @MAG-ElliotMorris
-
 ## [6.43.0]
 
 ### 🍰 🙌 New Features
@@ -25,8 +15,8 @@ All notable changes to this project will be documented in this file. For compile
   practice a single element containing the full JSON array is expected. Equivalent constructors accepting
   `Array<ComponentSchema>` directly are also provided.
 
-- [OF-1878] feat: Add support for federated login. @MAG-AdamThorn.
-  A new federated login flow is being added that will allow client applications to authenticate directly with MCS. They will not be authenticating through CSP as they currently do. This creates a problem, as with our current login flows we create the LoginState object via `LoginState::OnResponse`. This data is then used to; refresh the token, for secure asset download, when starting the Multiplayer Connection among other things. To support federated login CSP has added a new `UserSystem::SetLoginDetails()` method that clients can call to pass the base64 encoded AuthDto json object to CSP.
+- [OF-1878] feat: Add support for federated login. @MAG-AdamThorn & @MAG-mv
+  A new federated login flow is being added that will allow client applications to authenticate directly with MCS. They will not be authenticating through CSP as they currently do. This creates a problem, as with our current login flows we create the LoginState object via `LoginState::OnResponse`. This data is then used to; refresh the token, for secure asset download, when starting the Multiplayer Connection among other things. To support federated login CSP has added a new `UserSystem::FederatedLogin()` method that clients can call to pass the base64 encoded AuthDto json object to CSP.
 
 ### 🔥 ❗Breaking Changes
 
