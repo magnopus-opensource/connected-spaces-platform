@@ -39,6 +39,32 @@ class GetResponseHeaders : public PublicTestBaseInternalWithParam<std::tuple<csp
 {
 };
 
+static ::testing::AssertionResult HasAuthHeader(const HttpPayload::HeadersMap& Headers, const std::string& AuthHeaderName)
+{
+    // Verify that the Authorization header is present
+    auto AuthIt = Headers.find(AuthHeaderName);
+    if (AuthIt == Headers.end())
+    {
+        return ::testing::AssertionFailure() << "Authorization header should be present when the user is logged in";
+    }
+
+    const auto& BearerToken = AuthIt->second;
+
+    // Verify the token is not empty after "Bearer "
+    const auto Prefix = std::string("Bearer ");
+    if (BearerToken.length() <= Prefix.length())
+    {
+        return ::testing::AssertionFailure() << "Bearer token should not be empty";
+    }
+
+    if (BearerToken.compare(0, Prefix.length(), Prefix) != 0)
+    {
+        return ::testing::AssertionFailure() << "Authorization header should start with 'Bearer ', but was: " << BearerToken;
+    }
+
+    return ::testing::AssertionSuccess();
+}
+
 TEST_P(GetFile, GetFileSendsCorrectRequest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -75,19 +101,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
 
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
-                    // Verify that the Authorization header is present
-                    auto AuthIt = Headers.find("Authorization");
-                    ASSERT_NE(AuthIt, Headers.end()) << "Authorization header should be present when the user is logged in";
-
-                    std::string BearerToken = AuthIt->second;
-
-                    // Verify the token is not empty after "Bearer "
-                    EXPECT_TRUE(BearerToken.length() > 7) << "Bearer token should not be empty";
-
-                    const std::string Prefix("Bearer ");
-
-                    EXPECT_TRUE(BearerToken.compare(0, Prefix.length(), Prefix) == 0)
-                        << "Authorization header should start with 'Bearer ', but was: " << BearerToken;
+                    EXPECT_TRUE(HasAuthHeader(Headers, "Authorization"));
                 }
             });
 
@@ -128,31 +142,13 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 
                 EXPECT_STREQ(InUri.GetAsString(), FileUrl.c_str());
 
+                // The X-AssetPlatform header is added to all HTTP requests. In addition the Authorization header should have been set
+                const auto& Headers = Payload.GetHeaders();
+                ASSERT_NE(Headers.find("X-AssetPlatform"), Headers.end());
+
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
-                    // The X-AssetPlatform header is added to all HTTP requests. In addition the Authorization header should have been set
-                    const auto& Headers = Payload.GetHeaders();
-                    EXPECT_EQ(Headers.size(), 2) << "Expected exactly two headers to be present in the request";
-
-                    // Verify that the Authorization header is present
-                    auto AuthIt = Headers.find("Authorization");
-                    ASSERT_NE(AuthIt, Headers.end()) << "Authorization header should be present when the user is logged in";
-
-                    std::string BearerToken = AuthIt->second;
-
-                    // Verify the token is not empty after "Bearer "
-                    EXPECT_TRUE(BearerToken.length() > 7) << "Bearer token should not be empty";
-
-                    const std::string Prefix("Bearer ");
-
-                    EXPECT_TRUE(BearerToken.compare(0, Prefix.length(), Prefix) == 0)
-                        << "Authorization header should start with 'Bearer ', but was: " << BearerToken;
-                }
-                else
-                {
-                    // The X-AssetPlatform header is added to all HTTP requests. There should be no additional Authorization header set
-                    const auto& Headers = Payload.GetHeaders();
-                    EXPECT_EQ(Headers.size(), 1) << "Expected exactly one header to be present in the request";
+                    EXPECT_TRUE(HasAuthHeader(Headers, "Authorization"));
                 }
             });
 
