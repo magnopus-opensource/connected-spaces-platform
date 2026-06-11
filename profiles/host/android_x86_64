@@ -1,0 +1,16 @@
+[settings]
+os=Android
+os.api_level=27
+arch=x86_64
+compiler=clang
+compiler.cppstd=17
+compiler.libcxx=c++_static
+compiler.version=17
+
+
+[tool_requires]
+ninja/1.11.1
+android-ndk/r29
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja
