@@ -207,8 +207,8 @@ public:
     /// @brief Connect with CSP after a federated login has been completed, provided the token returned from a federated login service.
     ///        This does not actually login to backend services, as this is managed externally by the federated login page.
     ///        Rather, this sets up CSP's auth state, and creates the multiplayer connection if specified to do so.
-    /// @param FederatedLoginDetailsJson : Encoded login details JSON from the Magnopus federated login service. Laid out according to the Magnopus
-    /// AuthDTO format.
+    /// @param FederatedLoginDetailsJson : Login details JSON from the Magnopus federated login service. Laid out according to the Magnopus
+    /// AuthDTO format. Note that if you get this string from services, it will likely be base64 encoded, and you will need to decode it first.
     /// @param CreateMultiplayerConnection : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
     /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
