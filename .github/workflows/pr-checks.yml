@@ -126,3 +126,46 @@ jobs:
           output_folder: build/emscripten-${{ matrix.config.preset_prefix }}
           build_folder: build/emscripten-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
           install_prefix: install/emscripten/${{ matrix.config.preset_prefix }}
+  
+  build-android:
+    name: Build android ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+        linkage:
+          - name: static
+            shared: false
+
+          - name: shared
+            shared: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: android_arm
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          output_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/android/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
