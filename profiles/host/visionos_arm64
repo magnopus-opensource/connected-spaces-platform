@@ -1,0 +1,14 @@
+[settings]
+os=visionOS
+os.sdk=xros
+os.version=1.0
+arch=armv8
+compiler=apple-clang
+compiler.version=15
+compiler.cppstd=17
+compiler.libcxx=libc++
+
+[buildenv]
+# Manually specify the OpenSSL configure target used by the Conan recipe,
+# as the OpenSSL 1.1 recipe does not fully support visionOS.
+CONAN_OPENSSL_CONFIGURATION=ios64-xcrun
