@@ -715,7 +715,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
     const auto& EntityOneComponent = EntityOne.SchemaComponents.front();
     EXPECT_EQ(EntityOneComponent.GetProperty(0), "1");
 
-    auto EntityTwo = Fixture.MakeEntity("Test Entity",
+    auto EntityTwo = Fixture.MakeEntity("Test Entity 2",
         {
             TestFixture::Entity::ComponentCreationArgs {
                 Schema::TypeIdType { 123 },
@@ -743,6 +743,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
         const example = ThisEntity.getExampleComponents()[0];
 
         assert(example.stringProperty === "1", "first entity remains unchanged");
+    )"));
+
+    EXPECT_TRUE(Fixture.InvokeScript(EntityTwo, R"(
+        import { assert } from "CSPTest";
+
+        const otherEntity = TheEntitySystem.getEntityByName("Test Entity");
+        const example = otherEntity.getExampleComponents()[0];
+
+        assert(example.stringProperty === "1", "first entity when looked up dynamically on second entity returns correct component state ");
     )"));
 }
 
