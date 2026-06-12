@@ -1,0 +1,9 @@
+[settings]
+os=iOS
+arch=armv8
+compiler=apple-clang
+compiler.cppstd=17
+compiler.version=15
+compiler.libcxx=libc++
+os.version=17.0
+os.sdk=iphoneos
