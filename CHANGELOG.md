@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.44.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5522] fix: Setup entity script component accessors to use correct instance. @mag-lt.
+  This addresses a regression introduced in 6.38.0 made in the context of binding components created w/ Schemas into scripts automatically.
+  Those changes accidentally made it so component accessors called on entities that are looked up by name or id returned the wrong information
+  i.e. they returned the information of the entity that owns the script instead.
 
 ## [6.43.0]
 
