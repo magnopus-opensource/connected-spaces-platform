@@ -132,6 +132,11 @@ target_link_libraries(csp-lib
     csp-quickjs
 )
 
+if(ANDROID)
+  # Link Android's native log library for __android_log_print
+  target_link_libraries(csp-lib PRIVATE log)
+endif()
+
 # Only include POCO for non-Emscripten builds
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   target_link_libraries(csp-lib
