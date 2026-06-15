@@ -101,7 +101,7 @@ template <> struct formatter<csp::web::HttpRequest> : formatter<std::string_view
             rapidjson::ParseResult ok = RequestJson.Parse(RequestPayload);
             if (!ok)
             {
-                RequestBody.Append(fmt::format("\tFailed to parse request body as JSON: {}\n", rapidjson::GetParseError_En(ok.Code())).c_str());
+                RequestBody.Append(RequestPayload);
             }
             else if (RequestJson.IsObject())
             {
