@@ -75,6 +75,12 @@ namespace
         UnlockFuncValueT _UnlockFunc;
     };
 
+    template <typename T> qjs::Value GetClassPrototype(qjs::Context& Context)
+    {
+        const auto ClassId = qjs::js_traits<std::shared_ptr<T>>::QJSClassId;
+        return qjs::Value { Context.ctx, JS_GetClassProto(Context.ctx, ClassId) };
+    }
+
     // Creates a JS prototype for a specific component type, baking in specialized accessors
     // that map directly to the correctly typed proxy property.
     template <typename ScriptInterfaceType = ComponentScriptInterface>
@@ -82,8 +88,7 @@ namespace
     {
         static_assert(std::is_base_of_v<ComponentScriptInterface, ScriptInterfaceType>);
 
-        const auto ClassId = qjs::js_traits<std::shared_ptr<ScriptInterfaceType>>::QJSClassId;
-        const auto BasePrototype = qjs::Value { Context.ctx, JS_GetClassProto(Context.ctx, ClassId) };
+        const auto BasePrototype = GetClassPrototype<ScriptInterfaceType>(Context);
         const auto SchemaDerivedPrototype = qjs::Value { Context.ctx, JS_NewObjectProto(Context.ctx, BasePrototype.v) };
 
         auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
@@ -486,7 +491,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
 
-    const auto RegisterDynamicComponentGetters = [this, Context, ContextId](auto&& ClassRegistrar) -> decltype(auto)
+    const auto RegisterDynamicComponentGetters = [this, Context](auto Proto)
     {
         for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
         {
@@ -495,23 +500,24 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
                 const auto& ComponentScriptName = Schema.Name;
                 const auto GetterName = fmt::format("get{}Components", ComponentScriptName.c_str());
 
-                ClassRegistrar.fun(GetterName.c_str(),
-                    [this, Schema = Schema, Context, ContextId]() -> std::vector<qjs::Value>
-                    {
-                        if (auto* Entity = EntitySystem->FindSpaceEntityById(ContextId))
-                        {
-                            return SchemaCache->GetComponents(*Context, *Entity->GetScriptInterface(), Schema);
-                        }
+                const auto GetterImpl
+                    = [this, Schema, Context](EntityScriptInterface* Entity) { return SchemaCache->GetComponents(*Context, *Entity, Schema); };
 
-                        return {};
-                    });
+                const auto Getter
+                    = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int /*Magic*/, JSValue* FnData) -> JSValue
+                {
+                    const auto GetterImpl = FnData[0];
+                    return JS_Call(Context, GetterImpl, JS_UNDEFINED, 1, &This);
+                };
+
+                auto FnData = Context->newValue(GetterImpl);
+
+                JS_SetPropertyStr(Context->ctx, Proto.v, GetterName.c_str(), JS_NewCFunctionData(Context->ctx, Getter, 0, 0, 1, &FnData.v));
             }
         }
-
-        return std::forward<decltype(ClassRegistrar)>(ClassRegistrar);
     };
 
-    RegisterDynamicComponentGetters(Module->class_<EntityScriptInterface>("Entity"))
+    Module->class_<EntityScriptInterface>("Entity")
         .constructor<>()
         .fun<&EntityScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&EntityScriptInterface::SubscribeToMessage>("subscribeToMessage")
@@ -530,6 +536,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&EntityScriptInterface::GetId>("id")
         .property<&EntityScriptInterface::GetName>("name")
         .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
+
+    RegisterDynamicComponentGetters(GetClassPrototype<EntityScriptInterface>(*Context));
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()
