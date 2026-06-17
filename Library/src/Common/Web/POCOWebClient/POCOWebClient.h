@@ -35,7 +35,6 @@ struct CookieData
 {
     std::string Name;
     std::string Value;
-
     std::string Domain;
 };
 

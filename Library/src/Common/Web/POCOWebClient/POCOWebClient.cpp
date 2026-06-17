@@ -222,7 +222,7 @@ void POCOWebClient::Send(HttpRequest& Request)
     }
 }
 
-void POCOWebClient::AddCookie(Poco::Net::HTTPRequest & PocoRequest, const std::string& Domain)
+void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::string& Domain)
 {
     {
         std::scoped_lock Lock(CookiesMutex);
