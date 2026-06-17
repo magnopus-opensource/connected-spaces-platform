@@ -26,7 +26,7 @@ using namespace std::chrono_literals;
 
 #define STRIP(__Type_) std::remove_const_t<std::remove_reference_t<__Type_>>
 
-constexpr std::chrono::duration<int> DefaultTimeout = 40s;
+constexpr std::chrono::duration<int> DefaultTimeout = 60s;
 
 class timeout_exception : public std::runtime_error
 {
