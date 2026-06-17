@@ -242,6 +242,9 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::st
 
         for (const auto& Cookie : *Cookies)
         {
+            // Only send cookies whose domain scope matches the request host.
+            // This prevents cookies set by one endpoint from being sent to
+            // another endpoint that did not expect them.
             if (Domain == Cookie.Domain)
             {
                 CookieCollection.add(Cookie.Name, Cookie.Value);
