@@ -2216,7 +2216,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
         auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-        EXPECT_EQ(Result.GetHttpResultCode(), 403);
+        EXPECT_EQ(Result.GetHttpResultCode(), 404);
     }
 
     // Log out
