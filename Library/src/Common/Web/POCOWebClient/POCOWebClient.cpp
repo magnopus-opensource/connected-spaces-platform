@@ -99,7 +99,7 @@ bool POCOWebClient::PrepareAndSendRequest(
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
-    AddCookie(PocoRequest);
+    AddCookie(PocoRequest, ClientSession->getHost());
 
     switch (SendBodyMode)
     {
@@ -144,7 +144,14 @@ std::istream& POCOWebClient::ReceiveResponse(Poco::Net::HTTPClientSession* Clien
 
     {
         std::scoped_lock Lock(CookiesMutex);
-        PocoResponse.getCookies(*Cookies);
+
+        std::vector<Poco::Net::HTTPCookie> ResponseCookies;
+        PocoResponse.getCookies(ResponseCookies);
+
+        for (const auto& ResponseCookie : ResponseCookies)
+        {
+            Cookies->push_back(CookieData { ResponseCookie.getName(), ResponseCookie.getValue(), ClientSession->getHost() });
+        }
     }
 
     return ResponseStream;
@@ -215,7 +222,7 @@ void POCOWebClient::Send(HttpRequest& Request)
     }
 }
 
-void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
+void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::string& Domain)
 {
     {
         std::scoped_lock Lock(CookiesMutex);
@@ -233,9 +240,15 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
     {
         std::scoped_lock Lock(CookiesMutex);
 
-        for (const Poco::Net::HTTPCookie& Cookie : *Cookies)
+        for (const auto& Cookie : *Cookies)
         {
-            CookieCollection.add(Cookie.getName(), Cookie.getValue());
+            // Only send cookies whose domain scope matches the request host.
+            // This prevents cookies set by one endpoint from being sent to
+            // another endpoint that did not expect them.
+            if (Domain == Cookie.Domain)
+            {
+                CookieCollection.add(Cookie.Name, Cookie.Value);
+            }
         }
     }
 

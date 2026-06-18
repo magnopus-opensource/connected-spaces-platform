@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file. For compile
   Those changes accidentally made it so component accessors called on entities that are looked up by name or id returned the wrong information
   i.e. they returned the information of the entity that owns the script instead.
 
+- [NT-0] fix: Fix Download asset calls failing. By @MAG-mv
+  Cookies are now handled better by only sending them to hosts that match. DownloadAsset is using a different host than other calls,
+  so sending cookies to this endpoint was causing calls to be rejected.
+
 ## [6.43.0]
 
 ### 🍰 🙌 New Features

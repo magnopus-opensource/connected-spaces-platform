@@ -31,6 +31,14 @@ class LogSystem;
 namespace csp::web
 {
 
+struct CookieData
+{
+    std::string Name;
+    std::string Value;
+    std::string Domain;
+};
+
+
 class PocoPrivateKeyHandler : public Poco::Net::PrivateKeyPassphraseHandler
 {
 public:
@@ -67,7 +75,7 @@ protected:
     void Send(HttpRequest& Request) override;
 
     void Get(HttpRequest& Request);
-    void AddCookie(Poco::Net::HTTPRequest& PocoRequest);
+    void AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::string& Domain);
     void Post(HttpRequest& Request);
     void Put(HttpRequest& Request);
     void Delete(HttpRequest& Request);
@@ -81,7 +89,7 @@ protected:
 
     Poco::Net::Context::Ptr PocoContext;
 
-    std::vector<Poco::Net::HTTPCookie>* Cookies;
+    std::vector<CookieData>* Cookies;
     std::mutex CookiesMutex;
 
 private:
