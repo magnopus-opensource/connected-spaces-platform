@@ -261,6 +261,14 @@ configure_file(
     ${CSP_INCLUDE_DIR}/CSP/version.h
 )
 
+# Legacy Emscripten wrapper ---------------------------------------
+
+  option(CSP_BUILD_LEGACY_EMSCRIPTEN "Build legacy emscripten project" OFF)
+
+  if(CSP_BUILD_LEGACY_EMSCRIPTEN AND EMSCRIPTEN)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/LegacyEmscriptenWrapper)
+  endif()
+
 # Install ---------------------------------------------------------
 
 include(GNUInstallDirs)
