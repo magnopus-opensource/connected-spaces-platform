@@ -19,20 +19,17 @@ jobs:
   create-binding-branch:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.DOTNET_REPO_ACCESS_TOKEN }}
-      REPO: magnopus-opensource/connected-spaces-platform-unity
-      BRANCH: csp-development-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+      # The usual pattern to support both PR and workflow_dispatch refs
+      BRANCH_TO: csp-development-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
     steps:
-      # We want this job to fail for all errors except when the branch already exists.
-      # Easiest to just not try to branch in that case, rather than doing inline error management.
-      - run: |
-          if gh api "repos/$REPO/git/ref/heads/$BRANCH" --silent; then
-            echo "$BRANCH already exists, reusing it."
-          else
-            echo "Creating $BRANCH from csp-development."
-            gh api "repos/$REPO/git/refs" -f ref="refs/heads/$BRANCH" \
-              -f sha="$(gh api "repos/$REPO/git/ref/heads/csp-development" -q .object.sha)"
-          fi
+      - uses: GuillaumeFalourd/create-other-repo-branch-action@v1.5
+        with:
+          repository_owner: magnopus-opensource
+          repository_name: connected-spaces-platform-unity
+          new_branch_name: $BRANCH_TO
+          new_branch_ref: csp-development
+          access_token: ${{ secrets.DOTNET_REPO_ACCESS_TOKEN}}
+          ignore_branch_exists: true
 
   # Leveraging the fact that github makes a "pull/number/head" ref for PRs.
   # Doing it this way means that PRs from both branches and forks will work.
