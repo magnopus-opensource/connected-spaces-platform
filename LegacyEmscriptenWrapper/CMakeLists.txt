@@ -1,3 +1,21 @@
+# Temporary project to support existing CSP WebAssembly builds for JavaScript/TypeScript.
+
+# The new binding repository separates JavaScript binding generation from the
+# csp static library generation.
+
+# Until the binding project is complete, this target creates a JavaScript
+# "executable" that links against symbols from the csp-lib static library and
+# produces the WebAssembly/JavaScript output.
+
+# We still need to generate typescript bindings, as emscripten only produces .wasm and .js artifacts.
+# Before running the CMake build step, generate the wrapper files with:
+#
+#   python3 Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
+#
+# Dummy.cpp is required to avoid the CMake configure-time error:
+#
+#   No SOURCES given to target
+
 cmake_minimum_required(VERSION 3.31)
 
 project(LegacyEmscriptenWrapper
