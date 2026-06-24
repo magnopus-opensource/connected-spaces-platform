@@ -180,7 +180,7 @@ private:
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    Material* Material;
+    Material* Material = nullptr;
 };
 
 /// @ingroup Asset System

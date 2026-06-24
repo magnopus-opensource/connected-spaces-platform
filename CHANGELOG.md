@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.45.0]
+
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Initialize pointer value in material result to nullptr. By @MAG-ElliotMorris
+
 ## [6.44.0]
 
 ### 🐛 🔨 Bug Fixes
