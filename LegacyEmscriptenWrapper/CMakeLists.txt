@@ -16,6 +16,10 @@
 #
 #   No SOURCES given to target
 
+if(NOT EMSCRIPTEN)
+    message(FATAL_ERROR "This project only supports Emscripten builds.")
+endif()
+
 cmake_minimum_required(VERSION 3.31)
 
 project(LegacyEmscriptenWrapper
@@ -30,49 +34,47 @@ target_link_libraries(csp-emscripten PRIVATE
 
 option(WASM_WITH_NODE "Build wasm target with Node.js environment support" OFF)
 
-if(EMSCRIPTEN)
-    set_target_properties(csp-emscripten PROPERTIES
-        OUTPUT_NAME "ConnectedSpacesPlatform_WASM"
-        SUFFIX ".js"
-    )
+set_target_properties(csp-emscripten PROPERTIES
+    OUTPUT_NAME "ConnectedSpacesPlatform_WASM"
+    SUFFIX ".js"
+)
 
-    target_compile_options(csp-emscripten PRIVATE
-        --no-entry
-        -pthread
-        -fwasm-exceptions
-        -fno-rtti
-        -Wno-error=deprecated-declarations
-        -Wno-braced-scalar-init
-        -Wno-missing-field-initializers
-        -Wno-ignored-qualifiers
-        $<$<CONFIG:Debug>:-gdwarf-5>
-        $<$<CONFIG:Debug>:-gseparate-dwarf>
-        $<$<CONFIG:Release>:-Os>
-        $<$<CONFIG:Release>:-flto>
-    )
+target_compile_options(csp-emscripten PRIVATE
+    --no-entry
+    -pthread
+    -fwasm-exceptions
+    -fno-rtti
+    -Wno-error=deprecated-declarations
+    -Wno-braced-scalar-init
+    -Wno-missing-field-initializers
+    -Wno-ignored-qualifiers
+    $<$<CONFIG:Debug>:-gdwarf-5>
+    $<$<CONFIG:Debug>:-gseparate-dwarf>
+    $<$<CONFIG:Release>:-Os>
+    $<$<CONFIG:Release>:-flto>
+)
 
-    target_link_options(csp-emscripten PRIVATE
-        -pthread
-        -sUSE_PTHREADS=1
-        -fwasm-exceptions
-        -sPTHREAD_POOL_SIZE_STRICT=0
-        "SHELL:-sEXPORTED_FUNCTIONS=['_malloc','_free']"
-        -sEXPORT_ES6=1
-        -sMODULARIZE=1
-        -sEXPORT_NAME=createModule
-        -sFETCH
-        -sALLOW_TABLE_GROWTH=1
-        -sWASM_BIGINT
-        -sALLOW_MEMORY_GROWTH=1
-        -sINITIAL_MEMORY=33554432
-        -sMAXIMUM_MEMORY=1073741824
-        "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','setValue','getValue','addFunction','removeFunction','UTF8ToString','stringToUTF8','lengthBytesUTF8']"
-        "SHELL:-sINCOMING_MODULE_JS_API=['buffer','fetchSettings','instantiateWasm','locateFile','mainScriptUrlOrBlob','wasmMemory']"
-        --no-entry
-        $<$<CONFIG:Debug>:-gdwarf-5>
-        $<$<CONFIG:Debug>:-gseparate-dwarf>
-        $<$<CONFIG:Debug>:-sSEPARATE_DWARF_URL=../Debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm>
-        $<$<CONFIG:Release>:-Os>
-        $<$<CONFIG:Release>:-flto>
-    )
-endif()
+target_link_options(csp-emscripten PRIVATE
+    -pthread
+    -sUSE_PTHREADS=1
+    -fwasm-exceptions
+    -sPTHREAD_POOL_SIZE_STRICT=0
+    "SHELL:-sEXPORTED_FUNCTIONS=['_malloc','_free']"
+    -sEXPORT_ES6=1
+    -sMODULARIZE=1
+    -sEXPORT_NAME=createModule
+    -sFETCH
+    -sALLOW_TABLE_GROWTH=1
+    -sWASM_BIGINT
+    -sALLOW_MEMORY_GROWTH=1
+    -sINITIAL_MEMORY=33554432
+    -sMAXIMUM_MEMORY=1073741824
+    "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','setValue','getValue','addFunction','removeFunction','UTF8ToString','stringToUTF8','lengthBytesUTF8']"
+    "SHELL:-sINCOMING_MODULE_JS_API=['buffer','fetchSettings','instantiateWasm','locateFile','mainScriptUrlOrBlob','wasmMemory']"
+    --no-entry
+    $<$<CONFIG:Debug>:-gdwarf-5>
+    $<$<CONFIG:Debug>:-gseparate-dwarf>
+    $<$<CONFIG:Debug>:-sSEPARATE_DWARF_URL=../Debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm>
+    $<$<CONFIG:Release>:-Os>
+    $<$<CONFIG:Release>:-flto>
+)
