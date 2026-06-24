@@ -1,12 +1,35 @@
 name: .NET Interop Binding Integration
 
 # Run a fully integrated build of the unity bindings, based on the CSP build from the current branch.
-# If breaking changes are made, push directly to the "csp-development" branch in the connected-spaces-platform-unity repo, which represents the breaking changeset of the next release.
+# Tests run against a dedicated branch in the connected-spaces-platform-unity repo, forked from
+# "csp-development" and named after the branch that triggered the run, e.g. "csp-development-my-branch".
+# If breaking changes are made, push to that branch to unblock these tests, then manually merge it
+# back into "csp-development" once the CSP change lands.
+# This workflow requires token permissions to create a branch, so will not run from forks.
+
 on:
   pull_request:
   workflow_dispatch:
 
 jobs:
+
+  # Creates the per-branch binding branch from csp-development, or reuses it if it already
+  # exists (so commits contributors have pushed to it survive re-runs). Any other failure
+  # (e.g. bad credentials, missing base branch) fails the job so it isn't silently swallowed.
+  create-binding-branch:
+    runs-on: ubuntu-latest
+    env:
+      # The usual pattern to support both PR and workflow_dispatch refs
+      BRANCH_TO: csp-development-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+    steps:
+      - uses: GuillaumeFalourd/create-other-repo-branch-action@v1.5
+        with:
+          repository_owner: magnopus-opensource
+          repository_name: connected-spaces-platform-unity
+          new_branch_name: ${{env.BRANCH_TO}} # Need to expand this here because there's a minor quoting bug in the action, trivial.
+          new_branch_ref: csp-development
+          access_token: ${{ secrets.DOTNET_REPO_ACCESS_TOKEN}}
+          ignore_branch_exists: true
 
   # Leveraging the fact that github makes a "pull/number/head" ref for PRs.
   # Doing it this way means that PRs from both branches and forks will work.
@@ -14,6 +37,7 @@ jobs:
   # it will still be in untrusted mode, and only have read only capabilities.
   # Workflow_dispatch triggers should fall through to use github.ref_name.
   run-unity-interop-layer-integration:
+    needs: create-binding-branch
     uses: magnopus-opensource/connected-spaces-platform-unity/.github/workflows/build-desktop.yml@csp-development
     with:
       unity_ext_matrix: '[false]'
@@ -22,5 +46,4 @@ jobs:
         ${{ github.event_name == 'pull_request'
             && format('refs/pull/{0}/head', github.event.pull_request.number)
             || github.ref_name }}
-      binding_repo_branch: csp-development
-
+      binding_repo_branch: csp-development-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
