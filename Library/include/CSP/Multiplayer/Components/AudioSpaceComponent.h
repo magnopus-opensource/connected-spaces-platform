@@ -68,6 +68,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates an audio space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new AudioSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<AudioSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
@@ -149,6 +157,9 @@ public:
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
     /// @}
+
+private:
+    AudioSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

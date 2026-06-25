@@ -54,7 +54,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& SplineSpaceComponent::GetSchema() { return Schema; }
 
 SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : SplineSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<SplineSpaceComponent> SplineSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(SplineSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<SplineSpaceComponent>(new SplineSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+SplineSpaceComponent::SplineSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }

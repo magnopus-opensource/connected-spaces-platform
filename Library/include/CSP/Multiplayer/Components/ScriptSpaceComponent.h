@@ -57,6 +57,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates a script space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ScriptSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<ScriptSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Retrieves the source of the script of this script component.
     /// @return The script source of this script component.
     const csp::common::String& GetScriptSource() const;
@@ -84,6 +92,9 @@ public:
 protected:
     void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
     void OnRemove() override;
+
+private:
+    ScriptSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

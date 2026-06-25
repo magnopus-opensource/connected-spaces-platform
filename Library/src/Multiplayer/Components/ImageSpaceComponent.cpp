@@ -90,7 +90,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ImageSpaceComponent::GetSchema() { return Schema; }
 
 ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ImageSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ImageSpaceComponent> ImageSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ImageSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ImageSpaceComponent>(new ImageSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+ImageSpaceComponent::ImageSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

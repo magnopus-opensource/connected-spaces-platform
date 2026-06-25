@@ -111,7 +111,24 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& CinematicCameraSpaceComponent::GetSchema() { return Schema; }
 
 CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : CinematicCameraSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<CinematicCameraSpaceComponent> CinematicCameraSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(CinematicCameraSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<CinematicCameraSpaceComponent>(new CinematicCameraSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CinematicCameraSpaceComponentScriptInterface(this));
 }

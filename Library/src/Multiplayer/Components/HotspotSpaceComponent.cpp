@@ -72,7 +72,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& HotspotSpaceComponent::GetSchema() { return Schema; }
 
 HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : HotspotSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<HotspotSpaceComponent> HotspotSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(HotspotSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<HotspotSpaceComponent>(new HotspotSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+HotspotSpaceComponent::HotspotSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }

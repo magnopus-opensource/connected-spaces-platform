@@ -104,7 +104,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ConversationSpaceComponent::GetSchema() { return Schema; }
 
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ConversationSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ConversationSpaceComponent> ConversationSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ConversationSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ConversationSpaceComponent>(new ConversationSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+ConversationSpaceComponent::ConversationSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

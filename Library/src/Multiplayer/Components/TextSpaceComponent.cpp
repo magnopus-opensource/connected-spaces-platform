@@ -95,7 +95,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& TextSpaceComponent::GetSchema() { return Schema; }
 
 TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : TextSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<TextSpaceComponent> TextSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(TextSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<TextSpaceComponent>(new TextSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+TextSpaceComponent::TextSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

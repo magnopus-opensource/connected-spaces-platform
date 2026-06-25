@@ -67,6 +67,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates a Gaussian splat space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new GaussianSplatSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<GaussianSplatSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Gets the ID of the asset associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
     /// @return The ID of the asset associated with this component.
@@ -139,6 +147,9 @@ public:
     /// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
     /// Defaults to 1,1,1.
     void SetTint(const csp::common::Vector3& TintValue);
+
+private:
+    GaussianSplatSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

@@ -76,7 +76,24 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& FiducialMarkerSpaceComponent::GetSchema() { return Schema; }
 
 FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : FiducialMarkerSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<FiducialMarkerSpaceComponent> FiducialMarkerSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(FiducialMarkerSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<FiducialMarkerSpaceComponent>(new FiducialMarkerSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

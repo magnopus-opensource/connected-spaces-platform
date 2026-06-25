@@ -73,6 +73,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates a collision space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new CollisionSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<CollisionSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// \addtogroup ITransformComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
@@ -170,6 +178,9 @@ public:
     /// @copydoc IEnableableComponent::SetIsEnabled()
     void SetIsEnabled(bool Value) override;
     /// @}
+
+private:
+    CollisionSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

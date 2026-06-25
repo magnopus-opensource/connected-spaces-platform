@@ -81,7 +81,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& GaussianSplatSpaceComponent::GetSchema() { return Schema; }
 
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : GaussianSplatSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<GaussianSplatSpaceComponent> GaussianSplatSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(GaussianSplatSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<GaussianSplatSpaceComponent>(new GaussianSplatSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

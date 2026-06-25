@@ -98,7 +98,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& StaticModelSpaceComponent::GetSchema() { return Schema; }
 
 StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : StaticModelSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<StaticModelSpaceComponent> StaticModelSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(StaticModelSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<StaticModelSpaceComponent>(new StaticModelSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+StaticModelSpaceComponent::StaticModelSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

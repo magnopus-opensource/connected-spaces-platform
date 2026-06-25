@@ -54,6 +54,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates a fiducial marker space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new FiducialMarkerSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<FiducialMarkerSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Gets the name of this fiducial marker space component.
     /// @return The name of this fiducial marker space component.
     [[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]] const csp::common::String& GetName() const;
@@ -115,6 +123,9 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+private:
+    FiducialMarkerSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

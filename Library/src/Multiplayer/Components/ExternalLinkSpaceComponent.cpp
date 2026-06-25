@@ -80,7 +80,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ExternalLinkSpaceComponent::GetSchema() { return Schema; }
 
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ExternalLinkSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ExternalLinkSpaceComponent> ExternalLinkSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ExternalLinkSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ExternalLinkSpaceComponent>(new ExternalLinkSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

@@ -48,7 +48,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }
 
 ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ScriptSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ScriptSpaceComponent> ScriptSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ScriptSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ScriptSpaceComponent>(new ScriptSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+ScriptSpaceComponent::ScriptSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     Parent->GetScript().SetScriptSpaceComponent(this);
 }

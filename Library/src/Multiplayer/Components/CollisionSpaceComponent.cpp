@@ -86,7 +86,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }
 
 CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : CollisionSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<CollisionSpaceComponent> CollisionSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(CollisionSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<CollisionSpaceComponent>(new CollisionSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+CollisionSpaceComponent::CollisionSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }

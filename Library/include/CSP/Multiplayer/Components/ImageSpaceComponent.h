@@ -66,6 +66,14 @@ public:
     /// @param Parent The Space entity that owns this component.
     ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates an image space component using the provided schema if it is compatible with the built-in schema.
+    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ImageSpaceComponent if the schema is compatible, nullptr otherwise.
+    CSP_NO_EXPORT static std::unique_ptr<ImageSpaceComponent> TryMake(
+        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Gets the name of this image space component.
     /// @return The name of this image space component.
     [[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]] const csp::common::String& GetName() const;
@@ -151,6 +159,9 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+private:
+    ImageSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

@@ -40,7 +40,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& CustomSpaceComponent::GetSchema() { return Schema; }
 
 CustomSpaceComponent::CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent) //, NumProperties(2)
+    : CustomSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<CustomSpaceComponent> CustomSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(CustomSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<CustomSpaceComponent>(new CustomSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+CustomSpaceComponent::CustomSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CustomSpaceComponentScriptInterface(this));
 }

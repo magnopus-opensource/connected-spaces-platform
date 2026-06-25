@@ -98,7 +98,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& AudioSpaceComponent::GetSchema() { return Schema; }
 
 AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AudioSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AudioSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AudioSpaceComponent>(new AudioSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
     SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }

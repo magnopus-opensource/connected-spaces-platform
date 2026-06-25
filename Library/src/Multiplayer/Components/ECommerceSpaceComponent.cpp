@@ -41,7 +41,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
 
 ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ECommerceSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ECommerceSpaceComponent> ECommerceSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ECommerceSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ECommerceSpaceComponent>(new ECommerceSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+ECommerceSpaceComponent::ECommerceSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 

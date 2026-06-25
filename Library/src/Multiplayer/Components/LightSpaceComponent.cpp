@@ -110,7 +110,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& LightSpaceComponent::GetSchema() { return Schema; }
 
 LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : LightSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<LightSpaceComponent> LightSpaceComponent::TryMake(
+    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(LightSpaceComponent::GetSchema(), UpdatedSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<LightSpaceComponent>(new LightSpaceComponent(UpdatedSchema, LogSystem, Parent));
+}
+
+LightSpaceComponent::LightSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(UpdatedSchema, LogSystem, Parent)
 {
 }
 
