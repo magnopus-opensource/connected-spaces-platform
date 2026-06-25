@@ -65,7 +65,10 @@ public:
         : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised())
         , Engine(LogSystem, *ScriptSystem, Schemas)
     {
+        InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
     }
+
+    ~TestFixture() { csp::CSPFoundation::Shutdown(); }
 
     csp::multiplayer::SpaceEntity* MakeEntity(const csp::common::String& Name)
     {
