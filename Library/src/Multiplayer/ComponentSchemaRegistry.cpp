@@ -68,11 +68,6 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
         }
     };
 
-    for (const auto& Schema : AdditionalComponents)
-    {
-        AddSchema(Schema);
-    }
-
     AddSchema(StaticModelSpaceComponent::GetSchema());
     AddSchema(AnimatedModelSpaceComponent::GetSchema());
     AddSchema(VideoPlayerSpaceComponent::GetSchema());
@@ -98,6 +93,18 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
     AddSchema(HotspotSpaceComponent::GetSchema());
     AddSchema(ScreenSharingSpaceComponent::GetSchema());
     AddSchema(AIChatbotSpaceComponent::GetSchema());
+
+    for (const auto& Schema : AdditionalComponents)
+    {
+        if (const auto It = SchemaMap.find(Schema.TypeId); It != SchemaMap.end() && !IsCompatible(It->second, Schema))
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Injected schema for TypeId {} is not compatible with the built-in schema and will be ignored.", Schema.TypeId).c_str());
+            continue;
+        }
+
+        AddSchema(Schema);
+    }
 }
 
 csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
