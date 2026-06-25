@@ -336,6 +336,43 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestDeferredProfileCreationT
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginWithRefreshToken)
+{
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Login to backend services in order to get the information to get a refresh token
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    const auto RefreshToken = csp::web::HttpAuth::GetRefreshToken();
+
+    // Shutdown and restart CSP. To simulate closing the app/tab and wanting to auto-login via refresh
+    // This is just taken from the fixture code we run at the start of every test.
+    csp::CSPFoundation::Shutdown();
+
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+
+    // New CSP, new objects.
+    auto* Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+
+    // Login with our new token
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId.c_str(), RefreshToken, true, nullptr);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    ASSERT_EQ(Result.GetLoginState().GetLoginStateValue(), csp::common::ELoginState::LoggedIn);
+    ASSERT_EQ(Result.GetLoginState().GetUserId(), UserId);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Connected);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();

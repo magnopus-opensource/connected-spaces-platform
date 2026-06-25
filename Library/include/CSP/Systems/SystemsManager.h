@@ -201,7 +201,6 @@ private:
     csp::web::WebClient* WebClient;
 
     csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
-    std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine;
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;

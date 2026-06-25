@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] chore: Initialize pointer value in material result to nullptr. By @MAG-ElliotMorris
 
+- [NT-0] chore: Remove redundant `RealtimeEngine` shared_ptr in `SystemsManager`. By @MAG-ElliotMorris
+
 ## [6.44.0]
 
 ### 🐛 🔨 Bug Fixes
