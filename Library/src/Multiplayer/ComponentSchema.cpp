@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace csp::multiplayer
@@ -473,5 +474,26 @@ bool ComponentSchema::operator==(const ComponentSchema& Other) const
 }
 
 bool ComponentSchema::operator!=(const ComponentSchema& Other) const { return !(*this == Other); }
+
+bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated)
+{
+    if (Original.Name != Updated.Name)
+    {
+        return false;
+    }
+
+    auto UpdatedByKey = std::unordered_map<ComponentProperty::KeyType, ComponentProperty> {};
+    for (const auto& Property : Updated.Properties)
+    {
+        UpdatedByKey.emplace(Property.Key, Property);
+    }
+
+    return std::all_of(Original.Properties.begin(), Original.Properties.end(),
+        [&UpdatedByKey](const auto& Property)
+        {
+            const auto It = UpdatedByKey.find(Property.Key);
+            return It != UpdatedByKey.end() && It->second == Property;
+        });
+}
 
 } // namespace csp::multiplayer

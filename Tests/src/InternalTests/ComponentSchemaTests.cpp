@@ -1281,6 +1281,125 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsVec4PropertyWi
     EXPECT_FALSE(Result.HasValue());
 }
 
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForValidUpdate)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_TRUE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNameMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "MegaDistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMissingProperty)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyDefaultMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.5f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyNameMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "drive", 1.0f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, UpdatedLegacySchemaExposesExtraProperty)
 {
     const auto WithExtraProperty = [](const Schema& Original) -> Schema

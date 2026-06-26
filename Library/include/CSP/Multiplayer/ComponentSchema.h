@@ -73,6 +73,13 @@ CSP_START_IGNORE
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
     const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem);
 
+/// @brief Checks whether a schema update is compatible with an existing schema.
+/// The check is conservative. The updated schema must be a superset of the original, without altering any existing property definitions.
+/// @param Original The existing schema to check against.
+/// @param Updated The candidate updated schema.
+/// @return True if the updated schema is a compatible update of the original, false otherwise.
+bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated);
+
 CSP_END_IGNORE
 
 } // namespace csp::multiplayer
