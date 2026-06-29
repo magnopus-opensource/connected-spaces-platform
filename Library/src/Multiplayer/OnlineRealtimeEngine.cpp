@@ -32,7 +32,6 @@
 #include "Events/EventSystem.h"
 #include "MCS/MCSTypes.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
-#include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/Election/ScopeLeadershipManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
@@ -99,6 +98,7 @@ template class csp::common::List<csp::multiplayer::SpaceEntity*>;
 namespace csp::multiplayer
 {
 
+constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 constexpr uint64_t ENTITY_PAGE_LIMIT = 100;
 
 class SpaceEntityEventHandler : public csp::events::EventListener
@@ -168,7 +168,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , LogSystem(nullptr)
     , ScriptBinding(nullptr)
     , EventHandler(nullptr)
-    , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
@@ -202,7 +201,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , MultiplayerConnectionInst(&InMultiplayerConnection)
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
-    , ElectionManager(nullptr)
     , TickEntitiesLock(new std::recursive_mutex)
     , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
@@ -323,11 +321,6 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
         Entities.Append(ReleasedAvatar);
         Avatars.Append(ReleasedAvatar);
         ReleasedAvatar->ApplyLocalPatch(false, GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag());
-
-        if (ElectionManager != nullptr)
-        {
-            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->NetworkEventBus);
-        }
 
         Callback(ReleasedAvatar);
     };
@@ -568,11 +561,6 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
     }
 
     ScriptSystemReadyCallback = Callback;
-
-    if (ElectionManager)
-    {
-        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
-    }
 }
 
 void OnlineRealtimeEngine::SetOnElectedScopeLeaderCallback(ScopeLeaderCallback Callback) { OnElectedScopeLeaderCallback = Callback; }
@@ -777,14 +765,6 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
                     {
                         ScriptSystemReadyCallback(true);
                     }
-                }
-                else
-                {
-                    // Start listening for election events
-                    //
-                    // If we are the first client to connect then this
-                    // will also set this client as the leader
-                    ElectionManager->OnConnect(Avatars, Objects);
                 }
             }
             else
@@ -1102,10 +1082,8 @@ bool OnlineRealtimeEngine::IsLocalClientLeader() const
     {
         return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
     }
-    else
-    {
-        return ElectionManager->IsLocalClientLeader();
-    }
+
+    return false;
 }
 
 void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
@@ -1123,11 +1101,6 @@ void OnlineRealtimeEngine::EnableLeaderElection()
     {
         LeaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*MultiplayerConnectionInst, *LogSystem);
     }
-    else
-    {
-        ElectionManager = new ClientElectionManager(this, *LogSystem, *ScriptRunner);
-        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
-    }
 }
 
 void OnlineRealtimeEngine::DisableLeaderElection()
@@ -1141,14 +1114,9 @@ void OnlineRealtimeEngine::DisableLeaderElection()
 
         LeaderElectionManager.reset(nullptr);
     }
-    if (ElectionManager != nullptr)
-    {
-        delete (ElectionManager);
-        ElectionManager = nullptr;
-    }
 }
 
-bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr) || (LeaderElectionManager.get() != nullptr); }
+bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return LeaderElectionManager.get() != nullptr; }
 
 uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
@@ -1161,7 +1129,7 @@ uint64_t OnlineRealtimeEngine::GetLeaderId() const
         }
         else
         {
-            return ElectionManager->GetLeader()->GetId();
+            return 0;
         }
     }
     else
@@ -1205,16 +1173,13 @@ bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
     }
     else
     {
-        // Only run script locally if we are the Leader
         if (ServerSideElectionEnabled)
         {
             return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
         }
-        else
-        {
-            return ElectionManager->IsLocalClientLeader();
-        }
     }
+
+    return false;
 }
 
 void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
@@ -1235,15 +1200,6 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error,
                 "OnlineRealtimeEngine::RunScriptRemotely failed due to receiving a script run event for a scope it is not the leader of.");
-        }
-    }
-    else
-    {
-        ClientProxy* LeaderProxy = ElectionManager->GetLeader();
-        if (LeaderProxy)
-        {
-            // This client is the leader, so run the script.
-            LeaderProxy->RunScript(ContextId, ScriptText);
         }
     }
 }
@@ -1445,12 +1401,10 @@ void OnlineRealtimeEngine::AddPendingEntity(SpaceEntity* EntityToAdd)
         {
         case SpaceEntityType::Avatar:
             Avatars.Append(EntityToAdd);
-            OnAvatarAdd(EntityToAdd, Avatars);
             break;
 
         case SpaceEntityType::Object:
             Objects.Append(EntityToAdd);
-            OnObjectAdd(EntityToAdd, Objects);
             break;
         }
     }
@@ -1468,13 +1422,11 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
     {
     case SpaceEntityType::Avatar:
         assert(Avatars.Contains(EntityToRemove));
-        OnAvatarRemove(EntityToRemove, Avatars);
         Avatars.RemoveItem(EntityToRemove);
         break;
 
     case SpaceEntityType::Object:
         assert(Objects.Contains(EntityToRemove));
-        OnObjectRemove(EntityToRemove, Objects);
         Objects.RemoveItem(EntityToRemove);
         break;
 
@@ -1489,40 +1441,6 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
     Entities.RemoveItem(EntityToRemove);
 
     delete (EntityToRemove);
-}
-
-void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& AddedAvatars)
-{
-    if (ElectionManager != nullptr)
-    {
-        // Note we are assuming Avatar==Client,
-        // which is true now but may not be in the future
-        ElectionManager->OnClientAdd(Avatar, AddedAvatars, *this->NetworkEventBus);
-    }
-}
-
-void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& RemovedAvatars)
-{
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnClientRemove(Avatar, RemovedAvatars);
-    }
-}
-
-void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& AddedObjects)
-{
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnObjectAdd(Object, AddedObjects);
-    }
-}
-
-void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& RemovedObjects)
-{
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnObjectRemove(Object, RemovedObjects);
-    }
 }
 
 void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessage)

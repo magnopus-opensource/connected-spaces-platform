@@ -72,7 +72,6 @@ class Event;
 namespace csp::multiplayer
 {
 
-class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -474,12 +473,6 @@ private:
 
     bool IsLocalClientLeader() const;
 
-    // These are used for client-side leader eleciton and can be removed as part of OF-1785.
-    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-
     void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
     // Used in OnObjectMessage as well as in the initial entity fetch. Uses CreateEntity to make entities when instructed to from the server, via
@@ -500,11 +493,6 @@ private:
     std::unique_ptr<class EntityScriptBinding> ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
 
-    // Leader election ---------------------------------------------------------
-
-    // Client-side election manager. Should be removed as part of OF-1785.
-    class ClientElectionManager* ElectionManager;
-
     // Server-side election data.
     CSP_START_IGNORE
     std::unique_ptr<ScopeLeadershipManager> LeaderElectionManager;
@@ -516,7 +504,6 @@ private:
     csp::common::String DefaultScopeId;
     // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
     bool ServerSideElectionEnabled = false;
-    // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;
     std::mutex LeadershipElectionLock;
