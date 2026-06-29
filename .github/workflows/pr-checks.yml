@@ -243,9 +243,56 @@ jobs:
           build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
           install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
 
+  build-legacy-emscripten:
+    name: Build emscripten ${{ matrix.config.build_type }}
+    runs-on: ubuntu-latest
+    
+    env:
+      EMSDK_VERSION: 3.1.40
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Set up MSVC (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup emsdk
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Build and package
+        uses: ./.github/actions/build-legacy-emscripten
+        with:
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-static
+          build_preset: ${{ matrix.config.preset_prefix }}-static
+          output_folder: build/emscripten-${{ matrix.config.preset_prefix }}
+          build_folder: build/emscripten-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
+
   tests-local-mcs:
     name: Run Tests (Local MCS) Linux
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build-desktop
 
     steps:
