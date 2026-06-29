@@ -272,6 +272,11 @@ configure_file(
 
   if(CSP_BUILD_LEGACY_EMSCRIPTEN AND EMSCRIPTEN)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/LegacyEmscriptenWrapper)
+
+    target_compile_definitions(csp-lib
+      PRIVATE
+        USE_LEGACY_WRAPPER_GEN
+    )
   endif()
 
 # Install ---------------------------------------------------------
