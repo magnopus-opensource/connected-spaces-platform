@@ -61,6 +61,8 @@ public:
     bool operator!=(const ComponentSchema& Other) const;
 };
 
+CSP_START_IGNORE
+
 /// @brief Parses a list of JSON documents into an array of component schemas.
 /// Each document is expected to be a JSON array of schema objects.
 /// Entries that fail to parse are skipped with a warning; valid entries in the same document are still returned.
@@ -70,5 +72,7 @@ public:
 /// @return An array containing all successfully parsed schemas.
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
     const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem);
+
+CSP_END_IGNORE
 
 } // namespace csp::multiplayer
