@@ -29,6 +29,7 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
+#include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/ECommerce/ECommerce.h"
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
@@ -84,6 +85,7 @@ template class CSP_API csp::common::Array<csp::systems::CartLine>;
 template class CSP_API csp::common::Array<csp::systems::FeatureLimitInfo>;
 template class CSP_API csp::common::Array<csp::systems::FeatureQuotaInfo>;
 template class CSP_API csp::common::Array<csp::systems::HotspotGroup>;
+template class CSP_API csp::common::Array<csp::systems::LODAsset>;
 template class CSP_API csp::common::Array<csp::systems::ProductInfo>;
 template class CSP_API csp::common::Array<csp::systems::ProductMediaInfo>;
 template class CSP_API csp::common::Array<csp::systems::ProductVariantInfo>;
