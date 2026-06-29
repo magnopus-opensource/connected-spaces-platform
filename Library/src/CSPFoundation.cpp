@@ -15,7 +15,10 @@
  */
 #include "CSP/CSPFoundation.h"
 
+#if defined(USE_LEGACY_WRAPPER_GEN)
 #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
+#endif
+
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/ServiceStatus.h"
