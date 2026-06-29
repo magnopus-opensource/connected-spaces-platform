@@ -345,9 +345,6 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     const bool ManagedLeaderElection = DefaultScopeIt->ManagedLeaderElection;
 
-                    // This will set server-side election to true if the scope has ManagedLeaderElection enabled. Otherwise it will default to client
-                    // election.
-                    static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->SetServerSideElectionEnabled(ManagedLeaderElection);
                     // Start leader election
                     static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->EnableLeaderElection();
 
@@ -501,9 +498,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     {
         csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetOnlineRealtimeEngine(
             static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
-
-        // This should start at false until we validate that the spaces default scope has ManagedLeaderElection enabled
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->SetServerSideElectionEnabled(false);
     }
 
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
