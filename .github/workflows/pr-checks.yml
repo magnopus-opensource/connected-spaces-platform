@@ -3,6 +3,10 @@ name: PR Checks
 # This workflow performs the following actions:
 #  - Builds all desktop platforms
 #  - Uploads the install tree as a workflow artifact
+#  - Builds csp as emscripten static lib
+#  - Builds csp for android
+#  - Builds csp for iOS and visionOS
+#  - Runs csp locsl tests on Linux
 
 on:
   pull_request:
@@ -245,6 +249,13 @@ jobs:
 
   tests-local-mcs:
     name: Run Tests (Local MCS) Linux
+    ## Why Local MCS cannot run on GitHub Windows runners
+
+    # MCS Docker stack uses Linux container images.
+    # GitHub windows-2022 runners do not provide the same Docker Desktop Linux-container environment.
+    # When Docker runs there, it attempts to pull Windows container images.
+    # Because the MCS images are Linux images, Docker fails with "no matching manifest for windows(10.0.20348)/amd64"
+    # For this reason, we currently run our local tests on Linux.
     runs-on: ubuntu-latest
     needs: build-desktop
 
