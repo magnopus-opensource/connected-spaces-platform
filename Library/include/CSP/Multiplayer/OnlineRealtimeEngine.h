@@ -405,9 +405,6 @@ public:
     CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback);
     CSP_END_IGNORE
 
-    // We should remove this in OF-1785
-    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
-
     /*
      * Called when MultiplayerConnection recieved signalR events.
      */
@@ -502,8 +499,6 @@ private:
     ScopeLeaderCallback OnVacatedAsScopeLeaderCallback;
 
     csp::common::String DefaultScopeId;
-    // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
-    bool ServerSideElectionEnabled = false;
 
     std::recursive_mutex* TickEntitiesLock;
     std::mutex LeadershipElectionLock;
