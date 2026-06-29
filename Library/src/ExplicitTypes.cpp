@@ -21,6 +21,7 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -54,6 +55,8 @@
 template class CSP_API csp::common::Array<csp::common::Map<csp::common::String, csp::common::String>>;
 template class CSP_API csp::common::Array<csp::common::String>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentBase*>;
+template class CSP_API csp::common::Array<csp::multiplayer::ComponentProperty>;
+template class CSP_API csp::common::Array<csp::multiplayer::ComponentSchema>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::MessageInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::NetworkEventRegistration>;
