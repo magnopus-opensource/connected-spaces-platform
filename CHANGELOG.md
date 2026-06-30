@@ -10,6 +10,14 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] chore: Remove redundant `RealtimeEngine` shared_ptr in `SystemsManager`. By @MAG-ElliotMorris
 
+### 🔥 ❗Breaking Changes
+
+- [OF-1785] refac!: Remove legacy leadership election logic. By @MAG-AdamThorn
+  Now that server-side script leader election has been operating as the default election model for ~6 months, it is time to remove the legacy client-side leader election logic.  The `ClientProxy.h/.cpp` and `ClientElectionManager.h/.cpp` files have been removed and references to them cleared up. All temporary branching logic that allowed for both election models has been removed.
+  
+  Breaking change:
+  - The public methods `OnlineRealtimeEngine::EnableLeaderElection()` and `OnlineRealtimeEngine::DisableLeaderElection()` have been made `CSP_NO_EXPORT` and will no-longer be available to those consuming CSP via the C# or Javascript generated interop APIs.
+
 ## [6.44.0]
 
 ### 🐛 🔨 Bug Fixes
