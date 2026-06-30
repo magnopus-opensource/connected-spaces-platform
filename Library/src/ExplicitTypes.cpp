@@ -33,6 +33,7 @@
 #include "CSP/Systems/ECommerce/ECommerce.h"
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
+#include "CSP/Systems/Maintenance/Maintenance.h"
 #include "CSP/Systems/Multiplayer/Scope.h"
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/Sequence/Sequence.h"
@@ -77,11 +78,13 @@ template class CSP_API csp::common::Array<csp::systems::PointOfInterest>;
 template class CSP_API csp::common::Array<csp::systems::Site>;
 template class CSP_API csp::common::Array<csp::systems::Space>;
 template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
+template class CSP_API csp::common::Array<csp::systems::MaintenanceInfo>;
 template class CSP_API csp::common::Array<csp::systems::Material*>;
 template class CSP_API csp::common::Array<csp::systems::Scope>;
 template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
 template class CSP_API csp::common::Array<csp::systems::EAssetCollectionType>;
 template class CSP_API csp::common::Array<csp::systems::CartLine>;
+template class CSP_API csp::common::Array<csp::FeatureFlag>;
 template class CSP_API csp::common::Array<csp::systems::FeatureLimitInfo>;
 template class CSP_API csp::common::Array<csp::systems::FeatureQuotaInfo>;
 template class CSP_API csp::common::Array<csp::systems::HotspotGroup>;

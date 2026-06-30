@@ -83,6 +83,9 @@ public:
 
     const csp::common::String& GetDescription() { return Description; };
 
+    bool operator==(const FeatureFlag& Other) const { return Type == Other.Type && Enabled == Other.Enabled && Description == Other.Description; }
+    bool operator!=(const FeatureFlag& Other) const { return !(*this == Other); }
+
 private:
     csp::common::String Description;
 };
