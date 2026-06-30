@@ -115,8 +115,6 @@ set(CSP_MULTIPLAYER_SOURCES
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Conversation/Conversation.cpp
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ClientElectionManager.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ClientProxy.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ScopeLeadershipManager.cpp
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCS/MCSSceneDescription.cpp
@@ -158,8 +156,6 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SpaceEntityStatePatcher.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/WebSocketClient.h
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ClientElectionManager.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ClientProxy.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Election/ScopeLeadershipManager.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCS/MCSSceneDescription.h
