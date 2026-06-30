@@ -335,11 +335,11 @@ public:
     void ClaimScriptOwnership(SpaceEntity* Entity) const;
 
     /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
+    CSP_NO_EXPORT void EnableLeaderElection();
 
     /// @brief Disable Leader Election feature.
     /// @pre SpaceSystem::EnterSpace should be called first for this to take affect.
-    void DisableLeaderElection();
+    CSP_NO_EXPORT void DisableLeaderElection();
 
     /// @brief Check if the Leader Election feature is enabled.
     /// @return true if enabled, false otherwise.
@@ -347,7 +347,7 @@ public:
 
     /// @brief Debug helper to get the id of the currently elected script leader.
     /// This should be updated when we fully support scopes. We will need to pass in the scopeId we want the leader for.
-    /// @return The id of the leader.
+    /// @return The id of the leader if leader election is enabled, 0 if it is not.
     uint64_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
