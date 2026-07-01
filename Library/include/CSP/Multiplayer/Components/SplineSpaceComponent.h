@@ -45,14 +45,14 @@ public:
     SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates a spline space component using the provided schema if it is compatible with the built-in schema.
-    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new SplineSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
     /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<SplineSpaceComponent> TryMake(
-        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Generate a vector3 at a chosen position along the spline
     /// Note: Generates a cubic spline position from current Waypoints
@@ -71,7 +71,7 @@ public:
     void SetWaypoints(const csp::common::List<csp::common::Vector3>& Waypoints);
 
 private:
-    SplineSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    SplineSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

@@ -59,18 +59,18 @@ SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<SplineSpaceComponent> SplineSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(SplineSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(SplineSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<SplineSpaceComponent>(new SplineSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<SplineSpaceComponent>(new SplineSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-SplineSpaceComponent::SplineSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+SplineSpaceComponent::SplineSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }

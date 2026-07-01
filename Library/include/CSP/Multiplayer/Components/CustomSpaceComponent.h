@@ -48,14 +48,14 @@ public:
     CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates a custom space component using the provided schema if it is compatible with the built-in schema.
-    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new CustomSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
     /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<CustomSpaceComponent> TryMake(
-        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets a string that identifies the application origin.
     /// @return The application origin for which this component has been generated.
@@ -98,7 +98,7 @@ public:
     uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& Key) const;
 
 private:
-    CustomSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CustomSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
     void AddKey(const csp::common::String& Key);
     void RemoveKey(const csp::common::String& Key);
 };

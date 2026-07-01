@@ -115,18 +115,18 @@ LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, Spac
 }
 
 std::unique_ptr<LightSpaceComponent> LightSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(LightSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(LightSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<LightSpaceComponent>(new LightSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<LightSpaceComponent>(new LightSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-LightSpaceComponent::LightSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+LightSpaceComponent::LightSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

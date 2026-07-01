@@ -91,18 +91,18 @@ CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSyst
 }
 
 std::unique_ptr<CollisionSpaceComponent> CollisionSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(CollisionSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(CollisionSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<CollisionSpaceComponent>(new CollisionSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<CollisionSpaceComponent>(new CollisionSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-CollisionSpaceComponent::CollisionSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+CollisionSpaceComponent::CollisionSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }

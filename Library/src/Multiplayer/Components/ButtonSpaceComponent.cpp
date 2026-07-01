@@ -85,18 +85,18 @@ ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<ButtonSpaceComponent> ButtonSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ButtonSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ButtonSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ButtonSpaceComponent>(new ButtonSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ButtonSpaceComponent>(new ButtonSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ButtonSpaceComponent::ButtonSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ButtonSpaceComponent::ButtonSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

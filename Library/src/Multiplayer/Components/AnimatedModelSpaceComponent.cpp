@@ -118,18 +118,18 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem*
 }
 
 std::unique_ptr<AnimatedModelSpaceComponent> AnimatedModelSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(AnimatedModelSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(AnimatedModelSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<AnimatedModelSpaceComponent>(new AnimatedModelSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<AnimatedModelSpaceComponent>(new AnimatedModelSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

@@ -55,14 +55,14 @@ public:
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates an AI chatbot space component using the provided schema if it is compatible with the built-in schema.
-    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new AIChatbotSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
     /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<AIChatbotSpaceComponent> TryMake(
-        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the voice name of the TTS model associated with this AI chatbot.
     /// @return The name of the TTS voice associated with this AI chatbot.
@@ -97,7 +97,7 @@ public:
     /// @}
 
 private:
-    AIChatbotSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AIChatbotSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

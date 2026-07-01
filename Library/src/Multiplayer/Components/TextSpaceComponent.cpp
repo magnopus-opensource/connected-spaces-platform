@@ -100,18 +100,18 @@ TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceE
 }
 
 std::unique_ptr<TextSpaceComponent> TextSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(TextSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(TextSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<TextSpaceComponent>(new TextSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<TextSpaceComponent>(new TextSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-TextSpaceComponent::TextSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+TextSpaceComponent::TextSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

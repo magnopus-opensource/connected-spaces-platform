@@ -130,18 +130,18 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<AvatarSpaceComponent> AvatarSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(AvatarSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(AvatarSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<AvatarSpaceComponent>(new AvatarSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<AvatarSpaceComponent>(new AvatarSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-AvatarSpaceComponent::AvatarSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+AvatarSpaceComponent::AvatarSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

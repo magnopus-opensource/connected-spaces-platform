@@ -172,18 +172,18 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* Log
 }
 
 std::unique_ptr<VideoPlayerSpaceComponent> VideoPlayerSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(VideoPlayerSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(VideoPlayerSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<VideoPlayerSpaceComponent>(new VideoPlayerSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<VideoPlayerSpaceComponent>(new VideoPlayerSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }

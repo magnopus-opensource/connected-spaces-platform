@@ -65,14 +65,14 @@ public:
     AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates an avatar space component using the provided schema if it is compatible with the built-in schema.
-    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new AvatarSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
     /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<AvatarSpaceComponent> TryMake(
-        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.
@@ -259,7 +259,7 @@ public:
     void SetAvatarUrl(const csp::common::String& Value);
 
 private:
-    AvatarSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AvatarSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

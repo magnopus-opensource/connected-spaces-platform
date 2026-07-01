@@ -60,14 +60,14 @@ public:
     TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates a text space component using the provided schema if it is compatible with the built-in schema.
-    /// @param UpdatedSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new TextSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
     /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<TextSpaceComponent> TryMake(
-        const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the text  this text component refers to.
     /// @return The text this text component refers to.
@@ -159,7 +159,7 @@ public:
     /// @}
 
 private:
-    TextSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    TextSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

@@ -72,18 +72,18 @@ ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSy
 }
 
 std::unique_ptr<ReflectionSpaceComponent> ReflectionSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ReflectionSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ReflectionSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ReflectionSpaceComponent>(new ReflectionSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ReflectionSpaceComponent>(new ReflectionSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ReflectionSpaceComponent::ReflectionSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ReflectionSpaceComponent::ReflectionSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }

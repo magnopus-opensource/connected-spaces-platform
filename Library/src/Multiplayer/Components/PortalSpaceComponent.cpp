@@ -70,18 +70,18 @@ PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<PortalSpaceComponent> PortalSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(PortalSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(PortalSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<PortalSpaceComponent>(new PortalSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<PortalSpaceComponent>(new PortalSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-PortalSpaceComponent::PortalSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+PortalSpaceComponent::PortalSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

@@ -53,18 +53,18 @@ ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<ScriptSpaceComponent> ScriptSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ScriptSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ScriptSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ScriptSpaceComponent>(new ScriptSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ScriptSpaceComponent>(new ScriptSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ScriptSpaceComponent::ScriptSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ScriptSpaceComponent::ScriptSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     Parent->GetScript().SetScriptSpaceComponent(this);
 }

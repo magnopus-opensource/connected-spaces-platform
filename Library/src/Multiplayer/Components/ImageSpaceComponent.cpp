@@ -95,18 +95,18 @@ ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, Spac
 }
 
 std::unique_ptr<ImageSpaceComponent> ImageSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ImageSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ImageSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ImageSpaceComponent>(new ImageSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ImageSpaceComponent>(new ImageSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ImageSpaceComponent::ImageSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ImageSpaceComponent::ImageSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

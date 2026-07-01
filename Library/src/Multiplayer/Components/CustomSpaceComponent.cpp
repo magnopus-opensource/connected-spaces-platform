@@ -45,18 +45,18 @@ CustomSpaceComponent::CustomSpaceComponent(csp::common::LogSystem* LogSystem, Sp
 }
 
 std::unique_ptr<CustomSpaceComponent> CustomSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(CustomSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(CustomSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<CustomSpaceComponent>(new CustomSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<CustomSpaceComponent>(new CustomSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-CustomSpaceComponent::CustomSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+CustomSpaceComponent::CustomSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CustomSpaceComponentScriptInterface(this));
 }

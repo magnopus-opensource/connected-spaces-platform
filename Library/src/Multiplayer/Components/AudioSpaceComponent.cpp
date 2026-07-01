@@ -103,18 +103,18 @@ AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, Spac
 }
 
 std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(AudioSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(AudioSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<AudioSpaceComponent>(new AudioSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<AudioSpaceComponent>(new AudioSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }

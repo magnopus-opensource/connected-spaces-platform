@@ -46,18 +46,18 @@ ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSyst
 }
 
 std::unique_ptr<ECommerceSpaceComponent> ECommerceSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ECommerceSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ECommerceSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ECommerceSpaceComponent>(new ECommerceSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ECommerceSpaceComponent>(new ECommerceSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ECommerceSpaceComponent::ECommerceSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ECommerceSpaceComponent::ECommerceSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

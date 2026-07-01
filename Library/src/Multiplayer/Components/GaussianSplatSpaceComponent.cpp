@@ -86,18 +86,18 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem*
 }
 
 std::unique_ptr<GaussianSplatSpaceComponent> GaussianSplatSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(GaussianSplatSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(GaussianSplatSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<GaussianSplatSpaceComponent>(new GaussianSplatSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<GaussianSplatSpaceComponent>(new GaussianSplatSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

@@ -109,18 +109,18 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::co
 }
 
 std::unique_ptr<ConversationSpaceComponent> ConversationSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ConversationSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ConversationSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ConversationSpaceComponent>(new ConversationSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ConversationSpaceComponent>(new ConversationSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ConversationSpaceComponent::ConversationSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ConversationSpaceComponent::ConversationSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

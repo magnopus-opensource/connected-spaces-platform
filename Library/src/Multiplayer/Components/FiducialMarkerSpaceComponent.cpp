@@ -81,19 +81,18 @@ FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSyste
 }
 
 std::unique_ptr<FiducialMarkerSpaceComponent> FiducialMarkerSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(FiducialMarkerSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(FiducialMarkerSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<FiducialMarkerSpaceComponent>(new FiducialMarkerSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<FiducialMarkerSpaceComponent>(new FiducialMarkerSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

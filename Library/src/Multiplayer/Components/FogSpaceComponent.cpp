@@ -109,19 +109,18 @@ FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEnt
 {
 }
 
-std::unique_ptr<FogSpaceComponent> FogSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+std::unique_ptr<FogSpaceComponent> FogSpaceComponent::TryMake(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(FogSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(FogSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<FogSpaceComponent>(new FogSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<FogSpaceComponent>(new FogSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-FogSpaceComponent::FogSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+FogSpaceComponent::FogSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

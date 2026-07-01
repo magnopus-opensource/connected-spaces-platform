@@ -85,18 +85,18 @@ ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* L
 }
 
 std::unique_ptr<ExternalLinkSpaceComponent> ExternalLinkSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ExternalLinkSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(ExternalLinkSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<ExternalLinkSpaceComponent>(new ExternalLinkSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<ExternalLinkSpaceComponent>(new ExternalLinkSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

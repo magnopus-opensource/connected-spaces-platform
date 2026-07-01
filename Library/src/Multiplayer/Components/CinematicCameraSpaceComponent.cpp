@@ -116,19 +116,18 @@ CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(csp::common::LogSys
 }
 
 std::unique_ptr<CinematicCameraSpaceComponent> CinematicCameraSpaceComponent::TryMake(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(CinematicCameraSpaceComponent::GetSchema(), UpdatedSchema))
+    if (!IsCompatible(CinematicCameraSpaceComponent::GetSchema(), InSchema))
     {
         return nullptr;
     }
 
-    return std::unique_ptr<CinematicCameraSpaceComponent>(new CinematicCameraSpaceComponent(UpdatedSchema, LogSystem, Parent));
+    return std::unique_ptr<CinematicCameraSpaceComponent>(new CinematicCameraSpaceComponent(InSchema, LogSystem, Parent));
 }
 
-CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(
-    const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(UpdatedSchema, LogSystem, Parent)
+CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new CinematicCameraSpaceComponentScriptInterface(this));
 }
