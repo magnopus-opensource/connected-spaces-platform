@@ -91,7 +91,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema; }
 
 ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ScreenSharingSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ScreenSharingSpaceComponent> ScreenSharingSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ScreenSharingSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ScreenSharingSpaceComponent>(new ScreenSharingSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

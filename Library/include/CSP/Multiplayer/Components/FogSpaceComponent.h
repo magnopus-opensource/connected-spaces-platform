@@ -68,6 +68,16 @@ public:
     /// @param Parent The Space entity that owns this component.
     FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates a fog space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new FogSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<FogSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Retrieves the type of fog currently used by this fog component.
     /// @return The modality of fog currently used by this component.
     FogMode GetFogMode() const;
@@ -183,6 +193,9 @@ public:
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
     /// @}
+
+private:
+    FogSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

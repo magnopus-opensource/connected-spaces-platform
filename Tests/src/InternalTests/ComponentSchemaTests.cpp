@@ -17,13 +17,39 @@
 #include "TestHelpers.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Multiplayer/Components/AIChatbotComponent.h"
+#include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
+#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FogSpaceComponent.h"
+#include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
+#include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
+#include "CSP/Multiplayer/Components/LightSpaceComponent.h"
+#include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
+#include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
+#include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
+#include "CSP/Multiplayer/Components/TextSpaceComponent.h"
+#include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Common/Convert.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 
@@ -39,7 +65,10 @@ public:
         : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised())
         , Engine(LogSystem, *ScriptSystem, Schemas)
     {
+        InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
     }
+
+    ~TestFixture() { csp::CSPFoundation::Shutdown(); }
 
     csp::multiplayer::SpaceEntity* MakeEntity(const csp::common::String& Name)
     {
@@ -1250,4 +1279,195 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsVec4PropertyWi
     })";
     const auto Result = Schema::FromJson(csp::common::String { RawJson });
     EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForValidUpdate)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_TRUE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNameMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "MegaDistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMissingProperty)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyDefaultMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.5f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyNameMismatch)
+{
+    const auto BuiltIn = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "gain", 0.25f },
+            { 1, "level", 0.5f },
+        },
+    };
+
+    const auto Updated = Schema {
+        Schema::TypeIdType { 808 },
+        "DistortionAudioEffect",
+        {
+            { 0, "drive", 1.0f },
+            { 1, "level", 0.5f },
+            { 2, "tone", 0.5f },
+        },
+    };
+
+    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, UpdatedLegacySchemaExposesExtraProperty)
+{
+    const auto WithExtraProperty = [](const Schema& Original) -> Schema
+    {
+        const auto NextPropertyKey = [](const auto& Properties) -> uint16_t
+        {
+            const auto Max
+                = std::max_element(Properties.begin(), Properties.end(), [](const auto& Left, const auto& Right) { return Left.Key < Right.Key; });
+
+            return Max == Properties.end() ? uint16_t { 0 } : static_cast<uint16_t>(Max->Key + 1);
+        };
+
+        auto Properties = csp::common::Convert(Original.Properties);
+        Properties.push_back({
+            NextPropertyKey(Properties),
+            "extraProperty",
+            csp::common::String { "ExtraDefault" },
+        });
+
+        return {
+            Original.TypeId,
+            Original.Name,
+            csp::common::Convert(Properties),
+        };
+    };
+
+    const auto AllUpdated = std::vector<Schema> {
+        WithExtraProperty(csp::multiplayer::StaticModelSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AnimatedModelSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::VideoPlayerSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ImageSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ExternalLinkSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AvatarSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::LightSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ScriptSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ButtonSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CustomSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::PortalSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ConversationSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AudioSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::SplineSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CollisionSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ReflectionSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::FogSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ECommerceSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CinematicCameraSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::FiducialMarkerSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::GaussianSplatSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::TextSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::HotspotSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ScreenSharingSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AIChatbotSpaceComponent::GetSchema()),
+    };
+
+    auto Fixture = TestFixture(csp::common::Convert(AllUpdated));
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    for (const auto& Schema : AllUpdated)
+    {
+        auto* Component = Entity->AddComponent(static_cast<csp::multiplayer::ComponentType>(Schema.TypeId));
+        ASSERT_NE(Component, nullptr) << Schema.Name.c_str();
+
+        const auto ExtraKey = Schema.Properties[Schema.Properties.Size() - 1].Key;
+        const auto* Value = Component->GetSchemaProperty(ExtraKey);
+        ASSERT_NE(Value, nullptr) << Schema.Name.c_str();
+
+        EXPECT_EQ(Value->GetString(), "ExtraDefault") << Schema.Name.c_str();
+    }
 }

@@ -167,7 +167,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& VideoPlayerSpaceComponent::GetSchema() { return Schema; }
 
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : VideoPlayerSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<VideoPlayerSpaceComponent> VideoPlayerSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(VideoPlayerSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<VideoPlayerSpaceComponent>(new VideoPlayerSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }

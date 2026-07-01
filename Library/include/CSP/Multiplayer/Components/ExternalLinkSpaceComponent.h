@@ -63,6 +63,16 @@ public:
     /// @param Parent - The space entity to which this new component will belong to.
     ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Creates an external link space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ExternalLinkSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<ExternalLinkSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Gets the name of this external link component.
     [[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]] const csp::common::String& GetName() const;
     /// @brief Sets the name for this external link component.
@@ -124,6 +134,9 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     virtual void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+private:
+    ExternalLinkSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

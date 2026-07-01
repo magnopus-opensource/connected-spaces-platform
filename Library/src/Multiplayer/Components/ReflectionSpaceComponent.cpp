@@ -67,7 +67,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ReflectionSpaceComponent::GetSchema() { return Schema; }
 
 ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ReflectionSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ReflectionSpaceComponent> ReflectionSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ReflectionSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ReflectionSpaceComponent>(new ReflectionSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+ReflectionSpaceComponent::ReflectionSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }

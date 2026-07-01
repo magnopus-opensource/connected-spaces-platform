@@ -125,7 +125,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& AvatarSpaceComponent::GetSchema() { return Schema; }
 
 AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AvatarSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AvatarSpaceComponent> AvatarSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AvatarSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AvatarSpaceComponent>(new AvatarSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AvatarSpaceComponent::AvatarSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

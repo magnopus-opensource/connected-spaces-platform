@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.45.0]
 
+### 🍰 🙌 New Features
+
+- [OF-1884] feat: Support injecting updated schemas for built-in components. By @mag-lt.
+  Clients can now register updated schemas for built-in component types, adding properties beyond those defined
+  in the built-in class, with compatibility enforced while the schema-driven and hardcoded component APIs coexist.
+  The `GetSchemaProperty` and `SetSchemaProperty` methods on `ComponentBase` can then be used to access/mutate those
+  additional properties.
+
 ### 🔨 🔨 Chore
 
 - [NT-0] chore: Initialize pointer value in material result to nullptr. By @MAG-ElliotMorris
