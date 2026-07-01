@@ -74,10 +74,13 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
     const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem);
 
 /// @brief Checks whether a schema update is compatible with an existing schema.
-/// The check is conservative. The updated schema must be a superset of the original, without altering any existing property definitions.
 /// @param Original The existing schema to check against.
 /// @param Updated The candidate updated schema.
 /// @return True if the updated schema is a compatible update of the original, false otherwise.
+///
+/// @note The check is conservative. The updated schema must be a superset of the original without altering any existing property definitions. This
+/// may be relaxed in future to permit changes that are unlikely to cause compatibility issues (e.g. updating a default value or exposing a property
+/// to scripting where it wasn't previously).
 bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated);
 
 CSP_END_IGNORE
