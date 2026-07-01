@@ -96,7 +96,7 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
 
     for (const auto& Schema : AdditionalComponents)
     {
-        if (const auto It = SchemaMap.find(Schema.TypeId); It != SchemaMap.end() && !IsCompatible(It->second, Schema))
+        if (const auto It = SchemaMap.find(Schema.TypeId); It != SchemaMap.end() && !IsCompatible(It->second, Schema, &LogSystem))
         {
             LogSystem.LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Injected schema for TypeId {} is not compatible with the built-in schema and will be ignored.", Schema.TypeId).c_str());
