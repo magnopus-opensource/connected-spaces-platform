@@ -72,7 +72,6 @@ class Event;
 namespace csp::multiplayer
 {
 
-class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -336,11 +335,11 @@ public:
     void ClaimScriptOwnership(SpaceEntity* Entity) const;
 
     /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
+    CSP_NO_EXPORT void EnableLeaderElection();
 
     /// @brief Disable Leader Election feature.
     /// @pre SpaceSystem::EnterSpace should be called first for this to take affect.
-    void DisableLeaderElection();
+    CSP_NO_EXPORT void DisableLeaderElection();
 
     /// @brief Check if the Leader Election feature is enabled.
     /// @return true if enabled, false otherwise.
@@ -348,7 +347,7 @@ public:
 
     /// @brief Debug helper to get the id of the currently elected script leader.
     /// This should be updated when we fully support scopes. We will need to pass in the scopeId we want the leader for.
-    /// @return The id of the leader.
+    /// @return The id of the leader if leader election is enabled, 0 if it is not.
     uint64_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
@@ -405,9 +404,6 @@ public:
     // This should only be used in testing.
     CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback);
     CSP_END_IGNORE
-
-    // We should remove this in OF-1785
-    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
@@ -474,12 +470,6 @@ private:
 
     bool IsLocalClientLeader() const;
 
-    // These are used for client-side leader eleciton and can be removed as part of OF-1785.
-    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-
     void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
     // Used in OnObjectMessage as well as in the initial entity fetch. Uses CreateEntity to make entities when instructed to from the server, via
@@ -500,11 +490,6 @@ private:
     std::unique_ptr<class EntityScriptBinding> ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
 
-    // Leader election ---------------------------------------------------------
-
-    // Client-side election manager. Should be removed as part of OF-1785.
-    class ClientElectionManager* ElectionManager;
-
     // Server-side election data.
     CSP_START_IGNORE
     std::unique_ptr<ScopeLeadershipManager> LeaderElectionManager;
@@ -514,9 +499,6 @@ private:
     ScopeLeaderCallback OnVacatedAsScopeLeaderCallback;
 
     csp::common::String DefaultScopeId;
-    // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
-    bool ServerSideElectionEnabled = false;
-    // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;
     std::mutex LeadershipElectionLock;
