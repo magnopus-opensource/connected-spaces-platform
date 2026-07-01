@@ -21,6 +21,7 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -28,9 +29,11 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
+#include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/ECommerce/ECommerce.h"
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
+#include "CSP/Systems/Maintenance/Maintenance.h"
 #include "CSP/Systems/Multiplayer/Scope.h"
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/Sequence/Sequence.h"
@@ -54,6 +57,8 @@
 template class CSP_API csp::common::Array<csp::common::Map<csp::common::String, csp::common::String>>;
 template class CSP_API csp::common::Array<csp::common::String>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentBase*>;
+template class CSP_API csp::common::Array<csp::multiplayer::ComponentProperty>;
+template class CSP_API csp::common::Array<csp::multiplayer::ComponentSchema>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::MessageInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::NetworkEventRegistration>;
@@ -73,14 +78,17 @@ template class CSP_API csp::common::Array<csp::systems::PointOfInterest>;
 template class CSP_API csp::common::Array<csp::systems::Site>;
 template class CSP_API csp::common::Array<csp::systems::Space>;
 template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
+template class CSP_API csp::common::Array<csp::systems::MaintenanceInfo>;
 template class CSP_API csp::common::Array<csp::systems::Material*>;
 template class CSP_API csp::common::Array<csp::systems::Scope>;
 template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
 template class CSP_API csp::common::Array<csp::systems::EAssetCollectionType>;
 template class CSP_API csp::common::Array<csp::systems::CartLine>;
+template class CSP_API csp::common::Array<csp::FeatureFlag>;
 template class CSP_API csp::common::Array<csp::systems::FeatureLimitInfo>;
 template class CSP_API csp::common::Array<csp::systems::FeatureQuotaInfo>;
 template class CSP_API csp::common::Array<csp::systems::HotspotGroup>;
+template class CSP_API csp::common::Array<csp::systems::LODAsset>;
 template class CSP_API csp::common::Array<csp::systems::ProductInfo>;
 template class CSP_API csp::common::Array<csp::systems::ProductMediaInfo>;
 template class CSP_API csp::common::Array<csp::systems::ProductVariantInfo>;
