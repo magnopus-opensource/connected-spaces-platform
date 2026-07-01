@@ -1,0 +1,85 @@
+name: "Build and Install"
+description: "Fetch dependencies with Conan, configure CMake, build, and install"
+
+inputs:
+
+  build_type:
+    description: "CMake build type [Debug, Release, RelWithDebInfo]"
+    required: true
+
+  configure_preset:
+    description: "CMake configure preset to use. Run cmake --list-presets to list available presets."
+    required: true
+
+  build_preset:
+    description: "CMake build preset to use. Run cmake --build --list-presets to list available presets."
+    required: true
+
+  build_folder:
+    description: "CMake build directory to install from. This can change depending on the generator used."
+    required: true
+
+  output_folder:
+    description: "Conan output folder"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Generate wrapper
+      shell: bash
+      run: |
+        pip install chevron
+        pip install jinja2
+        python Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
+
+    - name: Install Conan
+      uses: conan-io/setup-conan@v1
+
+    - name: Set CMake compatibility policy
+      shell: bash
+      run: |
+        echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> "$GITHUB_ENV"
+
+    - name: Conan install
+      shell: bash
+      run: |
+        set -eux
+
+        OUTPUT_FOLDER="${{ inputs.output_folder }}"
+
+        if [ -n "$OUTPUT_FOLDER" ]; then
+          conan install . \
+            -of "$OUTPUT_FOLDER" \
+            -s build_type="${{ inputs.build_type }}" \
+            --build=missing \
+            --profile:host=profiles/host/emscripten
+        else
+          conan install . \
+            -s build_type="${{ inputs.build_type }}" \
+            --build=missing \
+            --profile:host=profiles/host/emscripten
+        fi
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        set -eux
+        cmake --preset "${{ inputs.configure_preset }}" -DCSP_BUILD_LEGACY_EMSCRIPTEN=1 -DWASM_WITH_NODE=1 -DUSE_LEGACY_WRAPPER_GEN=1
+
+    - name: Build
+      shell: bash
+      run: |
+        set -eux
+        cmake --build --preset "${{ inputs.build_preset }}"
+
+    - name: Create Package
+      shell: bash
+      run: |
+        set -eux
+        ./LegacyEmscriptenWrapper/GenerateLegacyEmscriptenPackage.sh \
+          "${{ inputs.build_type }}" \
+          "${{ inputs.build_folder }}"
