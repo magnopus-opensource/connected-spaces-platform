@@ -73,6 +73,8 @@ public:
     /// @param LogSystem The log system.
     /// @param Parent The space entity that owns this component.
     /// @return A new FogSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<FogSpaceComponent> TryMake(
         const ComponentSchema& UpdatedSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
