@@ -475,10 +475,15 @@ bool ComponentSchema::operator==(const ComponentSchema& Other) const
 
 bool ComponentSchema::operator!=(const ComponentSchema& Other) const { return !(*this == Other); }
 
-bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated)
+bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated, csp::common::LogSystem* LogSystem)
 {
     if (Original.Name != Updated.Name)
     {
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Schema name mismatch: expected '{}', got '{}'.", Original.Name.c_str(), Updated.Name.c_str()).c_str());
+        }
         return false;
     }
 
@@ -488,12 +493,27 @@ bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Update
         UpdatedByKey.emplace(Property.Key, Property);
     }
 
-    return std::all_of(Original.Properties.begin(), Original.Properties.end(),
-        [&UpdatedByKey](const auto& Property)
+    const auto LogOnMismatch = [LogSystem](auto Predicate)
+    {
+        return [LogSystem, Predicate](const auto& Property)
         {
-            const auto It = UpdatedByKey.find(Property.Key);
-            return It != UpdatedByKey.end() && It->second == Property;
-        });
+            const auto Result = Predicate(Property);
+            if (!Result && LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                    fmt::format("Incompatible property: key {}, name '{}'.", Property.Key, Property.Name.c_str()).c_str());
+            }
+            return Result;
+        };
+    };
+
+    return std::all_of(Original.Properties.begin(), Original.Properties.end(),
+        LogOnMismatch(
+            [&UpdatedByKey](const auto& Property)
+            {
+                const auto It = UpdatedByKey.find(Property.Key);
+                return It != UpdatedByKey.end() && It->second == Property;
+            }));
 }
 
 } // namespace csp::multiplayer
