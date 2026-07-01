@@ -1,0 +1,323 @@
+name: PR Checks
+
+# This workflow performs the following actions:
+#  - Builds all desktop platforms
+#  - Uploads the install tree as a workflow artifact
+#  - Builds csp as emscripten static lib
+#  - Builds csp for android
+#  - Builds csp for iOS and visionOS
+#  - Runs csp locsl tests on Linux
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-desktop:
+    name: Build ${{ matrix.platform.name }} ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: ${{ matrix.platform.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: windows
+            runner: windows-2022
+            host_profile: windows_ninja
+            
+          - name: linux
+            runner: ubuntu-latest
+            host_profile: linux_gcc
+
+          - name: macos
+            runner: macos-latest
+            host_profile: osx_arm
+
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+        linkage:
+          - name: static
+            shared: false
+            preset_postfix: -tests
+
+          - name: shared
+            shared: true
+            preset_postfix: ""
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Set up MSVC (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Resolve LFS
+        shell: bash
+        run: |
+          set -eux
+          git lfs ls-files
+          git lfs pull
+          git lfs checkout
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: ${{ matrix.platform.host_profile }}
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}${{ matrix.linkage.preset_postfix }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}${{ matrix.linkage.preset_postfix }}
+          output_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+
+      - name: Upload build
+        if: matrix.config.preset_prefix == 'relwithdebinfo' && matrix.linkage.name == 'static'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}-build
+          path: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          if-no-files-found: error
+    
+  build-emscripten:
+    name: Build emscripten ${{ matrix.config.build_type }}
+    runs-on: windows-latest
+    
+    env:
+      EMSDK_VERSION: 5.0.2
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Set up MSVC (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup emsdk
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: emscripten
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-static
+          build_preset: ${{ matrix.config.preset_prefix }}-static
+          output_folder: build/emscripten-${{ matrix.config.preset_prefix }}
+          build_folder: build/emscripten-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/emscripten/${{ matrix.config.preset_prefix }}
+  
+  build-android:
+    name: Build android ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+        linkage:
+          - name: static
+            shared: false
+
+          - name: shared
+            shared: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: android_arm
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          output_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/android/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+
+  ios-visionos-build:
+    name: Build ${{ matrix.platform.name }} ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: ios
+            host_profile: ios_arm64
+
+          - name: visionos
+            host_profile: visionos_arm64
+
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+        linkage:
+          - name: static
+            shared: false
+
+          - name: shared
+            shared: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Initialize Xcode
+        shell: bash
+        run: |
+          set -eux
+          xcodebuild -version
+          sudo xcodebuild -runFirstLaunch
+
+      # Manually specify the OpenSSL configure target used by the Conan recipe,
+      # as the OpenSSL 1.1 recipe does not fully support visionOS.
+      - name: Set OpenSSL configuration for visionOS
+        if: matrix.platform.name == 'visionos'
+        shell: bash
+        run: |
+          echo "CONAN_OPENSSL_CONFIGURATION=ios64-xcrun" >> "$GITHUB_ENV"
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: ${{ matrix.platform.host_profile }}
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          output_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+
+  tests-local-mcs:
+    name: Run Tests (Local MCS) Linux
+    ## Why Local MCS cannot run on GitHub Windows runners
+
+    # MCS Docker stack uses Linux container images.
+    # GitHub windows-2022 runners do not provide the same Docker Desktop Linux-container environment.
+    # When Docker runs there, it attempts to pull Windows container images.
+    # Because the MCS images are Linux images, Docker fails with "no matching manifest for windows(10.0.20348)/amd64"
+    # For this reason, we currently run our local tests on Linux.
+    runs-on: ubuntu-latest
+    needs: build-desktop
+
+    steps:
+      - name: Enable Git long paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          repository: magnopus/Magnopus.Services
+          ssh-key: ${{ secrets.MSC_DEPLOY_KEY }}
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker diagnostics
+        shell: bash
+        run: |
+          docker version
+          docker info
+          docker compose version
+
+      - name: Pull CHS
+        shell: bash
+        env:
+          COMPOSE_ANSI: never
+          COMPOSE_PROGRESS: plain
+        run: |
+          set -euxo pipefail
+          pip install requests
+          python Build/LocalContainers/start_current_o2dev.py
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: linux-relwithdebinfo-static-build
+          path: ${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo
+
+      - name: Set endpoint var
+        shell: bash
+        run: |
+          echo "MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081/" >> "$GITHUB_ENV" 
+
+      - name: Run Tests
+        shell: bash
+        run: |
+          set -eux
+
+          git lfs ls-files
+          git lfs pull
+          git lfs checkout
+
+          cd "${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo"
+
+          chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
+          chmod +x ./csp-tests
+          ./csp-tests
