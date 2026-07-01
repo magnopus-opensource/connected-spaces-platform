@@ -39,8 +39,11 @@ mkdir -p "$CONFIG_OUTPUT_DIR"
 # Copy specific Emscripten output files into the config folder
 cp "$WRAPPER_BUILD_DIR/ConnectedSpacesPlatform_WASM.js" "$CONFIG_OUTPUT_DIR/"
 cp "$WRAPPER_BUILD_DIR/ConnectedSpacesPlatform_WASM.wasm" "$CONFIG_OUTPUT_DIR/"
-cp "$WRAPPER_BUILD_DIR/ConnectedSpacesPlatform_WASM.wasm.debug.wasm" "$CONFIG_OUTPUT_DIR/"
 cp "$WRAPPER_BUILD_DIR/ConnectedSpacesPlatform_WASM.worker.js" "$CONFIG_OUTPUT_DIR/"
+
+if [ "$CONFIG" = "Debug" ]; then
+    cp "$WRAPPER_BUILD_DIR/ConnectedSpacesPlatform_WASM.wasm.debug.wasm" "$CONFIG_OUTPUT_DIR/"
+fi
 
 # Copy all generated TypeScript output into the package folder
 cp -R "$TYPESCRIPT_OUTPUT_DIR"/. "$OUTPUT_DIR/"
