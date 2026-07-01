@@ -83,3 +83,6 @@ runs:
         ./LegacyEmscriptenWrapper/GenerateLegacyEmscriptenPackage.sh \
           "${{ inputs.build_type }}" \
           "${{ inputs.build_folder }}"
+
+        cd WasmTesting
+        cmd.exe /c run-csp-wasm-tests.cmd
