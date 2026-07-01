@@ -84,5 +84,8 @@ runs:
           "${{ inputs.build_type }}" \
           "${{ inputs.build_folder }}"
 
-        cd WasmTesting
-        cmd.exe /c run-csp-wasm-tests.cmd
+    - name: Run Tests
+      shell: pwsh
+        run: |
+          cd WasmTesting
+          ./run-csp-wasm-tests.cmd
