@@ -86,6 +86,6 @@ runs:
 
     - name: Run Tests
       shell: pwsh
-        run: |
-          cd WasmTesting
-          ./run-csp-wasm-tests.cmd
+      run: |
+        cd WasmTesting
+        ./run-csp-wasm-tests.cmd
