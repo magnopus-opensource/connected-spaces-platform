@@ -84,6 +84,15 @@ runs:
           "${{ inputs.build_type }}" \
           "${{ inputs.build_folder }}"
 
+    - name: Copy wasm package
+      shell: pwsh
+      run: |
+        $Source = ".\Library\Binaries\package\wasm\connected-spaces-platform.web"
+        $Dest = ".\WasmTesting\node_modules\connected-spaces-platform.web"
+
+        Remove-Item $Dest -Recurse -Force -ErrorAction SilentlyContinue
+        Copy-Item $Source $Dest -Recurse -Force
+
     - name: Run Tests
       shell: pwsh
       run: |
