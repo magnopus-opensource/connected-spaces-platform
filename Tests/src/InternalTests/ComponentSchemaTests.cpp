@@ -1461,12 +1461,10 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, UpdatedLegacySchemaExposesExt
 
     for (const auto& Schema : AllUpdated)
     {
-        const auto LastPropertyIndex = Schema.Properties.Size() - 1;
-        const auto ExtraKey = Schema.Properties[LastPropertyIndex].Key;
-
         auto* Component = Entity->AddComponent(static_cast<csp::multiplayer::ComponentType>(Schema.TypeId));
         ASSERT_NE(Component, nullptr) << Schema.Name.c_str();
 
+        const auto ExtraKey = Schema.Properties[Schema.Properties.Size() - 1].Key;
         const auto* Value = Component->GetSchemaProperty(ExtraKey);
         ASSERT_NE(Value, nullptr) << Schema.Name.c_str();
 
