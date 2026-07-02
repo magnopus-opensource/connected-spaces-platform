@@ -27,11 +27,11 @@ jobs:
             host_profile: windows_ninja
             
           - name: linux
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             host_profile: linux_gcc
 
           - name: macos
-            runner: macos-latest
+            runner: macos-15
             host_profile: osx_arm
 
         config:
@@ -93,7 +93,7 @@ jobs:
     
   build-emscripten:
     name: Build emscripten ${{ matrix.config.build_type }}
-    runs-on: windows-latest
+    runs-on: windows-2022
     
     env:
       EMSDK_VERSION: 5.0.2
@@ -142,7 +142,7 @@ jobs:
   
   build-android:
     name: Build android ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     strategy:
       fail-fast: false
@@ -185,7 +185,7 @@ jobs:
 
   ios-visionos-build:
     name: Build ${{ matrix.platform.name }} ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
-    runs-on: macos-latest
+    runs-on: macos-15
 
     strategy:
       fail-fast: false
@@ -256,7 +256,7 @@ jobs:
     # When Docker runs there, it attempts to pull Windows container images.
     # Because the MCS images are Linux images, Docker fails with "no matching manifest for windows(10.0.20348)/amd64"
     # For this reason, we currently run our local tests on Linux.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-desktop
 
     steps:
