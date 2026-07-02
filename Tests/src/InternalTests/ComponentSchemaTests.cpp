@@ -356,7 +356,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
     const auto* Component = Entity->GetComponent(0);
     ASSERT_NE(Component, nullptr);
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(Value->GetString(), csp::common::String { "OverriddenValue" });
@@ -387,7 +387,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
     const auto* Component = Entity->GetComponent(0);
     ASSERT_NE(Component, nullptr);
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(Value->GetString(), csp::common::String { "OverriddenValue" });
@@ -508,7 +508,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemDataAbove
     EXPECT_NE(Entity->GetComponent(0), nullptr);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsDefaultValue)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetPropertyReturnsDefaultValue)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -526,13 +526,13 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsDefau
     const auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(*Value, "Value");
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsNullptrForUnknownKey)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetPropertyReturnsNullptrForUnknownKey)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -550,10 +550,10 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetSchemaPropertyReturnsNullp
     const auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    EXPECT_EQ(Component->GetSchemaProperty(999), nullptr);
+    EXPECT_EQ(Component->GetProperty(999), nullptr);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMatchingTypeSucceeds)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMatchingTypeSucceeds)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -571,15 +571,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMatching
     auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    Component->SetSchemaProperty(0, "NewValue");
+    Component->SetProperty(0, "NewValue");
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(*Value, "NewValue");
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMismatchedTypeLeavesValueUnchanged)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedTypeLeavesValueUnchanged)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -597,15 +597,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithMismatch
     auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    Component->SetSchemaProperty(0, int64_t { 42 });
+    Component->SetProperty(0, int64_t { 42 });
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(*Value, "Value");
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithUnknownKeyHasNoEffect)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithUnknownKeyHasNoEffect)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -623,12 +623,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWithUnknownK
     auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    Component->SetSchemaProperty(999, "SomeValue");
+    Component->SetProperty(999, "SomeValue");
 
-    EXPECT_EQ(Component->GetSchemaProperty(999), nullptr);
+    EXPECT_EQ(Component->GetProperty(999), nullptr);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWhenParentIsLockedHasNoEffect)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWhenParentIsLockedHasNoEffect)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -647,15 +647,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyWhenParentIs
     ASSERT_NE(Component, nullptr);
 
     Entity->Lock();
-    Component->SetSchemaProperty(0, "NewValue");
+    Component->SetProperty(0, "NewValue");
 
-    const auto* Value = Component->GetSchemaProperty(0);
+    const auto* Value = Component->GetProperty(0);
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(*Value, "Value");
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyReflectsInTypedGetter)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyReflectsInTypedGetter)
 {
     auto Fixture = TestFixture({});
 
@@ -669,12 +669,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetSchemaPropertyReflectsInTy
     ASSERT_NE(AudioComponent, nullptr);
 
     const auto NewPosition = csp::common::Vector3 { 1.0f, 2.0f, 3.0f };
-    Component->SetSchemaProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position), NewPosition);
+    Component->SetProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position), NewPosition);
 
     EXPECT_EQ(AudioComponent->GetPosition(), NewPosition);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetSchemaProperty)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetProperty)
 {
     auto Fixture = TestFixture({});
 
@@ -690,7 +690,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetSchem
     const auto NewPosition = csp::common::Vector3 { 4.0f, 5.0f, 6.0f };
     AudioComponent->SetPosition(NewPosition);
 
-    const auto* SchemaValue = Component->GetSchemaProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position));
+    const auto* SchemaValue = Component->GetProperty(static_cast<uint16_t>(csp::multiplayer::AudioPropertyKeys::Position));
     ASSERT_NE(SchemaValue, nullptr);
 
     EXPECT_EQ(SchemaValue->GetVector3(), NewPosition);

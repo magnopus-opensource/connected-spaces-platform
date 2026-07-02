@@ -185,11 +185,11 @@ public:
 
     /// @brief Get a property value by schema key.
     /// @return A pointer to the value, or nullptr if the key is not in this component's schema.
-    const csp::common::ReplicatedValue* GetSchemaProperty(uint16_t Key) const;
+    const csp::common::ReplicatedValue* GetProperty(uint16_t Key) const;
 
     /// @brief Set a property value by schema key.
     /// Silently ignored if the key is absent from this component's schema or the value type does not match the schema definition.
-    void SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value);
+    void SetProperty(uint16_t Key, const csp::common::ReplicatedValue& Value);
 
 protected:
     ComponentBase();

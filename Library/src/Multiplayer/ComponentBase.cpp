@@ -96,7 +96,7 @@ namespace
     }
 } // namespace
 
-const csp::common::ReplicatedValue* ComponentBase::GetSchemaProperty(uint16_t Key) const
+const csp::common::ReplicatedValue* ComponentBase::GetProperty(uint16_t Key) const
 {
     if (!CachedSchema)
     {
@@ -112,7 +112,7 @@ const csp::common::ReplicatedValue* ComponentBase::GetSchemaProperty(uint16_t Ke
     return Value != InvalidValue ? &Value : nullptr;
 }
 
-void ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)
+void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)
 {
     if (!CachedSchema)
     {
