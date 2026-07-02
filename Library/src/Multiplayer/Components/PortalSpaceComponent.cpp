@@ -65,7 +65,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& PortalSpaceComponent::GetSchema() { return Schema; }
 
 PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : PortalSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<PortalSpaceComponent> PortalSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(PortalSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<PortalSpaceComponent>(new PortalSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+PortalSpaceComponent::PortalSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

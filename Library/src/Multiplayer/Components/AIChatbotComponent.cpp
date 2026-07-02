@@ -51,7 +51,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& AIChatbotSpaceComponent::GetSchema() { return Schema; }
 
 csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AIChatbotSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AIChatbotSpaceComponent> AIChatbotSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AIChatbotSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AIChatbotSpaceComponent>(new AIChatbotSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AIChatbotSpaceComponent::AIChatbotSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

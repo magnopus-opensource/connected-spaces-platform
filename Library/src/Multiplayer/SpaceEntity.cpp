@@ -505,14 +505,26 @@ uint16_t SpaceEntity::GenerateComponentId()
     }
 }
 
+template <typename T> static ComponentBase* TryMakeOrDefault(const ComponentSchema* Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (Schema != nullptr)
+    {
+        if (auto Component = T::TryMake(*Schema, LogSystem, Parent))
+        {
+            return Component.release();
+        }
+    }
+
+    return new T(LogSystem, Parent);
+}
+
 ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, uint64_t TypeId)
 {
+    const auto* Registry = EntitySystem != nullptr ? EntitySystem->GetComponentSchemaRegistry() : nullptr;
+    const auto* Schema = Registry != nullptr ? Registry->Find(TypeId) : nullptr;
+
     if (!IsLegacyComponentTypeId(TypeId))
     {
-        const auto* Registry = EntitySystem != nullptr ? EntitySystem->GetComponentSchemaRegistry() : nullptr;
-
-        const auto* Schema = Registry != nullptr ? Registry->Find(TypeId) : nullptr;
-
         if (Schema == nullptr)
         {
             if (LogSystem != nullptr)
@@ -533,79 +545,79 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, uint64_
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = new StaticModelSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<StaticModelSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AnimatedModel:
-        Component = new AnimatedModelSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AnimatedModelSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::VideoPlayer:
-        Component = new VideoPlayerSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<VideoPlayerSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Image:
-        Component = new ImageSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ImageSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ExternalLink:
-        Component = new ExternalLinkSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ExternalLinkSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AvatarData:
-        Component = new AvatarSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AvatarSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Light:
-        Component = new LightSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<LightSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ScriptData:
-        Component = new ScriptSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ScriptSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Button:
-        Component = new ButtonSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ButtonSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Custom:
-        Component = new CustomSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CustomSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Portal:
-        Component = new PortalSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<PortalSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Conversation:
-        Component = new ConversationSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ConversationSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Audio:
-        Component = new AudioSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AudioSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Spline:
-        Component = new SplineSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<SplineSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Collision:
-        Component = new CollisionSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CollisionSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Reflection:
-        Component = new ReflectionSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ReflectionSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Fog:
-        Component = new FogSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<FogSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ECommerce:
-        Component = new ECommerceSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ECommerceSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::CinematicCamera:
-        Component = new CinematicCameraSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CinematicCameraSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::FiducialMarker:
-        Component = new FiducialMarkerSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<FiducialMarkerSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::GaussianSplat:
-        Component = new GaussianSplatSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<GaussianSplatSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Text:
-        Component = new TextSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<TextSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Hotspot:
-        Component = new HotspotSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<HotspotSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ScreenSharing:
-        Component = new ScreenSharingSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ScreenSharingSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AIChatbot:
-        Component = new AIChatbotSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AIChatbotSpaceComponent>(Schema, LogSystem, this);
         break;
     default:
     {

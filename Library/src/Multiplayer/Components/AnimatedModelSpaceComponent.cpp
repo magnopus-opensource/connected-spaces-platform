@@ -113,7 +113,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& AnimatedModelSpaceComponent::GetSchema() { return Schema; }
 
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AnimatedModelSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AnimatedModelSpaceComponent> AnimatedModelSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AnimatedModelSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AnimatedModelSpaceComponent>(new AnimatedModelSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 

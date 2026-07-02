@@ -80,7 +80,23 @@ const auto Schema = ComponentSchema {
 const ComponentSchema& ButtonSpaceComponent::GetSchema() { return Schema; }
 
 ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ButtonSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<ButtonSpaceComponent> ButtonSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ButtonSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ButtonSpaceComponent>(new ButtonSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+ButtonSpaceComponent::ButtonSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
 }
 
