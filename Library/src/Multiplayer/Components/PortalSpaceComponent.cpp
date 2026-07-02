@@ -87,7 +87,10 @@ PortalSpaceComponent::PortalSpaceComponent(const ComponentSchema& InSchema, csp:
 
 const csp::common::String& PortalSpaceComponent::GetSpaceId() const { return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId)); }
 
-void PortalSpaceComponent::SetSpaceId(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value); }
+void PortalSpaceComponent::SetSpaceId(const csp::common::String& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value);
+}
 
 /* IPositionComponent */
 
@@ -96,14 +99,17 @@ const csp::common::Vector3& PortalSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
 }
 
-void PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value); }
+void PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
+}
 
 float PortalSpaceComponent::GetRadius() const { return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius)); }
 
-void PortalSpaceComponent::SetRadius(float Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
+void PortalSpaceComponent::SetRadius(float Value) { SetPropertyDirect(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
 
 bool PortalSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)); }
 
-void PortalSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }
+void PortalSpaceComponent::SetIsEnabled(bool Value) { SetPropertyDirect(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }
 
 } // namespace csp::multiplayer

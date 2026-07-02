@@ -119,14 +119,17 @@ TextSpaceComponent::TextSpaceComponent(const ComponentSchema& InSchema, csp::com
 
 const csp::common::String& TextSpaceComponent::GetText() const { return GetStringProperty(static_cast<uint32_t>(TextPropertyKeys::Text)); }
 
-void TextSpaceComponent::SetText(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Text), Value); }
+void TextSpaceComponent::SetText(const csp::common::String& Value) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Text), Value); }
 
 const csp::common::Vector3& TextSpaceComponent::GetTextColor() const
 {
     return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::TextColor));
 }
 
-void TextSpaceComponent::SetTextColor(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::TextColor), Value); }
+void TextSpaceComponent::SetTextColor(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::TextColor), Value);
+}
 
 const csp::common::Vector3& TextSpaceComponent::GetBackgroundColor() const
 {
@@ -135,32 +138,41 @@ const csp::common::Vector3& TextSpaceComponent::GetBackgroundColor() const
 
 void TextSpaceComponent::SetBackgroundColor(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(TextPropertyKeys::BackgroundColor), Value);
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::BackgroundColor), Value);
 }
 
 bool TextSpaceComponent::GetIsBackgroundVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible)); }
 
-void TextSpaceComponent::SetIsBackgroundVisible(bool InValue) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible), InValue); }
+void TextSpaceComponent::SetIsBackgroundVisible(bool InValue)
+{
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible), InValue);
+}
 
 float TextSpaceComponent::GetWidth() const { return GetFloatProperty(static_cast<uint32_t>(TextPropertyKeys::Width)); }
 
-void TextSpaceComponent::SetWidth(float InValue) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Width), InValue); }
+void TextSpaceComponent::SetWidth(float InValue) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Width), InValue); }
 
 float TextSpaceComponent::GetHeight() const { return GetFloatProperty(static_cast<uint32_t>(TextPropertyKeys::Height)); }
 
-void TextSpaceComponent::SetHeight(float InValue) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Height), InValue); }
+void TextSpaceComponent::SetHeight(float InValue) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Height), InValue); }
 
 const csp::common::Vector3& TextSpaceComponent::GetPosition() const { return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::Position)); }
 
-void TextSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Position), Value); }
+void TextSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Position), Value);
+}
 
 const csp::common::Vector4& TextSpaceComponent::GetRotation() const { return GetVector4Property(static_cast<uint32_t>(TextPropertyKeys::Rotation)); }
 
-void TextSpaceComponent::SetRotation(const csp::common::Vector4& Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Rotation), Value); }
+void TextSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Rotation), Value);
+}
 
 const csp::common::Vector3& TextSpaceComponent::GetScale() const { return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::Scale)); }
 
-void TextSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::Scale), Value); }
+void TextSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::Scale), Value); }
 
 SpaceTransform TextSpaceComponent::GetTransform() const
 {
@@ -183,15 +195,15 @@ void TextSpaceComponent::SetTransform(const SpaceTransform& InValue)
 
 bool TextSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsVisible)); }
 
-void TextSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsVisible), Value); }
+void TextSpaceComponent::SetIsVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::IsVisible), Value); }
 
 bool TextSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible)); }
 
-void TextSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible), Value); }
+void TextSpaceComponent::SetIsARVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::IsARVisible), Value); }
 
 bool TextSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsVirtualVisible)); }
 
-void TextSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsVirtualVisible), Value); }
+void TextSpaceComponent::SetIsVirtualVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::IsVirtualVisible), Value); }
 
 BillboardMode TextSpaceComponent::GetBillboardMode() const
 {
@@ -200,6 +212,6 @@ BillboardMode TextSpaceComponent::GetBillboardMode() const
 
 void TextSpaceComponent::SetBillboardMode(BillboardMode Value)
 {
-    SetProperty(static_cast<uint32_t>(TextPropertyKeys::BillboardMode), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(TextPropertyKeys::BillboardMode), static_cast<int64_t>(Value));
 }
 } // namespace csp::multiplayer

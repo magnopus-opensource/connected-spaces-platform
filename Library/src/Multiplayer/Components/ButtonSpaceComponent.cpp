@@ -107,7 +107,7 @@ const csp::common::String& ButtonSpaceComponent::GetLabelText() const
 
 void ButtonSpaceComponent::SetLabelText(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::LabelText), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::LabelText), Value);
 }
 
 const csp::common::String& ButtonSpaceComponent::GetIconAssetId() const
@@ -117,7 +117,7 @@ const csp::common::String& ButtonSpaceComponent::GetIconAssetId() const
 
 void ButtonSpaceComponent::SetIconAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IconAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::IconAssetId), Value);
 }
 
 const csp::common::String& ButtonSpaceComponent::GetAssetCollectionId() const
@@ -127,7 +127,7 @@ const csp::common::String& ButtonSpaceComponent::GetAssetCollectionId() const
 
 void ButtonSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::AssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::AssetCollectionId), Value);
 }
 
 /* ITransformComponent */
@@ -137,18 +137,24 @@ const csp::common::Vector3& ButtonSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(ButtonPropertyKeys::Position));
 }
 
-void ButtonSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Position), Value); }
+void ButtonSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::Position), Value);
+}
 
 const csp::common::Vector4& ButtonSpaceComponent::GetRotation() const
 {
     return GetVector4Property(static_cast<uint32_t>(ButtonPropertyKeys::Rotation));
 }
 
-void ButtonSpaceComponent::SetRotation(const csp::common::Vector4& Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Rotation), Value); }
+void ButtonSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::Rotation), Value);
+}
 
 const csp::common::Vector3& ButtonSpaceComponent::GetScale() const { return GetVector3Property(static_cast<uint32_t>(ButtonPropertyKeys::Scale)); }
 
-void ButtonSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Scale), Value); }
+void ButtonSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::Scale), Value); }
 
 SpaceTransform ButtonSpaceComponent::GetTransform() const
 {
@@ -171,20 +177,20 @@ void ButtonSpaceComponent::SetTransform(const SpaceTransform& InValue)
 
 bool ButtonSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled)); }
 
-void ButtonSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled), Value); }
+void ButtonSpaceComponent::SetIsEnabled(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled), Value); }
 
 /* IVisibleComponent */
 
 bool ButtonSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVisible)); }
 
-void ButtonSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVisible), Value); }
+void ButtonSpaceComponent::SetIsVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::IsVisible), Value); }
 
 bool ButtonSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible)); }
 
-void ButtonSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible), Value); }
+void ButtonSpaceComponent::SetIsARVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible), Value); }
 
 bool ButtonSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible)); }
 
-void ButtonSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible), Value); }
+void ButtonSpaceComponent::SetIsVirtualVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible), Value); }
 
 } // namespace csp::multiplayer

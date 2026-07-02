@@ -124,7 +124,10 @@ const csp::common::Vector3& AudioSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(AudioPropertyKeys::Position));
 }
 
-void AudioSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Position), Value); }
+void AudioSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::Position), Value);
+}
 
 AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 {
@@ -133,7 +136,7 @@ AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 
 void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState Value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState), static_cast<int64_t>(Value));
 }
 
 const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
@@ -143,7 +146,7 @@ const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
 
 void AudioSpaceComponent::SetAudioAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId), Value);
 }
 
 const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
@@ -153,20 +156,20 @@ const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
 
 void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId), Value);
 }
 
 bool AudioSpaceComponent::GetIsLoopPlayback() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback)); }
 
-void AudioSpaceComponent::SetIsLoopPlayback(bool Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback), Value); }
+void AudioSpaceComponent::SetIsLoopPlayback(bool Value) { SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback), Value); }
 
 float AudioSpaceComponent::GetTimeSincePlay() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay)); }
 
-void AudioSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay), Value); }
+void AudioSpaceComponent::SetTimeSincePlay(float Value) { SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay), Value); }
 
 bool AudioSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)); }
 
-void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }
+void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }
 
 const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
 {
@@ -175,14 +178,14 @@ const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() cons
 
 void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 /* IAudioControlComponent */
 
 float AudioSpaceComponent::GetAttenuationRadius() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)); }
 
-void AudioSpaceComponent::SetAttenuationRadius(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), Value); }
+void AudioSpaceComponent::SetAttenuationRadius(float Value) { SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), Value); }
 
 AudioType AudioSpaceComponent::GetAudioType() const
 {
@@ -191,7 +194,7 @@ AudioType AudioSpaceComponent::GetAudioType() const
 
 void AudioSpaceComponent::SetAudioType(AudioType Value)
 {
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(Value));
 }
 
 float AudioSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume)); }
@@ -200,7 +203,7 @@ void AudioSpaceComponent::SetVolume(float Value)
 {
     if (Value >= 0.f && Value <= 1.f)
     {
-        SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume), Value);
+        SetPropertyDirect(static_cast<uint32_t>(AudioPropertyKeys::Volume), Value);
     }
     else
     {

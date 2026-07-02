@@ -94,7 +94,7 @@ std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProp
         return {};
     }
 
-    const auto& MaybeValue = Component->GetProperty(Key);
+    const auto& MaybeValue = Component->GetPropertyDirect(Key);
     if (MaybeValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::InvalidType)
     {
         return std::nullopt;
@@ -198,7 +198,7 @@ void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
 
     if (auto MaybeMappedValue = std::visit(Visitor{}, std::move(DesiredValue)))
     {
-        Component->SetProperty(Key, std::move(*MaybeMappedValue));
+        Component->SetPropertyDirect(Key, std::move(*MaybeMappedValue));
         SendPropertyUpdate();
     }
 }

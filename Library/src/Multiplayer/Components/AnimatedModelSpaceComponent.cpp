@@ -142,7 +142,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAsset
 
 void AnimatedModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
 const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAssetCollectionId() const
@@ -152,7 +152,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAsset
 
 void AnimatedModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
 /* ITransformComponent */
@@ -164,7 +164,7 @@ const csp::common::Vector3& AnimatedModelSpaceComponent::GetPosition() const
 
 void AnimatedModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& AnimatedModelSpaceComponent::GetRotation() const
@@ -174,7 +174,7 @@ const csp::common::Vector4& AnimatedModelSpaceComponent::GetRotation() const
 
 void AnimatedModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& AnimatedModelSpaceComponent::GetScale() const
@@ -184,7 +184,7 @@ const csp::common::Vector3& AnimatedModelSpaceComponent::GetScale() const
 
 void AnimatedModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale), Value);
 }
 
 SpaceTransform AnimatedModelSpaceComponent::GetTransform() const
@@ -211,12 +211,12 @@ bool AnimatedModelSpaceComponent::GetIsLoopPlayback() const
 
 void AnimatedModelSpaceComponent::SetIsLoopPlayback(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback), Value);
 }
 
 bool AnimatedModelSpaceComponent::GetIsPlaying() const { return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)); }
 
-void AnimatedModelSpaceComponent::SetIsPlaying(bool Value) { SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying), Value); }
+void AnimatedModelSpaceComponent::SetIsPlaying(bool Value) { SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying), Value); }
 
 int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 {
@@ -225,7 +225,7 @@ int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 
 void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex), Value);
 }
 
 csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceComponent::GetMaterialOverrides() const
@@ -252,7 +252,7 @@ void AnimatedModelSpaceComponent::AddMaterialOverride(const csp::common::String&
     auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
     ReplicatedOverrides[ModelPath] = MaterialId;
 
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 void AnimatedModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
@@ -260,18 +260,21 @@ void AnimatedModelSpaceComponent::RemoveMaterialOverride(const csp::common::Stri
     auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
     ReplicatedOverrides.Remove(ModelPath);
 
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 /* IVisibleComponent */
 
 bool AnimatedModelSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)); }
 
-void AnimatedModelSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible), Value); }
+void AnimatedModelSpaceComponent::SetIsVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible), Value); }
 
 bool AnimatedModelSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)); }
 
-void AnimatedModelSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value); }
+void AnimatedModelSpaceComponent::SetIsARVisible(bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value);
+}
 
 bool AnimatedModelSpaceComponent::GetIsVirtualVisible() const
 {
@@ -280,7 +283,7 @@ bool AnimatedModelSpaceComponent::GetIsVirtualVisible() const
 
 void AnimatedModelSpaceComponent::SetIsVirtualVisible(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible), Value);
 }
 
 /* IThirdPartyRefComponent */
@@ -292,7 +295,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRe
 
 void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 /* IShadowCasterComponent */
@@ -304,7 +307,7 @@ bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
 
 void AnimatedModelSpaceComponent::SetIsShadowCaster(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster), Value);
 }
 
 /* IRenderBehaviourComponent */
@@ -316,7 +319,7 @@ bool AnimatedModelSpaceComponent::GetShowAsHoldoutInAR() const
 
 void AnimatedModelSpaceComponent::SetShowAsHoldoutInAR(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR), Value);
 }
 
 bool AnimatedModelSpaceComponent::GetShowAsHoldoutInVirtual() const
@@ -326,7 +329,7 @@ bool AnimatedModelSpaceComponent::GetShowAsHoldoutInVirtual() const
 
 void AnimatedModelSpaceComponent::SetShowAsHoldoutInVirtual(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual), Value);
 }
 
 } // namespace csp::multiplayer

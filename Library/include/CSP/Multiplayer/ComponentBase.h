@@ -195,7 +195,7 @@ protected:
     ComponentBase();
     ComponentBase(uint64_t TypeId, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
+    const csp::common::ReplicatedValue& GetPropertyDirect(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;
     int64_t GetIntegerProperty(uint32_t Key) const;
     float GetFloatProperty(uint32_t Key) const;
@@ -205,7 +205,7 @@ protected:
     const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
     const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetStringMapProperty(uint32_t Key) const;
 
-    void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
+    void SetPropertyDirect(uint32_t Key, const csp::common::ReplicatedValue& Value);
     void RemoveProperty(uint32_t Key);
     void SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value);
 

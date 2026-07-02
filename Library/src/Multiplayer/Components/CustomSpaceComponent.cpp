@@ -68,7 +68,7 @@ const csp::common::String& CustomSpaceComponent::GetApplicationOrigin() const
 
 void CustomSpaceComponent::SetApplicationOrigin(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin), Value);
 }
 
 uint32_t CustomSpaceComponent::GetCustomPropertySubscriptionKey(const csp::common::String& Key) const
@@ -89,7 +89,7 @@ const csp::common::ReplicatedValue& CustomSpaceComponent::GetCustomProperty(cons
 {
     const uint32_t PropertyKey = GetCustomPropertySubscriptionKey(Key);
 
-    return GetProperty(PropertyKey);
+    return GetPropertyDirect(PropertyKey);
 }
 
 void CustomSpaceComponent::SetCustomProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value)
@@ -101,7 +101,7 @@ void CustomSpaceComponent::SetCustomProperty(const csp::common::String& Key, con
         {
             AddKey(Key);
         }
-        SetProperty(PropertyKey, Value);
+        SetPropertyDirect(PropertyKey, Value);
     }
 }
 
@@ -120,11 +120,11 @@ csp::common::List<csp::common::String> CustomSpaceComponent::GetCustomPropertyKe
 {
     if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)))
     {
-        const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
+        const auto& RepVal = GetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
         if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String && !RepVal.GetString().IsEmpty())
         {
-            return GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)).GetString().Split(',');
+            return GetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)).GetString().Split(',');
         }
     }
 
@@ -147,7 +147,7 @@ void CustomSpaceComponent::AddKey(const csp::common::String& Value)
 {
     if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)))
     {
-        const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
+        const auto& RepVal = GetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
         if (RepVal.GetReplicatedValueType() != csp::common::ReplicatedValueType::String)
         {
@@ -159,16 +159,16 @@ void CustomSpaceComponent::AddKey(const csp::common::String& Value)
         if (!ReturnKeys.IsEmpty())
         {
             ReturnKeys = ReturnKeys + "," + Value;
-            SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
+            SetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
         }
         else
         {
-            SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
+            SetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
         }
     }
     else
     {
-        SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
+        SetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
     }
 }
 
@@ -195,7 +195,7 @@ void CustomSpaceComponent::RemoveKey(const csp::common::String& Key)
             }
         }
 
-        SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
+        SetPropertyDirect(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
     }
     else
     {
