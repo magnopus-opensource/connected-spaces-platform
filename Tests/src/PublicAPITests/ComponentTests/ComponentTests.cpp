@@ -18,27 +18,43 @@
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/Multiplayer/ComponentSchema.h"
+#include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
+#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
+#include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
+#include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
+#include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
+#include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
+#include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "Common/Convert.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace csp::multiplayer;
@@ -404,4 +420,81 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProperty)
+{
+    const auto WithExtraProperty = [](const csp::multiplayer::ComponentSchema& Original) -> csp::multiplayer::ComponentSchema
+    {
+        const auto NextPropertyKey = [](const auto& Properties) -> uint16_t
+        {
+            const auto Max
+                = std::max_element(Properties.begin(), Properties.end(), [](const auto& Left, const auto& Right) { return Left.Key < Right.Key; });
+
+            return Max == Properties.end() ? uint16_t { 0 } : static_cast<uint16_t>(Max->Key + 1);
+        };
+
+        auto Properties = csp::common::Convert(Original.Properties);
+        Properties.push_back({
+            NextPropertyKey(Properties),
+            "extraProperty",
+            csp::common::String { "ExtraDefault" },
+        });
+
+        return {
+            Original.TypeId,
+            Original.Name,
+            csp::common::Convert(Properties),
+        };
+    };
+
+    const auto AllUpdated = std::vector<csp::multiplayer::ComponentSchema> {
+        WithExtraProperty(csp::multiplayer::StaticModelSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AnimatedModelSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::VideoPlayerSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ImageSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ExternalLinkSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AvatarSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::LightSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ScriptSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ButtonSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CustomSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::PortalSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ConversationSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AudioSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::SplineSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CollisionSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ReflectionSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::FogSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ECommerceSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::CinematicCameraSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::FiducialMarkerSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::GaussianSplatSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::TextSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::HotspotSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::ScreenSharingSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::AIChatbotSpaceComponent::GetSchema()),
+    };
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto Engine = csp::multiplayer::OfflineRealtimeEngine {
+        *SystemsManager.GetLogSystem(),
+        *SystemsManager.GetScriptSystem(),
+        csp::common::Convert(AllUpdated),
+    };
+
+    auto* Entity = std::get<0>(AWAIT(&Engine, CreateEntity, "Test Entity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {}));
+    ASSERT_NE(Entity, nullptr);
+
+    for (const auto& Schema : AllUpdated)
+    {
+        auto* Component = Entity->AddComponent(static_cast<csp::multiplayer::ComponentType>(Schema.TypeId));
+        ASSERT_NE(Component, nullptr) << Schema.Name.c_str();
+
+        const auto ExtraKey = Schema.Properties[Schema.Properties.Size() - 1].Key;
+        const auto* Value = Component->GetSchemaProperty(ExtraKey);
+        ASSERT_NE(Value, nullptr) << Schema.Name.c_str();
+
+        EXPECT_EQ(Value->GetString(), "ExtraDefault") << Schema.Name.c_str();
+    }
 }
