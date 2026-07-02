@@ -59,7 +59,6 @@ class IRealtimeEngine;
 namespace csp::multiplayer
 {
 class OnlineRealtimeEngine;
-class ClientElectionManager;
 class ISignalRConnection;
 class NetworkEventManagerImpl;
 class IWebSocketClient;

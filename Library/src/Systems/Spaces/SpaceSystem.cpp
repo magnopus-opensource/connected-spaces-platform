@@ -343,21 +343,8 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                     auto DefaultScopeIt
                         = std::find_if(Scopes.begin(), Scopes.end(), [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
 
-                    const bool ManagedLeaderElection = DefaultScopeIt->ManagedLeaderElection;
-
-                    // This will set server-side election to true if the scope has ManagedLeaderElection enabled. Otherwise it will default to client
-                    // election.
-                    static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->SetServerSideElectionEnabled(ManagedLeaderElection);
                     // Start leader election
                     static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->EnableLeaderElection();
-
-                    // We don't want to register the scope and activate the server-side leader election system,
-                    // if the scope doesn't have ManagedLeaderElection set to true.
-                    if (ManagedLeaderElection == false)
-                    {
-                        FinishedGetScopeEvent->set(SpaceResult);
-                        return;
-                    }
 
                     // 3. We want to find the scope leader, and register this scope to the RealtimeEngine for use in leader election.
                     this->MultiplayerSystem->GetScopeLeader(DefaultScopeIt->Id,
@@ -501,9 +488,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     {
         csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetOnlineRealtimeEngine(
             static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
-
-        // This should start at false until we validate that the spaces default scope has ManagedLeaderElection enabled
-        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->SetServerSideElectionEnabled(false);
     }
 
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
