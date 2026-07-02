@@ -287,7 +287,7 @@ jobs:
           docker info
           docker compose version
 
-      - name: Pull CHS
+      - name: Pull and run CHS container
         shell: bash
         env:
           COMPOSE_ANSI: never
