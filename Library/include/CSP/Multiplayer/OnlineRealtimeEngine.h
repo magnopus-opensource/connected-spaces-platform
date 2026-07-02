@@ -346,8 +346,9 @@ public:
     bool IsLeaderElectionEnabled() const;
 
     /// @brief Debug helper to get the id of the currently elected script leader.
-    /// This should be updated when we fully support scopes. We will need to pass in the scopeId we want the leader for.
-    /// @return The id of the leader if leader election is enabled, 0 if it is not.
+    /// @note It is safe to assume that server-side leader election is always enabled. While an internal endpoint does exist to disable leader
+    /// election, it is only used for testing and is not exported as part of the public interop API surface.
+    /// @return The id of the leader if a leader is set, 0 if it is not.
     uint64_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.

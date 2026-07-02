@@ -1105,16 +1105,8 @@ bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return LeaderElecti
 
 uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
-    if (IsLeaderElectionEnabled())
-    {
-        std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
-        return LeaderId.has_value() ? *LeaderId : 0;
-    }
-    else
-    {
-        LogSystem->LogMsg(csp::common::LogLevel::Warning, "OnlineRealtimeEngine::GetLeaderId Called when leader election isn't enabled.");
-        return 0;
-    }
+    std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+    return LeaderId.has_value() ? *LeaderId : 0;
 }
 
 bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
