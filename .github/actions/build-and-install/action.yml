@@ -65,7 +65,7 @@ runs:
     - name: Conan install
       shell: bash
       run: |
-        set -eux
+        set -euxo pipefail
 
         PROFILE_PATH="profiles/host/${{ inputs.host_profile }}"
 
@@ -83,19 +83,19 @@ runs:
     - name: Configure CMake
       shell: bash
       run: |
-        set -eux
+        set -euxo pipefail
         cmake --preset "${{ inputs.configure_preset }}"
 
     - name: Build
       shell: bash
       run: |
-        set -eux
+        set -euxo pipefail
         cmake --build --preset "${{ inputs.build_preset }}"
 
     - name: Install
       shell: bash
       run: |
-        set -eux
+        set -euxo pipefail
         cmake --install \
           "${{ github.workspace }}/${{ inputs.build_folder }}" \
           --config "${{ inputs.build_type }}" \

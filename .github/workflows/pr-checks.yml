@@ -67,7 +67,8 @@ jobs:
       - name: Resolve LFS
         shell: bash
         run: |
-          set -eux
+          set -euxo pipefail
+
           git lfs ls-files
           git lfs pull
           git lfs checkout
@@ -224,7 +225,8 @@ jobs:
       - name: Initialize Xcode
         shell: bash
         run: |
-          set -eux
+          set -euxo pipefail
+
           xcodebuild -version
           sudo xcodebuild -runFirstLaunch
 
@@ -234,6 +236,7 @@ jobs:
         if: matrix.platform.name == 'visionos'
         shell: bash
         run: |
+          set -euo pipefail
           echo "CONAN_OPENSSL_CONFIGURATION=ios64-xcrun" >> "$GITHUB_ENV"
 
       - name: Build and install
@@ -283,6 +286,8 @@ jobs:
       - name: Docker diagnostics
         shell: bash
         run: |
+          set -euxo pipefail
+
           docker version
           docker info
           docker compose version
@@ -293,7 +298,8 @@ jobs:
           COMPOSE_ANSI: never
           COMPOSE_PROGRESS: plain
         run: |
-          set -euxo pipefail
+          set -euo pipefail
+
           pip install requests
           python Build/LocalContainers/start_current_o2dev.py
 
@@ -305,12 +311,13 @@ jobs:
       - name: Set endpoint var
         shell: bash
         run: |
+          set -euo pipefail
           echo "MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081/" >> "$GITHUB_ENV" 
 
       - name: Run Tests
         shell: bash
         run: |
-          set -eux
+          set -euxo pipefail
 
           cd "${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo"
 
