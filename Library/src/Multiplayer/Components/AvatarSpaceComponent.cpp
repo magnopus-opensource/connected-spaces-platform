@@ -15,124 +15,20 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::AvatarData),
-    "Avatar",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarId),
-            "avatarId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::UserId),
-            "userId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::State),
-            "state",
-            static_cast<int64_t>(AvatarState::Idle),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(-1),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AgoraUserId),
-            "agoraUserId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsHandIKEnabled),
-            "isHandIKEnabled",
-            false,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
-            "targetHandIKTargetLocation",
-            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HandRotation),
-            "handRotation",
-            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HeadRotation),
-            "headRotation",
-            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
-            "walkRunBlendPercentage",
-            0.0f,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
-            "torsoTwistAlpha",
-            0.0f,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarPlayMode),
-            "avatarPlayMode",
-            static_cast<int64_t>(AvatarPlayMode::Default),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
-            "movementDirection",
-            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::LocomotionModel),
-            "locomotionModel",
-            static_cast<int64_t>(LocomotionModel::Grounded),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVisible),
-            "isVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsARVisible),
-            "isARVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVirtualVisible),
-            "isVirtualVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarUrl),
-            "avatarUrl",
-            "",
-        },
-    },
-};
-
-const ComponentSchema& AvatarSpaceComponent::GetSchema() { return Schema; }
-
 AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : AvatarSpaceComponent(Schema, LogSystem, Parent)
+    : AvatarSpaceComponent(GetAvatarSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<AvatarSpaceComponent> AvatarSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(AvatarSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetAvatarSchema(), InSchema))
     {
         return nullptr;
     }

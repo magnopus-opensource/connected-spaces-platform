@@ -18,44 +18,20 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::ScriptData),
-    {}, // not exposed to scripting
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptSource),
-            {}, // not exposed to scripting
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::OwnerId),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(0),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(ScriptScope::Owner),
-        },
-    },
-};
-
-const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }
-
 ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ScriptSpaceComponent(Schema, LogSystem, Parent)
+    : ScriptSpaceComponent(GetScriptSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<ScriptSpaceComponent> ScriptSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ScriptSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetScriptSchema(), InSchema))
     {
         return nullptr;
     }

@@ -15,71 +15,22 @@
  */
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::Hotspot),
-    "Hotspot",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Position),
-            "position",
-            csp::common::Vector3::Zero(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Rotation),
-            "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsTeleportPoint),
-            "isTeleportPoint",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsSpawnPoint),
-            "isSpawnPoint",
-            false,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVisible),
-            "isVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsARVisible),
-            "isARVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVirtualVisible),
-            "isVirtualVisible",
-            true,
-        },
-    },
-};
-
-const ComponentSchema& HotspotSpaceComponent::GetSchema() { return Schema; }
-
 HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : HotspotSpaceComponent(Schema, LogSystem, Parent)
+    : HotspotSpaceComponent(GetHotspotSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<HotspotSpaceComponent> HotspotSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(HotspotSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetHotspotSchema(), InSchema))
     {
         return nullptr;
     }

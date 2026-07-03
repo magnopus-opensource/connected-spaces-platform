@@ -15,79 +15,20 @@
  */
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::Button),
-    "Button",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::LabelText),
-            "labelText",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IconAssetId),
-            "iconAssetId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::AssetCollectionId),
-            "assetCollectionId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Position),
-            "position",
-            csp::common::Vector3 { 0, 0, 0 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Rotation),
-            "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Scale),
-            "scale",
-            csp::common::Vector3 { 1, 1, 1 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVisible),
-            "isVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsEnabled),
-            "isEnabled",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsARVisible),
-            "isARVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVirtualVisible),
-            "isVirtualVisible",
-            true,
-        },
-    },
-};
-
-const ComponentSchema& ButtonSpaceComponent::GetSchema() { return Schema; }
-
 ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ButtonSpaceComponent(Schema, LogSystem, Parent)
+    : ButtonSpaceComponent(GetButtonSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<ButtonSpaceComponent> ButtonSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ButtonSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetButtonSchema(), InSchema))
     {
         return nullptr;
     }

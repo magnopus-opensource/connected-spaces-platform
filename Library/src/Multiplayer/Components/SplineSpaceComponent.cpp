@@ -17,7 +17,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 
 #include "tinyspline.h"
@@ -39,29 +39,15 @@ namespace
     };
 }
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::Spline),
-    "Spline",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
-            {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
-            0.f,
-        },
-    },
-};
-
-const ComponentSchema& SplineSpaceComponent::GetSchema() { return Schema; }
-
 SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : SplineSpaceComponent(Schema, LogSystem, Parent)
+    : SplineSpaceComponent(GetSplineSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<SplineSpaceComponent> SplineSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(SplineSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetSplineSchema(), InSchema))
     {
         return nullptr;
     }

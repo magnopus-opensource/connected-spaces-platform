@@ -16,96 +16,22 @@
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 #include <memory>
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::StaticModel),
-    "StaticModel",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetId),
-            "externalResourceAssetId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId),
-            "externalResourceAssetCollectionId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::MaterialOverrides),
-            {}, // not exposed to scripting
-            csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Position),
-            "position",
-            csp::common::Vector3::Zero(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Rotation),
-            "rotation",
-            csp::common::Vector4::Identity(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Scale),
-            "scale",
-            csp::common::Vector3::One(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVisible),
-            "isVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsARVisible),
-            "isARVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsShadowCaster),
-            "isShadowCaster",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVirtualVisible),
-            "isVirtualVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInAR),
-            "showAsHoldoutInAR",
-            false,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual),
-            "showAsHoldoutInVirtual",
-            false,
-        },
-    },
-};
-
-const ComponentSchema& StaticModelSpaceComponent::GetSchema() { return Schema; }
-
 StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : StaticModelSpaceComponent(Schema, LogSystem, Parent)
+    : StaticModelSpaceComponent(GetStaticModelSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<StaticModelSpaceComponent> StaticModelSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(StaticModelSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetStaticModelSchema(), InSchema))
     {
         return nullptr;
     }

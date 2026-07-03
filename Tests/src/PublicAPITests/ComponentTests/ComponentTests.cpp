@@ -50,6 +50,7 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Common/Convert.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -453,31 +454,31 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
     };
 
     const auto AllUpdated = std::vector<csp::multiplayer::ComponentSchema> {
-        WithExtraProperty(csp::multiplayer::StaticModelSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::AnimatedModelSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::VideoPlayerSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ImageSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ExternalLinkSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::AvatarSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::LightSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ScriptSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ButtonSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::CustomSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::PortalSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ConversationSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::AudioSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::SplineSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::CollisionSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ReflectionSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::FogSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ECommerceSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::CinematicCameraSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::FiducialMarkerSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::GaussianSplatSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::TextSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::HotspotSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::ScreenSharingSpaceComponent::GetSchema()),
-        WithExtraProperty(csp::multiplayer::AIChatbotSpaceComponent::GetSchema()),
+        WithExtraProperty(csp::multiplayer::GetStaticModelSchema()),
+        WithExtraProperty(csp::multiplayer::GetAnimatedModelSchema()),
+        WithExtraProperty(csp::multiplayer::GetVideoPlayerSchema()),
+        WithExtraProperty(csp::multiplayer::GetImageSchema()),
+        WithExtraProperty(csp::multiplayer::GetExternalLinkSchema()),
+        WithExtraProperty(csp::multiplayer::GetAvatarSchema()),
+        WithExtraProperty(csp::multiplayer::GetLightSchema()),
+        WithExtraProperty(csp::multiplayer::GetScriptSchema()),
+        WithExtraProperty(csp::multiplayer::GetButtonSchema()),
+        WithExtraProperty(csp::multiplayer::GetCustomSchema()),
+        WithExtraProperty(csp::multiplayer::GetPortalSchema()),
+        WithExtraProperty(csp::multiplayer::GetConversationSchema()),
+        WithExtraProperty(csp::multiplayer::GetAudioSchema()),
+        WithExtraProperty(csp::multiplayer::GetSplineSchema()),
+        WithExtraProperty(csp::multiplayer::GetCollisionSchema()),
+        WithExtraProperty(csp::multiplayer::GetReflectionSchema()),
+        WithExtraProperty(csp::multiplayer::GetFogSchema()),
+        WithExtraProperty(csp::multiplayer::GetECommerceSchema()),
+        WithExtraProperty(csp::multiplayer::GetCinematicCameraSchema()),
+        WithExtraProperty(csp::multiplayer::GetFiducialMarkerSchema()),
+        WithExtraProperty(csp::multiplayer::GetGaussianSplatSchema()),
+        WithExtraProperty(csp::multiplayer::GetTextSchema()),
+        WithExtraProperty(csp::multiplayer::GetHotspotSchema()),
+        WithExtraProperty(csp::multiplayer::GetScreenSharingSchema()),
+        WithExtraProperty(csp::multiplayer::GetAIChatbotSchema()),
     };
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();

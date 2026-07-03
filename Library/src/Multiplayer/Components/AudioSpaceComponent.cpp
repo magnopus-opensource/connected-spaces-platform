@@ -17,95 +17,23 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
 #include <fmt/format.h>
 
-namespace
-{
-
-constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
-constexpr const float DefaultVolume = 1.f;
-
-} // namespace
-
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::Audio),
-    "Audio",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
-            "position",
-            csp::common::Vector3 { 0, 0, 0 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
-            "playbackState",
-            static_cast<int64_t>(AudioPlaybackState::Reset),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
-            "audioType",
-            static_cast<int64_t>(AudioType::Global),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
-            "audioAssetId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
-            "assetCollectionId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
-            "attenuationRadius",
-            DefaultAttenuationRadius,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
-            "isLoopPlayback",
-            false,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
-            "timeSincePlay",
-            0.f,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
-            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
-            DefaultVolume,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
-            "isEnabled",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
-        },
-    },
-};
-
-const ComponentSchema& AudioSpaceComponent::GetSchema() { return Schema; }
-
 AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : AudioSpaceComponent(Schema, LogSystem, Parent)
+    : AudioSpaceComponent(GetAudioSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(AudioSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetAudioSchema(), InSchema))
     {
         return nullptr;
     }

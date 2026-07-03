@@ -16,39 +16,20 @@
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::ECommerce),
-    "ECommerce",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::Position),
-            "position",
-            csp::common::Vector3 { 0, 0, 0 },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::ProductId),
-            "productId",
-            "",
-        },
-    },
-};
-
-const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
-
 ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ECommerceSpaceComponent(Schema, LogSystem, Parent)
+    : ECommerceSpaceComponent(GetECommerceSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<ECommerceSpaceComponent> ECommerceSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ECommerceSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetECommerceSchema(), InSchema))
     {
         return nullptr;
     }

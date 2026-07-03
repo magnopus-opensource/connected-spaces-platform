@@ -50,8 +50,6 @@ enum class AIChatbotVisualState
 class CSP_API AIChatbotSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
-
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates an AI chatbot space component using the provided schema if it is compatible with the built-in schema.

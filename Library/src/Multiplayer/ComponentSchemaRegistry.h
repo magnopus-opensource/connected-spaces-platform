@@ -34,6 +34,34 @@ std::optional<ComponentType> ToComponentType(uint64_t TypeId);
 
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
+const csp::common::Array<ComponentSchema>& GetAllComponentSchemas();
+
+const ComponentSchema& GetStaticModelSchema();
+const ComponentSchema& GetAnimatedModelSchema();
+const ComponentSchema& GetVideoPlayerSchema();
+const ComponentSchema& GetExternalLinkSchema();
+const ComponentSchema& GetAvatarSchema();
+const ComponentSchema& GetLightSchema();
+const ComponentSchema& GetButtonSchema();
+const ComponentSchema& GetImageSchema();
+const ComponentSchema& GetScriptSchema();
+const ComponentSchema& GetCustomSchema();
+const ComponentSchema& GetConversationSchema();
+const ComponentSchema& GetPortalSchema();
+const ComponentSchema& GetAudioSchema();
+const ComponentSchema& GetSplineSchema();
+const ComponentSchema& GetCollisionSchema();
+const ComponentSchema& GetReflectionSchema();
+const ComponentSchema& GetFogSchema();
+const ComponentSchema& GetECommerceSchema();
+const ComponentSchema& GetFiducialMarkerSchema();
+const ComponentSchema& GetGaussianSplatSchema();
+const ComponentSchema& GetTextSchema();
+const ComponentSchema& GetHotspotSchema();
+const ComponentSchema& GetCinematicCameraSchema();
+const ComponentSchema& GetScreenSharingSchema();
+const ComponentSchema& GetAIChatbotSchema();
+
 class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
 {
 public:

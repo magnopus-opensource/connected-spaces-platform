@@ -15,90 +15,21 @@
  */
 #include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-
-namespace
-{
-constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
-}
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentSchema {
-    static_cast<ComponentSchema::TypeIdType>(ComponentType::ScreenSharing),
-    "ScreenSharing",
-    csp::common::Array<ComponentProperty> {
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Position),
-            "position",
-            csp::common::Vector3::Zero(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Rotation),
-            "rotation",
-            csp::common::Vector4::Identity(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Scale),
-            "scale",
-            csp::common::Vector3::One(),
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVisible),
-            "isVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsARVisible),
-            "isARVisible",
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsShadowCaster),
-            "isShadowCaster",
-            false,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::UserId),
-            "userId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
-            "defaultImageCollectionId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageAssetId),
-            "defaultImageAssetId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::AttenuationRadius),
-            "attenuationRadius",
-            DefaultAttenuationRadius,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVirtualVisible),
-            "isVirtualVisible",
-            true,
-        },
-    },
-};
-
-const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema; }
-
 ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ScreenSharingSpaceComponent(Schema, LogSystem, Parent)
+    : ScreenSharingSpaceComponent(GetScreenSharingSchema(), LogSystem, Parent)
 {
 }
 
 std::unique_ptr<ScreenSharingSpaceComponent> ScreenSharingSpaceComponent::TryMake(
     const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
-    if (!IsCompatible(ScreenSharingSpaceComponent::GetSchema(), InSchema))
+    if (!IsCompatible(GetScreenSharingSchema(), InSchema))
     {
         return nullptr;
     }
