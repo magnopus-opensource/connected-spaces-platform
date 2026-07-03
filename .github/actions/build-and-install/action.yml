@@ -57,12 +57,9 @@ runs:
         restore-keys: |
           ${{ env.CONAN_CACHE_PREFIX }}-
 
-    - name: Set CMake compatibility policy
-      shell: bash
-      run: |
-        echo "CMAKE_POLICY_VERSION_MINIMUM=3.5" >> "$GITHUB_ENV"
-
     - name: Conan install
+      env:
+        CMAKE_POLICY_VERSION_MINIMUM: "3.5"
       shell: bash
       run: |
         set -euxo pipefail
