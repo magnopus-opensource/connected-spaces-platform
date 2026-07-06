@@ -324,3 +324,56 @@ jobs:
           chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
           chmod +x ./csp-tests
           ./csp-tests
+
+  build-and-run-legacy-emscripten:
+    name: Build legacy emscripten ${{ matrix.config.build_type }}
+    runs-on: windows-latest
+    
+    env:
+      EMSDK_VERSION: 3.1.40
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Set up MSVC (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup emsdk
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Build Emscripten
+        uses: ./.github/actions/build-legacy-emscripten
+        with:
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-static
+          build_preset: ${{ matrix.config.preset_prefix }}-static
+          output_folder: build/emscripten-${{ matrix.config.preset_prefix }}
+          build_folder: build/emscripten-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
+
+      - name: Run Tests
+        if: matrix.config.build_type == 'Debug'
+        env:
+          MCS_X_WAF_BYPASS: ${{ secrets.MCS_BYPASS }}
+        shell: bash
+        run: |
+          cd WasmTesting
+          ./run-csp-wasm-tests.cmd
