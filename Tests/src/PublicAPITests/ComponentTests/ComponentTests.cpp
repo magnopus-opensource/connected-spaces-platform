@@ -376,7 +376,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
         auto* Component = Entity->AddComponentByTypeId(uint64_t { SchemaTypeId });
         ASSERT_NE(Component, nullptr);
 
-        Component->SetSchemaProperty(0, csp::common::String { "RoundtripValue" });
+        Component->SetProperty(0, csp::common::String { "RoundtripValue" });
 
         Entity->QueueUpdate();
         Engine.ProcessPendingEntityOperations();
@@ -411,7 +411,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
         const auto* SchemaComponent = Components->begin()->second;
         ASSERT_EQ(SchemaComponent->GetTypeId(), SchemaTypeId);
 
-        const auto* Value = SchemaComponent->GetSchemaProperty(0);
+        const auto* Value = SchemaComponent->GetProperty(0);
         ASSERT_NE(Value, nullptr);
         EXPECT_EQ(Value->GetString(), csp::common::String { "RoundtripValue" });
 
@@ -492,7 +492,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
         ASSERT_NE(Component, nullptr) << Schema.Name.c_str();
 
         const auto ExtraKey = Schema.Properties[Schema.Properties.Size() - 1].Key;
-        const auto* Value = Component->GetSchemaProperty(ExtraKey);
+        const auto* Value = Component->GetProperty(ExtraKey);
         ASSERT_NE(Value, nullptr) << Schema.Name.c_str();
 
         EXPECT_EQ(Value->GetString(), "ExtraDefault") << Schema.Name.c_str();

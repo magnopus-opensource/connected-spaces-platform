@@ -56,7 +56,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
 
     auto* Component = Entity->AddComponentByTypeId(LargeTypeId);
     ASSERT_NE(Component, nullptr);
-    Component->SetSchemaProperty(0, "hello");
+    Component->SetProperty(0, "hello");
 
     auto Packer = MCSComponentPacker {};
     Packer.WriteValue(Component->GetId(), Component);

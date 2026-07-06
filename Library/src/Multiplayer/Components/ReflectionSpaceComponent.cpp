@@ -95,7 +95,7 @@ const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() cons
 
 void ReflectionSpaceComponent::SetReflectionAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId), Value);
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetAssetCollectionId() const
@@ -105,7 +105,7 @@ const csp::common::String& ReflectionSpaceComponent::GetAssetCollectionId() cons
 
 void ReflectionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId), Value);
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetName() const
@@ -115,7 +115,7 @@ const csp::common::String& ReflectionSpaceComponent::GetName() const
 
 void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* IPositionComponent */
@@ -127,7 +127,7 @@ const csp::common::Vector3& ReflectionSpaceComponent::GetPosition() const
 
 void ReflectionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
 }
 
 /* IScaleComponent */
@@ -139,7 +139,7 @@ const csp::common::Vector3& ReflectionSpaceComponent::GetScale() const
 
 void ReflectionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
 }
 
 ReflectionShape ReflectionSpaceComponent::GetReflectionShape() const
@@ -149,7 +149,7 @@ ReflectionShape ReflectionSpaceComponent::GetReflectionShape() const
 
 void ReflectionSpaceComponent::SetReflectionShape(ReflectionShape Value)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape), static_cast<int64_t>(Value));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetThirdPartyComponentRef() const
@@ -159,7 +159,7 @@ const csp::common::String& ReflectionSpaceComponent::GetThirdPartyComponentRef()
 
 void ReflectionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

@@ -116,7 +116,7 @@ const csp::common::Vector3& CollisionSpaceComponent::GetPosition() const
 
 void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
@@ -126,7 +126,7 @@ const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
 
 void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
@@ -134,7 +134,10 @@ const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
     return GetVector3Property(static_cast<uint32_t>(CollisionPropertyKeys::Scale));
 }
 
-void CollisionSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale), Value); }
+void CollisionSpaceComponent::SetScale(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::Scale), Value);
+}
 
 SpaceTransform CollisionSpaceComponent::GetTransform() const
 {
@@ -160,7 +163,7 @@ CollisionShape CollisionSpaceComponent::GetCollisionShape() const
 
 void CollisionSpaceComponent::SetCollisionShape(CollisionShape collisionShape)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape), static_cast<int64_t>(collisionShape));
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape), static_cast<int64_t>(collisionShape));
 }
 
 CollisionMode CollisionSpaceComponent::GetCollisionMode() const
@@ -170,7 +173,7 @@ CollisionMode CollisionSpaceComponent::GetCollisionMode() const
 
 void CollisionSpaceComponent::SetCollisionMode(CollisionMode collisionMode)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode), static_cast<int64_t>(collisionMode));
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode), static_cast<int64_t>(collisionMode));
 }
 
 const csp::common::String& CollisionSpaceComponent::GetCollisionAssetId() const
@@ -180,7 +183,7 @@ const csp::common::String& CollisionSpaceComponent::GetCollisionAssetId() const
 
 void CollisionSpaceComponent::SetCollisionAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId), Value);
 }
 
 const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
@@ -190,7 +193,7 @@ const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
 
 void CollisionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId), Value);
 }
 
 const csp::common::Vector3 CollisionSpaceComponent::GetUnscaledBoundingBoxMin() { return csp::common::Vector3(-0.5f, -0.5f, -0.5f); }
@@ -220,11 +223,11 @@ const csp::common::String& CollisionSpaceComponent::GetThirdPartyComponentRef() 
 
 void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 bool CollisionSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled)); }
 
-void CollisionSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), Value); }
+void CollisionSpaceComponent::SetIsEnabled(bool Value) { SetPropertyDirect(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), Value); }
 
 } // namespace csp::multiplayer

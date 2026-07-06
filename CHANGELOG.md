@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.46.0]
+
+### 💫 💥 Code Refactors
+
+- [NT-0] refac!: Rename `GetSchemaProperty`/`SetSchemaProperty` on `ComponentBase` to `GetProperty`/`SetProperty`. By @mag-lt.
+  As clients haven't adopted data driven components yet, there shouldn't be any impact as a result of these changes,
+  but it is still technically a breaking change.
+  The protected `GetProperty`/`SetProperty` overloads previously used by derived component classes have been
+  renamed to `GetPropertyDirect`/`SetPropertyDirect` to avoid ambiguity and make way for these.
+  Developers making changes within CSP should use `GetPropertyDirect`/`SetPropertyDirect` in the cases they'd
+  traditionally have used the original methods.
+
 ## [6.45.0]
 
 ### 🍰 🙌 New Features

@@ -50,11 +50,11 @@ public:
     {
         struct Component final
         {
-            void SetProperty(uint16_t Key, csp::common::ReplicatedValue Value) { Ref.SetSchemaProperty(Key, std::move(Value)); }
+            void SetProperty(uint16_t Key, csp::common::ReplicatedValue Value) { Ref.SetProperty(Key, std::move(Value)); }
 
             std::optional<csp::common::ReplicatedValue> GetProperty(uint16_t Key) const
             {
-                const auto* MaybeValue = Ref.GetSchemaProperty(Key);
+                const auto* MaybeValue = Ref.GetProperty(Key);
                 return MaybeValue ? *MaybeValue : std::optional<csp::common::ReplicatedValue>();
             }
 

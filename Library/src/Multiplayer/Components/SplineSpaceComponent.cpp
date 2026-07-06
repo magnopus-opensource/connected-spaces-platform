@@ -154,11 +154,11 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
 
 void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vector3>& Waypoints)
 {
-    SetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)Waypoints.Size());
+    SetPropertyDirect(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)Waypoints.Size());
 
     for (size_t i = 0; i < Waypoints.Size(); ++i)
     {
-        SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
+        SetPropertyDirect(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
     }
 }
 } // namespace csp::multiplayer

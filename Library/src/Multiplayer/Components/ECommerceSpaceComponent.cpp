@@ -70,7 +70,7 @@ const csp::common::Vector3& ECommerceSpaceComponent::GetPosition() const
 
 void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
 }
 
 csp::common::String ECommerceSpaceComponent::GetProductId() const
@@ -78,6 +78,9 @@ csp::common::String ECommerceSpaceComponent::GetProductId() const
     return GetStringProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
 }
 
-void ECommerceSpaceComponent::SetProductId(csp::common::String Value) { SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), Value); }
+void ECommerceSpaceComponent::SetProductId(csp::common::String Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), Value);
+}
 
 } // namespace csp::multiplayer
