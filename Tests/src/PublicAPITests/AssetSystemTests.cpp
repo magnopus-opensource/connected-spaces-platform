@@ -1230,7 +1230,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
     FILE* File = fopen(FilePath.string().c_str(), "rb");
     uintmax_t FileSize = std::filesystem::file_size(FilePath);
     auto* FileData = new unsigned char[FileSize];
-    fread(FileData, FileSize, 1, File);
+    size_t ElementCount = fread(FileData, FileSize, 1, File);
+    EXPECT_EQ(ElementCount, 1);
+    
     fclose(File);
 
     EXPECT_EQ(DownloadedAssetDataSize, FileSize);
@@ -1399,7 +1401,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
     FILE* File = fopen(FilePath.string().c_str(), "rb");
     uintmax_t FileSize = std::filesystem::file_size(FilePath);
     auto* FileData = new unsigned char[FileSize];
-    fread(FileData, FileSize, 1, File);
+    size_t ElementCount = fread(FileData, FileSize, 1, File);
+    EXPECT_EQ(ElementCount, 1);
     fclose(File);
 
     EXPECT_EQ(DownloadedAssetDataSize, FileSize);
@@ -1600,7 +1603,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
     FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
     auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    size_t ElementCount = fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    EXPECT_EQ(ElementCount, 1);
     fclose(UploadFile);
 
     csp::systems::BufferAssetDataSource BufferSource;
@@ -1792,7 +1796,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     FILE* UpdateFile = fopen(UpdateFilePath.string().c_str(), "rb");
     uintmax_t UpdateFileSize = std::filesystem::file_size(UpdateFilePath);
     auto* UpdateFileData = new unsigned char[UpdateFileSize];
-    fread(UpdateFileData, UpdateFileSize, 1, UpdateFile);
+    size_t ElementCount = fread(UpdateFileData, UpdateFileSize, 1, UpdateFile);
+    EXPECT_EQ(ElementCount, 1);
+    
     fclose(UpdateFile);
 
     csp::systems::BufferAssetDataSource BufferSource;
@@ -2328,7 +2334,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         FILE* File = fopen(FilePath.string().c_str(), "rb");
         uintmax_t FileSize = std::filesystem::file_size(FilePath);
         auto* FileData = new unsigned char[FileSize];
-        fread(FileData, FileSize, 1, File);
+        size_t ElementCount = fread(FileData, FileSize, 1, File);
+        EXPECT_EQ(ElementCount, 1);
         fclose(File);
 
         EXPECT_EQ(DownloadedAssetDataSize, FileSize);
