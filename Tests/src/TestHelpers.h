@@ -208,15 +208,23 @@ inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
     return ClientHeaderInfo;
 }
 
+inline csp::common::Optional<csp::common::String> GetWAFBypassEnv()
+{
+    const auto WAFBypassEnv = std::getenv("X_WAF_BYPASS");
+    return (WAFBypassEnv != nullptr) ? csp::common::Optional<csp::common::String> { WAFBypassEnv } : nullptr;
+}
+
 inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
 {
     csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, nullptr);
+    csp::systems::SystemsManager::Get().__SetWAFBypass(GetWAFBypassEnv());
 }
 
 inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& EndpointRootURI,
     const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
 {
     csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, FeatureFlags);
+    csp::systems::SystemsManager::Get().__SetWAFBypass(GetWAFBypassEnv());
 }
 
 inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
