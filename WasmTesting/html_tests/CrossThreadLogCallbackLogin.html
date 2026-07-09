@@ -18,7 +18,8 @@
         console.log ('email: ', email)
         console.log ('password: ', password)
 
-        await initializeCSP(useDebugCSP);
+        const wafBypass = window.__CSP_TEST_CONFIG__?.wafBypass;
+        await initializeCSP(useDebugCSP, wafBypass);
 
         const logSystem = Systems.SystemsManager.get().getLogSystem();
         const userSystem = Systems.SystemsManager.get().getUserSystem();

@@ -1,11 +1,11 @@
-import { ready, CSPFoundation, ClientUserAgent} from '../node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
+import { ready, CSPFoundation, ClientUserAgent, Common, Systems} from '../node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
 
-let CHS_ENDPOINT_ROOT = "https://ogs-internal.magnopus-dev.cloud";
+let CHS_ENDPOINT_ROOT = "https://ogs.magnopus-dev.cloud";
 let TENANT = "OKO_TESTS";
 let TESTS_CLIENT_SKU = "WASMTest";
 let TESTS_CLIENT_OS = "WASMTestsOS";
 
-export async function initializeCSP(useDebugCSP) {
+export async function initializeCSP(useDebugCSP, wafBypass) {
   try {
     console.log(
       useDebugCSP
@@ -30,7 +30,21 @@ export async function initializeCSP(useDebugCSP) {
 
     console.log("CSP Initialization complete.");
   } catch (error) {
-    console.error("Failed to initialize CSP:", error.message);
-    console.error(error.stack);
+      console.error("Failed to initialize CSP:", error.message);
+      console.error(error.stack);
   }
+
+  if (wafBypass === undefined) {
+    console.log("WAF bypass not set.");
+    return;
+  }
+
+  const setWAF = Systems.SystemsManager.get().__SetWAFBypass(wafBypass);
+
+  if (!setWAF) {
+    console.warn("WAF bypass could not be set because CSP is not initialized.");
+    return;
+  }
+
+  console.log("WAF bypass set.");
 }

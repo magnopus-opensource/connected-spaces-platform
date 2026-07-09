@@ -12,7 +12,8 @@
         const params = new URLSearchParams(window.location.search);
         const useDebugCSP = params.get('useDebugCsp');
 
-        await initializeCSP(useDebugCSP);
+        const wafBypass = window.__CSP_TEST_CONFIG__?.wafBypass;
+        await initializeCSP(useDebugCSP, wafBypass);
 
         const systemsManager = Systems.SystemsManager.get();
         const userSystem = systemsManager.getUserSystem();
