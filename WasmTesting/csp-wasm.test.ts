@@ -28,7 +28,7 @@ test.after.each(async (context) => {
 });
 
 test.before(async () => {
-  const wafBypassEnv = process.env.X_WAF_BYPASS;
+  const wafBypassEnv = process.env.MCS_X_WAF_BYPASS;
   const wafBypass = wafBypassEnv && wafBypassEnv.length > 0
   ? wafBypassEnv
   : undefined;

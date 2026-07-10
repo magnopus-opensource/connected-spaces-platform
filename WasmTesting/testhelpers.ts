@@ -132,7 +132,7 @@ export async function LaunchTestPage(
       page.on('console', msg => consoleMessages.push(msg.text()));
 
       // Read WAF value from environment and pass to test pages.
-      const wafBypass = process.env.X_WAF_BYPASS;
+      const wafBypass = process.env.MCS_X_WAF_BYPASS;
       
       // Inject test config into the browser page before scripts run.
       // This keeps secrets out of URL query parameters for safety.

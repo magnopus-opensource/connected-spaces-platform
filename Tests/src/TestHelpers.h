@@ -210,7 +210,7 @@ inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
 
 inline csp::common::Optional<csp::common::String> GetWAFBypassEnv()
 {
-    const auto WAFBypassEnv = std::getenv("X_WAF_BYPASS");
+    const auto WAFBypassEnv = std::getenv("MCS_X_WAF_BYPASS");
     return (WAFBypassEnv != nullptr) ? csp::common::Optional<csp::common::String> { WAFBypassEnv } : nullptr;
 }
 
