@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file. For compile
   Developers making changes within CSP should use `GetPropertyDirect`/`SetPropertyDirect` in the cases they'd
   traditionally have used the original methods.
 
+- [OF-1681] feat: Add SystemsManager::__SetWAFBypass to allow csp devs to bypass firewall restrictions in tests. By @MAG-mv
+  This is an internal Magnopus org function and shouldn't be used by third party clients. 
+  If set, this will cause the csp web client to send an additional header in requests.
+
 ## [6.45.0]
 
 ### 🍰 🙌 New Features
