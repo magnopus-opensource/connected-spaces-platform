@@ -130,17 +130,14 @@ csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::Re
     }
 }
 
-bool SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::String>& Value)
+void SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::String>& Value)
 {
-    if (WebClient != nullptr)
+    if (WebClient == nullptr)
     {
-        WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string{ Value->c_str() }) : std::nullopt);
-        return true;
+        throw std::logic_error("SystemsManager must be initialized before setting WAF bypass.");
     }
-    else
-    {
-        return false;
-    }
+
+     WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
 }
 
 SystemsManager::SystemsManager()

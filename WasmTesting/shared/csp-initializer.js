@@ -39,12 +39,6 @@ export async function initializeCSP(useDebugCSP, wafBypass) {
     return;
   }
 
-  const setWAF = Systems.SystemsManager.get().__SetWAFBypass(wafBypass);
-
-  if (!setWAF) {
-    console.warn("WAF bypass could not be set because CSP is not initialized.");
-    return;
-  }
-
+  Systems.SystemsManager.get().__SetWAFBypass(wafBypass);
   console.log("WAF bypass set.");
 }
