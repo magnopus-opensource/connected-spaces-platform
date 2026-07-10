@@ -60,6 +60,13 @@ if(MSVC)
     set_property(TARGET MultiplayerTestRunner PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
     )
+
+    # Currently used to work around errors with std::getenv
+    target_compile_definitions(
+        MultiplayerTestRunner
+        PRIVATE
+            _CRT_SECURE_NO_WARNINGS
+    )
 endif()
 
 target_compile_options(MultiplayerTestRunner PRIVATE
