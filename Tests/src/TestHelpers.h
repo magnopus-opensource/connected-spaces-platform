@@ -16,21 +16,22 @@
 #pragma once
 
 #include "Awaitable.h"
-#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
+#include "Common/PlatformUtils.h"
 #include "PublicTestBase.h"
 
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <functional>
+#include <future>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <random>
 #include <thread>
-#include <future>
-#include <filesystem>
-#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -210,18 +211,20 @@ inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
 
 inline csp::common::Optional<csp::common::String> GetWAFBypassEnv()
 {
-    const auto WAFBypassEnv = std::getenv("X_WAF_BYPASS");
-    return (WAFBypassEnv != nullptr) ? csp::common::Optional<csp::common::String> { WAFBypassEnv } : nullptr;
+    const auto WAFBypassEnv = csp::common::GetEnvironmentVariableValue("X_WAF_BYPASS");
+    return (WAFBypassEnv.has_value()) ? csp::common::Optional<csp::common::String> { WAFBypassEnv->c_str() } : nullptr;
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
+inline void InitialiseFoundationWithUserAgentInfo(
+    const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
 {
     csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, nullptr);
     csp::systems::SystemsManager::Get().__SetWAFBypass(GetWAFBypassEnv());
 }
 
 inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& EndpointRootURI,
-    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
+    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr,
+    csp::web::WebClient* WebClient = nullptr)
 {
     csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, FeatureFlags);
     csp::systems::SystemsManager::Get().__SetWAFBypass(GetWAFBypassEnv());
@@ -253,7 +256,6 @@ template <typename T> inline bool WaitForFuture(const std::future<T>& Future, in
     auto Status = Future.wait_for(std::chrono::seconds(MaxWaitTimeSeconds));
     return Status == std::future_status::ready;
 }
-
 
 inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& RealtimeEngine)
 {
@@ -324,6 +326,6 @@ inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& Fil
     {
         return std::nullopt;
     }
-    
+
     return FileData;
 }

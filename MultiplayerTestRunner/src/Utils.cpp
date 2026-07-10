@@ -23,6 +23,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/WebService.h" //For resultbase
+#include "Common/PlatformUtils.h"
 #include <filesystem>
 #include <fstream>
 #include <future>
@@ -73,8 +74,8 @@ csp::systems::Profile CreateTestUser(bool AgeVerified /* = true */, csp::systems
 
 csp::common::Optional<csp::common::String> GetWAFBypassEnv()
 {
-    const auto WAFBypassEnv = std::getenv("X_WAF_BYPASS");
-    return (WAFBypassEnv != nullptr) ? csp::common::Optional<csp::common::String> { WAFBypassEnv } : nullptr;
+    const auto WAFBypassEnv = csp::common::GetEnvironmentVariableValue("X_WAF_BYPASS");
+    return (WAFBypassEnv.has_value()) ? csp::common::Optional<csp::common::String> { WAFBypassEnv->c_str() } : nullptr;
 }
 
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
