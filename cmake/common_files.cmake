@@ -50,7 +50,6 @@ set(CSP_COMMON_SOURCES
     ${CSP_COMMON_SOURCE_DIR}/CancellationToken.cpp
     ${CSP_COMMON_SOURCE_DIR}/DateTime.cpp
     ${CSP_COMMON_SOURCE_DIR}/Encode.cpp
-    ${CSP_COMMON_SOURCE_DIR}/PlatformUtils.cpp
     ${CSP_COMMON_SOURCE_DIR}/Hash.cpp
     ${CSP_COMMON_SOURCE_DIR}/LoginState.cpp
     ${CSP_COMMON_SOURCE_DIR}/LoginStateData.cpp
@@ -112,7 +111,6 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     ${CSP_COMMON_SOURCE_DIR}/Convert.h
     ${CSP_COMMON_SOURCE_DIR}/DateTime.h
     ${CSP_COMMON_SOURCE_DIR}/Encode.h
-    ${CSP_COMMON_SOURCE_DIR}/PlatformUtils.h
     ${CSP_COMMON_SOURCE_DIR}/Logger.h
     ${CSP_COMMON_SOURCE_DIR}/LoginStateData.h
     ${CSP_COMMON_SOURCE_DIR}/NumberFormatter.h
