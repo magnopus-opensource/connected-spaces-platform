@@ -28,7 +28,12 @@ test.after.each(async (context) => {
 });
 
 test.before(async () => {
-  return initializeCSP(USE_DEBUG_CSP); //gotta return the promise or tests wont automatically await
+  const wafBypassEnv = process.env.MCS_X_WAF_BYPASS;
+  const wafBypass = wafBypassEnv && wafBypassEnv.length > 0
+  ? wafBypassEnv
+  : undefined;
+  
+  return initializeCSP(USE_DEBUG_CSP, wafBypass); //gotta return the promise or tests wont automatically await
 });
 
 test('Login', async ({ user }) => {

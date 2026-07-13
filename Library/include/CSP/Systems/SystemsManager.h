@@ -182,6 +182,11 @@ public:
     CSP_NO_EXPORT csp::multiplayer::OfflineRealtimeEngine* MakeOfflineRealtimeEngine();
     CSP_NO_EXPORT csp::common::IRealtimeEngine* MakeRealtimeEngine(csp::common::RealtimeEngineType RealtimeEngineType);
 
+    // @brief Internal CSP dev function to bypass firewall restrictions for our tests.
+    // Will throw if this function is called before csp is initialized.
+    // @param Value : Secret key to allow bypassing.
+    void __SetWAFBypass(const csp::common::Optional<csp::common::String>& Value);
+
 private:
     SystemsManager();
     ~SystemsManager();

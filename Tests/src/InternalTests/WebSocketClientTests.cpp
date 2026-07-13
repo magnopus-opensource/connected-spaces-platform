@@ -118,17 +118,17 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, RegularMultiplayerServiceURI)
 {
-    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://ogs-internal.magnopus-dev.cloud");
-    ASSERT_EQ(Endpoints.MultiplayerConnection.GetURI(), "https://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://ogs.magnopus-dev.cloud");
+    ASSERT_EQ(Endpoints.MultiplayerConnection.GetURI(), "https://ogs-multiplayer.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
 
     CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
         = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerConnection.GetURI().c_str());
 
     EXPECT_EQ(ParsedURI.Protocol, "https");
-    EXPECT_EQ(ParsedURI.Domain, "ogs-multiplayer-internal.magnopus-dev.cloud");
+    EXPECT_EQ(ParsedURI.Domain, "ogs-multiplayer.magnopus-dev.cloud");
     EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
     EXPECT_EQ(ParsedURI.Port, 443);
-    EXPECT_EQ(ParsedURI.Endpoint, "https://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Endpoint, "https://ogs-multiplayer.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalMultiplayerServiceURI)

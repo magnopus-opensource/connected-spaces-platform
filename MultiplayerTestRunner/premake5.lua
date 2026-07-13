@@ -39,6 +39,10 @@ if not MultiplayerTestRunner then
         libdirs {"%{wks.location}/Library/Binaries/%{cfg.platform}/%{cfg.buildcfg}"}
 		links {"ConnectedSpacesPlatform"}
 		defines {"USING_CSP_DLL"}
+
+		filter "toolset:msc*"
+        	defines { "_CRT_SECURE_NO_WARNINGS" }
+    	filter {}
 		
 		filter "platforms:x64"
             linkoptions { "/ignore:4099"} --Complains about no PDB for googletest, don't care.

@@ -21,6 +21,7 @@
 #include "Services/ApiBase/ApiBase.h"
 
 #include <chrono>
+#include <optional>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -175,6 +176,11 @@ void WebClient::RefreshIfExpired()
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
     csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
 {
+    if (WAFBypassValue.has_value())
+    {
+        Payload.AddHeader(CSP_TEXT("X-WAF-Bypass"), CSP_TEXT(WAFBypassValue->c_str()));
+    }
+
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
 
     if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
@@ -204,6 +210,8 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 }
 
 void WebClient::SetAuthContext(csp::common::IAuthContext& InAuthContext) { AuthContext = &InAuthContext; }
+
+void WebClient::SetWAFBypass(const std::optional<std::string>& Value) { WAFBypassValue = Value; }
 
 void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {

@@ -130,7 +130,7 @@ TEST(CLITest, DefaultsSet)
     EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");
     EXPECT_EQ(Settings.LoginEmailAndPassword.second, "password123");
     EXPECT_EQ(Settings.TestIdentifier, TestIdentifier::CREATE_AVATAR);
-    EXPECT_EQ(Settings.Endpoint, "https://ogs-internal.magnopus-dev.cloud");
+    EXPECT_EQ(Settings.Endpoint, "https://ogs.magnopus-dev.cloud");
     EXPECT_EQ(Settings.TimeoutInSeconds, 30);
     EXPECT_FALSE(Settings.SpaceId.has_value());
 }

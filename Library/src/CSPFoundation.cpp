@@ -272,7 +272,7 @@ namespace
     {
         /* This is not the best, we've hard encoded how the root uri and the multiplayer uri relate, which is no real guarantee.
          * We should probably take the multiplayer too separately
-         * Remember, this transformation needs to work on both "http://ogs-internal.cloud" sorts of formats, as well as "http://localhost:8081" sort
+         * Remember, this transformation needs to work on both "http://ogs.cloud" sorts of formats, as well as "http://localhost:8081" sort
          * of formats
          *
          * Even if we're doing it this way, we should still be using a URI library to do all this transformation, not doing it as fragile raw strings.

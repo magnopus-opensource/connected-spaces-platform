@@ -130,6 +130,16 @@ csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::Re
     }
 }
 
+void SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::String>& Value)
+{
+    if (WebClient == nullptr)
+    {
+        throw std::logic_error("SystemsManager must be initialized before setting WAF bypass.");
+    }
+
+     WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
+}
+
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
     , MultiplayerConnection(nullptr)
