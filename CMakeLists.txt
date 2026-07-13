@@ -266,6 +266,14 @@ configure_file(
     ${CSP_INCLUDE_DIR}/CSP/version.h
 )
 
+# Temporary define until we remove the legacy wrapper gen
+if(USE_LEGACY_WRAPPER_GEN)
+    target_compile_definitions(csp-lib
+        PRIVATE
+            USE_LEGACY_WRAPPER_GEN=1
+    )
+endif()
+
 # Legacy Emscripten wrapper ---------------------------------------
 
   option(CSP_BUILD_LEGACY_EMSCRIPTEN "Build legacy emscripten project" OFF)
