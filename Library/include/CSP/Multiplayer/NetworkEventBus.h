@@ -59,9 +59,19 @@ namespace csp::multiplayer
 class EventDeserialiser;
 enum class ErrorCode;
 
-// The callback used to register to listen to events.
+// The callback used to register to listen to custom network events.
 // NetworkEventData lifetime is tied to the callback, do not attempt to store it via reference.
 typedef std::function<void(const csp::common::NetworkEventData& NetworkEventData)> NetworkEventCallback;
+
+// Event listener specializations
+// Callbacks used to register to listen to event specializations.
+// The lifetime of network event data types are tied to the callback, do not attempt to store it via reference.
+typedef std::function<void(const csp::common::AccessControlChangedNetworkEventData& AccessControlChangedEventData)> AccessControlChangedEventCallback;
+typedef std::function<void(const csp::common::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedEventData)>
+    AssetDetailBlobChangedEventCallback;
+typedef std::function<void(const csp::common::AsyncCallCompletedEventData& AsyncCallCompletedEventData)> AsyncCallCompletedEventCallback;
+typedef std::function<void(const csp::common::ConversationNetworkEventData& ConversationNetworkEventData)> ConversationEventCallback;
+typedef std::function<void(const csp::common::SequenceChangedNetworkEventData& SequenceChangedEventData)> SequenceChangedEventCallback;
 
 /*
  * @brief Details about a network event registrations to serve as a key in the event map.
@@ -74,10 +84,10 @@ class CSP_API NetworkEventRegistration
 {
 public:
     /// @brief Construct a NetworkEventRegistration
-    /// @param EventReceiverId csp::common::String : The identifying name for the event receiver, used for management purposes, allowing clients to
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes, allowing clients to
     /// register multiple interests in single events. May be any arbitrary unique string. This is distinct from client ID. A single client/application
     /// may register multiple receivers if they choose.
-    /// @param EventName csp::common::String : The identifying name for the event. May be any arbitrary string.
+    /// @param EventName : The identifying name for the event. May be any arbitrary string.
     NetworkEventRegistration(const csp::common::String& EventReceiverId, const csp::common::String& EventName)
         : EventReceiverId(EventReceiverId)
         , EventName(EventName)
@@ -132,43 +142,105 @@ public:
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
     /// @brief Sends a network event by EventName to all currently connected clients.
-    /// @param EventName csp::common::String : The identifying name for the event.
-    /// @param Args csp::common::Array<csp::common::ReplicatedValue> : An array of arguments (csp::common::ReplicatedValue) to be passed as part of
+    /// @param EventName : The identifying name for the event.
+    /// @param Args : An array of arguments (csp::common::ReplicatedValue) to be passed as part of
     /// the event payload.
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    /// @param Callback : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEvent(
         const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
     CSP_NO_EXPORT async::task<std::optional<csp::multiplayer::ErrorCode>> SendNetworkEvent(
         const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args);
 
     /// @brief Sends a network event by EventName, to TargetClientId.
-    /// @param EventName csp::common::String : The identifying name for the event.
-    /// @param Args csp::common::Array<csp::common::ReplicatedValue> : An array of arguments (csp::common::ReplicatedValue) to be passed as part of
+    /// @param EventName : The identifying name for the event.
+    /// @param Args : An array of arguments (csp::common::ReplicatedValue) to be passed as part of
     /// the event payload.
-    /// @param TargetClientId uint64_t : The client ID to send the event to.
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    /// @param TargetClientId : The client ID to send the event to.
+    /// @param Callback : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
-    /// @brief Register interest in a network event, such that the NetworkEventBus will call the provided callback when it arrives
-    /// @param Registration NetworkEventRegistration : Registration information, containing a ReceiverID and an EventName. Will fail to register if
-    /// identical callback registration already registered.
-    /// @param Callback NetworkEventCallback : Callback to invoke when specified event is received. Will fail to register if null.
-    void ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback);
+    /// @brief Register interest in a custom network event, such that the NetworkEventBus will call the provided callback when it arrives.
+    /// @note This is for registration of custom events. To register for an event specializations, please use one of the dedicated
+    /// listen methods. Registration will fail if a callback has already been registered with the same ReceiverId and EventName.
+    /// @param ReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple receivers
+    /// for the same event if they choose.
+    /// @param EventName : The identifying name for the event. May be any arbitrary string.
+    /// @param Callback : Callback to invoke when the custom event is received. Will fail to register if the callback is null.
+    void ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, NetworkEventCallback Callback);
 
-    // Here is where a nice method overload would go that lets you pass 2 strings directly as a convenience, however it can't be done at the moment
-    // due to the wrapper generator (JS), and having a distinct name seems more confusing than anything.
+    /// @brief Register interest in a access control changed network event, such that the NetworkEventBus will call the provided callback when it
+    /// arrives.
+    /// @note Registration will fail if a callback has already been registered with the same ReceiverId.
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple
+    /// receivers for the same event if they choose.
+    /// @param Callback : Callback to invoke when a access control changed event is received. Will fail to register if the callback is null.
+    void ListenAccessControlChangedEvent(csp::common::String EventReceiverId, AccessControlChangedEventCallback Callback);
 
-    /// @brief Deregister interest in a network event
-    /// @param Registration NetworkEventRegistration : Registration information of already registered event, containing a ReceiverID and an EventName.
-    void StopListenNetworkEvent(NetworkEventRegistration Registration);
+    /// @brief Register interest in a asset detail blob changed network event, such that the NetworkEventBus will call the provided
+    /// callback when it arrives.
+    /// @note Registration will fail if a callback has already been registered with the same ReceiverId.
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple
+    /// receivers for the same event if they choose.
+    /// @param Callback : Callback to invoke when a asset detail blob changed event is received. Will fail to register if the callback is null.
+    void ListenAssetDetailBlobChangedEvent(csp::common::String EventReceiverId, AssetDetailBlobChangedEventCallback Callback);
+
+    /// @brief Register interest in a async call completed network event for a specific operation, such that the NetworkEventBus will call the provided
+    /// callback when it arrives.
+    /// @note Registration will fail if a callback has already been registered with the same ReceiverId and OperationName.
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple
+    /// receivers for the same event if they choose.
+    /// @param OperationName : The name of the async call completed operation, eg: 'DuplicateSpaceAsync' or 'CreateSnapshotAsync'.
+    /// @param Callback : Callback to invoke when a async call completed event is received with a specific operation name. Will fail to register if
+    /// the callback is null.
+    void ListenAsyncCallCompletedEvent(
+        csp::common::String EventReceiverId, csp::common::String OperationName, AsyncCallCompletedEventCallback Callback);
+
+    /// @brief Register interest in a conversation network event, such that the NetworkEventBus will call the provided callback when it arrives.
+    /// @note Registration will fail if a callback has already been registered with the same ReceiverId.
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple
+    /// receivers for the same event if they choose.
+    /// @param Callback : Callback to invoke when a conversation event is received. Will fail to register if the callback is null.
+    void ListenConversationEvent(csp::common::String EventReceiverId, ConversationEventCallback Callback);
+
+    /// @brief Register interest in a sequence changed network event, such that the NetworkEventBus will call the provided callback when it arrives.
+    /// @note Registration will fail if a callback has already been registered with the same ReceiverId.
+    /// @param EventReceiverId : The identifying name for the event receiver, used for management purposes. Allows clients to register multiple
+    /// receivers for the same event if they choose.
+    /// @param Callback : Callback to invoke when a sequence changed event is received. Will fail to register if the callback is null.
+    void ListenSequenceChangedEvent(csp::common::String EventReceiverId, SequenceChangedEventCallback Callback);
+
+    /// @brief Deregister interest in a custom network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    /// @param EventName : The identifying name for the event.
+    void StopListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName);
+
+    /// @brief Deregister interest in a access control changed network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    void StopListenAccessControlChangedEvent(csp::common::String EventReceiverId);
+
+    /// @brief Deregister interest in a asset detail blob changed network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    void StopListenAssetDetailBlobChangedEvent(csp::common::String EventReceiverId);
+
+    /// @brief Deregister interest in a async call completed network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    void StopListenAsyncCallCompletedEvent(csp::common::String EventReceiverId, csp::common::String OperationName);
+
+    /// @brief Deregister interest in a conversation network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    void StopListenConversationEvent(csp::common::String EventReceiverId);
+
+    /// @brief Deregister interest in a sequence changed network event
+    /// @param ReceiverId : The identifying name for the event receiver.
+    void StopListenSequenceChangedEvent(csp::common::String EventReceiverId);
 
     /// @brief Deregister interest in all network events registered to a particular EventReceiverId
-    /// @param EventReceiverId const csp::common::String& : EventReceiverId to deregister.
+    /// @param EventReceiverId : EventReceiverId to deregister.
     void StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
 
-    /// @brief Get an array of all interests currently registered to the NetworkEventBus
-    /// @return csp::common::Array<csp::multiplayer::NetworkEventRegistration> A container of all currently registered registrations.
+    /// @brief Get an array of all network event registrations currently registered with the NetworkEventBus
+    /// @return An array of all current network event registrations.
     csp::common::Array<NetworkEventRegistration> AllRegistrations() const;
 
     /// @brief Instructs the event bus to start listening to messages
@@ -176,7 +248,8 @@ public:
     bool StartEventMessageListening();
 
     /// @brief NetworkEventBus constructor
-    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
+    /// @param InMultiplayerConnection : the multiplayer connection to construct the event bus with
+    /// @param LogSystem : Logger such that this system can print status and debug output
     CSP_NO_EXPORT NetworkEventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
 
     /// @brief NetworkEventBus destructor
@@ -228,11 +301,14 @@ private:
 
     CSP_END_IGNORE
 
-    // Map internal event values to the deserializers needed to unpack them
-    CSP_NO_EXPORT std::unique_ptr<csp::common::NetworkEventData> DeserialiseForEventType(
-        NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
-
+    // General purpose event registration.
     std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
+    // Registrations for event listener specializations.
+    std::unordered_map<NetworkEventRegistration, AccessControlChangedEventCallback> RegisteredAccessControlChangedEvents = {};
+    std::unordered_map<NetworkEventRegistration, AssetDetailBlobChangedEventCallback> RegisteredAssetDetailBlobChangedEvents = {};
+    std::unordered_map<NetworkEventRegistration, AsyncCallCompletedEventCallback> RegisteredAsyncCallCompletedEvents = {};
+    std::unordered_map<NetworkEventRegistration, ConversationEventCallback> RegisteredConversationEvents = {};
+    std::unordered_map<NetworkEventRegistration, SequenceChangedEventCallback> RegisteredSequenceChangedEvents = {};
 };
 
 } // namespace csp::multiplayer
