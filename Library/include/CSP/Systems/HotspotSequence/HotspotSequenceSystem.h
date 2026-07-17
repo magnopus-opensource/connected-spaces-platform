@@ -102,7 +102,7 @@ public:
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::SequenceChangedNetworkEventData& NetworkEventData);
 
 private:
     HotspotSequenceSystem(

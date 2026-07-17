@@ -1139,18 +1139,14 @@ void ConversationSystemInternal::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
-        csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)),
-        [this](const csp::common::NetworkEventData& NetworkEventData)
+    EventBusPtr->ListenConversationEvent("CSPInternal::ConversationSystemInternal",
+        [this](const csp::common::ConversationNetworkEventData& NetworkEventData)
         {
-            const csp::common::ConversationNetworkEventData& ConversationNetworkEventData
-                = static_cast<const csp::common::ConversationNetworkEventData&>(NetworkEventData);
-            if (TrySendEvent(ConversationNetworkEventData) == false)
+            if (TrySendEvent(NetworkEventData) == false)
             {
                 // If component doesn't exist, add it to the queue for processing later
                 std::unique_ptr<csp::common::ConversationNetworkEventData> EventDataCopy
-                    = std::make_unique<csp::common::ConversationNetworkEventData>(ConversationNetworkEventData);
+                    = std::make_unique<csp::common::ConversationNetworkEventData>(NetworkEventData);
                 Events.push_back(std::move(EventDataCopy));
             }
         });

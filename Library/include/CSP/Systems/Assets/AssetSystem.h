@@ -356,7 +356,7 @@ public:
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData);
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

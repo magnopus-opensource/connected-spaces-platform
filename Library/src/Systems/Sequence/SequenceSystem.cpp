@@ -333,21 +333,17 @@ void SequenceSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
-        csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
+    EventBusPtr->ListenSequenceChangedEvent("CSPInternal::SequenceSystem",
+        [this](const csp::common::SequenceChangedNetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
 }
 
-void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
+void SequenceSystem::OnSequenceChangedEvent(const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
 {
     // This event may either represent a default sequence or a hotspot sequence. Here we are only concerned with default sequences.
-    const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
-
-    if (SequenceEvent.SequenceType == csp::common::ESequenceType::Default && SequenceChangedCallback)
+    if (NetworkEventData.SequenceType == csp::common::ESequenceType::Default && SequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
-        SequenceChangedCallback(SequenceEvent);
+        SequenceChangedCallback(NetworkEventData);
     }
 }
 
