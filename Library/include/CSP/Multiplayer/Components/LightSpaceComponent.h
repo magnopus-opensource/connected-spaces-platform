@@ -90,9 +90,21 @@ class CSP_API LightSpaceComponent : public ComponentBase,
                                     public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the light space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a light space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new LightSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<LightSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the type of light of this light component.
     /// @return The type of light of this light component.
@@ -213,6 +225,9 @@ public:
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
     /// @}
+
+private:
+    LightSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

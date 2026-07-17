@@ -2,22 +2,163 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [6.33.0]
+## [6.45.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1884] feat: Support injecting updated schemas for built-in components. By @mag-lt.
+  Clients can now register updated schemas for built-in component types, adding properties beyond those defined
+  in the built-in class, with compatibility enforced while the schema-driven and hardcoded component APIs coexist.
+  The `GetSchemaProperty` and `SetSchemaProperty` methods on `ComponentBase` can then be used to access/mutate those
+  additional properties.
+
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Initialize pointer value in material result to nullptr. By @MAG-ElliotMorris
+
+- [NT-0] chore: Remove redundant `RealtimeEngine` shared_ptr in `SystemsManager`. By @MAG-ElliotMorris
+
+### 🔥 ❗Breaking Changes
+
+- [OF-1785] refac!: Remove legacy leadership election logic. By @MAG-AdamThorn
+  Now that server-side script leader election has been operating as the default election model for ~6 months, it is time to remove the legacy client-side leader election logic.  The `ClientProxy.h/.cpp` and `ClientElectionManager.h/.cpp` files have been removed and references to them cleared up. All temporary branching logic that allowed for both election models has been removed.
+  
+  Breaking change:
+  - The public methods `OnlineRealtimeEngine::EnableLeaderElection()` and `OnlineRealtimeEngine::DisableLeaderElection()` have been made `CSP_NO_EXPORT` and will no-longer be available to those consuming CSP via the C# or Javascript generated interop APIs.
+
+## [6.44.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5522] fix: Setup entity script component accessors to use correct instance. @mag-lt.
+  This addresses a regression introduced in 6.38.0 made in the context of binding components created w/ Schemas into scripts automatically.
+  Those changes accidentally made it so component accessors called on entities that are looked up by name or id returned the wrong information
+  i.e. they returned the information of the entity that owns the script instead.
+
+- [NT-0] fix: Fix Download asset calls failing. By @MAG-mv
+  Cookies are now handled better by only sending them to hosts that match. DownloadAsset is using a different host than other calls,
+  so sending cookies to this endpoint was causing calls to be rejected.
+
+## [6.43.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1867] feat: Support injecting custom component schemas via JSON at engine construction time. By @mag-lt.
+  Both `OfflineRealtimeEngine` and `OnlineRealtimeEngine` now accept a `List<String>` of JSON documents at
+  construction, allowing custom component schemas to be registered in the engine-wide schema registry alongside
+  the built-in schemas. Each document should be a JSON array of schema objects, invalid entries are skipped with
+  a warning. The `List<String>` parameter is a wrapper generator workaround for passing large strings, in
+  practice a single element containing the full JSON array is expected. Equivalent constructors accepting
+  `Array<ComponentSchema>` directly are also provided.
+
+- [OF-1878] feat: Add support for federated login. @MAG-AdamThorn & @MAG-mv
+  A new federated login flow is being added that will allow client applications to authenticate directly with MCS. They will not be authenticating through CSP as they currently do. This creates a problem, as with our current login flows we create the LoginState object via `LoginState::OnResponse`. This data is then used to; refresh the token, for secure asset download, when starting the Multiplayer Connection among other things. To support federated login CSP has added a new `UserSystem::FederatedLogin()` method that clients can call to pass the base64 encoded AuthDto json object to CSP.
+
+- [OF-1880] feat: Add `x-auth-token` header to asset download methods by @mag-lt.
+  This ensures we set `x-auth-token` headers for the requests that are sent when calling the asset
+  download related methods on the `AssetSystem` (i.e. `DownloadAssetData`, `DownloadAssetDataEx`).
+  Most of the work for this was done in a prior release (6.34.0 as part of [OF-1844]), this just
+  updates the header set for auth (`x-auth-token` vs `Authorization` that we use for all other requests).
+
+### 🔥 ❗Breaking Changes
+
+- [OB-5368] fix!: Guard access to LoginState data with a mutex. By @MAG-AdamThorn.
+  The Login, Logout and Refresh Token response handlers access the LoginState object on different threads which was resulting in loginstate data race conditions. In addition the LoginState object was being passed to the response handlers by value, which resulted in the LoginState being destroyed when CSP was torn down while callbacks were still in flight. To resolve this issue the LoginState data members have been moved to a new LoginStateData class, and access to it is controlled via a mutex guard. In addition a copy of the LoginState shared_ptr is now captured by the response handler callbacks to ensure it's lifetime persists for the duration of the callback.
+
+### 🔨 🔨 Chore
+
+- [OB-5464] chore: Removed backwards compatibility parsing of AvatarData `identifierType`. All identifiers are strings now, data has been migrated. By @MAG-ElliotMorris
+
+## [6.42.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1850] feat: Updated initialization process to fail if directories fail to create. By @MAG-mv.
+
+- [OF-1866] feat: Add public API for interacting with Components defined in terms of a Schema description. By @mag-lt.
+  This adds the following public methods:
+  - `IRealtimeEngine::GetComponentSchemaRegistry()`: Returns a "registry" instance, a read-only type describing the Components known by the engine. This can be used to interrogate the shape of a Component at runtime. Currently this is populated by CSP with a corresponding Schema for each of the hardcoded Component types in the library. It is still not possible to register a new schema externally, but this will come in a future release.
+  - `SpaceEntity::AddComponentByTypeId(uint64_t TypeId)`: Allows adding a component that corresponds to a Schema with the given TypeId.
+  - `ComponentBase::GetTypeId()`: This returns the unique integer ID representing the component type. For traditional hardcoded components, this corresponds to casting the `ComponentType` to its underlying integer value. This supersedes `GetComponentType` in that it allows for representing an open vs closed set of components. Details of allocating these IDs in a unique fashion is still to be defined.
+  - `ComponentBase::GetSchemaProperty(uint16_t Key)`: Get the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, or null is returned. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+  - `ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)`: Set the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, and the value must match the type declared there or it is ignored. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+
+- [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
+  Adds focus distance and depth of field enabled properties to the cinematic camera space component.
+  
+- [OF-1071] feat: Add support for third party auth with token. By @MAG-AdamThorn.
+  Add support for third party authentication using a token provided by the third party provider. This is an alternate path for SSO to the one already provided, in that it expects the application to request the authorization token from the third party provider directly before passing it to CSP.
+
+## [6.39.0 - 6.41.0]
+
+- Note: Versions 6.39.0 to 6.41.0 were skipped due to a CI deployment issue. All planned changes are included in release 6.42.0.
+
+## [6.38.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1849] feat: Bind components created w/ Schemas into scripts automatically. By @mag-lt.
+  Components defined in terms of a schema description will have their properties bound into the
+  scripting system automatically where possible. This moves a large portion of CSP's own components
+  over to this pattern, with only a handful still being registered manually due to some remaining
+  edge cases.
+
+- [OF-1831] feat: Add Linux support to new build system. by @MAG-mv.
+  At this point, the CSP project builds on Linux for both gcc and clang. We have yet to test if this runs.
+
+- [OF-1850] feat: CSP tests now run on Linux platforms by @MAG-mv.
+  This includes code changes used by the new buld system to run tests on Linux.
+  This still isn't officially public, but noting here due to changes to List::Append.
+
+## [6.37.0]
+
+- Note: Version 6.37.0 was skipped due to a CI deployment issue. All planned changes are included in release 6.38.0.
+
+## [6.36.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Incorrect client argument used for Social Login by @MAG-AdamThorn
+
+## [6.35.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1830] feat: Inital integration of new build system by MAG-mv
+  This adds the start of our new build system that uses conan and cmake.
+  At this point, only support for local Windows and Mac builds has been added, and had only been tested on 1 machine.
+  This should currently not replace our current build system, feel free to use for testing.
+
+- [OF-5310] feat: Added Volume and AudioType properties to `VideoPlayerSpaceComponent`. By @MAG-ME.
+
+- [OF-1846] feat: Setup new csp build system to support wasm builds by @MAG-mv.
+  This isn't currently a public-facing change. However, it includes internal changes to the internal usage of tinyspline. This should not have any effect on behaviour.
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-4980] fix!: Address issues with third party authorization flow. By @MAG-AdamThorn
+  The third party authorization flow is divided into three parts, with two of those handled via calls to CSP. This change addresses an issue whereby a call to the first CSP method would leave you in an invalid login state if you did not complete the authorization flow. In addition, the backend services are constructing the authorization URL that users require directly, rather than CSP constructing it from data returned. This will allow the services to account for changes required to the URL depending on client type and provider. This change introduces the following breaking changes:
+  1. Spelling of method `UserSystem::GetThirdPartyProviderAuthoriseURL()` Americanised to `UserSystem::GetThirdPartyProviderAuthorizeURL()`.
+  2. Method `UserSystem::GetThirdPartyProviderAuthorizeURL()` now takes an additional optional ClientType argument.
+  3. The values of enum `EThirdPartyPlatform` are now capitalized rather than upper case and the value `Web` has been added.
+
+## [6.34.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
+  This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
 
 ### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] test: Address issue with flackey ValidExpiryLengthInTokenOptionsTest by MAG-AdamThorn
   The test ValidExpiryLengthInTokenOptionsTest was failing when run against live services on our CI due to network latency. Adressed the flackiness and also removed calls to `NotifyRefreshTokenHasChanged()` from the UserSystem as this is already being done within the `LoginStateResult::OnResponse()`, resulting in the `UserSystem NewLoginTokenReceivedCallback` callback being fired twice.
 
-
-## [6.32.0]
+## [6.33.0]
 
 ### 🍰 🙌 New Features
 
 - [OF-1625] feat: Add enabled property to `CollisionSpaceComponent`. By @mag-lt.
-
-- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
-  This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
 
 ###💫 💥 Code Refactors
 
@@ -28,11 +169,16 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to ensure compatibility with SignalR wire representation. By @mag-lt
   This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
   the existing constaints into the type system.
-  
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: Fix tasks dropping in signalR scheduler by @MAG-ElliotMorris
   Address issue where signalR scheduler can drop tasks in rare instances where scheduler threads are almost completely busy.
+- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
+  The SignalR threading library by default, constructs several instances of the scheduler,
+  (and thus several sets of threads) during initialization. These are never cleared on WASM,
+  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
+  generally under a similar motivation, as we don't need 5 threads.
 
 ## [6.31.0]
 
@@ -44,9 +190,9 @@ All notable changes to this project will be documented in this file. For compile
   the error handling behaviour which we can just do without. Login with email
   now, you probably already are.
   Removes username as an option from public api:
-    - UserSystem::Login
-    - UserSystem::CreateUser
-    - UserSystem::UpgradeGuestAccount
+  - UserSystem::Login
+  - UserSystem::CreateUser
+  - UserSystem::UpgradeGuestAccount
 
 ### 🐛 🔨 Bug Fixes
 
@@ -55,12 +201,6 @@ All notable changes to this project will be documented in this file. For compile
   (instead of default initialised values), exposed that CSP was naively assuming
   that various optional fields are always set, resulting in `bad_optional_access`
   exceptions being thrown.
-  
-- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
-  The SignalR threading library by default, constructs several instances of the scheduler,
-  (and thus several sets of threads) during initialization. These are never cleared on WASM,
-  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
-  generally under a similar motivation, as we don't need 5 threads.
 
 ## [6.30.0]
 
@@ -96,7 +236,7 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1836] fix: Log errors when parsing malformed JSON by magnopus-swifty
   This is a partial fix to log errors when parsing malformed JSON strings and avoid hitting unwanted assertions.
   A more complete fix will implement error handling logic so calling code can correctly report failures.
-  
+
 ### 🍰 🙌 New Features
 
 - [OF-1818] feat: Update AsyncCompletedEventCallback format by MAG-AdamThorn
@@ -105,7 +245,7 @@ All notable changes to this project will be documented in this file. For compile
 ### 🐛 🔨 Bug Fixes
 
 - [OB-5070] fix: `GetMaterials` no longer bails out after first failure
-  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success. 
+  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success.
 
 ## [6.27.0]
 
@@ -132,40 +272,40 @@ All notable changes to this project will be documented in this file. For compile
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
   all U's need equality. All equality operations are standard memberwise == comparison, of the like a c++20 =default would generate.
   The following types have been given new operators:
-    - MessageInfo
-    - ComponentUpdateInfo
-    - Asset
-    - AssetCollection
-    - CurrencyInfo
-    - ProductMediaInfo
-    - VariantOptionInfo
-    - ProductVariantInfo
-    - ProductInfo
-    - CartLine
-    - ShopifyStoreInfo
-    - TicketedEvent
-    - HotspotGroup
-    - Scope
-    - FeatureLimitInfo
-    - UserTierInfo
-    - FeatureQuotaInfo
-    - Sequence
-    - VersionMetadata
-    - ServiceStatus
-    - ServicesDeploymentStatus
-    - Site
-    - BasicSpace
-    - Space
-    - UserRoleInfo
-    - InviteUserRoleInfo
-    - OlyAnchorPosition
-    - OlyRotation
-    - Anchor
-    - AnchorResolution
-    - PointOfInterest
-    - BasicProfile
-    - Profile
-    - Array<T>
+  - MessageInfo
+  - ComponentUpdateInfo
+  - Asset
+  - AssetCollection
+  - CurrencyInfo
+  - ProductMediaInfo
+  - VariantOptionInfo
+  - ProductVariantInfo
+  - ProductInfo
+  - CartLine
+  - ShopifyStoreInfo
+  - TicketedEvent
+  - HotspotGroup
+  - Scope
+  - FeatureLimitInfo
+  - UserTierInfo
+  - FeatureQuotaInfo
+  - Sequence
+  - VersionMetadata
+  - ServiceStatus
+  - ServicesDeploymentStatus
+  - Site
+  - BasicSpace
+  - Space
+  - UserRoleInfo
+  - InviteUserRoleInfo
+  - OlyAnchorPosition
+  - OlyRotation
+  - Anchor
+  - AnchorResolution
+  - PointOfInterest
+  - BasicProfile
+  - Profile
+  - Array<T>
 
 ## [6.24.0]
 
@@ -178,7 +318,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
-  
+
 ### 🔥 ❗Breaking Changes
 
 - [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
@@ -201,7 +341,7 @@ All notable changes to this project will be documented in this file. For compile
   SpaceEntity::IsModifiable now returns an enum, specifying the reason.
   Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
   Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
-  
+
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
@@ -215,17 +355,17 @@ All notable changes to this project will be documented in this file. For compile
   This method provides a means of changing a users tier (basic, pro, enterprise, etc)
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
-  
+
   This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore
 
 - [OPE-3056] chore: Add exported symbols, equality operators, and hash implementation
-  for types required for the common modules in the C# SWIG wrapper. This will be a 
+  for types required for the common modules in the C# SWIG wrapper. This will be a
   common theme going forward.
-    - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
-    - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
-    - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+  - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
+  - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
+  - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
 
 ### 🐛 🔨 Bug Fixes
 
@@ -242,11 +382,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-4154] fix!: Improve how Hotspot sequence event data is handled by MAG-AdamThorn
   The existing implementation of `HotspotSequenceChangedNetworkEventData` was unnecessarily complex and confusing to developers. This event type has now been removed and new `SpaceId` and `SequenceType` properties have been added to the `SequenceChangedNetworkEventData`.
   This is a breaking change:
-  * `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
-  * `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
-  * When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
-      * SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
-	  * SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
+  - `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
+  - `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
+  - When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
+    - SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
+    - SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
 
 ## [6.19.0]
 
@@ -254,7 +394,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] feat: Exposed equality and inequality operators for `Vector2`, `Vector3`, `Vector4` and `Map` by MAG-ElliotMorris.
   Also added hash functions in the `std` namespace for the Vector types.
-  
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4123] fix: Fix some text rendering as black/unreadable in generated docs.
@@ -283,7 +423,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
   RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
-  
+
 ### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] test: Await exiting spaces in certain realtime engine tests by MAG-ElliotMorris.

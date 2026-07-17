@@ -17,6 +17,11 @@
 
 namespace csp::systems
 {
+
+bool LODAsset::operator==(const LODAsset& Other) const { return Asset == Other.Asset && Level == Other.Level; }
+
+bool LODAsset::operator!=(const LODAsset& Other) const { return !(*this == Other); }
+
 const LODChain& LODChainResult::GetLODChain() const { return Chain; }
 
 void LODChainResult::SetLODChain(const LODChain& InChain) { Chain = InChain; }

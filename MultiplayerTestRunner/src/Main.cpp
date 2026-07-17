@@ -47,7 +47,7 @@
  *
  * Dependencies :
  *	- CSP. From the ConnectedSpacePlatform Solution. Linked.
- *  - UUID_v4. For generating unique space names. Header only.
+ *  - sole. For generating unique space names. Header only.
  *  - CLI11. For defining the command line interface. Header only.
  ********************************/
 

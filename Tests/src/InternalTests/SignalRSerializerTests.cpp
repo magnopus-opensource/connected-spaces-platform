@@ -294,7 +294,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleTypes
     signalr::value SerializedValue = Serializer.Get();
 
     SignalRDeserializer Deserializer { SerializedValue };
-    std::tuple<int64_t, uint64_t, double, bool, std::string, nullptr_t> DeserializedValue;
+    std::tuple<int64_t, uint64_t, double, bool, std::string, std::nullptr_t> DeserializedValue;
 
     size_t ArraySize = 0;
     Deserializer.StartReadArray(ArraySize);
@@ -338,7 +338,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleArray
     signalr::value SerializedValue = Serializer.Get();
 
     SignalRDeserializer Deserializer { SerializedValue };
-    std::tuple<int64_t, uint64_t, std::tuple<uint64_t, std::string>, double, bool, std::string, nullptr_t> DeserializedValue;
+    std::tuple<int64_t, uint64_t, std::tuple<uint64_t, std::string>, double, bool, std::string, std::nullptr_t> DeserializedValue;
 
     size_t ArraySize = 0;
     Deserializer.StartReadArray(ArraySize);
@@ -388,7 +388,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapMultipleTyp
     std::pair<uint64_t, double> Pair3 { 2, 3.0 };
     std::pair<uint64_t, bool> Pair4 { 3, true };
     std::pair<uint64_t, std::string> Pair5 { 4, "Test1" };
-    std::pair<uint64_t, nullptr_t> Pair6 { 5, nullptr };
+    std::pair<uint64_t, std::nullptr_t> Pair6 { 5, nullptr };
 
     SignalRSerializer Serializer;
     Serializer.StartWriteUintMap();
@@ -411,7 +411,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapMultipleTyp
     std::pair<uint64_t, double> DeserializedPair3;
     std::pair<uint64_t, bool> DeserializedPair4;
     std::pair<uint64_t, std::string> DeserializedPair5;
-    std::pair<uint64_t, nullptr_t> DeserializedPair6;
+    std::pair<uint64_t, std::nullptr_t> DeserializedPair6;
 
     size_t ArraySize = 0;
     Deserializer.StartReadUintMap(ArraySize);
@@ -519,7 +519,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeStringMapMultipleT
     std::pair<std::string, double> Pair3 { "2", 3.0 };
     std::pair<std::string, bool> Pair4 { "3", true };
     std::pair<std::string, std::string> Pair5 { "4", "Test1" };
-    std::pair<std::string, nullptr_t> Pair6 { "5", nullptr };
+    std::pair<std::string, std::nullptr_t> Pair6 { "5", nullptr };
 
     SignalRSerializer Serializer;
     Serializer.StartWriteStringMap();
@@ -542,7 +542,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeStringMapMultipleT
     std::pair<std::string, double> DeserializedPair3;
     std::pair<std::string, bool> DeserializedPair4;
     std::pair<std::string, std::string> DeserializedPair5;
-    std::pair<std::string, nullptr_t> DeserializedPair6;
+    std::pair<std::string, std::nullptr_t> DeserializedPair6;
 
     size_t ArraySize = 0;
     Deserializer.StartReadStringMap(ArraySize);

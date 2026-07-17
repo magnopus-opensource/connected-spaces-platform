@@ -16,6 +16,8 @@
 
 #include "CSP/Systems/Users/Authentication.h"
 
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "CSP/Common/Settings.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -27,11 +29,8 @@
 #include "Services/UserService/Dto.h"
 #include "Systems/Users/Authentication.h"
 
-#include "Common/Convert.h"
-
 using namespace csp;
 using namespace csp::common;
-using namespace std::chrono;
 
 namespace chs = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
@@ -44,35 +43,12 @@ LoginStateResult::LoginStateResult()
 {
 }
 
-LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
-    : State(InStatePtr)
+LoginStateResult::LoginStateResult(csp::common::LoginState* LoginState)
+    : State(LoginState)
 {
 }
 
 const csp::common::LoginState& LoginStateResult::GetLoginState() const { return *State; }
-
-namespace
-{
-    csp::common::ApplicationSettings MakeApplicationSetting(const csp::services::generated::userservice::ApplicationSettingsDto& Setting)
-    {
-        csp::common::ApplicationSettings ApplicationSetting;
-        ApplicationSetting.ApplicationName = Setting.HasApplicationName() ? Setting.GetApplicationName() : "";
-        ApplicationSetting.Context = Setting.HasContext() ? Setting.GetContext() : "";
-        ApplicationSetting.AllowAnonymous = Setting.HasAllowAnonymous() ? Setting.GetAllowAnonymous() : false;
-        ApplicationSetting.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(ApplicationSetting.Settings) {};
-        return ApplicationSetting;
-    }
-
-    // Otherwise known as a UserSetting
-    csp::common::SettingsCollection MakeSettingsCollection(const csp::services::generated::userservice::SettingsDto& Setting)
-    {
-        csp::common::SettingsCollection SettingsCollection;
-        SettingsCollection.UserId = Setting.HasUserId() ? Setting.GetUserId() : "";
-        SettingsCollection.Context = Setting.HasContext() ? Setting.GetContext() : "";
-        SettingsCollection.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(SettingsCollection.Settings) {};
-        return SettingsCollection;
-    }
-}
 
 void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
@@ -88,60 +64,19 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
         if (State)
         {
-            State->State = ELoginState::LoggedIn;
-            State->AccessToken = AuthResponse->GetAccessToken();
-            State->RefreshToken = AuthResponse->GetRefreshToken();
-            State->UserId = AuthResponse->GetUserId();
-            State->DeviceId = AuthResponse->GetDeviceId();
+            auto DataOpt = csp::common::AuthDtoToLoginStateData(AuthResponse);
 
-            if (AuthResponse->HasDefaultSettings())
+            if (DataOpt.has_value() == false)
             {
-                const auto& DefaultSettings = AuthResponse->GetDefaultSettings();
-                if (DefaultSettings->HasDefaultUserSettings())
-                {
-                    const auto& UserSettingsDto = DefaultSettings->GetDefaultUserSettings();
-                    for (const auto& SettingDto : UserSettingsDto)
-                    {
-                        State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
-                    }
-                }
-                if (DefaultSettings->HasDefaultApplicationSettings())
-                {
-                    const auto& ApplicationSettingsDto = DefaultSettings->GetDefaultApplicationSettings();
-                    for (const auto& SettingDto : ApplicationSettingsDto)
-                    {
-                        State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
-                    }
-                }
-            }
-
-            const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
-            const DateTime CurrentTime(DateTime::UtcTimeNow());
-
-            if (CurrentTime >= Expiry)
-            {
-                CSP_LOG_FORMAT(LogLevel::Error, "AccessToken Expired: %s %s", AuthResponse->GetAccessToken().c_str(),
-                    AuthResponse->GetAccessTokenExpiresAt().c_str());
-
                 return;
             }
+
+            auto Data = *DataOpt;
+
+            State->SetLoginStateDataThreadSafe(Data);
 
             web::HttpAuth::SetAccessToken(AuthResponse->GetAccessToken(), AuthResponse->GetAccessTokenExpiresAt(), AuthResponse->GetRefreshToken(),
                 AuthResponse->GetRefreshTokenExpiresAt());
-
-            // Schedule a Refresh of the Token 5 minutes before it expires
-            system_clock::time_point RefreshTimepoint = Expiry.GetTimePoint() - system_clock::duration(5min);
-            DateTime RefreshTime(RefreshTimepoint);
-
-            if (RefreshTime >= Expiry)
-            {
-                CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", AuthResponse->GetRefreshToken().c_str(),
-                    AuthResponse->GetRefreshTokenExpiresAt().c_str());
-
-                return;
-            }
-
-            State->SetAccessTokenRefreshTime(RefreshTime);
 
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
@@ -157,11 +92,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
         {
             web::HttpAuth::SetAccessToken("", "", "", "");
 
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ReinitializeResponseLoginState(ELoginState::Error);
         }
     }
 }
@@ -171,9 +102,9 @@ LogoutResult::LogoutResult()
 {
 }
 
-LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
-    : NullResult(InStatePtr)
-    , State(InStatePtr)
+LogoutResult::LogoutResult(csp::common::LoginState* LoginState)
+    : NullResult()
+    , State(LoginState)
 {
 }
 
@@ -185,11 +116,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::LoggedOut;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ReinitializeResponseLoginState(ELoginState::LoggedOut);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
 
@@ -202,11 +129,7 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            State->State = ELoginState::Error;
-            State->AccessToken = "InvalidAccessToken";
-            State->RefreshToken = "InvalidRefreshToken";
-            State->UserId = "InvalidUserId";
-            State->DeviceId = "InvalidDeviceId";
+            State->ReinitializeResponseLoginState(ELoginState::Error);
 
             web::HttpAuth::SetAccessToken("", "", "", "");
         }

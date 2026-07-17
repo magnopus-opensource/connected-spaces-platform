@@ -30,7 +30,7 @@ class CustomSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
     CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent = nullptr);
-    DECLARE_SCRIPT_PROPERTY(std::string, ApplicationOrigin);
+
     uint32_t GetCustomPropertySubscriptionKey(const std::string& Key);
     bool HasCustomProperty(const std::string& Key) const;
     void RemoveCustomProperty(const std::string& Key);

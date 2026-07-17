@@ -44,6 +44,8 @@ enum class CinematicCameraPropertyKeys : uint16_t
     Aperture,
     IsViewerCamera,
     ThirdPartyComponentRef,
+    FocusDistance,
+    DepthOfFieldEnabled,
     Num
 };
 
@@ -56,9 +58,21 @@ class CSP_API CinematicCameraSpaceComponent : public ComponentBase,
                                               public IEnableableComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a cinematic camera space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new CinematicCameraSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<CinematicCameraSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gived the sensor size and focal length, return the horizonal fov
     /// @return FOV in radians
@@ -145,14 +159,28 @@ public:
     void SetShutterSpeed(float Value);
 
     /// @brief Get aperture.
-    /// Note: reserved for future use, do not implement on clients
     /// @param Value float : aperture
     float GetAperture() const;
 
     /// @brief Set aperture
-    /// Note: reserved for future use, do not implement on clients
-    /// @param Value float : aperture Flag
+    /// @param Value float : aperture
     void SetAperture(float Value);
+
+    /// @brief Get focus distance.
+    /// @param Value float : focus distance
+    float GetFocusDistance() const;
+
+    /// @brief Set focus distance
+    /// @param Value float : focus distance
+    void SetFocusDistance(float Value);
+
+    /// @brief Get depth of field enabled flag
+    /// @return Current depth of field enabled flag
+    bool GetDepthOfFieldEnabled() const;
+
+    /// @brief Set depth of field enabled flag
+    /// @param Value boolean : Depth of field enabled flag
+    void SetDepthOfFieldEnabled(bool Value);
 
     /// @brief Get IsViewerCamera.
     /// Note: reserved for future use, do not implement on clients
@@ -179,6 +207,9 @@ public:
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
     /// @}
+
+private:
+    CinematicCameraSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

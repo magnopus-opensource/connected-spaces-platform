@@ -19,6 +19,7 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/NetworkEventData.h"
@@ -72,7 +73,6 @@ class Event;
 namespace csp::multiplayer
 {
 
-class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -88,12 +88,12 @@ class CSP_API OnlineRealtimeEngine : public csp::common::IRealtimeEngine
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
-    friend class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
+    friend class ::CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
     /** @endcond */
     CSP_END_IGNORE
 
@@ -109,6 +109,32 @@ public:
     /// election system
     OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    /// @brief OnlineRealtimeEngine constructor.
+    /// Creates a realtime engine with additional component schemas.
+    /// @param InMultiplayerConnection The multiplayer connection to construct the engine with.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param NetworkEventBus Reference to the network event bus, used for leadership election messaging.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+
+    /// @brief OnlineRealtimeEngine constructor.
+    /// Creates a realtime engine with additional component schemas from JSON.
+    /// @param InMultiplayerConnection The multiplayer connection to construct the engine with.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param NetworkEventBus Reference to the network event bus, used for leadership election messaging.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped
+    /// with a warning.
+    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::List<csp::common::String>& JsonSchemas);
 
     /// @brief OnlineRealtimeEngine destructor
     CSP_NO_EXPORT ~OnlineRealtimeEngine();
@@ -278,6 +304,10 @@ public:
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
+    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
+    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
+    const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
@@ -314,19 +344,20 @@ public:
     void ClaimScriptOwnership(SpaceEntity* Entity) const;
 
     /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
+    CSP_NO_EXPORT void EnableLeaderElection();
 
     /// @brief Disable Leader Election feature.
     /// @pre SpaceSystem::EnterSpace should be called first for this to take affect.
-    void DisableLeaderElection();
+    CSP_NO_EXPORT void DisableLeaderElection();
 
     /// @brief Check if the Leader Election feature is enabled.
     /// @return true if enabled, false otherwise.
     bool IsLeaderElectionEnabled() const;
 
     /// @brief Debug helper to get the id of the currently elected script leader.
-    /// This should be updated when we fully support scopes. We will need to pass in the scopeId we want the leader for.
-    /// @return The id of the leader.
+    /// @note It is safe to assume that server-side leader election is always enabled. While an internal endpoint does exist to disable leader
+    /// election, it is only used for testing and is not exported as part of the public interop API surface.
+    /// @return The id of the leader if a leader is set, 0 if it is not.
     uint64_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
@@ -383,9 +414,6 @@ public:
     // This should only be used in testing.
     CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback);
     CSP_END_IGNORE
-
-    // We should remove this in OF-1785
-    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
@@ -452,12 +480,6 @@ private:
 
     bool IsLocalClientLeader() const;
 
-    // These are used for client-side leader eleciton and can be removed as part of OF-1785.
-    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
-
     void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
     // Used in OnObjectMessage as well as in the initial entity fetch. Uses CreateEntity to make entities when instructed to from the server, via
@@ -475,13 +497,8 @@ private:
         LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
-    csp::common::IScriptBinding* ScriptBinding;
+    std::unique_ptr<csp::common::IScriptBinding> ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
-
-    // Leader election ---------------------------------------------------------
-
-    // Client-side election manager. Should be removed as part of OF-1785.
-    class ClientElectionManager* ElectionManager;
 
     // Server-side election data.
     CSP_START_IGNORE
@@ -492,9 +509,6 @@ private:
     ScopeLeaderCallback OnVacatedAsScopeLeaderCallback;
 
     csp::common::String DefaultScopeId;
-    // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
-    bool ServerSideElectionEnabled = false;
-    // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;
     std::mutex LeadershipElectionLock;
@@ -516,6 +530,8 @@ private:
     csp::common::IJSScriptRunner* ScriptRunner;
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
+
+    std::unique_ptr<csp::multiplayer::IComponentSchemaRegistry> ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

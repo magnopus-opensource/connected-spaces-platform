@@ -6,6 +6,7 @@
 #include "signalrclient/signalr_value.h"
 #include "signalrclient/signalr_exception.h"
 #include <string>
+#include <cstring>
 
 namespace signalr
 {

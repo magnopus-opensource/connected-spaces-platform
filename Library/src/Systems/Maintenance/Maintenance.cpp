@@ -23,6 +23,13 @@
 namespace csp::systems
 {
 
+bool MaintenanceInfo::operator==(const MaintenanceInfo& Other) const
+{
+    return Description == Other.Description && StartDateTimestamp == Other.StartDateTimestamp && EndDateTimestamp == Other.EndDateTimestamp;
+}
+
+bool MaintenanceInfo::operator!=(const MaintenanceInfo& Other) const { return !(*this == Other); }
+
 bool MaintenanceInfo::IsInsideWindow() const
 {
     if (StartDateTimestamp.IsEmpty() || EndDateTimestamp.IsEmpty())

@@ -16,30 +16,49 @@
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::ECommerce,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::ECommerce),
+    "ECommerce",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(ECommercePropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(ECommercePropertyKeys::ProductId),
+            static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::ProductId),
+            "productId",
             "",
         },
     },
 };
 
+const ComponentSchema& ECommerceSpaceComponent::GetSchema() { return Schema; }
+
 ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : ECommerceSpaceComponent(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ECommerceSpaceComponentScriptInterface(this));
+}
+
+std::unique_ptr<ECommerceSpaceComponent> ECommerceSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(ECommerceSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<ECommerceSpaceComponent>(new ECommerceSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+ECommerceSpaceComponent::ECommerceSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
+{
 }
 
 /* IPositionComponent */

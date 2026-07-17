@@ -70,7 +70,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthInitialisationTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthZeroInitialisationTest)
 {
-    String Instance(0ULL);
+    String Instance(static_cast<size_t>(0ULL));
 
     EXPECT_TRUE(Instance.IsEmpty());
     EXPECT_EQ(Instance.Length(), 0);
@@ -396,7 +396,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListEmptyTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListSomeEmptyEntriesTest)
 {
-    List<String> Parts = { "abc", String(), String(0ULL) };
+    List<String> Parts = { "abc", String(), String(static_cast<size_t>(0ULL)) };
     String Instance = String::Join(Parts);
 
     EXPECT_EQ(Instance, "abc");
@@ -404,7 +404,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListSomeEmptyEntriesTe
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTest)
 {
-    List<String> Parts = { "", String(), String(0ULL) };
+    List<String> Parts = { "", String(), String(static_cast<size_t>(0ULL)) };
     String Instance = String::Join(Parts);
 
     EXPECT_EQ(Instance, "");

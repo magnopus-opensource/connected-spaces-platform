@@ -1,0 +1,186 @@
+{
+  "version": 4,
+  "include": ["./ConanPresets.json"],
+  "configurePresets": [
+    {
+      "name": "multi-static",
+      "displayName": "multi-config static (with tests)",
+      "inherits": "conan-default",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "multi-shared",
+      "displayName": "multi-config shared",
+      "inherits": "conan-default",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+
+    {
+      "name": "debug-static",
+      "displayName": "single-config debug static",
+      "inherits": "conan-debug",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "debug-static-tests",
+      "displayName": "single-config debug static (with tests)",
+      "inherits": "conan-debug",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "debug-shared",
+      "displayName": "single-config debug shared",
+      "inherits": "conan-debug",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+
+    {
+      "name": "release-static",
+      "displayName": "single-config release static",
+      "inherits": "conan-release",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "release-static-tests",
+      "displayName": "single-config release static (with tests)",
+      "inherits": "conan-release",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "release-shared",
+      "displayName": "single-config release shared",
+      "inherits": "conan-release",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+
+    {
+      "name": "relwithdebinfo-static",
+      "displayName": "single-config release with debug info static",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "relwithdebinfo-static-tests",
+      "displayName": "single-config release with debug info static (with tests)",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "relwithdebinfo-shared",
+      "displayName": "single-config release with debug info shared",
+      "inherits": "conan-relwithdebinfo",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "multi-debug-static",
+      "configurePreset": "multi-static",
+      "configuration": "Debug"
+    },
+    {
+      "name": "multi-release-static",
+      "configurePreset": "multi-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "multi-relwithdebinfo-static",
+      "configurePreset": "multi-static",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "multi-debug-shared",
+      "configurePreset": "multi-shared",
+      "configuration": "Debug"
+    },
+    {
+      "name": "multi-release-shared",
+      "configurePreset": "multi-shared",
+      "configuration": "Release"
+    },
+    {
+      "name": "multi-relwithdebinfo-shared",
+      "configurePreset": "multi-shared",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "debug-static",
+      "configurePreset": "debug-static",
+      "configuration": "Debug"
+    },
+    {
+      "name": "debug-static-tests",
+      "configurePreset": "debug-static-tests",
+      "configuration": "Debug"
+    },
+    {
+      "name": "debug-shared",
+      "configurePreset": "debug-shared",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-static",
+      "configurePreset": "release-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-static-tests",
+      "configurePreset": "release-static-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-shared",
+      "configurePreset": "release-shared",
+      "configuration": "Release"
+    },
+
+    {
+      "name": "relwithdebinfo-static",
+      "configurePreset": "relwithdebinfo-static",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "relwithdebinfo-static-tests",
+      "configurePreset": "relwithdebinfo-static-tests",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "relwithdebinfo-shared",
+      "configurePreset": "relwithdebinfo-shared",
+      "configuration": "RelWithDebInfo"
+    }
+  ]
+}

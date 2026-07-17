@@ -50,6 +50,6 @@ ASSERT_MOVE_CAPABLE(RunnerSettings);
  * Call this first in main to get your CLI.
  * Processes provided arguments, validating them and produces a `RunnerSettings` struct.
  */
-RunnerSettings ProcessCLI(int argc, char* argv[]);
+RunnerSettings ProcessCLI(int argc, const char* const* argv);
 
 } // namespace CLIArgs

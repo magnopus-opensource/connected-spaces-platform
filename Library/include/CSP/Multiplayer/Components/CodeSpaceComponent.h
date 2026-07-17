@@ -23,6 +23,8 @@
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Multiplayer/Components/NgxScriptAttribute.h"
 
+#include <memory>
+
 namespace csp::multiplayer
 {
 
@@ -56,7 +58,17 @@ enum class CodeSpaceComponentPropertyKeys
 class CSP_API CodeSpaceComponent : public ComponentBase
 {
 public:
+    /// @brief The engine-wide ComponentSchema describing this component type.
+    /// @note Named GetComponentSchema (not GetSchema like other components) because GetSchema()
+    /// on this component already returns the replicated per-script `$schema` JSON string.
+    CSP_NO_EXPORT static const ComponentSchema& GetComponentSchema();
+
     CodeSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a code space component using the provided schema if it is compatible with the built-in schema.
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<CodeSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     const csp::common::String& GetScriptAssetPath() const;
     void SetScriptAssetPath(const csp::common::String& Value);
@@ -81,6 +93,9 @@ public:
     /// @brief Parse the $schema and current attribute values into a list of
     /// NgxScriptAttribute objects that combine metadata with live values.
     csp::common::List<NgxScriptAttribute> GetScriptAttributes() const;
+
+private:
+    CodeSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

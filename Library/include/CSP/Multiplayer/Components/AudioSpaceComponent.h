@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IAudioControlComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
@@ -33,16 +34,6 @@ enum class AudioPlaybackState
     Reset = 0,
     Pause,
     Play,
-    Num
-};
-
-/// @brief Specifies the type of audio source for an audio component.
-enum class AudioType
-{
-    /// A global audio type keeps the volume of the audio independent from the player position.
-    Global = 0,
-    /// A spatial audio takes the player position into account to attenuate or amplify the volume.
-    Spatial,
     Num
 };
 
@@ -68,14 +59,26 @@ enum class AudioPropertyKeys : uint16_t
 ///
 /// This component creates immersive soundscapes by playing audio that reacts to the user's position in the space.
 /// Whether it's background music, sound effects, or voiceovers, the AudioSpaceComponent makes sound more engaging by positioning it in 3D space.
-class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
+class CSP_API AudioSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:
     typedef std::function<void(AudioSpaceComponent&)> PlaySoundCallbackHandler;
 
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates an audio space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new AudioSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<AudioSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup IPositionComponent
     /// @{
@@ -92,14 +95,6 @@ public:
     /// @brief Sets the new playback state of the audio of this audio component.
     /// @param Value The new playback state of the audio of this audio component.
     void SetPlaybackState(AudioPlaybackState Value);
-
-    /// @brief Gets the type of the audio of this audio component.
-    /// @return The type of the audio of this audio component.
-    AudioType GetAudioType() const;
-
-    /// @brief Sets the type of the audio of this audio component.
-    /// @param Value Type of the audio of this audio component.
-    void SetAudioType(AudioType Value);
 
     /// @brief Gets the asset ID for this audio asset.
     /// @return The ID of this audio asset.
@@ -119,22 +114,6 @@ public:
     /// @param Value The ID of the asset collection associated with this component.
     void SetAssetCollectionId(const csp::common::String& Value);
 
-    /// @brief Gets the attenuation for the audio when a spatial audio type.
-    ///        The radius is the minimum distance between the origin of this audio component and
-    ///        the position of the player, from within which the player can start hearing
-    ///        the spatial audio in range.
-    ///        The radius is expressed in meters.
-    /// @return The minimum radius in meters from the origin of the audio component to hear the spatial audio.
-    float GetAttenuationRadius() const;
-
-    /// @brief Sets the attenuation for the audio when a spatial audio type.
-    ///        The radius is the minimum distance between the origin of this audio component and
-    ///        the position of the player, from within which the player can start hearing
-    ///        the spatial audio in range.
-    ///        The radius is expressed in meters.
-    /// @param Value The minimum radius in meters from the origin of the audio component to hear the spatial audio.
-    void SetAttenuationRadius(float Value);
-
     /// @brief Checks if the audio playback is looping.
     /// @return True if the audio loops (i.e. starts from the beginning when ended), false otherwise.
     bool GetIsLoopPlayback() const;
@@ -151,15 +130,21 @@ public:
     /// @param Value The timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
     void SetTimeSincePlay(float Value);
 
-    /// @brief Gets the volume of the audio in a ratio between 0 and 1.
-    ///        Volume 1 represents the full volume of the audio clip of this component.
-    /// @return The volume of the audio, in a ratio between 0 and 1.
-    float GetVolume() const;
-
-    /// @brief Sets the volume of the audio in a ratio between 0 and 1.
-    ///        Volume 1 represents the full volume of the audio clip of this component.
-    /// @param Value The volume of the audio, in a ratio between 0 and 1.
-    void SetVolume(float Value);
+    /// \addtogroup IAudioControlComponent
+    /// @{
+    /// @copydoc IAudioControlComponent::GetAudioType()
+    AudioType GetAudioType() const override;
+    /// @copydoc IAudioControlComponent::SetAudioType()
+    void SetAudioType(AudioType Value) override;
+    /// @copydoc IAudioControlComponent::GetAttenuationRadius()
+    float GetAttenuationRadius() const override;
+    /// @copydoc IAudioControlComponent::SetAttenuationRadius()
+    void SetAttenuationRadius(float Value) override;
+    /// @copydoc IAudioControlComponent::GetVolume()
+    float GetVolume() const override;
+    /// @copydoc IAudioControlComponent::SetVolume()
+    void SetVolume(float Value) override;
+    /// @}
 
     /// @brief Requests that this component's audio be played once.
     /// Intended for one-shot sound effects triggered by gameplay or script.
@@ -169,12 +154,13 @@ public:
     /// The client can use this to bridge component/script requests into the platform audio playback layer.
     CSP_EVENT void SetPlaySoundCallback(PlaySoundCallbackHandler Callback);
 
+
     /// \addtogroup IEnableableComponent
     /// @{
     /// @copydoc IEnableableComponent::GetIsEnabled()
-    virtual bool GetIsEnabled() const override;
+    bool GetIsEnabled() const override;
     /// @copydoc IEnableableComponent::SetIsEnabled()
-    virtual void SetIsEnabled(bool InValue) override;
+    void SetIsEnabled(bool InValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -187,6 +173,8 @@ public:
 
 private:
     PlaySoundCallbackHandler PlaySoundCallback;
+
+    AudioSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

@@ -84,7 +84,7 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
 #endif
 
 #if defined(CSP_ANDROID)
-        __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str());
+        __android_log_print(ANDROID_LOG_VERBOSE, "CSP", "%s", InMessage.c_str());
 #endif
     }
 }

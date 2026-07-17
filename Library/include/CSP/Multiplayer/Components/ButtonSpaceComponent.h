@@ -52,9 +52,21 @@ enum class ButtonPropertyKeys : uint16_t
 class CSP_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the button space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a button space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ButtonSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<ButtonSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the text of the label of this button.
     /// @return The text on the label of this button.
@@ -127,6 +139,9 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+private:
+    ButtonSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

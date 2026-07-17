@@ -95,7 +95,7 @@ mcs::ItemComponentData ToItemComponentData(ComponentBase* Value)
 
     // Manually write the component type, as this isn't stored in the component properties.
     // This is currently the ONLY value that uses a uint64 types as a key for some reason. The rest use int64.
-    ComponentPacker.WriteValue(COMPONENT_KEY_COMPONENTTYPE, static_cast<uint64_t>(Value->GetComponentType()));
+    ComponentPacker.WriteValue(COMPONENT_KEY_COMPONENTTYPE, Value->GetTypeId());
 
     // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
     std::unique_ptr<common::Array<uint32_t>> Keys(const_cast<common::Array<uint32_t>*>(Value->GetProperties()->Keys()));

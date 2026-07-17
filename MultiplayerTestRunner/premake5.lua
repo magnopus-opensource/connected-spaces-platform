@@ -29,7 +29,7 @@ if not MultiplayerTestRunner then
 			"%{prj.location}/thirdparty/**.h",
             "%{wks.location}/Library/include", --CSP
 			"%{wks.location}/ThirdParty/googletest/include",
-			"%{wks.location}/ThirdParty/uuid-v4"
+			"%{wks.location}/ThirdParty/sole"
 		}
 
         debugdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"

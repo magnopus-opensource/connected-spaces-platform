@@ -692,7 +692,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         RealtimeEngine->SetOnVacatedAsScopeLeaderCallback(
             [&VacatedCallbackCalled, ElectedUserId](const csp::common::String&, const csp::common::String& VacatedUserId)
             {
-                printf((std::string { "SetOnVacatedAsScopeLeaderCallback 2" } + VacatedUserId.c_str() + "\n").c_str());
+                printf("SetOnVacatedAsScopeLeaderCallback 2%s\n", VacatedUserId.c_str());
 
                 EXPECT_EQ(ElectedUserId, VacatedUserId);
                 VacatedCallbackCalled = true;
@@ -704,7 +704,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
             [&ElectedCallbackCalled, TestRunnerUser1, TestRunnerUser2, &ElectedUserId](
                 const csp::common::String&, const csp::common::String& LeaderUserId)
             {
-                printf((std::string { "SetOnElectedScopeLeaderCallback 2" } + LeaderUserId.c_str() + "\n").c_str());
+                printf("SetOnElectedScopeLeaderCallback 2%s\n", LeaderUserId.c_str());
                 // If the previous leader was User1, the new leader should be User2
                 if (ElectedUserId == TestRunnerUser1.UserId)
                 {

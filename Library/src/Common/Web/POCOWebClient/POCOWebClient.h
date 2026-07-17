@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#ifndef CSP_WASM
+
 #include "Common/Web/WebClient.h"
 
 #include <Poco/Net/HTTPCookie.h>
@@ -28,6 +30,14 @@ class LogSystem;
 }
 namespace csp::web
 {
+
+struct CookieData
+{
+    std::string Name;
+    std::string Value;
+    std::string Domain;
+};
+
 
 class PocoPrivateKeyHandler : public Poco::Net::PrivateKeyPassphraseHandler
 {
@@ -65,11 +75,12 @@ protected:
     void Send(HttpRequest& Request) override;
 
     void Get(HttpRequest& Request);
-    void AddCookie(Poco::Net::HTTPRequest& PocoRequest);
+    void AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::string& Domain);
     void Post(HttpRequest& Request);
     void Put(HttpRequest& Request);
     void Delete(HttpRequest& Request);
     void Head(HttpRequest& Request);
+    void Patch(HttpRequest& Request);
 
     void ProcessResponseAsync(
         Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPResponse& PocoResponse, std::istream& ResponseStream, HttpRequest& Request);
@@ -78,8 +89,27 @@ protected:
 
     Poco::Net::Context::Ptr PocoContext;
 
-    std::vector<Poco::Net::HTTPCookie>* Cookies;
+    std::vector<CookieData>* Cookies;
     std::mutex CookiesMutex;
+
+private:
+    /// @brief Specifies how the request body will be sent.
+    enum class ERequestBodyMode
+    {
+        // No body is sent with the request
+        None,
+        // Body is streamed in chunks with progress tracking and cancellation support
+        Streamed,
+        // Body is written inline to the request stream in a single operation
+        Inline
+    };
+
+    bool PrepareAndSendRequest(
+        HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode);
+
+    std::istream& ReceiveResponse(
+        Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request);
 };
 
 } // namespace csp::web
+#endif

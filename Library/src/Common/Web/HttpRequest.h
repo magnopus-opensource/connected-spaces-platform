@@ -45,12 +45,14 @@ enum class ERequestVerb : uint8_t
     Post = 2,
     Delete = 3,
     Head = 4,
+    Patch = 5,
 
     GET = Get,
     PUT = Put,
     POST = Post,
     DELETE = Delete,
-    HEAD = Head
+    HEAD = Head,
+    PATCH = Patch
 };
 
 #pragma pop_macro("DELETE")

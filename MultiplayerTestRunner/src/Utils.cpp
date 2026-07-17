@@ -17,7 +17,7 @@
 #include "Utils.h"
 
 #include "../include/ErrorCodes.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -30,16 +30,14 @@
 namespace Utils
 {
 
-std::string Utils::GetUniqueString()
+std::string GetUniqueString()
 {
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-
+    const auto uuid = sole::uuid4();
     return uuid.str();
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
+csp::systems::Profile CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
     csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ /* = None */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -75,7 +73,7 @@ csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::
 
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
-    constexpr char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
+    constexpr const char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
 
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();

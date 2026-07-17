@@ -19,7 +19,6 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/Election/ScopeLeadershipManager.h"
 #include <fmt/format.h>
 
@@ -239,42 +238,6 @@ void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId)
 {
     EntityScript& Script = Entity->GetScript();
     Script.SetOwnerId(ClientId);
-}
-
-std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
-    const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
-    csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager)
-{
-    std::scoped_lock EntitiesLocker(EntitiesLock);
-
-    const auto CurrentTime = std::chrono::system_clock::now();
-    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
-
-    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
-
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        bool CanRunScripts = true;
-
-        // Note that offline realtime engines may always run scripts.
-        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
-        {
-            // If this is an online engine with leadership election enabled, then only the script leader may run scripts.
-            // If there is no leadership election, then we assume all clients may run scripts.
-            csp::multiplayer::ClientElectionManager* ElectionManagerPtr = ElectionManager.HasValue() ? *ElectionManager : nullptr;
-            if (ElectionManagerPtr != nullptr)
-            {
-                CanRunScripts = ElectionManagerPtr->IsLocalClientLeader();
-            }
-        }
-
-        if (CanRunScripts)
-        {
-            Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-        }
-    }
-
-    return CurrentTime;
 }
 
 std::chrono::system_clock::time_point TickEntityScripts(

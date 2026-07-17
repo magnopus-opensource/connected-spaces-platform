@@ -22,11 +22,11 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "Common/Convert.h"
 #include "SpaceSystemTestHelpers.h"
+#include "Services/AggregationService/AggregationServiceApiMock.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 #include "Json/JsonSerializer.h"
 
-#include "Services/AggregationService/AggregationServiceApiMock.h"
 #include "gtest/gtest.h"
 #include <future>
 #include <gmock/gmock.h>

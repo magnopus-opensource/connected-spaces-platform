@@ -354,4 +354,6 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, ParseWithErrorLogging_LogsFailure)
     EXPECT_EQ(
         log_,
         "Error: ParseWithErrorLogging_LogsFailure: JSON parse error: Missing a name for object member. (at offset 2). Context: { invalid json }");
+
+    csp::CSPFoundation::Shutdown();
 }

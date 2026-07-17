@@ -24,6 +24,8 @@
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
+#include <memory>
+
 namespace csp::multiplayer
 {
 
@@ -52,9 +54,16 @@ enum class AttachmentPropertyKeys
 class CSP_API AttachmentSpaceComponent : public ComponentBase
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the attachment component and associates it with the specified parent space entity.
     /// @param Parent The space entity that owns this component.
     AttachmentSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates an attachment space component using the provided schema if it is compatible with the built-in schema.
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<AttachmentSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the anchor path that the renderer should resolve for this entity.
     /// An empty string means the entity is not attached.
@@ -95,6 +104,9 @@ public:
     /// path resolves.
     /// @param Value The scale relative to the resolved anchor.
     void SetAttachedScale(const csp::common::Vector3& Value);
+
+private:
+    AttachmentSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

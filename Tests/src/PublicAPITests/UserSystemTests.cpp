@@ -15,6 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/LoginState.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -22,8 +23,11 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
+#include "Common/LoginStateData.h"
+#include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "RAIIMockLogger.h"
+#include "Services/UserService/Dto.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -81,7 +85,7 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -95,7 +99,7 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -108,7 +112,7 @@ void LogInAsGuestWithDeferredProfileCreation(
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        OutUserId = Result.GetLoginState().UserId;
+        OutUserId = Result.GetLoginState().GetUserId();
     }
 }
 
@@ -146,10 +150,17 @@ csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSyste
     return GetProfileResult.GetProfile();
 }
 
-void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, const csp::common::String& RedirectURL)
+struct AuthorizeURLTokens
 {
-    EXPECT_FALSE(AuthoriseURL.IsEmpty());
-    EXPECT_NE(AuthoriseURL, "error");
+    std::string StateId;
+    std::string ClientId;
+    std::string Scope;
+    std::string RetrievedRedirectURL;
+};
+
+AuthorizeURLTokens ExtractTokensFromAuthorizeURL(const csp::common::String& AuthorizeURL)
+{
+    AuthorizeURLTokens URLTokens;
 
     const char* STATE_ID_URL_PARAM = "state=";
     const char* CLIENT_ID_URL_PARAM = "client_id=";
@@ -157,56 +168,64 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     const char* REDIRECT_URL_PARAM = "redirect_uri=";
     const char* INVALID_URL_PARAM_VALUE = "N/A";
 
-    std::string StateId = INVALID_URL_PARAM_VALUE;
-    std::string ClientId = INVALID_URL_PARAM_VALUE;
-    std::string Scope = INVALID_URL_PARAM_VALUE;
-    std::string RetrievedRedirectURL = INVALID_URL_PARAM_VALUE;
+    URLTokens.StateId = INVALID_URL_PARAM_VALUE;
+    URLTokens.ClientId = INVALID_URL_PARAM_VALUE;
+    URLTokens.Scope = INVALID_URL_PARAM_VALUE;
+    URLTokens.RetrievedRedirectURL = INVALID_URL_PARAM_VALUE;
 
-    const auto& Tokens = AuthoriseURL.Split('&');
-    for (size_t idx = 0; idx < Tokens.Size(); ++idx)
+    const auto& QueryParams = AuthorizeURL.Split('&');
+    for (size_t idx = 0; idx < QueryParams.Size(); ++idx)
     {
-        std::string URLElement(Tokens[idx].c_str());
+        std::string URLElement(QueryParams[idx].c_str());
         if (URLElement.find(STATE_ID_URL_PARAM, 0) == 0)
         {
-            StateId = URLElement.substr(strlen(STATE_ID_URL_PARAM));
+            URLTokens.StateId = URLElement.substr(strlen(STATE_ID_URL_PARAM));
             continue;
         }
         else if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
         {
-            ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
+            URLTokens.ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
             continue;
         }
         else if (URLElement.find(SCOPE_URL_PARAM, 0) == 0)
         {
-            Scope = URLElement.substr(strlen(SCOPE_URL_PARAM));
+            URLTokens.Scope = URLElement.substr(strlen(SCOPE_URL_PARAM));
             continue;
         }
         else if (URLElement.find(REDIRECT_URL_PARAM, 0) == 0)
         {
-            RetrievedRedirectURL = URLElement.substr(strlen(REDIRECT_URL_PARAM));
+            URLTokens.RetrievedRedirectURL = URLElement.substr(strlen(REDIRECT_URL_PARAM));
             continue;
         }
     }
 
-    const auto NewTokens = Tokens[0].Split('?');
+    const auto NewTokens = QueryParams[0].Split('?');
     EXPECT_EQ(NewTokens.Size(), 2);
 
     std::string URLElement(NewTokens[1].c_str());
     if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
     {
-        ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
+        URLTokens.ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
     }
 
-    // validate that the following contain something that potentially makes sense
-    EXPECT_NE(StateId, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(ClientId, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(Scope, INVALID_URL_PARAM_VALUE);
-    EXPECT_NE(RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
+    return URLTokens;
+}
 
-    EXPECT_GT(StateId.length(), 0);
-    EXPECT_GT(ClientId.length(), 0);
-    EXPECT_GE(Scope.length(), 0);
-    EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
+void ValidateThirdPartyAuthorizeURL(const AuthorizeURLTokens& URLTokens, const csp::common::String& RedirectURL)
+{
+    const char* INVALID_URL_PARAM_VALUE = "N/A";
+
+    // validate that the following contain something that potentially makes sense
+    EXPECT_NE(URLTokens.StateId, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(URLTokens.ClientId, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(URLTokens.Scope, INVALID_URL_PARAM_VALUE);
+    EXPECT_NE(URLTokens.RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
+
+    EXPECT_GT(URLTokens.StateId.length(), 0);
+    EXPECT_GT(URLTokens.ClientId.length(), 0);
+    EXPECT_GE(URLTokens.Scope.length(), 0);
+
+    EXPECT_EQ(URLTokens.RetrievedRedirectURL, RedirectURL.c_str());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
@@ -315,6 +334,43 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestDeferredProfileCreationT
 
     // Log out
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginWithRefreshToken)
+{
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Login to backend services in order to get the information to get a refresh token
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    const auto RefreshToken = csp::web::HttpAuth::GetRefreshToken();
+
+    // Shutdown and restart CSP. To simulate closing the app/tab and wanting to auto-login via refresh
+    // This is just taken from the fixture code we run at the start of every test.
+    csp::CSPFoundation::Shutdown();
+
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+
+    // New CSP, new objects.
+    auto* Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+
+    // Login with our new token
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId.c_str(), RefreshToken, true, nullptr);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    ASSERT_EQ(Result.GetLoginState().GetLoginStateValue(), csp::common::ELoginState::LoggedIn);
+    ASSERT_EQ(Result.GetLoginState().GetUserId(), UserId);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Connected);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
@@ -465,6 +521,79 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
     LogOut(UserSystem);
 }
 
+/* The federated login was a last-minute pre release addition
+ * It should probably have more tests than just this. */
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Login to backend services in order to get the information to build an AuthDTO
+    // We're simulating a successful federated login here, it's all the same stuff at the end of the day.
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    // Assemble the AuthDTO
+    csp::services::generated::userservice::AuthDto AuthDetails;
+    AuthDetails.SetUserId(UserId.c_str());
+    AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
+    AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
+    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
+    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+
+    const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
+
+    // Logout so we can login again
+    LogOut(UserSystem);
+
+    // Login with the "federated JSON response"
+    auto [Result] = AWAIT_PRE(UserSystem, FederatedLogin, RequestPredicate, FederatedLoginDetailsJson, true);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    ASSERT_EQ(Result.GetLoginState().GetLoginStateValue(), csp::common::ELoginState::LoggedIn);
+    ASSERT_EQ(Result.GetLoginState().GetUserId(), UserId);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Connected);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTestBadJson)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Login to backend services in order to get the information to build an AuthDTO
+    // We're simulating a successful federated login here, it's all the same stuff at the end of the day.
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
+
+    // Assemble the AuthDTO
+    csp::services::generated::userservice::AuthDto AuthDetails;
+    AuthDetails.SetUserId(UserId.c_str());
+    AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
+    // Deliberately don't set the access token to trigger a failure
+    // AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
+    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
+    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+
+    const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
+
+    // Logout so we can login again
+    LogOut(UserSystem);
+
+    // Login with the "federated JSON response" - this will fail
+    auto [Result] = AWAIT_PRE(UserSystem, FederatedLogin, RequestPredicate, FederatedLoginDetailsJson, true);
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    ASSERT_EQ(Connection->GetConnectionState(), csp::multiplayer::ConnectionState::Disconnected);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -474,7 +603,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     // Log in
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.AccessTokenExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:10";
 
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
@@ -490,6 +619,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     std::this_thread::sleep_for(10s);
 
+    // Make any api call to cause refresh check to run.
     auto Profile = GetFullProfileByUserId(UserSystem, UserId);
 
     EXPECT_EQ(TokenHasBeenRefreshed, true);
@@ -513,7 +643,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTokenFailedTest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
-    RAIIMockLogger MockLogger {};
+    RAIIMockLogger MockLogger { };
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Fatal);
     csp::common::String Msg = "User authentication token refresh failed!";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, Msg)).Times(1);
@@ -536,10 +666,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
     std::future<csp::systems::LoginTokenInfoResult> TokenFuture = TokenPromise.get_future();
 
     UserSystem->SetNewLoginTokenReceivedCallback(
-        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result)
-        {
-            TokenPromise.set_value(Result);
-        });
+        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result) { TokenPromise.set_value(Result); });
 
     // Log in
     csp::common::String UserId;
@@ -569,7 +696,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
 
     SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Warning);
 
-    RAIIMockLogger MockLogger {};
+    RAIIMockLogger MockLogger { };
     csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(2);
 
@@ -681,7 +808,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 
     // Attempt Update - bad display name
     {
-        UniqueTestDisplayName = csp::common::String("??//-\"#~*") + GetUniqueString().c_str();
+        // Using \? to prevent a trigraph error on gcc.
+        UniqueTestDisplayName = csp::common::String("?\?//-\"#~*") + GetUniqueString().c_str();
 
         auto [Result] = AWAIT_PRE(UserSystem, UpdateUserDisplayName, RequestPredicate, UserId, UniqueTestDisplayName);
 
@@ -908,11 +1036,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 
     // Check the FDN supported providers
     auto SupportedProviders = UserSystem->GetSupportedThirdPartyAuthenticationProviders();
-    EXPECT_EQ(SupportedProviders.Size(), 3L);
+    EXPECT_EQ(SupportedProviders.Size(), 4L);
 
     bool FoundGoogle = false;
     bool FoundDiscord = false;
     bool FoundApple = false;
+    bool FoundNetflix = false;
     for (size_t idx = 0; idx < SupportedProviders.Size(); ++idx)
     {
         if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google)
@@ -927,61 +1056,91 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
         {
             FoundApple = true;
         }
+        else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Netflix)
+        {
+            FoundNetflix = true;
+        }
         else
         {
             ASSERT_TRUE(false) << "Please update this test with this new FDN auth provider: " << SupportedProviders[idx];
         }
     }
 
-    EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple);
+    EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple && FoundNetflix);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Google
-    auto [ResGoogle] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+    // Retrieve Authorize URL for Google
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
     EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = ResGoogle.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+
+    AuthorizeURLTokens Tokens = ExtractTokensFromAuthorizeURL(AuthorizeURL);
+    ValidateThirdPartyAuthorizeURL(Tokens, RedirectURL);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTestWithClient)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Discord
-    auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    csp::systems::EThirdPartyPlatform Client = csp::systems::EThirdPartyPlatform::Unity;
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    // Retrieve Authorize URL for Google
+    auto [ResGoogle] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, Client);
+    EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = ResGoogle.GetValue();
+
+    AuthorizeURLTokens Tokens = ExtractTokensFromAuthorizeURL(AuthorizeURL);
+    ValidateThirdPartyAuthorizeURL(Tokens, RedirectURL);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-    // Retrieve Authorise URL for Apple
-    auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL);
+    // Retrieve Authorize URL for Discord
+    auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthorizeURL = Result.GetValue();
+
+    AuthorizeURLTokens Tokens = ExtractTokensFromAuthorizeURL(AuthorizeURL);
+    ValidateThirdPartyAuthorizeURL(Tokens, RedirectURL);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForAppleTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+
+    // Retrieve Authorize URL for Apple
+    auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL, nullptr);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthorizeURL = Result.GetValue();
+
+    AuthorizeURLTokens Tokens = ExtractTokensFromAuthorizeURL(AuthorizeURL);
+    ValidateThirdPartyAuthorizeURL(Tokens, RedirectURL);
 }
 
 // As the following three tests require manual actions explained inside, they are currently disabled
@@ -1144,6 +1303,49 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 }
 #endif
 
+// This is a manual only test as it requires an SSO token from a third party provider to be stored in a text file in a specific location.
+// Further details below.
+#if 0
+// Requires a SSO token placed in a file named "sso_token.txt" in the parent directory of the repository.
+// The file should contain only the raw token string.
+// Obtain the token from the third party provider before running this test.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, SSOLoginWithTokenTest)
+{
+    // Will look for the token file in the parent directory of the repository.
+    const std::filesystem::path TokenFilePath
+        = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path().parent_path() / "sso_token.txt";
+
+    if (!std::filesystem::exists(TokenFilePath))
+    {
+        GTEST_SKIP() << "sso_token.txt not found at " << TokenFilePath
+                     << ". Place the SSO token in that file to run this test.";
+    }
+
+    std::ifstream TokenFile(TokenFilePath);
+    std::string SSOToken;
+    TokenFile >> SSOToken;
+
+    ASSERT_FALSE(SSOToken.empty()) << "sso_token.txt exists but is empty.";
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProviderWithToken, RequestPredicate,
+        csp::systems::EThirdPartyAuthenticationProviders::Netflix, csp::common::String(SSOToken.c_str()), csp::systems::EThirdPartyPlatform::Unreal, true, true);
+    
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    if (LoginResult.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        const auto UserId = LoginResult.GetLoginState().UserId;
+        auto Profile = GetFullProfileByUserId(UserSystem, UserId);
+        EXPECT_FALSE(Profile.UserId.IsEmpty());
+
+        LogOut(UserSystem);
+    }
+}
+#endif
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 {
     SetRandSeed();
@@ -1262,16 +1464,16 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     std::promise<csp::common::LoginState> SettingsPromise;
     std::future<csp::common::LoginState> SettingsFuture = SettingsPromise.get_future();
 
-    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, false, true, {},
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, false, true, { },
         [&SettingsPromise](const csp::systems::LoginStateResult& Result) { SettingsPromise.set_value(Result.GetLoginState()); });
 
     csp::common::LoginState LoginState = SettingsFuture.get();
 
     // OKO_TESTS Tenant has a default applications settings setup. All these values are arbitrary just for tests
-    ASSERT_EQ(LoginState.DefaultApplicationSettings.Size(), 1);
-    ASSERT_EQ(LoginState.DefaultSettings.Size(), 0);
+    ASSERT_EQ(LoginState.GetDefaultApplicationSettings().Size(), 1);
+    ASSERT_EQ(LoginState.GetDefaultSettings().Size(), 0);
 
-    csp::common::ApplicationSettings ApplicationSetting = LoginState.DefaultApplicationSettings[0];
+    csp::common::ApplicationSettings ApplicationSetting = LoginState.GetDefaultApplicationSettings()[0];
     ASSERT_EQ(ApplicationSetting.AllowAnonymous, false);
     ASSERT_EQ(ApplicationSetting.Context, "checkpoint");
     // application name not listed because it uses a project codename which is secret ... it's six characters long though :P Ooooh what could it be?
@@ -1280,4 +1482,105 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     ASSERT_EQ(ApplicationSetting.Settings.Size(), 1);
     ASSERT_TRUE(ApplicationSetting.Settings.HasKey("URL"));
     ASSERT_EQ(ApplicationSetting.Settings["URL"], "https://www.google.com/search?q=why+google");
+}
+
+// Regression test for the LoginStateMutex guard in UserSystem.
+//
+// The crash was occurring under the following conditions:
+//   1. A user calls Logout().
+//   2. Before the logout response is received, Login() is called again.
+//   3. Both OnResponse handlers execute concurrently on different threads and write to
+//      CurrentLoginState without synchronization, causing a data race.
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginStateMutexGuardTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+    csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Call Logout without blocking, then immediately call Login for the same user.
+    // Without the LoginStateMutex, the concurrent OnResponse callbacks would produce a data
+    // race on CurrentLoginState � potentially crashing or corrupting the login state.
+    std::promise<bool> LogoutPromise;
+    std::future<bool> LogoutFuture = LogoutPromise.get_future();
+    std::promise<bool> LoginPromise;
+    std::future<bool> LoginFuture = LoginPromise.get_future();
+
+    csp::systems::EResultCode LogoutResultCode { csp::systems::EResultCode::InProgress };
+    csp::systems::EResultCode LoginResultCode { csp::systems::EResultCode::InProgress };
+
+    UserSystem->Logout(
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LogoutResultCode = Result.GetResultCode();
+                LogoutPromise.set_value(true);
+            }
+        });
+
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        [&](const csp::systems::LoginStateResult& Result)
+        {
+            if (Result.GetResultCode() != csp::systems::EResultCode::InProgress)
+            {
+                LoginResultCode = Result.GetResultCode();
+                LoginPromise.set_value(true);
+            }
+        });
+
+    std::future_status LogoutStatus = LogoutFuture.wait_for(30s);
+    std::future_status LoginStatus = LoginFuture.wait_for(30s);
+
+    if (LogoutStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LogoutFuture.get());
+    }
+    else
+    {
+        FAIL() << "Logout did not complete successfully.";
+    }
+
+    if (LoginStatus == std::future_status::ready)
+    {
+        EXPECT_TRUE(LoginFuture.get());
+    }
+    else
+    {
+        FAIL() << "Login did not complete successfully.";
+    }
+
+    // Ensure the call to Logout was successful and that we were correctly logged in when it was dispatched.
+    EXPECT_EQ(LogoutResultCode, csp::systems::EResultCode::Success);
+
+    // The LoginState must be in a valid state, not partially overwritten by concurrent writes from the two response handlers.
+    const auto Data = UserSystem->GetLoginState().GetSnapshotThreadSafe();
+
+    const csp::common::ELoginState FinalState = Data->State;
+
+    if (FinalState == csp::common::ELoginState::LoggedIn)
+    {
+        EXPECT_NE(Data->AccessToken, "");
+        EXPECT_NE(Data->RefreshToken, "");
+        EXPECT_NE(Data->UserId, "");
+        EXPECT_NE(Data->DeviceId, "");
+    }
+    else if (FinalState == csp::common::ELoginState::LoggedOut || FinalState == csp::common::ELoginState::Error)
+    {
+        EXPECT_EQ(Data->AccessToken, "");
+        EXPECT_EQ(Data->RefreshToken, "");
+        EXPECT_EQ(Data->UserId, "");
+        EXPECT_EQ(Data->DeviceId, "");
+    }
+    else
+    {
+        FAIL() << "Final LoginState is incorrect.";
+    }
+
+    if (LoginResultCode == csp::systems::EResultCode::Success)
+    {
+        LogOut(UserSystem);
+    }
 }

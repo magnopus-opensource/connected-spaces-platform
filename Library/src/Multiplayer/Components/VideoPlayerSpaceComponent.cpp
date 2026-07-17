@@ -14,120 +14,176 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
-
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Component/Schema.h"
+
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+
+#include <fmt/format.h>
 
 namespace
 {
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
+constexpr const float DefaultVolume = 1.f;
 }
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::VideoPlayer,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::VideoPlayer),
+    "VideoPlayer",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Name_DEPRECATED),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Name_DEPRECATED),
+            "name",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::VideoAssetId),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoAssetId),
+            "videoAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::VideoAssetURL),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoAssetURL),
+            "videoAssetURL",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Rotation),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Rotation),
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Scale),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Scale),
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsStateShared),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsStateShared),
+            "isStateShared",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsAutoPlay),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsAutoPlay),
+            "isAutoPlay",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsLoopPlayback),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsLoopPlayback),
+            "isLoopPlayback",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsAutoResize),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsAutoResize),
+            "isAutoResize",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::PlaybackState),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::PlaybackState),
+            "playbackState",
             static_cast<int64_t>(0),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::CurrentPlayheadPosition),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::CurrentPlayheadPosition),
+            "currentPlayheadPosition",
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::TimeSincePlay),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::TimeSincePlay),
+            "timeSincePlay",
             0.0f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::AttenuationRadius),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::VideoPlayerSourceType),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoPlayerSourceType),
+            "videoPlayerSourceType",
             static_cast<int64_t>(VideoPlayerSourceType::AssetSource),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::StereoVideoType),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::StereoVideoType),
+            "stereoVideoType",
             static_cast<int64_t>(StereoVideoType::None),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsStereoFlipped),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsStereoFlipped),
+            "isStereoFlipped",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsVisible),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsVisible),
+            "isVisible",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsARVisible),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsARVisible),
+            "isARVisible",
             true,
         },
         {
             static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId),
+            {}, // not exposed to scripting
             static_cast<int64_t>(0),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsVirtualVisible),
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsVirtualVisible),
+            "isVirtualVisible",
             true,
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Volume),
+            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
+            DefaultVolume,
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AudioType),
+            "audioType",
+            static_cast<int64_t>(AudioType::Spatial),
         },
     },
 };
 
+const ComponentSchema& VideoPlayerSpaceComponent::GetSchema() { return Schema; }
+
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : VideoPlayerSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<VideoPlayerSpaceComponent> VideoPlayerSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(VideoPlayerSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<VideoPlayerSpaceComponent>(new VideoPlayerSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
@@ -264,16 +320,6 @@ float VideoPlayerSpaceComponent::GetTimeSincePlay() const { return GetFloatPrope
 
 void VideoPlayerSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay), Value); }
 
-float VideoPlayerSpaceComponent::GetAttenuationRadius() const
-{
-    return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
-}
-
-void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
-{
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
-}
-
 VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() const
 {
     return static_cast<VideoPlayerSourceType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)));
@@ -316,6 +362,45 @@ bool VideoPlayerSpaceComponent::GetIsVirtualVisible() const
 void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), Value);
+}
+
+/* IAudioControlComponent */
+
+float VideoPlayerSpaceComponent::GetAttenuationRadius() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
+}
+
+void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
+{
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
+}
+
+AudioType VideoPlayerSpaceComponent::GetAudioType() const
+{
+    return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType)));
+}
+
+void VideoPlayerSpaceComponent::SetAudioType(AudioType Value)
+{
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType), static_cast<int64_t>(Value));
+}
+
+float VideoPlayerSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume)); }
+
+void VideoPlayerSpaceComponent::SetVolume(float Value)
+{
+    if (Value >= 0.f && Value <= 1.f)
+    {
+        SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume), Value);
+    }
+    else
+    {
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", Value).c_str());
+        }
+    }
 }
 
 /* IEnableableComponent */

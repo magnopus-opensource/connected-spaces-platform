@@ -414,6 +414,9 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     case ERequestVerb::Head:
         Verb = "HEAD";
         break;
+    case ERequestVerb::Patch:
+        Verb = "PATCH";
+        break;
     default:
         break;
     }

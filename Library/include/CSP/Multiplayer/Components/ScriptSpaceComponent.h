@@ -51,9 +51,21 @@ enum class ScriptComponentPropertyKeys : uint16_t
 class CSP_API ScriptSpaceComponent : public ComponentBase
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the script space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a script space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ScriptSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<ScriptSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Retrieves the source of the script of this script component.
     /// @return The script source of this script component.
@@ -82,6 +94,9 @@ public:
 protected:
     void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
     void OnRemove() override;
+
+private:
+    ScriptSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

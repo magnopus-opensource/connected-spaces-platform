@@ -44,6 +44,9 @@ class CSP_API LODAsset
 public:
     Asset Asset;
     int Level = 0;
+
+    bool operator==(const LODAsset& Other) const;
+    bool operator!=(const LODAsset& Other) const;
 };
 
 /// @ingroup Asset System

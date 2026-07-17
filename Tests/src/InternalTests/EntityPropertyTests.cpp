@@ -50,10 +50,10 @@ CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyCallbackTest)
     EntityProperty Property { TestKey, TestUpdateFlag, TestToReplicatedValue, TestFromReplicatedValue };
 
     EXPECT_CALL(MockToReplicatedValue, Call()).Times(1);
-    EXPECT_CALL(MockFromReplicatedValue, Call(csp::common::ReplicatedValue { 0ll })).Times(1);
+    EXPECT_CALL(MockFromReplicatedValue, Call(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) })).Times(1);
 
     Property.Get();
-    Property.Set(csp::common::ReplicatedValue { 0ll });
+    Property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(0ll) });
 }
 
 // Ensures the Set function correctly sets the value via the callback and Get returns the updated value.
@@ -77,7 +77,7 @@ CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertySetGetTest)
     EXPECT_EQ(TestValue, 0);
     EXPECT_EQ(Property.Get().GetInt(), TestValue);
 
-    Property.Set(csp::common::ReplicatedValue { 100ll });
+    Property.Set(csp::common::ReplicatedValue { static_cast<int64_t>(100ll) });
 
     EXPECT_EQ(TestValue, 100);
     EXPECT_EQ(Property.Get().GetInt(), TestValue);

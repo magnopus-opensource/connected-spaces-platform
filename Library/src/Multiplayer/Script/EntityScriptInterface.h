@@ -124,7 +124,9 @@ public:
     TextSpaceComponentScriptInterface* AddTextComponent();
     VideoPlayerSpaceComponentScriptInterface* AddVideoComponent();
 
+    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType Type);
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
+    template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(uint64_t TypeId);
 
 private:
     void CommitEntityUpdate();
@@ -135,14 +137,12 @@ private:
     std::map<std::string, std::vector<qjs::Value>> EventListeners;
 };
 
-template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(uint64_t TypeId)
 {
     std::vector<ScriptInterface*> Components;
 
     if (Entity)
     {
-        const ComponentType ThisType = Type;
-
         const auto& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
@@ -150,7 +150,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
         {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
-            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
+            if ((Component != nullptr) && (Component->GetTypeId() == TypeId) && (Component->GetScriptInterface() != nullptr))
             {
                 auto* Iface = (ScriptInterface*)Component->GetScriptInterface();
                 Iface->SetLocalScope(LocalScope || Entity->IsLocal());
@@ -195,6 +195,16 @@ template <typename ScriptInterface, ComponentType Type> ScriptInterface* EntityS
     }
 
     return Iface;
+}
+
+template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)
+{
+    return GetComponentsOfType<ScriptInterface>(static_cast<uint64_t>(Type));
+}
+
+template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
+{
+    return GetComponentsOfType<ScriptInterface>(Type);
 }
 
 } // namespace csp::multiplayer

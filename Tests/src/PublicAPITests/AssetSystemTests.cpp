@@ -1174,7 +1174,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
     const csp::common::String& FileNoMimeType = "";
@@ -1345,7 +1345,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
     const csp::common::String& FileNoMimeType = "";
@@ -1427,10 +1427,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    constexpr char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    constexpr char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    constexpr char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    constexpr char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
+    constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    constexpr const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    constexpr const char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1468,7 +1468,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
 
     // Get uploaded asset
     auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
-    std::string UriStr = AssetResult.GetAsset().Uri;
+    std::string UriStr = std::string { AssetResult.GetAsset().Uri.c_str() };
 
     // Check uri is encoded as expected
     EXPECT_TRUE(UriStr.find("TestWith%20Space") != std::string::npos);
@@ -1495,10 +1495,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    constexpr char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    constexpr char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    constexpr char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    constexpr char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
+    constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    constexpr const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    constexpr const char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1536,7 +1536,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
 
     // Get uploaded asset
     auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
-    std::string UriStr = AssetResult.GetAsset().Uri;
+    std::string UriStr = std::string { AssetResult.GetAsset().Uri.c_str() };
 
     // Check uri is encoded as expected
     EXPECT_TRUE(UriStr.find("TestWithEncoded%20Space") != std::string::npos);
@@ -1594,9 +1594,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
     // Create asset
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    Asset.FileName = "test.json";
+    Asset.FileName = "Test.json";
 
-    auto UploadFilePath = std::filesystem::absolute("assets/test.json");
+    auto UploadFilePath = std::filesystem::absolute("assets/Test.json");
     FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
     auto* UploadFileData = new unsigned char[UploadFileSize];
@@ -1685,7 +1685,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
     csp::systems::Asset Asset;
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 
@@ -1703,7 +1703,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
     EXPECT_EQ(Asset.Id, UpdatedAsset.Id);
 
     // Replace data
-    FilePath = std::filesystem::absolute("assets/test2.json");
+    FilePath = std::filesystem::absolute("assets/Test2.json");
     Source.FilePath = FilePath.u8string().c_str();
 
     printf("Uploading new asset data...\n");
@@ -1774,7 +1774,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     auto& InitialAssetId = Asset.Id;
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 
@@ -1786,9 +1786,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
     // Replace data
-    Asset.FileName = "test2.json";
+    Asset.FileName = "Test2.json";
 
-    auto UpdateFilePath = std::filesystem::absolute("assets/test2.json");
+    auto UpdateFilePath = std::filesystem::absolute("assets/Test2.json");
     FILE* UpdateFile = fopen(UpdateFilePath.string().c_str(), "rb");
     uintmax_t UpdateFileSize = std::filesystem::file_size(UpdateFilePath);
     auto* UpdateFileData = new unsigned char[UpdateFileSize];
@@ -1998,11 +1998,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
     EXPECT_EQ(Assets.Size(), 1);
     EXPECT_EQ(Assets[0].Name, UniqueAssetName);
     EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, "");
-    EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::NONE);
+    EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::None);
     // Delete asset
     DeleteAsset(AssetSystem, assetCollection, Asset);
 
-    CreateAsset(AssetSystem, assetCollection, UniqueAssetName, ThirdPartyPackagedAssetIdentifier, csp::systems::EThirdPartyPlatform::UNITY, Asset);
+    CreateAsset(AssetSystem, assetCollection, UniqueAssetName, ThirdPartyPackagedAssetIdentifier, csp::systems::EThirdPartyPlatform::Unity, Asset);
 
     // Get assets
     GetAssetsInCollection(AssetSystem, assetCollection, Assets);
@@ -2010,7 +2010,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
     EXPECT_EQ(Assets.Size(), 1);
     EXPECT_EQ(Assets[0].Name, UniqueAssetName);
     EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
-    EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::UNITY);
+    EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::Unity);
 
     Assets[0].ThirdPartyPackagedAssetIdentifier = ThirdPartyPackagedAssetIdentifierLocal;
     EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifierLocal);
@@ -2098,7 +2098,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
+    auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
 
@@ -2216,7 +2216,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
         auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-        EXPECT_EQ(Result.GetHttpResultCode(), 403);
+        EXPECT_EQ(Result.GetHttpResultCode(), 404);
     }
 
     // Log out

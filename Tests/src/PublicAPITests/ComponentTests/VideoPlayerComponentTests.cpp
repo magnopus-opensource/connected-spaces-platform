@@ -93,6 +93,8 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
     EXPECT_EQ(VideoComponent->GetIsStereoFlipped(), false);
+    EXPECT_EQ(VideoComponent->GetAudioType(), AudioType::Spatial);
+    EXPECT_EQ(VideoComponent->GetVolume(), 1.f);
 
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
@@ -119,6 +121,8 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     VideoComponent->SetIsVirtualVisible(false);
     VideoComponent->SetIsEnabled(false);
     VideoComponent->SetIsStereoFlipped(true);
+    VideoComponent->SetAudioType(AudioType::Global);
+    VideoComponent->SetVolume(0.5f);
 
     // Ensure values are set correctly
     EXPECT_EQ(VideoComponent->GetPosition(), csp::common::Vector3::One());
@@ -139,6 +143,8 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
     EXPECT_EQ(VideoComponent->GetIsStereoFlipped(), true);
+    EXPECT_EQ(VideoComponent->GetAudioType(), AudioType::Global);
+    EXPECT_EQ(VideoComponent->GetVolume(), 0.5f);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -207,6 +213,11 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsStereoFlipped(), false);
+    EXPECT_EQ(VideoPlayerComponent->GetAudioType(), AudioType::Spatial);
+    EXPECT_EQ(VideoPlayerComponent->GetVolume(), 1.f);
+    EXPECT_EQ(VideoPlayerComponent->GetVolume(), 1.f);
+    EXPECT_EQ(VideoPlayerComponent->GetIsAutoPlay(), false);
+    EXPECT_EQ(VideoPlayerComponent->GetAttenuationRadius(), 10.f);
 
     // Setup script
     const std::string VideoPlayerScriptText = R"xx(
@@ -232,7 +243,10 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.isARVisible = false;
         video.isVirtualVisible = false;
         video.isEnabled = false;
-
+        video.audioType = 0;
+        video.volume = 0.5;
+        video.isAutoPlay = true;
+        video.attenuationRadius = 22.0;
     )xx";
 
     ScriptComponent->SetScriptSource(VideoPlayerScriptText.c_str());
@@ -262,6 +276,34 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), false);
+    EXPECT_EQ(VideoPlayerComponent->GetAudioType(), AudioType::Global);
+    EXPECT_EQ(VideoPlayerComponent->GetVolume(), 0.5f);
+    EXPECT_EQ(VideoPlayerComponent->GetIsAutoPlay(), true);
+    EXPECT_EQ(VideoPlayerComponent->GetAttenuationRadius(), 22.f);
+
+    // volume input range validation
+    {
+        const auto ExpectedVolume = VideoPlayerComponent->GetVolume();
+        CreatedObject->GetScript().SetScriptSource(R"(
+            const video = ThisEntity.getVideoPlayerComponents()[0];
+            video.volume = 1.75;
+        )");
+
+        CreatedObject->GetScript().Invoke();
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        EXPECT_EQ(VideoPlayerComponent->GetVolume(), ExpectedVolume);
+    
+        CreatedObject->GetScript().SetScriptSource(R"(
+            const video = ThisEntity.getVideoPlayerComponents()[0];
+            video.volume = -2.75;
+        )");
+
+        CreatedObject->GetScript().Invoke();
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        EXPECT_EQ(VideoPlayerComponent->GetVolume(), ExpectedVolume);
+    }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

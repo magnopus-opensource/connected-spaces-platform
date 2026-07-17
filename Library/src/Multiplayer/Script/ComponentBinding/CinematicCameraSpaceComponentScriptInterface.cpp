@@ -30,23 +30,4 @@ CinematicCameraSpaceComponentScriptInterface::CinematicCameraSpaceComponentScrip
 
 float CinematicCameraSpaceComponentScriptInterface::GetFov() { return static_cast<CinematicCameraSpaceComponent*>(Component)->GetFov(); }
 
-DEFINE_SCRIPT_PROPERTY_VEC3(CinematicCameraSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_VEC4(CinematicCameraSpaceComponent, Rotation);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, FocalLength);
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, AspectRatio);
-
-DEFINE_SCRIPT_PROPERTY_VEC2(CinematicCameraSpaceComponent, SensorSize);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, NearClip);
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, FarClip);
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, Iso);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, ShutterSpeed);
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, float, float, Aperture);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, bool, bool, IsViewerCamera);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(CinematicCameraSpaceComponent, bool, bool, IsEnabled);
-
 } // namespace csp::multiplayer

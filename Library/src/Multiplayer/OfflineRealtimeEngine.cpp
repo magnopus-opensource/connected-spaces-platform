@@ -19,11 +19,13 @@
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/UUIDGenerator.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
 
@@ -61,7 +63,7 @@ void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
     if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
     {
         LastTickTime = RealtimeEngineUtils::TickEntityScripts(
-            EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(), *EntitySystem->GetAllEntities(), LastTickTime, nullptr);
+            EntitySystem->GetEntitiesLock(), *EntitySystem->GetAllEntities(), LastTickTime);
     }
 }
 
@@ -87,7 +89,13 @@ namespace
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
+    : OfflineRealtimeEngine(SceneDescription, LogSystem, RemoteScriptRunner, {})
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem,
+    csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, JsonSchemas)
 {
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
@@ -108,10 +116,24 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
 }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, csp::common::Array<ComponentSchema> {})
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(
+    csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, ComponentSchemasFromJson(JsonSchemas, LogSystem))
+{
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+    const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
+    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
 {
-    ScriptBinding = RealtimeEntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner, true);
+    ScriptBinding = std::unique_ptr<csp::common::IScriptBinding>(
+        RealtimeEntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner, true));
 
     // Is this undefined behaviour? Probably only if we actually use the pointer during construction
     EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
@@ -121,7 +143,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
 
 OfflineRealtimeEngine::~OfflineRealtimeEngine()
 {
-    RealtimeEntityScriptBinding::RemoveBinding(static_cast<RealtimeEntityScriptBinding*>(ScriptBinding), *ScriptRunner);
+    RealtimeEntityScriptBinding::RemoveBinding(static_cast<RealtimeEntityScriptBinding*>(ScriptBinding.get()), *ScriptRunner);
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
 }
@@ -321,6 +343,8 @@ ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
         return ModifiableStatus::Modifiable;
     }
 }
+
+const csp::multiplayer::IComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return ComponentRegistry.get(); }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

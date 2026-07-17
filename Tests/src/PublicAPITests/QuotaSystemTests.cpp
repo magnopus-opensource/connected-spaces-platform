@@ -482,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     auto& InitialAssetId = Asset.Id;
 
     // Upload data
-    auto FilePath = std::filesystem::absolute("assets/testkb.json");
+    auto FilePath = std::filesystem::absolute("assets/Testkb.json");
     uintmax_t UpdateFileSize = std::filesystem::file_size(FilePath);
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
@@ -522,4 +522,31 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, FailWhenNotLoggedInTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, {});
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
+
+    {
+        auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    }
 }

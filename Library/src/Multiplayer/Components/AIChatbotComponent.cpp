@@ -16,38 +16,59 @@
 
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
-#include "Multiplayer/Component/Schema.h"
-#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::AIChatbot,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::AIChatbot),
+    "AIChatbot",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Position),
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Voice),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Voice),
+            "voice",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
+            "guardrailAssetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::VisualState),
+            static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::VisualState),
+            "visualState",
             static_cast<int64_t>(0),
         },
     },
 };
 
+const ComponentSchema& AIChatbotSpaceComponent::GetSchema() { return Schema; }
+
 csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AIChatbotSpaceComponent(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new AIChatbotSpaceComponentScriptInterface(this));
+}
+
+std::unique_ptr<AIChatbotSpaceComponent> AIChatbotSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AIChatbotSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AIChatbotSpaceComponent>(new AIChatbotSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AIChatbotSpaceComponent::AIChatbotSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
+{
 }
 
 const csp::common::String& AIChatbotSpaceComponent::GetVoice() const

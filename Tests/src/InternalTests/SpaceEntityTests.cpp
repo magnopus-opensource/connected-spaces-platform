@@ -30,7 +30,6 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
-#include "quickjspp.hpp"
 
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
@@ -59,7 +58,7 @@ void CreateAvatarForLeaderElection(csp::common::IRealtimeEngine* EntitySystem)
 
     const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState, UserAvatarId,
         UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 

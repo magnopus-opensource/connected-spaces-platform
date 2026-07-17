@@ -155,13 +155,13 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         else
         {
             Asset.ThirdPartyPackagedAssetIdentifier = Dto.GetAddressableId();
-            Asset.ThirdPartyPlatformType = EThirdPartyPlatform::NONE;
+            Asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
         }
     }
     else
     {
         Asset.ThirdPartyPackagedAssetIdentifier = "";
-        Asset.ThirdPartyPlatformType = EThirdPartyPlatform::NONE;
+        Asset.ThirdPartyPlatformType = EThirdPartyPlatform::None;
     }
 
     if (Dto.HasUri())
@@ -189,7 +189,7 @@ Asset::Asset()
     : Type(EAssetType::MODEL)
     , Version(0)
     , ThirdPartyPackagedAssetIdentifier("")
-    , ThirdPartyPlatformType(EThirdPartyPlatform::NONE)
+    , ThirdPartyPlatformType(EThirdPartyPlatform::None)
 {
 }
 

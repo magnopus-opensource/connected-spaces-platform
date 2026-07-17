@@ -15,8 +15,11 @@
  */
 
 #include "CSP/Systems/Quota/QuotaSystem.h"
+#include "Systems/ResultHelpers.h"
 
-#include "CSP/Systems/Users/UserSystem.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "Services/TrackingService/Api.h"
 
 namespace chs = csp::services::generated::trackingservice;
@@ -28,11 +31,13 @@ QuotaSystem::QuotaSystem()
     , QuotaTierAssignmentAPI(nullptr)
     , QuotaManagementAPI(nullptr)
     , QuotaActivityAPI(nullptr)
+    , Context { nullptr }
 {
 }
 
-QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context)
     : SystemBase(InWebClient, nullptr, &LogSystem)
+    , Context { &Context }
 {
     QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient);
     QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);
@@ -48,14 +53,21 @@ QuotaSystem::~QuotaSystem()
 
 void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
 {
+    const auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data->State != common::ELoginState::LoggedIn)
+    {
+        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
+        Callback(MakeInvalid<FeatureLimitResult>());
+        return;
+    }
+
     std::vector<csp::common::String> FeatureNamesList = { TierFeatureEnumToString(TierFeatures::SpaceOwner) };
 
     csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet(
-            { csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->usersUserIdQuota_progressGet({ Data->UserId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
@@ -80,6 +92,15 @@ void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceI
 
 void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
 {
+    const auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data->State != common::ELoginState::LoggedIn)
+    {
+        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
+        Callback(MakeInvalid<FeaturesLimitResult>());
+        return;
+    }
+
     csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeaturesLimitCallback, FeaturesLimitResult, void,
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
@@ -91,9 +112,7 @@ void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFea
         FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
     }
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuota_progressGet(
-            { csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->usersUserIdQuota_progressGet({ Data->UserId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetTierFeatureProgressForSpace(
@@ -115,11 +134,19 @@ void QuotaSystem::GetTierFeatureProgressForSpace(
 
 void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 {
+    const auto Data = Context->GetLoginState().GetSnapshotThreadSafe();
+
+    if (Data->State != common::ELoginState::LoggedIn)
+    {
+        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
+        Callback(MakeInvalid<UserTierResult>());
+        return;
+    }
+
     csp::services::ResponseHandlerPtr ResponseHandler
         = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
 
-    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)
-        ->usersUserIdTier_assignmentGet({ csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId }, ResponseHandler);
+    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)->usersUserIdTier_assignmentGet({ Data->UserId }, ResponseHandler);
 }
 
 void QuotaSystem::SetUserTier(TierNames TierName, const csp::common::String& UserId, UserTierCallback Callback)

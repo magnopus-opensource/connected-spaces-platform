@@ -137,6 +137,4 @@ void CustomSpaceComponentScriptInterface::SetCustomProperty(
     SendPropertyUpdate();
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING(CustomSpaceComponent, ApplicationOrigin);
-
 } // namespace csp::multiplayer

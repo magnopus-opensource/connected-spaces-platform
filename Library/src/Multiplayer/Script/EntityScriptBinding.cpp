@@ -24,22 +24,16 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
@@ -47,9 +41,8 @@
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/Script/RuntimeMaterialScriptInterface.h"
@@ -57,7 +50,10 @@
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
+#include <fmt/format.h>
+
 #include <unordered_map>
+#include <utility>
 
 namespace csp::multiplayer
 {
@@ -93,6 +89,111 @@ namespace
         LockFuncValueT _LockFunc;
         UnlockFuncValueT _UnlockFunc;
     };
+
+    template <typename T> qjs::Value GetClassPrototype(qjs::Context& Context)
+    {
+        const auto ClassId = qjs::js_traits<std::shared_ptr<T>>::QJSClassId;
+        return qjs::Value { Context.ctx, JS_GetClassProto(Context.ctx, ClassId) };
+    }
+
+    // Creates a JS prototype for a specific component type, baking in specialized accessors
+    // that map directly to the correctly typed proxy property.
+    template <typename ScriptInterfaceType = ComponentScriptInterface>
+    qjs::Value MakeComponentPrototype(qjs::Context& Context, const ComponentSchema& Schema)
+    {
+        static_assert(std::is_base_of_v<ComponentScriptInterface, ScriptInterfaceType>);
+
+        const auto BasePrototype = GetClassPrototype<ScriptInterfaceType>(Context);
+        const auto SchemaDerivedPrototype = qjs::Value { Context.ctx, JS_NewObjectProto(Context.ctx, BasePrototype.v) };
+
+        auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
+        {
+            using T = std::decay_t<decltype(V)>;
+
+            if constexpr (IsScriptableV<T>)
+            {
+                const auto Getter = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int Magic) -> JSValue
+                {
+                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
+                    if (!Self)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto Result = (*Self)->GetProperty(static_cast<ComponentProperty::KeyType>(Magic));
+                    if (!Result)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto* CheckedResult = std::get_if<ScriptTypeT<T>>(&*Result);
+                    if (CheckedResult == nullptr)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    return qjs::js_traits<ScriptTypeT<T>>::wrap(Context, std::move(*CheckedResult));
+                };
+
+                const auto Setter = [](JSContext* Context, JSValueConst This, int ArgC, JSValueConst* ArgV, int Magic) -> JSValue
+                {
+                    if (ArgC <= 0)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    const auto Self = qjs::js_traits<std::optional<ScriptInterfaceType*>>::unwrap(Context, This);
+                    if (!Self)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    auto Result = qjs::js_traits<std::optional<ScriptTypeT<T>>>::unwrap(Context, ArgV[0]);
+                    if (!Result)
+                    {
+                        return JS_EXCEPTION;
+                    }
+
+                    (*Self)->SetProperty(static_cast<ComponentProperty::KeyType>(Magic), std::move(*Result));
+
+                    return JS_UNDEFINED;
+                };
+
+                return std::make_pair(Getter, Setter);
+            }
+            else
+            {
+                return std::nullopt;
+            }
+        };
+
+        for (const auto& Property : Schema.Properties)
+        {
+            if (!IsScriptable(Property))
+            {
+                continue;
+            }
+
+            auto MaybeAccessors = std::visit(CreateAccessors, Property.DefaultValue.GetValue());
+            if (!MaybeAccessors)
+            {
+                continue;
+            }
+
+            const auto [Getter, Setter] = *MaybeAccessors;
+
+            const auto Magic = static_cast<int>(Property.Key);
+            const auto PropertyName = JS_NewAtom(Context.ctx, Property.Name.c_str());
+
+            JS_DefinePropertyGetSet(Context.ctx, SchemaDerivedPrototype.v, PropertyName,
+                JS_NewCFunctionMagic(Context.ctx, Getter, "get", 0, JS_CFUNC_generic_magic, Magic),
+                JS_NewCFunctionMagic(Context.ctx, Setter, "set", 1, JS_CFUNC_generic_magic, Magic), JS_PROP_C_W_E);
+
+            JS_FreeAtom(Context.ctx, PropertyName);
+        }
+
+        return SchemaDerivedPrototype;
+    }
 }
 
 class EntitySystemScriptInterface
@@ -380,12 +481,76 @@ void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSys
     LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
+class EntityScriptBinding::SchemaCacheImpl
+{
+public:
+    std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    {
+        switch (ToComponentType(Schema.TypeId).value_or(ComponentType::Invalid))
+        {
+        case ComponentType::VideoPlayer:
+            return GetComponents<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Custom:
+            return GetComponents<CustomSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Audio:
+            return GetComponents<AudioSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Hotspot:
+            return GetComponents<HotspotSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::CinematicCamera:
+            return GetComponents<CinematicCameraSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::StaticModel:
+            return GetComponents<StaticModelSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::AnimatedModel:
+            return GetComponents<AnimatedModelSpaceComponentScriptInterface>(Context, Entity, Schema);
+        default:
+            break;
+        };
+
+        return GetComponents<ComponentScriptInterface>(Context, Entity, Schema);
+    }
+
+private:
+    template <typename ScriptInterface>
+    std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    {
+        const auto Proto = GetOrCreate(Schema.TypeId, [&] { return MakeComponentPrototype<ScriptInterface>(Context, Schema); });
+
+        auto Wrapped = std::vector<qjs::Value>();
+
+        for (auto* Component : Entity.GetComponentsOfType<ScriptInterface>(Schema.TypeId))
+        {
+            auto Instance = qjs::js_traits<ScriptInterface*>::wrap(Proto.ctx, Component);
+            JS_SetPrototype(Proto.ctx, Instance, Proto.v); // Overwrite the prototype
+
+            Wrapped.push_back({ Proto.ctx, std::move(Instance) });
+        }
+
+        return Wrapped;
+    }
+
+    template <typename FactoryFn> const qjs::Value& GetOrCreate(ComponentSchema::TypeIdType TypeId, FactoryFn&& Create)
+    {
+        const auto It = Cache.find(TypeId);
+        if (It != Cache.end())
+        {
+            return It->second;
+        }
+
+        return Cache.emplace(TypeId, Create()).first->second;
+    }
+
+    std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> Cache;
+};
+
 EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool InLocalScope)
-    : EntitySystem(InEntitySystem)
+    : SchemaCache(std::make_unique<SchemaCacheImpl>())
+    , EntitySystem(InEntitySystem)
     , LogSystem(LogSystem)
     , LocalScope(InLocalScope)
 {
 }
+
+EntityScriptBinding::~EntityScriptBinding() = default;
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
     csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner, bool LocalScope)
@@ -695,7 +860,6 @@ void BindComponents(qjs::Context::Module* Module)
     Module->class_<CustomSpaceComponentScriptInterface>("CustomSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(CustomSpaceComponent, ApplicationOrigin, "applicationOrigin")
         .fun<&CustomSpaceComponentScriptInterface::GetCustomPropertySubscriptionKey>("getCustomPropertySubscriptionKey")
         .fun<&CustomSpaceComponentScriptInterface::HasCustomProperty>("hasCustomProperty")
         .fun<&CustomSpaceComponentScriptInterface::RemoveCustomProperty>("removeCustomProperty")
@@ -709,18 +873,6 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&SplineSpaceComponentScriptInterface::SetWaypoints>("setWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
-
-    Module->class_<ConversationSpaceComponentScriptInterface>("ConversationSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ConversationSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, IsActive, "isActive")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Title, "title")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Resolved, "resolved")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraPosition, "conversationCameraPosition")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraRotation, "conversationCameraRotation");
 
     Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()
@@ -770,37 +922,7 @@ void BindComponents(qjs::Context::Module* Module)
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .fun<&HotspotSpaceComponentScriptInterface::GetUniqueComponentId>("getUniqueComponentId")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
-        .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
-
-    Module->class_<ScreenSharingSpaceComponentScriptInterface>("ScreenSharingSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, UserId, "userId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageCollectionId, "defaultImageCollectionId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageAssetId, "defaultImageAssetId")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, AttenuationRadius, "attenuationRadius")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsShadowCaster, "isShadowCaster");
-
-    Module->class_<AIChatbotSpaceComponentScriptInterface>("AIChatbotSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Voice, "voice")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetCollectionId, "guardrailAssetCollectionId")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, VisualState, "visualState");
+        .fun<&HotspotSpaceComponentScriptInterface::GetUniqueComponentId>("getUniqueComponentId");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -809,6 +931,32 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
     qjs::Context::Module* Module = (qjs::Context::Module*)ScriptRunner.GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
 
     Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
+
+    const auto RegisterDynamicComponentGetters = [this, Context](auto Proto)
+    {
+        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
+        {
+            if (IsScriptable(Schema))
+            {
+                const auto& ComponentScriptName = Schema.Name;
+                const auto GetterName = fmt::format("get{}Components", ComponentScriptName.c_str());
+
+                const auto GetterImpl
+                    = [this, Schema, Context](EntityScriptInterface* Entity) { return SchemaCache->GetComponents(*Context, *Entity, Schema); };
+
+                const auto Getter
+                    = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int /*Magic*/, JSValue* FnData) -> JSValue
+                {
+                    const auto GetterImpl = FnData[0];
+                    return JS_Call(Context, GetterImpl, JS_UNDEFINED, 1, &This);
+                };
+
+                auto FnData = Context->newValue(GetterImpl);
+
+                JS_SetPropertyStr(Context->ctx, Proto.v, GetterName.c_str(), JS_NewCFunctionData(Context->ctx, Getter, 0, 0, 1, &FnData.v));
+            }
+        }
+    };
 
     Module->class_<EntityScriptInterface>("Entity")
         .constructor<>()
@@ -841,19 +989,6 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
             "getConversationComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>>(
-            "getCinematicCameraComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
-            "getFiducialMarkerComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
-            "getGaussianSplatComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ScreenSharingSpaceComponentScriptInterface, ComponentType::ScreenSharing>>(
-            "getScreenSharingComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AIChatbotSpaceComponentScriptInterface, ComponentType::AIChatbot>>("getAIChatbotComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .fun<&EntityScriptInterface::GetChildEntitiesByQuery>("getChildEntitiesByQuery")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
@@ -889,6 +1024,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::AddSplineComponent>("addSplineComponent")
         .fun<&EntityScriptInterface::AddTextComponent>("addTextComponent")
         .fun<&EntityScriptInterface::AddVideoComponent>("addVideoComponent");
+
+    RegisterDynamicComponentGetters(GetClassPrototype<EntityScriptInterface>(*Context));
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()

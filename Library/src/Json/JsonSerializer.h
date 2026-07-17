@@ -33,12 +33,12 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, T Object);
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T& Object);
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T* Object);
+template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, T Object);
+template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const T& Object);
+template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const T* Object);
 
-template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
-template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
+template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
+template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
 
 namespace csp::json
 {
@@ -85,7 +85,7 @@ private:
         // If T isn't one of the internal supported types,
         // assume this is a custom object
         Writer.StartObject();
-        ::ToJson(*this, Value);
+        ToJson(*this, Value);
         Writer.EndObject();
     }
 
@@ -129,7 +129,7 @@ public:
             return false;
         }
 
-        rapidjson::Value Root = Deserializer.Doc.GetObject();
+        rapidjson::Value Root { Deserializer.Doc.GetObj() };
 
         Deserializer.ValueStack.push(&Root);
         Deserializer.DeserializeValue(Object);
@@ -186,7 +186,7 @@ public:
 private:
     JsonDeserializer(const char* Data) { Doc.Parse(Data); }
 
-    template <typename T> inline void DeserializeValue(T& Value) const { ::FromJson(*this, Value); }
+    template <typename T> inline void DeserializeValue(T& Value) const { FromJson(*this, Value); }
 
     rapidjson::Document Doc;
     mutable std::stack<const rapidjson::Value*> ValueStack;

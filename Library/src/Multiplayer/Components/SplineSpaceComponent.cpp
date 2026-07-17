@@ -15,27 +15,62 @@
  */
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 
-#include "tinysplinecxx.h"
+#include "tinyspline.h"
 
 namespace csp::multiplayer
 {
+namespace
+{
+    struct TsSpline
+    {
+        tsBSpline s = ts_bspline_init();
+        ~TsSpline() { ts_bspline_free(&s); }
+    };
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Spline,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+    struct TsNet
+    {
+        tsDeBoorNet n = ts_deboornet_init();
+        ~TsNet() { ts_deboornet_free(&n); }
+    };
+}
+
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Spline),
+    "Spline",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(SplinePropertyKeys::Waypoints),
+            static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
+            {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
             0.f,
         },
     },
 };
 
+const ComponentSchema& SplineSpaceComponent::GetSchema() { return Schema; }
+
 SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : SplineSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<SplineSpaceComponent> SplineSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(SplineSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<SplineSpaceComponent>(new SplineSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+SplineSpaceComponent::SplineSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
@@ -45,19 +80,52 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
     csp::common::List<csp::common::Vector3> ListPoints = GetWaypoints();
     if (ListPoints.Size() != 0)
     {
-        std::vector<tinyspline::real> Internalpoints;
+        std::vector<tsReal> InternalPoints;
+        InternalPoints.reserve(ListPoints.Size() * 3);
 
         for (size_t i = 0; i < ListPoints.Size(); ++i)
         {
-            Internalpoints.push_back(static_cast<double>(ListPoints[i].X));
-            Internalpoints.push_back(static_cast<double>(ListPoints[i].Y));
-            Internalpoints.push_back(static_cast<double>(ListPoints[i].Z));
+            InternalPoints.push_back(static_cast<double>(ListPoints[i].X));
+            InternalPoints.push_back(static_cast<double>(ListPoints[i].Y));
+            InternalPoints.push_back(static_cast<double>(ListPoints[i].Z));
         }
 
-        tinyspline::BSpline spline = tinyspline::BSpline::interpolateCubicNatural(Internalpoints, 3);
-        const std::vector<tinyspline::real> SplineResult = spline.eval(NormalisedDistance).result();
+        constexpr size_t Dimension = 3;
 
-        return { (float)SplineResult[0], (float)SplineResult[1], (float)SplineResult[2] };
+        tsStatus Status {};
+        TsSpline Spline;
+
+        tsError Err = ts_bspline_interpolate_cubic_natural(InternalPoints.data(), InternalPoints.size() / Dimension, Dimension, &Spline.s, &Status);
+
+        if (Err != TS_SUCCESS)
+        {
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", Status.message).c_str());
+            }
+
+            return {};
+        }
+
+        TsNet Net;
+        Err = ts_bspline_eval(&Spline.s, NormalisedDistance, &Net.n, &Status);
+
+        if (Err != TS_SUCCESS)
+        {
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("SplineSpaceComponent::GetLocationAlongSpline spline error: {}", Status.message).c_str());
+            }
+
+            return {};
+        }
+
+        const tsReal* ptr = ts_deboornet_result_ptr(&Net.n);
+
+        std::vector<tsReal> SplineResult(ptr, ptr + ts_deboornet_dimension(&Net.n));
+        return { static_cast<float>(SplineResult[0]), static_cast<float>(SplineResult[1]), static_cast<float>(SplineResult[2]) };
     }
     else
     {

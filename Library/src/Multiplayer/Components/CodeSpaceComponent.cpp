@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <cmath>
@@ -23,15 +24,56 @@
 namespace csp::multiplayer
 {
 
-CodeSpaceComponent::CodeSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Code, LogSystem, Parent)
+namespace
 {
-    SetScriptInterface(new ComponentScriptInterface(this));
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::ScriptAssetPath)] = "";
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType)] = static_cast<int64_t>(csp::multiplayer::CodeScopeType::Local);
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes)]
-        = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema)] = "";
+    const auto CodeComponentSchema = ComponentSchema {
+        static_cast<ComponentSchema::TypeIdType>(ComponentType::Code),
+        "Code",
+        csp::common::Array<ComponentProperty> {
+            {
+                static_cast<ComponentProperty::KeyType>(CodeSpaceComponentPropertyKeys::ScriptAssetPath),
+                "scriptAssetPath",
+                "",
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(CodeSpaceComponentPropertyKeys::CodeScopeType),
+                "codeScopeType",
+                static_cast<int64_t>(CodeScopeType::Local),
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(CodeSpaceComponentPropertyKeys::Attributes),
+                {}, // StringMap of CodeAttributes; managed via the CodeSpaceComponent attribute API, not scriptable via schema
+                csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {},
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(CodeSpaceComponentPropertyKeys::Schema),
+                {}, // raw $schema JSON replicated by the script runtime, not scriptable via schema
+                "",
+            },
+        },
+    };
+}
+
+const ComponentSchema& CodeSpaceComponent::GetComponentSchema() { return CodeComponentSchema; }
+
+CodeSpaceComponent::CodeSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : CodeSpaceComponent(CodeComponentSchema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<CodeSpaceComponent> CodeSpaceComponent::TryMake(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(CodeSpaceComponent::GetComponentSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<CodeSpaceComponent>(new CodeSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+CodeSpaceComponent::CodeSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
+{
 }
 
 const csp::common::String& CodeSpaceComponent::GetScriptAssetPath() const

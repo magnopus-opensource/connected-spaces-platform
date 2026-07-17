@@ -16,19 +16,63 @@
 
 #include "CSP/Multiplayer/Components/AttachmentSpaceComponent.h"
 
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-AttachmentSpaceComponent::AttachmentSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Attachment, LogSystem, Parent)
+namespace
 {
-    Properties[static_cast<uint32_t>(AttachmentPropertyKeys::AnchorPath)] = "";
-    Properties[static_cast<uint32_t>(AttachmentPropertyKeys::AttachedPosition)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(AttachmentPropertyKeys::AttachedRotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(AttachmentPropertyKeys::AttachedScale)] = csp::common::Vector3::One();
+    const auto Schema = ComponentSchema {
+        static_cast<ComponentSchema::TypeIdType>(ComponentType::Attachment),
+        "Attachment",
+        csp::common::Array<ComponentProperty> {
+            {
+                static_cast<ComponentProperty::KeyType>(AttachmentPropertyKeys::AnchorPath),
+                "anchorPath",
+                "",
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(AttachmentPropertyKeys::AttachedPosition),
+                "attachedPosition",
+                csp::common::Vector3 { 0, 0, 0 },
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(AttachmentPropertyKeys::AttachedRotation),
+                "attachedRotation",
+                csp::common::Vector4 { 0, 0, 0, 1 },
+            },
+            {
+                static_cast<ComponentProperty::KeyType>(AttachmentPropertyKeys::AttachedScale),
+                "attachedScale",
+                csp::common::Vector3 { 1, 1, 1 },
+            },
+        },
+    };
+}
 
+const ComponentSchema& AttachmentSpaceComponent::GetSchema() { return Schema; }
+
+AttachmentSpaceComponent::AttachmentSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : AttachmentSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AttachmentSpaceComponent> AttachmentSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AttachmentSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AttachmentSpaceComponent>(new AttachmentSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AttachmentSpaceComponent::AttachmentSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
+{
     SetScriptInterface(new AttachmentSpaceComponentScriptInterface(this));
 }
 

@@ -41,7 +41,7 @@ enum class GaussianSplatPropertyKeys : uint16_t
     Scale,
     IsVisible,
     IsARVisible,
-    IsShadowCaster,
+    IsShadowCaster_DEPRECATED,
     Tint,
     IsVirtualVisible,
     Num
@@ -61,9 +61,21 @@ class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
 
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a Gaussian splat space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new GaussianSplatSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<GaussianSplatSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID of the asset associated with this component.
     /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
@@ -137,6 +149,9 @@ public:
     /// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
     /// Defaults to 1,1,1.
     void SetTint(const csp::common::Vector3& TintValue);
+
+private:
+    GaussianSplatSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

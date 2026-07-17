@@ -67,9 +67,21 @@ class CSP_API StaticModelSpaceComponent : public ComponentBase,
 
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a static model space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new StaticModelSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<StaticModelSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /* clang-format off */
 	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
@@ -168,6 +180,9 @@ public:
     /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInVirtual()
     void SetShowAsHoldoutInVirtual(bool InValue) override;
     /// @}
+
+private:
+    StaticModelSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

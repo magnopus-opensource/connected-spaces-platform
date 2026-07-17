@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef CSP_WASM
+
 #include "EmscriptenWebClient.h"
 
 #include "CSP/Common/Map.h"
@@ -222,6 +224,9 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
     case ERequestVerb::Head:
         strcpy(attr.requestMethod, "HEAD");
         break;
+    case ERequestVerb::Patch:
+        strcpy(attr.requestMethod, "PATCH");
+        break;
     }
 
     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
@@ -273,3 +278,4 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 }
 
 } // namespace csp::web
+#endif

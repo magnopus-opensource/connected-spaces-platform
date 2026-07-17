@@ -1,0 +1,17 @@
+[settings]
+arch=x86_64
+compiler=msvc
+compiler.cppstd=17
+compiler.runtime=dynamic
+compiler.version=194
+os=Windows
+
+[options]
+# We have to set poco to build as static here
+poco/*:shared=False
+
+[tool_requires]
+ninja/1.11.1
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja

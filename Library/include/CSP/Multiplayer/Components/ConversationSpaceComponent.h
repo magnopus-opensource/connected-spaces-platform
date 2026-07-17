@@ -85,11 +85,23 @@ class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositio
     CSP_END_IGNORE
 
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
     /// This constructor should not be called directly. Instead, use the SpaceEntity::AddComponent function.
     /// @param Parent csp::multiplayer::SpaceEntity* : The Space entity that owns this component. This will also register the component to the entity.
     /// @pre Parent must not be null.
     ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a conversation space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new ConversationSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<ConversationSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates a conversation represented by this component.
     /// @param Message const csp::common::String& : The message to be stored.
@@ -302,6 +314,7 @@ protected:
     void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
 
 private:
+    ConversationSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
     void SetConversationId(const csp::common::String& Value);
     void RemoveConversationId();
     const csp::common::String& GetConversationId() const;

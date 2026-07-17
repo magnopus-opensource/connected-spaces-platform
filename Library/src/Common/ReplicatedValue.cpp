@@ -114,7 +114,11 @@ ReplicatedValue& ReplicatedValue::operator=(ReplicatedValue&& Other)
     return *this;
 }
 
-bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const { return (Value) == OtherValue.Value; }
+bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
+{
+    return OtherValue.ReplicatedType == ReplicatedType && (Value) == OtherValue.Value;
+}
+
 bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const { return (*this == OtherValue) == false; }
 
 void ReplicatedValue::SetBool(bool InValue)

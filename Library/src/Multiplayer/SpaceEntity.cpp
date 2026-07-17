@@ -49,6 +49,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/PatchUtils.h"
@@ -459,7 +460,9 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
+ComponentBase* SpaceEntity::AddComponent(ComponentType AddType) { return AddComponentByTypeId(static_cast<uint64_t>(AddType)); }
+
+ComponentBase* SpaceEntity::AddComponentByTypeId(uint64_t TypeId)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
     ModifiableStatus Modifiable = IsModifiable();
@@ -479,7 +482,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     std::scoped_lock ScopedComponentsLock { ComponentsLock };
 
     // Only allow one script component
-    if (AddType == ComponentType::ScriptData)
+    if (ToComponentType(TypeId) == ComponentType::ScriptData)
     {
         ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData);
 
@@ -496,10 +499,11 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     }
 
     auto ComponentId = GenerateComponentId();
-    auto* Component = InstantiateComponent(ComponentId, AddType);
+    auto* Component = InstantiateComponent(ComponentId, TypeId);
 
-    // If Component is null, component has not been instantiated, so is skipped. (Can this ever be null... seems a bit of a footgun not to just
-    // assert)
+    // If Component is null, component has not been instantiated, so is skipped.
+    // This has historically been the case if a new Component type/class is added in a new version of the library,
+    // and an older client receives it. With dynamic schema-based components, this is more likely to happen.
     if (Component != nullptr)
     {
         // Either add the component to the patch, or just directly insert it.
@@ -639,92 +643,125 @@ uint16_t SpaceEntity::GenerateComponentId()
     }
 }
 
-ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, ComponentType InstantiateType)
+template <typename T> static ComponentBase* TryMakeOrDefault(const ComponentSchema* Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
 {
+    if (Schema != nullptr)
+    {
+        if (auto Component = T::TryMake(*Schema, LogSystem, Parent))
+        {
+            return Component.release();
+        }
+    }
+
+    return new T(LogSystem, Parent);
+}
+
+ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, uint64_t TypeId)
+{
+    const auto* Registry = EntitySystem != nullptr ? EntitySystem->GetComponentSchemaRegistry() : nullptr;
+    const auto* Schema = Registry != nullptr ? Registry->Find(TypeId) : nullptr;
+
+    if (!IsLegacyComponentTypeId(TypeId))
+    {
+        if (Schema == nullptr)
+        {
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, fmt::format("Unknown Component TypeId: {}", TypeId).c_str());
+            }
+            return nullptr;
+        }
+
+        auto* Component = new ComponentBase(*Schema, LogSystem, this);
+        Component->Id = InstantiateId;
+        return Component;
+    }
+
     ComponentBase* Component;
+    const auto InstantiateType = static_cast<ComponentType>(TypeId);
 
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = new StaticModelSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<StaticModelSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AnimatedModel:
-        Component = new AnimatedModelSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AnimatedModelSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::VideoPlayer:
-        Component = new VideoPlayerSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<VideoPlayerSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Image:
-        Component = new ImageSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ImageSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ExternalLink:
-        Component = new ExternalLinkSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ExternalLinkSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AvatarData:
-        Component = new AvatarSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AvatarSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Light:
-        Component = new LightSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<LightSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ScriptData:
-        Component = new ScriptSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ScriptSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Code:
-        Component = new CodeSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CodeSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Button:
-        Component = new ButtonSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ButtonSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Custom:
-        Component = new CustomSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CustomSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Portal:
-        Component = new PortalSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<PortalSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Conversation:
-        Component = new ConversationSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ConversationSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Audio:
-        Component = new AudioSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AudioSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Spline:
-        Component = new SplineSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<SplineSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Collision:
-        Component = new CollisionSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CollisionSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Reflection:
-        Component = new ReflectionSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ReflectionSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Fog:
-        Component = new FogSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<FogSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ECommerce:
-        Component = new ECommerceSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ECommerceSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::CinematicCamera:
-        Component = new CinematicCameraSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<CinematicCameraSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::FiducialMarker:
-        Component = new FiducialMarkerSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<FiducialMarkerSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::GaussianSplat:
-        Component = new GaussianSplatSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<GaussianSplatSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Text:
-        Component = new TextSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<TextSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Hotspot:
-        Component = new HotspotSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<HotspotSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::ScreenSharing:
-        Component = new ScreenSharingSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<ScreenSharingSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::AIChatbot:
-        Component = new AIChatbotSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AIChatbotSpaceComponent>(Schema, LogSystem, this);
         break;
     case ComponentType::Attachment:
-        Component = new AttachmentSpaceComponent(LogSystem, this);
+        Component = TryMakeOrDefault<AttachmentSpaceComponent>(Schema, LogSystem, this);
         break;
     default:
     {
@@ -1042,11 +1079,11 @@ std::unique_ptr<SpaceEntityStatePatcher>& SpaceEntity::GetStatePatcher() { retur
 void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType MessageComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    const auto TypeId = std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue());
 
-    if (MessageComponentType != ComponentType::Invalid)
+    if (TypeId != static_cast<uint64_t>(ComponentType::Invalid))
     {
-        auto* Component = InstantiateComponent(ComponentId, MessageComponentType);
+        auto* Component = InstantiateComponent(ComponentId, TypeId);
 
         // if Component == nullptr component has not been instantiated, so is skipped.
         if (Component != nullptr)
@@ -1073,7 +1110,7 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
 ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
-    ComponentType PatchComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+    const auto PatchComponentType = std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue());
 
     auto UpdateType = ComponentUpdateType::Update;
 
@@ -1081,7 +1118,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
     {
         UpdateType = ComponentUpdateType::Add;
     }
-    else if (Components[ComponentId]->GetComponentType() != PatchComponentType)
+    else if (Components[ComponentId]->GetTypeId() != PatchComponentType)
     {
         UpdateType = ComponentUpdateType::Delete;
     }

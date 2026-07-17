@@ -72,9 +72,21 @@ enum class CollisionMode
 class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IEnableableComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a collision space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new CollisionSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<CollisionSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup ITransformComponent
     /// @{
@@ -197,6 +209,9 @@ public:
     /// @copydoc IEnableableComponent::SetIsEnabled()
     void SetIsEnabled(bool Value) override;
     /// @}
+
+private:
+    CollisionSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

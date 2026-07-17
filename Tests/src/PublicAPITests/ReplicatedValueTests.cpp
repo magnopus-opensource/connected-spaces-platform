@@ -229,7 +229,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MapAssignmentTest)
 // Tests move logic with a basic type
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MoveConstructorIntTest)
 {
-    csp::common::ReplicatedValue Value { 10ll };
+    csp::common::ReplicatedValue Value { static_cast<int64_t>(10ll) };
     csp::common::ReplicatedValue NewValue { std::move(Value) };
 
     EXPECT_EQ(NewValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Integer);
@@ -252,8 +252,8 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MoveConstructorStringTest)
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MoveAssignmentIntTest)
 {
-    csp::common::ReplicatedValue Value { 10ll };
-    csp::common::ReplicatedValue NewValue { 5ll };
+    csp::common::ReplicatedValue Value { static_cast<int64_t>(10ll) };
+    csp::common::ReplicatedValue NewValue { static_cast<int64_t>(5ll) };
 
     NewValue = std::move(Value);
 
@@ -290,6 +290,8 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, EqualityOperatorTest)
     Value2.SetInt(5);
 
     EXPECT_FALSE(Value == Value2);
+
+    EXPECT_NE(csp::common::ReplicatedValue(), csp::common::ReplicatedValue(false));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, InequalityOperatorTest)

@@ -17,7 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "Services/aggregationservice/Api.h"
+#include "Services/AggregationService/Api.h"
 
 using namespace csp::common;
 

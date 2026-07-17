@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -159,8 +160,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            RealtimeEngine->SendNewAvatarObjectMessage(
-                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default, LocomotionModel::Grounded))
+            RealtimeEngine->SendNewAvatarObjectMessage("Username", LoginState.GetUserId(), UserTransform, IsVisible, "AvatarId", AvatarState::Idle,
+                AvatarPlayMode::Default, LocomotionModel::Grounded))
         .then(async::inline_scheduler(),
             [](async::task<uint64_t> Id)
             {
@@ -200,8 +201,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            RealtimeEngine->SendNewAvatarObjectMessage(
-                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default, LocomotionModel::Grounded))
+            RealtimeEngine->SendNewAvatarObjectMessage("Username", LoginState.GetUserId(), UserTransform, IsVisible, "AvatarId", AvatarState::Idle,
+                AvatarPlayMode::Default, LocomotionModel::Grounded))
         .then(async::inline_scheduler(),
             [](async::task<uint64_t> Id)
             {
@@ -270,8 +271,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
         []()
         { return async::make_task(uint64_t { 55 }); }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
-            RealtimeEngine->CreateNewLocalAvatar(
-                Username, LoginState.UserId, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, MockCallback.AsStdFunction()));
+            RealtimeEngine->CreateNewLocalAvatar(Username, LoginState.GetUserId(), UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode,
+                LocomotionModel, MockCallback.AsStdFunction()));
 }
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLoggedFromWholeCreateAvatarChain)
@@ -311,7 +312,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
 
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar("Username", LoginState.UserId, UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
+    RealtimeEngine->CreateAvatar("Username", LoginState.GetUserId(), UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
@@ -339,7 +340,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntityGen
                 {
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error{ "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 
@@ -396,7 +397,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntitySen
 
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error { "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 
@@ -408,7 +409,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntitySen
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
@@ -472,7 +473,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
@@ -504,7 +505,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
 
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error { "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 
@@ -571,7 +572,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarGen
     const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
+    RealtimeEngine->CreateAvatar("Username", LoginState.GetUserId(), Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
@@ -615,7 +616,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
                     const auto ExceptionPtr = std::exception_ptr { nullptr };
 
                     // Return a valid object id
-                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    std::vector<signalr::value> ParamsV { signalr::value { static_cast<uint64_t>(1ull) } };
                     signalr::value Params { ParamsV };
 
                     Callback(Params, ExceptionPtr);
@@ -637,7 +638,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
     const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
+    RealtimeEngine->CreateAvatar("Username", LoginState.GetUserId(), Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
@@ -729,4 +730,130 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, LocalEntityBypa
 
     EXPECT_EQ(CreatedEntity->GetPosition(), csp::common::Vector3(2.0f, 0.0f, 0.0f));
     EXPECT_EQ(UpdateCount, 2);
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithComponentSchema)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    const auto ExampleSchemaId = ComponentSchema::TypeIdType { 666 };
+
+    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+        {
+            ExampleSchemaId,
+            "Example",
+            csp::common::Array<ComponentProperty> {
+                {
+                    ComponentProperty::KeyType { 42 },
+                    "value",
+                    "DefaultValue",
+                },
+            },
+        },
+    };
+
+    const auto Engine = OnlineRealtimeEngine {
+        *SystemsManager.GetMultiplayerConnection(),
+        *SystemsManager.GetLogSystem(),
+        *SystemsManager.GetEventBus(),
+        *SystemsManager.GetScriptSystem(),
+        Components,
+    };
+
+    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructFromJsonWithComponentSchemas)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    const auto AllPropertyTypesSchemaId = ComponentSchema::TypeIdType { 123 };
+    const auto InvalidSchemaId = ComponentSchema::TypeIdType { 789 };
+    const auto EmptySchemaId = ComponentSchema::TypeIdType { 456 };
+
+    constexpr auto RawJsonFirstFile = R"([
+        {
+            "typeId": 123,
+            "name": "AllPropertyTypesComponent",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "stringProperty",
+                    "type": "string",
+                    "defaultValue": "hello"
+                },
+                {
+                    "key": 1,
+                    "name": "floatProperty",
+                    "type": "float",
+                    "defaultValue": 1.5
+                },
+                {
+                    "key": 2,
+                    "name": "intProperty",
+                    "type": "int",
+                    "defaultValue": 42
+                },
+                {
+                    "key": 3,
+                    "name": "boolProperty",
+                    "type": "bool",
+                    "defaultValue": true
+                },
+                {
+                    "key": 4,
+                    "name": "vec2Property",
+                    "type": "vec2",
+                    "defaultValue": [1.0, 2.0]
+                },
+                {
+                    "key": 5,
+                    "name": "vec3Property",
+                    "type": "vec3",
+                    "defaultValue": [1.0, 2.0, 3.0]
+                },
+                {
+                    "key": 6,
+                    "name": "vec4Property",
+                    "type": "vec4",
+                    "defaultValue": [1.0, 2.0, 3.0, 4.0]
+                }
+            ]
+        }
+    ])";
+
+    constexpr auto RawJsonThirdFile = R"([
+        {
+            "typeId": 789,
+            "name": "InvalidComponent",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "missingTypeProperty",
+                    "defaultValue": "hello"
+                }
+            ]
+        },
+        {
+            "typeId": 456,
+            "name": "EmptyComponent",
+            "properties": []
+        }
+    ])";
+
+    const auto JsonSchemas = csp::common::List<csp::common::String> {
+        csp::common::String { RawJsonFirstFile },
+        csp::common::String { "this is not json at all" },
+        csp::common::String { RawJsonThirdFile },
+    };
+
+    const auto Engine = OnlineRealtimeEngine {
+        *SystemsManager.GetMultiplayerConnection(),
+        *SystemsManager.GetLogSystem(),
+        *SystemsManager.GetEventBus(),
+        *SystemsManager.GetScriptSystem(),
+        JsonSchemas,
+    };
+
+    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(AllPropertyTypesSchemaId), nullptr);
+    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(EmptySchemaId), nullptr);
+    EXPECT_EQ(Engine.GetComponentSchemaRegistry()->Find(InvalidSchemaId), nullptr);
 }

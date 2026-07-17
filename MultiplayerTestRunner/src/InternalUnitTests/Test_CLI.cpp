@@ -24,7 +24,7 @@ TEST(CLITest, AllArgsBasic)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123",
+    std::vector<const char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123",
         "--space", "space-id-123", "--timeout", "60", "--endpoint", "https://example.com" };
     CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
 
@@ -38,7 +38,7 @@ TEST(CLITest, AllArgsBasic)
 
 TEST(CLITest, TestIdentifierRequired)
 {
-    std::vector<char*> args = { "MultiplayerTestRunner", "--email", "test@example.com", "--password", "password123", "--space", "space-id-123",
+    std::vector<const char*> args = { "MultiplayerTestRunner", "--email", "test@example.com", "--password", "password123", "--space", "space-id-123",
         "--timeout", "60", "--endpoint", "https://example.com" };
 
     try
@@ -60,7 +60,7 @@ TEST(CLITest, LoginEmailRequired)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--password", "password123", "--space", "space-id-123", "--timeout",
+    std::vector<const char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--password", "password123", "--space", "space-id-123", "--timeout",
         "60", "--endpoint", "https://example.com" };
 
     try
@@ -82,7 +82,7 @@ TEST(CLITest, PasswordRequired)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "ergeqrheh", "--space",
+    std::vector<const char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "ergeqrheh", "--space",
         "space-id-123", "--timeout", "60", "--endpoint", "https://example.com" };
 
     try
@@ -102,7 +102,7 @@ TEST(CLITest, PasswordRequired)
 
 TEST(CLITest, WhenInvalidTestIdentiferThenExceptionThrow)
 {
-    std::vector<char*> args
+    std::vector<const char*> args
         = { "MultiplayerTestRunner", "--test", "NotARealTestIdentifier", "--email", "test@example.com", "--password", "password123" };
 
     try
@@ -124,7 +124,7 @@ TEST(CLITest, DefaultsSet)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123" };
+    std::vector<const char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123" };
     CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
 
     EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");

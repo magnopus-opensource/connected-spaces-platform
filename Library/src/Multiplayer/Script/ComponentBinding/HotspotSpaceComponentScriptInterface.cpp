@@ -31,16 +31,4 @@ std::string HotspotSpaceComponentScriptInterface::GetUniqueComponentId()
     return static_cast<HotspotSpaceComponent*>(Component)->GetUniqueComponentId().c_str();
 }
 
-DEFINE_SCRIPT_PROPERTY_VEC3(HotspotSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_VEC4(HotspotSpaceComponent, Rotation);
-
-DEFINE_SCRIPT_PROPERTY_STRING(HotspotSpaceComponent, Name);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsTeleportPoint);
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsSpawnPoint);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVirtualVisible);
-
 } // namespace csp::multiplayer

@@ -54,9 +54,21 @@ enum class PortalPropertyKeys : uint16_t
 class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a portal space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new PortalSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<PortalSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Retrieves the space ID that this portal points to.
     /// @note When the user uses the portal, it should be able to leave the current space and enter the one
@@ -93,6 +105,9 @@ public:
     /// @copydoc IEnableableComponent::SetIsEnabled()
     void SetIsEnabled(bool InValue) override;
     /// @}
+
+private:
+    PortalSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

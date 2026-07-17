@@ -18,6 +18,7 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/SharedEnums.h"
@@ -68,6 +69,37 @@ public:
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
     OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates an empty realtime engine with additional component schemas.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates an empty realtime engine, registering additional component schemas from JSON.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped with a warning.
+    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+        const csp::common::List<csp::common::String>& JsonSchemas);
+
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates a realtime engine pre-populated from a scene description, with additional component schemas from JSON.
+    /// @param SceneDescription The scene description containing entities to populate in the engine.
+    /// @param LogSystem Logger for status and debug output.
+    /// @param RemoteScriptRunner Object capable of running a script.
+    /// @param JsonSchemas Component schemas to register alongside the built-in schemas in the engine-wide registry.
+    /// The list is a wrapper generator workaround for passing large strings. In practice a single element is
+    /// expected, containing a JSON array of schema objects. Multiple elements are supported for combining schemas
+    /// from independent sources. Entries that fail to parse are skipped with a warning.
+    OfflineRealtimeEngine(const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem,
+        csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas);
 
     /// @brief OfflineRealtimeEngine destructor
     /// Removes entity script bindings and deregisters tick event listeners
@@ -229,6 +261,10 @@ public:
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
+    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
+    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
+    const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
@@ -259,6 +295,8 @@ private:
     std::recursive_mutex EntitiesLock;
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
-    csp::common::IScriptBinding* ScriptBinding;
+    std::unique_ptr<csp::common::IScriptBinding> ScriptBinding;
+
+    std::unique_ptr<csp::multiplayer::IComponentSchemaRegistry> ComponentRegistry;
 };
 }

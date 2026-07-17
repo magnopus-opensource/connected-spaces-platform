@@ -18,6 +18,7 @@
 
 #include "TestIdentifiers.h"
 
+#include <vector>
 #include <future>
 #include <memory>
 #include <optional>
@@ -120,5 +121,5 @@ private:
     std::optional<std::string> Endpoint;
 
     // Created in StartProcess
-    std::unique_ptr<TinyProcessLib::Process> ProcessHandle = nullptr;
+    std::unique_ptr<TinyProcessLib::Process> ProcessHandle;
 };

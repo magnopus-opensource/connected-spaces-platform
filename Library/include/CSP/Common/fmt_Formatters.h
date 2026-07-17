@@ -30,6 +30,7 @@ CSP_START_IGNORE
 #include "Common/Web/Json.h"
 
 #include <fmt/base.h>
+#include <fmt/format.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <string_view>
@@ -39,7 +40,7 @@ namespace fmt
 
 // Formatter for csp::common::String.
 
-template <> struct fmt::formatter<csp::common::String> : formatter<std::string_view>
+template <> struct formatter<csp::common::String> : formatter<std::string_view>
 {
     // parse is inherited from formatter<string_view>.
 
@@ -50,7 +51,7 @@ template <> struct fmt::formatter<csp::common::String> : formatter<std::string_v
     }
 };
 
-template <> struct fmt::formatter<csp::web::HttpRequest> : formatter<std::string_view>
+template <> struct formatter<csp::web::HttpRequest> : formatter<std::string_view>
 {
     auto format(const csp::web::HttpRequest& Request, format_context& ctx) const -> format_context::iterator
     {
@@ -71,6 +72,9 @@ template <> struct fmt::formatter<csp::web::HttpRequest> : formatter<std::string
             break;
         case csp::web::ERequestVerb::Head:
             Verb = "HEAD";
+            break;
+        case csp::web::ERequestVerb::Patch:
+            Verb = "PATCH";
             break;
         default:
             Verb = "UNKNOWN";

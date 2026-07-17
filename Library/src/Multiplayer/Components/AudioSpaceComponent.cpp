@@ -17,7 +17,7 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Multiplayer/Component/Schema.h"
+#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
 #include <fmt/format.h>
@@ -33,58 +33,88 @@ constexpr const float DefaultVolume = 1.f;
 namespace csp::multiplayer
 {
 
-const auto Schema = ComponentBase::ComponentSchema {
-    ComponentType::Audio,
-    std::vector<ComponentBase::ComponentSchema::Property> {
+const auto Schema = ComponentSchema {
+    static_cast<ComponentSchema::TypeIdType>(ComponentType::Audio),
+    "Audio",
+    csp::common::Array<ComponentProperty> {
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::Position),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::PlaybackState),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
+            "playbackState",
             static_cast<int64_t>(AudioPlaybackState::Reset),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AudioType),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
+            "audioType",
             static_cast<int64_t>(AudioType::Global),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AudioAssetId),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
+            "audioAssetId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AssetCollectionId),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
+            "assetCollectionId",
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::AttenuationRadius),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
             DefaultAttenuationRadius,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::IsLoopPlayback),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
+            "isLoopPlayback",
             false,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::TimeSincePlay),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
+            "timeSincePlay",
             0.f,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::Volume),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
+            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
             DefaultVolume,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::IsEnabled),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
+            "isEnabled",
             true,
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AudioPropertyKeys::ThirdPartyComponentRef),
+            static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
+            {}, // not exposed to scripting
             "",
         },
     },
 };
 
+const ComponentSchema& AudioSpaceComponent::GetSchema() { return Schema; }
+
 AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(Schema, LogSystem, Parent)
+    : AudioSpaceComponent(Schema, LogSystem, Parent)
+{
+}
+
+std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
+    const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+{
+    if (!IsCompatible(AudioSpaceComponent::GetSchema(), InSchema))
+    {
+        return nullptr;
+    }
+
+    return std::unique_ptr<AudioSpaceComponent>(new AudioSpaceComponent(InSchema, LogSystem, Parent));
+}
+
+AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(InSchema, LogSystem, Parent)
 {
     SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }
@@ -104,16 +134,6 @@ AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState Value)
 {
     SetProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState), static_cast<int64_t>(Value));
-}
-
-AudioType AudioSpaceComponent::GetAudioType() const
-{
-    return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType)));
-}
-
-void AudioSpaceComponent::SetAudioType(AudioType Value)
-{
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(Value));
 }
 
 const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
@@ -136,10 +156,6 @@ void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
     SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId), Value);
 }
 
-float AudioSpaceComponent::GetAttenuationRadius() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)); }
-
-void AudioSpaceComponent::SetAttenuationRadius(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), Value); }
-
 bool AudioSpaceComponent::GetIsLoopPlayback() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback)); }
 
 void AudioSpaceComponent::SetIsLoopPlayback(bool Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback), Value); }
@@ -147,6 +163,36 @@ void AudioSpaceComponent::SetIsLoopPlayback(bool Value) { SetProperty(static_cas
 float AudioSpaceComponent::GetTimeSincePlay() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay)); }
 
 void AudioSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay), Value); }
+
+bool AudioSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)); }
+
+void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }
+
+const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
+{
+    return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
+}
+
+void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
+}
+
+/* IAudioControlComponent */
+
+float AudioSpaceComponent::GetAttenuationRadius() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)); }
+
+void AudioSpaceComponent::SetAttenuationRadius(float Value) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius), Value); }
+
+AudioType AudioSpaceComponent::GetAudioType() const
+{
+    return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType)));
+}
+
+void AudioSpaceComponent::SetAudioType(AudioType Value)
+{
+    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType), static_cast<int64_t>(Value));
+}
 
 float AudioSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume)); }
 
@@ -178,18 +224,5 @@ void AudioSpaceComponent::SetPlaySoundCallback(PlaySoundCallbackHandler Callback
     PlaySoundCallback = Callback;
 }
 
-bool AudioSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)); }
-
-void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }
-
-const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
-{
-    return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
-}
-
-void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
-{
-    SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
-}
 
 } // namespace csp::multiplayer

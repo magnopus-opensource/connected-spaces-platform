@@ -6,6 +6,8 @@
 
 #ifdef USE_MSGPACK
 
+#include <cstddef>
+
 namespace signalr
 {
     namespace binary_message_parser

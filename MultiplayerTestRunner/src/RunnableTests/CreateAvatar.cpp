@@ -15,8 +15,8 @@
  */
 
 #include "CreateAvatar.h"
+#include "../Utils.h"
 
-#include "uuid_v4.h"
 #include <CSP/Common/Optional.h>
 #include <CSP/Multiplayer/OnlineRealtimeEngine.h>
 #include <CSP/Multiplayer/SpaceTransform.h>
@@ -24,6 +24,7 @@
 #include <CSP/Systems/SystemsManager.h>
 #include <CSP/Systems/Users/UserSystem.h>
 #include <future>
+#include <thread>
 
 namespace CreateAvatar
 {
@@ -35,9 +36,8 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
 
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid.str();
+    const auto uuid = Utils::GetUniqueString();
+    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid;
 
     // Create avater
     csp::common::String UserName = "Player 1";
@@ -53,9 +53,8 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
 
-    const auto LoginState = UserSystem.GetLoginState();
-
-    RealtimeEngine.CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
+    RealtimeEngine.CreateAvatar(UserName, UserSystem.GetLoginState().GetUserId(), UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode,
         LocomotionModel::Grounded, [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
     csp::multiplayer::SpaceEntity* CreatedAvatar = ResultFuture.get();

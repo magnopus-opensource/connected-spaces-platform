@@ -16,6 +16,8 @@
 
 #pragma once
 
+#ifdef CSP_WASM
+
 #include "Multiplayer/WebSocketClient.h"
 
 #include <emscripten/websocket.h>
@@ -58,3 +60,4 @@ private:
 };
 
 } // namespace csp::multiplayer
+#endif // CSP_WASM

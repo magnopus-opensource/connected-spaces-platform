@@ -21,7 +21,6 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
-#include "uuid_v4.h"
 
 #include <chrono>
 #include <functional>
@@ -30,6 +29,8 @@
 #include <random>
 #include <thread>
 #include <future>
+#include <filesystem>
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -187,13 +188,7 @@ inline double RandomRangeDouble(double Min, double Max)
 }
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
-inline std::string GetUniqueString()
-{
-    static thread_local UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-
-    return uuid.str();
-}
+std::string GetUniqueString();
 
 inline void LogFatal(std::string Message)
 {
@@ -292,4 +287,35 @@ inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEng
     auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
+}
+
+inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
+{
+    auto AbsoluteFilePath = std::filesystem::absolute(FilePath);
+    if (!std::filesystem::exists(AbsoluteFilePath))
+    {
+        return std::nullopt;
+    }
+
+    const auto FileSize = std::filesystem::file_size(AbsoluteFilePath);
+
+    std::ifstream File(AbsoluteFilePath, std::ios::binary);
+    if (!File)
+    {
+        return std::nullopt;
+    }
+
+    if (!std::filesystem::is_regular_file(AbsoluteFilePath))
+    {
+        return std::nullopt;
+    }
+
+    std::vector<unsigned char> FileData(static_cast<size_t>(FileSize));
+
+    if (!File.read(reinterpret_cast<char*>(FileData.data()), static_cast<std::streamsize>(FileData.size())))
+    {
+        return std::nullopt;
+    }
+    
+    return FileData;
 }

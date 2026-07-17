@@ -81,7 +81,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
@@ -218,7 +219,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.GetUserId(), UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId,
         UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
@@ -275,6 +277,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
             avatar.isVisible = true;
             avatar.isARVisible = false;
             avatar.isVirtualVisible = false;
+            avatar.movementDirection = [1.0, 0.0, 0.0];
 		)xx";
 
     Avatar->GetScript().SetScriptSource(AvatarComponentScriptText.c_str());
@@ -298,6 +301,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), true);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), false);
     EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3(1.0f, 0.0f, 0.0f));
 
     // Exit space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

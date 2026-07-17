@@ -16,11 +16,13 @@
 
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "ECommerceSystemHelpers.h"
-#include "Services/aggregationservice/Api.h"
+#include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
 #include <array>
@@ -138,10 +140,9 @@ void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActi
     auto& SystemsManager = SystemsManager::Get();
     const auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const auto& UserId = UserSystem->GetLoginState().UserId;
-
     static_cast<chs::ShopifyApi*>(ShopifyAPI)
-        ->vendorsShopifyUsersUserIdStorefrontsGet({ UserId, ActiveParam, std::nullopt, std::nullopt }, ResponseHandler);
+        ->vendorsShopifyUsersUserIdStorefrontsGet(
+            { UserSystem->GetLoginState().GetUserId(), ActiveParam, std::nullopt, std::nullopt }, ResponseHandler);
 }
 
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive,

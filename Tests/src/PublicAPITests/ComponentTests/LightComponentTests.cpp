@@ -108,16 +108,12 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
     Asset.Name = "OKO";
     Asset.Type = csp::systems::EAssetType::IMAGE;
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_TRUE(UploadFileData.has_value());
 
     csp::systems::BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -125,8 +121,6 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 
     // Upload data
     UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-    delete[] UploadFileData;
 
     EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
     EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
@@ -288,6 +282,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetIsARVisible(), true);
     EXPECT_EQ(LightComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "");
+    EXPECT_EQ(LightComponent->GetLightCookieAssetCollectionId(), "");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::NoCookie);
 
     // Setup script
@@ -307,6 +302,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
         light.isARVisible = false;
         light.isVirtualVisible = false;
         light.cookieAssetId = "TestLightCookieAssetId";
+        light.cookieAssetCollectionId = "TestLightCookieAssetCollectionId";
         light.lightCookieType = 0;
 
     )xx";
@@ -331,6 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetIsARVisible(), false);
     EXPECT_EQ(LightComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "TestLightCookieAssetId");
+    EXPECT_EQ(LightComponent->GetLightCookieAssetCollectionId(), "TestLightCookieAssetCollectionId");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::ImageCookie);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <iomanip>
 
 static bool PortableLocaltime(time_t seconds, struct tm* out)
 {

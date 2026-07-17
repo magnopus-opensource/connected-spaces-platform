@@ -48,7 +48,7 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
     if (LoginResult.GetResultCode() == csp::systems::EResultCode::Success)
     {
         MultiplayerTestRunner::ProcessDescriptors::PrintProcessDescriptor(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR);
-        return LoginResult.GetLoginState().UserId;
+        return LoginResult.GetLoginState().GetUserId();
     }
     else
     {

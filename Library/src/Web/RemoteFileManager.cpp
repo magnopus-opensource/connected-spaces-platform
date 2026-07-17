@@ -16,6 +16,8 @@
 #include "Web/RemoteFileManager.h"
 
 #include "CSP/Common/Interfaces/IAuthContext.h"
+#include "CSP/Common/LoginState.h"
+#include "Common/LoginStateData.h"
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
@@ -26,11 +28,13 @@ namespace
 {
 csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
 {
+    const auto Data = InAuthContext.GetLoginState().GetSnapshotThreadSafe();
+
     csp::common::Optional<csp::common::String> BearerToken;
 
-    if (InAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    if (Data->State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = InAuthContext.GetLoginState().AccessToken;
+        csp::common::String AccessToken = Data->AccessToken;
         BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
     }
 
@@ -61,7 +65,7 @@ void RemoteFileManager::GetFile(
 
     if (BearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        Payload.AddHeader(CSP_TEXT("x-auth-token"), *BearerToken);
     }
 
     WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
@@ -76,7 +80,7 @@ void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::
 
     if (BearerToken.HasValue())
     {
-        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+        Payload.AddHeader(CSP_TEXT("x-auth-token"), *BearerToken);
     }
 
     WebClient->SendRequest(csp::web::ERequestVerb::HEAD, GetUri, Payload, ResponseHandler, csp::common::CancellationToken::Dummy());

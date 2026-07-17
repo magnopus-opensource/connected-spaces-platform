@@ -79,7 +79,7 @@ constexpr bool IsSupportedSignalRBasicType =
     std::is_same_v<T, float> ||
     std::is_same_v<T, bool> || 
     std::is_same_v<T, std::string> || 
-    std::is_same_v<T, nullptr_t> ||
+    std::is_same_v<T, std::nullptr_t> ||
     std::is_base_of_v<ISignalRSerializable, T> ||
     std::is_base_of_v<ISignalRDeserializable, T>;
 // clang-format on

@@ -31,7 +31,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
     EXPECT_EQ(Process.GetPassword(), std::string { "Hunter2" });
     EXPECT_EQ(Process.GetInvocationArgs(),
         (std::vector<std::string> {
-            "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password", "Hunter2" }));
+            MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password", "Hunter2" }));
 
     // Optional arguments have no value initially
     EXPECT_FALSE(Process.GetSpaceId().has_value());
@@ -41,19 +41,19 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
     Process.SetSpaceId("MyFakeSpaceId");
     EXPECT_EQ(Process.GetSpaceId(), std::optional<std::string> { "MyFakeSpaceId" });
     EXPECT_EQ(Process.GetInvocationArgs(),
-        (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
+        (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId" }));
 
     Process.SetTimeoutInSeconds(5);
     EXPECT_EQ(Process.GetTimeoutInSeconds(), std::optional<int> { 5 });
     EXPECT_EQ(Process.GetInvocationArgs(),
-        (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
+        (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId", "--timeout", "5" }));
 
     Process.SetEndpoint("https://www.website.com");
     EXPECT_EQ(Process.GetEndpoint(), std::optional<std::string> { "https://www.website.com" });
     EXPECT_EQ(Process.GetInvocationArgs(),
-        (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
+        (std::vector<std::string> { MULTIPLAYER_TEST_RUNNER_PATH, "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId", "--timeout", "5", "--endpoint", "https://www.website.com" }));
 }
 

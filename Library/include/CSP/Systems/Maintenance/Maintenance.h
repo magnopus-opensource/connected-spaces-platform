@@ -43,6 +43,9 @@ public:
     csp::common::String Description;
     csp::common::String StartDateTimestamp;
     csp::common::String EndDateTimestamp;
+
+    bool operator==(const MaintenanceInfo& Other) const;
+    bool operator!=(const MaintenanceInfo& Other) const;
 };
 
 /// @ingroup CSPFoundation

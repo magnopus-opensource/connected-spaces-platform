@@ -109,16 +109,12 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     Asset.Name = "OKO";
     Asset.Type = csp::systems::EAssetType::IMAGE;
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_TRUE(UploadFileData.has_value());
 
     csp::systems::BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -126,8 +122,6 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 
     // Upload data
     UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-    delete[] UploadFileData;
 
     EXPECT_EQ(ImageSpaceComponentInstance->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(ImageSpaceComponentInstance->GetDisplayMode(), DisplayMode::DoubleSided);
@@ -203,6 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 
     EXPECT_EQ(ImageComponent->GetName(), "");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "");
+    EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::Identity());
@@ -218,6 +213,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 		var image = ThisEntity.getImageComponents()[0];
         image.name = "TestName";
         image.imageAssetId = "TestImageAssetId";
+        image.assetCollectionId = "TestAssetCollectionId";
         image.position = [1, 1, 1];
         image.scale = [2, 2, 2];
 		image.rotation = [1, 1, 1, 1];
@@ -239,6 +235,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 
     EXPECT_EQ(ImageComponent->GetName(), "TestName");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "TestImageAssetId");
+    EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "TestAssetCollectionId");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::One());
     EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3(2, 2, 2));
     EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::One());

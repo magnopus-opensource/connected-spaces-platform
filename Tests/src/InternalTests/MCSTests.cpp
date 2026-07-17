@@ -14,12 +14,68 @@
  * limitations under the License.
  */
 
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 #include "TestHelpers.h"
 
 #include <gtest/gtest.h>
 
+#include <limits>
+
 using namespace csp::multiplayer;
+
+CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTypeId)
+{
+    constexpr auto LargeTypeId = std::numeric_limits<uint64_t>::max();
+
+    auto LogSystem = csp::common::LogSystem {};
+    auto ScriptSystem = csp::systems::ScriptSystem::MakeInitialised();
+    auto Engine = csp::multiplayer::OfflineRealtimeEngine {
+        LogSystem,
+        *ScriptSystem,
+        {
+            csp::multiplayer::ComponentSchema {
+                csp::multiplayer::ComponentSchema::TypeIdType { LargeTypeId },
+                "Example",
+                {
+                    csp::multiplayer::ComponentProperty {
+                        csp::multiplayer::ComponentProperty::KeyType { 0 },
+                        "value",
+                        "hello",
+                    },
+                },
+            },
+        },
+    };
+
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "Test Entity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(LargeTypeId);
+    ASSERT_NE(Component, nullptr);
+    Component->SetSchemaProperty(0, "hello");
+
+    auto Packer = MCSComponentPacker {};
+    Packer.WriteValue(Component->GetId(), Component);
+
+    const auto Expected = std::map<uint16_t, mcs::ItemComponentData> {
+        {
+            Component->GetId(),
+            mcs::ItemComponentData {
+                std::map<uint16_t, mcs::ItemComponentData> {
+                    { COMPONENT_KEY_COMPONENTTYPE, mcs::ItemComponentData { LargeTypeId } },
+                    { static_cast<uint16_t>(SpaceEntityComponentKey::Name), mcs::ItemComponentData { std::string {} } },
+                    { uint16_t { 0 }, mcs::ItemComponentData { std::string { "hello" } } },
+                },
+            },
+        },
+    };
+
+    EXPECT_EQ(Packer.GetComponents(), Expected);
+}
 
 // Test constructor values of ObjectMessage are correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageConstructorTest)

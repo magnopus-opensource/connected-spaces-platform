@@ -109,16 +109,12 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
     Asset.Name = "OKO";
     Asset.Type = csp::systems::EAssetType::IMAGE;
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_TRUE(UploadFileData.has_value());
 
     csp::systems::BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -126,8 +122,6 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     // Upload data
     UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-    delete[] UploadFileData;
 
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVirtualVisible(), true);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsARVisible(), true);
@@ -196,6 +190,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     RealtimeEngine->ProcessPendingEntityOperations();
 
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), true);
+    EXPECT_EQ(FiducialMarkerComponent->GetMarkerAssetId(), "");
+    EXPECT_EQ(FiducialMarkerComponent->GetAssetCollectionId(), "");
 
     // Setup script
     const std::string FiducialMarkerScriptText = R"xx(
@@ -207,6 +203,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 		marker.isVisible = false;
         marker.isARVisible = false;
         marker.isVirtualVisible = false;
+        marker.markerAssetId = "TestAssetId";
+        marker.assetCollectionId = "TestAssetCollectionId";
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
@@ -224,6 +222,8 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
     EXPECT_EQ(FiducialMarkerComponent->GetIsARVisible(), false);
     EXPECT_EQ(FiducialMarkerComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(FiducialMarkerComponent->GetMarkerAssetId(), "TestAssetId");
+    EXPECT_EQ(FiducialMarkerComponent->GetAssetCollectionId(), "TestAssetCollectionId");
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

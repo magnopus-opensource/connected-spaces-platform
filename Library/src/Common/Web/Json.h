@@ -129,6 +129,7 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
     const T& /*Value*/, RapidJsonAlloc& /*Allocator*/)
 {
     assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
+    return rapidjson::Value{ };
 }
 
 // Serialisation function for types that derive from DtoBase
@@ -138,8 +139,8 @@ inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocato
     csp::common::String Json = Value.ToJson();
     rapidjson::Document JsonDocument(rapidjson::Type::kObjectType, &Allocator);
     JsonDocument.Parse<0>(Json.c_str());
-
-    return JsonDocument.GetObject();
+    
+    return rapidjson::Value { JsonDocument.GetObj() };
 }
 
 // Serialisation function for types that derive from EnumDtoBase
@@ -303,7 +304,7 @@ template <typename U, typename V> inline void JsonValueToType(const rapidjson::V
 {
     assert(Value.IsObject());
 
-    for (auto& Member : Value.GetObject())
+    for (auto& Member : Value.GetObj())
     {
         U ElementKey;
         V ElementValue;

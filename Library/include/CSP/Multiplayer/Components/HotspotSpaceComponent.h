@@ -49,9 +49,21 @@ enum class HotspotPropertyKeys : uint16_t
 class CSP_API HotspotSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent, public IVisibleComponent
 {
 public:
+    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+
     /// @brief Constructs the Hotspot space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Creates a hotspot space component using the provided schema if it is compatible with the built-in schema.
+    /// @param InSchema The schema to use. Must be compatible with the built-in schema.
+    /// @param LogSystem The log system.
+    /// @param Parent The space entity that owns this component.
+    /// @return A new HotspotSpaceComponent if the schema is compatible, nullptr otherwise.
+    ///
+    /// @see csp::multiplayer::IsCompatible
+    CSP_NO_EXPORT static std::unique_ptr<HotspotSpaceComponent> TryMake(
+        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the Name of the Hotspot.
     /// @return The Name of the Hotspot.
@@ -111,6 +123,9 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+private:
+    HotspotSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer
