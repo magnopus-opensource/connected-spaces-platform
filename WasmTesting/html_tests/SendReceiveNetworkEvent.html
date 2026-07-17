@@ -67,14 +67,13 @@
                  
         const receiverId = "Id";
         const eventName = "EventName";
-        const networkEventRegistration = Multiplayer.NetworkEventRegistration.create_eventReceiverId_eventName(receiverId, eventName);
-
+        
         const replicatedValues = Common.Array.ofcsp_common_ReplicatedValue()
  
         function sendAndWaitForEvent() {
           return new Promise((resolve, reject) => {
             // Register for "EventName" event
-            const success = eventBus.listenNetworkEvent(networkEventRegistration, (ab, networkEventData) => {
+            const success = eventBus.listenCustomNetworkEvent(receiverId, eventName, (ab, networkEventData) => {
                 console.log("Received event:", eventName);
                 resolve(networkEventData);
               }
