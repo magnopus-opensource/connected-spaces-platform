@@ -521,7 +521,10 @@ std::string BuildBootstrapSnippet(const std::string& ModulePath)
 }
 
 constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = R"(
-import { signal, effect, batch } from '@preact/signals-core';
+// Import the RAW signals module: registry-internal effects manage their own
+// disposal (entry.effects / entry.uiEffects / entry.uiDispose) and must not be
+// double-registered by the tracking wrapper served at '@preact/signals-core'.
+import { signal, effect, batch } from '/__csp/internal/signals-core-raw.js';
 
 const codeComponents = new Map();
 
@@ -1350,9 +1353,11 @@ export function createScriptRegistry() {
                         unmountUI(entityId);
                     }
                 }
+                reportComponentRecovery(entityId);
             } catch (error) {
                 console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
                 unmountUI(entityId);
+                reportComponentError(entityId, 'ui');
             } finally {
                 reconcileUiEffects(entityId, entry);
                 globalThis.__cspUiRenderActive = previousUiRenderActive;
@@ -1405,9 +1410,11 @@ export function createScriptRegistry() {
             } finally {
                 globalThis.__cspCurrentEntityId = previousEntityId;
             }
+            reportComponentRecovery(entityId);
             return true;
         } catch (error) {
             console.error(`NgxCodeComponentRuntime: UI handler failed for entity ${entityId}`, error);
+            reportComponentError(entityId, 'ui-action');
             return false;
         }
     }
@@ -1572,6 +1579,7 @@ export function createScriptRegistry() {
                 ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))
                 : String(error);
             console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId} (${scriptPath})\n${detail}`);
+            reportComponentError(entityId, 'init');
         }
     }
 
@@ -1624,6 +1632,10 @@ export function createScriptRegistry() {
                 current.retryCountdown = 0;
                 current.hasWarnedMissingModule = false;
                 current.activationFailed = false;
+                // Hot reload clears the error boundary — the new module source
+                // gets a fresh chance.
+                current.disabledByErrors = false;
+                current.consecutiveErrorCount = 0;
                 current.module = moduleRef;
 
                 // If reinitializing (e.g. after a hot-reload), tear down any
@@ -1654,13 +1666,79 @@ export function createScriptRegistry() {
                 current.retryCountdown = delayFrames;
 
                 const errorMessage = (error && typeof error.message === 'string') ? error.message : String(error);
-                if (errorMessage.includes('module not found') && !current.hasWarnedMissingModule) {
+                const isModuleNotFound = (error && error.code === 'NGX_MODULE_NOT_FOUND') || errorMessage.includes('module not found');
+                if (isModuleNotFound && !current.hasWarnedMissingModule) {
                     current.hasWarnedMissingModule = true;
                     warn(entityId, `module '${scriptAssetPath}' is not available yet; import will be retried automatically.`);
                 }
                 console.error(`NgxCodeComponentRuntime: Failed to import module ${scriptAssetPath} (${reason})`, error);
             });
 
+        return true;
+    }
+
+    // --- Error boundary ---
+    //
+    // A component that throws every frame (rAF loop, timer, ui() render) would
+    // otherwise crash-loop forever, spamming the log. After
+    // MAX_CONSECUTIVE_COMPONENT_ERRORS consecutive failures the component is
+    // torn down and disabled; a successful callback in between resets the
+    // counter. Disabled components re-enable on script/attribute changes and
+    // hot reloads, so authors recover by fixing the script or its inputs.
+
+    const MAX_CONSECUTIVE_COMPONENT_ERRORS = 8;
+
+    function disableComponentAfterErrors(entityId, entry, source) {
+        entry.disabledByErrors = true;
+        entry.isDisposing = true;
+        try {
+            stopUIRuntime(entityId, entry);
+            runScriptTeardown(entityId, entry, 'error-boundary');
+            disposeAllEffects(entry);
+        } finally {
+            entry.isDisposing = false;
+        }
+        const scriptPath = entry.scriptAssetPath || '<unknown>';
+        console.error(`NgxCodeComponentRuntime: entity ${entityId} (${scriptPath}) disabled after ${MAX_CONSECUTIVE_COMPONENT_ERRORS} consecutive errors (${source}). Edit the script or its attributes to re-enable.`);
+    }
+
+    function reportComponentError(entityId, source) {
+        const entry = codeComponents.get(entityId);
+        if (!entry || entry.disabledByErrors) {
+            return;
+        }
+        entry.consecutiveErrorCount = (entry.consecutiveErrorCount || 0) + 1;
+        if (entry.consecutiveErrorCount >= MAX_CONSECUTIVE_COMPONENT_ERRORS) {
+            disableComponentAfterErrors(entityId, entry, source);
+        }
+    }
+
+    function reportComponentRecovery(entityId) {
+        const entry = codeComponents.get(entityId);
+        if (entry && !entry.disabledByErrors && entry.consecutiveErrorCount) {
+            entry.consecutiveErrorCount = 0;
+        }
+    }
+
+    function requeueDisabledComponent(entityId, entry) {
+        entry.disabledByErrors = false;
+        entry.consecutiveErrorCount = 0;
+        entry.initialized = false;
+        pendingModuleActivations.add(entityId);
+    }
+
+    // Registers a raw-effect disposer created by the '@preact/signals-core'
+    // tracking wrapper so component teardown can dispose it. Fixes the leak
+    // where direct effect() imports outlived their component.
+    function trackDisposerForEntity(entityId, dispose) {
+        if (typeof dispose !== 'function') {
+            return false;
+        }
+        const entry = codeComponents.get(entityId);
+        if (!entry) {
+            return false;
+        }
+        entry.effects.push(dispose);
         return true;
     }
 
@@ -1732,6 +1810,8 @@ export function createScriptRegistry() {
             retryCountdown: 0,
             hasWarnedMissingModule: false,
             activationFailed: false,
+            consecutiveErrorCount: 0,
+            disabledByErrors: false,
             entityRefStates: {},
             effects: [],
             uiDispose: null,
@@ -1765,6 +1845,13 @@ export function createScriptRegistry() {
         const previousAttributes = cloneAttributes(entry.attributes);
         entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);
 
+        // An attribute change is an author action — give a component disabled
+        // by the error boundary another chance with the new inputs.
+        if (entry.disabledByErrors) {
+            requeueDisabledComponent(entityId, entry);
+            return cloneAttributes(entry.attributes);
+        }
+
         if (entry.initialized && entry.signalAttributes) {
             updateSignalAttributes(entry, entityId);
         }
@@ -1775,27 +1862,34 @@ export function createScriptRegistry() {
     function updateAttributeForEntity(entityId, key, value) {
         const entry = codeComponents.get(entityId);
         if (!entry) {
-            return;
+            return false;
         }
 
         if (entry.activationFailed) {
-            return;
+            return false;
         }
 
         if (entry.schema) {
             if (!Object.prototype.hasOwnProperty.call(entry.schema, key)) {
                 warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
-                return;
+                return false;
             }
 
             const rule = entry.schema[key];
             if (!valueMatchesType(rule.type, value)) {
                 warn(entityId, `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; update ignored.`);
-                return;
+                return false;
             }
         }
 
         entry.attributes[key] = cloneValue(value);
+
+        // An attribute change is an author action — give a component disabled
+        // by the error boundary another chance with the new inputs.
+        if (entry.disabledByErrors) {
+            requeueDisabledComponent(entityId, entry);
+            return true;
+        }
 
         if (entry.initialized && entry.signalAttributes && entry.signalAttributes[key]) {
             const schema = entry.schema || {};
@@ -1809,12 +1903,13 @@ export function createScriptRegistry() {
                 entry.signalAttributes[key].value = value;
             }
         }
+        return true;
     }
 
     function removeCodeComponent(entityId) {
         const entry = codeComponents.get(entityId);
         if (!entry) {
-            return;
+            return false;
         }
 
         entry.isDisposing = true;
@@ -1827,17 +1922,17 @@ export function createScriptRegistry() {
         entry.thisEntitySignal = null;
         pendingModuleActivations.delete(entityId);
         codeComponents.delete(entityId);
+        return true;
     }
 
     function tick() {
-        // Throttle activations to one entity per tick. Activating a user module
+        // Activate at most ONE entity per tick() call. Activating a user module
         // runs script() + initial ui() + their signal/effect chains synchronously
-        // in the foundation tick call stack; doing several in the same tick stacks
-        // all those JS call chains on top of each other and blows V8's per-WASM
-        // stack frame budget (notably when DevTools is open and adds per-call
-        // instrumentation overhead). Pending activations queue up and drain over
-        // subsequent ticks instead — a few dozen ms of startup staggering is
-        // invisible to users and costs nothing in steady state.
+        // in the caller's JS stack; doing several in the same call stacks all
+        // those chains on top of each other and blows V8's per-WASM stack frame
+        // budget (notably with DevTools open). The C++ caller loops tick() while
+        // the returned pending count is > 0 — each call is a fresh JS entry, so
+        // the stack fully unwinds between activations.
         let activationBudget = 1;
 
         for (const [entityId, entry] of codeComponents) {
@@ -1857,7 +1952,7 @@ export function createScriptRegistry() {
                 }
             }
 
-            if (entry.activationFailed) {
+            if (entry.activationFailed || entry.disabledByErrors) {
                 continue;
             }
 
@@ -1874,6 +1969,10 @@ export function createScriptRegistry() {
                 tryImportCodeComponentModule(entityId, entry, 'tick-retry');
             }
         }
+
+        // Lets the C++ caller drain remaining activations with extra tick()
+        // calls in the same foundation tick (stack unwinds between calls).
+        return pendingModuleActivations.size;
     }
 
     function drainPendingSchemaSyncs() {
@@ -1907,7 +2006,15 @@ export function createScriptRegistry() {
         tick,
         drainPendingSchemaSyncs,
         destroy,
-        isEntityRegistered: (entityId) => codeComponents.has(entityId),
+        reportComponentError,
+        reportComponentRecovery,
+        trackDisposerForEntity,
+        // Disabled components count as unregistered so host dispatchers (rAF,
+        // timers, input) stop delivering callbacks to them.
+        isEntityRegistered: (entityId) => {
+            const entry = codeComponents.get(entityId);
+            return !!entry && !entry.disabledByErrors;
+        },
     };
 }
 
@@ -2204,8 +2311,13 @@ bool NgxCodeComponentRuntime::CaptureEntitySnapshots(EntitySnapshotMap& OutSnaps
 
 void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnapshots)
 {
-    bool bAllOperationsApplied = true;
+    // Commit progress per operation instead of all-or-nothing: each successful
+    // registry op updates LastEntitySnapshots immediately, so a single deferred
+    // op (e.g. a WASM try_lock miss) only re-runs the ops that actually failed
+    // on the next tick, not the whole diff.
+    bool bAnyOperationDeferred = false;
 
+    std::vector<uint64_t> RemovedEntityIds;
     for (const auto& PreviousEntityPair : LastEntitySnapshots)
     {
         if (CurrentSnapshots.find(PreviousEntityPair.first) == CurrentSnapshots.end())
@@ -2214,16 +2326,23 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
                 fmt::format("NgxCodeComponentRuntime Trace: Deactivating entity {} (no longer activatable in runtimeMode={}).",
                     PreviousEntityPair.first, RuntimeModeToString(GetRuntimeMode()))
                     .c_str());
-            const bool bRemoved = RemoveEntityFromRegistry(PreviousEntityPair.first);
-            if (!bRemoved)
+            if (RemoveEntityFromRegistry(PreviousEntityPair.first))
+            {
+                RemovedEntityIds.push_back(PreviousEntityPair.first);
+            }
+            else
             {
                 LogSystem.LogMsg(csp::common::LogLevel::Warning,
                     fmt::format("NgxCodeComponentRuntime Trace: Deactivation of entity {} did not complete (deferred={}).",
                         PreviousEntityPair.first, ScriptSystem.WasLastEvaluationDeferred() ? "true" : "false")
                         .c_str());
+                bAnyOperationDeferred = true;
             }
-            bAllOperationsApplied = bRemoved && bAllOperationsApplied;
         }
+    }
+    for (const uint64_t RemovedEntityId : RemovedEntityIds)
+    {
+        LastEntitySnapshots.erase(RemovedEntityId);
     }
 
     for (const auto& CurrentEntityPair : CurrentSnapshots)
@@ -2242,40 +2361,72 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
                         : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Server ? "Server" : "Unknown",
                     CurrentSnapshot.ScriptAssetPath, RuntimeModeToString(CurrentSnapshot.RuntimeMode))
                     .c_str());
-            bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
+            if (AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot))
+            {
+                LastEntitySnapshots[EntityId] = CurrentSnapshot;
+            }
+            else
+            {
+                bAnyOperationDeferred = true;
+            }
             continue;
         }
 
-        const CodeComponentSnapshot& PreviousSnapshot = PreviousSnapshotIt->second;
+        CodeComponentSnapshot& StoredSnapshot = PreviousSnapshotIt->second;
 
         // Selection transitions fire an entity-scoped event so JS scripts can
         // listen via `thisEntity.on('select', cb)` / `thisEntity.on('deselect', cb)`.
         // Selection is local-only; the event mirrors whatever this client did
-        // via SpaceEntity::Select()/Deselect() since the last tick.
-        if (CurrentSnapshot.IsLocallySelected != PreviousSnapshot.IsLocallySelected)
+        // via SpaceEntity::Select()/Deselect() since the last tick. Only commit
+        // the flag when the event was not deferred so a busy context does not
+        // swallow the transition.
+        bool bSelectionEventDeferred = false;
+        if (CurrentSnapshot.IsLocallySelected != StoredSnapshot.IsLocallySelected)
         {
             const csp::common::String EntityIdStr(std::to_string(EntityId).c_str());
             const csp::common::String EventName(CurrentSnapshot.IsLocallySelected ? "select" : "deselect");
             ScriptSystem.FireEntityEvent(EntityIdStr, EventName, csp::common::String("{}"));
+            bSelectionEventDeferred = ScriptSystem.WasLastEvaluationDeferred();
+            if (!bSelectionEventDeferred)
+            {
+                StoredSnapshot.IsLocallySelected = CurrentSnapshot.IsLocallySelected;
+            }
+            else
+            {
+                bAnyOperationDeferred = true;
+            }
         }
 
-        if ((CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != PreviousSnapshot.ScopeType)
-            || (CurrentSnapshot.RuntimeMode != PreviousSnapshot.RuntimeMode))
+        if ((CurrentSnapshot.ScriptAssetPath != StoredSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != StoredSnapshot.ScopeType)
+            || (CurrentSnapshot.RuntimeMode != StoredSnapshot.RuntimeMode))
         {
             const char* ScopeLabel = CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Local      ? "Local"
                 : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Editor ? "Editor"
                 : CurrentSnapshot.ScopeType == csp::multiplayer::CodeScopeType::Server ? "Server" : "Unknown";
             LogSystem.LogMsg(csp::common::LogLevel::Log,
                 fmt::format("NgxCodeComponentRuntime Trace: Reactivating entity {} (scope={}, runtimeMode {} -> {}, path={}).",
-                    EntityId, ScopeLabel, RuntimeModeToString(PreviousSnapshot.RuntimeMode), RuntimeModeToString(CurrentSnapshot.RuntimeMode),
-                    CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath ? "changed" : "unchanged")
+                    EntityId, ScopeLabel, RuntimeModeToString(StoredSnapshot.RuntimeMode), RuntimeModeToString(CurrentSnapshot.RuntimeMode),
+                    CurrentSnapshot.ScriptAssetPath != StoredSnapshot.ScriptAssetPath ? "changed" : "unchanged")
                     .c_str());
-            bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
+            if (AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot))
+            {
+                const bool bPreviousSelection = StoredSnapshot.IsLocallySelected;
+                StoredSnapshot = CurrentSnapshot;
+                if (bSelectionEventDeferred)
+                {
+                    // Keep the un-committed selection flag so the event retries.
+                    StoredSnapshot.IsLocallySelected = bPreviousSelection;
+                }
+            }
+            else
+            {
+                bAnyOperationDeferred = true;
+            }
             continue;
         }
 
         bool bHasRemovedAttributes = false;
-        for (const auto& PreviousAttributePair : PreviousSnapshot.Attributes)
+        for (const auto& PreviousAttributePair : StoredSnapshot.Attributes)
         {
             if (CurrentSnapshot.Attributes.find(PreviousAttributePair.first) == CurrentSnapshot.Attributes.end())
             {
@@ -2286,29 +2437,38 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
 
         if (bHasRemovedAttributes)
         {
-            bAllOperationsApplied = SyncAttributesInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
+            if (SyncAttributesInRegistry(EntityId, CurrentSnapshot))
+            {
+                StoredSnapshot.Attributes = CurrentSnapshot.Attributes;
+            }
+            else
+            {
+                bAnyOperationDeferred = true;
+            }
             continue;
         }
 
         for (const auto& CurrentAttributePair : CurrentSnapshot.Attributes)
         {
-            const auto PreviousAttributeIt = PreviousSnapshot.Attributes.find(CurrentAttributePair.first);
-            if ((PreviousAttributeIt == PreviousSnapshot.Attributes.end()) || (PreviousAttributeIt->second != CurrentAttributePair.second))
+            const auto PreviousAttributeIt = StoredSnapshot.Attributes.find(CurrentAttributePair.first);
+            if ((PreviousAttributeIt == StoredSnapshot.Attributes.end()) || (PreviousAttributeIt->second != CurrentAttributePair.second))
             {
-                bAllOperationsApplied
-                    = UpdateAttributeInRegistry(EntityId, CurrentAttributePair.first, CurrentAttributePair.second) && bAllOperationsApplied;
+                if (UpdateAttributeInRegistry(EntityId, CurrentAttributePair.first, CurrentAttributePair.second))
+                {
+                    StoredSnapshot.Attributes[CurrentAttributePair.first] = CurrentAttributePair.second;
+                }
+                else
+                {
+                    bAnyOperationDeferred = true;
+                }
             }
         }
     }
 
-    if (bAllOperationsApplied)
-    {
-        LastEntitySnapshots = CurrentSnapshots;
-    }
-    else
+    if (bAnyOperationDeferred)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Warning,
-            "NgxCodeComponentRuntime Trace: SyncSnapshots finished with deferred operations; LastEntitySnapshots not committed, will retry next tick.");
+            "NgxCodeComponentRuntime Trace: SyncSnapshots finished with deferred operations; committed successful ops, failed ops retry next tick.");
     }
 }
 

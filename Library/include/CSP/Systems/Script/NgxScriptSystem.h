@@ -205,6 +205,17 @@ private:
     void OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData);
     bool IsTrackedScriptAssetCollection(const csp::common::String& AssetCollectionId) const;
 
+    // Debounced module reload: blob-changed events request a reload; the actual
+    // context rebuild happens once, after a quiet window, so a multi-file sync
+    // triggers one rebuild instead of one per file.
+    void TickModuleReloadDebounce();
+
+    // Per-foundation-tick memo for entity snapshot JSON. Entity state changes
+    // land on foundation ticks and script-side writes invalidate explicitly, so
+    // entries are valid for at most one tick.
+    void InvalidateEntitySnapshotCache(uint64_t EntityId);
+    void ClearEntitySnapshotCache();
+
     void FetchAssetCollectionMapForSpace(uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const;
 
     bool IsGenerationCurrent(uint64_t Generation) const;
@@ -257,6 +268,12 @@ private:
     std::unique_ptr<csp::multiplayer::NgxEntityScriptBinding> EntityBinding;
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
+    // Countdown in foundation ticks until a pending module reload is applied.
+    // -1 = no reload pending. Reset to the debounce window on every qualifying
+    // AssetDetailBlobChanged event so bursts (multi-file syncs) coalesce.
+    std::atomic<int32_t> ModuleReloadDebounceTicks { -1 };
+    mutable std::mutex SnapshotCacheMutex;
+    std::unordered_map<uint64_t, std::string> EntitySnapshotJsonCache;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;
 
     struct DebugDrawLineCommand

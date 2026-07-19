@@ -66,7 +66,7 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     csp::common::String ScopeId = Result.GetScopes()[0].Id;
 
     RealtimeEngine.SetOnElectedScopeLeaderCallback(
-        [UserId, &MultiplayerSystem, &SpaceSystem, ScopeId, &RealtimeEngine](const csp::common::String&, const csp::common::String& LeaderUserId)
+        [UserId, &SpaceSystem, ScopeId](const csp::common::String&, const csp::common::String& LeaderUserId)
         {
             std::cout << "SetOnElectedScopeLeaderCallback called for client: " << UserId << std::endl;
 

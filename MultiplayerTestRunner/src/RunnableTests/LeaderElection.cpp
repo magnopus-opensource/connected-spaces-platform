@@ -69,7 +69,7 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     std::shared_ptr<bool> First { new bool { true } };
 
     RealtimeEngine.SetOnElectedScopeLeaderCallback(
-        [UserId, &MultiplayerSystem, &SpaceSystem, ScopeId, &RealtimeEngine, First](
+        [UserId, &MultiplayerSystem, &SpaceSystem, ScopeId, First](
             const csp::common::String&, const csp::common::String& LeaderUserId)
         {
             std::cout << "SetOnElectedScopeLeaderCallback called for client: " << UserId << std::endl;

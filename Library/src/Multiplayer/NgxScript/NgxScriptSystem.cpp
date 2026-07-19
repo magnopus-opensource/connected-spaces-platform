@@ -60,10 +60,35 @@ namespace
 constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 256 * 1024;
 
 constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
-constexpr const char* CODECOMPONENT_JSON_RESULT_SLOT = "__cspCodeComponentJsonResult";
-constexpr const char* CODECOMPONENT_BOOL_RESULT_SLOT = "__cspCodeComponentBoolResult";
+constexpr const char* PREACT_SIGNALS_CORE_RAW_MODULE = "/__csp/internal/signals-core-raw.js";
 constexpr const char* EMPTY_JSON_OBJECT_STRING = "{}";
 constexpr const char* ASSET_BLOB_CHANGED_RECEIVER_ID = "CSPInternal::NgxScriptSystem";
+
+// Number of foundation ticks of quiet after the last AssetDetailBlobChanged
+// event before the module map is reloaded. A multi-file sync uploads assets
+// over a few seconds; debouncing coalesces the burst into a single context
+// rebuild instead of one full rebuild per changed file.
+constexpr int32_t MODULE_RELOAD_DEBOUNCE_TICKS = 30; // ~0.5 s at 60 fps
+
+// Wraps @preact/signals-core so raw effect() disposers created while a code
+// component is initializing/running are registered with the scriptRegistry and
+// disposed on component teardown. Without this, direct `effect()` imports leak
+// across teardown and hot reload because the registry only tracks useEffect
+// disposers (gotchas.md: "Direct effect imports leak across teardown").
+// The local `effect` export shadows the star re-export per ES module semantics.
+constexpr const char* PREACT_SIGNALS_CORE_WRAPPER_SOURCE = R"(
+export * from '/__csp/internal/signals-core-raw.js';
+import { effect as __cspRawEffect } from '/__csp/internal/signals-core-raw.js';
+export const effect = (callback, options) => {
+    const dispose = __cspRawEffect(callback, options);
+    const entityId = globalThis.__cspCurrentEntityId ?? null;
+    const registry = globalThis.scriptRegistry;
+    if (entityId != null && registry && typeof registry.trackDisposerForEntity === 'function') {
+        registry.trackDisposerForEntity(entityId, dispose);
+    }
+    return dispose;
+};
+)";
 
 #ifdef CSP_WASM
 // Re-baselines QuickJS's stack-overflow check to the caller's current SP.
@@ -319,6 +344,186 @@ csp::multiplayer::ComponentBase* FindComponentByTypeAndIndex(
     return nullptr;
 }
 
+// --- Direct JS_Call dispatch -------------------------------------------------
+// Replaces the old string-formatted EvaluateSnippet bridges (format -> escape ->
+// parse -> compile -> eval per call, results round-tripped through well-known
+// globals). Cached lookups + JS_Call skip the per-call compile entirely and
+// remove the string-escaping bug surface.
+
+struct HostCallContext
+{
+    std::mutex& ContextMutex;
+    std::unique_ptr<qjs::Runtime>& Runtime;
+    std::unique_ptr<qjs::Context>& Context;
+    std::atomic<bool>& LastEvaluationDeferred;
+    csp::common::LogSystem& LogSystem;
+};
+
+void LogJsException(JSContext* Ctx, csp::common::LogSystem& LogSystem, const char* DebugName)
+{
+    JSValue ExceptionValue = JS_GetException(Ctx);
+    std::string ErrorMessage = fmt::format("NgxScript: Host call '{}' failed.", DebugName);
+
+    const char* ExceptionStr = JS_ToCString(Ctx, ExceptionValue);
+    if (ExceptionStr != nullptr)
+    {
+        ErrorMessage += " ";
+        ErrorMessage += ExceptionStr;
+        JS_FreeCString(Ctx, ExceptionStr);
+    }
+
+    JSValue StackValue = JS_GetPropertyStr(Ctx, ExceptionValue, "stack");
+    if (JS_IsString(StackValue))
+    {
+        const char* StackStr = JS_ToCString(Ctx, StackValue);
+        if (StackStr != nullptr)
+        {
+            ErrorMessage += "\n";
+            ErrorMessage += StackStr;
+            JS_FreeCString(Ctx, StackStr);
+        }
+    }
+    JS_FreeValue(Ctx, StackValue);
+    JS_FreeValue(Ctx, ExceptionValue);
+
+    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMessage.c_str());
+}
+
+// Calls globalThis.<FnName>(...) (bOnRegistry == false) or
+// globalThis.scriptRegistry.<FnName>(...) (bOnRegistry == true) directly.
+// BuildArgs pushes owned JSValues into Args; the helper frees them after the
+// call. ConsumeResult (optional) receives the non-exception result before it
+// is freed. Returns false when the context is busy (WASM defer), the function
+// is missing, or the call threw. Mirrors the EvaluateSnippet locking contract:
+// a WASM try_lock miss sets LastEvaluationDeferred so callers can retry.
+bool CallHostFunction(const HostCallContext& Call, const char* DebugName, bool bOnRegistry, const char* FnName,
+    const std::function<void(JSContext*, std::vector<JSValue>&)>& BuildArgs,
+    const std::function<void(JSContext*, JSValue)>& ConsumeResult = nullptr)
+{
+#ifdef CSP_WASM
+    // Never block the browser thread waiting for other script work; callers
+    // observe WasLastEvaluationDeferred() and retry on a later tick.
+    std::unique_lock<std::mutex> ContextLock(Call.ContextMutex, std::defer_lock);
+    if (!ContextLock.try_lock())
+    {
+        Call.LastEvaluationDeferred.store(true);
+        return false;
+    }
+#else
+    std::scoped_lock ContextLock(Call.ContextMutex);
+#endif
+    Call.LastEvaluationDeferred.store(false);
+    if (!Call.Context)
+    {
+        return false;
+    }
+
+#ifdef CSP_WASM
+    RebaseQuickJsStackCheck(*Call.Runtime);
+#endif
+
+    JSContext* Ctx = Call.Context->ctx;
+    JSValue GlobalObj = JS_GetGlobalObject(Ctx);
+    JSValue ThisObj = JS_UNDEFINED;
+    JSValue Fn = JS_UNDEFINED;
+
+    if (bOnRegistry)
+    {
+        ThisObj = JS_GetPropertyStr(Ctx, GlobalObj, "scriptRegistry");
+        if (JS_IsObject(ThisObj))
+        {
+            Fn = JS_GetPropertyStr(Ctx, ThisObj, FnName);
+        }
+    }
+    else
+    {
+        ThisObj = JS_DupValue(Ctx, GlobalObj);
+        Fn = JS_GetPropertyStr(Ctx, GlobalObj, FnName);
+    }
+
+    bool bResult = false;
+    if (JS_IsFunction(Ctx, Fn))
+    {
+        std::vector<JSValue> Args;
+        BuildArgs(Ctx, Args);
+
+        JSValue CallResult = JS_Call(Ctx, Fn, ThisObj, static_cast<int>(Args.size()), Args.data());
+        if (!JS_IsException(CallResult))
+        {
+            if (ConsumeResult)
+            {
+                ConsumeResult(Ctx, CallResult);
+            }
+            bResult = true;
+        }
+        else
+        {
+            LogJsException(Ctx, Call.LogSystem, DebugName);
+        }
+        JS_FreeValue(Ctx, CallResult);
+
+        for (JSValue& Arg : Args)
+        {
+            JS_FreeValue(Ctx, Arg);
+        }
+    }
+
+    JS_FreeValue(Ctx, Fn);
+    JS_FreeValue(Ctx, ThisObj);
+    JS_FreeValue(Ctx, GlobalObj);
+    return bResult;
+}
+
+// Parses JSON into a JSValue, falling back to an empty object on parse failure
+// (matching the old snippet bridges' `catch { payload = {} }` behaviour).
+JSValue ParseJsonOrEmptyObject(JSContext* Ctx, const std::string& Json, const char* DebugName)
+{
+    if (!Json.empty())
+    {
+        JSValue Parsed = JS_ParseJSON(Ctx, Json.c_str(), Json.size(), DebugName);
+        if (!JS_IsException(Parsed))
+        {
+            return Parsed;
+        }
+        JS_FreeValue(Ctx, Parsed);
+        JSValue Exception = JS_GetException(Ctx);
+        JS_FreeValue(Ctx, Exception);
+    }
+    return JS_NewObject(Ctx);
+}
+
+// Stringifies a call result to JSON, returning FallbackJson for undefined/null
+// results or stringify failures.
+std::string StringifyResultJson(JSContext* Ctx, JSValue Result, const char* FallbackJson)
+{
+    if (JS_IsUndefined(Result) || JS_IsNull(Result))
+    {
+        return FallbackJson;
+    }
+
+    JSValue JsonValue = JS_JSONStringify(Ctx, Result, JS_UNDEFINED, JS_UNDEFINED);
+    if (JS_IsException(JsonValue))
+    {
+        JS_FreeValue(Ctx, JsonValue);
+        JSValue Exception = JS_GetException(Ctx);
+        JS_FreeValue(Ctx, Exception);
+        return FallbackJson;
+    }
+
+    std::string ResultJson = FallbackJson;
+    if (JS_IsString(JsonValue))
+    {
+        const char* JsonStr = JS_ToCString(Ctx, JsonValue);
+        if (JsonStr != nullptr)
+        {
+            ResultJson = JsonStr;
+            JS_FreeCString(Ctx, JsonStr);
+        }
+    }
+    JS_FreeValue(Ctx, JsonValue);
+    return ResultJson;
+}
+
 } // namespace
 
 namespace csp::systems::ngxscript
@@ -388,6 +593,8 @@ public:
     {
         if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
         {
+            System->ClearEntitySnapshotCache();
+            System->TickModuleReloadDebounce();
             System->PumpPendingJobs();
         }
     }
@@ -545,18 +752,17 @@ void NgxScriptSystem::OnAssetDetailBlobChanged(const csp::common::NetworkEventDa
     }
 
     if ((AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Created)
-        || (AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Updated))
+        || (AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Updated)
+        || (AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Deleted))
     {
-        ReloadScriptModule(AssetBlobEvent.AssetCollectionId, AssetBlobEvent.AssetId);
-        return;
-    }
-
-    if (AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Deleted)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Script library asset deleted; rebuilding context and reloading module map.");
-        ScriptModulesLoaded.store(false);
-        RebuildContext();
-        LoadScriptModules();
+        // Debounce: multi-file syncs raise one blob-changed event per file over
+        // a few seconds. Each event restarts the quiet window; the actual
+        // rebuild + reload happens once via TickModuleReloadDebounce, so
+        // clients see a single consistent module-map swap instead of N context
+        // rebuilds with mixed old/new module graphs in between.
+        ModuleReloadDebounceTicks.store(MODULE_RELOAD_DEBOUNCE_TICKS);
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            "NgxScript Trace: Script library asset changed; scheduling debounced module reload.");
     }
 }
 
@@ -779,10 +985,38 @@ bool NgxScriptSystem::SubmitUITextMeasureResults(const csp::common::String& Resu
 
 bool NgxScriptSystem::FlushPendingCodeComponentUI()
 {
-    static constexpr const char* SNIPPET = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
-                                           "    globalThis.scriptRegistry.tick(0);\n"
-                                           "}\n";
-    return EvaluateSnippet(SNIPPET, "<ngx-codecomponent-flush-pending-ui>");
+    // Registry tick() activates at most one pending module per call and returns
+    // how many are still pending. Each call is a separate JS entry, so the
+    // native/JS stack fully unwinds between activations — several activations
+    // per foundation tick are safe without stacking QuickJS frames (the crash
+    // mode the original one-per-tick throttle was added for). Loading N
+    // components now takes ceil(N / MAX_ACTIVATIONS_PER_TICK) ticks instead of N.
+    static constexpr int32_t MAX_ACTIVATIONS_PER_TICK = 8;
+
+    bool bSuccess = false;
+    for (int32_t Iteration = 0; Iteration < MAX_ACTIVATIONS_PER_TICK; ++Iteration)
+    {
+        int32_t PendingActivationCount = 0;
+        bSuccess = CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+            "<ngx-codecomponent-flush-pending-ui>", true, "tick",
+            [](JSContext*, std::vector<JSValue>&) {},
+            [&](JSContext* Ctx, JSValue Result)
+            {
+                // Older/asset-supplied registries may return undefined — treat
+                // as "nothing pending" and fall back to one call per tick.
+                if (JS_IsNumber(Result))
+                {
+                    JS_ToInt32(Ctx, &PendingActivationCount, Result);
+                }
+            });
+
+        if (!bSuccess || (PendingActivationCount <= 0))
+        {
+            break;
+        }
+    }
+
+    return bSuccess;
 }
 
 csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
@@ -981,13 +1215,24 @@ void NgxScriptSystem::FireEntityEvent(const csp::common::String& EntityId, const
     {
         return;
     }
-    // EntityId is a numeric string (e.g. "12345"). Embedding it unquoted makes it a
-    // JS number literal. EventName is a C++ constant. PayloadJson is standard JSON
-    // (double-quoted strings only) so it is safe to embed inside single quotes.
-    const std::string Snippet = fmt::format(
-        R"(if (typeof globalThis.__ngxFireEntityEvent === "function") {{ globalThis.__ngxFireEntityEvent({}, "{}", JSON.parse('{}')); }})",
-        EntityId.c_str(), EventName.c_str(), PayloadJson.c_str());
-    EvaluateSnippet(Snippet.c_str(), "<fire-entity-event>");
+
+    // EntityId is a numeric string (e.g. "12345"); listeners receive it as a JS
+    // number, matching the old number-literal embedding.
+    const auto ParsedEntityId = TryParseEntityId(EntityId.c_str());
+    if (!ParsedEntityId.has_value())
+    {
+        return;
+    }
+
+    const std::string EventNameStd = EventName.c_str();
+    const std::string PayloadStd = PayloadJson.c_str();
+    CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem }, "<fire-entity-event>", false, "__ngxFireEntityEvent",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args)
+        {
+            Args.push_back(JS_NewFloat64(Ctx, static_cast<double>(*ParsedEntityId)));
+            Args.push_back(JS_NewString(Ctx, EventNameStd.c_str()));
+            Args.push_back(ParseJsonOrEmptyObject(Ctx, PayloadStd, "<fire-entity-event-payload>"));
+        });
 }
 
 bool NgxScriptSystem::FireKeyboardEvent(const csp::common::String& EventType, const csp::common::String& Key, const csp::common::String& Code,
@@ -998,12 +1243,21 @@ bool NgxScriptSystem::FireKeyboardEvent(const csp::common::String& EventType, co
         return false;
     }
 
-    const std::string Snippet = fmt::format(
-        "if (typeof globalThis.__cspDispatchKeyboardEvent === 'function') {{ globalThis.__cspDispatchKeyboardEvent({{ type: '{}', key: '{}', code: "
-        "'{}', repeat: {}, altKey: {}, ctrlKey: {}, shiftKey: {}, metaKey: {} }}); }}",
-        EscapeJSStringLiteral(EventType.c_str()), EscapeJSStringLiteral(Key.c_str()), EscapeJSStringLiteral(Code.c_str()), Repeat ? "true" : "false",
-        AltKey ? "true" : "false", CtrlKey ? "true" : "false", ShiftKey ? "true" : "false", MetaKey ? "true" : "false");
-    return EvaluateSnippet(Snippet.c_str(), "<fire-keyboard-event>");
+    return CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem }, "<fire-keyboard-event>", false,
+        "__cspDispatchKeyboardEvent",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args)
+        {
+            JSValue Event = JS_NewObject(Ctx);
+            JS_SetPropertyStr(Ctx, Event, "type", JS_NewString(Ctx, EventType.c_str()));
+            JS_SetPropertyStr(Ctx, Event, "key", JS_NewString(Ctx, Key.c_str()));
+            JS_SetPropertyStr(Ctx, Event, "code", JS_NewString(Ctx, Code.c_str()));
+            JS_SetPropertyStr(Ctx, Event, "repeat", JS_NewBool(Ctx, Repeat));
+            JS_SetPropertyStr(Ctx, Event, "altKey", JS_NewBool(Ctx, AltKey));
+            JS_SetPropertyStr(Ctx, Event, "ctrlKey", JS_NewBool(Ctx, CtrlKey));
+            JS_SetPropertyStr(Ctx, Event, "shiftKey", JS_NewBool(Ctx, ShiftKey));
+            JS_SetPropertyStr(Ctx, Event, "metaKey", JS_NewBool(Ctx, MetaKey));
+            Args.push_back(Event);
+        });
 }
 
 bool NgxScriptSystem::FireMouseEvent(const csp::common::String& EventType, int32_t Button, int32_t Buttons, int32_t PointerId,
@@ -1014,12 +1268,22 @@ bool NgxScriptSystem::FireMouseEvent(const csp::common::String& EventType, int32
         return false;
     }
 
-    const std::string Snippet = fmt::format(
-        "if (typeof globalThis.__cspDispatchMouseEvent === 'function') {{ globalThis.__cspDispatchMouseEvent({{ type: '{}', button: {}, buttons: {}, "
-        "pointerId: {}, pointerType: '{}', altKey: {}, ctrlKey: {}, shiftKey: {}, metaKey: {} }}); }}",
-        EscapeJSStringLiteral(EventType.c_str()), Button, Buttons, PointerId, EscapeJSStringLiteral(PointerType.c_str()),
-        AltKey ? "true" : "false", CtrlKey ? "true" : "false", ShiftKey ? "true" : "false", MetaKey ? "true" : "false");
-    return EvaluateSnippet(Snippet.c_str(), "<fire-mouse-event>");
+    return CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem }, "<fire-mouse-event>", false,
+        "__cspDispatchMouseEvent",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args)
+        {
+            JSValue Event = JS_NewObject(Ctx);
+            JS_SetPropertyStr(Ctx, Event, "type", JS_NewString(Ctx, EventType.c_str()));
+            JS_SetPropertyStr(Ctx, Event, "button", JS_NewInt32(Ctx, Button));
+            JS_SetPropertyStr(Ctx, Event, "buttons", JS_NewInt32(Ctx, Buttons));
+            JS_SetPropertyStr(Ctx, Event, "pointerId", JS_NewInt32(Ctx, PointerId));
+            JS_SetPropertyStr(Ctx, Event, "pointerType", JS_NewString(Ctx, PointerType.c_str()));
+            JS_SetPropertyStr(Ctx, Event, "altKey", JS_NewBool(Ctx, AltKey));
+            JS_SetPropertyStr(Ctx, Event, "ctrlKey", JS_NewBool(Ctx, CtrlKey));
+            JS_SetPropertyStr(Ctx, Event, "shiftKey", JS_NewBool(Ctx, ShiftKey));
+            JS_SetPropertyStr(Ctx, Event, "metaKey", JS_NewBool(Ctx, MetaKey));
+            Args.push_back(Event);
+        });
 }
 
 void NgxScriptSystem::SetLocalPlayerCameraState(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation,
@@ -1126,10 +1390,45 @@ void NgxScriptSystem::RebuildContext()
         Context = std::make_unique<qjs::Context>(*Runtime);
     }
 
+    ClearEntitySnapshotCache();
     InstallModuleLoader();
     InstallHostBindings();
     ContextGeneration.fetch_add(1);
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: RebuildContext complete.");
+}
+
+void NgxScriptSystem::InvalidateEntitySnapshotCache(uint64_t EntityId)
+{
+    std::scoped_lock CacheLock(SnapshotCacheMutex);
+    EntitySnapshotJsonCache.erase(EntityId);
+}
+
+void NgxScriptSystem::ClearEntitySnapshotCache()
+{
+    std::scoped_lock CacheLock(SnapshotCacheMutex);
+    EntitySnapshotJsonCache.clear();
+}
+
+void NgxScriptSystem::TickModuleReloadDebounce()
+{
+    const int32_t Current = ModuleReloadDebounceTicks.load();
+    if (Current < 0)
+    {
+        return;
+    }
+
+    if (Current > 0)
+    {
+        ModuleReloadDebounceTicks.store(Current - 1);
+        return;
+    }
+
+    ModuleReloadDebounceTicks.store(-1);
+    LogSystem.LogMsg(csp::common::LogLevel::Log,
+        "NgxScript Trace: Debounced script module reload window closed; rebuilding context and reloading modules once.");
+    ScriptModulesLoaded.store(false);
+    RebuildContext();
+    LoadScriptModules();
 }
 
 void NgxScriptSystem::TeardownContext()
@@ -1158,11 +1457,18 @@ void NgxScriptSystem::InstallModuleLoader()
         {
             const std::string RequestedModule(ModuleName);
 
-            if (RequestedModule == PREACT_SIGNALS_CORE_MODULE)
+            if (RequestedModule == PREACT_SIGNALS_CORE_RAW_MODULE)
             {
                 const std::string ResolveMessage = fmt::format("NgxScript Trace: Resolved built-in module '{}'.", RequestedModule);
                 LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
                 return qjs::Context::ModuleData { RequestedModule, csp::systems::SignalsScriptCode.c_str(), std::nullopt };
+            }
+
+            if (RequestedModule == PREACT_SIGNALS_CORE_MODULE)
+            {
+                const std::string ResolveMessage = fmt::format("NgxScript Trace: Resolved built-in module '{}' (registry-tracked wrapper).", RequestedModule);
+                LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
+                return qjs::Context::ModuleData { RequestedModule, PREACT_SIGNALS_CORE_WRAPPER_SOURCE, std::nullopt };
             }
 
             {
@@ -1188,7 +1494,13 @@ void NgxScriptSystem::InstallModuleLoader()
             const std::string MissingMessage = fmt::format("NgxScript: Missing module '{}' (module source may still be loading).", RequestedModule);
             LogSystem.LogMsg(csp::common::LogLevel::Warning, MissingMessage.c_str());
 
-            const std::string ThrowingModule = "throw new Error('NgxScript module not found: " + EscapeJSStringLiteral(RequestedModule) + "');";
+            // Throw a typed error so retry logic can match on `error.code` rather
+            // than a fragile message-substring check.
+            const std::string ThrowingModule = "const __ngxMissingModuleError = new Error('NgxScript module not found: "
+                + EscapeJSStringLiteral(RequestedModule)
+                + "');\n"
+                  "__ngxMissingModuleError.code = 'NGX_MODULE_NOT_FOUND';\n"
+                  "throw __ngxMissingModuleError;";
             return qjs::Context::ModuleData { RequestedModule, ThrowingModule, std::nullopt };
         };
         LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Module loader installed.");
@@ -1243,15 +1555,37 @@ void NgxScriptSystem::InstallHostBindings()
                 return "";
             }
 
-            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-            const auto Entities = CollectEntities(ActiveRealtimeEngine);
-            auto* Entity = FindEntityById(Entities, *EntityId);
-            if (Entity == nullptr)
+            // Per-tick memo: repeated reads of the same entity within one
+            // foundation tick (e.g. rAF loops polling an entity ref) reuse the
+            // serialized snapshot instead of re-walking + re-serializing.
+            // Script-side writes invalidate; the tick handler clears the map.
             {
-                return "";
+                std::scoped_lock CacheLock(SnapshotCacheMutex);
+                const auto CacheIt = EntitySnapshotJsonCache.find(*EntityId);
+                if (CacheIt != EntitySnapshotJsonCache.end())
+                {
+                    return CacheIt->second;
+                }
             }
 
-            return BuildEntitySnapshotJson(*Entity);
+            std::string SnapshotJson;
+            {
+                EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+                const auto Entities = CollectEntities(ActiveRealtimeEngine);
+                auto* Entity = FindEntityById(Entities, *EntityId);
+                if (Entity == nullptr)
+                {
+                    return "";
+                }
+
+                SnapshotJson = BuildEntitySnapshotJson(*Entity);
+            }
+
+            {
+                std::scoped_lock CacheLock(SnapshotCacheMutex);
+                EntitySnapshotJsonCache[*EntityId] = SnapshotJson;
+            }
+            return SnapshotJson;
         });
     CSPModule.function("__getComponentSnapshot",
         [this](const std::string& EntityIdText, int32_t ComponentTypeValue, int32_t ComponentIndex) -> std::string
@@ -1310,7 +1644,12 @@ void NgxScriptSystem::InstallHostBindings()
                 return false;
             }
 
-            return Entity->SetPosition(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+            const bool bSet = Entity->SetPosition(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+            if (bSet)
+            {
+                InvalidateEntitySnapshotCache(*EntityId);
+            }
+            return bSet;
         });
     CSPModule.function("__setEntityRotation",
         [this](const std::string& EntityIdText, double X, double Y, double Z, double W) -> bool
@@ -1334,8 +1673,13 @@ void NgxScriptSystem::InstallHostBindings()
                 return false;
             }
 
-            return Entity->SetRotation(
+            const bool bSet = Entity->SetRotation(
                 csp::common::Vector4 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z), static_cast<float>(W) });
+            if (bSet)
+            {
+                InvalidateEntitySnapshotCache(*EntityId);
+            }
+            return bSet;
         });
     CSPModule.function("__setEntityScale",
         [this](const std::string& EntityIdText, double X, double Y, double Z) -> bool
@@ -1359,7 +1703,12 @@ void NgxScriptSystem::InstallHostBindings()
                 return false;
             }
 
-            return Entity->SetScale(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+            const bool bSet = Entity->SetScale(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+            if (bSet)
+            {
+                InvalidateEntitySnapshotCache(*EntityId);
+            }
+            return bSet;
         });
     CSPModule.function("__setEntityName",
         [this](const std::string& EntityIdText, const std::string& Name) -> bool
@@ -1383,7 +1732,12 @@ void NgxScriptSystem::InstallHostBindings()
                 return false;
             }
 
-            return Entity->SetName(Name.c_str());
+            const bool bSet = Entity->SetName(Name.c_str());
+            if (bSet)
+            {
+                InvalidateEntitySnapshotCache(*EntityId);
+            }
+            return bSet;
         });
     CSPModule.function("__setEntityThirdPartyRef",
         [this](const std::string& EntityIdText, const std::string& ThirdPartyRef) -> bool
@@ -1407,7 +1761,12 @@ void NgxScriptSystem::InstallHostBindings()
                 return false;
             }
 
-            return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
+            const bool bSet = Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
+            if (bSet)
+            {
+                InvalidateEntitySnapshotCache(*EntityId);
+            }
+            return bSet;
         });
     CSPModule.function("__uiMount",
         [this](const std::string& EntityIdText, qjs::Value TreeValue) -> bool
@@ -1526,7 +1885,103 @@ globalThis.cancelAnimationFrame = (handle) => {
     globalThis.__cspRafPendingCount = __cspAnimationFrameState.callbacks.size;
 };
 
+// ---- Timers -----------------------------------------------------------------
+// setTimeout/setInterval built on the animation-frame dispatch. There is no OS
+// timer in the embedded runtime; timers advance on the same client display tick
+// that drives requestAnimationFrame, sharing its timestamp base. Callbacks are
+// tagged with the owning code component (like rAF) and are dropped when that
+// component is deregistered so intervals cannot outlive their script.
+const __cspTimerState = { nextId: 1, timers: new Map() };
+globalThis.__cspTimerPendingCount = 0;
+const __cspSyncTimerCount = () => { globalThis.__cspTimerPendingCount = __cspTimerState.timers.size; };
+
+const __cspRegisterTimer = (callback, delay, repeat, args) => {
+    if (typeof callback !== 'function') {
+        throw new TypeError('timer callback must be a function');
+    }
+    const id = __cspTimerState.nextId++;
+    __cspTimerState.timers.set(id, {
+        callback,
+        args,
+        delay: Math.max(0, Number(delay) || 0),
+        repeat,
+        // Stamped with the first dispatch timestamp so all timers share the
+        // rAF time base regardless of when they were registered.
+        startTs: null,
+        entityId: globalThis.__cspCurrentEntityId ?? null,
+    });
+    __cspSyncTimerCount();
+    return id;
+};
+
+globalThis.setTimeout = (callback, delay = 0, ...args) => __cspRegisterTimer(callback, delay, false, args);
+globalThis.setInterval = (callback, delay = 0, ...args) => __cspRegisterTimer(callback, delay, true, args);
+globalThis.clearTimeout = (handle) => {
+    const id = Math.trunc(Number(handle));
+    if (Number.isFinite(id) && __cspTimerState.timers.delete(id)) {
+        __cspSyncTimerCount();
+    }
+};
+globalThis.clearInterval = globalThis.clearTimeout;
+
+const __cspDispatchTimers = (timestampMs) => {
+    if (__cspTimerState.timers.size === 0) {
+        return;
+    }
+
+    const registry = globalThis.scriptRegistry;
+    const isEntityRegistered = registry && typeof registry.isEntityRegistered === 'function'
+        ? (id) => registry.isEntityRegistered(id)
+        : null;
+
+    const due = [];
+    for (const [id, timer] of __cspTimerState.timers) {
+        // Timers must not outlive their owning code component — unlike one-shot
+        // rAFs they would otherwise spin forever, so delete rather than skip.
+        if (timer.entityId != null && isEntityRegistered && !isEntityRegistered(timer.entityId)) {
+            __cspTimerState.timers.delete(id);
+            continue;
+        }
+        if (timer.startTs === null) {
+            timer.startTs = timestampMs;
+        }
+        if (timestampMs - timer.startTs >= timer.delay) {
+            due.push([id, timer]);
+        }
+    }
+
+    for (const [id, timer] of due) {
+        if (!__cspTimerState.timers.has(id)) {
+            continue; // cleared by an earlier callback this frame
+        }
+        if (timer.repeat) {
+            timer.startTs = timestampMs;
+        } else {
+            __cspTimerState.timers.delete(id);
+        }
+
+        const previousEntityId = globalThis.__cspCurrentEntityId;
+        if (timer.entityId != null) {
+            globalThis.__cspCurrentEntityId = timer.entityId;
+        }
+        try {
+            timer.callback(...timer.args);
+        } catch (error) {
+            csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
+            if (timer.entityId != null && registry && typeof registry.reportComponentError === 'function') {
+                registry.reportComponentError(timer.entityId, 'timer');
+            }
+        } finally {
+            globalThis.__cspCurrentEntityId = previousEntityId;
+        }
+    }
+
+    __cspSyncTimerCount();
+};
+
 globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
+    __cspDispatchTimers(timestampMs);
+
     if (__cspAnimationFrameState.callbacks.size === 0) {
         return;
     }
@@ -1538,6 +1993,12 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
     const registry = globalThis.scriptRegistry;
     const isEntityRegistered = registry && typeof registry.isEntityRegistered === 'function'
         ? (id) => registry.isEntityRegistered(id)
+        : null;
+    const reportError = registry && typeof registry.reportComponentError === 'function'
+        ? (id, source) => registry.reportComponentError(id, source)
+        : null;
+    const reportRecovery = registry && typeof registry.reportComponentRecovery === 'function'
+        ? (id) => registry.reportComponentRecovery(id)
         : null;
 
     // Track which entities we've already warned about this tick so one dead
@@ -1568,8 +2029,14 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
         }
         try {
             entry.callback(timestampMs);
+            if (entry.entityId != null && reportRecovery) {
+                reportRecovery(entry.entityId);
+            }
         } catch (error) {
             csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
+            if (entry.entityId != null && reportError) {
+                reportError(entry.entityId, 'raf');
+            }
         } finally {
             globalThis.__cspCurrentEntityId = previousEntityId;
         }
@@ -1785,13 +2252,34 @@ void NgxScriptSystem::DrainPendingJobs()
     // Proxy chains, etc.). JS_RunGC runs the full mark-and-sweep cycle collector.
     // We also reset the threshold afterwards to prevent the adaptive 1.5× growth
     // from allowing heap unbounded growth inside the fixed WASM address space.
-    static constexpr uint32_t GC_INTERVAL_TICKS = 180; // ~3 s at 60 fps
+    //
+    // The forced pass is a frame-hitch candidate, so prefer running it when the
+    // script side is idle (no rAF loops pending). If scripts animate continuously
+    // the pass still runs at the hard-cap cadence — allocation-triggered GC via
+    // the 4 MB threshold covers acyclic pressure in between.
+    static constexpr uint32_t GC_INTERVAL_TICKS = 180;   // preferred cadence, ~3 s at 60 fps
+    static constexpr uint32_t GC_MAX_DEFER_TICKS = 600;  // hard cap when never idle, ~10 s
     static constexpr size_t   GC_HEAP_CAP        = 4 * 1024 * 1024;
     if (++GcTickCounter >= GC_INTERVAL_TICKS)
     {
-        GcTickCounter = 0;
-        JS_RunGC(Runtime->rt);
-        JS_SetGCThreshold(Runtime->rt, GC_HEAP_CAP);
+        bool bScriptSideIdle = true;
+        if (GcTickCounter < GC_MAX_DEFER_TICKS)
+        {
+            try
+            {
+                bScriptSideIdle = Context->global()["__cspRafPendingCount"].as<int32_t>() <= 0;
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (bScriptSideIdle || (GcTickCounter >= GC_MAX_DEFER_TICKS))
+        {
+            GcTickCounter = 0;
+            JS_RunGC(Runtime->rt);
+            JS_SetGCThreshold(Runtime->rt, GC_HEAP_CAP);
+        }
     }
 }
 
@@ -2151,7 +2639,7 @@ bool NgxScriptSystem::HasModuleSource(const csp::common::String& ModulePath) con
         return false;
     }
 
-    if (ModulePathStd == PREACT_SIGNALS_CORE_MODULE)
+    if ((ModulePathStd == PREACT_SIGNALS_CORE_MODULE) || (ModulePathStd == PREACT_SIGNALS_CORE_RAW_MODULE))
     {
         return true;
     }
@@ -2232,6 +2720,14 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
             {
                 PendingCount = 0;
             }
+            try
+            {
+                // Timers (setTimeout/setInterval) are driven by the same dispatch.
+                PendingCount += Context->global()["__cspTimerPendingCount"].as<int32_t>();
+            }
+            catch (...)
+            {
+            }
 
             if (PendingCount > 0)
             {
@@ -2299,66 +2795,27 @@ csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::
         return EMPTY_JSON_OBJECT_STRING;
     }
 
-    const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = '{}';\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
-          "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentSchema('"
-        + EntityIdEscaped
-        + "');\n"
-          "    const __cspSerializable = (__cspResult === undefined || __cspResult === null) ? {} : __cspResult;\n"
-          "    try {\n"
-          "        globalThis."
-        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = JSON.stringify(__cspSerializable);\n"
-          "    } catch (_error) {\n"
-          "        globalThis."
-        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = '{}';\n"
-          "    }\n"
-          "}\n";
+    const std::string EntityIdStd = EntityId.c_str();
+    std::string JsonResultString = EMPTY_JSON_OBJECT_STRING;
 
-    auto ReadJsonResultString = [this]() -> std::string
+    const auto DoCall = [&]() -> bool
     {
-        std::scoped_lock ContextLock(ContextMutex);
-        if (!Context)
-        {
-            return EMPTY_JSON_OBJECT_STRING;
-        }
-
-        try
-        {
-            const qjs::Value JsonResult = Context->global()[CODECOMPONENT_JSON_RESULT_SLOT];
-            return JsonResult.as<std::string>();
-        }
-        catch (...)
-        {
-            return EMPTY_JSON_OBJECT_STRING;
-        }
+        JsonResultString = EMPTY_JSON_OBJECT_STRING;
+        return CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+            "<ngx-codecomponent-sync-schema-bridge>", true, "syncCodeComponentSchema",
+            [&](JSContext* Ctx, std::vector<JSValue>& Args) { Args.push_back(JS_NewString(Ctx, EntityIdStd.c_str())); },
+            [&](JSContext* Ctx, JSValue Result) { JsonResultString = StringifyResultJson(Ctx, Result, EMPTY_JSON_OBJECT_STRING); });
     };
 
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-sync-schema-bridge>"))
-    {
-        PumpPendingJobs();
-        return EMPTY_JSON_OBJECT_STRING;
-    }
-
+    DoCall();
     PumpPendingJobs();
-    std::string JsonResultString = ReadJsonResultString();
 
     // If module import completed during pending jobs, one immediate retry returns the resolved schema payload
     // rather than requiring a second user click.
     if (JsonResultString == EMPTY_JSON_OBJECT_STRING)
     {
-        if (EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-sync-schema-bridge-retry>"))
-        {
-            PumpPendingJobs();
-            JsonResultString = ReadJsonResultString();
-        }
-        else
-        {
-            PumpPendingJobs();
-        }
+        DoCall();
+        PumpPendingJobs();
     }
 
     return csp::common::String(JsonResultString.c_str());
@@ -2383,49 +2840,27 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
         return true;
     }
 
-    const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string PayloadJsonEscaped = EscapeJSStringLiteral(PayloadJson.c_str());
-    const std::string Snippet = "{\n"
-          "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = false;\n"
-          "let __cspPayload = {};\n"
-          "try {\n"
-          "    __cspPayload = JSON.parse('"
-        + PayloadJsonEscaped
-        + "');\n"
-          "} catch (_error) {\n"
-          "    __cspPayload = {};\n"
-          "}\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.addCodeComponent === 'function') {\n"
-          "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.addCodeComponent('" + EntityIdEscaped
-        + "', __cspPayload);\n"
-          "}\n"
-          "}\n";
+    const std::string EntityIdStd = EntityId.c_str();
+    const std::string PayloadStd = PayloadJson.c_str();
+    bool bRegistryResult = false;
 
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-add-bridge>"))
+    const bool bCallSucceeded = CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+        "<ngx-codecomponent-add-bridge>", true, "addCodeComponent",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args)
+        {
+            Args.push_back(JS_NewString(Ctx, EntityIdStd.c_str()));
+            Args.push_back(ParseJsonOrEmptyObject(Ctx, PayloadStd, "<ngx-codecomponent-add-payload>"));
+        },
+        [&](JSContext* Ctx, JSValue Result) { bRegistryResult = JS_ToBool(Ctx, Result) > 0; });
+
+    if (!bCallSucceeded)
     {
         return false;
     }
 
-    std::scoped_lock ContextLock(ContextMutex);
-    if (!Context)
-    {
-        return false;
-    }
-
-    try
-    {
-        const qjs::Value BoolResult = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT];
-        const bool bResult = BoolResult.as<bool>();
-        const std::string AddResultMessage = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}') -> {}.", EntityId.c_str(), bResult);
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, AddResultMessage.c_str());
-        return bResult;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    const std::string AddResultMessage = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}') -> {}.", EntityId.c_str(), bRegistryResult);
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, AddResultMessage.c_str());
+    return bRegistryResult;
 }
 
 csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(const csp::common::String& EntityId, const csp::common::String& AttributesJson)
@@ -2443,75 +2878,30 @@ csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(const csp::comm
         return EMPTY_JSON_OBJECT_STRING;
     }
 
-    const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string AttributesJsonEscaped = EscapeJSStringLiteral(AttributesJson.c_str());
-    const std::string Snippet = "{\n"
-          "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = '{}';\n"
-          "let __cspAttributes = {};\n"
-          "try {\n"
-          "    __cspAttributes = JSON.parse('"
-        + AttributesJsonEscaped
-        + "');\n"
-          "} catch (_error) {\n"
-          "    __cspAttributes = {};\n"
-          "}\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentAttributes === 'function') {\n"
-          "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentAttributes('"
-        + EntityIdEscaped
-        + "', __cspAttributes);\n"
-          "    const __cspSerializable = (__cspResult === undefined || __cspResult === null) ? {} : __cspResult;\n"
-          "    try {\n"
-          "        globalThis."
-        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = JSON.stringify(__cspSerializable);\n"
-          "    } catch (_error) {\n"
-          "        globalThis."
-        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = '{}';\n"
-          "    }\n"
-          "}\n"
-          "}\n";
+    const std::string EntityIdStd = EntityId.c_str();
+    const std::string AttributesStd = AttributesJson.c_str();
+    std::string JsonResultString = EMPTY_JSON_OBJECT_STRING;
 
-    auto ReadJsonResultString = [this]() -> std::string
+    const auto DoCall = [&]() -> bool
     {
-        std::scoped_lock ContextLock(ContextMutex);
-        if (!Context)
-        {
-            return EMPTY_JSON_OBJECT_STRING;
-        }
-
-        try
-        {
-            const qjs::Value JsonResult = Context->global()[CODECOMPONENT_JSON_RESULT_SLOT];
-            return JsonResult.as<std::string>();
-        }
-        catch (...)
-        {
-            return EMPTY_JSON_OBJECT_STRING;
-        }
+        JsonResultString = EMPTY_JSON_OBJECT_STRING;
+        return CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+            "<ngx-codecomponent-sync-attributes-bridge>", true, "syncCodeComponentAttributes",
+            [&](JSContext* Ctx, std::vector<JSValue>& Args)
+            {
+                Args.push_back(JS_NewString(Ctx, EntityIdStd.c_str()));
+                Args.push_back(ParseJsonOrEmptyObject(Ctx, AttributesStd, "<ngx-codecomponent-sync-attributes-payload>"));
+            },
+            [&](JSContext* Ctx, JSValue Result) { JsonResultString = StringifyResultJson(Ctx, Result, EMPTY_JSON_OBJECT_STRING); });
     };
 
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-sync-attributes-bridge>"))
-    {
-        PumpPendingJobs();
-        return EMPTY_JSON_OBJECT_STRING;
-    }
-
+    DoCall();
     PumpPendingJobs();
-    std::string JsonResultString = ReadJsonResultString();
 
     if (JsonResultString == EMPTY_JSON_OBJECT_STRING)
     {
-        if (EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-sync-attributes-bridge-retry>"))
-        {
-            PumpPendingJobs();
-            JsonResultString = ReadJsonResultString();
-        }
-        else
-        {
-            PumpPendingJobs();
-        }
+        DoCall();
+        PumpPendingJobs();
     }
 
     return csp::common::String(JsonResultString.c_str());
@@ -2534,48 +2924,36 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
         return true;
     }
 
-    const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string KeyEscaped = EscapeJSStringLiteral(Key.c_str());
-    const std::string ValueJsonEscaped = EscapeJSStringLiteral(ValueJson.c_str());
-    const std::string Snippet = "{\n"
-          "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = false;\n"
-          "let __cspValue = null;\n"
-          "try {\n"
-          "    __cspValue = JSON.parse('"
-        + ValueJsonEscaped
-        + "');\n"
-          "} catch (_error) {\n"
-          "    __cspValue = null;\n"
-          "}\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.updateAttributeForEntity === 'function') {\n"
-          "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.updateAttributeForEntity('" + EntityIdEscaped + "', '"
-        + KeyEscaped
-        + "', __cspValue);\n"
-          "}\n"
-          "}\n";
+    const std::string EntityIdStd = EntityId.c_str();
+    const std::string KeyStd = Key.c_str();
+    const std::string ValueStd = ValueJson.c_str();
+    bool bRegistryResult = false;
 
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-update-attribute-bridge>"))
-    {
-        return false;
-    }
+    const bool bCallSucceeded = CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+        "<ngx-codecomponent-update-attribute-bridge>", true, "updateAttributeForEntity",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args)
+        {
+            Args.push_back(JS_NewString(Ctx, EntityIdStd.c_str()));
+            Args.push_back(JS_NewString(Ctx, KeyStd.c_str()));
 
-    std::scoped_lock ContextLock(ContextMutex);
-    if (!Context)
-    {
-        return false;
-    }
+            // Parse the JSON value; fall back to null (matching the old bridge).
+            JSValue Parsed = JS_NULL;
+            if (!ValueStd.empty())
+            {
+                Parsed = JS_ParseJSON(Ctx, ValueStd.c_str(), ValueStd.size(), "<ngx-codecomponent-update-attribute-value>");
+                if (JS_IsException(Parsed))
+                {
+                    JS_FreeValue(Ctx, Parsed);
+                    JSValue Exception = JS_GetException(Ctx);
+                    JS_FreeValue(Ctx, Exception);
+                    Parsed = JS_NULL;
+                }
+            }
+            Args.push_back(Parsed);
+        },
+        [&](JSContext* Ctx, JSValue Result) { bRegistryResult = JS_ToBool(Ctx, Result) > 0; });
 
-    try
-    {
-        const qjs::Value BoolResult = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT];
-        return BoolResult.as<bool>();
-    }
-    catch (...)
-    {
-        return false;
-    }
+    return bCallSucceeded && bRegistryResult;
 }
 
 bool NgxScriptSystem::RemoveCodeComponent(const csp::common::String& EntityId)
@@ -2593,76 +2971,28 @@ bool NgxScriptSystem::RemoveCodeComponent(const csp::common::String& EntityId)
         return true;
     }
 
-    const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = false;\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.removeCodeComponent === 'function') {\n"
-          "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.removeCodeComponent('" + EntityIdEscaped
-        + "');\n"
-          "}\n";
+    const std::string EntityIdStd = EntityId.c_str();
+    bool bRegistryResult = false;
 
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-remove-bridge>"))
-    {
-        return false;
-    }
+    const bool bCallSucceeded = CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+        "<ngx-codecomponent-remove-bridge>", true, "removeCodeComponent",
+        [&](JSContext* Ctx, std::vector<JSValue>& Args) { Args.push_back(JS_NewString(Ctx, EntityIdStd.c_str())); },
+        [&](JSContext* Ctx, JSValue Result) { bRegistryResult = JS_ToBool(Ctx, Result) > 0; });
 
-    std::scoped_lock ContextLock(ContextMutex);
-    if (!Context)
-    {
-        return false;
-    }
-
-    try
-    {
-        const qjs::Value BoolResult = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT];
-        return BoolResult.as<bool>();
-    }
-    catch (...)
-    {
-        return false;
-    }
+    return bCallSucceeded && bRegistryResult;
 }
 
 csp::common::String NgxScriptSystem::DrainPendingSchemaSyncs()
 {
-    if (!Context)
-    {
-        return "[]";
-    }
+    std::string JsonResultString = "[]";
 
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = '[]';\n"
-          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.drainPendingSchemaSyncs === 'function') {\n"
-          "    try {\n"
-          "        globalThis."
-        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
-        + " = JSON.stringify(globalThis.scriptRegistry.drainPendingSchemaSyncs());\n"
-          "    } catch (_e) {}\n"
-          "}\n";
-
-    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-drain-schema-syncs>"))
-    {
-        PumpPendingJobs();
-        return "[]";
-    }
+    CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+        "<ngx-codecomponent-drain-schema-syncs>", true, "drainPendingSchemaSyncs",
+        [](JSContext*, std::vector<JSValue>&) {},
+        [&](JSContext* Ctx, JSValue Result) { JsonResultString = StringifyResultJson(Ctx, Result, "[]"); });
 
     PumpPendingJobs();
-
-    std::scoped_lock ContextLock(ContextMutex);
-    if (!Context)
-    {
-        return "[]";
-    }
-    try
-    {
-        const qjs::Value Result = Context->global()[CODECOMPONENT_JSON_RESULT_SLOT];
-        return csp::common::String(Result.as<std::string>().c_str());
-    }
-    catch (...)
-    {
-        return "[]";
-    }
+    return csp::common::String(JsonResultString.c_str());
 }
 
 bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
@@ -2675,7 +3005,7 @@ bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
         std::scoped_lock ModuleLock(ModuleSourcesMutex);
         const bool bFoundInLoaded = (LoadedModuleSources.find(ModulePathStd) != LoadedModuleSources.end());
         const bool bFoundInStatic = (StaticModuleSources.find(ModulePathStd) != StaticModuleSources.end());
-        const bool bFoundInBuiltIn = (ModulePathStd == PREACT_SIGNALS_CORE_MODULE);
+        const bool bFoundInBuiltIn = (ModulePathStd == PREACT_SIGNALS_CORE_MODULE) || (ModulePathStd == PREACT_SIGNALS_CORE_RAW_MODULE);
         if (!bFoundInLoaded && !bFoundInStatic && !bFoundInBuiltIn)
         {
             const std::string WarningMessage = fmt::format("NgxScript: Module '{}' not found in loaded or static module maps.", ModulePathStd);
