@@ -34,24 +34,6 @@ AnimatedModelSpaceComponentScriptInterface::AnimatedModelSpaceComponentScriptInt
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, ExternalResourceAssetId);
-DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId);
-
-DEFINE_SCRIPT_PROPERTY_VEC3(AnimatedModelSpaceComponent, Scale);
-DEFINE_SCRIPT_PROPERTY_VEC3(AnimatedModelSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_VEC4(AnimatedModelSpaceComponent, Rotation);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsLoopPlayback);
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsPlaying);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVirtualVisible);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldoutInAR);
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldoutInVirtual);
-
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, int32_t, int32_t, AnimationIndex);
 
 std::vector<std::string> AnimatedModelSpaceComponentScriptInterface::GetMaterialPaths() const
 {

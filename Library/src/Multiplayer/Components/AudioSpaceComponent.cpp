@@ -215,7 +215,7 @@ void AudioSpaceComponent::PlaySound()
 {
     if (PlaySoundCallback)
     {
-        PlaySoundCallback(*this);
+        PlaySoundCallback(this);
     }
 }
 

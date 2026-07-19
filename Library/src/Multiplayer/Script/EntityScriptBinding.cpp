@@ -26,20 +26,13 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/EntityQueryUtils.h"
-#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptHelpers.h"
@@ -52,6 +45,7 @@
 
 #include <fmt/format.h>
 
+#include <cstring>
 #include <unordered_map>
 #include <utility>
 
@@ -502,6 +496,8 @@ public:
             return GetComponents<StaticModelSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::AnimatedModel:
             return GetComponents<AnimatedModelSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Collision:
+            return GetComponents<CollisionSpaceComponentScriptInterface>(Context, Entity, Schema);
         default:
             break;
         };
@@ -509,7 +505,53 @@ public:
         return GetComponents<ComponentScriptInterface>(Context, Entity, Schema);
     }
 
+    // Adds a component of the schema's type to the entity and returns a single wrapped instance
+    // using the same schema-derived prototype as GetComponents.
+    qjs::Value AddComponent(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    {
+        switch (ToComponentType(Schema.TypeId).value_or(ComponentType::Invalid))
+        {
+        case ComponentType::VideoPlayer:
+            return AddComponent<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Custom:
+            return AddComponent<CustomSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Audio:
+            return AddComponent<AudioSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Hotspot:
+            return AddComponent<HotspotSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::CinematicCamera:
+            return AddComponent<CinematicCameraSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::StaticModel:
+            return AddComponent<StaticModelSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::AnimatedModel:
+            return AddComponent<AnimatedModelSpaceComponentScriptInterface>(Context, Entity, Schema);
+        case ComponentType::Collision:
+            return AddComponent<CollisionSpaceComponentScriptInterface>(Context, Entity, Schema);
+        default:
+            break;
+        };
+
+        return AddComponent<ComponentScriptInterface>(Context, Entity, Schema);
+    }
+
 private:
+    template <typename ScriptInterface>
+    qjs::Value AddComponent(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
+    {
+        auto* Iface = Entity.AddComponentForSchema(Schema.TypeId);
+        if (Iface == nullptr)
+        {
+            return qjs::Value { Context.ctx, JS_NULL };
+        }
+
+        const auto Proto = GetOrCreate(Schema.TypeId, [&] { return MakeComponentPrototype<ScriptInterface>(Context, Schema); });
+
+        auto Instance = qjs::js_traits<ScriptInterface*>::wrap(Proto.ctx, static_cast<ScriptInterface*>(Iface));
+        JS_SetPrototype(Proto.ctx, Instance, Proto.v); // Overwrite the prototype
+
+        return qjs::Value { Proto.ctx, std::move(Instance) };
+    }
+
     template <typename ScriptInterface>
     std::vector<qjs::Value> GetComponents(qjs::Context& Context, EntityScriptInterface& Entity, const ComponentSchema& Schema)
     {
@@ -573,36 +615,7 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, cs
 
 void BindComponents(qjs::Context::Module* Module)
 {
-    Module->class_<ButtonSpaceComponentScriptInterface>("ButtonSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ButtonSpaceComponent, LabelText, "labelText")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IconAssetId, "iconAssetId")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, AssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(ButtonSpaceComponent, IsEnabled, "isEnabled");
 
-    Module->class_<LightSpaceComponentScriptInterface>("LightSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(LightSpaceComponent, LightType, "lightType")
-        .PROPERTY_GET_SET(LightSpaceComponent, Intensity, "Intensity")
-        .PROPERTY_GET_SET(LightSpaceComponent, Range, "range")
-        .PROPERTY_GET_SET(LightSpaceComponent, InnerConeAngle, "innerConeAngle")
-        .PROPERTY_GET_SET(LightSpaceComponent, OuterConeAngle, "outerConeAngle")
-        .PROPERTY_GET_SET(LightSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(LightSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(LightSpaceComponent, Color, "color")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(LightSpaceComponent, LightCookieAssetId, "cookieAssetId")
-        .PROPERTY_GET_SET(LightSpaceComponent, LightCookieType, "lightCookieType");
 
     Module->class_<RuntimeMaterialTextureScriptInterface>("RuntimeMaterialTexture")
         .property<&RuntimeMaterialTextureScriptInterface::GetIsSet>("isSet")
@@ -658,138 +671,26 @@ void BindComponents(qjs::Context::Module* Module)
     Module->class_<AnimatedModelSpaceComponentScriptInterface>("AnimatedModelSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetId, "modelAssetId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsLoopPlayback, "isLoopPlayback")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsPlaying, "isPlaying")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex")
         .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterialPaths>("__getMaterialPaths")
         .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterial>("__getMaterial");
 
-    Module->class_<AttachmentSpaceComponentScriptInterface>("AttachmentSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AttachmentSpaceComponent, AnchorPath, "anchorPath");
 
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, VideoAssetId, "videoAssetId")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, VideoAssetURL, "videoAssetURL")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, AssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsStateShared, "isStateShared")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsLoopPlayback, "isLoopPlayback")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsAutoResize, "isAutoResize")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, PlaybackState, "playbackState")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, CurrentPlayheadPosition, "currentPlayheadPosition")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, TimeSincePlay, "timeSincePlay")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, VideoPlayerSourceType, "videoPlayerSourceType")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, StereoVideoType, "stereoVideoType")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsStereoFlipped, "isStereoFlipped")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsEnabled, "isEnabled");
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
-    Module->class_<AvatarSpaceComponentScriptInterface>("AvatarSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarId, "avatarId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, UserId, "userId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, State, "state")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AgoraUserId, "agoraUserId")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarUrl, "avatarUrl")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsHandIKEnabled, "isHandIKEnabled")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, TargetHandIKTargetLocation, "targetHandIKTargetLocation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, HandRotation, "handRotation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, HeadRotation, "headRotation")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, WalkRunBlendPercentage, "walkRunBlendPercentage")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, TorsoTwistAlpha, "torsoTwistAlpha")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarPlayMode, "avatarPlayMode")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, LocomotionModel, "locomotionModel")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsScripted, "isScripted")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsAvatarEnabled, "isAvatarEnabled")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, CameraType, "cameraType");
 
-    Module->class_<ExternalLinkSpaceComponentScriptInterface>("ExternalLinkSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, LinkUrl, "linkUrl")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, DisplayText, "displayText")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
-    Module->class_<FogSpaceComponentScriptInterface>("FogSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(FogSpaceComponent, FogMode, "fogMode")
-        .PROPERTY_GET_SET(FogSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(FogSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(FogSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(FogSpaceComponent, StartDistance, "startDistance")
-        .PROPERTY_GET_SET(FogSpaceComponent, EndDistance, "endDistance")
-        .PROPERTY_GET_SET(FogSpaceComponent, Color, "color")
-        .PROPERTY_GET_SET(FogSpaceComponent, Density, "density")
-        .PROPERTY_GET_SET(FogSpaceComponent, HeightFalloff, "heightFalloff")
-        .PROPERTY_GET_SET(FogSpaceComponent, MaxOpacity, "maxOpacity")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .fun<&CinematicCameraSpaceComponentScriptInterface::GetFov>("getFov")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, FocalLength, "focalLength")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, AspectRatio, "aspectRatio")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, SensorSize, "sensorSize")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, NearClip, "nearClip")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, FarClip, "farClip")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Iso, "iso")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, ShutterSpeed, "shutterSpeed")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Aperture, "aperture")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
+        .fun<&CinematicCameraSpaceComponentScriptInterface::GetFov>("getFov");
 
     Module->class_<CollisionSpaceComponentScriptInterface>("CollisionSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionShape, "collisionShape")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionMode, "collisionMode")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionAssetId, "collisionAssetId")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, AssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Friction, "friction")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Restitution, "restitution")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Mass, "mass")
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPose>("setKinematicPose")
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPosition>("setKinematicPosition")
         .fun<&CollisionSpaceComponentScriptInterface::SetKinematicRotation>("setKinematicRotation")
@@ -799,63 +700,14 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&CollisionSpaceComponentScriptInterface::SetLinearVelocity>("setLinearVelocity")
         .fun<&CollisionSpaceComponentScriptInterface::SetAngularVelocity>("setAngularVelocity");
 
-    Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ImageSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(ImageSpaceComponent, ImageAssetId, "imageAssetId")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(ImageSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(ImageSpaceComponent, BillboardMode, "billboardMode")
-        .PROPERTY_GET_SET(ImageSpaceComponent, DisplayMode, "displayMode")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsEmissive, "isEmissive")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
-    Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(TextSpaceComponent, Text, "text")
-        .PROPERTY_GET_SET(TextSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(TextSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(TextSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(TextSpaceComponent, TextColor, "textColor")
-        .PROPERTY_GET_SET(TextSpaceComponent, BackgroundColor, "backgroundColor")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsBackgroundVisible, "isBackgroundVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, Width, "width")
-        .PROPERTY_GET_SET(TextSpaceComponent, Height, "height")
-        .PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<StaticModelSpaceComponentScriptInterface>("StaticModelSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetId, "modelAssetId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
         .fun<&StaticModelSpaceComponentScriptInterface::GetMaterialPaths>("__getMaterialPaths")
         .fun<&StaticModelSpaceComponentScriptInterface::GetMaterial>("__getMaterial");
 
-    Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(PortalSpaceComponent, SpaceId, "spaceId")
-        .PROPERTY_GET_SET(PortalSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(PortalSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(PortalSpaceComponent, Radius, "radius");
 
     Module->class_<CustomSpaceComponentScriptInterface>("CustomSpaceComponent")
         .constructor<>()
@@ -878,46 +730,10 @@ void BindComponents(qjs::Context::Module* Module)
         .constructor<>()
         .base<ComponentScriptInterface>()
         .fun<&AudioSpaceComponentScriptInterface::PlaySound>("playSound")
-        .PROPERTY_GET_SET(AudioSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(AudioSpaceComponent, PlaybackState, "playbackState")
-        .PROPERTY_GET_SET(AudioSpaceComponent, AudioType, "audioType")
-        .PROPERTY_GET_SET(AudioSpaceComponent, AudioAssetId, "audioAssetId")
-        .PROPERTY_GET_SET(AudioSpaceComponent, AssetCollectionId, "assetCollectionId")
-        .PROPERTY_GET_SET(AudioSpaceComponent, AttenuationRadius, "attenuationRadius")
-        .PROPERTY_GET_SET(AudioSpaceComponent, IsLoopPlayback, "isLoopPlayback")
-        .PROPERTY_GET_SET(AudioSpaceComponent, TimeSincePlay, "timeSincePlay")
-        .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume");
+        .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
-    Module->class_<ECommerceSpaceComponentScriptInterface>("ECommerceSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(ECommerceSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ECommerceSpaceComponent, ProductId, "productId");
 
-    Module->class_<FiducialMarkerSpaceComponentScriptInterface>("FiducialMarkerSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Name, "name")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, MarkerAssetId, "markerAssetId")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
-    Module->class_<GaussianSplatSpaceComponentScriptInterface>("GaussianSplatSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
 
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
@@ -958,6 +774,44 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         }
     };
 
+    // Registers an add<Name>Component function per scriptable schema, mirroring the dynamic getters.
+    // The returned instance is wrapped with the same schema-derived prototype as get<Name>Components.
+    const auto RegisterDynamicComponentAdders = [this, Context](auto Proto)
+    {
+        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
+        {
+            if (!IsScriptable(Schema))
+            {
+                continue;
+            }
+
+            const auto RegisterAdder = [this, Context, &Proto](const ComponentSchema& Schema, const std::string& AdderName)
+            {
+                const auto AdderImpl
+                    = [this, Schema, Context](EntityScriptInterface* Entity) { return SchemaCache->AddComponent(*Context, *Entity, Schema); };
+
+                const auto Adder
+                    = [](JSContext* Context, JSValueConst This, int /*ArgC*/, JSValueConst* /*ArgV*/, int /*Magic*/, JSValue* FnData) -> JSValue
+                {
+                    const auto AdderImpl = FnData[0];
+                    return JS_Call(Context, AdderImpl, JS_UNDEFINED, 1, &This);
+                };
+
+                auto FnData = Context->newValue(AdderImpl);
+
+                JS_SetPropertyStr(Context->ctx, Proto.v, AdderName.c_str(), JS_NewCFunctionData(Context->ctx, Adder, 0, 0, 1, &FnData.v));
+            };
+
+            RegisterAdder(Schema, fmt::format("add{}Component", Schema.Name.c_str()));
+
+            // Legacy alias: scripts historically used addVideoComponent for the VideoPlayer component.
+            if (std::strcmp(Schema.Name.c_str(), "VideoPlayer") == 0)
+            {
+                RegisterAdder(Schema, "addVideoComponent");
+            }
+        }
+    };
+
     Module->class_<EntityScriptInterface>("Entity")
         .constructor<>()
         .fun<&EntityScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
@@ -968,26 +822,6 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::Off>("off")
         .fun<&EntityScriptInterface::Fire>("fire")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<CollisionSpaceComponentScriptInterface, ComponentType::Collision>>("getCollisionComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>>(
-            "getVideoPlayerComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>>(
-            "getAnimatedModelComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AttachmentSpaceComponentScriptInterface, ComponentType::Attachment>>(
-            "getAttachmentComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AvatarSpaceComponentScriptInterface, ComponentType::AvatarData>>("getAvatarComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>>(
-            "getExternalLinkComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>>(
-            "getStaticModelComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ImageSpaceComponentScriptInterface, ComponentType::Image>>("getImageComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<CustomSpaceComponentScriptInterface, ComponentType::Custom>>("getCustomComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<PortalSpaceComponentScriptInterface, ComponentType::Portal>>("getPortalComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<ConversationSpaceComponentScriptInterface, ComponentType::Conversation>>(
-            "getConversationComponents")
-        .fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .fun<&EntityScriptInterface::GetChildEntitiesByQuery>("getChildEntitiesByQuery")
@@ -1006,26 +840,10 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::SetTags>("setTags")
         .fun<&EntityScriptInterface::HasTag>("hasTag")
         .fun<&EntityScriptInterface::AddTag>("addTag")
-        .fun<&EntityScriptInterface::RemoveTag>("removeTag")
-        .fun<&EntityScriptInterface::AddStaticModelComponent>("addStaticModelComponent")
-        .fun<&EntityScriptInterface::AddAnimatedModelComponent>("addAnimatedModelComponent")
-        .fun<&EntityScriptInterface::AddAttachmentComponent>("addAttachmentComponent")
-        .fun<&EntityScriptInterface::AddAudioComponent>("addAudioComponent")
-        .fun<&EntityScriptInterface::AddButtonComponent>("addButtonComponent")
-        .fun<&EntityScriptInterface::AddCinematicCameraComponent>("addCinematicCameraComponent")
-        .fun<&EntityScriptInterface::AddCollisionComponent>("addCollisionComponent")
-        .fun<&EntityScriptInterface::AddExternalLinkComponent>("addExternalLinkComponent")
-        .fun<&EntityScriptInterface::AddFogComponent>("addFogComponent")
-        .fun<&EntityScriptInterface::AddGaussianSplatComponent>("addGaussianSplatComponent")
-        .fun<&EntityScriptInterface::AddImageComponent>("addImageComponent")
-        .fun<&EntityScriptInterface::AddLightComponent>("addLightComponent")
-        .fun<&EntityScriptInterface::AddPortalComponent>("addPortalComponent")
-        .fun<&EntityScriptInterface::AddReflectionComponent>("addReflectionComponent")
-        .fun<&EntityScriptInterface::AddSplineComponent>("addSplineComponent")
-        .fun<&EntityScriptInterface::AddTextComponent>("addTextComponent")
-        .fun<&EntityScriptInterface::AddVideoComponent>("addVideoComponent");
+        .fun<&EntityScriptInterface::RemoveTag>("removeTag");
 
     RegisterDynamicComponentGetters(GetClassPrototype<EntityScriptInterface>(*Context));
+    RegisterDynamicComponentAdders(GetClassPrototype<EntityScriptInterface>(*Context));
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()

@@ -33,41 +33,41 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
-    {}, // not exposed to scripting
+    "Collision",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
-            {}, // not exposed to scripting
+            "position",
             csp::common::Vector3 { 0, 0, 0 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
-            {}, // not exposed to scripting
+            "rotation",
             csp::common::Vector4 { 0, 0, 0, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
-            {}, // not exposed to scripting
+            "scale",
             csp::common::Vector3 { 1, 1, 1 },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
-            {}, // not exposed to scripting
+            "collisionShape",
             static_cast<int64_t>(CollisionShape::Box),
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
-            {}, // not exposed to scripting
+            "collisionMode",
             static_cast<int64_t>(CollisionMode::CollisionStatic),
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
-            {}, // not exposed to scripting
+            "collisionAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
+            "assetCollectionId",
             "",
         },
         {
@@ -82,17 +82,17 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Friction),
-            {}, // exposed to scripting via the manual CollisionSpaceComponent binding
+            "friction",
             0.5f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Restitution),
-            {}, // exposed to scripting via the manual CollisionSpaceComponent binding
+            "restitution",
             0.0f,
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Mass),
-            {}, // exposed to scripting via the manual CollisionSpaceComponent binding
+            "mass",
             1.0f,
         },
     },

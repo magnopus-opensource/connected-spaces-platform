@@ -27,23 +27,7 @@ namespace csp::multiplayer
 
 class SpaceEntity;
 class ComponentScriptInterface;
-class AttachmentSpaceComponentScriptInterface;
-class LightSpaceComponentScriptInterface;
-class ButtonSpaceComponentScriptInterface;
-class VideoPlayerSpaceComponentScriptInterface;
-class AudioSpaceComponentScriptInterface;
-class StaticModelSpaceComponentScriptInterface;
-class AnimatedModelSpaceComponentScriptInterface;
-class CinematicCameraSpaceComponentScriptInterface;
-class CollisionSpaceComponentScriptInterface;
-class ExternalLinkSpaceComponentScriptInterface;
-class FogSpaceComponentScriptInterface;
-class GaussianSplatSpaceComponentScriptInterface;
-class ImageSpaceComponentScriptInterface;
-class PortalSpaceComponentScriptInterface;
-class ReflectionSpaceComponentScriptInterface;
 class SplineSpaceComponentScriptInterface;
-class TextSpaceComponentScriptInterface;
 
 class EntityScriptInterface
 {
@@ -106,23 +90,11 @@ public:
     void ClearEventListeners();
 
     std::vector<ComponentScriptInterface*> GetComponents();
-    AttachmentSpaceComponentScriptInterface* AddAttachmentComponent();
-    StaticModelSpaceComponentScriptInterface* AddStaticModelComponent();
-    AnimatedModelSpaceComponentScriptInterface* AddAnimatedModelComponent();
-    AudioSpaceComponentScriptInterface* AddAudioComponent();
-    ButtonSpaceComponentScriptInterface* AddButtonComponent();
-    CinematicCameraSpaceComponentScriptInterface* AddCinematicCameraComponent();
-    CollisionSpaceComponentScriptInterface* AddCollisionComponent();
-    ExternalLinkSpaceComponentScriptInterface* AddExternalLinkComponent();
-    FogSpaceComponentScriptInterface* AddFogComponent();
-    GaussianSplatSpaceComponentScriptInterface* AddGaussianSplatComponent();
-    ImageSpaceComponentScriptInterface* AddImageComponent();
-    LightSpaceComponentScriptInterface* AddLightComponent();
-    PortalSpaceComponentScriptInterface* AddPortalComponent();
-    ReflectionSpaceComponentScriptInterface* AddReflectionComponent();
-    SplineSpaceComponentScriptInterface* AddSplineComponent();
-    TextSpaceComponentScriptInterface* AddTextComponent();
-    VideoPlayerSpaceComponentScriptInterface* AddVideoComponent();
+
+    /// @brief Adds a component whose type is described by a registered schema and returns its
+    /// base script interface after flushing the add-component patch. Used by the dynamic
+    /// add<SchemaName>Component bindings, which wrap the result with the schema-derived prototype.
+    ComponentScriptInterface* AddComponentForSchema(uint64_t TypeId);
 
     template <typename ScriptInterface> std::vector<ScriptInterface*> GetComponentsOfType(ComponentType Type);
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
@@ -130,7 +102,6 @@ public:
 
 private:
     void CommitEntityUpdate();
-    template <typename ScriptInterface, ComponentType Type> ScriptInterface* AddComponentForScript();
 
     SpaceEntity* Entity;
     bool LocalScope = false;
@@ -162,39 +133,6 @@ template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptIn
     }
 
     return Components;
-}
-
-template <typename ScriptInterface, ComponentType Type> ScriptInterface* EntityScriptInterface::AddComponentForScript()
-{
-    if (Entity == nullptr)
-    {
-        return nullptr;
-    }
-
-    auto* Component = Entity->AddComponent(Type);
-    if ((Component == nullptr) || (Component->GetScriptInterface() == nullptr))
-    {
-        return nullptr;
-    }
-
-    auto* Iface = static_cast<ScriptInterface*>(Component->GetScriptInterface());
-    Iface->SetLocalScope(LocalScope || Entity->IsLocal());
-
-    // Flush the dirty add-component patch so EntityUpdateCallback fires on the
-    // next tick and downstream JS wrappers (cspwa OlySpaceEntity, Electra's
-    // ToRenderingCommon component factories) actually learn about the new
-    // component. Without this, AddComponent sits as a dirty entry on the
-    // StatePatcher and the renderer-side never builds a body for it.
-    if (LocalScope || Entity->IsLocal())
-    {
-        Entity->ApplyLocalPropertyPatch();
-    }
-    else
-    {
-        Entity->QueueUpdate();
-    }
-
-    return Iface;
 }
 
 template <typename ScriptInterface> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType(ComponentType Type)

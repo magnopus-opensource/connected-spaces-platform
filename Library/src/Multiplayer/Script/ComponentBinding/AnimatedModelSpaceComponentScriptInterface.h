@@ -31,25 +31,6 @@ class AnimatedModelSpaceComponentScriptInterface : public ComponentScriptInterfa
 public:
     AnimatedModelSpaceComponentScriptInterface(AnimatedModelSpaceComponent* InComponent = nullptr);
 
-    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
-    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
-
-    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-
-    DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
-    DECLARE_SCRIPT_PROPERTY(bool, IsPlaying);
-
-    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
-    DECLARE_SCRIPT_PROPERTY(bool, IsVirtualVisible);
-
-    DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInAR);
-    DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInVirtual);
-
-    DECLARE_SCRIPT_PROPERTY(int32_t, AnimationIndex);
-
     std::vector<std::string> GetMaterialPaths() const;
     std::shared_ptr<class RuntimeMaterialScriptInterface> GetMaterial(const std::string& MaterialPath) const;
 };

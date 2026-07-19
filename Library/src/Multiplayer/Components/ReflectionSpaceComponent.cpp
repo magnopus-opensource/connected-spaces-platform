@@ -17,14 +17,13 @@
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Reflection),
-    {}, // not exposed to scripting
+    "Reflection",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Name_DEPRECATED),
@@ -33,27 +32,27 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionAssetId),
-            {}, // not exposed to scripting
+            "reflectionAssetId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
+            "assetCollectionId",
             "",
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Position),
-            {}, // not exposed to scripting
+            "position",
             csp::common::Vector3::Zero(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Scale),
-            {}, // not exposed to scripting
+            "scale",
             csp::common::Vector3::One(),
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionShape),
-            {}, // not exposed to scripting
+            "reflectionShape",
             static_cast<int64_t>(ReflectionShape::UnitBox),
         },
         {
@@ -85,7 +84,6 @@ std::unique_ptr<ReflectionSpaceComponent> ReflectionSpaceComponent::TryMake(
 ReflectionSpaceComponent::ReflectionSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(InSchema, LogSystem, Parent)
 {
-    SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() const

@@ -120,12 +120,19 @@ const auto Schema = ComponentSchema {
             "",
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::CameraType),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CameraType),
+            "cameraType",
             static_cast<int64_t>(CameraType::FirstAndThirdPerson),
         },
         {
-            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsScripted),
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsScripted),
+            "isScripted",
             false,
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsAvatarEnabled),
+            "isAvatarEnabled",
+            true,
         },
     },
 };

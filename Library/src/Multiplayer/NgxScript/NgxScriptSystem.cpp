@@ -1102,6 +1102,10 @@ void NgxScriptSystem::RebuildContext()
         UIRuntime->Clear();
     }
 
+    // The entity binding's schema prototype cache holds qjs::Values for the current
+    // context — destroy it before the context goes away.
+    EntityBinding.reset();
+
     {
         std::scoped_lock ContextLock(ContextMutex);
         Context.reset();
@@ -1132,6 +1136,11 @@ void NgxScriptSystem::TeardownContext()
 {
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: TeardownContext.");
     ClearAllEntityEventListeners();
+
+    // As in RebuildContext: the entity binding caches qjs::Values for the current context,
+    // so it must be destroyed while the context is still alive.
+    EntityBinding.reset();
+
     std::scoped_lock ContextLock(ContextMutex);
     if (AssetBinding && Context)
     {
@@ -1717,8 +1726,12 @@ globalThis.__cspDispatchMouseEvent = (event) => {
         return;
     }
 
-    csp::multiplayer::NgxEntityScriptBinding EntityBinding(ActiveRealtimeEngine, LogSystem, true);
-    EntityBinding.BindToContext(*Context);
+    // The binding must outlive this call: the dynamic component getters/adders registered by
+    // BindToContext capture the binding in JS closures, and its schema prototype cache holds
+    // qjs::Values for the current context. Recreate it per context build; RebuildContext and
+    // TeardownContext destroy it before resetting the context.
+    EntityBinding = std::make_unique<csp::multiplayer::NgxEntityScriptBinding>(ActiveRealtimeEngine, LogSystem, true);
+    EntityBinding->BindToContext(*Context);
 
     if (!AssetBinding)
     {

@@ -30,17 +30,6 @@ class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface
 public:
     CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent = nullptr);
 
-    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-    DECLARE_SCRIPT_PROPERTY(int32_t, CollisionShape);
-    DECLARE_SCRIPT_PROPERTY(int32_t, CollisionMode);
-    DECLARE_SCRIPT_PROPERTY(std::string, CollisionAssetId);
-    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
-    DECLARE_SCRIPT_PROPERTY(float, Friction);
-    DECLARE_SCRIPT_PROPERTY(float, Restitution);
-    DECLARE_SCRIPT_PROPERTY(float, Mass);
-
     void SetKinematicPose(qjs::Value Pose, float Dt);
     void SetKinematicPosition(Vector3 Position, float Dt);
     void SetKinematicRotation(Vector4 Rotation, float Dt);

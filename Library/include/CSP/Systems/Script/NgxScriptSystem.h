@@ -35,6 +35,7 @@
 namespace csp::multiplayer
 {
 class NgxAssetScriptBinding;
+class NgxEntityScriptBinding;
 } // namespace csp::multiplayer
 
 namespace qjs
@@ -249,6 +250,11 @@ private:
     bool LocalPlayerXrActive;
     std::unique_ptr<NgxUIRuntime> UIRuntime;
     std::unique_ptr<csp::multiplayer::NgxAssetScriptBinding> AssetBinding;
+
+    // Owns the per-context entity bindings. Must outlive the JS closures created during
+    // BindToContext (they capture the binding), and must be destroyed BEFORE the QuickJS
+    // context is reset so cached qjs::Values are freed while their owning context is alive.
+    std::unique_ptr<csp::multiplayer::NgxEntityScriptBinding> EntityBinding;
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;

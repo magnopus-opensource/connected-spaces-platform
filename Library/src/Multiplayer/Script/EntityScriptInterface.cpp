@@ -20,23 +20,6 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Multiplayer/EntityQueryUtils.h"
-#include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include <fmt/format.h>
 
@@ -538,89 +521,37 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
     return Components;
 }
 
-AttachmentSpaceComponentScriptInterface* EntityScriptInterface::AddAttachmentComponent()
+ComponentScriptInterface* EntityScriptInterface::AddComponentForSchema(uint64_t TypeId)
 {
-    return AddComponentForScript<AttachmentSpaceComponentScriptInterface, ComponentType::Attachment>();
-}
+    if (Entity == nullptr)
+    {
+        return nullptr;
+    }
 
-StaticModelSpaceComponentScriptInterface* EntityScriptInterface::AddStaticModelComponent()
-{
-    return AddComponentForScript<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>();
-}
+    auto* Component = Entity->AddComponentByTypeId(TypeId);
+    if ((Component == nullptr) || (Component->GetScriptInterface() == nullptr))
+    {
+        return nullptr;
+    }
 
-AnimatedModelSpaceComponentScriptInterface* EntityScriptInterface::AddAnimatedModelComponent()
-{
-    return AddComponentForScript<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>();
-}
+    auto* Iface = Component->GetScriptInterface();
+    Iface->SetLocalScope(LocalScope || Entity->IsLocal());
 
-AudioSpaceComponentScriptInterface* EntityScriptInterface::AddAudioComponent()
-{
-    return AddComponentForScript<AudioSpaceComponentScriptInterface, ComponentType::Audio>();
-}
+    // Flush the dirty add-component patch so EntityUpdateCallback fires on the
+    // next tick and downstream JS wrappers (cspwa OlySpaceEntity, Electra's
+    // ToRenderingCommon component factories) actually learn about the new
+    // component. Without this, AddComponent sits as a dirty entry on the
+    // StatePatcher and the renderer-side never builds a body for it.
+    if (LocalScope || Entity->IsLocal())
+    {
+        Entity->ApplyLocalPropertyPatch();
+    }
+    else
+    {
+        Entity->QueueUpdate();
+    }
 
-ButtonSpaceComponentScriptInterface* EntityScriptInterface::AddButtonComponent()
-{
-    return AddComponentForScript<ButtonSpaceComponentScriptInterface, ComponentType::Button>();
-}
-
-CinematicCameraSpaceComponentScriptInterface* EntityScriptInterface::AddCinematicCameraComponent()
-{
-    return AddComponentForScript<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>();
-}
-
-CollisionSpaceComponentScriptInterface* EntityScriptInterface::AddCollisionComponent()
-{
-    return AddComponentForScript<CollisionSpaceComponentScriptInterface, ComponentType::Collision>();
-}
-
-ExternalLinkSpaceComponentScriptInterface* EntityScriptInterface::AddExternalLinkComponent()
-{
-    return AddComponentForScript<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>();
-}
-
-FogSpaceComponentScriptInterface* EntityScriptInterface::AddFogComponent()
-{
-    return AddComponentForScript<FogSpaceComponentScriptInterface, ComponentType::Fog>();
-}
-
-GaussianSplatSpaceComponentScriptInterface* EntityScriptInterface::AddGaussianSplatComponent()
-{
-    return AddComponentForScript<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>();
-}
-
-ImageSpaceComponentScriptInterface* EntityScriptInterface::AddImageComponent()
-{
-    return AddComponentForScript<ImageSpaceComponentScriptInterface, ComponentType::Image>();
-}
-
-LightSpaceComponentScriptInterface* EntityScriptInterface::AddLightComponent()
-{
-    return AddComponentForScript<LightSpaceComponentScriptInterface, ComponentType::Light>();
-}
-
-PortalSpaceComponentScriptInterface* EntityScriptInterface::AddPortalComponent()
-{
-    return AddComponentForScript<PortalSpaceComponentScriptInterface, ComponentType::Portal>();
-}
-
-ReflectionSpaceComponentScriptInterface* EntityScriptInterface::AddReflectionComponent()
-{
-    return AddComponentForScript<ReflectionSpaceComponentScriptInterface, ComponentType::Reflection>();
-}
-
-SplineSpaceComponentScriptInterface* EntityScriptInterface::AddSplineComponent()
-{
-    return AddComponentForScript<SplineSpaceComponentScriptInterface, ComponentType::Spline>();
-}
-
-TextSpaceComponentScriptInterface* EntityScriptInterface::AddTextComponent()
-{
-    return AddComponentForScript<TextSpaceComponentScriptInterface, ComponentType::Text>();
-}
-
-VideoPlayerSpaceComponentScriptInterface* EntityScriptInterface::AddVideoComponent()
-{
-    return AddComponentForScript<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>();
+    return Iface;
 }
 
 } // namespace csp::multiplayer

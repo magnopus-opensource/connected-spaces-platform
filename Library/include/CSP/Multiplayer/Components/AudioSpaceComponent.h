@@ -62,7 +62,9 @@ enum class AudioPropertyKeys : uint16_t
 class CSP_API AudioSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:
-    typedef std::function<void(AudioSpaceComponent&)> PlaySoundCallbackHandler;
+    // Note: the component is passed by pointer rather than reference — the wrapper generator
+    // copy-constructs reference arguments, and ComponentBase is non-copyable.
+    typedef std::function<void(AudioSpaceComponent*)> PlaySoundCallbackHandler;
 
     CSP_NO_EXPORT static const ComponentSchema& GetSchema();
 

@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/AttachmentSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/AttachmentSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -73,7 +72,6 @@ std::unique_ptr<AttachmentSpaceComponent> AttachmentSpaceComponent::TryMake(
 AttachmentSpaceComponent::AttachmentSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(InSchema, LogSystem, Parent)
 {
-    SetScriptInterface(new AttachmentSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AttachmentSpaceComponent::GetAnchorPath() const
