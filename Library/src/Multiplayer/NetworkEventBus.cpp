@@ -106,7 +106,7 @@ NetworkEventBus::~NetworkEventBus()
 {
     // The NetworkEventBus is owned by the MultiplayerConnection which is one of the last systems to be destroyed by the Systems Manager.
     // Clean up all registered listeners.
-    RegisteredEvents.clear();
+    RegisteredCustomEvents.clear();
     RegisteredAccessControlChangedEvents.clear();
     RegisteredAssetDetailBlobChangedEvents.clear();
     RegisteredAsyncCallCompletedEvents.clear();
@@ -120,7 +120,7 @@ NetworkEventBus::NetworkEventBus(MultiplayerConnection* InMultiplayerConnection,
     MultiplayerConnectionInst = InMultiplayerConnection;
 }
 
-void NetworkEventBus::ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, NetworkEventCallback Callback)
+void NetworkEventBus::ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, CustomNetworkEventCallback Callback)
 {
     if (EventName.IsEmpty())
     {
@@ -135,7 +135,7 @@ void NetworkEventBus::ListenCustomNetworkEvent(csp::common::String EventReceiver
         return;
     }
 
-    RegisterEventCallback(LogSystem, EventReceiverId, EventName, "ListenCustomNetworkEvent", RegisteredEvents, Callback);
+    RegisterEventCallback(LogSystem, EventReceiverId, EventName, "ListenCustomNetworkEvent", RegisteredCustomEvents, Callback);
 }
 
 void NetworkEventBus::ListenAccessControlChangedEvent(csp::common::String EventReceiverId, AccessControlChangedEventCallback Callback)
@@ -213,7 +213,7 @@ void NetworkEventBus::StopListenCustomNetworkEvent(csp::common::String EventRece
 {
     NetworkEventRegistration Registration(EventReceiverId, EventName);
 
-    size_t RemovedCount = RegisteredEvents.erase(Registration);
+    size_t RemovedCount = RegisteredCustomEvents.erase(Registration);
 
     if (RemovedCount == 0)
     {
@@ -335,7 +335,7 @@ void NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& Even
     size_t RegistrationsToRemoveCount = 0;
 
     RegistrationsToRemoveCount += StopListenMatchingEventReceivers(
-        RegisteredEvents, [&](const auto& EventReceiverId, const auto& EventName) { StopListenCustomNetworkEvent(EventReceiverId, EventName); });
+        RegisteredCustomEvents, [&](const auto& EventReceiverId, const auto& EventName) { StopListenCustomNetworkEvent(EventReceiverId, EventName); });
     RegistrationsToRemoveCount += StopListenMatchingEventReceivers(RegisteredAccessControlChangedEvents,
         [&](const auto& EventReceiverId, const auto& /*EventName*/) { StopListenAccessControlChangedEvent(EventReceiverId); });
     RegistrationsToRemoveCount += StopListenMatchingEventReceivers(RegisteredAssetDetailBlobChangedEvents,
@@ -366,7 +366,7 @@ void NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& Even
 
 csp::common::Array<NetworkEventRegistration> NetworkEventBus::AllRegistrations() const
 {
-    size_t TotalRegistrationsCount = RegisteredEvents.size() + RegisteredAccessControlChangedEvents.size()
+    size_t TotalRegistrationsCount = RegisteredCustomEvents.size() + RegisteredAccessControlChangedEvents.size()
         + RegisteredAssetDetailBlobChangedEvents.size() + RegisteredAsyncCallCompletedEvents.size() + RegisteredConversationEvents.size()
         + RegisteredSequenceChangedEvents.size();
 
@@ -383,7 +383,7 @@ csp::common::Array<NetworkEventRegistration> NetworkEventBus::AllRegistrations()
         }
     };
 
-    CopyRegistrations(RegisteredEvents);
+    CopyRegistrations(RegisteredCustomEvents);
     CopyRegistrations(RegisteredAccessControlChangedEvents);
     CopyRegistrations(RegisteredAssetDetailBlobChangedEvents);
     CopyRegistrations(RegisteredAsyncCallCompletedEvents);
@@ -579,7 +579,7 @@ bool NetworkEventBus::StartEventMessageListening()
         default:
         case csp::multiplayer::NetworkEventBus::NetworkEvent::GeneralPurposeEvent:
         {
-            if (RegisteredEvents.size() > 0)
+            if (RegisteredCustomEvents.size() > 0)
             {
                 csp::common::NetworkEventData GeneralPurposeEventData;
 
@@ -590,7 +590,7 @@ bool NetworkEventBus::StartEventMessageListening()
                     return;
                 }
 
-                for (auto const& [Registration, Callback] : RegisteredEvents)
+                for (auto const& [Registration, Callback] : RegisteredCustomEvents)
                 {
                     if (Registration.EventName == EventTypeStr)
                     {

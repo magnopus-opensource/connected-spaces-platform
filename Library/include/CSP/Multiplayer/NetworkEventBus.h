@@ -61,7 +61,7 @@ enum class ErrorCode;
 
 // The callback used to register to listen to custom network events.
 // NetworkEventData lifetime is tied to the callback, do not attempt to store it via reference.
-typedef std::function<void(const csp::common::NetworkEventData& NetworkEventData)> NetworkEventCallback;
+typedef std::function<void(const csp::common::NetworkEventData& NetworkEventData)> CustomNetworkEventCallback;
 
 // Event listener specializations
 // Callbacks used to register to listen to event specializations.
@@ -167,7 +167,7 @@ public:
     /// for the same event if they choose.
     /// @param EventName : The identifying name for the event. May be any arbitrary string.
     /// @param Callback : Callback to invoke when the custom event is received. Will fail to register if the callback is null.
-    void ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, NetworkEventCallback Callback);
+    void ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, CustomNetworkEventCallback Callback);
 
     /// @brief Register interest in a access control changed network event, such that the NetworkEventBus will call the provided callback when it
     /// arrives.
@@ -301,8 +301,8 @@ private:
 
     CSP_END_IGNORE
 
-    // General purpose event registration.
-    std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
+    // Custom event registration.
+    std::unordered_map<NetworkEventRegistration, CustomNetworkEventCallback> RegisteredCustomEvents = {};
     // Registrations for event listener specializations.
     std::unordered_map<NetworkEventRegistration, AccessControlChangedEventCallback> RegisteredAccessControlChangedEvents = {};
     std::unordered_map<NetworkEventRegistration, AssetDetailBlobChangedEventCallback> RegisteredAssetDetailBlobChangedEvents = {};
