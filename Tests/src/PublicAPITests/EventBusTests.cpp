@@ -272,7 +272,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterMultiStopAll)
     using namespace csp::multiplayer;
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    
+
     const char* ReceiverId1 = "TestReceiverId1";
     const char* EventName = "TestEventName";
     const char* OperationName = "TestEventName";
@@ -295,7 +295,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterMultiStopAll)
     EXPECT_FALSE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId1, OperationName }));
 }
 
-CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
+CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullReceiverIdForEventRegistration)
 {
     using namespace csp::multiplayer;
 
@@ -303,11 +303,35 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    const csp::common::String Error = "NetworkEventBus::ListenCustomNetworkEvent: Expected non-null callback. Registration denied.";
+    const char* ReceiverId = "";
+    const char* EventName = "TestEventName";
+
+    const csp::common::String Error
+        = fmt::format("NetworkEventBus: Expected non-empty EventReceiverId for event {}. Registration denied.", EventName)
+              .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
+
+    SystemsManager.GetEventBus()->ListenCustomNetworkEvent(ReceiverId, EventName, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+    auto AllRegistrations = SystemsManager.GetEventBus()->AllRegistrations();
+    EXPECT_FALSE(std::any_of(AllRegistrations.begin(), AllRegistrations.end(),
+        [ReceiverId](const NetworkEventRegistration& Registration) { return Registration.EventReceiverId == ReceiverId; }));
+}
+
+CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullCallback)
+{
+    using namespace csp::multiplayer;
+
+    RAIIMockLogger MockLogger {};
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
+
+    const csp::common::String Error
+        = fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, ReceiverId)
+              .c_str();
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     SystemsManager.GetEventBus()->ListenCustomNetworkEvent(ReceiverId, EventName, nullptr);
     auto AllRegistrations = SystemsManager.GetEventBus()->AllRegistrations();
@@ -315,7 +339,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
         [ReceiverId](const NetworkEventRegistration& Registration) { return Registration.EventReceiverId == ReceiverId; }));
 }
 
-CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEventAsyncCallCompleted)
+CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullCallbackAsyncCallCompleted)
 {
     using namespace csp::multiplayer;
 
@@ -323,11 +347,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEventAsyncCallCompleted)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    const csp::common::String Error = "NetworkEventBus::ListenAsyncCallCompletedEvent: Expected non-null callback. Registration denied.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
-
     const char* ReceiverId = "TestReceiverId";
     const char* OperationName = "DuplicateSpaceAsync";
+
+    const csp::common::String Error
+        = fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", OperationName, ReceiverId)
+              .c_str();
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName, nullptr);
 
@@ -345,7 +371,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNoOperationNameAsyncCallComplete
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    const csp::common::String Error = "NetworkEventBus::ListenAsyncCallCompletedEvent: Expected non-empty OperationName. Registration denied.";
+    const csp::common::String Error = "NetworkEventBus: Expected non-empty name for event registration. Registration denied.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     const char* ReceiverId = "TestReceiverId";
@@ -380,7 +406,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, Success2)).Times(1);
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, Success3)).Times(1);
 
-    const csp::common::String Error = fmt::format("NetworkEventBus::ListenCustomNetworkEvent: Attempting to register a duplicate {} network event "
+    const csp::common::String Error = fmt::format("NetworkEventBus: Attempting to register a duplicate {} network event "
                                                   "with EventReceiverId: {}. Registration denied.",
         EventName, ReceiverId2)
                                           .c_str();
@@ -423,8 +449,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistrationAsyncCallCo
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, Success3)).Times(1);
 
     const csp::common::String Error
-        = fmt::format("NetworkEventBus::ListenAsyncCallCompletedEvent: Attempting to register a duplicate {} network event "
-                      "with EventReceiverId: {}. Registration denied.",
+        = fmt::format("NetworkEventBus: Attempting to register a duplicate {} network event with EventReceiverId: {}. Registration denied.",
             OperationName1, ReceiverId2)
               .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, Error)).Times(1);
@@ -490,7 +515,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistrationAsyncCallCo
 
     const csp::common::String Error
         = fmt::format("NetworkEventBus::StopListenAsyncCallCompletedEvent: Could not find async call completed network event for registration with "
-                        "Event ReceiverId: {} for Operation: {}. Deregistration denied.",
+                      "Event ReceiverId: {} for Operation: {}. Deregistration denied.",
             ReceiverId, OperationName)
               .c_str();
 

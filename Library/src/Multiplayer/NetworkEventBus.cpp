@@ -36,12 +36,27 @@ namespace
 
 template <typename EventContainer, typename EventCallback>
 void RegisterEventCallback(csp::common::LogSystem& LogSystem, const csp::common::String& EventReceiverId, csp::common::String EventName,
-    const csp::common::String& MethodName, EventContainer& RegisteredEvents, const EventCallback& Callback)
+    EventContainer& RegisteredEvents, const EventCallback& Callback)
 {
+    if (EventName.IsEmpty())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Expected non-empty name for event registration. Registration denied.");
+
+        return;
+    }
+
     if (EventReceiverId.IsEmpty())
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("NetworkEventBus::{}: Expected non-empty EventReceiverId. Registration denied.", MethodName).c_str());
+            fmt::format("NetworkEventBus: Expected non-empty EventReceiverId for event {}. Registration denied.", EventName).c_str());
+
+        return;
+    }
+
+    if (!Callback)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, EventReceiverId).c_str());
 
         return;
     }
@@ -52,9 +67,9 @@ void RegisterEventCallback(csp::common::LogSystem& LogSystem, const csp::common:
     {
         // An event with matching ReceiverId and EventName has already been registered, double registration is not allowed.
         LogSystem.LogMsg(csp::common::LogLevel::Warning,
-            fmt::format("NetworkEventBus::{}: Attempting to register a duplicate {} network event "
+            fmt::format("NetworkEventBus: Attempting to register a duplicate {} network event "
                         "with EventReceiverId: {}. Registration denied.",
-                MethodName, EventName, EventReceiverId)
+                EventName, EventReceiverId)
                 .c_str());
 
         return;
@@ -120,93 +135,39 @@ NetworkEventBus::NetworkEventBus(MultiplayerConnection* InMultiplayerConnection,
     MultiplayerConnectionInst = InMultiplayerConnection;
 }
 
-void NetworkEventBus::ListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName, CustomNetworkEventCallback Callback)
+void NetworkEventBus::ListenCustomNetworkEvent(
+    csp::common::String EventReceiverId, csp::common::String EventName, CustomNetworkEventCallback Callback)
 {
-    if (EventName.IsEmpty())
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenCustomNetworkEvent: Expected non-empty EventName. Registration denied.");
-        return;
-    }
-
-    if (!Callback)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus::ListenCustomNetworkEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, EventName, "ListenCustomNetworkEvent", RegisteredCustomEvents, Callback);
+    RegisterEventCallback(LogSystem, EventReceiverId, EventName, RegisteredCustomEvents, Callback);
 }
 
 void NetworkEventBus::ListenAccessControlChangedEvent(csp::common::String EventReceiverId, AccessControlChangedEventCallback Callback)
 {
-    if (!Callback)
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenAccessControlChangedEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::AccessControlChanged), "ListenAccessControlChangedEvent",
-        RegisteredAccessControlChangedEvents, Callback);
+    RegisterEventCallback(
+        LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::AccessControlChanged), RegisteredAccessControlChangedEvents, Callback);
 }
 
 void NetworkEventBus::ListenAssetDetailBlobChangedEvent(csp::common::String EventReceiverId, AssetDetailBlobChangedEventCallback Callback)
 {
-    if (!Callback)
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenAssetDetailBlobChangedEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::AssetDetailBlobChanged),
-        "ListenAssetDetailBlobChangedEvent", RegisteredAssetDetailBlobChangedEvents, Callback);
+    RegisterEventCallback(
+        LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::AssetDetailBlobChanged), RegisteredAssetDetailBlobChangedEvents, Callback);
 }
 
 void NetworkEventBus::ListenAsyncCallCompletedEvent(
     csp::common::String EventReceiverId, csp::common::String OperationName, AsyncCallCompletedEventCallback Callback)
 {
-    if (OperationName.IsEmpty())
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenAsyncCallCompletedEvent: Expected non-empty OperationName. Registration denied.");
-        return;
-    }
-
-    if (!Callback)
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenAsyncCallCompletedEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, OperationName, "ListenAsyncCallCompletedEvent", RegisteredAsyncCallCompletedEvents, Callback);
+    RegisterEventCallback(LogSystem, EventReceiverId, OperationName, RegisteredAsyncCallCompletedEvents, Callback);
 }
 
 void NetworkEventBus::ListenConversationEvent(csp::common::String EventReceiverId, ConversationEventCallback Callback)
 {
-    if (!Callback)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus::ListenConversationEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::Conversation), "ListenConversationEvent",
-        RegisteredConversationEvents, Callback);
+    RegisterEventCallback(LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::Conversation), RegisteredConversationEvents, Callback);
 }
 
 void NetworkEventBus::ListenSequenceChangedEvent(csp::common::String EventReceiverId, SequenceChangedEventCallback Callback)
 {
-    if (!Callback)
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, "NetworkEventBus::ListenSequenceChangedEvent: Expected non-null callback. Registration denied.");
-        return;
-    }
-
-    RegisterEventCallback(LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::SequenceChanged), "ListenSequenceChangedEvent",
-        RegisteredSequenceChangedEvents, Callback);
+    RegisterEventCallback(
+        LogSystem, EventReceiverId, StringFromNetworkEvent(NetworkEvent::SequenceChanged), RegisteredSequenceChangedEvents, Callback);
 }
 
 void NetworkEventBus::StopListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName)
@@ -334,8 +295,8 @@ void NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& Even
 
     size_t RegistrationsToRemoveCount = 0;
 
-    RegistrationsToRemoveCount += StopListenMatchingEventReceivers(
-        RegisteredCustomEvents, [&](const auto& EventReceiverId, const auto& EventName) { StopListenCustomNetworkEvent(EventReceiverId, EventName); });
+    RegistrationsToRemoveCount += StopListenMatchingEventReceivers(RegisteredCustomEvents,
+        [&](const auto& EventReceiverId, const auto& EventName) { StopListenCustomNetworkEvent(EventReceiverId, EventName); });
     RegistrationsToRemoveCount += StopListenMatchingEventReceivers(RegisteredAccessControlChangedEvents,
         [&](const auto& EventReceiverId, const auto& /*EventName*/) { StopListenAccessControlChangedEvent(EventReceiverId); });
     RegistrationsToRemoveCount += StopListenMatchingEventReceivers(RegisteredAssetDetailBlobChangedEvents,
