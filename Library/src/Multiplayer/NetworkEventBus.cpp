@@ -312,7 +312,7 @@ void NetworkEventBus::StopListenSequenceChangedEvent(csp::common::String EventRe
 
 void NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiverId)
 {
-    auto StopListenMatchingEventReceivers = [&](const auto& RegisteredEvents, auto StopListenAction) -> size_t
+    auto StopListenMatchingEventReceivers = [&](const auto& RegisteredEvents, auto&& StopListenAction) -> size_t
     {
         std::vector<NetworkEventRegistration> RegistrationsToRemove {};
 
