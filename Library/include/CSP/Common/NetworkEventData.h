@@ -149,30 +149,8 @@ public:
 class CSP_API AsyncCallCompletedEventData : public NetworkEventData
 {
 public:
-    /*
-    Please note:
-    The structure of the AsyncCallCompleted event has been updated by the backend services to include some additional properties.
-    ReferenceId and ReferenceType are being replaced by a Map called References, and new Status and StatusReason properties have been added.
-    This change is currently behind an backend feature flag, ready to be switched over. As this will be a breaking change we have added these new
-    properties to the event, but will temporarily be keeping the old ones. We will populate both the old and new properties when we deserialise the
-    SignalR event values, which means that Clients will continue to be able to consume the event as before.
-
-    Once this CSP change has been adopted by clients and is confirmed working, we can:
-    - Get the backend services to update the flag and send the new AsyncCallCompletedEvent structure.
-    - Ask client teams to update to use the new event properties.
-    - Remove the old event properties and temporary logic, including this comment - this last step is captured by ticket OF-1835.
-    */
-
     /// @brief The name of the async operation that has been completed.
     csp::common::String OperationName;
-
-    /// @brief An Id related to the async operation that has been completed.
-    /// This could for example be a group Id, if this were an async duplicate group operation.
-    csp::common::String ReferenceId;
-
-    /// @brief The type that the Id represents.
-    /// In the previous example this would be "GroupId".
-    csp::common::String ReferenceType;
 
     /// @brief A string map containing reference information related to this operation.
     /// Each key:value pair in this map represents a reference name and its corresponding Id.

@@ -3264,14 +3264,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
 
     // Attempt to duplicate space asynchrously
     {
-        std::promise<std::tuple<String, String, String>> AsyncCallCompletedPromise;
-        std::future<std::tuple<String, String, String>> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
+        std::promise<std::tuple<String, String>> AsyncCallCompletedPromise;
+        std::future<std::tuple<String, String>> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
 
         const char* ReceiverId = "TestReceiverId";
         const char* EventName = "DuplicateSpaceAsync";
 
         auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { AsyncCallCompletedPromise.set_value({ NetworkEventData.OperationName, NetworkEventData.ReferenceId, NetworkEventData.ReferenceType }); };
+        { AsyncCallCompletedPromise.set_value({ NetworkEventData.OperationName, NetworkEventData.References["SpaceId"] }); };
 
         SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, EventName, AsyncCallCompletedCallback);
 
@@ -3290,14 +3290,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
 
         ASSERT_NE(Status, std::future_status::timeout) << "The DuplicateSpaceAsync operation timed out after 30 seconds.";
 
-        std::tuple<String, String, String> AsyncCallResult = AsyncCallCompletedFuture.get();
+        std::tuple<String, String> AsyncCallResult = AsyncCallCompletedFuture.get();
 
         String OperationName = std::get<0>(AsyncCallResult);
-        String ReferenceType = std::get<2>(AsyncCallResult);
         NewSpaceId = std::get<1>(AsyncCallResult);
 
         ASSERT_TRUE(OperationName == "DuplicateSpaceAsync");
-        ASSERT_TRUE(ReferenceType == "GroupId");
     }
 
     // Ensure we can enter the newly duplicated Space
