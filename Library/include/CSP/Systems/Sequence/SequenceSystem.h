@@ -121,7 +121,7 @@ public:
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::SequenceChangedNetworkEventData& NetworkEventData);
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

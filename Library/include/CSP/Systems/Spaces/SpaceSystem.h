@@ -363,16 +363,22 @@ public:
         const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback);
 
     /// @brief Duplicate an existing space and assign it to the current user.
-    /// This is an asynchronous operation. If the user disconnects while waiting for the operation to complete it will continue unaffected. Please
-    /// subscribe to the AsyncCallCompletedCallback via @ref SpaceSystem::SetAsyncCallCompletedCallback() to be notified when the duplication operation
-    /// is complete. The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
+    /// This is a long running asynchronous operation. If the user disconnects while waiting for the operation to complete it will continue
+    /// unaffected. Please subscribe to @ref NetworkEventBus::ListenAsyncCallCompletedEvent() to be notified when the duplication operation is
+    /// complete. The ListenAsyncCallCompletedEvent() method takes the following arguments:
+    /// - EventReceiverId: The identifying name for the event receiver, used for management purposes, allowing clients to register multiple interests
+    /// in a single AsyncCallCompleted operation.
+    /// - OperationName: The identifying name of the async operation. To register interest in **this** operation, OperationName should be set to
+    /// "DuplicateSpaceAsync".
+    ///
+    /// The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
     /// - OperationName: "DuplicateSpaceAsync".
     /// - References: A String map containing the following key:value pairs:
     ///     - "OrignalSpaceId": Id of the original Space.
     ///     - "SpaceId": Id of the newly duplicated Space.
     /// - Success: A boolean value indicating whether the duplication operation was successful.
     /// - StatusReason: This will be an empty string if the operation was successful, but if the operation failed it will contain the failure status.
-    /// 
+    ///
     /// @param SpaceId csp::common::String : Id of the space to duplicate.
     /// @param NewName csp::common::String : A unique name for the duplicated space.
     /// @param NewAttributes csp::systems::SpaceAttributes : Attributes to apply to the duplicated space.
@@ -388,27 +394,6 @@ public:
     // This is required due to a circular dependency between SpaceSystem and MultiplayerSystem.
     // This will be broken when we move enter space logic into RealtimeEngine.
     CSP_NO_EXPORT void SetMultiplayerSystem(csp::systems::MultiplayerSystem& MultiplayerSystem);
-
-    /// @brief The callback for receiving an alert when an async operation is completed.
-    /// Currently this callback is only being used for the DuplicateSpaceAsync operation.
-    /// A callback can be set via @ref SpaceSystem::SetAsyncCallCompletedCallback().
-    typedef std::function<void(const csp::common::AsyncCallCompletedEventData&)> AsyncCallCompletedCallbackHandler;
-
-    /// @brief Sets a callback for the async call completed event. Triggered when an async call to DuplicateSpace is completed.
-    /// @param Callback AsyncCallCompletedCallbackHandler: Callback to receive data concerning the Space duplication.
-    CSP_EVENT void SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback);
-
-    /// @brief Deserialises the AsyncCallCompleted event values.
-    /// The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
-    /// - OperationName: "DuplicateSpaceAsync".
-    /// - References: A String map containing the following key:value pairs:
-    ///     - "OrignalSpaceId": Id of the original Space.
-    ///     - "SpaceId": Id of the newly duplicated Space.
-    /// - Success: A boolean value indicating whether the duplication operation was successful.
-    /// - StatusReason: This will be an empty string if the operation was successful, but if the operation failed it will contain the failure status.
-    /// 
-    /// @param NetworkEventData const csp::common::NetworkEventData& : event values to deserialise
-    CSP_NO_EXPORT void OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
@@ -430,8 +415,6 @@ private:
     void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
-
-    AsyncCallCompletedCallbackHandler AsyncCallCompletedCallback;
 
     // CreateSpace Continuations
     async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
