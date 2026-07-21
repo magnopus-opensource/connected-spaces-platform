@@ -333,14 +333,14 @@ csp::common::Array<NetworkEventRegistration> NetworkEventBus::AllRegistrations()
 
     csp::common::Array<NetworkEventRegistration> Registrations(TotalRegistrationsCount);
 
-    auto* RegistrationsIt = Registrations.begin();
+    size_t Index = 0;
 
-    // Copy the NetworkEventRegistration and increment pointer
-    auto CopyRegistrations = [&RegistrationsIt](const auto& EventMap)
+    // Flatten all event containers into a single array of NetworkEventRegistration objects.
+    auto CopyRegistrations = [&Index, &Registrations](const auto& EventMap)
     {
         for (const auto& [Key, Value] : EventMap)
         {
-            *RegistrationsIt++ = Key;
+            Registrations[Index++] = Key;
         }
     };
 
