@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.47.0]
+
+###  🔨 🔨 Chore
+
+- [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn
+  Remove backwards compatibility logic for legacy `AsyncCallCompleted` event data structure.
+
 ## [6.46.0]
 
 ### 🔌 API Changes
