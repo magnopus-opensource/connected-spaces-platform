@@ -973,7 +973,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventDispatchReplicatedValueException)
 
     const csp::common::String Error
         = fmt::format("NetworkEventBus: Failed to deserialize event '{}'. Registered events will not be fired.", EventName).c_str();
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
+
+    std::promise<void> LogCallPromise;
+    std::future<void> LogCallFuture = LogCallPromise.get_future();
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error))
+        .Times(1)
+        .WillOnce([&LogCallPromise]() { LogCallPromise.set_value(); });
 
     int64_t TestValue = 5;
 
@@ -987,8 +993,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventDispatchReplicatedValueException)
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture = NetworkEventPromise.get_future();
+    std::promise<void> NetworkEventPromise;
+    std::future<void> NetworkEventFuture = NetworkEventPromise.get_future();
 
     // The AsyncCallCompleted event is expected to be sent with the following payload:
     // - csp::common::String OperationName
@@ -1000,11 +1006,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventDispatchReplicatedValueException)
     const csp::common::Array<csp::common::ReplicatedValue> EventData = { csp::common::ReplicatedValue { TestValue } };
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, EventName,
-        [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
+        [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& /* NetworkEventData */)
+        { NetworkEventPromise.set_value(); });
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, EventData, Connection->GetClientId(), ErrorCallback);
 
-    EXPECT_NE(NetworkEventFuture.wait_for(5s), std::future_status::ready)
-        << "Network Event will not be sent due to ReplicatedValueException being thrown for invalid ReplicatedValue type.";
+    std::future_status LogStatus = LogCallFuture.wait_for(std::chrono::seconds(30));
+    ASSERT_EQ(LogStatus, std::future_status::ready)
+        << "EventDispatchReplicatedValueException: Test timed out waiting for the deserialize-failure error log.";
+
+    EXPECT_NE(NetworkEventFuture.wait_for(std::chrono::milliseconds(0)), std::future_status::ready)
+        << "Network Event should not be dispatched since a ReplicatedValueException was thrown for the invalid ReplicatedValue type.";
 }
