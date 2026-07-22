@@ -290,27 +290,35 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
 
     LogInAsNewTestUser(UserSystem, UserId);
 
+    // Randomise the search origin each run so that any POI orphaned as a result of a prior failed run
+    // does not fall inside this run's search area and inflate the result count.
+    csp::systems::GeoLocation SearchLocationOrigin;
+    SearchLocationOrigin.Latitude = RandomRangeDouble(-80.0, 80.0);
+    SearchLocationOrigin.Longitude = RandomRangeDouble(-170.0, 170.0);
+
     csp::systems::GeoLocation InsidePOILocation;
-    InsidePOILocation.Latitude = 45.0;
-    InsidePOILocation.Longitude = 160.0;
+    InsidePOILocation.Latitude = SearchLocationOrigin.Latitude + 1.0;
+    InsidePOILocation.Longitude = SearchLocationOrigin.Longitude;
 
     csp::systems::PointOfInterest InsidePointOfInterest;
     CreatePointOfInterest(POISystem, nullptr, InsidePOILocation, nullptr, InsidePointOfInterest);
 
+    // Calculate the antipode - the point on Earth's surface directly opposite a given location.
+    // This is calculated by inverting the latitude and adding or subtracting 180 degrees from the longitude.
     csp::systems::GeoLocation OutsidePOILocation;
-    OutsidePOILocation.Latitude = -45.0;
-    OutsidePOILocation.Longitude = -160.0;
+    OutsidePOILocation.Latitude = -SearchLocationOrigin.Latitude;
+    OutsidePOILocation.Longitude = SearchLocationOrigin.Longitude >= 0.0 ? SearchLocationOrigin.Longitude - 180.0
+                                                                         : SearchLocationOrigin.Longitude + 180.0;
 
     csp::systems::PointOfInterest OutsidePointOfInterest;
     CreatePointOfInterest(POISystem, nullptr, OutsidePOILocation, nullptr, OutsidePointOfInterest);
+    
+    // Search radius in meters: 130000m == 130km.
+    // Half the earth's circumference, which is the maximum distance to an antipodal point, is 20,000,000m (20,000km).
+    const double SearchRadiusMeters = 130000;
 
     // Search for the newly created POI inside a circular area
-    csp::systems::GeoLocation SearchLocationOrigin;
-    SearchLocationOrigin.Latitude = 44.0;
-    SearchLocationOrigin.Longitude = 160.0;
-    double SearchRadius = 130000;
-
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadiusMeters,
         csp::systems::EPointOfInterestType::DEFAULT)
                         .Await(RequestPredicate);
 
@@ -318,11 +326,12 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
 
     const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
 
-    EXPECT_EQ(POICollection.Size(), 1);
-    EXPECT_EQ(POICollection[0].Name, InsidePointOfInterest.Name);
-
+    // Delete the POIs prior to the assertions to ensure that they are cleaned up even if the assertions fail.
     DeletePointOfInterest(POISystem, InsidePointOfInterest);
     DeletePointOfInterest(POISystem, OutsidePointOfInterest);
+
+    EXPECT_EQ(POICollection.Size(), 1);
+    EXPECT_EQ(POICollection[0].Name, InsidePointOfInterest.Name);
 
     LogOut(UserSystem);
 }
