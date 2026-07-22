@@ -295,7 +295,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
     csp::systems::GeoLocation SearchLocationOrigin;
     SearchLocationOrigin.Latitude = RandomRangeDouble(-80.0, 80.0);
     SearchLocationOrigin.Longitude = RandomRangeDouble(-170.0, 170.0);
-    double SearchRadius = 130000;
 
     csp::systems::GeoLocation InsidePOILocation;
     InsidePOILocation.Latitude = SearchLocationOrigin.Latitude + 1.0;
@@ -304,7 +303,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
     csp::systems::PointOfInterest InsidePointOfInterest;
     CreatePointOfInterest(POISystem, nullptr, InsidePOILocation, nullptr, InsidePointOfInterest);
 
-    // Placed on the opposite side of the globe from the search origin to ensure it will always be outside the search radius.
+    // Calculate the antipode - the point on Earth's surface directly opposite a given location.
+    // This is calculated by inverting the latitude and adding or subtracting 180 degrees from the longitude.
     csp::systems::GeoLocation OutsidePOILocation;
     OutsidePOILocation.Latitude = -SearchLocationOrigin.Latitude;
     OutsidePOILocation.Longitude = SearchLocationOrigin.Longitude >= 0.0 ? SearchLocationOrigin.Longitude - 180.0
@@ -312,9 +312,13 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
 
     csp::systems::PointOfInterest OutsidePointOfInterest;
     CreatePointOfInterest(POISystem, nullptr, OutsidePOILocation, nullptr, OutsidePointOfInterest);
+    
+    // Search radius in meters: 130000m == 130km.
+    // Half the earth's circumference, which is the maximum distance to an antipodal point, is 20,000,000m (20,000km).
+    const double SearchRadiusMeters = 130000;
 
     // Search for the newly created POI inside a circular area
-    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadiusMeters,
         csp::systems::EPointOfInterestType::DEFAULT)
                         .Await(RequestPredicate);
 
