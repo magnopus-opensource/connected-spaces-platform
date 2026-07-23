@@ -50,35 +50,7 @@ std::vector<signalr::value> ConstructEventValues(const std::map<uint64_t, signal
 }
 }
 
-CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCallCompletedEventOldStructureTest)
-{
-    csp::common::LogSystem LogSystem;
-
-    const csp::common::String OperationName("DuplicateSpace");
-    const csp::common::String ReferenceId("new_space-abc-123");
-    const csp::common::String ReferenceType("GroupId");
-
-    // Components map:
-    // 0: OperationName (ItemComponentDataType::STRING)
-    // 1: ReferenceId (ItemComponentDataType::STRING)
-    // 2: ReferenceType (ItemComponentDataType::STRING)
-    std::map<uint64_t, signalr::value> Components;
-
-    Components[0] = ConstructComponentElement(DataTypeString, signalr::value(OperationName.c_str()));
-    Components[1] = ConstructComponentElement(DataTypeString, signalr::value(ReferenceId.c_str()));
-    Components[2] = ConstructComponentElement(DataTypeString, signalr::value(ReferenceType.c_str()));
-
-    // Construct EventValues vector: [ EventName, SenderClientId, Recipient (null), Components map ]
-    std::vector<signalr::value> EventValues = ConstructEventValues(Components);
-
-    csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(EventValues, LogSystem);
-
-    EXPECT_EQ(Parsed.OperationName, OperationName);
-    EXPECT_EQ(Parsed.ReferenceId, ReferenceId);
-    EXPECT_EQ(Parsed.ReferenceType, ReferenceType);
-}
-
-CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCallCompletedEventNewStructureTest)
+CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCallCompletedEventTest)
 {
     csp::common::LogSystem LogSystem;
 
@@ -114,7 +86,7 @@ CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCal
 
     csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(EventValues, LogSystem);
 
-    // Verify new event structure was parsed corrctly
+    // Verify event structure was parsed corrctly
     EXPECT_EQ(Parsed.OperationName, OperationName);
     EXPECT_TRUE(Parsed.Success);
     EXPECT_EQ(Parsed.StatusReason, StatusReason);
@@ -123,9 +95,4 @@ CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCal
     ASSERT_TRUE(Parsed.References.HasKey("OriginalSpaceId"));
     EXPECT_EQ(Parsed.References["SpaceId"], NewSpaceId);
     EXPECT_EQ(Parsed.References["OriginalSpaceId"], OriginalSpaceId);
-
-    // Check backwards compatibility
-    // If the References map contains the key "SpaceId", the deserializer sets the old ReferenceId and ReferenceType properties
-    EXPECT_EQ(Parsed.ReferenceId, NewSpaceId);
-    EXPECT_EQ(Parsed.ReferenceType, "GroupId"); // The key used to be "GroupId"
 }
