@@ -30,11 +30,10 @@ jobs:
     with:
       upload_install: false
 
-      - name: Setup emsdk
-        uses: emscripten-core/setup-emsdk@v15
-        with:
-          version: ${{ env.EMSDK_VERSION }}
-          actions-cache-folder: 'emsdk-cache'
+  ios-visionos:
+    uses: ./.github/workflows/ios-visionos-build.yml
+    with:
+      upload_install: false
 
       - name: Build Emscripten
         uses: ./.github/actions/build-legacy-emscripten
