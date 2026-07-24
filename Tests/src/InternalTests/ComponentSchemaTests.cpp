@@ -1179,6 +1179,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
 {
+    using Option = csp::multiplayer::SchemaOption;
+
     const auto Original = Schema {
         Schema::TypeIdType { 123 },
         "Example",
@@ -1188,7 +1190,55 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
                 "stringProperty",
                 "value",
             },
+            {
+                1,
+                "intProp",
+                int64_t { 0 },
+                /*.Description =*/"A description.",
+                /*.IsScriptable =*/true,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/false,
+                /*.RangeMin =*/ {},
+                /*.RangeMax =*/ {},
+                /*.Options =*/
+                csp::common::Array<Option> {
+                    { "Off", int64_t { 0 } },
+                    { "On", int64_t { 1 } },
+                },
+            },
+            {
+                2,
+                "floatProp",
+                1.0f,
+                /*.Description =*/"Another description.",
+                /*.IsScriptable =*/false,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/false,
+                /*.RangeMin =*/0.0f,
+                /*.RangeMax =*/1.0f,
+            },
+            {
+                3,
+                "stringProp",
+                csp::common::String { "" },
+                /*.Description =*/ {},
+                /*.IsScriptable =*/true,
+                /*.IsDeprecated =*/true,
+            },
+            {
+                4,
+                {},
+                {},
+                /*.Description =*/"Was prop, removed",
+                /*.IsScriptable =*/false,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/true,
+            },
         },
+        /*.Description =*/"A component description.",
+        /*.IsScriptable =*/false,
+        /*.IsReserved =*/false,
+        /*.IsDeprecated =*/true,
     };
 
     const auto Json = Schema::ToJson(Original);
@@ -1451,6 +1501,382 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsVec4PropertyWi
     })";
     const auto Result = Schema::FromJson(csp::common::String { RawJson });
     EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesPropertyMetadata)
+{
+    using Option = csp::multiplayer::SchemaOption;
+
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "intProp",
+                "type": "int",
+                "defaultValue": 0,
+                "description": "A description.",
+                "scripting": false,
+                "options": [
+                    { "name": "Off", "value": 0 },
+                    { "name": "On", "value": 1 }
+                ]
+            },
+            {
+                "key": 1,
+                "name": "floatProp",
+                "type": "float",
+                "defaultValue": 1.0,
+                "scripting": false,
+                "range": { "min": 0.0, "max": 1.0 }
+            },
+            {
+                "key": 2,
+                "name": "stringProp",
+                "type": "string",
+                "defaultValue": "",
+                "deprecated": true
+            }
+        ]
+    })";
+
+    const auto Expected = Schema {
+        Schema::TypeIdType { 123 },
+        "Example",
+        {
+            {
+                0,
+                "intProp",
+                int64_t { 0 },
+                /*.Description =*/"A description.",
+                /*.IsScriptable =*/false,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/false,
+                /*.RangeMin =*/ {},
+                /*.RangeMax =*/ {},
+                /*.Options =*/
+                csp::common::Array<Option> {
+                    { "Off", int64_t { 0 } },
+                    { "On", int64_t { 1 } },
+                },
+            },
+            {
+                1,
+                "floatProp",
+                1.0f,
+                /*.Description =*/ {},
+                /*.IsScriptable =*/false,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/false,
+                /*.RangeMin =*/0.0f,
+                /*.RangeMax =*/1.0f,
+            },
+            {
+                2,
+                "stringProp",
+                csp::common::String { "" },
+                /*.Description =*/ {},
+                /*.IsScriptable =*/true,
+                /*.IsDeprecated =*/true,
+            },
+        },
+    };
+
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+
+    ASSERT_TRUE(Result.HasValue());
+    EXPECT_EQ(*Result, Expected);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesReservedProperty)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "prop",
+                "type": "string",
+                "defaultValue": ""
+            },
+            {
+                "key": 1,
+                "reserved": true,
+                "description": "Was prop, removed"
+            }
+        ]
+    })";
+
+    const auto Expected = Schema {
+        Schema::TypeIdType { 123 },
+        "Example",
+        {
+            {
+                0,
+                "prop",
+                csp::common::String { "" },
+            },
+            {
+                1,
+                {},
+                {},
+                /*.Description =*/"Was prop, removed",
+                /*.IsScriptable =*/false,
+                /*.IsDeprecated =*/false,
+                /*.IsReserved =*/true,
+            },
+        },
+    };
+
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+
+    ASSERT_TRUE(Result.HasValue());
+    EXPECT_EQ(*Result, Expected);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesReservedSchema)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 5,
+        "reserved": true,
+        "description": "Was Example, removed"
+    })";
+
+    const auto Expected = Schema {
+        Schema::TypeIdType { 5 },
+        /*.Name =*/ {},
+        /*.Properties =*/ {},
+        /*.Description =*/"Was Example, removed",
+        /*.IsScriptable =*/false,
+        /*.IsReserved =*/true,
+    };
+
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+
+    ASSERT_TRUE(Result.HasValue());
+    EXPECT_EQ(*Result, Expected);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTripReservedSchema)
+{
+    const auto Original = Schema {
+        Schema::TypeIdType { 5 },
+        /*.Name =*/ {},
+        /*.Properties =*/ {},
+        /*.Description =*/"Was Example, removed",
+        /*.IsScriptable =*/false,
+        /*.IsReserved =*/true,
+    };
+
+    const auto Json = Schema::ToJson(Original);
+    const auto Result = Schema::FromJson(Json);
+
+    ASSERT_TRUE(Result.HasValue());
+    EXPECT_EQ(*Result, Original);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsPropertyWithMalformedRange)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "floatProp",
+                "type": "float",
+                "defaultValue": 1.0,
+                "range": { "min": "low", "max": "high" }
+            }
+        ]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsPropertyWithMalformedOption)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "intProp",
+                "type": "int",
+                "defaultValue": 0,
+                "options": [
+                    { "name": "Off", "value": 0 },
+                    { "name": "On" }
+                ]
+            }
+        ]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsOptionsOnUnsupportedPropertyTypes)
+{
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "bool",
+                    "defaultValue": false,
+                    "options": [{ "name": "Off", "value": false }, { "name": "On", "value": true }]
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec2",
+                    "defaultValue": [0.0, 0.0],
+                    "options": [{ "name": "Zero", "value": [0.0, 0.0] }]
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec3",
+                    "defaultValue": [0.0, 0.0, 0.0],
+                    "options": [{ "name": "Zero", "value": [0.0, 0.0, 0.0] }]
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec4",
+                    "defaultValue": [0.0, 0.0, 0.0, 1.0],
+                    "options": [{ "name": "Identity", "value": [0.0, 0.0, 0.0, 1.0] }]
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsRangeOnUnsupportedPropertyTypes)
+{
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "string",
+                    "defaultValue": "",
+                    "range": { "min": "a", "max": "z" }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "bool",
+                    "defaultValue": false,
+                    "range": { "min": false, "max": true }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec2",
+                    "defaultValue": [0.0, 0.0],
+                    "range": { "min": 0.0, "max": 1.0 }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec3",
+                    "defaultValue": [0.0, 0.0, 0.0],
+                    "range": { "min": 0.0, "max": 1.0 }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "vec4",
+                    "defaultValue": [0.0, 0.0, 0.0, 1.0],
+                    "range": { "min": 0.0, "max": 1.0 }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForValidUpdate)

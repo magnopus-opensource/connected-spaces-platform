@@ -86,6 +86,26 @@ namespace
         return std::all_of(Array.begin(), Array.end(), [](const auto& Element) { return Element.IsNumber(); });
     }
 
+    template <typename T> std::optional<T> GetRequired(const rapidjson::Value& Object, const char* Key)
+    {
+        if (!Object.HasMember(Key) || !Object[Key].Is<T>())
+        {
+            return std::nullopt;
+        }
+
+        return Object[Key].Get<T>();
+    }
+
+    template <typename T> T GetOrDefault(const rapidjson::Value& Object, const char* Key, T Default)
+    {
+        if (!Object.HasMember(Key) || !Object[Key].Is<T>())
+        {
+            return std::move(Default);
+        }
+
+        return Object[Key].Get<T>();
+    }
+
     template <typename T> std::optional<csp::common::ReplicatedValue> AsReplicatedValue(std::optional<T> Value)
     {
         if (!Value)
@@ -218,6 +238,76 @@ namespace
         return std::nullopt;
     }
 
+    std::optional<std::pair<csp::common::ReplicatedValue, csp::common::ReplicatedValue>> TryParseRange(
+        const rapidjson::Value& RangeValue, const std::string& Type)
+    {
+        if (!RangeValue.IsObject() || !RangeValue.HasMember("min") || !RangeValue.HasMember("max"))
+        {
+            return std::nullopt;
+        }
+
+        const auto Min = TryParse(Type, RangeValue["min"]);
+        const auto Max = TryParse(Type, RangeValue["max"]);
+
+        if (!Min || !Max)
+        {
+            return std::nullopt;
+        }
+
+        return std::make_pair(*Min, *Max);
+    }
+
+    std::optional<SchemaOption> TryParseOption(const rapidjson::Value& OptionValue, const std::string& Type)
+    {
+        if (!OptionValue.IsObject())
+        {
+            return std::nullopt;
+        }
+
+        const auto Name = GetRequired<const char*>(OptionValue, "name");
+
+        if (!Name)
+        {
+            return std::nullopt;
+        }
+
+        if (!OptionValue.HasMember("value"))
+        {
+            return std::nullopt;
+        }
+
+        const auto Value = TryParse(Type, OptionValue["value"]);
+
+        if (!Value)
+        {
+            return std::nullopt;
+        }
+
+        return SchemaOption {
+            /*Name =*/*Name,
+            /*Value =*/*Value,
+        };
+    }
+
+    std::optional<csp::common::Array<SchemaOption>> TryParseOptions(rapidjson::Value::ConstArray JsonOptions, const std::string& Type)
+    {
+        auto Options = std::vector<SchemaOption> {};
+
+        for (const auto& Element : JsonOptions)
+        {
+            const auto Option = TryParseOption(Element, Type);
+
+            if (!Option)
+            {
+                return std::nullopt;
+            }
+
+            Options.push_back(*Option);
+        }
+
+        return csp::common::Convert(Options);
+    }
+
     std::optional<ComponentProperty> TryParseProperty(const rapidjson::Value& Value, csp::common::LogSystem* LogSystem = nullptr)
     {
         if (!Value.IsObject())
@@ -230,7 +320,9 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("key") || !Value["key"].IsUint())
+        const auto Key = GetRequired<unsigned int>(Value, "key");
+
+        if (!Key)
         {
             if (LogSystem)
             {
@@ -240,7 +332,25 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("name") || !Value["name"].IsString())
+        const auto Description = GetOrDefault<const char*>(Value, "description", "");
+        const auto IsDeprecated = GetOrDefault<bool>(Value, "deprecated", false);
+
+        if (GetOrDefault<bool>(Value, "reserved", false))
+        {
+            return ComponentProperty {
+                /*Key =*/static_cast<ComponentProperty::KeyType>(*Key),
+                /*Name =*/ {},
+                /*DefaultValue =*/ {},
+                /*Description =*/Description,
+                /*IsScriptable =*/false,
+                /*IsDeprecated =*/IsDeprecated,
+                /*IsReserved =*/true,
+            };
+        }
+
+        const auto Name = GetRequired<const char*>(Value, "name");
+
+        if (!Name)
         {
             if (LogSystem)
             {
@@ -250,7 +360,9 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("type") || !Value["type"].IsString())
+        const auto Type = GetRequired<const char*>(Value, "type");
+
+        if (!Type)
         {
             if (LogSystem)
             {
@@ -270,26 +382,109 @@ namespace
             return std::nullopt;
         }
 
-        const auto Key = static_cast<ComponentProperty::KeyType>(Value["key"].GetUint());
-        const auto* Name = Value["name"].GetString();
-        const auto* Type = Value["type"].GetString();
-        const auto DefaultValue = TryParse(Type, Value["defaultValue"]);
+        const auto DefaultValue = TryParse(*Type, Value["defaultValue"]);
 
         if (!DefaultValue)
         {
             if (LogSystem)
             {
                 LogSystem->LogMsg(
-                    csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'defaultValue' is not valid for type '{}'", Type).c_str());
+                    csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'defaultValue' is not valid for type '{}'", *Type).c_str());
             }
 
             return std::nullopt;
         }
 
+        const auto IsScriptable = GetOrDefault<bool>(Value, "scripting", true);
+
+        using csp::common::ReplicatedValueType;
+        const auto ValueType = DefaultValue->GetReplicatedValueType();
+
+        auto RangeMin = csp::common::ReplicatedValue {};
+        auto RangeMax = csp::common::ReplicatedValue {};
+
+        if (Value.HasMember("range"))
+        {
+            if (ValueType != ReplicatedValueType::Integer && ValueType != ReplicatedValueType::Float)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(
+                        csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'range' is not supported for type '{}'", *Type).c_str());
+                }
+
+                return std::nullopt;
+            }
+
+            const auto Range = TryParseRange(Value["range"], *Type);
+
+            if (!Range)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'range' is malformed");
+                }
+
+                return std::nullopt;
+            }
+
+            RangeMin = Range->first;
+            RangeMax = Range->second;
+        }
+
+        auto Options = csp::common::Convert(std::vector<SchemaOption> {});
+
+        if (Value.HasMember("options"))
+        {
+            if (ValueType != ReplicatedValueType::Integer && ValueType != ReplicatedValueType::Float && ValueType != ReplicatedValueType::String)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(
+                        csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'options' is not supported for type '{}'", *Type).c_str());
+                }
+
+                return std::nullopt;
+            }
+
+            const auto JsonOptions = GetRequired<rapidjson::Value::ConstArray>(Value, "options");
+
+            if (!JsonOptions)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'options' must be an array");
+                }
+
+                return std::nullopt;
+            }
+
+            const auto ParsedOptions = TryParseOptions(*JsonOptions, *Type);
+
+            if (!ParsedOptions)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'options' contains an invalid entry");
+                }
+
+                return std::nullopt;
+            }
+
+            Options = *ParsedOptions;
+        }
+
         return ComponentProperty {
-            Key,
-            Name,
-            *DefaultValue,
+            /*Key =*/static_cast<ComponentProperty::KeyType>(*Key),
+            /*Name =*/*Name,
+            /*DefaultValue =*/*DefaultValue,
+            /*Description =*/Description,
+            /*IsScriptable =*/IsScriptable,
+            /*IsDeprecated =*/IsDeprecated,
+            /*IsReserved =*/false,
+            /*RangeMin =*/RangeMin,
+            /*RangeMax =*/RangeMax,
+            /*Options =*/std::move(Options),
         };
     }
 
@@ -325,7 +520,9 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("typeId") || !Value["typeId"].IsUint64())
+        const auto TypeId = GetRequired<uint64_t>(Value, "typeId");
+
+        if (!TypeId)
         {
             if (LogSystem)
             {
@@ -335,7 +532,26 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("name") || !Value["name"].IsString())
+        const auto IsReserved = GetOrDefault<bool>(Value, "reserved", false);
+        const auto Description = GetOrDefault<const char*>(Value, "description", "");
+        const auto IsScriptable = GetOrDefault<bool>(Value, "scripting", true);
+        const auto IsDeprecated = GetOrDefault<bool>(Value, "deprecated", false);
+
+        if (IsReserved)
+        {
+            return ComponentSchema {
+                /*TypeId =*/*TypeId,
+                /*Name =*/ {},
+                /*Properties =*/ {},
+                /*Description =*/Description,
+                /*IsScriptable =*/false,
+                /*IsReserved =*/true,
+            };
+        }
+
+        const auto Name = GetRequired<const char*>(Value, "name");
+
+        if (!Name)
         {
             if (LogSystem)
             {
@@ -345,7 +561,9 @@ namespace
             return std::nullopt;
         }
 
-        if (!Value.HasMember("properties") || !Value["properties"].IsArray())
+        const auto JsonProperties = GetRequired<rapidjson::Value::ConstArray>(Value, "properties");
+
+        if (!JsonProperties)
         {
             if (LogSystem)
             {
@@ -355,7 +573,7 @@ namespace
             return std::nullopt;
         }
 
-        const auto Properties = TryParseProperties(Value["properties"].GetArray(), LogSystem);
+        const auto Properties = TryParseProperties(*JsonProperties, LogSystem);
 
         if (!Properties)
         {
@@ -363,19 +581,74 @@ namespace
         }
 
         return ComponentSchema {
-            Value["typeId"].GetUint64(),
-            Value["name"].GetString(),
-            *Properties,
+            /*TypeId =*/*TypeId,
+            /*Name =*/*Name,
+            /*Properties =*/*Properties,
+            /*Description =*/Description,
+            /*IsScriptable =*/IsScriptable,
+            /*IsReserved =*/false,
+            /*IsDeprecated =*/IsDeprecated,
         };
     }
 
+    void SerializeReplicatedValueMember(csp::json::JsonSerializer& Serializer, const char* Key, const csp::common::ReplicatedValue& Value)
+    {
+        using csp::common::ReplicatedValueType;
+
+        switch (Value.GetReplicatedValueType())
+        {
+        case ReplicatedValueType::Float:
+            Serializer.SerializeMember(Key, Value.GetFloat());
+            break;
+        case ReplicatedValueType::Integer:
+            Serializer.SerializeMember(Key, Value.GetInt());
+            break;
+        case ReplicatedValueType::String:
+            Serializer.SerializeMember(Key, Value.GetString());
+            break;
+        default:
+            break;
+        }
+    }
+
 } // namespace
+
+struct PropertyRange
+{
+    csp::common::ReplicatedValue Min;
+    csp::common::ReplicatedValue Max;
+};
+
+void ToJson(csp::json::JsonSerializer& Serializer, const PropertyRange& Range)
+{
+    SerializeReplicatedValueMember(Serializer, "min", Range.Min);
+    SerializeReplicatedValueMember(Serializer, "max", Range.Max);
+}
+
+void ToJson(csp::json::JsonSerializer& Serializer, const SchemaOption& Option)
+{
+    Serializer.SerializeMember("name", Option.Name);
+    SerializeReplicatedValueMember(Serializer, "value", Option.Value);
+}
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentProperty& Property)
 {
     using csp::common::ReplicatedValueType;
 
     Serializer.SerializeMember("key", static_cast<uint32_t>(Property.Key));
+
+    if (Property.IsReserved)
+    {
+        Serializer.SerializeMember("reserved", true);
+
+        if (!Property.Description.IsEmpty())
+        {
+            Serializer.SerializeMember("description", Property.Description);
+        }
+
+        return;
+    }
+
     Serializer.SerializeMember("name", Property.Name);
 
     switch (Property.DefaultValue.GetReplicatedValueType())
@@ -404,13 +677,66 @@ void ToJson(csp::json::JsonSerializer& Serializer, const ComponentProperty& Prop
     default:
         break;
     }
+
+    if (!Property.Description.IsEmpty())
+    {
+        Serializer.SerializeMember("description", Property.Description);
+    }
+
+    if (!Property.IsScriptable)
+    {
+        Serializer.SerializeMember("scripting", false);
+    }
+
+    if (Property.IsDeprecated)
+    {
+        Serializer.SerializeMember("deprecated", true);
+    }
+
+    if (Property.HasRange())
+    {
+        Serializer.SerializeMember("range", PropertyRange { Property.RangeMin, Property.RangeMax });
+    }
+
+    if (!Property.Options.IsEmpty())
+    {
+        Serializer.SerializeMember("options", Property.Options);
+    }
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentSchema& Schema)
 {
     Serializer.SerializeMember("typeId", Schema.TypeId);
+
+    if (Schema.IsReserved)
+    {
+        Serializer.SerializeMember("reserved", true);
+
+        if (!Schema.Description.IsEmpty())
+        {
+            Serializer.SerializeMember("description", Schema.Description);
+        }
+
+        return;
+    }
+
     Serializer.SerializeMember("name", Schema.Name);
     Serializer.SerializeMember("properties", Schema.Properties);
+
+    if (!Schema.Description.IsEmpty())
+    {
+        Serializer.SerializeMember("description", Schema.Description);
+    }
+
+    if (!Schema.IsScriptable)
+    {
+        Serializer.SerializeMember("scripting", false);
+    }
+
+    if (Schema.IsDeprecated)
+    {
+        Serializer.SerializeMember("deprecated", true);
+    }
 }
 
 csp::common::String ComponentSchema::ToJson(const ComponentSchema& Schema) { return csp::json::JsonSerializer::Serialize(Schema); }
