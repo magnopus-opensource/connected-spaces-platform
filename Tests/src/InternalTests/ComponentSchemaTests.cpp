@@ -699,6 +699,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetPrope
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
 {
     using Property = csp::multiplayer::ComponentProperty;
+    using Option = csp::multiplayer::SchemaOption;
 
     {
         const auto A = Property {
@@ -749,6 +750,134 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
             0,
             "name",
             "other",
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/"a description",
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/false,
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/true,
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/true,
+        };
+        const auto B = Property {
+            0,
+            "name",
+            "value",
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/false,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            1.0f,
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/false,
+            /*.RangeMin =*/0.0f,
+            /*.RangeMax =*/1.0f,
+        };
+        const auto B = Property {
+            0,
+            "name",
+            1.0f,
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/false,
+            /*.RangeMin =*/ {},
+            /*.RangeMax =*/ {},
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            int64_t { 0 },
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/false,
+            /*.RangeMin =*/ {},
+            /*.RangeMax =*/ {},
+            /*.Options =*/
+            csp::common::Array<Option> {
+                { "Off", int64_t { 0 } },
+                { "On", int64_t { 1 } },
+            },
+        };
+        const auto B = Property {
+            0,
+            "name",
+            int64_t { 0 },
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsDeprecated =*/false,
+            /*.IsReserved =*/false,
+            /*.RangeMin =*/ {},
+            /*.RangeMax =*/ {},
+            /*.Options =*/ {},
         };
         EXPECT_NE(A, B);
     }
@@ -872,6 +1001,78 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                     "other",
                 },
             },
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/"A description.",
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/false,
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/false,
+            /*.IsReserved =*/true,
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/false,
+            /*.IsReserved =*/false,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsReserved =*/false,
+            /*.IsDeprecated =*/true,
+        };
+        const auto B = Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/true,
+            /*.IsReserved =*/false,
+            /*.IsDeprecated =*/false,
         };
         EXPECT_NE(A, B);
     }

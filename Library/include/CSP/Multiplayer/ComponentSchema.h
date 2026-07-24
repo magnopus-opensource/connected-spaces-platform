@@ -57,6 +57,21 @@ public:
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
 
+    /// @brief Optional human-readable description of this component type.
+    csp::common::String Description;
+
+    /// @brief Whether this component is exposed to scripting. Defaults to true.
+    /// When false, no properties on this component are scriptable regardless of their individual
+    /// @ref ComponentProperty::IsScriptable setting. When true, individual properties may still
+    /// opt out via their own @ref ComponentProperty::IsScriptable flag.
+    bool IsScriptable = true;
+
+    /// @brief Whether this component type slot is reserved for wire compatibility with no intended API surface.
+    bool IsReserved = false;
+
+    /// @brief Whether this component is deprecated.
+    bool IsDeprecated = false;
+
     bool operator==(const ComponentSchema& Other) const;
     bool operator!=(const ComponentSchema& Other) const;
 };

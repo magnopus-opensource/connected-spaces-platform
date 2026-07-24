@@ -16,12 +16,29 @@
 
 #include "CSP/Multiplayer/ComponentProperty.h"
 
+#include "CSP/Common/ReplicatedValue.h"
+
 namespace csp::multiplayer
 {
 
+bool SchemaOption::operator==(const SchemaOption& Other) const
+{
+    return Name == Other.Name && Value == Other.Value;
+}
+
+bool SchemaOption::operator!=(const SchemaOption& Other) const { return !(*this == Other); }
+
+bool ComponentProperty::HasRange() const
+{
+    const auto Type = DefaultValue.GetReplicatedValueType();
+    return RangeMin.GetReplicatedValueType() == Type && RangeMax.GetReplicatedValueType() == Type;
+}
+
 bool ComponentProperty::operator==(const ComponentProperty& Other) const
 {
-    return Key == Other.Key && Name == Other.Name && DefaultValue == Other.DefaultValue;
+    return Key == Other.Key && Name == Other.Name && DefaultValue == Other.DefaultValue && Description == Other.Description
+        && IsScriptable == Other.IsScriptable && IsDeprecated == Other.IsDeprecated && IsReserved == Other.IsReserved
+        && RangeMin == Other.RangeMin && RangeMax == Other.RangeMax && Options == Other.Options;
 }
 
 bool ComponentProperty::operator!=(const ComponentProperty& Other) const { return !(*this == Other); }

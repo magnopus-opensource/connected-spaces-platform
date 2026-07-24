@@ -23,6 +23,18 @@
 namespace csp::multiplayer
 {
 
+/// @brief A named value option for a property, pairing a human-readable label with its
+/// corresponding replicated value.
+class CSP_API SchemaOption
+{
+public:
+    csp::common::String Name;
+    csp::common::ReplicatedValue Value;
+
+    bool operator==(const SchemaOption& Other) const;
+    bool operator!=(const SchemaOption& Other) const;
+};
+
 /// @brief Represents an individual data field, or "property", within a component schema,
 /// consisting of a stable ID/key, a type kind and default value (via ReplicatedValue),
 /// and other metadata.
@@ -37,7 +49,7 @@ public:
     /// multiplayer connection.
     KeyType Key;
 
-    /// @brief A human-readable name describing this propery (in `camelCase`).
+    /// @brief A human-readable name describing this property (in `camelCase`).
     /// Must be unique within the component (two properties should not have the same name).
     /// This name will be used for generating script bindings i.e. a property with this name will
     /// be exposed on the component in scripts.
@@ -47,6 +59,30 @@ public:
     /// property, which is considered static i.e. if the value is a `float`, it can't be later
     /// changed to hold a `String`.
     csp::common::ReplicatedValue DefaultValue;
+
+    /// @brief Optional human-readable description of this property.
+    csp::common::String Description;
+
+    /// @brief Whether this property is exposed to scripting. Defaults to true.
+    bool IsScriptable = true;
+
+    /// @brief Whether this property is deprecated.
+    bool IsDeprecated = false;
+
+    /// @brief Whether this key slot is reserved for wire compatibility with no intended API surface.
+    bool IsReserved = false;
+
+    /// @brief Lower bound of the valid range. InvalidType indicates no range is set.
+    csp::common::ReplicatedValue RangeMin;
+
+    /// @brief Upper bound of the valid range. Only meaningful when RangeMin is set.
+    csp::common::ReplicatedValue RangeMax;
+
+    /// @brief Named discrete values for this property. Empty if not enum-valued.
+    csp::common::Array<SchemaOption> Options;
+
+    /// @brief Returns true if a range constraint is set on this property.
+    bool HasRange() const;
 
     bool operator==(const ComponentProperty& Other) const;
     bool operator!=(const ComponentProperty& Other) const;

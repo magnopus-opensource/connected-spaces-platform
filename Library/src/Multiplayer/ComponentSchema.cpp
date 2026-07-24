@@ -470,7 +470,8 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 
 bool ComponentSchema::operator==(const ComponentSchema& Other) const
 {
-    return TypeId == Other.TypeId && Name == Other.Name && Properties == Other.Properties;
+    return TypeId == Other.TypeId && Name == Other.Name && Properties == Other.Properties && Description == Other.Description
+        && IsScriptable == Other.IsScriptable && IsReserved == Other.IsReserved && IsDeprecated == Other.IsDeprecated;
 }
 
 bool ComponentSchema::operator!=(const ComponentSchema& Other) const { return !(*this == Other); }
