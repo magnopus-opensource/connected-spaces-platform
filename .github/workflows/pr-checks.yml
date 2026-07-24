@@ -42,11 +42,7 @@ jobs:
       upload_package: false
       run_tests: true
 
-      - name: Run Tests
-        if: matrix.config.build_type == 'Debug'
-        env:
-          MCS_X_WAF_BYPASS: ${{ secrets.MCS_BYPASS }}
-        shell: bash
-        run: |
-          cd WasmTesting
-          ./run-csp-wasm-tests.cmd
+  local-mcs-tests:
+    uses: ./.github/workflows/local-mcs-tests-run.yml
+    secrets: inherit
+    needs: desktop
