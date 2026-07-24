@@ -71,7 +71,12 @@ inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty
 
 inline bool IsScriptable(const ComponentProperty& Property)
 {
-    return IsScriptable(Property.Name)
+    if (Property.IsReserved)
+    {
+        return false;
+    }
+
+    return Property.IsScriptable && IsScriptable(Property.Name)
         && std::visit(
             [](const auto& V)
             {
@@ -83,10 +88,15 @@ inline bool IsScriptable(const ComponentProperty& Property)
 
 inline bool IsScriptable(const ComponentSchema& Schema)
 {
+    if (Schema.IsReserved)
+    {
+        return false;
+    }
+
     const auto HasScriptableProperties = [&](const auto& Properties)
     { return std::any_of(Properties.begin(), Properties.end(), [](const auto& Property) { return IsScriptable(Property); }); };
 
-    return IsScriptable(Schema.Name) && HasScriptableProperties(Schema.Properties);
+    return Schema.IsScriptable && IsScriptable(Schema.Name) && HasScriptableProperties(Schema.Properties);
 }
 
 } // namespace csp::multiplayer

@@ -812,7 +812,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleScriptab
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
 }
 
-CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaComponentsOneNonScriptable)
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaComponentsSomeNonScriptable)
 {
     auto Fixture = TestFixture({
         Schema {
@@ -835,7 +835,30 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                     "value",
                     "Hello",
                 },
+                {
+                    1,
+                    "nonScriptableProperty",
+                    "Hidden",
+                    /*.Description =*/ {},
+                    /*.IsScriptable =*/false,
+                },
+                {
+                    2,
+                    {},
+                    {},
+                    /*.Description =*/"Was a property, now reserved",
+                    /*.IsScriptable =*/false,
+                    /*.IsDeprecated =*/false,
+                    /*.IsReserved =*/true,
+                },
             },
+        },
+        Schema {
+            Schema::TypeIdType { 456 },
+            "NonScriptable",
+            {},
+            /*.Description =*/ {},
+            /*.IsScriptable =*/false,
         },
     });
 
@@ -849,6 +872,10 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                 Schema::TypeIdType { 321 },
                 TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
             },
+            TestFixture::Entity::ComponentCreationArgs {
+                Schema::TypeIdType { 456 },
+                TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
+            },
         });
 
     // Test script ensures that getScriptableComponents still gets registered despite a
@@ -856,7 +883,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
     constexpr auto ScriptText = R"(
         import { assert } from "CSPTest";
 
-        assert(typeof ThisEntity.getScriptableComponents === "function", "Scriptable component getter exists");
+        assert(typeof ThisEntity.getScriptableComponents === "function", "getScriptableComponents should exist");
+        assert(typeof ThisEntity.getNonScriptableComponents === "undefined", "getNonScriptableComponents should not exist");
+
+        const scriptable = ThisEntity.getScriptableComponents()[0];
+        assert("value" in scriptable, "value should be exposed");
+        assert(!("nonScriptableProperty" in scriptable), "nonScriptableProperty should not be exposed");
     )";
 
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
