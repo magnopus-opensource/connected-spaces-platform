@@ -1,0 +1,97 @@
+name: Publish CSP
+
+on: 
+
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        type: boolean
+        description: 'Whether tests should be skipped'
+        required: true
+        default: false
+      
+      create_release:
+        type: boolean
+        description: 'Whether a Github release should be created'
+        required: true
+        default: false
+
+      release_number:
+        type: string
+        description: 'Version number of this release'
+        required: true
+
+      # Choose platforms
+jobs:
+  desktop:
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      upload_test_build: ${{ !inputs.skip_tests }}
+      upload_install: ${{ inputs.create_release }}
+
+  wasm:
+    uses: ./.github/workflows/wasm-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  android:
+    uses: ./.github/workflows/android-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  ios-visionos:
+    uses: ./.github/workflows/ios-visionos-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  legacy-wasm:
+    uses: ./.github/workflows/legacy-wasm-build.yml
+    secrets: inherit
+    with:
+      upload_package: ${{ inputs.create_release }}
+      run_tests: ${{ !inputs.skip_tests }}
+
+  live-desktop-tests:
+    if: ${{ !inputs.skip_tests }}
+    uses: ./.github/workflows/live-mcs-tests-run.yml
+    secrets: inherit
+    needs: desktop
+  
+  upload-releases:
+    uses: ./.github/workflows/upload-releases.yml
+    with:
+      release_number: ${{ inputs.release_number }}
+
+    needs:
+    - desktop
+    - live-desktop-tests
+    - legacy-wasm
+    - android
+    - ios-visionos
+
+    if: |
+      always() &&
+        inputs.create_release &&
+        needs.desktop.result == 'success' &&
+        needs.legacy-wasm.result == 'success' &&
+        needs.android.result == 'success' &&
+        needs.ios-visionos.result == 'success' &&
+        (
+          needs.live-desktop-tests.result == 'success' ||
+          needs.live-desktop-tests.result == 'skipped'
+        )
+
+  publish-npm-sandbox:
+    uses: ./.github/workflows/publish-legacy-npm.yml
+    needs:
+      - legacy-wasm
+      - live-desktop-tests
+
+    if: |
+      always() &&
+      inputs.create_release &&
+      needs.legacy-wasm.result == 'success' &&
+      (
+        needs.live-desktop-tests.result == 'success' ||
+        needs.live-desktop-tests.result == 'skipped'
+      )
