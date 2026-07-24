@@ -21,30 +21,64 @@ on:
         description: 'Version number of this release'
         required: true
 
-      # Choose platforms
+      build_desktop:
+        type: boolean
+        description: Build desktop packages
+        required: true
+        default: true
+
+      build_wasm:
+        type: boolean
+        description: Build modern WASM packages
+        required: true
+        default: true
+
+      build_android:
+        type: boolean
+        description: Build Android packages
+        required: true
+        default: true
+
+      build_ios_visionos:
+        type: boolean
+        description: Build iOS and visionOS packages
+        required: true
+        default: true
+
+      build_legacy_wasm:
+        type: boolean
+        description: Build legacy WASM/NPM package
+        required: true
+        default: true
+
 jobs:
   desktop:
+    if: inputs.build_desktop
     uses: ./.github/workflows/desktop-build.yml
     with:
       upload_test_build: ${{ !inputs.skip_tests }}
       upload_install: ${{ inputs.create_release }}
 
   wasm:
+    if: inputs.build_wasm
     uses: ./.github/workflows/wasm-build.yml
     with:
       upload_install: ${{ inputs.create_release }}
 
   android:
+    if: inputs.build_android
     uses: ./.github/workflows/android-build.yml
     with:
       upload_install: ${{ inputs.create_release }}
 
   ios-visionos:
+    if: inputs.build_ios_visionos
     uses: ./.github/workflows/ios-visionos-build.yml
     with:
       upload_install: ${{ inputs.create_release }}
 
   legacy-wasm:
+    if: inputs.build_legacy_wasm
     uses: ./.github/workflows/legacy-wasm-build.yml
     secrets: inherit
     with:
@@ -52,7 +86,7 @@ jobs:
       run_tests: ${{ !inputs.skip_tests }}
 
   live-desktop-tests:
-    if: ${{ !inputs.skip_tests }}
+    if: inputs.build_desktop && !inputs.skip_tests
     uses: ./.github/workflows/live-mcs-tests-run.yml
     secrets: inherit
     needs: desktop
