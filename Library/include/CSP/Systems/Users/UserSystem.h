@@ -327,7 +327,7 @@ public:
     void RegisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::AccessControlChangedNetworkEventData& NetworkEventData);
 
     /// The IAuthContext object is owned by the UserSystem, and will be destroyed when the UserSystem is destroyed.
     CSP_NO_EXPORT csp::common::IAuthContext& GetAuthContext();

@@ -2,7 +2,44 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.47.0]
+
+###  🔨 🔨 Chore
+
+- [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn
+  Remove backwards compatibility logic for legacy `AsyncCallCompleted` event data structure.
+
 ## [6.46.0]
+
+### 🔌 API Changes
+
+#### NetworkEventBus
+- 🔄 **Updated:** `ListenNetworkEvent(NeworkEventRegistration Registration, NetworkEventCallback Callback)` → `ListenCustomNetworkEvent(String EventReceiverId, String EventName, NetworkEventCallback Callback)`
+- 🔄 **Updated:** `StopListenNetworkEvent(NeworkEventRegistration Registration)` → `StopListenCustomNetworkEvent(String EventReceiverId, String EventName)`
+
+- ➕ **Added:** `ListenAccessControlChangedEvent(String EventReceiverId, AccessControlChangedEventCallback Callback)`
+- ➕ **Added:** `ListenAssetDetailBlobChangedEvent(String EventReceiverId, AssetDetailBlobChangedEventCallback Callback)`
+- ➕ **Added:** `ListenAsyncCallCompletedEvent(String EventReceiverId, String OperationName, AsyncCallCompletedEventCallback Callback)`
+- ➕ **Added:** `ListenConversationEvent(String EventReceiverId, ConversationEventCallback Callback)`
+- ➕ **Added:** `ListenSequenceChangedEvent(String EventReceiverId, SequenceChangedEventCallback Callback)`
+- ➕ **Added:** `StopListenAccessControlChangedEvent(String EventReceiverId)`
+- ➕ **Added:** `StopListenAssetDetailBlobChangedEvent(String EventReceiverId)`
+- ➕ **Added:** `StopListenAsyncCallCompletedEvent(String EventReceiverId, String OperationName)`
+- ➕ **Added:** `StopListenConversationEvent(String EventReceiverId)`
+- ➕ **Added:** `StopListenSequenceChangedEvent(String EventReceiverId)`
+
+#### SpaceSystem
+- ➖ **Removed:** `SetAsyncCallCompletedCallback()`
+- ➖ **Removed:** `OnAsyncCallCompletedEvent()`
+
+### 🔥 ❗Breaking Changes
+
+- [OF-1886] feat!: Expose event specializations via network event bus. By @MAG-AdamThorn
+  Added new dedicated Listen and StopListen methods for our event specializations, as well as dedicated std::unordered_map containers and callbacks for each event type. The existing `ListenNetworkEvent` and `StopListenNetworkEvent` methods have been renamed to `ListenCustomNetworkEvent` and `StopListenNetworkEvent` to better reflect their purpose as a means for clients to register their own custom events. In addition, rather than take a NetworkEventRegistration as an argument they now take EventReceiverId and EventName strings directly. This aligns usage with the new event specialization methods.
+  The `SpaceSystem` has a `DuplicateSpaceAsync` method which fires the AsyncCallCompleted event on completion of the operation. The SpaceSystem had dedicated API for registering a callback with this event and for responding to its firing. Now that the event specializations have been added to the NetworkEventBus, including Listen and StopListen methods for AsyncCallCompleted, the SpaceSystem no longer requires this functionality and it has been removed.
+  The existing NetworkEventBus tests have been updated to reflect the change to the `ListenNetworkEvent` and `StopListenNetworkEvent` method signatures. Tests have also been added to verify that the new Event Specialization methods work correctly. I have elected to test just those related to `AsyncCallCompleted` as they all delegate to shared logic internally.
+  Please see the API Changes section above for further details.
+
 
 ### 💫 💥 Code Refactors
 

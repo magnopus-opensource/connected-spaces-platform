@@ -27,6 +27,74 @@
 #include <limits>
 #include <signalrclient/signalr_value.h>
 
+namespace
+{
+
+// Serialises a single ReplicatedValue into a [TypeId, [Field]] signalr::value that is expected by the MCS ItemComponentData wire format.
+signalr::value SerialiseReplicatedValueToSignalRValue(const csp::common::ReplicatedValue& Value)
+{
+    using namespace csp::multiplayer;
+
+    switch (Value.GetReplicatedValueType())
+    {
+    case csp::common::ReplicatedValueType::Boolean:
+    {
+        std::vector<signalr::value> Fields { Value.GetBool() };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), Fields };
+    }
+    case csp::common::ReplicatedValueType::Integer:
+    {
+        std::vector<signalr::value> Fields { Value.GetInt() };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), Fields };
+    }
+    case csp::common::ReplicatedValueType::Float:
+    {
+        std::vector<signalr::value> Fields { Value.GetFloat() };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), Fields };
+    }
+    case csp::common::ReplicatedValueType::String:
+    {
+        std::vector<signalr::value> Fields { Value.GetString().c_str() };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), Fields };
+    }
+    case csp::common::ReplicatedValueType::Vector2:
+    {
+        auto Vector = Value.GetVector2();
+        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y } };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
+    }
+    case csp::common::ReplicatedValueType::Vector3:
+    {
+        auto Vector = Value.GetVector3();
+        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z } };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
+    }
+    case csp::common::ReplicatedValueType::Vector4:
+    {
+        auto Vector = Value.GetVector4();
+        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W } };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
+    }
+    case csp::common::ReplicatedValueType::StringMap:
+    {
+        std::map<std::string, signalr::value> StringMap;
+
+        for (const auto& [Key, MapValue] : Value.GetStringMap())
+        {
+            StringMap[Key.c_str()] = SerialiseReplicatedValueToSignalRValue(MapValue);
+        }
+
+        std::vector<signalr::value> Fields { StringMap };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING_DICTIONARY), Fields };
+    }
+    default:
+        assert(false && "Argument csp::common::ReplicatedValueType is unsupported.");
+        return signalr::value();
+    }
+}
+
+} // namespace
+
 namespace csp::multiplayer
 {
 
@@ -78,85 +146,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     for (size_t i = 0; i < Arguments.Size(); ++i)
     {
-        switch (Arguments[i].GetReplicatedValueType())
-        {
-        case csp::common::ReplicatedValueType::Boolean:
-        {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetBool());
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::Integer:
-        {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetInt());
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::Float:
-        {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetFloat());
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::String:
-        {
-            std::vector<signalr::value> Fields;
-            Fields.push_back(Arguments[i].GetString().c_str());
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::Vector2:
-        {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector2();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y });
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::Vector3:
-        {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector3();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z });
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        case csp::common::ReplicatedValueType::Vector4:
-        {
-            std::vector<signalr::value> Fields;
-            auto Vector = Arguments[i].GetVector4();
-            Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W });
-
-            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-            Components.insert({ i, Component });
-
-            break;
-        }
-        default:
-            assert(false && "Argument csp::common::ReplicatedValueType is unsupported.");
-            break;
-        }
+        Components.insert({ i, SerialiseReplicatedValueToSignalRValue(Arguments[i]) });
     }
 
     /*
