@@ -35,14 +35,12 @@ jobs:
     with:
       upload_install: false
 
-      - name: Build Emscripten
-        uses: ./.github/actions/build-legacy-emscripten
-        with:
-          build_type: ${{ matrix.config.build_type }}
-          configure_preset: ${{ matrix.config.preset_prefix }}-static
-          build_preset: ${{ matrix.config.preset_prefix }}-static
-          output_folder: build/emscripten-${{ matrix.config.preset_prefix }}
-          build_folder: build/emscripten-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
+  legacy-wasm:
+    uses: ./.github/workflows/legacy-wasm-build.yml
+    secrets: inherit
+    with:
+      upload_package: false
+      run_tests: true
 
       - name: Run Tests
         if: matrix.config.build_type == 'Debug'

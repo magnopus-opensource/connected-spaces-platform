@@ -15,10 +15,6 @@ inputs:
     description: "CMake build preset to use. Run cmake --build --list-presets to list available presets."
     required: true
 
-  build_folder:
-    description: "CMake build directory to install from. This can change depending on the generator used."
-    required: true
-
   output_folder:
     description: "Conan output folder"
     required: true
@@ -28,15 +24,6 @@ runs:
   using: "composite"
 
   steps:
-
-    - name: Generate wrapper
-      shell: bash
-      run: |
-        set -euxo pipefail
-
-        pip install chevron
-        pip install jinja2
-        python Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
 
     - name: Install Conan
       uses: conan-io/setup-conan@v1
@@ -65,11 +52,3 @@ runs:
       run: |
         set -euxo pipefail
         cmake --build --preset "${{ inputs.build_preset }}"
-
-    - name: Create Package
-      shell: bash
-      run: |
-        set -euxo pipefail
-        ./LegacyEmscriptenWrapper/GenerateLegacyEmscriptenPackage.sh \
-          "${{ inputs.build_type }}" \
-          "${{ inputs.build_folder }}"
