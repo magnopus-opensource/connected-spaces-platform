@@ -34,8 +34,6 @@ std::optional<ComponentType> ToComponentType(uint64_t TypeId);
 
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
-const csp::common::Array<ComponentSchema>& GetAllComponentSchemas();
-
 const ComponentSchema& GetStaticModelSchema();
 const ComponentSchema& GetAnimatedModelSchema();
 const ComponentSchema& GetVideoPlayerSchema();
