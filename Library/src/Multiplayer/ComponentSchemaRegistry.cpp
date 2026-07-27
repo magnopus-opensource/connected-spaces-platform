@@ -480,7 +480,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "name": "volume",
         "type": "float",
         "defaultValue": 1.0,
-        "scripting": false
+        "range": {
+          "min": 0.0,
+          "max": 1.0
+        }
       },
       {
         "key": 24,
@@ -1410,7 +1413,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "name": "volume",
         "type": "float",
         "defaultValue": 1.0,
-        "scripting": false
+        "range": {
+          "min": 0.0,
+          "max": 1.0
+        }
       },
       {
         "key": 9,

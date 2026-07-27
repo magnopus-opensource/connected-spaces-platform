@@ -446,11 +446,6 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, cs
 
 void BindComponents(qjs::Context::Module* Module)
 {
-    Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
-
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -472,11 +467,6 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&SplineSpaceComponentScriptInterface::SetWaypoints>("setWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
-
-    Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
