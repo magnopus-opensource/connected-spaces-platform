@@ -31,9 +31,29 @@ namespace csp::multiplayer
 constexpr const auto* BuiltinSchemasJson = R"(
 [
   {
+    "typeId": 0,
+    "reserved": true,
+    "description": "Invalid. Sentinel value, not a real component type."
+  },
+  {
+    "typeId": 1,
+    "reserved": true,
+    "description": "Was Core, removed"
+  },
+  {
+    "typeId": 2,
+    "reserved": true,
+    "description": "Was UIController, removed"
+  },
+  {
     "typeId": 3,
     "name": "StaticModel",
     "properties": [
+      {
+        "key": 0,
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
+      },
       {
         "key": 1,
         "name": "externalResourceAssetId",
@@ -102,6 +122,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": true
       },
       {
+        "key": 10,
+        "reserved": true,
+        "description": "materialOverrides: Map<String, String>. No equivalent type currently supported."
+      },
+      {
         "key": 11,
         "name": "isVirtualVisible",
         "type": "bool",
@@ -125,6 +150,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "typeId": 4,
     "name": "AnimatedModel",
     "properties": [
+      {
+        "key": 0,
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
+      },
       {
         "key": 1,
         "name": "externalResourceAssetId",
@@ -187,6 +217,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": true
       },
       {
+        "key": 9,
+        "reserved": true,
+        "description": "Reserved slot in AnimatedModelPropertyKeys"
+      },
+      {
         "key": 10,
         "name": "animationIndex",
         "type": "int",
@@ -211,6 +246,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": true
       },
       {
+        "key": 14,
+        "reserved": true,
+        "description": "materialOverrides: Map<String, String>. No equivalent type currently supported."
+      },
+      {
         "key": 15,
         "name": "isVirtualVisible",
         "type": "bool",
@@ -229,6 +269,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": false
       }
     ]
+  },
+  {
+    "typeId": 5,
+    "reserved": true,
+    "description": "Was MediaSurface, removed"
   },
   {
     "typeId": 6,
@@ -357,9 +402,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 18,
-        "name": "",
-        "type": "int",
-        "defaultValue": 0
+        "reserved": true,
+        "description": "Unused key `MeshComponentId` from original `VideoPlayerPropertyKeys` enum"
       },
       {
         "key": 19,
@@ -398,6 +442,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": 1
       }
     ]
+  },
+  {
+    "typeId": 7,
+    "reserved": true,
+    "description": "Was ImageSequencer, removed"
   },
   {
     "typeId": 8,
@@ -502,9 +551,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 3,
-        "name": "",
-        "type": "int",
-        "defaultValue": -1
+        "reserved": true,
+        "description": "Was avatarMeshIndex"
       },
       {
         "key": 4,
@@ -514,9 +562,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 5,
-        "name": "",
-        "type": "string",
-        "defaultValue": ""
+        "reserved": true,
+        "description": "Was customAvatarUrl"
       },
       {
         "key": 6,
@@ -620,6 +667,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "typeId": 10,
     "name": "Light",
     "properties": [
+      {
+        "key": 0,
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
+      },
       {
         "key": 1,
         "name": "lightType",
@@ -735,6 +787,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "typeId": 11,
     "name": "Button",
     "properties": [
+      {
+        "key": 0,
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
+      },
       {
         "key": 1,
         "name": "labelText",
@@ -987,6 +1044,16 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": ""
       },
       {
+        "key": 6,
+        "reserved": true,
+        "description": "Was Date, deprecated and removed"
+      },
+      {
+        "key": 7,
+        "reserved": true,
+        "description": "Was NumberOfReplies, deprecated and removed"
+      },
+      {
         "key": 8,
         "name": "resolved",
         "type": "bool",
@@ -1027,21 +1094,18 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 1,
-        "name": "",
-        "type": "bool",
-        "defaultValue": true
+        "reserved": true,
+        "description": "Was IsVisible, retained for wire compatibility"
       },
       {
         "key": 2,
-        "name": "",
-        "type": "bool",
-        "defaultValue": true
+        "reserved": true,
+        "description": "Was IsActive, retained for wire compatibility"
       },
       {
         "key": 3,
-        "name": "",
-        "type": "bool",
-        "defaultValue": true
+        "reserved": true,
+        "description": "Was IsARVisible, retained for wire compatibility"
       },
       {
         "key": 4,
@@ -1145,15 +1209,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
   },
   {
     "typeId": 18,
-    "name": "Spline",
-    "properties": [
-      {
-        "key": 0,
-        "name": "",
-        "type": "float",
-        "defaultValue": 0.0
-      }
-    ]
+    "reserved": true,
+    "description": "Spline component. Key 0 stores waypoint count, keys 1..N store Vector3 waypoints at runtime. Dynamic keys are not unrepresentable as a static schema."
   },
   {
     "typeId": 19,
@@ -1234,9 +1291,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "properties": [
       {
         "key": 0,
-        "name": "",
-        "type": "string",
-        "defaultValue": ""
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
       },
       {
         "key": 1,
@@ -1259,6 +1315,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
           0.0,
           0.0
         ]
+      },
+      {
+        "key": 4,
+        "reserved": true,
+        "description": "Was Rotation, reserved as Rotation_NOT_USED in ReflectionPropertyKeys"
       },
       {
         "key": 5,
@@ -1497,6 +1558,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "name": "GaussianSplat",
     "properties": [
       {
+        "key": 0,
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
+      },
+      {
         "key": 1,
         "name": "externalResourceAssetId",
         "type": "string",
@@ -1707,9 +1773,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 2,
-        "name": "",
-        "type": "string",
-        "defaultValue": ""
+        "reserved": true,
+        "description": "Was name, superseded by component-level naming"
       },
       {
         "key": 3,
@@ -1969,6 +2034,11 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "defaultValue": 0
       }
     ]
+  },
+  {
+    "typeId": 56,
+    "reserved": true,
+    "description": "An implementation detail of component deletion on the wire. Not a real component type."
   }
 ]
 )";
@@ -1978,37 +2048,37 @@ static csp::common::Array<ComponentSchema> ParseBuiltinSchemas()
     auto Docs = csp::common::List<csp::common::String> {};
     Docs.Append(BuiltinSchemasJson);
     const auto Schemas = ComponentSchemasFromJson(Docs);
-    assert(Schemas.Size() == 25 && "Not all built-in schemas could be parsed from JSON");
+    assert(Schemas.Size() == 31 && "Not all built-in schemas could be parsed from JSON");
     return Schemas;
 }
 
 const auto AllSchemas = ParseBuiltinSchemas();
 
-const ComponentSchema& GetStaticModelSchema() { return AllSchemas[0]; }
-const ComponentSchema& GetAnimatedModelSchema() { return AllSchemas[1]; }
-const ComponentSchema& GetVideoPlayerSchema() { return AllSchemas[2]; }
-const ComponentSchema& GetExternalLinkSchema() { return AllSchemas[3]; }
-const ComponentSchema& GetAvatarSchema() { return AllSchemas[4]; }
-const ComponentSchema& GetLightSchema() { return AllSchemas[5]; }
-const ComponentSchema& GetButtonSchema() { return AllSchemas[6]; }
-const ComponentSchema& GetImageSchema() { return AllSchemas[7]; }
-const ComponentSchema& GetScriptSchema() { return AllSchemas[8]; }
-const ComponentSchema& GetCustomSchema() { return AllSchemas[9]; }
-const ComponentSchema& GetConversationSchema() { return AllSchemas[10]; }
-const ComponentSchema& GetPortalSchema() { return AllSchemas[11]; }
-const ComponentSchema& GetAudioSchema() { return AllSchemas[12]; }
-const ComponentSchema& GetSplineSchema() { return AllSchemas[13]; }
-const ComponentSchema& GetCollisionSchema() { return AllSchemas[14]; }
-const ComponentSchema& GetReflectionSchema() { return AllSchemas[15]; }
-const ComponentSchema& GetFogSchema() { return AllSchemas[16]; }
-const ComponentSchema& GetECommerceSchema() { return AllSchemas[17]; }
-const ComponentSchema& GetFiducialMarkerSchema() { return AllSchemas[18]; }
-const ComponentSchema& GetGaussianSplatSchema() { return AllSchemas[19]; }
-const ComponentSchema& GetTextSchema() { return AllSchemas[20]; }
-const ComponentSchema& GetHotspotSchema() { return AllSchemas[21]; }
-const ComponentSchema& GetCinematicCameraSchema() { return AllSchemas[22]; }
-const ComponentSchema& GetScreenSharingSchema() { return AllSchemas[23]; }
-const ComponentSchema& GetAIChatbotSchema() { return AllSchemas[24]; }
+const ComponentSchema& GetStaticModelSchema() { return AllSchemas[3]; }
+const ComponentSchema& GetAnimatedModelSchema() { return AllSchemas[4]; }
+const ComponentSchema& GetVideoPlayerSchema() { return AllSchemas[6]; }
+const ComponentSchema& GetExternalLinkSchema() { return AllSchemas[8]; }
+const ComponentSchema& GetAvatarSchema() { return AllSchemas[9]; }
+const ComponentSchema& GetLightSchema() { return AllSchemas[10]; }
+const ComponentSchema& GetButtonSchema() { return AllSchemas[11]; }
+const ComponentSchema& GetImageSchema() { return AllSchemas[12]; }
+const ComponentSchema& GetScriptSchema() { return AllSchemas[13]; }
+const ComponentSchema& GetCustomSchema() { return AllSchemas[14]; }
+const ComponentSchema& GetConversationSchema() { return AllSchemas[15]; }
+const ComponentSchema& GetPortalSchema() { return AllSchemas[16]; }
+const ComponentSchema& GetAudioSchema() { return AllSchemas[17]; }
+const ComponentSchema& GetSplineSchema() { return AllSchemas[18]; }
+const ComponentSchema& GetCollisionSchema() { return AllSchemas[19]; }
+const ComponentSchema& GetReflectionSchema() { return AllSchemas[20]; }
+const ComponentSchema& GetFogSchema() { return AllSchemas[21]; }
+const ComponentSchema& GetECommerceSchema() { return AllSchemas[22]; }
+const ComponentSchema& GetFiducialMarkerSchema() { return AllSchemas[23]; }
+const ComponentSchema& GetGaussianSplatSchema() { return AllSchemas[24]; }
+const ComponentSchema& GetTextSchema() { return AllSchemas[25]; }
+const ComponentSchema& GetHotspotSchema() { return AllSchemas[26]; }
+const ComponentSchema& GetCinematicCameraSchema() { return AllSchemas[27]; }
+const ComponentSchema& GetScreenSharingSchema() { return AllSchemas[28]; }
+const ComponentSchema& GetAIChatbotSchema() { return AllSchemas[29]; }
 
 ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
     csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
