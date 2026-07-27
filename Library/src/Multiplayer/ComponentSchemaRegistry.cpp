@@ -56,6 +56,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 1,
+        "deprecated": true,
         "name": "externalResourceAssetId",
         "type": "string",
         "defaultValue": ""
@@ -157,6 +158,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 1,
+        "deprecated": true,
         "name": "externalResourceAssetId",
         "type": "string",
         "defaultValue": ""
@@ -1619,6 +1621,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 8,
+        "deprecated": true,
         "name": "",
         "type": "bool",
         "defaultValue": true
