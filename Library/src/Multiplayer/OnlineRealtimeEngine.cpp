@@ -190,7 +190,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner,
     const csp::common::List<csp::common::String>& JsonSchemas)
-    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, ComponentSchemasFromJson(JsonSchemas, LogSystem))
+    : OnlineRealtimeEngine(InMultiplayerConnection, LogSystem, NetworkEventBus, ScriptRunner, ComponentSchemasFromJson(JsonSchemas, &LogSystem))
 {
 }
 

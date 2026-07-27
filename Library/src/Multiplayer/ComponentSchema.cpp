@@ -762,7 +762,7 @@ csp::common::Optional<ComponentSchema> ComponentSchema::FromJson(const csp::comm
 }
 
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
-    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem)
+    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem* LogSystem)
 {
     auto Collected = std::vector<ComponentSchema> {};
 
@@ -773,17 +773,23 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 
         if (Doc.HasParseError() || !Doc.IsArray())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping document, expected a top-level JSON array");
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping document, expected a top-level JSON array");
+            }
             continue;
         }
 
         for (const auto& Element : Doc.GetArray())
         {
-            const auto Schema = TryParseSchema(Element, &LogSystem);
+            const auto Schema = TryParseSchema(Element, LogSystem);
 
             if (!Schema)
             {
-                LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping entry, failed to parse schema");
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping entry, failed to parse schema");
+                }
                 continue;
             }
 

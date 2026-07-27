@@ -120,7 +120,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner, const csp::common::List<csp::common::String>& JsonSchemas)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, ComponentSchemasFromJson(JsonSchemas, LogSystem))
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner, ComponentSchemasFromJson(JsonSchemas, &LogSystem))
 {
 }
 

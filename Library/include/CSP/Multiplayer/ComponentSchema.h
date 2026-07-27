@@ -83,10 +83,10 @@ CSP_START_IGNORE
 /// Entries that fail to parse are skipped with a warning; valid entries in the same document are still returned.
 /// @param JsonDocuments One or more JSON documents, each containing an array of schema objects.
 /// The list is a wrapper generator workaround for passing large strings; in practice a single element is expected.
-/// @param LogSystem Logger for reporting skipped entries.
+/// @param LogSystem Optional logger. If provided, logs entries skipped due to parse errors.
 /// @return An array containing all successfully parsed schemas.
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
-    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem& LogSystem);
+    const csp::common::List<csp::common::String>& JsonDocuments, csp::common::LogSystem* LogSystem = nullptr);
 
 /// @brief Checks whether a schema update is compatible with an existing schema.
 /// @param Original The existing schema to check against.
