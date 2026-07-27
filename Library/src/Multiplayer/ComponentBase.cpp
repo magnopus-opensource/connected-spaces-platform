@@ -122,6 +122,48 @@ void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue
     if (const auto* Property = FindSchemaProperty(*CachedSchema, Key);
         Property && Value.GetReplicatedValueType() == Property->DefaultValue.GetReplicatedValueType())
     {
+        if (Property->HasRange())
+        {
+            const auto IsWithinRange = std::visit(
+                [&](const auto& DesiredValue) -> bool
+                {
+                    using T = std::decay_t<decltype(DesiredValue)>;
+                    if constexpr (std::is_same_v<T, float> || std::is_same_v<T, int64_t>)
+                    {
+                        return DesiredValue >= std::get<T>(Property->RangeMin.GetValue())
+                            && DesiredValue <= std::get<T>(Property->RangeMax.GetValue());
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                },
+                Value.GetValue());
+
+            if (!IsWithinRange)
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "SetProperty: value is outside the valid range");
+                }
+                return;
+            }
+        }
+
+        if (!Property->Options.IsEmpty())
+        {
+            const auto IsKnownOption = [&](const auto& Option) { return Option.Value == Value; };
+
+            if (!std::any_of(Property->Options.begin(), Property->Options.end(), IsKnownOption))
+            {
+                if (LogSystem)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Warning, "SetProperty: value is not a valid option");
+                }
+                return;
+            }
+        }
+
         SetPropertyDirect(Key, Value);
     }
 }
