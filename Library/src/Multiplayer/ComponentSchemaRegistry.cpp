@@ -370,7 +370,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 12,
         "name": "playbackState",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Reset",
+            "value": 0
+          },
+          {
+            "name": "Pause",
+            "value": 1
+          },
+          {
+            "name": "Play",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 13,
@@ -388,7 +402,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 15,
         "name": "videoPlayerSourceType",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "URLSource",
+            "value": 0
+          },
+          {
+            "name": "AssetSource",
+            "value": 1
+          },
+          {
+            "name": "WowzaStreamSource",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 16,
@@ -423,7 +451,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 21,
         "name": "stereoVideoType",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "None",
+            "value": 0
+          },
+          {
+            "name": "SideBySide",
+            "value": 1
+          },
+          {
+            "name": "TopBottom",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 22,
@@ -441,7 +483,17 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 24,
         "name": "audioType",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "Global",
+            "value": 0
+          },
+          {
+            "name": "Spatial",
+            "value": 1
+          }
+        ]
       }
     ]
   },
@@ -549,7 +601,33 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 2,
         "name": "state",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Idle",
+            "value": 0
+          },
+          {
+            "name": "Walking",
+            "value": 1
+          },
+          {
+            "name": "Running",
+            "value": 2
+          },
+          {
+            "name": "Flying",
+            "value": 3
+          },
+          {
+            "name": "Jumping",
+            "value": 4
+          },
+          {
+            "name": "Falling",
+            "value": 5
+          }
+        ]
       },
       {
         "key": 3,
@@ -621,7 +699,25 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 12,
         "name": "avatarPlayMode",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Default",
+            "value": 0
+          },
+          {
+            "name": "AR",
+            "value": 1
+          },
+          {
+            "name": "VR",
+            "value": 2
+          },
+          {
+            "name": "Creator",
+            "value": 3
+          }
+        ]
       },
       {
         "key": 13,
@@ -637,7 +733,17 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 14,
         "name": "locomotionModel",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Grounded",
+            "value": 0
+          },
+          {
+            "name": "FreeCamera",
+            "value": 1
+          }
+        ]
       },
       {
         "key": 15,
@@ -678,7 +784,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 1,
         "name": "lightType",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "Directional",
+            "value": 0
+          },
+          {
+            "name": "Point",
+            "value": 1
+          },
+          {
+            "name": "Spot",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 2,
@@ -757,7 +877,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 12,
         "name": "lightCookieType",
         "type": "int",
-        "defaultValue": 2
+        "defaultValue": 2,
+        "options": [
+          {
+            "name": "ImageCookie",
+            "value": 0
+          },
+          {
+            "name": "VideoCookie",
+            "value": 1
+          },
+          {
+            "name": "NoCookie",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 13,
@@ -775,7 +909,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 15,
         "name": "",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "None",
+            "value": 0
+          },
+          {
+            "name": "Static",
+            "value": 1
+          },
+          {
+            "name": "Realtime",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 16,
@@ -932,13 +1080,41 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 7,
         "name": "billboardMode",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Off",
+            "value": 0
+          },
+          {
+            "name": "Billboard",
+            "value": 1
+          },
+          {
+            "name": "YawLockedBillboard",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 8,
         "name": "displayMode",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "SingleSided",
+            "value": 0
+          },
+          {
+            "name": "DoubleSided",
+            "value": 1
+          },
+          {
+            "name": "DoubleSidedReversed",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 9,
@@ -980,7 +1156,17 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 3,
         "name": "",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "Local",
+            "value": 0
+          },
+          {
+            "name": "Owner",
+            "value": 1
+          }
+        ]
       }
     ]
   },
@@ -1151,13 +1337,37 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 1,
         "name": "playbackState",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Reset",
+            "value": 0
+          },
+          {
+            "name": "Pause",
+            "value": 1
+          },
+          {
+            "name": "Play",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 2,
         "name": "audioType",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Global",
+            "value": 0
+          },
+          {
+            "name": "Spatial",
+            "value": 1
+          }
+        ]
       },
       {
         "key": 3,
@@ -1253,13 +1463,41 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 3,
         "name": "",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Box",
+            "value": 0
+          },
+          {
+            "name": "Mesh",
+            "value": 1
+          },
+          {
+            "name": "Capsule",
+            "value": 2
+          },
+          {
+            "name": "Sphere",
+            "value": 3
+          }
+        ]
       },
       {
         "key": 4,
         "name": "",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Collision",
+            "value": 0
+          },
+          {
+            "name": "Trigger",
+            "value": 1
+          }
+        ]
       },
       {
         "key": 5,
@@ -1337,7 +1575,17 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 6,
         "name": "",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "UnitSphere",
+            "value": 0
+          },
+          {
+            "name": "UnitBox",
+            "value": 1
+          }
+        ]
       },
       {
         "key": 7,
@@ -1355,7 +1603,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 0,
         "name": "fogMode",
         "type": "int",
-        "defaultValue": 1
+        "defaultValue": 1,
+        "options": [
+          {
+            "name": "Linear",
+            "value": 0
+          },
+          {
+            "name": "Exponential",
+            "value": 1
+          },
+          {
+            "name": "Exponential2",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 1,
@@ -1727,7 +1989,21 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 9,
         "name": "billboardMode",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Off",
+            "value": 0
+          },
+          {
+            "name": "Billboard",
+            "value": 1
+          },
+          {
+            "name": "YawLockedBillboard",
+            "value": 2
+          }
+        ]
       },
       {
         "key": 10,
@@ -2034,7 +2310,29 @@ constexpr const auto* BuiltinSchemasJson = R"(
         "key": 3,
         "name": "visualState",
         "type": "int",
-        "defaultValue": 0
+        "defaultValue": 0,
+        "options": [
+          {
+            "name": "Waiting",
+            "value": 0
+          },
+          {
+            "name": "Listening",
+            "value": 1
+          },
+          {
+            "name": "Thinking",
+            "value": 2
+          },
+          {
+            "name": "Speaking",
+            "value": 3
+          },
+          {
+            "name": "Unknown",
+            "value": 4
+          }
+        ]
       }
     ]
   },
