@@ -1,4 +1,6 @@
-name: Run Tests (Local MCS) Linux
+# This workflow downloads the Linux, ReleaseWithDebugInfo, Static build and runs tests against live services.
+
+name: Run Tests (Live MCS) Linux
 
 on:
   workflow_call:
