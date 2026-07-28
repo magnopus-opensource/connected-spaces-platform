@@ -9,6 +9,12 @@ name: Run Tests (Local MCS) Linux
 
 on:
   workflow_call:
+    inputs:
+      gtest_filter:
+        description: "An optional gtest filter to pass to Google Test"
+        type: string
+        required: false
+        default: "*"
 
 jobs:
   run-local-mcs-tests:
@@ -82,4 +88,4 @@ jobs:
 
           chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
           chmod +x ./csp-tests
-          ./csp-tests    
+          ./csp-tests --gtest_filter='${{ inputs.gtest_filter }}'

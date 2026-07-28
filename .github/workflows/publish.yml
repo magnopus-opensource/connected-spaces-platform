@@ -19,6 +19,12 @@ on:
         description: 'Whether tests should be skipped'
         required: true
         default: false
+
+      gtest_filter:
+        description: 'An optional gtest filter to pass to Google Test if running tests'
+        type: string
+        required: false
+        default: "*"
       
       create_release:
         type: boolean
@@ -100,6 +106,8 @@ jobs:
     uses: ./.github/workflows/live-mcs-tests-run.yml
     secrets: inherit
     needs: desktop
+    with:
+       gtest_filter: ${{ inputs.gtest_filter }}
   
   upload-releases:
     uses: ./.github/workflows/upload-releases.yml
