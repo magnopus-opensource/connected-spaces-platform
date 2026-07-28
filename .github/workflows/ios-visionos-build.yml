@@ -96,7 +96,7 @@ jobs:
           install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
 
       - name: Upload install
-        if: inputs.create_release
+        if: inputs.upload_install
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}-install
