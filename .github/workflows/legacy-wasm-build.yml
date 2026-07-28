@@ -89,7 +89,7 @@ jobs:
           set -euxo pipefail
           python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
       
-      - name: Build Debug
+      - name: Create Debug Package
         shell: bash
         run: |
           set -euxo pipefail
@@ -97,7 +97,7 @@ jobs:
             Debug \
             build/emscripten-debug/build/Debug
 
-      - name: Build Release
+      - name: Create Release Package
         shell: bash
         run: |
           set -euxo pipefail
