@@ -1,6 +1,16 @@
+# This workflow performs the following actions:
+#  - Builds csp for all desktop platforms
+#  - Builds csp for wasm
+#  - Builds csp for android
+#  - Builds csp for iOS and visionOS
+#  - Builds csp using legacy wasm wrapper
+#  - Optionally runs csp live tests on Linux
+#  - Optionally uploads artifacts to GitHub
+#  - Optionally uploads legacy wasm artifact to NPM
+
 name: Publish CSP
 
-on: 
+on:
 
   workflow_dispatch:
     inputs:

@@ -1,14 +1,31 @@
+# This workflow builds, optionally runs csp wasm tests against live services,
+# and optionally uploads CSP artifacts for every supported.
+
+# This works slightly differently to the other build workflows, 
+# as it builds both Debug and Release into the same package.
+
+# The legacy wasm project uses the legacy wrapper generator for its binding layer,
+# which will be replaced by the new binding repo when the work is complete.
+# This is a temporary project that allows us to continue making csp web builds from the new build system.
+
 name: Build Legacy Wasm
 
 on:
   workflow_call:
     inputs:
+      # The path generated for this artifact is:
+      #   ./Library/Binaries/package/wasm
+      #
+      # The name generated for this artifact is:
+      #   wasm-npm-package
       upload_package:
+        description: "If true, the package will be uploaded as an artifact. These artifacts are used for releases."
         type: boolean
         required: false
         default: false
       
       run_tests:
+        description: "If true, csp wasm tests will be ran against live services"
         type: boolean
         required: false
         default: false

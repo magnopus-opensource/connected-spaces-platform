@@ -1,9 +1,26 @@
+# This workflow builds, installs, and optionally uploads CSP artifacts for every supported
+# combination of wasm build configuration:
+#
+# [Debug, Release, RelWithDebInfo]
+
 name: Build Wasm
 
 on:
   workflow_call:
     inputs:
+      # The path generated for this artifact is:
+      #   install/wasm/{CONFIG_LOWERCASE}
+      #
+      # Example:
+      #   install/wasm/debug
+      #
+      # The name generated for this artifact is:
+      #   wasm-{CONFIG_LOWERCASE}-install
+      #
+      # Example:
+      #   wasm-debug-install
       upload_install:
+        description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
         type: boolean
         required: false
         default: false

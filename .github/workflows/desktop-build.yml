@@ -1,14 +1,45 @@
+# This workflow builds, installs, and optionally uploads CSP artifacts for every supported
+# combination of desktop platform, build configuration, and linkage type:
+#
+# [Windows, MacOS, Linux]
+# [Debug, Release, RelWithDebInfo]
+# [Static, Shared]
+
 name: Build Desktop
 
 on:
   workflow_call:
     inputs:
+      # The path generated for this artifact is:
+      #   build/{PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}/build/{CONFIG}
+      #
+      # Example:
+      #   build/windows-debug-static/build/Debug
+      #
+      # The name generated for this artifact is:
+      #   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-build
+      #
+      # Example:
+      #   windows-debug-static-build
       upload_test_build:
+        description: "If true, the build will be uploaded as an artifact. This allows us to run the csp-tests binary for testing."
         type: boolean
         required: false
         default: false
 
+      # The path generated for this artifact is:
+      #   install/{PLATFORM_NAME_LOWERCASE}/{CONFIG_LOWERCASE}-{LINKAGE}
+      #
+      # Example:
+      #   install/windows/debug-static
+      #
+      # The name generated for this artifact is:
+      #   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-install
+      #
+      # Example:
+      #   windows-debug-static-install
       upload_install:
+        description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
         type: boolean
         required: false
         default: false

@@ -1,12 +1,12 @@
-name: PR Checks
-
 # This workflow performs the following actions:
-#  - Builds all desktop platforms
-#  - Uploads the install tree as a workflow artifact
-#  - Builds csp as emscripten static lib
+#  - Builds csp for all desktop platforms
+#  - Builds csp for wasm
 #  - Builds csp for android
 #  - Builds csp for iOS and visionOS
-#  - Runs csp locsl tests on Linux
+#  - Builds csp using legacy wasm wrapper
+#  - Runs csp local tests on Linux
+
+name: PR Checks
 
 on:
   pull_request:

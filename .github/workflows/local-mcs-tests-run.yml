@@ -1,3 +1,10 @@
+# This workflow performs the following actions:
+#   - Pulls the MCS Repo
+#   - Sets up and logs into Docker
+#   - Runs the MCS Docker container
+#   - Downloads the Linux, ReleaseWithDebugInfo, Static build
+#   - Runs tests against local services.
+
 name: Run Tests (Local MCS) Linux
 
 on:
@@ -44,7 +51,7 @@ jobs:
           docker info
           docker compose version
 
-      - name: Pull and run CHS container
+      - name: Pull and run MCS container
         shell: bash
         env:
           COMPOSE_ANSI: never
