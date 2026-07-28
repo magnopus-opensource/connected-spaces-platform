@@ -115,7 +115,8 @@ jobs:
           build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
           install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
 
-      # Upload builds for testing
+      # Upload build artifact for testing
+      # This is downloaded in a later step to run the tests.
       - name: Upload test build
         if: |
           inputs.upload_test_build &&
