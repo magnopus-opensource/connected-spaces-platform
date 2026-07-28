@@ -112,9 +112,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 8,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 9,
@@ -237,9 +238,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 12,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 13,
@@ -475,9 +477,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 23,
-        "name": "",
+        "name": "volume",
         "type": "float",
-        "defaultValue": 1.0
+        "defaultValue": 1.0,
+        "scripting": false
       },
       {
         "key": 24,
@@ -901,13 +904,14 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 14,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 15,
-        "name": "",
+        "name": "lightShadowType",
         "type": "int",
         "defaultValue": 0,
         "options": [
@@ -1138,23 +1142,24 @@ constexpr const auto* BuiltinSchemasJson = R"(
   },
   {
     "typeId": 13,
-    "name": "",
+    "name": "Script",
+    "scripting": false,
     "properties": [
       {
         "key": 1,
-        "name": "",
+        "name": "scriptSource",
         "type": "string",
         "defaultValue": ""
       },
       {
         "key": 2,
-        "name": "",
+        "name": "ownerId",
         "type": "int",
         "defaultValue": 0
       },
       {
         "key": 3,
-        "name": "",
+        "name": "scriptScope",
         "type": "int",
         "defaultValue": 1,
         "options": [
@@ -1188,9 +1193,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
     "properties": [
       {
         "key": 0,
-        "name": "",
+        "name": "conversationId",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 1,
@@ -1401,9 +1407,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 8,
-        "name": "",
+        "name": "volume",
         "type": "float",
-        "defaultValue": 1.0
+        "defaultValue": 1.0,
+        "scripting": false
       },
       {
         "key": 9,
@@ -1413,9 +1420,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 10,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       }
     ]
   },
@@ -1426,11 +1434,12 @@ constexpr const auto* BuiltinSchemasJson = R"(
   },
   {
     "typeId": 19,
-    "name": "",
+    "name": "Collision",
+    "scripting": false,
     "properties": [
       {
         "key": 0,
-        "name": "",
+        "name": "position",
         "type": "vec3",
         "defaultValue": [
           0.0,
@@ -1440,7 +1449,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 1,
-        "name": "",
+        "name": "rotation",
         "type": "vec4",
         "defaultValue": [
           0.0,
@@ -1451,7 +1460,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 2,
-        "name": "",
+        "name": "scale",
         "type": "vec3",
         "defaultValue": [
           1.0,
@@ -1461,7 +1470,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 3,
-        "name": "",
+        "name": "collisionShape",
         "type": "int",
         "defaultValue": 0,
         "options": [
@@ -1485,7 +1494,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 4,
-        "name": "",
+        "name": "collisionMode",
         "type": "int",
         "defaultValue": 0,
         "options": [
@@ -1501,25 +1510,26 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 5,
-        "name": "",
+        "name": "collisionAssetId",
         "type": "string",
         "defaultValue": ""
       },
       {
         "key": 6,
-        "name": "",
+        "name": "assetCollectionId",
         "type": "string",
         "defaultValue": ""
       },
       {
         "key": 7,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 8,
-        "name": "",
+        "name": "isEnabled",
         "type": "bool",
         "defaultValue": true
       }
@@ -1527,7 +1537,8 @@ constexpr const auto* BuiltinSchemasJson = R"(
   },
   {
     "typeId": 20,
-    "name": "",
+    "name": "Reflection",
+    "scripting": false,
     "properties": [
       {
         "key": 0,
@@ -1536,19 +1547,19 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 1,
-        "name": "",
+        "name": "reflectionAssetId",
         "type": "string",
         "defaultValue": ""
       },
       {
         "key": 2,
-        "name": "",
+        "name": "assetCollectionId",
         "type": "string",
         "defaultValue": ""
       },
       {
         "key": 3,
-        "name": "",
+        "name": "position",
         "type": "vec3",
         "defaultValue": [
           0.0,
@@ -1563,7 +1574,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 5,
-        "name": "",
+        "name": "scale",
         "type": "vec3",
         "defaultValue": [
           1.0,
@@ -1573,7 +1584,7 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 6,
-        "name": "",
+        "name": "reflectionShape",
         "type": "int",
         "defaultValue": 1,
         "options": [
@@ -1589,9 +1600,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 7,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       }
     ]
   },
@@ -1710,9 +1722,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 13,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 14,
@@ -1884,9 +1897,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       {
         "key": 8,
         "deprecated": true,
-        "name": "",
+        "name": "isShadowCaster",
         "type": "bool",
-        "defaultValue": true
+        "defaultValue": true,
+        "scripting": false
       },
       {
         "key": 9,
@@ -2177,9 +2191,10 @@ constexpr const auto* BuiltinSchemasJson = R"(
       },
       {
         "key": 12,
-        "name": "",
+        "name": "thirdPartyComponentRef",
         "type": "string",
-        "defaultValue": ""
+        "defaultValue": "",
+        "scripting": false
       },
       {
         "key": 13,
