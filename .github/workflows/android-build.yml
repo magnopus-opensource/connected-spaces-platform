@@ -35,6 +35,8 @@ jobs:
       fail-fast: false
       
       matrix:
+        # preset_prefix - Allows us to select a cmake preset based on the build type.
+        # We also use this value for build/artifact names and paths.
         config:
           - build_type: Debug
             preset_prefix: debug

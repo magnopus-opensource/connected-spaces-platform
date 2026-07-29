@@ -65,6 +65,8 @@ jobs:
             runner: macos-15
             host_profile: osx_arm
 
+        # preset_prefix - Allows us to select a cmake preset based on the build type.
+        # We also use this value for build/artifact names and paths.
         config:
           - build_type: Debug
             preset_prefix: debug
@@ -74,7 +76,9 @@ jobs:
 
           - build_type: RelWithDebInfo
             preset_prefix: relwithdebinfo
-
+        
+        # preset_postfix - Allows us to select a cmake preset to build csp with tests for static builds.
+        # We do this because csp tests can only be ran with static builds.
         linkage:
           - name: static
             shared: false
