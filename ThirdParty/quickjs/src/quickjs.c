@@ -272,6 +272,7 @@ struct JSRuntime {
     uintptr_t stack_size; /* in bytes, 0 if no limit */
     uintptr_t stack_top;
     uintptr_t stack_limit; /* lower stack limit */
+    uint32_t max_call_depth; /* 0 if no limit */
 
     JSValue current_exception;
     /* true if inside an out of memory error, to avoid recursing */
@@ -1650,6 +1651,21 @@ static inline BOOL js_check_stack_overflow(JSRuntime *rt, size_t alloca_size)
 }
 #endif
 
+static inline BOOL js_check_call_depth(JSRuntime *rt)
+{
+    JSStackFrame *sf;
+    uint32_t depth = 0;
+
+    if (rt->max_call_depth == 0)
+        return FALSE;
+
+    for (sf = rt->current_stack_frame; sf != NULL; sf = sf->prev_frame) {
+        if (++depth >= rt->max_call_depth)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 JSRuntime *JS_NewRuntime2(const JSMallocFunctions *mf, void *opaque)
 {
     JSRuntime *rt;
@@ -2416,6 +2432,11 @@ void JS_SetMaxStackSize(JSRuntime *rt, size_t stack_size)
 {
     rt->stack_size = stack_size;
     update_stack_limit(rt);
+}
+
+void JS_SetMaxCallDepth(JSRuntime *rt, uint32_t max_call_depth)
+{
+    rt->max_call_depth = max_call_depth;
 }
 
 void JS_UpdateStackTop(JSRuntime *rt)
@@ -16455,6 +16476,11 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
     JSValue *local_buf, *stack_buf, *var_buf, *arg_buf, *sp, ret_val, *pval;
     JSVarRef **var_refs;
     size_t alloca_size;
+
+    if (js_check_call_depth(rt))
+        return JS_ThrowInternalError(caller_ctx,
+                                     "stack overflow: maximum call depth (%u) exceeded",
+                                     rt->max_call_depth);
 
 #ifdef CONFIG_DEBUGGER
     sf->pthis = &this_obj;

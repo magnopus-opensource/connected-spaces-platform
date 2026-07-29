@@ -528,19 +528,7 @@ import { signal, effect, batch } from '/__csp/internal/signals-core-raw.js';
 
 const codeComponents = new Map();
 
-export const useEffect = (callback) => {
-    const entityId = globalThis.__cspCurrentEntityId;
-    if (globalThis.__cspUiRenderActive && entityId && codeComponents.has(entityId)) {
-        const entry = codeComponents.get(entityId);
-        const slotIndex = typeof entry.uiEffectCursor === 'number' ? entry.uiEffectCursor : 0;
-        entry.uiEffectCursor = slotIndex + 1;
-        if (!Array.isArray(entry.pendingUiEffectCallbacks)) {
-            entry.pendingUiEffectCallbacks = [];
-        }
-        entry.pendingUiEffectCallbacks[slotIndex] = callback;
-        return () => {};
-    }
-
+function createTrackedEffect(entityId, callback) {
     const dispose = effect(() => {
         const previousEntityId = globalThis.__cspCurrentEntityId;
         globalThis.__cspCurrentEntityId = entityId;
@@ -554,6 +542,36 @@ export const useEffect = (callback) => {
         codeComponents.get(entityId).effects.push(dispose);
     }
     return dispose;
+}
+
+export const useEffect = (callback) => {
+    const entityId = globalThis.__cspCurrentEntityId;
+    if (globalThis.__cspUiRenderActive && entityId && codeComponents.has(entityId)) {
+        const entry = codeComponents.get(entityId);
+        const slotIndex = typeof entry.uiEffectCursor === 'number' ? entry.uiEffectCursor : 0;
+        entry.uiEffectCursor = slotIndex + 1;
+        if (!Array.isArray(entry.pendingUiEffectCallbacks)) {
+            entry.pendingUiEffectCallbacks = [];
+        }
+        entry.pendingUiEffectCallbacks[slotIndex] = callback;
+        return () => {};
+    }
+
+    if (entityId && codeComponents.has(entityId)) {
+        const entry = codeComponents.get(entityId);
+        if (entry.isInitializingScript) {
+            const pending = { callback, dispose: null, cancelled: false };
+            entry.pendingInitialEffects.push(pending);
+            return () => {
+                pending.cancelled = true;
+                if (typeof pending.dispose === 'function') {
+                    pending.dispose();
+                }
+            };
+        }
+    }
+
+    return createTrackedEffect(entityId, callback);
 };
 
 export function createScriptRegistry() {
@@ -1466,50 +1484,57 @@ export function createScriptRegistry() {
             return;
         }
 
-        const nextCallbacks = Array.isArray(entry.pendingUiEffectCallbacks) ? entry.pendingUiEffectCallbacks : [];
-        const previousSlots = Array.isArray(entry.uiEffects) ? entry.uiEffects : [];
-        const nextSlots = [];
+        // Creating a signals effect runs its callback immediately. A UI
+        // useEffect may update a signal read by the outer ui() effect; without
+        // a batch that re-enters ui() before these slots are committed and
+        // creates the same effects recursively until the WASM stack overflows.
+        // Commit the complete slot table before signal invalidations flush.
+        batch(() => {
+            const nextCallbacks = Array.isArray(entry.pendingUiEffectCallbacks) ? entry.pendingUiEffectCallbacks : [];
+            const previousSlots = Array.isArray(entry.uiEffects) ? entry.uiEffects : [];
+            const nextSlots = [];
 
-        for (let index = 0; index < nextCallbacks.length; index += 1) {
-            const callback = nextCallbacks[index];
-            const previousSlot = previousSlots[index];
+            for (let index = 0; index < nextCallbacks.length; index += 1) {
+                const callback = nextCallbacks[index];
+                const previousSlot = previousSlots[index];
 
-            if (previousSlot && typeof previousSlot.dispose === 'function') {
-                previousSlot.callback = callback;
-                nextSlots.push(previousSlot);
-                continue;
-            }
-
-            const slot = { callback, dispose: null };
-            slot.dispose = effect(() => {
-                const previousEntityId = globalThis.__cspCurrentEntityId;
-                globalThis.__cspCurrentEntityId = entityId;
-                try {
-                    return slot.callback();
-                } finally {
-                    globalThis.__cspCurrentEntityId = previousEntityId;
+                if (previousSlot && typeof previousSlot.dispose === 'function') {
+                    previousSlot.callback = callback;
+                    nextSlots.push(previousSlot);
+                    continue;
                 }
-            });
 
-            nextSlots.push(slot);
-        }
+                const slot = { callback, dispose: null };
+                slot.dispose = effect(() => {
+                    const previousEntityId = globalThis.__cspCurrentEntityId;
+                    globalThis.__cspCurrentEntityId = entityId;
+                    try {
+                        return slot.callback();
+                    } finally {
+                        globalThis.__cspCurrentEntityId = previousEntityId;
+                    }
+                });
 
-        for (let index = nextCallbacks.length; index < previousSlots.length; index += 1) {
-            const previousSlot = previousSlots[index];
-            if (!previousSlot || typeof previousSlot.dispose !== 'function') {
-                continue;
+                nextSlots.push(slot);
             }
 
-            try {
-                previousSlot.dispose();
-            } catch (e) {
-                console.error('NgxCodeComponentRuntime: ui effect dispose failed', e);
-            }
-        }
+            for (let index = nextCallbacks.length; index < previousSlots.length; index += 1) {
+                const previousSlot = previousSlots[index];
+                if (!previousSlot || typeof previousSlot.dispose !== 'function') {
+                    continue;
+                }
 
-        entry.uiEffects = nextSlots;
-        entry.pendingUiEffectCallbacks = [];
-        entry.uiEffectCursor = 0;
+                try {
+                    previousSlot.dispose();
+                } catch (e) {
+                    console.error('NgxCodeComponentRuntime: ui effect dispose failed', e);
+                }
+            }
+
+            entry.uiEffects = nextSlots;
+            entry.pendingUiEffectCallbacks = [];
+            entry.uiEffectCursor = 0;
+        });
     }
 
     function removeInputListenersForEntity(entityId) {
@@ -1560,27 +1585,70 @@ export function createScriptRegistry() {
 
     function initializeScript(entityId, entry) {
         if (!entry || !entry.module || typeof entry.module.script !== 'function') {
-            return;
+            return true;
         }
 
         try {
             ensureThisEntitySignal(entityId, entry);
 
             globalThis.__cspCurrentEntityId = entityId;
+            entry.isInitializingScript = true;
+            entry.pendingInitialEffects = [];
             try {
                 const teardown = entry.module.script({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
                 entry.teardown = typeof teardown === 'function' ? teardown : null;
             } finally {
+                entry.isInitializingScript = false;
                 globalThis.__cspCurrentEntityId = undefined;
             }
+            return true;
         } catch (error) {
+            entry.isInitializingScript = false;
+            entry.pendingInitialEffects = [];
             const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
             const detail = error instanceof Error
                 ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))
                 : String(error);
             console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId} (${scriptPath})\n${detail}`);
             reportComponentError(entityId, 'init');
+            return false;
         }
+    }
+
+    function flushInitialEffects(entityId, entry, activationGeneration) {
+        const current = codeComponents.get(entityId);
+        if (current !== entry
+            || entry.importGeneration !== activationGeneration
+            || entry.isDisposing
+            || isDestroying) {
+            return;
+        }
+
+        const pendingEffects = Array.isArray(entry.pendingInitialEffects) ? entry.pendingInitialEffects : [];
+        entry.pendingInitialEffects = [];
+        for (const pending of pendingEffects) {
+            if (!pending || pending.cancelled || typeof pending.callback !== 'function') {
+                continue;
+            }
+            try {
+                pending.dispose = createTrackedEffect(entityId, pending.callback);
+                reportComponentRecovery(entityId);
+            } catch (error) {
+                console.error(`NgxCodeComponentRuntime: initial effect failed for entity ${entityId}`, error);
+                reportComponentError(entityId, 'initial-effect');
+            }
+        }
+    }
+
+    function startDeferredUIRuntime(entityId, entry, activationGeneration) {
+        const current = codeComponents.get(entityId);
+        if (current !== entry
+            || entry.importGeneration !== activationGeneration
+            || entry.isDisposing
+            || isDestroying) {
+            return;
+        }
+        startUIRuntime(entityId, entry);
     }
 
     function activateImportedModule(entityId, entry) {
@@ -1598,8 +1666,16 @@ export function createScriptRegistry() {
         ensureThisEntitySignal(entityId, entry);
         entry.initialized = true;
 
-        initializeScript(entityId, entry);
-        startUIRuntime(entityId, entry);
+        if (!initializeScript(entityId, entry)) {
+            return;
+        }
+
+        // Run initial effects and UI mounting as separate QuickJS jobs after
+        // this activation stack has completely unwound. Nested computed
+        // signals then start from a shallow stack.
+        const activationGeneration = entry.importGeneration;
+        Promise.resolve().then(() => flushInitialEffects(entityId, entry, activationGeneration));
+        Promise.resolve().then(() => startDeferredUIRuntime(entityId, entry, activationGeneration));
     }
 
     // --- Module import with retry ---
@@ -1814,6 +1890,8 @@ export function createScriptRegistry() {
             disabledByErrors: false,
             entityRefStates: {},
             effects: [],
+            pendingInitialEffects: [],
+            isInitializingScript: false,
             uiDispose: null,
             uiEffects: [],
             pendingUiEffectCallbacks: [],
@@ -1926,13 +2004,11 @@ export function createScriptRegistry() {
     }
 
     function tick() {
-        // Activate at most ONE entity per tick() call. Activating a user module
+        // Activate at most ONE entity per foundation tick. Activating a user module
         // runs script() + initial ui() + their signal/effect chains synchronously
-        // in the caller's JS stack; doing several in the same call stacks all
-        // those chains on top of each other and blows V8's per-WASM stack frame
-        // budget (notably with DevTools open). The C++ caller loops tick() while
-        // the returned pending count is > 0 — each call is a fresh JS entry, so
-        // the stack fully unwinds between activations.
+        // in the caller's JS stack. Doing several in the same browser tick adds
+        // enough WASM frame pressure to exceed V8's frame budget, notably with
+        // DevTools open. Pending activations drain on subsequent foundation ticks.
         let activationBudget = 1;
 
         for (const [entityId, entry] of codeComponents) {
@@ -1970,8 +2046,9 @@ export function createScriptRegistry() {
             }
         }
 
-        // Lets the C++ caller drain remaining activations with extra tick()
-        // calls in the same foundation tick (stack unwinds between calls).
+        // Exposed for diagnostics; C++ deliberately does not drain this count
+        // synchronously because batching across foundation ticks is the stack
+        // safety boundary.
         return pendingModuleActivations.size;
     }
 

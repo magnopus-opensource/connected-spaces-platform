@@ -748,6 +748,105 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentBridgeMethodsFal
     NgxScriptSystem.OnExitSpace();
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, FlushPendingCodeComponentUIRunsOneRegistryTickPerCall)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("single-registry-tick-space", &OfflineEngine);
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+globalThis.__ngxFlushTickCalls = 0;
+globalThis.scriptRegistry = {
+    tick() {
+        globalThis.__ngxFlushTickCalls += 1;
+        return 100;
+    },
+};
+)"));
+
+    EXPECT_TRUE(NgxScriptSystem.FlushPendingCodeComponentUI());
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxFlushTickCalls", -1), 1);
+
+    EXPECT_TRUE(NgxScriptSystem.FlushPendingCodeComponentUI());
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxFlushTickCalls", -1), 2);
+
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, LocalEntityLifecycleIsExposedThroughNgxEntitySystem)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("ngx-create-local-entity-space", &OfflineEngine);
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+import { TheEntitySystem as ImportedEntitySystem } from '@csp/code';
+globalThis.__ngxGlobalCreateLocalEntityExposed =
+    typeof globalThis.TheEntitySystem.createLocalEntity === 'function' ? 1 : 0;
+globalThis.__ngxImportedCreateLocalEntityExposed =
+    typeof ImportedEntitySystem.createLocalEntity === 'function' ? 1 : 0;
+globalThis.__ngxGlobalDestroyLocalEntityExposed =
+    typeof globalThis.TheEntitySystem.destroyLocalEntity === 'function' ? 1 : 0;
+globalThis.__ngxImportedDestroyLocalEntityExposed =
+    typeof ImportedEntitySystem.destroyLocalEntity === 'function' ? 1 : 0;
+globalThis.__ngxOfflineCreateLocalEntityReturnsNull =
+    ImportedEntitySystem.createLocalEntity('Local Test Entity') === null ? 1 : 0;
+globalThis.__ngxDestroyLocalEntityRejectsInvalidInput =
+    ImportedEntitySystem.destroyLocalEntity(null) === false &&
+    ImportedEntitySystem.destroyLocalEntity(123) === false ? 1 : 0;
+)"));
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxGlobalCreateLocalEntityExposed", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxImportedCreateLocalEntityExposed", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxGlobalDestroyLocalEntityExposed", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxImportedDestroyLocalEntityExposed", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxOfflineCreateLocalEntityReturnsNull", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxDestroyLocalEntityRejectsInvalidInput", -1), 1);
+
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, PlayerControllerActionDiscoveryStaysInNativeBinding)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    csp::multiplayer::SpaceEntity HostEntity;
+    ASSERT_TRUE(HostEntity.AddTag("player-controller-config"));
+    auto* CodeComponent
+        = static_cast<csp::multiplayer::CodeSpaceComponent*>(HostEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+
+    std::string InvokedAction;
+    std::string InvokedParams;
+    CodeComponent->RegisterActionHandler("teleportCharacter",
+        [&InvokedAction, &InvokedParams](csp::multiplayer::ComponentBase*, const csp::common::String& Action,
+            const csp::common::String& Params)
+        {
+            InvokedAction = Action.c_str();
+            InvokedParams = Params.c_str();
+        });
+    Engine.AddEntity(&HostEntity);
+
+    NgxScriptSystem.OnEnterSpace("native-player-controller-action-space", &Engine);
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+import { ThePlayerController } from '@csp/code';
+globalThis.__ngxPlayerControllerActionInvoked =
+    ThePlayerController.teleportCharacter(1, 2, 3) ? 1 : 0;
+)"));
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxPlayerControllerActionInvoked", -1), 1);
+    EXPECT_EQ(InvokedAction, "teleportCharacter");
+    EXPECT_EQ(InvokedParams, R"({"x":1,"y":2,"z":3})");
+
+    NgxScriptSystem.OnExitSpace();
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
@@ -2189,6 +2288,79 @@ export function ui({ attributes }) {
     ASSERT_NE(UpdatedDrawable, nullptr);
     ASSERT_TRUE(UpdatedDrawable->HasMember("text"));
     EXPECT_STREQ((*UpdatedDrawable)["text"].GetString(), "Score: 7");
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, UIEffectSignalWriteDoesNotReenterBeforeEffectSlotsCommit)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(800.0f, 600.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-effect-signal-write.js", R"(
+import { screen, text, useEffect } from '@csp/ui';
+import { signal, computed } from '@preact/signals-core';
+
+const ready = signal(false);
+const level1 = computed(() => ready.value ? 1 : 0);
+const level2 = computed(() => level1.value + 1);
+const level3 = computed(() => level2.value + 1);
+const level4 = computed(() => level3.value + 1);
+
+export function script() {
+    useEffect(() => {
+        globalThis.__ngxDeferredInitialEffectValue = level4.value;
+    });
+}
+
+export function ui() {
+    globalThis.__ngxUiEffectRenderCount = (globalThis.__ngxUiEffectRenderCount || 0) + 1;
+    const label = ready.value ? 'Ready' : 'Loading';
+
+    useEffect(() => {
+        globalThis.__ngxUiEffectRunCount = (globalThis.__ngxUiEffectRunCount || 0) + 1;
+        if (!ready.value) {
+            ready.value = true;
+        }
+    });
+
+    return screen(
+        { width: 320, height: 120 },
+        text(label, { key: 'status' })
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-effect-signal-write-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-effect-signal-write-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-effect-signal-write.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxUiEffectRenderCount", 0), 1);
+    EXPECT_LE(NgxScriptSystem.GetGlobalIntForTesting("__ngxUiEffectRenderCount", 0), 3);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxUiEffectRunCount", 0), 1);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxDeferredInitialEffectValue", 0), 4);
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* StatusDrawable = FindDrawableById(Drawables, "root.0");
+    ASSERT_NE(StatusDrawable, nullptr);
+    ASSERT_TRUE(StatusDrawable->HasMember("text"));
+    EXPECT_STREQ((*StatusDrawable)["text"].GetString(), "Ready");
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();

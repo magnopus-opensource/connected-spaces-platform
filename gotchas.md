@@ -76,9 +76,30 @@ Running list of non-obvious landmines and existing bugs in the foundation. Keep 
 
 DevTools adds per-call instrumentation overhead (stack capture, profiler hooks) that effectively shrinks the V8 budget. Code that fits fine with DevTools closed overflows with it open.
 
-**QuickJS's `JS_SetMaxStackSize` does NOT help** — its check is based on linear-memory stack pointer comparison and can't detect V8's frame-count limit.
+**QuickJS's `JS_SetMaxStackSize` alone does NOT help** — its check is based on linear-memory stack pointer comparison and can't detect V8's frame-count limit.
 
 **Fix applied.** `scriptRegistry.tick(0)` now activates at most one code component module per foundation tick (see `NgxCodeComponentRuntime.cpp` `function tick()`). Each activation runs `script()` + the initial `ui()` effect + their signal/effect chain synchronously in the tick call stack, so processing N entities in one tick stacks N deep chains. Activations now queue across ticks — startup is visibly a few frames longer but the per-tick V8 stack usage stays bounded.
+
+The NGX QuickJS runtime also sets an explicit maximum active call depth. The
+guard walks QuickJS's active frame chain at each call boundary, so recursive
+JS/native-binding call chains throw QuickJS `InternalError: stack overflow`
+before reaching V8's independent WASM frame limit. Keep this limit conservative:
+one QuickJS call expands into several WASM frames, especially for built-ins such
+as `Array.find` that invoke a JavaScript callback.
+
+Initial script effects and UI mounting run as separate QuickJS jobs after module
+activation unwinds. Without that phase boundary, the valid Scene Viewer
+`scene.js` → `poi-store.js` computed-signal chain carried unnecessary activation
+frames. QuickJS is also compiled with optimization in debug WASM builds: at
+`-O0`, its helper functions consume enough V8 WASM frames that the valid chain
+cannot fit below a useful recursion guard. NGX uses a 24-call guard.
+
+**UI-specific recursion.** Creating a UI `useEffect` executes its callback
+immediately. If that callback changes a signal consumed by `ui()`, signal
+invalidation must not flush until `reconcileUiEffects` has committed the new
+effect slots. Reconciliation is therefore wrapped in `batch()`; without that
+commit boundary, the nested render sees no existing slot, creates the same
+effect again, and recursively re-enters `JS_CallInternal`.
 
 **Watch for.** Any other code path that fans out to multiple user-script executions in a single synchronous call. Similar patterns in `SyncSnapshots` / `FlushPendingCodeComponentUI` should batch or throttle the same way if they start running user code synchronously.
 

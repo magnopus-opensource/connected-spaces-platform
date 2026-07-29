@@ -51,13 +51,16 @@
 
 namespace
 {
-// QuickJS bounds its own recursion against a saved stack-top baseline. Must be
-// smaller than V8's native stack budget so QuickJS throws InternalError: stack
-// overflow (with a JS-level trace) before V8 throws an opaque RangeError from
-// inside JS_CallInternal. DevTools shrinks V8's budget significantly, so keep
-// this well under ~1MB. 256KB ≈ ~256 QuickJS frames — shallow enough to trip
-// first under DevTools, deep enough for typical script recursion.
+// QuickJS's byte-based guard tracks the WASM linear-memory stack. V8 imposes
+// a separate, tighter WASM call-frame limit, especially with DevTools open, so
+// also cap active QuickJS calls explicitly. This converts runaway recursion
+// into a catchable QuickJS InternalError before V8 fatally overflows.
 constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 256 * 1024;
+// A single JS call expands into several WASM calls (interpreter, property
+// access, native callback). Component activation defers initial effects and UI
+// mounting to separate jobs, and QuickJS is optimized even in debug WASM, so
+// valid computed-signal chains fit below V8's independent frame ceiling.
+constexpr uint32_t NGX_SCRIPT_WASM_MAX_CALL_DEPTH = 24;
 
 constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
 constexpr const char* PREACT_SIGNALS_CORE_RAW_MODULE = "/__csp/internal/signals-core-raw.js";
@@ -69,6 +72,23 @@ constexpr const char* ASSET_BLOB_CHANGED_RECEIVER_ID = "CSPInternal::NgxScriptSy
 // over a few seconds; debouncing coalesces the burst into a single context
 // rebuild instead of one full rebuild per changed file.
 constexpr int32_t MODULE_RELOAD_DEBOUNCE_TICKS = 30; // ~0.5 s at 60 fps
+
+// Script blobs are served from a stable per-asset URL, so on web the browser
+// HTTP cache keeps returning the old source after a re-upload — a page reload
+// runs stale code until the asset is saved again mid-session. Key the fetch
+// URL on the asset version (bumped by CHS on every blob upload): each upload
+// gets a fresh URL while unchanged versions stay fully cacheable.
+csp::systems::Asset WithVersionedUri(const csp::systems::Asset& Source)
+{
+    csp::systems::Asset Result = Source;
+    if (Result.Version > 0 && !Result.Uri.IsEmpty())
+    {
+        const std::string Uri(Result.Uri.c_str());
+        const char* Separator = Uri.find('?') == std::string::npos ? "?v=" : "&v=";
+        Result.Uri = Result.Uri + Separator + std::to_string(Result.Version).c_str();
+    }
+    return Result;
+}
 
 // Wraps @preact/signals-core so raw effect() disposers created while a code
 // component is initializing/running are registered with the scriptRegistry and
@@ -98,10 +118,11 @@ export const effect = (callback, options) => {
 // baseline the check is always "not overflowing" and V8 surfaces the overflow
 // instead. Call this at every external entry into QuickJS, then re-apply the
 // size so the limit (= top − size) is computed against the current frame.
-void RebaseQuickJsStackCheck(qjs::Runtime& Runtime)
+void ConfigureQuickJsStackGuards(qjs::Runtime& Runtime)
 {
     JS_UpdateStackTop(Runtime.rt);
     JS_SetMaxStackSize(Runtime.rt, NGX_SCRIPT_WASM_MAX_STACK_BYTES);
+    JS_SetMaxCallDepth(Runtime.rt, NGX_SCRIPT_WASM_MAX_CALL_DEPTH);
 }
 #endif
 
@@ -419,7 +440,7 @@ bool CallHostFunction(const HostCallContext& Call, const char* DebugName, bool b
     }
 
 #ifdef CSP_WASM
-    RebaseQuickJsStackCheck(*Call.Runtime);
+    ConfigureQuickJsStackGuards(*Call.Runtime);
 #endif
 
     JSContext* Ctx = Call.Context->ctx;
@@ -854,7 +875,7 @@ void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollect
                     }
 
                     const csp::systems::Asset ScriptAsset = AssetResult.GetAsset();
-                    AssetSystem->DownloadAssetData(ScriptAsset,
+                    AssetSystem->DownloadAssetData(WithVersionedUri(ScriptAsset),
                         [this, Generation, AssetCollections, ScriptAsset](const csp::systems::AssetDataResult& DownloadResult)
                         {
                             if (!IsGenerationCurrent(Generation))
@@ -985,38 +1006,13 @@ bool NgxScriptSystem::SubmitUITextMeasureResults(const csp::common::String& Resu
 
 bool NgxScriptSystem::FlushPendingCodeComponentUI()
 {
-    // Registry tick() activates at most one pending module per call and returns
-    // how many are still pending. Each call is a separate JS entry, so the
-    // native/JS stack fully unwinds between activations — several activations
-    // per foundation tick are safe without stacking QuickJS frames (the crash
-    // mode the original one-per-tick throttle was added for). Loading N
-    // components now takes ceil(N / MAX_ACTIVATIONS_PER_TICK) ticks instead of N.
-    static constexpr int32_t MAX_ACTIVATIONS_PER_TICK = 8;
-
-    bool bSuccess = false;
-    for (int32_t Iteration = 0; Iteration < MAX_ACTIVATIONS_PER_TICK; ++Iteration)
-    {
-        int32_t PendingActivationCount = 0;
-        bSuccess = CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
-            "<ngx-codecomponent-flush-pending-ui>", true, "tick",
-            [](JSContext*, std::vector<JSValue>&) {},
-            [&](JSContext* Ctx, JSValue Result)
-            {
-                // Older/asset-supplied registries may return undefined — treat
-                // as "nothing pending" and fall back to one call per tick.
-                if (JS_IsNumber(Result))
-                {
-                    JS_ToInt32(Ctx, &PendingActivationCount, Result);
-                }
-            });
-
-        if (!bSuccess || (PendingActivationCount <= 0))
-        {
-            break;
-        }
-    }
-
-    return bSuccess;
+    // Registry tick() activates at most one pending module. Do not drain the
+    // remaining queue here: every activation can synchronously run script(),
+    // ui(), and their signal/effect chains. Re-entering QuickJS repeatedly in
+    // one browser/foundation tick exhausts V8's WASM frame budget when DevTools
+    // instrumentation is active. Let subsequent foundation ticks drain it.
+    return CallHostFunction({ ContextMutex, Runtime, Context, LastEvaluationDeferred, LogSystem },
+        "<ngx-codecomponent-flush-pending-ui>", true, "tick", [](JSContext*, std::vector<JSValue>&) {});
 }
 
 csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
@@ -2357,7 +2353,7 @@ void NgxScriptSystem::LoadScriptModules()
 
                 for (const csp::systems::Asset& ScriptAsset : ScriptAssets)
                 {
-                    AssetSystem->DownloadAssetData(ScriptAsset,
+                    AssetSystem->DownloadAssetData(WithVersionedUri(ScriptAsset),
                         [this, Generation, TotalAssets, ScriptAsset, AssetCollections, DownloadedSources, DownloadedCount, HasFailed](
                             const csp::systems::AssetDataResult& DownloadResult)
                         {
@@ -2528,7 +2524,7 @@ bool NgxScriptSystem::EvaluateGlobalScript(const std::string& ScriptText, const 
     }
 
 #ifdef CSP_WASM
-    RebaseQuickJsStackCheck(*Runtime);
+    ConfigureQuickJsStackGuards(*Runtime);
 #endif
 
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_GLOBAL);
@@ -2588,7 +2584,7 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
     }
 
 #ifdef CSP_WASM
-    RebaseQuickJsStackCheck(*Runtime);
+    ConfigureQuickJsStackGuards(*Runtime);
 #endif
 
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_MODULE);
@@ -2667,7 +2663,7 @@ void NgxScriptSystem::PumpPendingJobs()
 #ifdef CSP_WASM
     if (Runtime)
     {
-        RebaseQuickJsStackCheck(*Runtime);
+        ConfigureQuickJsStackGuards(*Runtime);
     }
 #endif
 
@@ -2700,7 +2696,7 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
             return false;
         }
 
-        RebaseQuickJsStackCheck(*Runtime);
+        ConfigureQuickJsStackGuards(*Runtime);
 #else
         std::scoped_lock ContextLock(ContextMutex);
 #endif

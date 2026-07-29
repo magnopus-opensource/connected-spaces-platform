@@ -539,6 +539,30 @@ export function script({ attributes }) {
 }
 ```
 
+NGX scripts can also create a client-local entity that is never replicated:
+
+```js
+import { TheEntitySystem } from "@csp/code";
+
+export function script() {
+  const localEntity = TheEntitySystem.createLocalEntity("Local helper");
+  if (localEntity) {
+    localEntity.position = [0, 1, 0];
+    localEntity.addComponent("light");
+
+    return () => {
+      TheEntitySystem.destroyLocalEntity(localEntity);
+    };
+  }
+}
+```
+
+`createLocalEntity(name)` is available only to NGX scripts and only creates an
+entity when the active realtime engine is online. It returns the new entity
+synchronously, or `null` when local creation is unavailable.
+`destroyLocalEntity(entityOrId)` accepts either that entity or its numeric ID.
+It returns `true` when deletion succeeds and refuses non-local entities.
+
 ## Materials On Model Components
 
 The NGX compatibility layer adds async material helpers for static and animated model components:

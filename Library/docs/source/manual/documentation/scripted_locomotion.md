@@ -82,7 +82,9 @@ The current design uses a space entity tagged:
 
 - `player-controller-config`
 
-At runtime, `ThePlayerController` searches `TheEntitySystem.getEntities()` for the first entity with that tag and then finds a component on that entity capable of `invokeAction(...)`.
+At runtime, the NGX native binding searches for the first entity with that tag
+and then finds its `CodeSpaceComponent`. Discovery and action dispatch stay on
+the native side to avoid deeply nested JavaScript/WASM wrapper calls.
 
 In practice, this is expected to be a `CodeSpaceComponent` host entity used as the root for creator-authored controller logic.
 

@@ -1833,12 +1833,43 @@ struct NgxUIRuntime::Impl
         }
 
         std::map<std::string, int32_t> SeenTextCommandCountById;
+        // clay.h emits SCISSOR_END commands with no userData (only id +
+        // commandType), so the clip element's metadata has to be recovered
+        // from the matching SCISSOR_START. Without this the end marker never
+        // becomes a drawable and clients pull every sibling after the scroll
+        // container into the clip range. Null-userData SCISSOR_STARTs (clay's
+        // per-floating-root clips) are intentionally skipped, and their END is
+        // paired off via SkippedScissorDepth so it cannot pop a real clip.
+        std::vector<const ClayNodeMetadata*> OpenScissorMetaStack;
+        int32_t SkippedScissorDepth = 0;
         for (int32_t Index = 0; Index < RenderCommands.length; ++Index)
         {
             Clay_RenderCommand* Command = Clay_RenderCommandArray_Get(const_cast<Clay_RenderCommandArray*>(&RenderCommands), Index);
-            if (Command == nullptr || Command->userData == nullptr)
+            if (Command == nullptr)
             {
                 continue;
+            }
+
+            if (Command->userData == nullptr)
+            {
+                if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
+                {
+                    ++SkippedScissorDepth;
+                    continue;
+                }
+                if (Command->commandType != CLAY_RENDER_COMMAND_TYPE_SCISSOR_END)
+                {
+                    continue;
+                }
+                if (SkippedScissorDepth > 0)
+                {
+                    --SkippedScissorDepth;
+                    continue;
+                }
+                if (OpenScissorMetaStack.empty())
+                {
+                    continue;
+                }
             }
 
             const ClayNodeMetadata* MetaPtr = nullptr;
@@ -1846,6 +1877,10 @@ struct NgxUIRuntime::Impl
             {
                 const ClayTextUserData* TextUserData = static_cast<const ClayTextUserData*>(Command->userData);
                 MetaPtr = TextUserData != nullptr ? TextUserData->Metadata : nullptr;
+            }
+            else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_END && Command->userData == nullptr)
+            {
+                MetaPtr = OpenScissorMetaStack.back();
             }
             else
             {
@@ -1855,6 +1890,15 @@ struct NgxUIRuntime::Impl
             if (MetaPtr == nullptr)
             {
                 continue;
+            }
+
+            if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
+            {
+                OpenScissorMetaStack.push_back(MetaPtr);
+            }
+            else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_END && !OpenScissorMetaStack.empty())
+            {
+                OpenScissorMetaStack.pop_back();
             }
 
             const ClayNodeMetadata& Meta = *MetaPtr;

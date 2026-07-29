@@ -22,6 +22,7 @@
 
 #include "fmt/format.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -31,6 +32,21 @@
 
 namespace
 {
+class ScopedEntityUpdateLock
+{
+public:
+    explicit ScopedEntityUpdateLock(csp::common::IRealtimeEngine& InEntitySystem)
+        : EntitySystem(InEntitySystem)
+    {
+        EntitySystem.LockEntityUpdate();
+    }
+
+    ~ScopedEntityUpdateLock() { EntitySystem.UnlockEntityUpdate(); }
+
+private:
+    csp::common::IRealtimeEngine& EntitySystem;
+};
+
 class SingleContextScriptRunner final : public csp::common::IJSScriptRunner
 {
 public:
@@ -149,37 +165,77 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
         return ScriptInterface;
     };
 
+    Context.global()["__ngxDestroyLocalEntity"] = [entitySystem = EntitySystem](int64_t EntityId) -> bool
+    {
+        if (entitySystem == nullptr)
+        {
+            return false;
+        }
+
+        auto* Entity = entitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
+        if (Entity == nullptr || !Entity->IsLocal())
+        {
+            return false;
+        }
+
+        bool bDestroyed = false;
+        Entity->Destroy([&bDestroyed](bool bSuccess) { bDestroyed = bSuccess; });
+        return bDestroyed;
+    };
+
+    // Resolve and invoke the player-controller host entirely in native code.
+    // The previous JS implementation walked entity/component wrapper arrays
+    // with Array.find(), crossing JS <-> WASM for every tag/property lookup.
+    // That nested bridge chain could exceed V8's WASM frame budget when an
+    // NGX script invoked ThePlayerController while entering Play mode.
+    Context.global()["__ngxInvokePlayerControllerAction"]
+        = [entitySystem = EntitySystem](const std::string& ActionId, const std::string& ActionParams) -> bool
+    {
+        if (entitySystem == nullptr)
+        {
+            return false;
+        }
+
+        csp::multiplayer::ComponentBase* HostComponent = nullptr;
+        {
+            ScopedEntityUpdateLock EntityLock(*entitySystem);
+
+            for (size_t EntityIndex = 0; EntityIndex < entitySystem->GetNumEntities() && HostComponent == nullptr; ++EntityIndex)
+            {
+                auto* Entity = entitySystem->GetEntityByIndex(EntityIndex);
+                if (Entity == nullptr || !Entity->HasTag("player-controller-config"))
+                {
+                    continue;
+                }
+
+                const auto* Components = Entity->GetComponents();
+                const std::unique_ptr<const csp::common::Array<uint16_t>> ComponentIds(Components->Keys());
+                for (size_t ComponentIndex = 0; ComponentIndex < ComponentIds->Size(); ++ComponentIndex)
+                {
+                    auto* Component = Entity->GetComponent((*ComponentIds)[ComponentIndex]);
+                    if (Component != nullptr && Component->GetComponentType() == csp::multiplayer::ComponentType::Code)
+                    {
+                        HostComponent = Component;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (HostComponent == nullptr)
+        {
+            return false;
+        }
+
+        HostComponent->InvokeAction(ActionId.c_str(), ActionParams.c_str());
+        return true;
+    };
+
     constexpr const char* NgxCompatibilityPatch = R"JS(
 
-const __ngxPlayerControllerConfigTag = "player-controller-config";
-const __ngxCodeComponentType = 35;
-
-function __ngxFindPlayerControllerHostComponent() {
-  if (!globalThis.TheEntitySystem || typeof globalThis.TheEntitySystem.getEntities !== "function") {
-    return null;
-  }
-
-  const entities = globalThis.TheEntitySystem.getEntities();
-  if (!Array.isArray(entities)) {
-    return null;
-  }
-
-  const configEntity = entities.find((entity) => entity && typeof entity.hasTag === "function" && entity.hasTag(__ngxPlayerControllerConfigTag));
-  if (!configEntity || typeof configEntity.getComponents !== "function") {
-    return null;
-  }
-
-  const components = configEntity.getComponents();
-  if (!Array.isArray(components)) {
-    return null;
-  }
-
-  return components.find(
-    (component) =>
-      component &&
-      component.type === __ngxCodeComponentType &&
-      typeof component.invokeAction === "function"
-  ) ?? null;
+function __ngxInvokePlayerControllerAction(actionId, params) {
+  return typeof globalThis.__ngxInvokePlayerControllerAction === "function" &&
+    globalThis.__ngxInvokePlayerControllerAction(actionId, JSON.stringify(params));
 }
 
 if (typeof globalThis.__cspPlayerController === "undefined" || globalThis.__cspPlayerController === null) {
@@ -187,36 +243,32 @@ if (typeof globalThis.__cspPlayerController === "undefined" || globalThis.__cspP
 }
 
 globalThis.__cspPlayerController.moveCharacter = (x, y, z, jump = false, isFlying = false) => {
-  const component = __ngxFindPlayerControllerHostComponent();
-  if (!component) {
-    return false;
-  }
-
-  component.invokeAction(
+  return __ngxInvokePlayerControllerAction(
     "moveCharacter",
-    JSON.stringify({ x: Number(x), y: Number(y), z: Number(z), jump: !!jump, isFlying: !!isFlying })
+    { x: Number(x), y: Number(y), z: Number(z), jump: !!jump, isFlying: !!isFlying }
   );
-  return true;
 };
 
 globalThis.__cspPlayerController.teleportCharacter = (x, y, z) => {
-  const component = __ngxFindPlayerControllerHostComponent();
-  if (!component) {
+  const invoked = __ngxInvokePlayerControllerAction(
+    "teleportCharacter",
+    { x: Number(x), y: Number(y), z: Number(z) }
+  );
+  if (!invoked) {
     console.warn("NgxScript: Teleportation requested but no entity with \"player-controller-config\" found.");
-    return false;
   }
-  component.invokeAction("teleportCharacter", JSON.stringify({ x: Number(x), y: Number(y), z: Number(z) }));
-  return true;
+  return invoked;
+};
+
+globalThis.__cspPlayerController.setCharacterRotation = (x, y, z, w) => {
+  return __ngxInvokePlayerControllerAction(
+    "setCharacterRotation",
+    { x: Number(x), y: Number(y), z: Number(z), w: Number(w) }
+  );
 };
 
 globalThis.__cspPlayerController.setFirstPersonEnabled = (enabled) => {
-  const component = __ngxFindPlayerControllerHostComponent();
-  if (!component) {
-    return false;
-  }
-
-  component.invokeAction("setFirstPersonEnabled", JSON.stringify({ enabled: !!enabled }));
-  return true;
+  return __ngxInvokePlayerControllerAction("setFirstPersonEnabled", { enabled: !!enabled });
 };
 
 globalThis.__cspPlayerController.getCameraPosition = () =>
@@ -527,6 +579,29 @@ if (globalThis.ThisEntity) {
 }
 
 if (globalThis.TheEntitySystem) {
+  // NGX-only entity creation API. The legacy EntitySystem class deliberately
+  // does not register this method; it is installed only by this compatibility
+  // patch in the dedicated NGX QuickJS context.
+  if (typeof globalThis.__ngxCreateLocalEntity === "function" &&
+      typeof globalThis.TheEntitySystem.createLocalEntity !== "function") {
+    globalThis.TheEntitySystem.createLocalEntity = function(name) {
+      return __ngxPatchEntity(globalThis.__ngxCreateLocalEntity(String(name ?? "")));
+    };
+  }
+
+  if (typeof globalThis.__ngxDestroyLocalEntity === "function" &&
+      typeof globalThis.TheEntitySystem.destroyLocalEntity !== "function") {
+    globalThis.TheEntitySystem.destroyLocalEntity = function(entityOrId) {
+      const id = (entityOrId !== null && typeof entityOrId === "object")
+        ? entityOrId.id
+        : entityOrId;
+      if (typeof id !== "number" || !Number.isFinite(id)) {
+        return false;
+      }
+      return globalThis.__ngxDestroyLocalEntity(id);
+    };
+  }
+
   for (const name of ["getEntityById", "getEntityByName"]) {
     if (typeof globalThis.TheEntitySystem[name] === "function" && !globalThis.TheEntitySystem[`__ngxWrapped_${name}`]) {
       const original = globalThis.TheEntitySystem[name];

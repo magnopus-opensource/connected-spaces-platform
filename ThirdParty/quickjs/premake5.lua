@@ -38,6 +38,12 @@ function QuickJS.AddProject()
             "EMSCRIPTEN",        -- quickjs.c checks `defined(EMSCRIPTEN)` (bare, not __EMSCRIPTEN__) to skip malloc_usable_size
             "CONFIG_STACK_CHECK" -- enable js_check_stack_overflow; without it JS_SetMaxStackSize is a no-op and deep recursion falls through to V8's RangeError
         }
+    filter { "platforms:wasm", "configurations:Debug*" }
+        -- QuickJS implements nested JavaScript calls with nested C calls.
+        -- At -O0 their helper frames exhaust V8's WASM frame budget during
+        -- otherwise valid computed-signal evaluation. Keep symbols, but
+        -- optimize this dependency in debug WASM builds.
+        optimize "Speed"
     filter {}
 	
     files {
