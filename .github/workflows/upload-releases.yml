@@ -1,3 +1,6 @@
+# This workflow downloads all uploaded install artifcats (postfixed with -install),
+# creates individual zip archives for each artifact, and uploads them as a Github release.
+
 name: Upload Releases
 
 on:
@@ -27,13 +30,18 @@ jobs:
           name: wasm-npm-package
           path: release-artifacts/wasm-npm-package
 
+      # This script iterates all artifcts that were downloaded in the previous step, and
+      # zips them up into a release-assets directory.
+      # It also zips the wasm-npm-package seperatly.
       - name: Create release archives
         shell: bash
         run: |
           set -euxo pipefail
 
+          # Create directory for zipped artifacts
           mkdir -p release-assets
 
+          # Iterate all artifacts and zip them into release-assets dir
           for artifact_dir in release-artifacts/*-install; do
             if [[ ! -d "$artifact_dir" ]]; then
               continue
