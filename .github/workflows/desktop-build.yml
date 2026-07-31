@@ -6,6 +6,10 @@
 # [Static, Shared]
 #
 # upload_test_build - If this is true, build artifacts containing the csp-tests executable will be uploaded for Static, RelWithDebInfo configs.
+# We chose to test against RelWithDebInfo for faster test execution while keeping most debugging information.
+# Only static builds are tested because the build system does not support running tests against shared csp libs.
+# 
+# The csp-tests binary is ran
 # These are stored and named as follows:
 #
 # The path generated for this artifact is:
@@ -128,8 +132,6 @@ jobs:
           build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
           install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
 
-      # Upload build artifact for testing
-      # This is downloaded in a later step to run the tests.
       - name: Upload test build
         if: |
           inputs.upload_test_build &&
