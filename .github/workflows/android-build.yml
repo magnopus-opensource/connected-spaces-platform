@@ -3,23 +3,31 @@
 #
 # [Debug, Release, RelWithDebInfo]
 # [Static, Shared]
+#
+# upload_install - If this is true, artifacts will be created for each of the above combinations.
+# These are stored and named as follows:
+#
+# The path generated for this artifact is:
+#   install/android/{CONFIG_LOWERCASE}-{LINKAGE}
+#
+# Example:
+#   install/android/debug-static
+#
+# The name generated for this artifact is:
+#   android-{CONFIG_LOWERCASE}-{LINKAGE}-install
+#
+# Example:
+#   android-debug-static-install
+#
+# config.preset_prefix - Used to select a CMake preset based on the build type.
+# This value is also substituted for {CONFIG_LOWERCASE} to create the artifact path and name shown above.
 
 name: Build Android
 
 on:
   workflow_call:
     inputs:
-      # The path generated for this artifact is:
-      #   install/android/{CONFIG_LOWERCASE}-{LINKAGE}
-      #
-      # Example:
-      #   install/android/debug-static
-      #
-      # The name generated for this artifact is:
-      #   android-{CONFIG_LOWERCASE}-{LINKAGE}-install
-      #
-      # Example:
-      #   android-debug-static-install
+      
       upload_install:
         description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
         type: boolean

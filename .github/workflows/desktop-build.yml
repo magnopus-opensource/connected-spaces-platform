@@ -4,40 +4,53 @@
 # [Windows, MacOS, Linux]
 # [Debug, Release, RelWithDebInfo]
 # [Static, Shared]
-
+#
+# upload_test_build - If this is true, build artifacts containing the csp-tests executable will be uploaded for Static, RelWithDebInfo configs.
+# These are stored and named as follows:
+#
+# The path generated for this artifact is:
+#   build/{PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}/build/{CONFIG}
+#
+# Example:
+#   build/windows-debug-static/build/Debug
+#
+# The name generated for this artifact is:
+#   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-build
+#
+# Example:
+#   windows-debug-static-build
+#
+# upload_install - If this is true, artifacts will be created for each of the above combinations.
+# These are stored and named as follows:
+#
+# The path generated for this artifact is:
+#   install/{PLATFORM_NAME_LOWERCASE}/{CONFIG_LOWERCASE}-{LINKAGE}
+#
+# Example:
+#   install/windows/debug-static
+#
+# The name generated for this artifact is:
+#   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-install
+#
+# Example:
+#   windows-debug-static-install
+#
+# config.preset_prefix - Used to select a CMake preset based on the build type.
+# This value is also substituted for {CONFIG_LOWERCASE} to create the artifact path and name shown above.
+#
+# linkage.preset_postfix - Used to select the CMake preset that builds csp with tests by postfixing "-tests".
+# We need this because csp tests can only be ran with static builds.
 name: Build Desktop
 
 on:
   workflow_call:
     inputs:
-      # The path generated for this artifact is:
-      #   build/{PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}/build/{CONFIG}
-      #
-      # Example:
-      #   build/windows-debug-static/build/Debug
-      #
-      # The name generated for this artifact is:
-      #   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-build
-      #
-      # Example:
-      #   windows-debug-static-build
       upload_test_build:
         description: "If true, the build will be uploaded as an artifact. This allows us to run the csp-tests binary for testing."
         type: boolean
         required: false
         default: false
 
-      # The path generated for this artifact is:
-      #   install/{PLATFORM_NAME_LOWERCASE}/{CONFIG_LOWERCASE}-{LINKAGE}
-      #
-      # Example:
-      #   install/windows/debug-static
-      #
-      # The name generated for this artifact is:
-      #   {PLATFORM_NAME_LOWERCASE}-{CONFIG_LOWERCASE}-{LINKAGE}-install
-      #
-      # Example:
-      #   windows-debug-static-install
       upload_install:
         description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
         type: boolean
@@ -65,8 +78,6 @@ jobs:
             runner: macos-15
             host_profile: osx_arm
 
-        # preset_prefix - Allows us to select a cmake preset based on the build type.
-        # We also use this value for build/artifact names and paths.
         config:
           - build_type: Debug
             preset_prefix: debug
@@ -77,8 +88,6 @@ jobs:
           - build_type: RelWithDebInfo
             preset_prefix: relwithdebinfo
         
-        # preset_postfix - Allows us to select a cmake preset to build csp with tests for static builds.
-        # We do this because csp tests can only be ran with static builds.
         linkage:
           - name: static
             shared: false
