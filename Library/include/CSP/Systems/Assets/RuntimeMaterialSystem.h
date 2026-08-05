@@ -28,6 +28,7 @@ namespace csp::common
 {
 class LogSystem;
 class NetworkEventData;
+class AssetDetailBlobChangedNetworkEventData;
 }
 
 namespace csp::systems
@@ -192,7 +193,7 @@ private:
     void RefreshAll();
     void RegisterAssetDetailBlobChangedListener();
     void UnregisterAssetDetailBlobChangedListener();
-    void OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData);
+    void OnAssetDetailBlobChanged(const csp::common::AssetDetailBlobChangedNetworkEventData& AssetBlobEvent);
 };
 
 } // namespace csp::systems

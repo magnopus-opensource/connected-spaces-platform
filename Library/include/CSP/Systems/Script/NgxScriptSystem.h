@@ -49,6 +49,7 @@ namespace csp::common
 class IRealtimeEngine;
 class LogSystem;
 class NetworkEventData;
+class AssetDetailBlobChangedNetworkEventData;
 } // namespace csp::common
 
 namespace csp::systems
@@ -208,7 +209,7 @@ private:
     void LoadScriptModules();
     void RegisterAssetDetailBlobChangedListener();
     void UnregisterAssetDetailBlobChangedListener();
-    void OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData);
+    void OnAssetDetailBlobChanged(const csp::common::AssetDetailBlobChangedNetworkEventData& AssetBlobEvent);
     bool IsTrackedScriptAssetCollection(const csp::common::String& AssetCollectionId) const;
 
     // Debounced module reload: blob-changed events request a reload; the actual

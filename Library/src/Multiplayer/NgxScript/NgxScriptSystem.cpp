@@ -716,11 +716,8 @@ void NgxScriptSystem::RegisterAssetDetailBlobChangedListener()
     }
 
     auto* EventBus = &MultiplayerConnection->GetEventBus();
-    const csp::common::String EventName
-        = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
-
-    EventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ASSET_BLOB_CHANGED_RECEIVER_ID, EventName),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChanged(NetworkEventData); });
+    EventBus->ListenAssetDetailBlobChangedEvent(ASSET_BLOB_CHANGED_RECEIVER_ID,
+        [this](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChanged(NetworkEventData); });
 
     bAssetDetailBlobChangedListenerRegistered = true;
 }
@@ -735,9 +732,7 @@ void NgxScriptSystem::UnregisterAssetDetailBlobChangedListener()
     if (auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection())
     {
         auto* EventBus = &MultiplayerConnection->GetEventBus();
-        const csp::common::String EventName
-            = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
-        EventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ASSET_BLOB_CHANGED_RECEIVER_ID, EventName));
+        EventBus->StopListenAssetDetailBlobChangedEvent(ASSET_BLOB_CHANGED_RECEIVER_ID);
     }
 
     bAssetDetailBlobChangedListenerRegistered = false;
@@ -754,14 +749,13 @@ bool NgxScriptSystem::IsTrackedScriptAssetCollection(const csp::common::String& 
     return TrackedScriptAssetCollectionIds.find(AssetCollectionId.c_str()) != TrackedScriptAssetCollectionIds.end();
 }
 
-void NgxScriptSystem::OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData)
+void NgxScriptSystem::OnAssetDetailBlobChanged(const csp::common::AssetDetailBlobChangedNetworkEventData& AssetBlobEvent)
 {
     if (ActiveSpaceId.IsEmpty())
     {
         return;
     }
 
-    const auto& AssetBlobEvent = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
     if (AssetBlobEvent.AssetType != csp::systems::EAssetType::SCRIPT_LIBRARY)
     {
         return;

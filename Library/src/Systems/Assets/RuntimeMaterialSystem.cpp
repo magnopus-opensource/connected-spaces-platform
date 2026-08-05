@@ -436,10 +436,8 @@ void RuntimeMaterialSystem::RegisterAssetDetailBlobChangedListener()
     }
 
     auto* EventBus = &MultiplayerConnection->GetEventBus();
-    const csp::common::String EventName
-        = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
-    EventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ASSET_BLOB_CHANGED_RECEIVER_ID, EventName),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChanged(NetworkEventData); });
+    EventBus->ListenAssetDetailBlobChangedEvent(ASSET_BLOB_CHANGED_RECEIVER_ID,
+        [this](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChanged(NetworkEventData); });
     State.bListenerRegistered = true;
 }
 
@@ -454,17 +452,14 @@ void RuntimeMaterialSystem::UnregisterAssetDetailBlobChangedListener()
     if (auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection())
     {
         auto* EventBus = &MultiplayerConnection->GetEventBus();
-        const csp::common::String EventName
-            = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
-        EventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ASSET_BLOB_CHANGED_RECEIVER_ID, EventName));
+        EventBus->StopListenAssetDetailBlobChangedEvent(ASSET_BLOB_CHANGED_RECEIVER_ID);
     }
 
     State.bListenerRegistered = false;
 }
 
-void RuntimeMaterialSystem::OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData)
+void RuntimeMaterialSystem::OnAssetDetailBlobChanged(const csp::common::AssetDetailBlobChangedNetworkEventData& AssetBlobEvent)
 {
-    const auto& AssetBlobEvent = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
     if (AssetBlobEvent.AssetType != csp::systems::EAssetType::MATERIAL)
     {
         return;
