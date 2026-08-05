@@ -125,11 +125,6 @@ const auto Schema = ComponentSchema {
             static_cast<int64_t>(CameraType::FirstAndThirdPerson),
         },
         {
-            static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsScripted),
-            "isScripted",
-            false,
-        },
-        {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsAvatarEnabled),
             "isAvatarEnabled",
             true,
@@ -288,17 +283,6 @@ LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
 void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)
 {
     SetPropertyDirect(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(Value));
-    SetPropertyDirect(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted), Value == LocomotionModel::Scripted);
-}
-
-bool AvatarSpaceComponent::GetIsScripted() const
-{
-    return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted));
-}
-
-void AvatarSpaceComponent::SetIsScripted(bool Value)
-{
-    SetPropertyDirect(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted), Value);
 }
 
 bool AvatarSpaceComponent::GetIsAvatarEnabled() const
