@@ -420,7 +420,9 @@ public:
     CSP_NO_EXPORT bool GetIsPersistent() const;
 
     /// @brief Whether this entity is local-only and should not replicate over the network.
-    CSP_NO_EXPORT bool IsLocal() const;
+    /// Exported so client layers can branch on locality (e.g. local cinematic
+    /// cameras take a different render path than replicated ones).
+    bool IsLocal() const;
 
     /// @brief Marks whether this entity is local-only and should not replicate over the network.
     CSP_NO_EXPORT void SetLocal(bool InIsLocal);

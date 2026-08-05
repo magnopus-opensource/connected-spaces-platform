@@ -1257,7 +1257,8 @@ bool NgxScriptSystem::FireKeyboardEvent(const csp::common::String& EventType, co
 }
 
 bool NgxScriptSystem::FireMouseEvent(const csp::common::String& EventType, int32_t Button, int32_t Buttons, int32_t PointerId,
-    const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey)
+    const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey, double X, double Y, double MovementX,
+    double MovementY, double WheelDeltaY, double WheelDeltaZ)
 {
     if (EventType.IsEmpty())
     {
@@ -1278,6 +1279,12 @@ bool NgxScriptSystem::FireMouseEvent(const csp::common::String& EventType, int32
             JS_SetPropertyStr(Ctx, Event, "ctrlKey", JS_NewBool(Ctx, CtrlKey));
             JS_SetPropertyStr(Ctx, Event, "shiftKey", JS_NewBool(Ctx, ShiftKey));
             JS_SetPropertyStr(Ctx, Event, "metaKey", JS_NewBool(Ctx, MetaKey));
+            JS_SetPropertyStr(Ctx, Event, "x", JS_NewFloat64(Ctx, X));
+            JS_SetPropertyStr(Ctx, Event, "y", JS_NewFloat64(Ctx, Y));
+            JS_SetPropertyStr(Ctx, Event, "movementX", JS_NewFloat64(Ctx, MovementX));
+            JS_SetPropertyStr(Ctx, Event, "movementY", JS_NewFloat64(Ctx, MovementY));
+            JS_SetPropertyStr(Ctx, Event, "wheelDeltaY", JS_NewFloat64(Ctx, WheelDeltaY));
+            JS_SetPropertyStr(Ctx, Event, "wheelDeltaZ", JS_NewFloat64(Ctx, WheelDeltaZ));
             Args.push_back(Event);
         });
 }
@@ -2177,6 +2184,12 @@ globalThis.__cspDispatchMouseEvent = (event) => {
         ctrlKey: !!event.ctrlKey,
         shiftKey: !!event.shiftKey,
         metaKey: !!event.metaKey,
+        x: Number(event.x ?? 0),
+        y: Number(event.y ?? 0),
+        movementX: Number(event.movementX ?? 0),
+        movementY: Number(event.movementY ?? 0),
+        wheelDeltaY: Number(event.wheelDeltaY ?? 0),
+        wheelDeltaZ: Number(event.wheelDeltaZ ?? 0),
     }));
     return true;
 };

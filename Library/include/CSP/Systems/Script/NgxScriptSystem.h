@@ -101,8 +101,14 @@ public:
         bool Repeat, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey);
 
     // Dispatch a normalized mouse event to active Local/Editor scripts.
+    // X/Y are viewport coordinates; MovementX/MovementY are per-event deltas
+    // (mousemove); WheelDeltaY/WheelDeltaZ are the scroll amounts for 'wheel'
+    // events (browser WheelEvent.deltaY/.deltaZ; positive Y = scroll
+    // down/away). Trailing params default to 0 so button-only call sites stay
+    // source-compatible.
     bool FireMouseEvent(const csp::common::String& EventType, int32_t Button, int32_t Buttons, int32_t PointerId,
-        const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey);
+        const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey, double X = 0.0, double Y = 0.0,
+        double MovementX = 0.0, double MovementY = 0.0, double WheelDeltaY = 0.0, double WheelDeltaZ = 0.0);
 
     // Cache the local player's active camera transform/orientation vectors for script queries.
     void SetLocalPlayerCameraState(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation,

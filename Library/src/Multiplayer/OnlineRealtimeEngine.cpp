@@ -460,6 +460,15 @@ void OnlineRealtimeEngine::CreateLocalEntity(const csp::common::String& Name, co
     Objects.Append(NewObject);
 
     Callback(NewObject);
+
+    // Local entities never arrive through the networked creation path, so the
+    // client layer must be notified here as well — without this, clients never
+    // wrap the entity (no render state, no component handlers), leaving
+    // script-added components such as cinematic cameras inert.
+    if (RemoteSpaceEntityCreatedCallback)
+    {
+        RemoteSpaceEntityCreatedCallback(NewObject);
+    }
 }
 
 void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
