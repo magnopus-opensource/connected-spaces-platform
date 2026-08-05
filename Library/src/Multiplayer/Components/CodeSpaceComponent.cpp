@@ -83,7 +83,7 @@ const csp::common::String& CodeSpaceComponent::GetScriptAssetPath() const
 
 void CodeSpaceComponent::SetScriptAssetPath(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::ScriptAssetPath), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::ScriptAssetPath), Value);
 }
 
 csp::multiplayer::CodeScopeType CodeSpaceComponent::GetCodeScopeType() const
@@ -93,7 +93,7 @@ csp::multiplayer::CodeScopeType CodeSpaceComponent::GetCodeScopeType() const
 
 void CodeSpaceComponent::SetCodeScopeType(csp::multiplayer::CodeScopeType Value)
 {
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType), static_cast<int64_t>(Value));
 }
 
 bool CodeSpaceComponent::HasAttribute(const csp::common::String& Key) const
@@ -118,14 +118,14 @@ void CodeSpaceComponent::SetAttribute(const csp::common::String& Key, const Code
 {
     auto Attributes = GetStringMapProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes));
     Attributes[Key] = Attribute.ToReplicatedValue();
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes), Attributes);
+    SetPropertyDirect(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes), Attributes);
 }
 
 void CodeSpaceComponent::RemoveAttribute(const csp::common::String& Key)
 {
     auto Attributes = GetStringMapProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes));
     Attributes.Remove(Key);
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes), Attributes);
+    SetPropertyDirect(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes), Attributes);
 }
 
 void CodeSpaceComponent::ClearAttributes()
@@ -152,7 +152,7 @@ const csp::common::String& CodeSpaceComponent::GetSchema() const
 
 void CodeSpaceComponent::SetSchema(const csp::common::String& SchemaJson)
 {
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema), SchemaJson);
+    SetPropertyDirect(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema), SchemaJson);
 }
 
 namespace

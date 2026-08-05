@@ -88,7 +88,19 @@ template <> struct formatter<csp::web::HttpRequest> : formatter<std::string_view
         csp::common::String Headers;
         for (const auto& Header : RequestHeaders)
         {
-            Headers.Append(fmt::format("\t{}: {}\n", Header.first, Header.second).c_str());
+            std::string HeaderValue;
+
+            if (Header.first == "X-WAF-Bypass")
+            {
+                // Hide WAF Bypass secret from logs.
+                HeaderValue = "*****";
+            }
+            else
+            {
+                HeaderValue = Header.second;
+            }
+
+            Headers.Append(fmt::format("\t{}: {}\n", Header.first, HeaderValue).c_str());
         }
 
         const csp::common::String& RequestPayload = Request.GetPayload().ToJson();

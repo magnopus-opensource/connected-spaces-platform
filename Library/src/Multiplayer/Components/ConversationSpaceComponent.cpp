@@ -446,7 +446,10 @@ void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdat
 
 bool ConversationSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)); }
 
-void ConversationSpaceComponent::SetIsVisible(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible), Value); }
+void ConversationSpaceComponent::SetIsVisible(const bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible), Value);
+}
 
 bool ConversationSpaceComponent::GetIsActive() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive)); }
 
@@ -459,7 +462,7 @@ const csp::common::Vector3& ConversationSpaceComponent::GetPosition() const
 
 void ConversationSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::Position), Value);
 }
 
 /* IRotationComponent */
@@ -471,14 +474,17 @@ const csp::common::Vector4& ConversationSpaceComponent::GetRotation() const
 
 void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
 
-void ConversationSpaceComponent::SetIsActive(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value); }
+void ConversationSpaceComponent::SetIsActive(const bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value);
+}
 
 void ConversationSpaceComponent::SetTitle(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::Title), Value);
 }
 
 const csp::common::String& ConversationSpaceComponent::GetTitle() const
@@ -486,13 +492,13 @@ const csp::common::String& ConversationSpaceComponent::GetTitle() const
     return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
 }
 
-void ConversationSpaceComponent::SetResolved(bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved), Value); }
+void ConversationSpaceComponent::SetResolved(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::Resolved), Value); }
 
 bool ConversationSpaceComponent::GetResolved() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved)); }
 
 void ConversationSpaceComponent::SetConversationCameraPosition(const csp::common::Vector3& InValue)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition), InValue);
 }
 
 const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPosition() const
@@ -502,7 +508,7 @@ const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPos
 
 void ConversationSpaceComponent::SetConversationCameraRotation(const csp::common::Vector4& InValue)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation), InValue);
 }
 
 const csp::common::Vector4& ConversationSpaceComponent::GetConversationCameraRotation() const
@@ -549,7 +555,7 @@ void ConversationSpaceComponent::SetPropertyFromPatch(uint32_t Key, const csp::c
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId), Value);
 }
 
 void ConversationSpaceComponent::RemoveConversationId() { RemoveProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)); }

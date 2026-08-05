@@ -71,6 +71,12 @@ csp::systems::Profile CreateTestUser(bool AgeVerified /* = true */, csp::systems
     }
 }
 
+csp::common::Optional<csp::common::String> GetWAFBypassEnv()
+{
+    const auto WAFBypassEnv = std::getenv("MCS_X_WAF_BYPASS");
+    return (WAFBypassEnv != nullptr) ? csp::common::Optional<csp::common::String> { WAFBypassEnv } : nullptr;
+}
+
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
     constexpr const char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
@@ -84,6 +90,8 @@ void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
     ClientHeaderInfo.CHSEnvironment = "oDev";
 
     csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo, nullptr);
+
+    csp::systems::SystemsManager::Get().__SetWAFBypass(GetWAFBypassEnv());
 }
 
 } // namespace Utils

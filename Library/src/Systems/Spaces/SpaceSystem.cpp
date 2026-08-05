@@ -2197,35 +2197,5 @@ void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewNa
     );
 }
 
-void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback)
-{
-    AsyncCallCompletedCallback = std::move(Callback);
-
-    if (!AsyncCallCompletedCallback)
-    {
-        CSP_LOG_ERROR_MSG("Error: The AsyncCallCompletedCallback handler has not been set and the SpaceSystem has not been registered with the "
-                          "AsyncCallCompleted event. Please call 'SetAsyncCallCompletedCallback()' with a valid AsyncCallCompletedCallbackHandler.");
-        return;
-    }
-
-    EventBusPtr->ListenNetworkEvent(
-        csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAsyncCallCompletedEvent(NetworkEventData); });
-}
-
-void SpaceSystem::OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData)
-{
-    if (!AsyncCallCompletedCallback)
-    {
-        return;
-    }
-
-    const csp::common::AsyncCallCompletedEventData& AsyncCallCompletedEventData
-        = static_cast<const csp::common::AsyncCallCompletedEventData&>(NetworkEventData);
-
-    AsyncCallCompletedCallback(AsyncCallCompletedEventData);
-}
-
 void SpaceSystem::SetMultiplayerSystem(csp::systems::MultiplayerSystem& InMultiplayerSystem) { MultiplayerSystem = &InMultiplayerSystem; }
 } // namespace csp::systems

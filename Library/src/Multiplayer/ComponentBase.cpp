@@ -96,7 +96,7 @@ namespace
     }
 } // namespace
 
-const csp::common::ReplicatedValue* ComponentBase::GetSchemaProperty(uint16_t Key) const
+const csp::common::ReplicatedValue* ComponentBase::GetProperty(uint16_t Key) const
 {
     if (!CachedSchema)
     {
@@ -108,11 +108,11 @@ const csp::common::ReplicatedValue* ComponentBase::GetSchemaProperty(uint16_t Ke
         return nullptr;
     }
 
-    const auto& Value = GetProperty(Key);
+    const auto& Value = GetPropertyDirect(Key);
     return Value != InvalidValue ? &Value : nullptr;
 }
 
-void ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)
+void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)
 {
     if (!CachedSchema)
     {
@@ -122,13 +122,13 @@ void ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::Replicate
     if (const auto* Property = FindSchemaProperty(*CachedSchema, Key);
         Property && Value.GetReplicatedValueType() == Property->DefaultValue.GetReplicatedValueType())
     {
-        SetProperty(Key, Value);
+        SetPropertyDirect(Key, Value);
     }
 }
 
 const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
-const csp::common::ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
+const csp::common::ReplicatedValue& ComponentBase::GetPropertyDirect(uint32_t Key) const
 {
     if (Properties.HasKey(Key))
     {
@@ -145,7 +145,7 @@ const csp::common::ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) con
 
 bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
     {
@@ -162,7 +162,7 @@ bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 
 int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
     {
@@ -179,7 +179,7 @@ int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 
 float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
     {
@@ -196,7 +196,7 @@ float ComponentBase::GetFloatProperty(uint32_t Key) const
 
 const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
@@ -213,7 +213,7 @@ const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 
 const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
     {
@@ -230,7 +230,7 @@ const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) cons
 
 const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
     {
@@ -247,7 +247,7 @@ const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) cons
 
 const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
     {
@@ -264,7 +264,7 @@ const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) cons
 
 const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& ComponentBase::GetStringMapProperty(uint32_t Key) const
 {
-    const auto& RepVal = GetProperty(Key);
+    const auto& RepVal = GetPropertyDirect(Key);
 
     if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
     {
@@ -279,7 +279,7 @@ const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Compo
     return csp::common::ReplicatedValue::GetDefaultStringMap();
 }
 
-void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value)
+void ComponentBase::SetPropertyDirect(uint32_t Key, const csp::common::ReplicatedValue& Value)
 {
     if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
     {
@@ -395,7 +395,7 @@ void ComponentBase::InvokeAction(const csp::common::String& InAction, const csp:
 
 const csp::common::String& ComponentBase::GetComponentName() const { return GetStringProperty(COMPONENT_KEY_NAME); }
 
-void ComponentBase::SetComponentName(const csp::common::String& Value) { SetProperty(COMPONENT_KEY_NAME, Value); }
+void ComponentBase::SetComponentName(const csp::common::String& Value) { SetPropertyDirect(COMPONENT_KEY_NAME, Value); }
 
 void ComponentBase::InitialiseProperties() { Properties[COMPONENT_KEY_NAME] = ""; }
 

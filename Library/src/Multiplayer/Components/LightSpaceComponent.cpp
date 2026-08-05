@@ -137,28 +137,28 @@ LightType LightSpaceComponent::GetLightType() const
 
 void LightSpaceComponent::SetLightType(LightType Value)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightType), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::LightType), static_cast<int64_t>(Value));
 }
 
 const csp::common::Vector3& LightSpaceComponent::GetColor() const { return GetVector3Property(static_cast<uint32_t>(LightPropertyKeys::Color)); }
 
-void LightSpaceComponent::SetColor(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::Color), Value); }
+void LightSpaceComponent::SetColor(const csp::common::Vector3& Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::Color), Value); }
 
 float LightSpaceComponent::GetIntensity() const { return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::Intensity)); }
 
-void LightSpaceComponent::SetIntensity(float Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::Intensity), Value); }
+void LightSpaceComponent::SetIntensity(float Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::Intensity), Value); }
 
 float LightSpaceComponent::GetRange() const { return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::Range)); }
 
-void LightSpaceComponent::SetRange(float Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::Range), Value); }
+void LightSpaceComponent::SetRange(float Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::Range), Value); }
 
 float LightSpaceComponent::GetInnerConeAngle() const { return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle)); }
 
-void LightSpaceComponent::SetInnerConeAngle(float Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle), Value); }
+void LightSpaceComponent::SetInnerConeAngle(float Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle), Value); }
 
 float LightSpaceComponent::GetOuterConeAngle() const { return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle)); }
 
-void LightSpaceComponent::SetOuterConeAngle(float Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle), Value); }
+void LightSpaceComponent::SetOuterConeAngle(float Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle), Value); }
 
 /* IPositionComponent */
 
@@ -167,7 +167,10 @@ const csp::common::Vector3& LightSpaceComponent::GetPosition() const
     return GetVector3Property(static_cast<uint32_t>(LightPropertyKeys::Position));
 }
 
-void LightSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::Position), Value); }
+void LightSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::Position), Value);
+}
 
 /* IRotationComponent */
 
@@ -176,21 +179,24 @@ const csp::common::Vector4& LightSpaceComponent::GetRotation() const
     return GetVector4Property(static_cast<uint32_t>(LightPropertyKeys::Rotation));
 }
 
-void LightSpaceComponent::SetRotation(const csp::common::Vector4& Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation), Value); }
+void LightSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::Rotation), Value);
+}
 
 /* IVisibleComponent */
 
 bool LightSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible)); }
 
-void LightSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible), Value); }
+void LightSpaceComponent::SetIsVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::IsVisible), Value); }
 
 bool LightSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsARVisible)); }
 
-void LightSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsARVisible), Value); }
+void LightSpaceComponent::SetIsARVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::IsARVisible), Value); }
 
 bool LightSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible)); }
 
-void LightSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible), Value); }
+void LightSpaceComponent::SetIsVirtualVisible(bool Value) { SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible), Value); }
 
 const csp::common::String& LightSpaceComponent::GetLightCookieAssetId() const
 {
@@ -199,7 +205,7 @@ const csp::common::String& LightSpaceComponent::GetLightCookieAssetId() const
 
 void LightSpaceComponent::SetLightCookieAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetId), Value);
 }
 
 const csp::common::String& LightSpaceComponent::GetLightCookieAssetCollectionId() const
@@ -209,7 +215,7 @@ const csp::common::String& LightSpaceComponent::GetLightCookieAssetCollectionId(
 
 void LightSpaceComponent::SetLightCookieAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId), Value);
 }
 
 LightCookieType LightSpaceComponent::GetLightCookieType() const
@@ -219,7 +225,7 @@ LightCookieType LightSpaceComponent::GetLightCookieType() const
 
 void LightSpaceComponent::SetLightCookieType(LightCookieType Value)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieType), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::LightCookieType), static_cast<int64_t>(Value));
 }
 
 const csp::common::String& LightSpaceComponent::GetThirdPartyComponentRef() const
@@ -229,7 +235,7 @@ const csp::common::String& LightSpaceComponent::GetThirdPartyComponentRef() cons
 
 void LightSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 LightShadowType LightSpaceComponent::GetLightShadowType() const
@@ -239,7 +245,7 @@ LightShadowType LightSpaceComponent::GetLightShadowType() const
 
 void LightSpaceComponent::SetLightShadowType(LightShadowType Value)
 {
-    SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType), static_cast<int64_t>(Value));
+    SetPropertyDirect(static_cast<uint32_t>(LightPropertyKeys::LightShadowType), static_cast<int64_t>(Value));
 }
 
 } // namespace csp::multiplayer

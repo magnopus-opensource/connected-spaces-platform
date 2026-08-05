@@ -81,7 +81,7 @@ const csp::common::String& AttachmentSpaceComponent::GetAnchorPath() const
 
 void AttachmentSpaceComponent::SetAnchorPath(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AttachmentPropertyKeys::AnchorPath), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AttachmentPropertyKeys::AnchorPath), Value);
 }
 
 const csp::common::Vector3& AttachmentSpaceComponent::GetAttachedPosition() const
@@ -91,7 +91,7 @@ const csp::common::Vector3& AttachmentSpaceComponent::GetAttachedPosition() cons
 
 void AttachmentSpaceComponent::SetAttachedPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedPosition), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedPosition), Value);
 }
 
 const csp::common::Vector4& AttachmentSpaceComponent::GetAttachedRotation() const
@@ -101,7 +101,7 @@ const csp::common::Vector4& AttachmentSpaceComponent::GetAttachedRotation() cons
 
 void AttachmentSpaceComponent::SetAttachedRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedRotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedRotation), Value);
 }
 
 const csp::common::Vector3& AttachmentSpaceComponent::GetAttachedScale() const
@@ -111,7 +111,7 @@ const csp::common::Vector3& AttachmentSpaceComponent::GetAttachedScale() const
 
 void AttachmentSpaceComponent::SetAttachedScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedScale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(AttachmentPropertyKeys::AttachedScale), Value);
 }
 
 } // namespace csp::multiplayer

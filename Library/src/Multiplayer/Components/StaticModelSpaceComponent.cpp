@@ -127,7 +127,7 @@ const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetId
 
 void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
 const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCollectionId() const
@@ -137,7 +137,7 @@ const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCo
 
 void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
 csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceComponent::GetMaterialOverrides() const
@@ -166,7 +166,7 @@ void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& M
 
     ReplicatedOverrides[ModelPath] = MaterialId;
 
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
@@ -174,7 +174,7 @@ void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String
     auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
     ReplicatedOverrides.Remove(ModelPath);
 
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 /* ITransformComponent */
@@ -186,7 +186,7 @@ const csp::common::Vector3& StaticModelSpaceComponent::GetPosition() const
 
 void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
@@ -196,7 +196,7 @@ const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
 
 void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
@@ -206,7 +206,7 @@ const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
 
 void StaticModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), Value);
 }
 
 SpaceTransform StaticModelSpaceComponent::GetTransform() const
@@ -230,11 +230,14 @@ void StaticModelSpaceComponent::SetTransform(const SpaceTransform& InValue)
 
 bool StaticModelSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)); }
 
-void StaticModelSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), InValue); }
+void StaticModelSpaceComponent::SetIsVisible(bool InValue) { SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), InValue); }
 
 bool StaticModelSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)); }
 
-void StaticModelSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue); }
+void StaticModelSpaceComponent::SetIsARVisible(bool InValue)
+{
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue);
+}
 
 bool StaticModelSpaceComponent::GetIsVirtualVisible() const
 {
@@ -243,7 +246,7 @@ bool StaticModelSpaceComponent::GetIsVirtualVisible() const
 
 void StaticModelSpaceComponent::SetIsVirtualVisible(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), InValue);
 }
 
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
@@ -253,7 +256,7 @@ const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef(
 
 void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 bool StaticModelSpaceComponent::GetIsShadowCaster() const
@@ -261,7 +264,10 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
     return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster));
 }
 
-void StaticModelSpaceComponent::SetIsShadowCaster(bool Value) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value); }
+void StaticModelSpaceComponent::SetIsShadowCaster(bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value);
+}
 
 /* IRenderBehaviourComponent */
 
@@ -272,7 +278,7 @@ bool StaticModelSpaceComponent::GetShowAsHoldoutInAR() const
 
 void StaticModelSpaceComponent::SetShowAsHoldoutInAR(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR), InValue);
 }
 
 bool StaticModelSpaceComponent::GetShowAsHoldoutInVirtual() const
@@ -282,7 +288,7 @@ bool StaticModelSpaceComponent::GetShowAsHoldoutInVirtual() const
 
 void StaticModelSpaceComponent::SetShowAsHoldoutInVirtual(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual), InValue);
 }
 
 } // namespace csp::multiplayer

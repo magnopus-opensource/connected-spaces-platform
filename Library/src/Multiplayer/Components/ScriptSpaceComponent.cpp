@@ -78,13 +78,13 @@ void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 {
     // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
 
-    SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
     Parent->GetScript().OnSourceChanged(Value);
 }
 
 int64_t ScriptSpaceComponent::GetOwnerId() const { return GetIntegerProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)); }
 
-void ScriptSpaceComponent::SetOwnerId(int64_t OwnerId) { SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId), OwnerId); }
+void ScriptSpaceComponent::SetOwnerId(int64_t OwnerId) { SetPropertyDirect(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId), OwnerId); }
 
 ScriptScope ScriptSpaceComponent::GetScriptScope() const
 {
@@ -93,7 +93,7 @@ ScriptScope ScriptSpaceComponent::GetScriptScope() const
 
 void ScriptSpaceComponent::SetScriptScope(ScriptScope Scope)
 {
-    SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope), static_cast<int64_t>(Scope));
+    SetPropertyDirect(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope), static_cast<int64_t>(Scope));
 }
 
 void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value)

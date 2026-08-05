@@ -103,7 +103,7 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetMarkerAssetId() cons
 
 void FiducialMarkerSpaceComponent::SetMarkerAssetId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId), Value);
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetAssetCollectionId() const
@@ -113,7 +113,7 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetAssetCollectionId() 
 
 void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId), Value);
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
@@ -123,7 +123,7 @@ const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
 
 void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* ITransformComponent */
@@ -135,7 +135,7 @@ const csp::common::Vector3& FiducialMarkerSpaceComponent::GetPosition() const
 
 void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
@@ -145,7 +145,7 @@ const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
 
 void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
@@ -155,7 +155,7 @@ const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
 
 void FiducialMarkerSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), Value);
 }
 
 SpaceTransform FiducialMarkerSpaceComponent::GetTransform() const
@@ -179,14 +179,20 @@ void FiducialMarkerSpaceComponent::SetTransform(const SpaceTransform& InValue)
 
 bool FiducialMarkerSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible)); }
 
-void FiducialMarkerSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible), Value); }
+void FiducialMarkerSpaceComponent::SetIsVisible(bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible), Value);
+}
 
 bool FiducialMarkerSpaceComponent::GetIsARVisible() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible));
 }
 
-void FiducialMarkerSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible), Value); }
+void FiducialMarkerSpaceComponent::SetIsARVisible(bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible), Value);
+}
 
 bool FiducialMarkerSpaceComponent::GetIsVirtualVisible() const
 {
@@ -195,7 +201,7 @@ bool FiducialMarkerSpaceComponent::GetIsVirtualVisible() const
 
 void FiducialMarkerSpaceComponent::SetIsVirtualVisible(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible), Value);
+    SetPropertyDirect(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible), Value);
 }
 
 } // namespace csp::multiplayer

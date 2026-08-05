@@ -109,6 +109,8 @@ public:
     /// @param AuthContext csp::common::IAuthContext& : The AuthContext for this object.
     virtual void SetAuthContext(csp::common::IAuthContext& AuthContext);
 
+    void SetWAFBypass(const std::optional<std::string>& Value);
+
 protected:
     /// @brief Send a http request
     /// @param Request Details of the web request headers and payload
@@ -128,8 +130,10 @@ protected:
     csp::common::LogSystem* LogSystem = nullptr;
 
 private:
+
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
+    std::optional<std::string> WAFBypassValue;
 
 #ifdef CSP_WASM
     csp::Queue<HttpRequest*> WasmRequests;

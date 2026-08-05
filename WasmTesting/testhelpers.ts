@@ -131,6 +131,18 @@ export async function LaunchTestPage(
       page.on('pageerror', e => errors.push(e));
       page.on('console', msg => consoleMessages.push(msg.text()));
 
+      // Read WAF value from environment and pass to test pages.
+      const wafBypass = process.env.MCS_X_WAF_BYPASS;
+      
+      // Inject test config into the browser page before scripts run.
+      // This keeps secrets out of URL query parameters for safety.
+      // The test pages can then read window.__CSP_TEST_CONFIG__ to get the values.
+      await page.evaluateOnNewDocument((value) => {
+        (window as any).__CSP_TEST_CONFIG__ = {
+          wafBypass: value,
+        };
+      }, wafBypass ?? undefined);
+
       //Build a URL argument list.
       //This is a bit rough and ready, since credentials and spaceID are both optional and we need to handle the formatting
       //There's almost certainly a better way to do this, probably even a native JS way specifically for URL arguments.

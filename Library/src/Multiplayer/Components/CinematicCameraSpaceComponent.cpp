@@ -150,7 +150,7 @@ const csp::common::Vector3& CinematicCameraSpaceComponent::GetPosition() const
 
 void CinematicCameraSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& CinematicCameraSpaceComponent::GetRotation() const
@@ -160,7 +160,7 @@ const csp::common::Vector4& CinematicCameraSpaceComponent::GetRotation() const
 
 void CinematicCameraSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::Rotation), Value);
 }
 
 // Focal Length
@@ -171,7 +171,7 @@ float CinematicCameraSpaceComponent::GetFocalLength() const
 
 void CinematicCameraSpaceComponent::SetFocalLength(float Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocalLength), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocalLength), Value);
 }
 
 // Aspect Ratio
@@ -182,7 +182,7 @@ float CinematicCameraSpaceComponent::GetAspectRatio() const
 
 void CinematicCameraSpaceComponent::SetAspectRatio(float Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::AspectRatio), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::AspectRatio), Value);
 }
 
 // Sensor Size
@@ -193,23 +193,26 @@ const csp::common::Vector2& CinematicCameraSpaceComponent::GetSensorSize() const
 
 void CinematicCameraSpaceComponent::SetSensorSize(const csp::common::Vector2& Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::SensorSize), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::SensorSize), Value);
 }
 
 // Near Clip
 float CinematicCameraSpaceComponent::GetNearClip() const { return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::NearClip)); }
 
-void CinematicCameraSpaceComponent::SetNearClip(float Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::NearClip), Value); }
+void CinematicCameraSpaceComponent::SetNearClip(float Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::NearClip), Value);
+}
 
 // Far Clip
 float CinematicCameraSpaceComponent::GetFarClip() const { return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FarClip)); }
 
-void CinematicCameraSpaceComponent::SetFarClip(float Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FarClip), Value); }
+void CinematicCameraSpaceComponent::SetFarClip(float Value) { SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::FarClip), Value); }
 
 // ISO
 float CinematicCameraSpaceComponent::GetIso() const { return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Iso)); }
 
-void CinematicCameraSpaceComponent::SetIso(float Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Iso), Value); }
+void CinematicCameraSpaceComponent::SetIso(float Value) { SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::Iso), Value); }
 
 // Shutter Speed
 float CinematicCameraSpaceComponent::GetShutterSpeed() const
@@ -219,13 +222,16 @@ float CinematicCameraSpaceComponent::GetShutterSpeed() const
 
 void CinematicCameraSpaceComponent::SetShutterSpeed(float Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::ShutterSpeed), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::ShutterSpeed), Value);
 }
 
 // Aperture
 float CinematicCameraSpaceComponent::GetAperture() const { return GetFloatProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Aperture)); }
 
-void CinematicCameraSpaceComponent::SetAperture(float Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::Aperture), Value); }
+void CinematicCameraSpaceComponent::SetAperture(float Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::Aperture), Value);
+}
 
 // Focus Distance
 float CinematicCameraSpaceComponent::GetFocusDistance() const
@@ -235,7 +241,7 @@ float CinematicCameraSpaceComponent::GetFocusDistance() const
 
 void CinematicCameraSpaceComponent::SetFocusDistance(float Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocusDistance), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::FocusDistance), Value);
 }
 
 // Depth of Field Enabled
@@ -246,7 +252,7 @@ bool CinematicCameraSpaceComponent::GetDepthOfFieldEnabled() const
 
 void CinematicCameraSpaceComponent::SetDepthOfFieldEnabled(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::DepthOfFieldEnabled), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::DepthOfFieldEnabled), Value);
 }
 
 // Is Viewer Camera
@@ -257,13 +263,16 @@ bool CinematicCameraSpaceComponent::GetIsViewerCamera() const
 
 void CinematicCameraSpaceComponent::SetIsViewerCamera(bool Value)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::IsViewerCamera), Value);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::IsViewerCamera), Value);
 }
 
 // Is Enabled
 bool CinematicCameraSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::IsEnabled)); }
 
-void CinematicCameraSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::IsEnabled), Value); }
+void CinematicCameraSpaceComponent::SetIsEnabled(bool Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::IsEnabled), Value);
+}
 
 // Third Party Component
 const csp::common::String& CinematicCameraSpaceComponent::GetThirdPartyComponentRef() const
@@ -273,7 +282,7 @@ const csp::common::String& CinematicCameraSpaceComponent::GetThirdPartyComponent
 
 void CinematicCameraSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-    SetProperty(static_cast<uint32_t>(CinematicCameraPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(CinematicCameraPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

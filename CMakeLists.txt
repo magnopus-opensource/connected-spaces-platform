@@ -266,6 +266,14 @@ configure_file(
     ${CSP_INCLUDE_DIR}/CSP/version.h
 )
 
+# Temporary define until we remove the legacy wrapper gen
+if(USE_LEGACY_WRAPPER_GEN)
+    target_compile_definitions(csp-lib
+        PRIVATE
+            USE_LEGACY_WRAPPER_GEN=1
+    )
+endif()
+
 # Legacy Emscripten wrapper ---------------------------------------
 
   option(CSP_BUILD_LEGACY_EMSCRIPTEN "Build legacy emscripten project" OFF)
@@ -414,6 +422,10 @@ if(BUILD_TESTING)
       -Wextra
       -Wno-error=changes-meaning
       -Wno-error=deprecated-declarations
+      # uninitialized and maybe-uninitialized are needed our test project.
+      # This to avoid treating GCC uninitialized warnings from GoogleTest headers as errors in Linux release builds.
+      -Wno-error=uninitialized
+      -Wno-error=maybe-uninitialized
       -Wno-missing-field-initializers
       -Wno-ignored-qualifiers
       -fpermissive

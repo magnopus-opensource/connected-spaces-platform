@@ -107,7 +107,7 @@ const csp::common::String& ExternalLinkSpaceComponent::GetName() const
 
 void ExternalLinkSpaceComponent::SetName(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED), Value);
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetLinkUrl() const
@@ -117,7 +117,7 @@ const csp::common::String& ExternalLinkSpaceComponent::GetLinkUrl() const
 
 void ExternalLinkSpaceComponent::SetLinkUrl(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl), Value);
 }
 
 /* ITransformComponent */
@@ -129,7 +129,7 @@ const csp::common::Vector3& ExternalLinkSpaceComponent::GetPosition() const
 
 void ExternalLinkSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Position), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& ExternalLinkSpaceComponent::GetRotation() const
@@ -139,7 +139,7 @@ const csp::common::Vector4& ExternalLinkSpaceComponent::GetRotation() const
 
 void ExternalLinkSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& ExternalLinkSpaceComponent::GetScale() const
@@ -149,7 +149,7 @@ const csp::common::Vector3& ExternalLinkSpaceComponent::GetScale() const
 
 void ExternalLinkSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale), Value);
 }
 
 SpaceTransform ExternalLinkSpaceComponent::GetTransform() const
@@ -176,22 +176,28 @@ const csp::common::String& ExternalLinkSpaceComponent::GetDisplayText() const
 
 void ExternalLinkSpaceComponent::SetDisplayText(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText), Value);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText), Value);
 }
 
 /* IClickableComponent */
 
 bool ExternalLinkSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled)); }
 
-void ExternalLinkSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled), Value); }
+void ExternalLinkSpaceComponent::SetIsEnabled(bool Value) { SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled), Value); }
 
 bool ExternalLinkSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible)); }
 
-void ExternalLinkSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible), InValue); }
+void ExternalLinkSpaceComponent::SetIsVisible(bool InValue)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible), InValue);
+}
 
 bool ExternalLinkSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)); }
 
-void ExternalLinkSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible), InValue); }
+void ExternalLinkSpaceComponent::SetIsARVisible(bool InValue)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible), InValue);
+}
 
 bool ExternalLinkSpaceComponent::GetIsVirtualVisible() const
 {
@@ -200,7 +206,7 @@ bool ExternalLinkSpaceComponent::GetIsVirtualVisible() const
 
 void ExternalLinkSpaceComponent::SetIsVirtualVisible(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVirtualVisible), InValue);
+    SetPropertyDirect(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVirtualVisible), InValue);
 }
 
 } // namespace csp::multiplayer

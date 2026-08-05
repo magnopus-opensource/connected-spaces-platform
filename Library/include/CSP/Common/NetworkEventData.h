@@ -47,7 +47,7 @@ enum class EPermissionChangeType
     Invalid,
 };
 
-/// @brief Data deserialized from a general purpose event. Serves as the base type for all custom deserialized events.
+/// @brief Data deserialized from a custom event. Serves as the base type for all specialized deserialized events.
 class CSP_API NetworkEventData
 {
 public:

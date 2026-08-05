@@ -23,7 +23,7 @@
 
 namespace
 {
-constexpr const char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
+constexpr const char* DEFAULT_TEST_ENDPOINT = "https://ogs.magnopus-dev.cloud";
 constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 
 /*
@@ -92,7 +92,7 @@ RunnerSettings ProcessCLI(int argc, const char* const* argv)
         "SpaceId to use in the invoked test. If none is provided, creates a random space. If a space id is provided, the space is assumed "
         "to already exist, and will not be cleaned up.");
     App.add_option("-o,--timeout", TimeoutInSeconds, "How long until the process self-terminates, in seconds. If not set, defaults to 30");
-    App.add_option("-c,--endpoint", Endpoint, "Cloud services endpoint. If not set, defaults to `https://ogs-internal.magnopus-dev.cloud`");
+    App.add_option("-c,--endpoint", Endpoint, "Cloud services endpoint. If not set, defaults to `https://ogs.magnopus-dev.cloud`");
 
     try
     {

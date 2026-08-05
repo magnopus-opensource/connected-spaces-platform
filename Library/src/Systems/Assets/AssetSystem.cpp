@@ -1810,33 +1810,28 @@ void AssetSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(
-        csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
-        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
+    EventBusPtr->ListenAssetDetailBlobChangedEvent("CSPInternal::AssetSystem",
+        [this](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
 }
 
-void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
+void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
 {
     if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
     {
         return;
     }
 
-    const csp::common::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedNetworkEventData
-        = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
-
     if (AssetDetailBlobChangedCallback)
     {
-        AssetDetailBlobChangedCallback(AssetDetailBlobChangedNetworkEventData);
+        AssetDetailBlobChangedCallback(NetworkEventData);
     }
 
-    if (AssetDetailBlobChangedNetworkEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+    if (NetworkEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
     {
         csp::common::MaterialChangedParams MaterialParams;
-        MaterialParams.ChangeType = AssetDetailBlobChangedNetworkEventData.ChangeType;
-        MaterialParams.MaterialCollectionId = AssetDetailBlobChangedNetworkEventData.AssetCollectionId;
-        MaterialParams.MaterialId = AssetDetailBlobChangedNetworkEventData.AssetId;
+        MaterialParams.ChangeType = NetworkEventData.ChangeType;
+        MaterialParams.MaterialCollectionId = NetworkEventData.AssetCollectionId;
+        MaterialParams.MaterialId = NetworkEventData.AssetId;
 
         MaterialChangedCallback(MaterialParams);
     }

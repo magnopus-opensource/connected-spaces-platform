@@ -1,3 +1,4 @@
 export function initializeCSP(
-  useDebugCSP: boolean
+  useDebugCSP: boolean,
+  wafBypass: string | undefined
 ): Promise<void>;

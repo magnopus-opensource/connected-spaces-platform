@@ -818,8 +818,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             {
                 // For server-side leader election, we want to listen for script run requests from other clients.
                 // We will receive these if we are the leader and another client modifies a script or sends an event.
-                this->NetworkEventBus->ListenNetworkEvent(
-                    csp::multiplayer::NetworkEventRegistration { "CSPInternal::ScriptEvent", RemoteRunScriptMessage },
+                this->NetworkEventBus->ListenCustomNetworkEvent("CSPInternal::ScriptEvent", RemoteRunScriptMessage,
                     [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
 
                 if (ScriptSystemReadyCallback)
@@ -1159,8 +1158,7 @@ void OnlineRealtimeEngine::DisableLeaderElection()
 
     if (LeaderElectionManager != nullptr)
     {
-        NetworkEventBus->StopListenNetworkEvent(
-            csp::multiplayer::NetworkEventRegistration("CSPInternal::ScriptEvent", RemoteRunScriptMessage));
+        NetworkEventBus->StopListenCustomNetworkEvent("CSPInternal::ScriptEvent", RemoteRunScriptMessage);
 
         LeaderElectionManager.reset(nullptr);
     }
