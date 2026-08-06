@@ -1,0 +1,151 @@
+# This workflow performs the following actions:
+#  - Builds csp for all desktop platforms
+#  - Builds csp for wasm
+#  - Builds csp for android
+#  - Builds csp for iOS and visionOS
+#  - Builds csp using legacy wasm wrapper
+#  - Optionally runs csp live tests on Linux
+#  - Optionally uploads artifacts to GitHub
+#  - Optionally uploads legacy wasm artifact to NPM
+
+name: Publish CSP
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        type: boolean
+        description: 'Whether tests should be skipped'
+        required: true
+        default: false
+
+      gtest_filter:
+        description: 'An optional gtest filter to pass to Google Test if running tests'
+        type: string
+        required: false
+        default: "*"
+      
+      create_release:
+        type: boolean
+        description: 'Whether a Github release should be created'
+        required: true
+        default: false
+
+      release_number:
+        type: string
+        description: 'Version number of this release'
+        required: true
+
+      build_desktop:
+        type: boolean
+        description: Build desktop packages
+        required: true
+        default: true
+
+      build_wasm:
+        type: boolean
+        description: Build modern WASM packages
+        required: true
+        default: true
+
+      build_android:
+        type: boolean
+        description: Build Android packages
+        required: true
+        default: true
+
+      build_ios_visionos:
+        type: boolean
+        description: Build iOS and visionOS packages
+        required: true
+        default: true
+
+      build_legacy_wasm:
+        type: boolean
+        description: Build legacy WASM/NPM package
+        required: true
+        default: true
+
+jobs:
+  desktop:
+    if: inputs.build_desktop
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      upload_test_build: ${{ !inputs.skip_tests }}
+      upload_install: ${{ inputs.create_release }}
+
+  wasm:
+    if: inputs.build_wasm
+    uses: ./.github/workflows/wasm-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  android:
+    if: inputs.build_android
+    uses: ./.github/workflows/android-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  ios-visionos:
+    if: inputs.build_ios_visionos
+    uses: ./.github/workflows/ios-visionos-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  legacy-wasm:
+    if: inputs.build_legacy_wasm
+    uses: ./.github/workflows/legacy-wasm-build.yml
+    secrets: inherit
+    with:
+      upload_package: ${{ inputs.create_release }}
+      run_tests: ${{ !inputs.skip_tests }}
+
+  live-desktop-tests:
+    if: inputs.build_desktop && !inputs.skip_tests
+    uses: ./.github/workflows/live-mcs-tests-run.yml
+    secrets: inherit
+    needs: desktop
+    with:
+       gtest_filter: ${{ inputs.gtest_filter }}
+  
+  upload-releases:
+    uses: ./.github/workflows/upload-releases.yml
+    with:
+      release_number: ${{ inputs.release_number }}
+
+    needs:
+    - desktop
+    - wasm
+    - live-desktop-tests
+    - legacy-wasm
+    - android
+    - ios-visionos
+
+    if: |
+      always() &&
+        inputs.create_release &&
+        needs.desktop.result == 'success' &&
+        needs.wasm.result == 'success' &&
+        needs.legacy-wasm.result == 'success' &&
+        needs.android.result == 'success' &&
+        needs.ios-visionos.result == 'success' &&
+        (
+          needs.live-desktop-tests.result == 'success' ||
+          needs.live-desktop-tests.result == 'skipped'
+        )
+
+  publish-npm-sandbox:
+    uses: ./.github/workflows/publish-legacy-npm.yml
+    needs:
+      - legacy-wasm
+      - live-desktop-tests
+
+    if: |
+      always() &&
+      inputs.create_release &&
+      needs.legacy-wasm.result == 'success' &&
+      (
+        needs.live-desktop-tests.result == 'success' ||
+        needs.live-desktop-tests.result == 'skipped'
+      )

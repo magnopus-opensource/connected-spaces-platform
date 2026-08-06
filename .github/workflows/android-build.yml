@@ -1,0 +1,89 @@
+# This workflow builds, installs, and optionally uploads CSP artifacts for every supported
+# combination of android build configuration, and linkage type:
+#
+# [Debug, Release, RelWithDebInfo]
+# [Static, Shared]
+#
+# upload_install - If this is true, artifacts will be created for each of the above combinations.
+# These are stored and named as follows:
+#
+# The path generated for this artifact is:
+#   install/android/{CONFIG_LOWERCASE}-{LINKAGE}
+#
+# Example:
+#   install/android/debug-static
+#
+# The name generated for this artifact is:
+#   android-{CONFIG_LOWERCASE}-{LINKAGE}-install
+#
+# Example:
+#   android-debug-static-install
+#
+# config.preset_prefix - Used to select a CMake preset based on the build type.
+# This value is also substituted for {CONFIG_LOWERCASE} to create the artifact path and name shown above.
+
+name: Build Android
+
+on:
+  workflow_call:
+    inputs:
+      
+      upload_install:
+        description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  android-build:
+    name: Build android ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: ubuntu-24.04
+    
+    strategy:
+      fail-fast: false
+      
+      matrix:
+        # preset_prefix - Allows us to select a cmake preset based on the build type.
+        # We also use this value for build/artifact names and paths.
+        config:
+          - build_type: Debug
+            preset_prefix: debug
+
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+
+        linkage:
+          - name: static
+            shared: false
+
+          - name: shared
+            shared: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: android_arm
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          output_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/android/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+
+      - name: Upload install
+        if: inputs.upload_install
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}-install
+          path: install/android/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          if-no-files-found: error

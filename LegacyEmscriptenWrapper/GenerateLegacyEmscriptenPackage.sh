@@ -34,8 +34,6 @@ CONFIG_OUTPUT_DIR="$OUTPUT_DIR/$CONFIG"
 WRAPPER_BUILD_DIR="./$BUILD_DIR/LegacyEmscriptenWrapper"
 TYPESCRIPT_OUTPUT_DIR="Tools/WrapperGenerator/Output/TypeScript"
 
-python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
-
 mkdir -p "$CONFIG_OUTPUT_DIR"
 
 # Copy specific Emscripten output files into the config folder

@@ -1,0 +1,35 @@
+# This workflow downloads the Linux, ReleaseWithDebugInfo, Static build and runs tests against live services.
+
+name: Run Tests (Live MCS) Linux
+
+on:
+  workflow_call:
+    inputs:
+      gtest_filter:
+        description: "An optional gtest filter to pass to Google Test"
+        type: string
+        required: false
+        default: "*"
+
+jobs:
+  run-live-mcs-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: linux-relwithdebinfo-static-build
+          path: ${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo
+
+      - name: Run Tests
+        env:
+          MCS_X_WAF_BYPASS: ${{ secrets.MCS_BYPASS }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          cd "${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo"
+
+          chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
+          chmod +x ./csp-tests
+          ./csp-tests --gtest_filter='${{ inputs.gtest_filter }}'
+   

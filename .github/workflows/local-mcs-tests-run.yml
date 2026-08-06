@@ -1,0 +1,91 @@
+# This workflow performs the following actions:
+#   - Pulls the MCS Repo
+#   - Sets up and logs into Docker
+#   - Runs the MCS Docker container
+#   - Downloads the Linux, ReleaseWithDebugInfo, Static build
+#   - Runs tests against local services.
+
+name: Run Tests (Local MCS) Linux
+
+on:
+  workflow_call:
+    inputs:
+      gtest_filter:
+        description: "An optional gtest filter to pass to Google Test"
+        type: string
+        required: false
+        default: "*"
+
+jobs:
+  run-local-mcs-tests:
+
+    ## Why Local MCS cannot run on GitHub Windows runners
+
+    # MCS Docker stack uses Linux container images.
+    # GitHub windows-2022 runners do not provide the same Docker Desktop Linux-container environment.
+    # When Docker runs there, it attempts to pull Windows container images.
+    # Because the MCS images are Linux images, Docker fails with "no matching manifest for windows(10.0.20348)/amd64"
+    # For this reason, we currently run our local tests on Linux.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Enable Git long paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          repository: magnopus/Magnopus.Services
+          ssh-key: ${{ secrets.MSC_DEPLOY_KEY }}
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker diagnostics
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          docker version
+          docker info
+          docker compose version
+
+      - name: Pull and run MCS container
+        shell: bash
+        env:
+          COMPOSE_ANSI: never
+          COMPOSE_PROGRESS: plain
+        run: |
+          set -euo pipefail
+
+          pip install requests
+          python Build/LocalContainers/start_current_o2dev.py
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: linux-relwithdebinfo-static-build
+          path: ${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo
+
+      - name: Set endpoint var
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081/" >> "$GITHUB_ENV" 
+
+      - name: Run Tests
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          cd "${{ github.workspace }}/build/linux-relwithdebinfo-static/build/RelWithDebInfo"
+
+          chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
+          chmod +x ./csp-tests
+          ./csp-tests --gtest_filter='${{ inputs.gtest_filter }}'

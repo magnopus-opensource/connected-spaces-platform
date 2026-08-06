@@ -1,0 +1,84 @@
+# This workflow downloads the legacy wasm package and uploads to npm.
+#
+# Before uploading, this verifies that the package has the expected name,
+# contains a non-empty version, and can be successfully packaged by npm.
+#
+# It also verifys the uploaded package by again validating the name and version.
+#
+# The legacy wasm project uses the legacy wrapper generator for its binding layer,
+# which will be replaced by the new binding repo when the work is complete.
+# This is a temporary project that allows us to continue making csp web builds using the new build system.
+
+name: Publish NPM Package
+
+on:
+  workflow_call:
+
+jobs:
+  publish-npm:
+    name: Publish NPM Package
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Download npm package
+        uses: actions/download-artifact@v5
+        with:
+          name: wasm-npm-package
+          path: npm-package
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@magnopus-opensource'
+
+      - name: Validate npm package
+        working-directory: npm-package/connected-spaces-platform.web
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+
+          test "$PACKAGE_NAME" = "@magnopus-opensource/connected-spaces-platform.web"
+          test -n "$PACKAGE_VERSION"
+
+          echo "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
+
+          npm pack --dry-run
+
+      - name: Publish npm package
+        working-directory: npm-package/connected-spaces-platform.web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          npm publish
+
+      - name: Verify published package
+        working-directory: npm-package/connected-spaces-platform.web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+
+          PUBLISHED_VERSION="$(
+            npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version \
+              --registry=https://npm.pkg.github.com
+          )"
+
+          test "$PUBLISHED_VERSION" = "$PACKAGE_VERSION"
+
+          echo "Verified ${PACKAGE_NAME}@${PACKAGE_VERSION}"

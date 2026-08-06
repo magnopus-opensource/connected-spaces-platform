@@ -1,0 +1,123 @@
+# This workflow builds, optionally runs csp wasm tests against live services,
+# and optionally uploads CSP artifacts for every supported.
+
+# This works slightly differently to the other build workflows, 
+# as it builds both Debug and Release into the same package.
+
+# The legacy wasm project uses the legacy wrapper generator for its binding layer,
+# which will be replaced by the new binding repo when the work is complete.
+# This is a temporary project that allows us to continue making csp web builds from the new build system.
+
+name: Build Legacy Wasm
+
+on:
+  workflow_call:
+    inputs:
+      # The path generated for this artifact is:
+      #   ./Library/Binaries/package/wasm
+      #
+      # The name generated for this artifact is:
+      #   wasm-npm-package
+      upload_package:
+        description: "If true, the package will be uploaded as an artifact. These artifacts are used for releases."
+        type: boolean
+        required: false
+        default: false
+      
+      run_tests:
+        description: "If true, csp wasm tests will be ran against live services"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build-legacy-wasm:
+    name: Build legacy emscripten ${{ matrix.config.build_type }}
+    runs-on: windows-latest
+    
+    env:
+      EMSDK_VERSION: 3.1.40
+    
+    strategy:
+      fail-fast: false
+      
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+
+      - name: Set up MSVC (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup emsdk
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Generate wrapper
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          pip install chevron
+          pip install jinja2
+          python Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
+
+      - name: Build Emscripten Debug
+        uses: ./.github/actions/build-legacy-emscripten
+        with:
+          build_type: Debug
+          configure_preset: debug-static
+          build_preset: debug-static
+          output_folder: build/emscripten-debug
+
+      - name: Build Emscripten Release
+        uses: ./.github/actions/build-legacy-emscripten
+        with:
+          build_type: Release
+          configure_preset: release-static
+          build_preset: release-static
+          output_folder: build/emscripten-release
+
+      - name: Build Package
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
+      
+      - name: Create Debug Package
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./LegacyEmscriptenWrapper/GenerateLegacyEmscriptenPackage.sh \
+            Debug \
+            build/emscripten-debug/build/Debug
+
+      - name: Create Release Package
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./LegacyEmscriptenWrapper/GenerateLegacyEmscriptenPackage.sh \
+            Release \
+            build/emscripten-release/build/Release
+
+      - name: Run Tests
+        if: inputs.run_tests
+        env:
+          MCS_X_WAF_BYPASS: ${{ secrets.MCS_BYPASS }}
+        shell: bash
+        run: |
+          cd WasmTesting
+          ./run-csp-wasm-tests.cmd
+
+      - name: Upload
+        if: inputs.upload_package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-npm-package
+          path: ./Library/Binaries/package/wasm
+          if-no-files-found: error

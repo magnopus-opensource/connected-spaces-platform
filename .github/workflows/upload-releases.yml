@@ -1,0 +1,79 @@
+# This workflow downloads all uploaded install artifcats (postfixed with -install),
+# creates individual zip archives for each artifact, and uploads them as a Github release.
+
+name: Upload Releases
+
+on:
+  workflow_call:
+    inputs:
+      release_number:
+        type: string
+        required: true
+
+jobs:
+  upload-release:
+    name: Publish Release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+  
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: '*-install'
+          path: release-artifacts
+
+      - name: Download npm package artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: wasm-npm-package
+          path: release-artifacts/wasm-npm-package
+
+      # This script iterates all artifcts that were downloaded in the previous step, and
+      # zips them up into a release-assets directory.
+      # It also zips the wasm-npm-package seperatly.
+      - name: Create release archives
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # Create directory for zipped artifacts
+          mkdir -p release-assets
+
+          # Iterate all artifacts and zip them into release-assets dir
+          for artifact_dir in release-artifacts/*-install; do
+            if [[ ! -d "$artifact_dir" ]]; then
+              continue
+            fi
+
+            artifact_name="$(basename "$artifact_dir")"
+            archive_name="${artifact_name%-install}"
+
+            (
+              cd "$artifact_dir"
+              zip -r "../../release-assets/${archive_name}.zip" .
+            )
+          done
+
+          # Package the npm separately.
+          (
+            cd release-artifacts/wasm-npm-package
+            zip -r "../../release-assets/wasm-npm-package.zip" .
+          )
+
+          echo "Release assets:"
+          ls -lh release-assets
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_number }}
+          name: CSP ${{ inputs.release_number }}
+          target_commitish: ${{ github.sha }}
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release-assets/*.zip
