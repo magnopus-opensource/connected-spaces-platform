@@ -49,6 +49,13 @@ if(NOT WIN32)
   )
 endif()
 
+set_target_properties(
+    csp-quickjs
+    PROPERTIES
+        OUTPUT_NAME csp-quickjs
+        DEBUG_POSTFIX _D
+)
+
 target_compile_definitions(csp-quickjs
   PRIVATE
     _HAS_EXCEPTIONS=0
@@ -74,13 +81,4 @@ target_compile_options(csp-quickjs PRIVATE
 
 target_link_options(csp-quickjs PUBLIC
   $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
-)
-
-install(TARGETS csp-quickjs
-  EXPORT CSPTargets
-  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

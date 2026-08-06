@@ -1,0 +1,79 @@
+# This file generates the library and include paths for CPS's bundled third-party dependencies,
+# including our vendored dependencies by setting the following variables:
+# 
+# - _CSP_STATIC_DEPENDENCY_LIBRARIES - A list of third-party library paths, e.g: 
+#       build/windows-debug-static/sdk-dependencies/lib/fmt.lib
+#
+# - _CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES - A list of third-party  public include paths, e.g:
+#       build/windows-debug-static/sdk-dependencies/include/fmt/
+
+set(_CSP_THIRD_PARTY_LIBRARY_FILENAMES
+    "@CSP_THIRD_PARTY_DEPENDENCY_LIBRARY_FILENAMES@"
+)
+
+set(_CSP_PUBLIC_INCLUDE_DIRECTORIES
+    "@CSP_THIRD_PARTY_PUBLIC_INCLUDE_DIRECTORIES@"
+)
+
+set(_CSP_SIGNALR_LIBRARY_FILENAME
+    "@CSP_SIGNALR_LIBRARY_FILENAME@"
+)
+
+set(_CSP_QUICKJS_LIBRARY_FILENAME
+    "@CSP_QUICKJS_LIBRARY_FILENAME@"
+)
+
+set(_CSP_STATIC_DEPENDENCY_LIBRARIES
+    "${PACKAGE_PREFIX_DIR}/lib/third-party/csp/${_CSP_SIGNALR_LIBRARY_FILENAME}"
+    "${PACKAGE_PREFIX_DIR}/lib/third-party/csp/${_CSP_QUICKJS_LIBRARY_FILENAME}"
+)
+
+# Construct a list of thirty-party library paths using the package directory and the library names
+foreach(_library_filename IN LISTS _CSP_THIRD_PARTY_LIBRARY_FILENAMES)
+    list(APPEND
+        _CSP_STATIC_DEPENDENCY_LIBRARIES
+        "${PACKAGE_PREFIX_DIR}/lib/third-party/${_library_filename}"
+    )
+endforeach()
+
+# Construct a list of third-party public include paths using the package directory and include names
+set(_CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES)
+
+foreach(_relative_include IN LISTS _CSP_PUBLIC_INCLUDE_DIRECTORIES)
+    list(APPEND
+        _CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES
+        "${PACKAGE_PREFIX_DIR}/include/third-party/${_relative_include}"
+    )
+endforeach()
+
+# Ensure platofrm libs are linked
+if(WIN32)
+    list(APPEND
+        _CSP_STATIC_DEPENDENCY_LIBRARIES
+        ws2_32
+        iphlpapi
+        crypt32
+        bcrypt
+    )
+endif()
+
+# Ensure the third-party library paths are valid
+foreach(_dependency IN LISTS _CSP_STATIC_DEPENDENCY_LIBRARIES)
+    if(IS_ABSOLUTE "${_dependency}" AND NOT EXISTS "${_dependency}")
+        message(FATAL_ERROR
+            "CSP SDK dependency was not found:\n"
+            "  ${_dependency}"
+        )
+    endif()
+endforeach()
+
+# Ensure the third-party public include paths are valid
+foreach(_include_directory
+        IN LISTS _CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES)
+    if(NOT IS_DIRECTORY "${_include_directory}")
+        message(FATAL_ERROR
+            "CSP SDK dependency include directory was not found:\n"
+            "  ${_include_directory}"
+        )
+    endif()
+endforeach()
