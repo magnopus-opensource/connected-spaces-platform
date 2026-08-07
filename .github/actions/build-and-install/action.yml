@@ -32,6 +32,11 @@ inputs:
     required: false
     default: "install"
 
+  generate_sdk:
+    description: "Whether to generate a redistributable static CSP SDK"
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
 
@@ -71,17 +76,39 @@ runs:
           exit 1
         fi
 
-        conan install . \
-          -of "${{ inputs.output_folder }}" \
-          -s build_type="${{ inputs.build_type }}" \
-          --build=missing \
+        CONAN_ARGS=(
+          .
+          -of "${{ inputs.output_folder }}"
+          -s build_type="${{ inputs.build_type }}"
+          --build=missing
           --profile:host="$PROFILE_PATH"
+        )
+
+        if [ "${{ inputs.generate_sdk }}" = "true" ]; then
+          CONAN_ARGS+=(
+            --deployer=./conan/csp_deployer.py
+            --deployer-folder="${{ inputs.output_folder }}/sdk-dependencies"
+          )
+        fi
+
+        conan install "${CONAN_ARGS[@]}"
 
     - name: Configure CMake
       shell: bash
       run: |
         set -euxo pipefail
-        cmake --preset "${{ inputs.configure_preset }}"
+        CMAKE_ARGS=(
+          --preset "${{ inputs.configure_preset }}"
+        )
+
+        if [ "${{ inputs.generate_sdk }}" = "true" ]; then
+          CMAKE_ARGS+=(
+            -DCSP_GENERATE_SDK=ON
+            -DCSP_SDK_DEPENDENCIES_DIR="${{ github.workspace }}/${{ inputs.output_folder }}/sdk-dependencies"
+          )
+        fi
+
+        cmake "${CMAKE_ARGS[@]}"
 
     - name: Build
       shell: bash
