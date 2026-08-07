@@ -10,6 +10,10 @@ on:
         type: string
         required: true
 
+      upload_legacy_wasm:
+        type: boolean
+        required: true
+
 jobs:
   upload-release:
     name: Publish Release
@@ -25,6 +29,7 @@ jobs:
           path: release-artifacts
 
       - name: Download npm package artifact
+        if: inputs.upload_legacy_wasm
         uses: actions/download-artifact@v5
         with:
           name: wasm-npm-package
@@ -41,7 +46,7 @@ jobs:
           # Create directory for zipped artifacts
           mkdir -p release-assets
 
-          # Iterate all artifacts and zip them into release-assets dir
+          # Iterate all install artifacts and zip them into release-assets dir
           for artifact_dir in release-artifacts/*-install; do
             if [[ ! -d "$artifact_dir" ]]; then
               continue
@@ -56,11 +61,13 @@ jobs:
             )
           done
 
-          # Package the npm separately.
-          (
-            cd release-artifacts/wasm-npm-package
-            zip -r "../../release-assets/wasm-npm-package.zip" .
-          )
+          # Package the legacy WASM NPM artifact if it was built.
+          if [[ -d "release-artifacts/wasm-npm-package" ]]; then
+            (
+              cd release-artifacts/wasm-npm-package
+              zip -r "../../release-assets/wasm-npm-package.zip" .
+            )
+          fi
 
           echo "Release assets:"
           ls -lh release-assets

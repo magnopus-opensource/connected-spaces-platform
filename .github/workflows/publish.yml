@@ -113,6 +113,7 @@ jobs:
     uses: ./.github/workflows/upload-releases.yml
     with:
       release_number: ${{ inputs.release_number }}
+      upload_legacy_wasm: ${{ inputs.build_legacy_wasm }}
 
     needs:
     - desktop
