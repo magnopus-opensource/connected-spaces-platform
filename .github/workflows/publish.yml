@@ -124,28 +124,29 @@ jobs:
 
     if: |
       always() &&
-        inputs.create_release &&
-        needs.desktop.result == 'success' &&
-        needs.wasm.result == 'success' &&
-        needs.legacy-wasm.result == 'success' &&
-        needs.android.result == 'success' &&
-        needs.ios-visionos.result == 'success' &&
-        (
-          needs.live-desktop-tests.result == 'success' ||
-          needs.live-desktop-tests.result == 'skipped'
-        )
+      inputs.create_release &&
+      (!inputs.build_desktop || needs.desktop.result == 'success') &&
+      (!inputs.build_wasm || needs.wasm.result == 'success') &&
+      (!inputs.build_legacy_wasm || needs.legacy-wasm.result == 'success') &&
+      (!inputs.build_android || needs.android.result == 'success') &&
+      (!inputs.build_ios_visionos || needs.ios-visionos.result == 'success') &&
+      (
+        inputs.skip_tests ||
+        needs.live-desktop-tests.result == 'success'
+      )
 
   publish-npm-sandbox:
     uses: ./.github/workflows/publish-legacy-npm.yml
+
     needs:
-      - legacy-wasm
-      - live-desktop-tests
+    - legacy-wasm
+    - live-desktop-tests
 
     if: |
       always() &&
       inputs.create_release &&
       needs.legacy-wasm.result == 'success' &&
       (
-        needs.live-desktop-tests.result == 'success' ||
-        needs.live-desktop-tests.result == 'skipped'
+        inputs.skip_tests ||
+        needs.live-desktop-tests.result == 'success'
       )
