@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.47.0]
 
+### 🐛 🔨 Bug Fixes
+
+- [OB-5754] fix: Expose base component name vs deprecated name to scripting for VideoPlayer. @mag-lt.
+  This addresses a regression introduced in 6.38.0 made in the context of binding components created w/ Schemas into scripts automatically.
+  The `name` property in scripts accidentally switched back to the older deprecated name property on the video player vs the name corresponding
+  to `ComponentBase::GetComponentName()`/`ComponentBase::SetComponentName()`. This has now been rectified.
+
 ###  🔨 🔨 Chore
 
 - [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn

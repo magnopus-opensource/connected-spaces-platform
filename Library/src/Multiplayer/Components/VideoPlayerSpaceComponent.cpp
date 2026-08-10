@@ -38,7 +38,7 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Name_DEPRECATED),
-            "name",
+            {}, // not exposed to scripting
             "",
         },
         {
