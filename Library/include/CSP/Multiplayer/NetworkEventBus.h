@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2023 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -216,26 +216,32 @@ public:
     void StopListenCustomNetworkEvent(csp::common::String EventReceiverId, csp::common::String EventName);
 
     /// @brief Deregister interest in a access control changed network event
+    /// @note Calling this immediately deletes the registered callback. Do not call this whilst execution is within said callback.
     /// @param ReceiverId : The identifying name for the event receiver.
     void StopListenAccessControlChangedEvent(csp::common::String EventReceiverId);
 
     /// @brief Deregister interest in a asset detail blob changed network event
+    /// @note Calling this immediately deletes the registered callback. Do not call this whilst execution is within said callback.
     /// @param ReceiverId : The identifying name for the event receiver.
     void StopListenAssetDetailBlobChangedEvent(csp::common::String EventReceiverId);
 
     /// @brief Deregister interest in a async call completed network event
+    /// @note Calling this immediately deletes the registered callback. Do not call this whilst execution is within said callback.
     /// @param ReceiverId : The identifying name for the event receiver.
     void StopListenAsyncCallCompletedEvent(csp::common::String EventReceiverId, csp::common::String OperationName);
 
     /// @brief Deregister interest in a conversation network event
+    /// @note Calling this immediately deletes the registered callback. Do not call this whilst execution is within said callback.
     /// @param ReceiverId : The identifying name for the event receiver.
     void StopListenConversationEvent(csp::common::String EventReceiverId);
 
     /// @brief Deregister interest in a sequence changed network event
+    /// @note Calling this immediately deletes the registered callback. Do not call this whilst execution is within said callback.
     /// @param ReceiverId : The identifying name for the event receiver.
     void StopListenSequenceChangedEvent(csp::common::String EventReceiverId);
 
     /// @brief Deregister interest in all network events registered to a particular EventReceiverId
+    /// @note Calling this immediately deletes all registered callbacks. Do not call this whilst execution is within said callbacks.
     /// @param EventReceiverId : EventReceiverId to deregister.
     void StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
 

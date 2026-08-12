@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn
   Remove backwards compatibility logic for legacy `AsyncCallCompleted` event data structure.
+  
+📔 📔 Documentation
+
+- [NT-0] doc: Add additional clarifying docs to EventBus deregistration. By @MAG-ElliotMorris
+  Clarify that these methods immediately delete the callback, and should not be called whilst in the callback.
 
 ## [6.46.0]
 
