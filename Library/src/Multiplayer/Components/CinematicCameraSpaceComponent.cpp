@@ -15,8 +15,8 @@
  */
 
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
 #include <cmath>

@@ -38,6 +38,8 @@ class LogSystem;
 
 namespace csp::multiplayer
 {
+struct ComponentSchema;
+class ComponentSchemaRegistryImpl;
 class CSPSceneDescription;
 class EntityScriptBinding;
 class SpaceEntityStatePatcher;
@@ -75,7 +77,7 @@ public:
     /// @param LogSystem Logger for status and debug output.
     /// @param RemoteScriptRunner Object capable of running a script.
     /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
-    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
+    CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
         const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
     /// @brief OfflineRealtimeEngine constructor.
@@ -261,10 +263,6 @@ public:
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
-    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
-    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
-    const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
-
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
@@ -297,6 +295,6 @@ private:
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     std::unique_ptr<EntityScriptBinding> ScriptBinding;
 
-    std::unique_ptr<csp::multiplayer::IComponentSchemaRegistry> ComponentRegistry;
+    std::unique_ptr<ComponentSchemaRegistryImpl> ComponentRegistry;
 };
 }

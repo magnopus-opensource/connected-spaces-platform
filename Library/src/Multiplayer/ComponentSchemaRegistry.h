@@ -16,8 +16,9 @@
 
 #pragma once
 
+#include "CSP/Common/Array.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/IComponentSchemaRegistry.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include <optional>
 #include <unordered_map>
@@ -34,13 +35,23 @@ std::optional<ComponentType> ToComponentType(uint64_t TypeId);
 
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
-class ComponentSchemaRegistryImpl final : public IComponentSchemaRegistry
+/// @brief The engine-wide index of registered component schemas.
+class ComponentSchemaRegistryImpl final
 {
 public:
     ComponentSchemaRegistryImpl(csp::common::LogSystem&, const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
-    csp::common::Array<ComponentSchema> GetAll() const override;
-    const ComponentSchema* Find(uint64_t TypeId) const override;
+    ComponentSchemaRegistryImpl(const ComponentSchemaRegistryImpl&) = delete;
+    ComponentSchemaRegistryImpl(ComponentSchemaRegistryImpl&&) = delete;
+    ComponentSchemaRegistryImpl& operator=(const ComponentSchemaRegistryImpl&) = delete;
+    ComponentSchemaRegistryImpl& operator=(ComponentSchemaRegistryImpl&&) = delete;
+
+    /// @brief Returns all registered schemas.
+    csp::common::Array<ComponentSchema> GetAll() const;
+
+    /// @brief Finds the schema for the given TypeId.
+    /// @return A pointer to the schema if found, otherwise nullptr.
+    const ComponentSchema* Find(uint64_t TypeId) const;
 
 private:
     std::unordered_map<ComponentSchema::TypeIdType, ComponentSchema> SchemaMap;

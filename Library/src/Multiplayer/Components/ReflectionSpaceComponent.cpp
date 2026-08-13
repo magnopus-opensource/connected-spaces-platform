@@ -15,8 +15,8 @@
  */
 
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

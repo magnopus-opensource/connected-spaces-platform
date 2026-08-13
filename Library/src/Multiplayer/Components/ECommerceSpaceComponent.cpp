@@ -15,8 +15,7 @@
  */
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {

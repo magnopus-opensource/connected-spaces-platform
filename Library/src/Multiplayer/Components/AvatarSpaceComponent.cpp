@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {

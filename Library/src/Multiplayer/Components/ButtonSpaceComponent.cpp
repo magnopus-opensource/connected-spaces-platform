@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {

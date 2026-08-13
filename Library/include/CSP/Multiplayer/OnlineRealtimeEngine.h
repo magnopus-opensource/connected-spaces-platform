@@ -72,6 +72,8 @@ class Event;
 namespace csp::multiplayer
 {
 
+struct ComponentSchema;
+class ComponentSchemaRegistryImpl;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -116,7 +118,7 @@ public:
     /// @param NetworkEventBus Reference to the network event bus, used for leadership election messaging.
     /// @param RemoteScriptRunner Object capable of running a script.
     /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
-    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
         const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
@@ -294,10 +296,6 @@ public:
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
-
-    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
-    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
-    const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
@@ -522,7 +520,7 @@ private:
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
-    std::unique_ptr<csp::multiplayer::IComponentSchemaRegistry> ComponentRegistry;
+    std::unique_ptr<ComponentSchemaRegistryImpl> ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

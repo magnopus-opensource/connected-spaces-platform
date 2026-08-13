@@ -21,6 +21,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include "quickjspp.hpp"
 
@@ -76,21 +77,16 @@ public:
             auto* Entity
                 = std::get<0>(AWAIT(&Fixture.Engine, CreateEntity, Name, csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {}));
 
-            const auto FindSchema = [&](auto TypeId) -> const Schema* { return Fixture.Engine.GetComponentSchemaRegistry()->Find(TypeId); };
-
             auto SchemaComponents = std::vector<Component>();
 
             for (const auto& [TypeId, InstanceCount] : ComponentsToAdd)
             {
-                if (const auto* Schema = FindSchema(TypeId))
+                for (uint16_t Count = 0; Count < InstanceCount; ++Count)
                 {
-                    for (uint16_t Count = 0; Count < InstanceCount; ++Count)
+                    // ownership: SpaceEntity is presumably supposed to take ownership, but it currently leaks all components
+                    if (auto* SchemaComponent = Entity->AddComponentByTypeId(TypeId))
                     {
-                        // ownership: SpaceEntity is presumably supposed to take ownership, but it currently leaks all components
-                        if (auto* SchemaComponent = Entity->AddComponentByTypeId(TypeId))
-                        {
-                            SchemaComponents.push_back({ *SchemaComponent });
-                        }
+                        SchemaComponents.push_back({ *SchemaComponent });
                     }
                 }
             }

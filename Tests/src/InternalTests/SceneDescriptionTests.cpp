@@ -284,10 +284,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
-
     CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(SceneDescription, LogSystem, ScriptRunner);
+    const auto& Entities = *RealtimeEngine.GetAllEntities();
 
     CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
@@ -340,10 +339,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
-
     CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(SceneDescription, LogSystem, ScriptRunner);
+    const auto& Entities = *RealtimeEngine.GetAllEntities();
 
     CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
@@ -473,10 +471,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
 
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
-
     CSPSceneDescription SceneDescription { JsonChars };
-    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(SceneDescription, LogSystem, ScriptRunner);
+    const auto& Entities = *RealtimeEngine.GetAllEntities();
 
     CSPSceneData SceneData { JsonChars };
 
