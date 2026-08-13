@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn
   Remove backwards compatibility logic for legacy `AsyncCallCompleted` event data structure.
   
+- [NT-0] chore: Add -fstandalone-debug to Emscripten Debug builds. By @MAG-ElliotMorris
+  This should improve symbol availability when debugging in the browser.
+  
 📔 📔 Documentation
 
 - [NT-0] doc: Add additional clarifying docs to EventBus deregistration. By @MAG-ElliotMorris
