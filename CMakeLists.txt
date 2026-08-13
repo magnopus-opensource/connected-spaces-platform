@@ -251,6 +251,14 @@ target_compile_options(csp-lib
     $<$<PLATFORM_ID:Emscripten>:-pthread;-fwasm-exceptions>
 )
 
+# This causes the clang compiler to output all debug information no matter what.
+# Normally the things it does are fine, as I think it's essentially deduplicating debug symbols,
+# but things don't work as one might expect in WASM land.
+# https://clang.llvm.org/docs/UsersManual.html#cmdoption-fstandalone-debug
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  target_compile_options(csp-lib PRIVATE $<$<CONFIG:Debug>:-fstandalone-debug>)
+endif()
+
 target_link_options(csp-lib PRIVATE
   $<$<PLATFORM_ID:Emscripten>:
     -pthread
