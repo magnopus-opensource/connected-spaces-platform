@@ -41,7 +41,7 @@ namespace csp::multiplayer
 {
 
 class SpaceEntity;
-class ComponentSchema;
+struct ComponentSchema;
 class ComponentScriptInterface;
 
 /// @brief Represents the type of component.

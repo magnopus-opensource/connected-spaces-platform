@@ -15,8 +15,8 @@
  */
 #include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace
 {

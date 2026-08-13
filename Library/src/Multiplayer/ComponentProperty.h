@@ -15,8 +15,6 @@
  */
 #pragma once
 
-#include "CSP/CSPCommon.h"
-#include "CSP/Common/Array.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 
@@ -26,9 +24,8 @@ namespace csp::multiplayer
 /// @brief Represents an individual data field, or "property", within a component schema,
 /// consisting of a stable ID/key, a type kind and default value (via ReplicatedValue),
 /// and other metadata.
-class CSP_API ComponentProperty
+struct ComponentProperty final
 {
-public:
     using KeyType = uint16_t;
 
     /// @brief An Id/Key for identifying this property within a component. Need only be unique

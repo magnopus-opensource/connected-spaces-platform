@@ -15,8 +15,7 @@
  */
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include <memory>
 

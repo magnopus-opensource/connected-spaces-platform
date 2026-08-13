@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
-
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/ResultHelpers.h"
 
 // Needs broken
 #include "CSP/Systems/SystemsManager.h"
+#include "Multiplayer/ComponentSchema.h"
 
 using namespace csp::systems;
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/LoginState.h"
@@ -213,7 +212,8 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , NetworkEventBus(&NetworkEventBus)
     , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
 {
-    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
+    ScriptBinding = std::unique_ptr<EntityScriptBinding>(
+        EntityScriptBinding::BindEntitySystem(this, *ComponentRegistry, *this->LogSystem, *this->ScriptRunner));
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 }
@@ -270,8 +270,8 @@ std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvat
 {
     return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
-            MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ComponentRegistry, *this->ScriptRunner, *LogSystem, NetworkId, Name,
+            Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
 
         const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
 
@@ -311,8 +311,8 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
-            Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ComponentRegistry, *ScriptRunner, *LogSystem, NetworkId, Name, Transform,
+            IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
@@ -364,7 +364,7 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
+        auto* NewObject = new SpaceEntity(this, *ComponentRegistry, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
             MultiplayerConnectionInst->GetClientId(), ParentID, true, true);
 
         const mcs::ObjectMessage Message = NewObject->GetStatePatcher()->CreateObjectMessage();
@@ -591,7 +591,7 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
+    auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ComponentRegistry, *ScriptRunner, *LogSystem);
 
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return PendingAdds->emplace_back(NewEntity.release());
@@ -817,8 +817,6 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
 
     return ModifiableStatus::Modifiable;
 }
-
-const csp::multiplayer::IComponentSchemaRegistry* OnlineRealtimeEngine::GetComponentSchemaRegistry() const { return ComponentRegistry.get(); }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {

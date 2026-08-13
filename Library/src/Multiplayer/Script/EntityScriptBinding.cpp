@@ -416,19 +416,21 @@ private:
     std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> Cache;
 };
 
-EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding::EntityScriptBinding(
+    csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistryImpl& Registry, csp::common::LogSystem& LogSystem)
     : SchemaCache(std::make_unique<SchemaCacheImpl>())
     , EntitySystem(InEntitySystem)
+    , SchemaRegistry(Registry)
     , LogSystem(LogSystem)
 {
 }
 
 EntityScriptBinding::~EntityScriptBinding() = default;
 
-EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistryImpl& Registry,
+    csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
-    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, Registry, LogSystem);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
 }
@@ -493,7 +495,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     const auto RegisterDynamicComponentGetters = [this, Context](auto Proto)
     {
-        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
+        for (const auto& Schema : SchemaRegistry.GetAll())
         {
             if (IsScriptable(Schema))
             {

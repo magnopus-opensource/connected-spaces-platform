@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
+
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/Convert.h"
 #include "Json/JsonSerializer.h"

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "CSP/Common/ContinuationUtils.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -23,6 +22,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Mocks/SignalRConnectionMock.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/SpaceEntityStatePatcher.h"
 #include "RAIIMockLogger.h"
@@ -642,6 +642,46 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
+static auto MakeSingleEntityCreationInvoker(uint64_t ObjectId = 42)
+{
+    return [ObjectId](const std::string& Method, const signalr::value& RequestParams,
+               std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+    {
+        const auto Respond = [&Callback](signalr::value Response, std::exception_ptr Error = {})
+        {
+            Callback(Response, Error);
+            return async::make_task(std::make_tuple(std::move(Response), std::move(Error)));
+        };
+
+        const auto HubMethods = csp::multiplayer::MultiplayerHubMethodMap {};
+
+        if (Method == HubMethods.Get(csp::multiplayer::MultiplayerHubMethod::GENERATE_OBJECT_IDS))
+        {
+            return Respond(std::vector<signalr::value> { { ObjectId } });
+        }
+
+        if (Method == HubMethods.Get(csp::multiplayer::MultiplayerHubMethod::SEND_OBJECT_MESSAGE))
+        {
+            const auto Messages = [&RequestParams]
+            {
+                auto Deserializer = csp::multiplayer::SignalRDeserializer { RequestParams };
+                auto Messages = std::vector<mcs::ObjectMessage> {};
+                Deserializer.ReadValue(Messages);
+                return Messages;
+            }();
+
+            if (Messages.empty() || Messages.front().GetId() != ObjectId)
+            {
+                return Respond({}, std::make_exception_ptr(std::runtime_error { "Mock called with unexpected params." }));
+            }
+
+            return Respond({});
+        }
+
+        return Respond({}, std::make_exception_ptr(std::runtime_error { "Message type unhandled by mock." }));
+    };
+}
+
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithComponentSchema)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -662,7 +702,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithCo
         },
     };
 
-    const auto Engine = OnlineRealtimeEngine {
+    auto Engine = OnlineRealtimeEngine {
         *SystemsManager.GetMultiplayerConnection(),
         *SystemsManager.GetLogSystem(),
         *SystemsManager.GetEventBus(),
@@ -670,7 +710,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithCo
         Components,
     };
 
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
+    EXPECT_CALL(*SignalRMock, Invoke).WillRepeatedly(MakeSingleEntityCreationInvoker());
+
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
+
+    EXPECT_NE(Entity->AddComponentByTypeId(ExampleSchemaId), nullptr);
 }
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructFromJsonWithComponentSchemas)
@@ -757,7 +802,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructFromJs
         csp::common::String { RawJsonThirdFile },
     };
 
-    const auto Engine = OnlineRealtimeEngine {
+    auto Engine = OnlineRealtimeEngine {
         *SystemsManager.GetMultiplayerConnection(),
         *SystemsManager.GetLogSystem(),
         *SystemsManager.GetEventBus(),
@@ -765,7 +810,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructFromJs
         JsonSchemas,
     };
 
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(AllPropertyTypesSchemaId), nullptr);
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(EmptySchemaId), nullptr);
-    EXPECT_EQ(Engine.GetComponentSchemaRegistry()->Find(InvalidSchemaId), nullptr);
+    EXPECT_CALL(*SignalRMock, Invoke).WillRepeatedly(MakeSingleEntityCreationInvoker());
+
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
+
+    EXPECT_NE(Entity->AddComponentByTypeId(AllPropertyTypesSchemaId), nullptr);
+    EXPECT_NE(Entity->AddComponentByTypeId(EmptySchemaId), nullptr);
+    EXPECT_EQ(Entity->AddComponentByTypeId(InvalidSchemaId), nullptr);
 }

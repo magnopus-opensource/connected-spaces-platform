@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include <algorithm>
 #include <type_traits>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "CSP/Multiplayer/ComponentProperty.h"
+#include "Multiplayer/ComponentProperty.h"
 
 namespace csp::multiplayer
 {
