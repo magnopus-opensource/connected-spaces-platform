@@ -194,6 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
+    EXPECT_EQ(VideoPlayerComponent->GetComponentName(), "");
     EXPECT_EQ(VideoPlayerComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(VideoPlayerComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_EQ(VideoPlayerComponent->GetRotation(), csp::common::Vector4::Identity());
@@ -224,6 +225,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
 
 		var video = ThisEntity.getVideoPlayerComponents()[0];
 
+        video.name = "VideoPlayerTest";
         video.position = [1, 1, 1];
         video.scale = [2, 2, 2];
 		video.rotation = [1, 1, 1, 1];
@@ -257,6 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
+    EXPECT_EQ(VideoPlayerComponent->GetComponentName(), "VideoPlayerTest");
     EXPECT_EQ(VideoPlayerComponent->GetPosition(), csp::common::Vector3::One());
     EXPECT_EQ(VideoPlayerComponent->GetScale(), csp::common::Vector3(2, 2, 2));
     EXPECT_EQ(VideoPlayerComponent->GetRotation(), csp::common::Vector4::One());

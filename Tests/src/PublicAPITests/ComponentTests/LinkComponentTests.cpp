@@ -175,7 +175,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(LinkComponent->GetName(), "");
+    EXPECT_EQ(LinkComponent->GetComponentName(), "");
     EXPECT_EQ(LinkComponent->GetLinkUrl(), "");
     EXPECT_EQ(LinkComponent->GetDisplayText(), "");
     EXPECT_EQ(LinkComponent->GetPosition(), csp::common::Vector3::Zero());
@@ -212,7 +212,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
-    EXPECT_EQ(LinkComponent->GetName(), "TestName");
+    EXPECT_EQ(LinkComponent->GetComponentName(), "TestName");
     EXPECT_EQ(LinkComponent->GetLinkUrl(), "http://youtube.com/avideo");
     EXPECT_EQ(LinkComponent->GetDisplayText(), "TestDisplayText");
     EXPECT_EQ(LinkComponent->GetPosition(), csp::common::Vector3::One());

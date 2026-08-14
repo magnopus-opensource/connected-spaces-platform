@@ -27,7 +27,7 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
-            "name",
+            {}, // not exposed to scripting
             "",
         },
         {
