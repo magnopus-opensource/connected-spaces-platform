@@ -195,7 +195,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(ImageComponent->GetName(), "");
+    EXPECT_EQ(ImageComponent->GetComponentName(), "");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "");
     EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::Zero());
@@ -233,7 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
-    EXPECT_EQ(ImageComponent->GetName(), "TestName");
+    EXPECT_EQ(ImageComponent->GetComponentName(), "TestName");
     EXPECT_EQ(ImageComponent->GetImageAssetId(), "TestImageAssetId");
     EXPECT_EQ(ImageComponent->GetAssetCollectionId(), "TestAssetCollectionId");
     EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::One());

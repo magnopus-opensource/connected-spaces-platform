@@ -189,6 +189,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
+    EXPECT_EQ(FiducialMarkerComponent->GetComponentName(), "");
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), true);
     EXPECT_EQ(FiducialMarkerComponent->GetMarkerAssetId(), "");
     EXPECT_EQ(FiducialMarkerComponent->GetAssetCollectionId(), "");
@@ -215,7 +216,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
-    EXPECT_EQ(FiducialMarkerComponent->GetName(), "Updated_FiducialMarkerScriptName");
+    EXPECT_EQ(FiducialMarkerComponent->GetComponentName(), "Updated_FiducialMarkerScriptName");
     EXPECT_EQ(FiducialMarkerComponent->GetPosition(), csp::common::Vector3::One());
     EXPECT_EQ(FiducialMarkerComponent->GetScale(), csp::common::Vector3(2, 2, 2));
     EXPECT_EQ(FiducialMarkerComponent->GetRotation(), csp::common::Vector4::One());

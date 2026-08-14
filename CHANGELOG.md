@@ -6,10 +6,13 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🐛 🔨 Bug Fixes
 
-- [OB-5754] fix: Expose base component name vs deprecated name to scripting for VideoPlayer. @mag-lt.
+- [OB-5754] fix!: Expose base component name vs deprecated name to scripting for Image, ExternalLink, FiducialMarker, and VideoPlayer components. @mag-lt.
   This addresses a regression introduced in 6.38.0 made in the context of binding components created w/ Schemas into scripts automatically.
   The `name` property in scripts accidentally switched back to the older deprecated name property on the video player vs the name corresponding
   to `ComponentBase::GetComponentName()`/`ComponentBase::SetComponentName()`. This has now been rectified.
+  Additionally, `Image`, `ExternalLink`, and `FiducialMarker` have also been updated to return the `ComponentName` vs the deprecated name in scripts,
+  as these were never updated to do so. This is technically a breaking change (without doing a data migration on the server), but should be low impact
+  in practice.
 
 ###  🔨 🔨 Chore
 
