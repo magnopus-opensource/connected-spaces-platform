@@ -167,3 +167,10 @@ cmake --install <BUILD_DIR> --config <CONFIG> --prefix <INSTALL_DIR>
  Destination directory for the installation
 
 This will install the CSP library, including: headers, and configured runtime binaries.
+
+## Building a redistributable SDK
+
+We also support generating a redistributable static CSP SDK containing CSP's required third-party dependencies. 
+This allows consumers to link against CSP without managing those dependencies themselves.
+
+See [Static SDK generation](csp-static-sdk.md) for generation instructions.
