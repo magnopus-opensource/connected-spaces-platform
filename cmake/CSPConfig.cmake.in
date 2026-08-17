@@ -8,31 +8,52 @@ set_and_check(CSP_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
 # don't have to know.
 set(CSP_BUILT_SHARED @CSP_BUILD_SHARED@)
 
-include(CMakeFindDependencyMacro)
+# Used to check if this package includes the bundled static SDK dependencies.
+# CSP_GENERATE_SDK is an option that is set at configure time.
+set(
+    CSP_PACKAGE_INCLUDES_STATIC_DEPENDENCIES
+    @CSP_GENERATE_SDK@
+)
 
-# Public-API dependencies: appear in installed headers
-# (CSPAsyncScheduler.h, fmt_Formatters.h, ReplicatedValueException.h).
-# Required regardless of whether CSP was built shared or static.
-# We should endevour to remove these as neccesary dependencies.
-find_dependency(fmt)
-find_dependency(RapidJSON)
-find_dependency(Async++)
+# When CSP is packaged as a static library with bundled dependencies,
+# we need to create a target with those dependencies.
+#
+# This propagates the dependency libraries and public includes to consumers
+# that link against the installed CSP package.
+if(
+    NOT CSP_BUILT_SHARED
+    AND CSP_PACKAGE_INCLUDES_STATIC_DEPENDENCIES
+)
+    # Generate paths for third-party libs and public includes
+    # This populates _CSP_STATIC_DEPENDENCY_LIBRARIES and _CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES
+    include(
+        "${CMAKE_CURRENT_LIST_DIR}/CSPStaticDependencies.cmake"
+    )
 
-# Private link-only dependencies. Currently, for a STATIC CSP, 
-# all dependencies are required to be resolved.
-# For a SHARED CSP, these deps are baked into the DLL and do NOT appear on
-# the exported target's link interface, so consumers never reference them.
-# We should endevour to bake these into static libs so we can remove these from here.
-if(NOT CSP_BUILT_SHARED)
-  find_dependency(tinyspline)
-  find_dependency(glm)
-  find_dependency(msgpack-cxx)
+    # Create the third-party dependency target
+    if(NOT TARGET CSPThirdParty::Dependencies)
+        add_library(
+            CSPThirdParty::Dependencies
+            INTERFACE # Should be an interface as it doesn't represent a real library
+            IMPORTED  # We don't want to treat this target as being owned by the consumer
+            GLOBAL    # Global to ensure target is visible in the consumer project
+        )
 
-  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-    find_dependency(Poco)
-  endif()
+        # Setup library and include paths
+        set_target_properties(
+            CSPThirdParty::Dependencies
+            PROPERTIES
+                INTERFACE_LINK_LIBRARIES
+                    "${_CSP_STATIC_DEPENDENCY_LIBRARIES}"
+
+                INTERFACE_INCLUDE_DIRECTORIES
+                    "${_CSP_PUBLIC_DEPENDENCY_INCLUDE_DIRECTORIES}"
+        )
+    endif()
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/CSPTargets.cmake")
+include(
+    "${CMAKE_CURRENT_LIST_DIR}/CSPTargets.cmake"
+)
 
 check_required_components(CSP)

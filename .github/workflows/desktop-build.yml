@@ -131,6 +131,7 @@ jobs:
           output_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
           build_folder: build/${{ matrix.platform.name }}-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
           install_prefix: install/${{ matrix.platform.name }}/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          generate_sdk: ${{ matrix.linkage.name == 'static' && inputs.upload_install }}
 
       - name: Upload test build
         if: |

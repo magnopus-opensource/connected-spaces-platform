@@ -84,6 +84,18 @@ source_group(TREE ${CSP_SERVICES_DIR} FILES
 
 option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
 
+option(
+    CSP_GENERATE_SDK
+    "Generate a CSP SDK containing all static dependencies"
+    OFF
+)
+
+if(CSP_GENERATE_SDK AND CSP_BUILD_SHARED)
+    message(FATAL_ERROR
+        "CSP_GENERATE_SDK currently supports static CSP builds only."
+    )
+endif()
+
 if(CSP_BUILD_SHARED)
   set(CSP_LIB_TYPE SHARED)
 else()
@@ -122,28 +134,36 @@ target_include_directories(csp-lib
 )
 
 target_link_libraries(csp-lib
-  PRIVATE
-    rapidjson
-    fmt::fmt
-    Async++
-    csp-signalr
-    tinyspline::tinyspline
-    glm::glm
-    csp-quickjs
+    PRIVATE
+        "$<BUILD_INTERFACE:rapidjson>"
+        "$<BUILD_INTERFACE:fmt::fmt>"
+        "$<BUILD_INTERFACE:Async++>"
+        "$<BUILD_INTERFACE:csp-signalr>"
+        "$<BUILD_INTERFACE:tinyspline::tinyspline>"
+        "$<BUILD_INTERFACE:glm::glm>"
+        "$<BUILD_INTERFACE:csp-quickjs>"
 )
+
+# Only include POCO for non-Emscripten builds
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    target_link_libraries(csp-lib
+        PRIVATE
+            "$<BUILD_INTERFACE:Poco::Poco>"
+            "$<BUILD_INTERFACE:Poco::Net>"
+    )
+endif()
+
+if(CSP_GENERATE_SDK)
+    # If we'e generating an SDK, create an install interface containing all dependencies
+    target_link_libraries(csp-lib
+        INTERFACE
+            "$<INSTALL_INTERFACE:CSPThirdParty::Dependencies>"
+    )
+endif()
 
 if(ANDROID)
   # Link Android's native log library for __android_log_print
   target_link_libraries(csp-lib PRIVATE log)
-endif()
-
-# Only include POCO for non-Emscripten builds
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-  target_link_libraries(csp-lib
-    PRIVATE
-      Poco::Poco
-      Poco::Net
-  )
 endif()
 
 set(TINYSPLINE_BUILD_TESTS OFF)
@@ -284,55 +304,102 @@ endif()
 
 # Legacy Emscripten wrapper ---------------------------------------
 
-  option(CSP_BUILD_LEGACY_EMSCRIPTEN "Build legacy emscripten project" OFF)
+option(CSP_BUILD_LEGACY_EMSCRIPTEN "Build legacy emscripten project" OFF)
 
-  if(CSP_BUILD_LEGACY_EMSCRIPTEN AND EMSCRIPTEN)
+if(CSP_BUILD_LEGACY_EMSCRIPTEN AND EMSCRIPTEN)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/LegacyEmscriptenWrapper)
-  endif()
+endif()
 
 # Install ---------------------------------------------------------
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-# Optional local alias for build-tree use
+# Optional alias for build-tree consumers.
 add_library(CSP::csp-lib ALIAS csp-lib)
 
-# Where package config files go
-set(CSP_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/CSP")
-
-install(TARGETS csp-lib
-  EXPORT CSPTargets
-  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+set(
+    CSP_CONFIG_INSTALL_DIR
+    "${CMAKE_INSTALL_LIBDIR}/cmake/CSP"
 )
 
+if (CSP_GENERATE_SDK)
+    include(cmake/generate_csp_sdk.cmake)
+endif()
+
+# Install csp-lib
+install(
+    TARGETS csp-lib
+    EXPORT CSPTargets
+
+    FILE_SET HEADERS
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+
+    RUNTIME
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+
+    LIBRARY
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+
+    ARCHIVE
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+
+    INCLUDES
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+# Install CSP's vendored static dependencies.
+if(NOT CSP_BUILD_SHARED)
+    install(
+        TARGETS
+            csp-signalr
+            csp-quickjs
+
+        ARCHIVE DESTINATION
+            "${CMAKE_INSTALL_LIBDIR}/third-party/csp"
+
+        LIBRARY DESTINATION
+            "${CMAKE_INSTALL_LIBDIR}/third-party/csp"
+
+        RUNTIME DESTINATION
+            "${CMAKE_INSTALL_BINDIR}/third-party/csp"
+    )
+endif()
+
+# ---------------------------------------------------------------------------
+# Generate and install the CSP CMake package
+# ---------------------------------------------------------------------------
+
 configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
-  INSTALL_DESTINATION ${CSP_CONFIG_INSTALL_DIR}
-  PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake"
+    INSTALL_DESTINATION
+        "${CSP_CONFIG_INSTALL_DIR}"
+    PATH_VARS
+        CMAKE_INSTALL_INCLUDEDIR
 )
 
 write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMajorVersion
+    "${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake"
+    VERSION
+        "${PROJECT_VERSION}"
+    COMPATIBILITY
+        SameMajorVersion
 )
 
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake
-  DESTINATION ${CSP_CONFIG_INSTALL_DIR}
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/CSPConfigVersion.cmake"
+    DESTINATION
+        "${CSP_CONFIG_INSTALL_DIR}"
 )
 
-install(EXPORT CSPTargets
-  FILE CSPTargets.cmake
-  NAMESPACE CSP::
-  DESTINATION ${CSP_CONFIG_INSTALL_DIR}
+install(
+    EXPORT CSPTargets
+    FILE CSPTargets.cmake
+    NAMESPACE CSP::
+    DESTINATION "${CSP_CONFIG_INSTALL_DIR}"
 )
 
 # ------------------------------------------------------------------------------------------------------------------
