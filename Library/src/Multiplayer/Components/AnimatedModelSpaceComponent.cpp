@@ -38,7 +38,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
-            {}, // not exposed to scripting
+            "materialOverrides",
             PlainValue<std::unordered_map<std::string, std::string>> {},
         },
         {
