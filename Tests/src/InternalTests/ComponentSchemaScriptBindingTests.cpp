@@ -37,6 +37,7 @@ using Schema = csp::multiplayer::ComponentSchema;
 using Property = csp::multiplayer::ComponentProperty;
 
 template <typename T> using PlainValue = csp::multiplayer::PlainValue<T>;
+template <typename T> using BoundedValue = csp::multiplayer::BoundedValue<T>;
 
 class TestFixture final
 {
@@ -311,6 +312,50 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
     EXPECT_EQ(Component.GetProperty(4), csp::common::Vector2(2.f, 3.f));
     EXPECT_EQ(Component.GetProperty(5), csp::common::Vector3(2.f, 3.f, 4.f));
     EXPECT_EQ(Component.GetProperty(6), csp::common::Vector4(2.f, 3.f, 4.f, 5.f));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SetterIgnoresValueOutsideRange)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "floatProperty",
+                    BoundedValue<float> {
+                        0.25f,
+                        { 0.0f, 1.0f },
+                    },
+                },
+            },
+        },
+    });
+
+    auto Entity = Fixture.MakeEntity("Test Entity",
+        {
+            TestFixture::Entity::ComponentCreationArgs {
+                Schema::TypeIdType { 123 },
+                TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
+            },
+        });
+
+    constexpr auto ScriptText = R"(
+        import { assert } from "CSPTest";
+
+        const example = ThisEntity.getExampleComponents()[0];
+        assert(example.floatProperty === 0.25, "Initial value of floatProperty === 0.25");
+
+        example.floatProperty = 2.0;
+    )";
+
+    EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
+
+    ASSERT_EQ(Entity.SchemaComponents.size(), 1);
+
+    const auto& Component = Entity.SchemaComponents.front();
+    EXPECT_EQ(Component.GetProperty(0), 0.25f);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothScriptableAndNonScriptableProperties)

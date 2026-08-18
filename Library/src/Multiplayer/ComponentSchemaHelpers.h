@@ -18,6 +18,7 @@
 #include "Multiplayer/ComponentSchema.h"
 
 #include <algorithm>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -80,16 +81,37 @@ template <> struct ReplicatedTypeMap<bool>
 template <> struct ReplicatedTypeMap<int64_t>
 {
     static constexpr auto ValueType = csp::common::ReplicatedValueType::Integer;
+
+    static std::optional<int64_t> From(const csp::common::ReplicatedValue& Value)
+    {
+        const auto* ActualValue = std::get_if<int64_t>(&Value.GetValue());
+
+        return ActualValue != nullptr ? std::optional<int64_t> { *ActualValue } : std::nullopt;
+    }
 };
 
 template <> struct ReplicatedTypeMap<float>
 {
     static constexpr auto ValueType = csp::common::ReplicatedValueType::Float;
+
+    static std::optional<float> From(const csp::common::ReplicatedValue& Value)
+    {
+        const auto* ActualValue = std::get_if<float>(&Value.GetValue());
+
+        return ActualValue != nullptr ? std::optional<float> { *ActualValue } : std::nullopt;
+    }
 };
 
 template <> struct ReplicatedTypeMap<std::string>
 {
     static constexpr auto ValueType = csp::common::ReplicatedValueType::String;
+
+    static std::optional<std::string> From(const csp::common::ReplicatedValue& Value)
+    {
+        const auto* ActualValue = std::get_if<csp::common::String>(&Value.GetValue());
+
+        return ActualValue != nullptr ? std::optional<std::string> { ActualValue->c_str() } : std::nullopt;
+    }
 };
 
 template <> struct ReplicatedTypeMap<csp::common::Vector2>
@@ -111,11 +133,6 @@ template <> struct ReplicatedTypeMap<std::unordered_map<std::string, std::string
 {
     static constexpr auto ValueType = csp::common::ReplicatedValueType::StringMap;
 };
-
-inline csp::common::ReplicatedValueType TypeOf(const PropertyValue& Value)
-{
-    return std::visit([](const auto& V) { return ReplicatedTypeMap<std::decay_t<decltype(V.Default)>>::ValueType; }, Value);
-}
 
 inline csp::common::ReplicatedValue ToReplicatedValue(const PropertyValue& Value)
 {
@@ -145,6 +162,31 @@ inline csp::common::ReplicatedValue ToReplicatedValue(const PropertyValue& Value
             }
         },
         Value);
+}
+
+template <typename T> bool IsValidValue(const PlainValue<T>&, const csp::common::ReplicatedValue& Value)
+{
+    return Value.GetReplicatedValueType() == ReplicatedTypeMap<T>::ValueType;
+}
+
+template <typename T> bool IsValidValue(const BoundedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
+{
+    const auto ActualValue = ReplicatedTypeMap<T>::From(Value);
+
+    return ActualValue && *ActualValue >= SchemaValue.Range.Min && *ActualValue <= SchemaValue.Range.Max;
+}
+
+template <typename T> bool IsValidValue(const EnumeratedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
+{
+    const auto ActualValue = ReplicatedTypeMap<T>::From(Value);
+    const auto Matches = [&ActualValue](const auto& Option) { return Option.Value == *ActualValue; };
+
+    return ActualValue && std::any_of(SchemaValue.Options.begin(), SchemaValue.Options.end(), Matches);
+}
+
+inline bool IsValidValue(const ComponentProperty& Property, const csp::common::ReplicatedValue& Value)
+{
+    return std::visit([&Value](const auto& SchemaValue) { return IsValidValue(SchemaValue, Value); }, Property.Value);
 }
 
 inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty(); }

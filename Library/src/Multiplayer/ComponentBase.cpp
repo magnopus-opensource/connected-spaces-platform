@@ -119,7 +119,7 @@ void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue
         return;
     }
 
-    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key); Property && Value.GetReplicatedValueType() == TypeOf(Property->Value))
+    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key); Property && IsValidValue(*Property, Value))
     {
         SetPropertyDirect(Key, Value);
     }
