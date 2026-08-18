@@ -62,12 +62,26 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
             "billboardMode",
-            PlainValue<int64_t> { static_cast<int64_t>(BillboardMode::Off) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(BillboardMode::Off),
+                {
+                    SchemaOption<int64_t> { "Off", static_cast<int64_t>(BillboardMode::Off) },
+                    SchemaOption<int64_t> { "Billboard", static_cast<int64_t>(BillboardMode::Billboard) },
+                    SchemaOption<int64_t> { "YawLockedBillboard", static_cast<int64_t>(BillboardMode::YawLockedBillboard) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
             "displayMode",
-            PlainValue<int64_t> { static_cast<int64_t>(DisplayMode::DoubleSided) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(DisplayMode::DoubleSided),
+                {
+                    SchemaOption<int64_t> { "SingleSided", static_cast<int64_t>(DisplayMode::SingleSided) },
+                    SchemaOption<int64_t> { "DoubleSided", static_cast<int64_t>(DisplayMode::DoubleSided) },
+                    SchemaOption<int64_t> { "DoubleSidedReversed", static_cast<int64_t>(DisplayMode::DoubleSidedReversed) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),

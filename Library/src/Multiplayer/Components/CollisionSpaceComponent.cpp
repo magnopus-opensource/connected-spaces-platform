@@ -53,12 +53,26 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
             "collisionShape",
-            PlainValue<int64_t> { static_cast<int64_t>(CollisionShape::Box) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(CollisionShape::Box),
+                {
+                    SchemaOption<int64_t> { "Box", static_cast<int64_t>(CollisionShape::Box) },
+                    SchemaOption<int64_t> { "Mesh", static_cast<int64_t>(CollisionShape::Mesh) },
+                    SchemaOption<int64_t> { "Capsule", static_cast<int64_t>(CollisionShape::Capsule) },
+                    SchemaOption<int64_t> { "Sphere", static_cast<int64_t>(CollisionShape::Sphere) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
             "collisionMode",
-            PlainValue<int64_t> { static_cast<int64_t>(CollisionMode::Collision) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(CollisionMode::Collision),
+                {
+                    SchemaOption<int64_t> { "Collision", static_cast<int64_t>(CollisionMode::Collision) },
+                    SchemaOption<int64_t> { "Trigger", static_cast<int64_t>(CollisionMode::Trigger) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),

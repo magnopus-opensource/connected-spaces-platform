@@ -115,7 +115,14 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoPlayerSourceType),
             "videoPlayerSourceType",
-            PlainValue<int64_t> { static_cast<int64_t>(VideoPlayerSourceType::AssetSource) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(VideoPlayerSourceType::AssetSource),
+                {
+                    SchemaOption<int64_t> { "URLSource", static_cast<int64_t>(VideoPlayerSourceType::URLSource) },
+                    SchemaOption<int64_t> { "AssetSource", static_cast<int64_t>(VideoPlayerSourceType::AssetSource) },
+                    SchemaOption<int64_t> { "WowzaStreamSource", static_cast<int64_t>(VideoPlayerSourceType::WowzaStreamSource) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsVisible),
@@ -146,7 +153,14 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::StereoVideoType),
             "stereoVideoType",
-            PlainValue<int64_t> { static_cast<int64_t>(StereoVideoType::None) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(StereoVideoType::None),
+                {
+                    SchemaOption<int64_t> { "None", static_cast<int64_t>(StereoVideoType::None) },
+                    SchemaOption<int64_t> { "SideBySide", static_cast<int64_t>(StereoVideoType::SideBySide) },
+                    SchemaOption<int64_t> { "TopBottom", static_cast<int64_t>(StereoVideoType::TopBottom) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsStereoFlipped),
@@ -162,7 +176,13 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AudioType),
             "audioType",
-            PlainValue<int64_t> { static_cast<int64_t>(AudioType::Spatial) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AudioType::Spatial),
+                {
+                    SchemaOption<int64_t> { "Global", static_cast<int64_t>(AudioType::Global) },
+                    SchemaOption<int64_t> { "Spatial", static_cast<int64_t>(AudioType::Spatial) },
+                },
+            },
         },
     },
 };

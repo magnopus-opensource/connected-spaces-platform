@@ -39,7 +39,13 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
             "scriptScope",
-            PlainValue<int64_t> { static_cast<int64_t>(ScriptScope::Owner) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(ScriptScope::Owner),
+                {
+                    SchemaOption<int64_t> { "Local", static_cast<int64_t>(ScriptScope::Local) },
+                    SchemaOption<int64_t> { "Owner", static_cast<int64_t>(ScriptScope::Owner) },
+                },
+            },
         },
     },
     /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
