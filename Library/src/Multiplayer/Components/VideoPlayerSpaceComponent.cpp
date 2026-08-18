@@ -92,6 +92,11 @@ const auto Schema = ComponentSchema {
             PlainValue<bool> { false },
         },
         {
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AttenuationRadius),
+            "attenuationRadius",
+            PlainValue<float> { DefaultAttenuationRadius },
+        },
+        {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::PlaybackState),
             "playbackState",
             PlainValue<int64_t> { static_cast<int64_t>(0) },
@@ -107,24 +112,9 @@ const auto Schema = ComponentSchema {
             PlainValue<float> { 0.0f },
         },
         {
-            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AttenuationRadius),
-            "attenuationRadius",
-            PlainValue<float> { DefaultAttenuationRadius },
-        },
-        {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoPlayerSourceType),
             "videoPlayerSourceType",
             PlainValue<int64_t> { static_cast<int64_t>(VideoPlayerSourceType::AssetSource) },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::StereoVideoType),
-            "stereoVideoType",
-            PlainValue<int64_t> { static_cast<int64_t>(StereoVideoType::None) },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsStereoFlipped),
-            "isStereoFlipped",
-            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsVisible),
@@ -150,6 +140,16 @@ const auto Schema = ComponentSchema {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
             PlainValue<bool> { true },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::StereoVideoType),
+            "stereoVideoType",
+            PlainValue<int64_t> { static_cast<int64_t>(StereoVideoType::None) },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsStereoFlipped),
+            "isStereoFlipped",
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Volume),

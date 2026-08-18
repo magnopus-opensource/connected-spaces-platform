@@ -37,11 +37,6 @@ const auto Schema = ComponentSchema {
             PlainValue<std::string> { "" },
         },
         {
-            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
-            "materialOverrides",
-            PlainValue<std::unordered_map<std::string, std::string>> {},
-        },
-        {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Position),
             "position",
             PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
@@ -90,6 +85,11 @@ const auto Schema = ComponentSchema {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsShadowCaster),
             "isShadowCaster",
             PlainValue<bool> { true },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
+            "materialOverrides",
+            PlainValue<std::unordered_map<std::string, std::string>> {},
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVirtualVisible),

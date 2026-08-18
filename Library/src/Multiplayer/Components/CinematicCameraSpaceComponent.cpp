@@ -86,16 +86,6 @@ const auto Schema = ComponentSchema {
             PlainValue<float> { 4.0f },
         },
         {
-            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
-            "focusDistance",
-            PlainValue<float> { 5.0f },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::DepthOfFieldEnabled),
-            "depthOfFieldEnabled",
-            PlainValue<bool> { false },
-        },
-        {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsViewerCamera),
             "isViewerCamera",
             PlainValue<bool> { false },
@@ -104,6 +94,16 @@ const auto Schema = ComponentSchema {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
             {}, // not exposed to scripting,
             PlainValue<std::string> { "" },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
+            "focusDistance",
+            PlainValue<float> { 5.0f },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::DepthOfFieldEnabled),
+            "depthOfFieldEnabled",
+            PlainValue<bool> { false },
         },
     },
 };

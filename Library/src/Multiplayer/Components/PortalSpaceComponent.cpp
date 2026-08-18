@@ -24,6 +24,11 @@ const auto Schema = ComponentSchema {
     "Portal",
     csp::common::Array<ComponentProperty> {
         {
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
+            "spaceId",
+            PlainValue<std::string> { "" },
+        },
+        {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
             {}, // not exposed to scripting
             PlainValue<bool> { true },
@@ -32,11 +37,6 @@ const auto Schema = ComponentSchema {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
             {}, // not exposed to scripting
             PlainValue<bool> { true },
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
-            "spaceId",
-            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
