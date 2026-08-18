@@ -109,7 +109,12 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
 
         StopFlag = false;
 
-        PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
+        // Ensures another thread does not try to use the PocoWebSocket pointer (for Send or Stop) while this thread is creating it.
+        {
+            std::unique_lock<std::shared_mutex> Lock(PocoWebSocketMutex);
+            PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
+        }
+
         // Receive worker thread
         ReceiveThread = std::thread([this]() { ReceiveThreadFunc(); });
 
@@ -127,7 +132,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 {
     CSP_PROFILE_SCOPED();
 
-    // Stop can be called from multiple threads
+    // Prevents multiple overlapping calls to Stop() from different threads.
     Mutex.lock();
 
     if (PocoWebSocket && !StopFlag)
@@ -138,8 +143,10 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
         // If the ReceiveThread is locked then the other thread will never finish because itd will be waiting for the ReceiveThread to join
         Mutex.unlock();
 
-        // POCO doesn't like close being called in the middle of
-        // receiveFrame, so wait for receive thread to close
+        // POCO doesn't like close being called in the middle of receiveFrame, so we wait for receive thread to close.
+        // This gets called from websocket_transport::receive_loop() if an exception is thrown.
+        // ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader and entity creation both use the main thread via CSPFoundation::Tick() which can
+        // result in this being called on the main thread.
         if (std::this_thread::get_id() != ReceiveThread.get_id())
         {
             ReceiveThread.join();
@@ -151,17 +158,22 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
             ReceiveThread.detach();
         }
 
-        try
+        // Ensures that another thread is not trying to call Send() while this thread is destroying the PocoWebSocket.
         {
-            PocoWebSocket->close();
-        }
-        catch (const std::exception&)
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to close socket.");
-        }
+            std::unique_lock<std::shared_mutex> Lock(PocoWebSocketMutex);
 
-        delete (PocoWebSocket);
-        PocoWebSocket = nullptr;
+            try
+            {
+                PocoWebSocket->close();
+            }
+            catch (const std::exception&)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to close socket.");
+            }
+
+            delete (PocoWebSocket);
+            PocoWebSocket = nullptr;
+        }
     }
     else
     {
@@ -178,7 +190,24 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 {
     CSP_PROFILE_SCOPED();
 
-    assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Send().");
+    // Ensures that another thread is not trying to call Stop() and destroy the PocoWebSocket while this thread is calling Send().
+    // Invariant: many concurrent Send()s are safe and should not contend with one another, but Send()s may not run while Stop() / Start() is
+    // mutating PocoWebSocket ptr.
+    std::shared_lock<std::shared_mutex> PocoWebSocketLock(PocoWebSocketMutex);
+
+    if (StopFlag)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "Multiplayer web socket connection is being stopped, aborting Send operation.");
+        Callback(false);
+        return;
+    }
+
+    if (!PocoWebSocket)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Web socket not created! Please call Start() before calling Send().");
+        Callback(false);
+        return;
+    }
 
     int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
     auto Remaining = Message.size();
@@ -211,17 +240,22 @@ void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
 {
     CSP_PROFILE_SCOPED();
 
-    if (!StopFlag)
+    if (StopFlag)
     {
-        assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Receive().");
-
-        ReceiveCallback = Callback;
-        ReceiveReady = true;
-    }
-    else if (Callback)
-    {
+        LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "Multiplayer web socket connection is being stopped, aborting Receive operation.");
         Callback("", false);
+        return;
     }
+
+    if (!PocoWebSocket)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Web socket not created! Please call Start() before calling Receive().");
+        Callback("", false);
+        return;
+    }
+
+    ReceiveCallback = Callback;
+    ReceiveReady = true;
 }
 
 void CSPWebSocketClientPOCO::__CauseFailure() { HandleReceiveError("__CauseFailure"); }

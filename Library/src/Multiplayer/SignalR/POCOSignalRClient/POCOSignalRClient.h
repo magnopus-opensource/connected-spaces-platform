@@ -22,6 +22,7 @@
 #include <Poco/Net/WebSocket.h>
 #include <atomic>
 #include <mutex>
+#include <shared_mutex>
 #include <signalrclient/hub_exception.h>
 #include <signalrclient/signalr_client_config.h>
 #include <thread>
@@ -66,7 +67,10 @@ private:
     Poco::Net::WebSocket* PocoWebSocket;
 
     std::thread ReceiveThread;
+    // Prevents multiple overlapping calls to Stop() from different threads.
     std::mutex Mutex;
+    // Controls access to the PocoWebSocket pointer which may be destroyed in Stop() on one thread, while another thread is using it to Send.
+    std::shared_mutex PocoWebSocketMutex;
     std::atomic_bool ReceiveReady;
     ReceiveHandler ReceiveCallback;
     std::atomic_bool StopFlag;
