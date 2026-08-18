@@ -53,6 +53,39 @@
 namespace csp::multiplayer
 {
 
+csp::common::Array<ComponentSchema> GetBuiltInComponentSchemas()
+{
+    return csp::common::Array<ComponentSchema> {
+        StaticModelSpaceComponent::GetSchema(),
+        AnimatedModelSpaceComponent::GetSchema(),
+        VideoPlayerSpaceComponent::GetSchema(),
+        ExternalLinkSpaceComponent::GetSchema(),
+        AvatarSpaceComponent::GetSchema(),
+        LightSpaceComponent::GetSchema(),
+        ButtonSpaceComponent::GetSchema(),
+        ImageSpaceComponent::GetSchema(),
+        ScriptSpaceComponent::GetSchema(),
+        CustomSpaceComponent::GetSchema(),
+        ConversationSpaceComponent::GetSchema(),
+        PortalSpaceComponent::GetSchema(),
+        AudioSpaceComponent::GetSchema(),
+        SplineSpaceComponent::GetSchema(),
+        CollisionSpaceComponent::GetSchema(),
+        ReflectionSpaceComponent::GetSchema(),
+        FogSpaceComponent::GetSchema(),
+        ECommerceSpaceComponent::GetSchema(),
+        FiducialMarkerSpaceComponent::GetSchema(),
+        GaussianSplatSpaceComponent::GetSchema(),
+        TextSpaceComponent::GetSchema(),
+        HotspotSpaceComponent::GetSchema(),
+        CinematicCameraSpaceComponent::GetSchema(),
+        ScreenSharingSpaceComponent::GetSchema(),
+        AIChatbotSpaceComponent::GetSchema(),
+    };
+}
+
+csp::common::String GetBuiltInComponentSchemasJson() { return ComponentSchemasToJson(GetBuiltInComponentSchemas()); }
+
 ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
     csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
@@ -68,31 +101,10 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
         }
     };
 
-    AddSchema(StaticModelSpaceComponent::GetSchema());
-    AddSchema(AnimatedModelSpaceComponent::GetSchema());
-    AddSchema(VideoPlayerSpaceComponent::GetSchema());
-    AddSchema(ImageSpaceComponent::GetSchema());
-    AddSchema(ExternalLinkSpaceComponent::GetSchema());
-    AddSchema(AvatarSpaceComponent::GetSchema());
-    AddSchema(LightSpaceComponent::GetSchema());
-    AddSchema(ScriptSpaceComponent::GetSchema());
-    AddSchema(ButtonSpaceComponent::GetSchema());
-    AddSchema(CustomSpaceComponent::GetSchema());
-    AddSchema(PortalSpaceComponent::GetSchema());
-    AddSchema(ConversationSpaceComponent::GetSchema());
-    AddSchema(AudioSpaceComponent::GetSchema());
-    AddSchema(SplineSpaceComponent::GetSchema());
-    AddSchema(CollisionSpaceComponent::GetSchema());
-    AddSchema(ReflectionSpaceComponent::GetSchema());
-    AddSchema(FogSpaceComponent::GetSchema());
-    AddSchema(ECommerceSpaceComponent::GetSchema());
-    AddSchema(CinematicCameraSpaceComponent::GetSchema());
-    AddSchema(FiducialMarkerSpaceComponent::GetSchema());
-    AddSchema(GaussianSplatSpaceComponent::GetSchema());
-    AddSchema(TextSpaceComponent::GetSchema());
-    AddSchema(HotspotSpaceComponent::GetSchema());
-    AddSchema(ScreenSharingSpaceComponent::GetSchema());
-    AddSchema(AIChatbotSpaceComponent::GetSchema());
+    for (const auto& Schema : GetBuiltInComponentSchemas())
+    {
+        AddSchema(Schema);
+    }
 
     for (const auto& Schema : AdditionalComponents)
     {

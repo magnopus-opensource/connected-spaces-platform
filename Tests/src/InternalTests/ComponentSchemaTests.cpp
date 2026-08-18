@@ -16,12 +16,14 @@
 
 #include "TestHelpers.h"
 
+#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 
@@ -2120,3 +2122,19 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
 
     EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
 }
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, BuiltInSchemasRoundTripThroughJson)
+{
+    auto LogSystem = csp::common::LogSystem {};
+
+    const auto Original = csp::multiplayer::GetBuiltInComponentSchemas();
+    const auto Parsed = csp::multiplayer::ComponentSchemasFromJson({ csp::GetComponentSchemasJson() }, LogSystem);
+
+    ASSERT_EQ(Parsed.Size(), Original.Size());
+
+    for (size_t i = 0; i < Original.Size(); ++i)
+    {
+        EXPECT_EQ(Parsed[i], Original[i]) << "schema " << i << " (" << Original[i].Name.c_str() << ") did not round trip";
+    }
+}
+

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/Common/Array.h"
+#include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "Multiplayer/ComponentSchema.h"
 
@@ -32,6 +33,12 @@ namespace csp::multiplayer
 {
 
 std::optional<ComponentType> ToComponentType(uint64_t TypeId);
+
+/// @brief The schemas for the components CSP itself defines.
+csp::common::Array<ComponentSchema> GetBuiltInComponentSchemas();
+
+/// @brief The built-in schemas as a JSON array, suitable for clients to read as a reference.
+csp::common::String GetBuiltInComponentSchemasJson();
 
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
