@@ -19,7 +19,10 @@
 namespace csp::multiplayer
 {
 
-bool ComponentProperty::operator==(const ComponentProperty& Other) const { return Key == Other.Key && Name == Other.Name && Value == Other.Value; }
+bool ComponentProperty::operator==(const ComponentProperty& Other) const
+{
+    return Key == Other.Key && Name == Other.Name && Value == Other.Value && IsScriptable == Other.IsScriptable;
+}
 
 bool ComponentProperty::operator!=(const ComponentProperty& Other) const { return !(*this == Other); }
 

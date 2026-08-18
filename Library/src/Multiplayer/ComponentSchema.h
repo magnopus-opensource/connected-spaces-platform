@@ -23,6 +23,7 @@
 #include "CSP/Common/String.h"
 
 #include <cstdint>
+#include <optional>
 
 namespace csp::common
 {
@@ -54,6 +55,10 @@ struct ComponentSchema final
 
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
+
+    /// @brief Whether this component is exposed to scripting. Absent when the schema does not say,
+    /// which means exposed.
+    std::optional<bool> IsScriptable;
 
     bool operator==(const ComponentSchema& Other) const;
     bool operator!=(const ComponentSchema& Other) const;

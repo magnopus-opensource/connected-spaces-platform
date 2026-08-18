@@ -376,6 +376,23 @@ namespace
         return ParseResult { std::move(Options) };
     }
 
+    template <typename T> ParseResult<std::optional<T>> TryParseOptional(const rapidjson::Value& Object, const char* Key)
+    {
+        if (!Object.HasMember(Key))
+        {
+            return ParseResult<std::optional<T>> { std::nullopt };
+        }
+
+        auto Parsed = TryParse<T>(Object[Key]);
+
+        if (!Parsed)
+        {
+            return ParseError { fmt::format("optional field '{}' has unexpected type", Key) };
+        }
+
+        return ParseResult<std::optional<T>> { std::move(*Parsed) };
+    }
+
     template <typename T> ParseResult<PropertyValue> TryParsePlainValue(const rapidjson::Value& Object)
     {
         auto Default = TryParseRequired<T>(Object, "defaultValue");
@@ -551,10 +568,18 @@ namespace
             return std::move(ParsedValue.GetError());
         }
 
+        const auto Scriptable = TryParseOptional<bool>(Value, "scriptable");
+
+        if (!Scriptable)
+        {
+            return Scriptable.GetError();
+        }
+
         return ParseResult { ComponentProperty {
             static_cast<ComponentProperty::KeyType>(*Key),
             std::move(*Name),
             std::move(*ParsedValue),
+            *Scriptable,
         } };
     }
 
@@ -615,10 +640,18 @@ namespace
             return ParseError { fmt::format("{}: {}", (*Name).c_str(), Properties.GetError().Description) };
         }
 
+        const auto Scriptable = TryParseOptional<bool>(Value, "scriptable");
+
+        if (!Scriptable)
+        {
+            return Scriptable.GetError();
+        }
+
         return ParseResult { ComponentSchema {
             *TypeId,
             std::move(*Name),
             std::move(*Properties),
+            *Scriptable,
         } };
     }
 
@@ -648,6 +681,11 @@ void ToJson(csp::json::JsonSerializer& Serializer, const ComponentProperty& Prop
             SerializeConstraint(Serializer, Value);
         },
         Property.Value);
+
+    if (Property.IsScriptable)
+    {
+        Serializer.SerializeMember("scriptable", *Property.IsScriptable);
+    }
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentSchema& Schema)
@@ -655,6 +693,11 @@ void ToJson(csp::json::JsonSerializer& Serializer, const ComponentSchema& Schema
     Serializer.SerializeMember("typeId", Schema.TypeId);
     Serializer.SerializeMember("name", Schema.Name);
     Serializer.SerializeMember("properties", Schema.Properties);
+
+    if (Schema.IsScriptable)
+    {
+        Serializer.SerializeMember("scriptable", *Schema.IsScriptable);
+    }
 }
 
 csp::common::String ComponentSchema::ToJson(const ComponentSchema& Schema) { return csp::json::JsonSerializer::Serialize(Schema); }
@@ -715,7 +758,7 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 
 bool ComponentSchema::operator==(const ComponentSchema& Other) const
 {
-    return TypeId == Other.TypeId && Name == Other.Name && Properties == Other.Properties;
+    return TypeId == Other.TypeId && Name == Other.Name && Properties == Other.Properties && IsScriptable == Other.IsScriptable;
 }
 
 bool ComponentSchema::operator!=(const ComponentSchema& Other) const { return !(*this == Other); }

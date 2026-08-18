@@ -19,6 +19,7 @@
 #include "CSP/Common/Vector.h"
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -140,6 +141,10 @@ struct ComponentProperty final
     /// which is considered static i.e. if the value is a `float`, it can't be later changed to hold
     /// a `std::string`.
     PropertyValue Value;
+
+    /// @brief Whether this property is exposed to scripting. Absent when the schema does not say,
+    /// which means exposed.
+    std::optional<bool> IsScriptable;
 
     bool operator==(const ComponentProperty& Other) const;
     bool operator!=(const ComponentProperty& Other) const;

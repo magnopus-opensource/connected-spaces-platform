@@ -884,6 +884,35 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
         };
         EXPECT_NE(A, B);
     }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            PlainValue<std::string> { "value" },
+        };
+        const auto B = Property {
+            0,
+            "name",
+            PlainValue<std::string> { "value" },
+            /*.IsScriptable =*/true,
+        };
+        EXPECT_NE(A, B);
+    }
+    {
+        const auto A = Property {
+            0,
+            "name",
+            PlainValue<std::string> { "value" },
+            /*.IsScriptable =*/true,
+        };
+        const auto B = Property {
+            0,
+            "name",
+            PlainValue<std::string> { "value" },
+            /*.IsScriptable =*/false,
+        };
+        EXPECT_NE(A, B);
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
@@ -1163,7 +1192,20 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
                     },
                 },
             },
+            {
+                4,
+                "scriptableProperty",
+                PlainValue<std::string> { "value" },
+                /*.IsScriptable =*/true,
+            },
+            {
+                5,
+                "nonScriptableProperty",
+                PlainValue<std::string> { "value" },
+                /*.IsScriptable =*/false,
+            },
         },
+        /*.IsScriptable =*/false,
     };
 
     const auto Json = Schema::ToJson(Original);
@@ -1283,6 +1325,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsPropertyWithMi
     constexpr auto RawJson = R"({
         "typeId": 123, "name": "Example",
         "properties": [{ "key": 0, "name": "prop", "type": "string" }]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsNonBoolPropertyScriptable)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "prop",
+                "type": "string",
+                "defaultValue": "",
+                "scriptable": "yes"
+            }
+        ]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsNonBoolSchemaScriptable)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "scriptable": "yes",
+        "properties": []
     })";
     const auto Result = Schema::FromJson(csp::common::String { RawJson });
     EXPECT_FALSE(Result.HasValue());
