@@ -33,6 +33,8 @@ namespace
 
 using Schema = csp::multiplayer::ComponentSchema;
 
+template <typename T> using PlainValue = csp::multiplayer::PlainValue<T>;
+
 class TestFixture final
 {
 public:
@@ -75,7 +77,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetTypeIdReturnsRegisteredTyp
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -98,7 +100,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetTypeIdPreservesFullUint64)
             Schema::TypeIdType { LargeTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -124,7 +126,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetComponentTypeReturnsInvali
             Schema::TypeIdType { WrappedTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -145,7 +147,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentByTypeIdCreatesCo
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -165,7 +167,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentWithUnregisteredT
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -185,7 +187,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentByTypeIdReturnsNu
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -222,7 +224,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
             Schema::TypeIdType { LargeTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -248,7 +250,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -294,7 +296,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -339,7 +341,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "DefaultValue" },
+                { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
             },
         },
     });
@@ -370,7 +372,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemComponent
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "DefaultValue" },
+                { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
             },
         },
     });
@@ -406,7 +408,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentWithTypeIdAboveLe
             Schema::TypeIdType { WrappedTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -432,7 +434,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentAboveLegacyRangeN
             Schema::TypeIdType { WrappedTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -460,7 +462,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemDataAbove
             Schema::TypeIdType { WrappedTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -492,7 +494,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, AddComponentFromItemDataAbove
             Schema::TypeIdType { WrappedTypeId },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -516,7 +518,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetPropertyReturnsDefaultValu
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -540,7 +542,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, GetPropertyReturnsNullptrForU
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -561,7 +563,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMatchingTypeSu
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -587,7 +589,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedType
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -613,7 +615,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithUnknownKeyHasN
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -636,7 +638,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWhenParentIsLocked
             Schema::TypeIdType { 123 },
             "Example",
             {
-                { 0, "stringProperty", "Value" },
+                { 0, "stringProperty", PlainValue<std::string> { "Value" } },
             },
         },
     });
@@ -705,12 +707,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
         const auto A = Property {
             0,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         const auto B = Property {
             0,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         EXPECT_EQ(A, B);
     }
@@ -718,12 +720,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
         const auto A = Property {
             0,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         const auto B = Property {
             1,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         EXPECT_NE(A, B);
     }
@@ -731,12 +733,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
         const auto A = Property {
             0,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         const auto B = Property {
             0,
             "other",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         EXPECT_NE(A, B);
     }
@@ -744,12 +746,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
         const auto A = Property {
             0,
             "name",
-            "value",
+            PlainValue<std::string> { "value" },
         };
         const auto B = Property {
             0,
             "name",
-            "other",
+            PlainValue<std::string> { "other" },
         };
         EXPECT_NE(A, B);
     }
@@ -765,7 +767,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -776,7 +778,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -790,7 +792,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -801,7 +803,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -815,7 +817,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -826,7 +828,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -840,7 +842,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -859,7 +861,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "value",
+                    PlainValue<std::string> { "value" },
                 },
             },
         };
@@ -870,7 +872,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentSchemaEquality)
                 {
                     0,
                     "prop",
-                    "other",
+                    PlainValue<std::string> { "other" },
                 },
             },
         };
@@ -936,37 +938,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
             {
                 0,
                 "stringProperty",
-                csp::common::String { "hello" },
+                PlainValue<std::string> { std::string { "hello" } },
             },
             {
                 1,
                 "floatProperty",
-                1.5f,
+                PlainValue<float> { 1.5f },
             },
             {
                 2,
                 "intProperty",
-                int64_t { 42 },
+                PlainValue<int64_t> { int64_t { 42 } },
             },
             {
                 3,
                 "boolProperty",
-                true,
+                PlainValue<bool> { true },
             },
             {
                 4,
                 "vec2Property",
-                csp::common::Vector2 { 1.0f, 2.0f },
+                PlainValue<csp::common::Vector2> { csp::common::Vector2 { 1.0f, 2.0f } },
             },
             {
                 5,
                 "vec3Property",
-                csp::common::Vector3 { 1.0f, 2.0f, 3.0f },
+                PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1.0f, 2.0f, 3.0f } },
             },
             {
                 6,
                 "vec4Property",
-                csp::common::Vector4 { 1.0f, 2.0f, 3.0f, 4.0f },
+                PlainValue<csp::common::Vector4> { csp::common::Vector4 { 1.0f, 2.0f, 3.0f, 4.0f } },
             },
         },
     };
@@ -986,7 +988,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
             {
                 0,
                 "stringProperty",
-                "value",
+                PlainValue<std::string> { "value" },
             },
         },
     };
@@ -1259,8 +1261,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForVal
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1268,9 +1270,9 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForVal
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
-            { 2, "tone", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
+            { 2, "tone", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1283,8 +1285,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNa
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1292,9 +1294,9 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNa
         Schema::TypeIdType { 808 },
         "MegaDistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
-            { 2, "tone", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
+            { 2, "tone", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1307,8 +1309,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMi
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1316,8 +1318,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMi
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 2, "tone", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 2, "tone", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1330,8 +1332,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1339,9 +1341,9 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.5f },
-            { 1, "level", 0.5f },
-            { 2, "tone", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.5f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
+            { 2, "tone", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1354,8 +1356,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "gain", 0.25f },
-            { 1, "level", 0.5f },
+            { 0, "gain", PlainValue<float> { 0.25f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
         },
     };
 
@@ -1363,9 +1365,9 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         Schema::TypeIdType { 808 },
         "DistortionAudioEffect",
         {
-            { 0, "drive", 1.0f },
-            { 1, "level", 0.5f },
-            { 2, "tone", 0.5f },
+            { 0, "drive", PlainValue<float> { 1.0f } },
+            { 1, "level", PlainValue<float> { 0.5f } },
+            { 2, "tone", PlainValue<float> { 0.5f } },
         },
     };
 

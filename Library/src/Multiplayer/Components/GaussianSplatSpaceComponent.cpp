@@ -27,52 +27,52 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetId),
             "externalResourceAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId),
             "externalResourceAssetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4::Identity(),
+            PlainValue<csp::common::Vector4> { csp::common::Vector4::Identity() },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED),
             {}, // not exposed to scripting: this is a deprecated property that was never exposed to scripting, so no need to start now.
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Tint),
             "tint",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

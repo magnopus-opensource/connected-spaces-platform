@@ -46,7 +46,7 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
             {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
-            0.f,
+            PlainValue<float> { 0.f },
         },
     },
 };

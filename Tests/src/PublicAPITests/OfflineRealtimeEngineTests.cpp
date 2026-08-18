@@ -964,7 +964,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
                 {
                     ComponentProperty::KeyType { 42 },
                     "value",
-                    "DefaultValue",
+                    PlainValue<std::string> { "DefaultValue" },
                 },
             },
         },
@@ -1086,7 +1086,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
                 {
                     ComponentProperty::KeyType { 42 },
                     "value",
-                    "DefaultValue",
+                    PlainValue<std::string> { "DefaultValue" },
                 },
             },
         },

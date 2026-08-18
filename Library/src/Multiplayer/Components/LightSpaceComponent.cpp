@@ -26,82 +26,82 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightType),
             "lightType",
-            static_cast<int64_t>(LightType::Point),
+            PlainValue<int64_t> { static_cast<int64_t>(LightType::Point) },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Color),
             "color",
-            csp::common::Vector3 { 255, 255, 255 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 255, 255, 255 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Intensity),
             "Intensity", // Note: exposed as PascalCase for backwards compatibility (casing was wrong when this property was originally exposed)
-            5000.0f,
+            PlainValue<float> { 5000.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Range),
             "range",
-            1000.0f,
+            PlainValue<float> { 1000.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::InnerConeAngle),
             "innerConeAngle",
-            0.0f,
+            PlainValue<float> { 0.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::OuterConeAngle),
             "outerConeAngle",
-            0.78539816339f, // Pi / 4
+            PlainValue<float> { 0.78539816339f }, // Pi / 4
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetId),
             "cookieAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetCollectionId),
             "cookieAssetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieType),
             "lightCookieType",
-            static_cast<int64_t>(LightCookieType::NoCookie),
+            PlainValue<int64_t> { static_cast<int64_t>(LightCookieType::NoCookie) },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::ThirdPartyComponentRef),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightShadowType),
             {}, // not exposed to scripting
-            static_cast<int64_t>(LightShadowType::None),
+            PlainValue<int64_t> { static_cast<int64_t>(LightShadowType::None) },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

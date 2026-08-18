@@ -26,97 +26,97 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarId),
             "avatarId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::UserId),
             "userId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::State),
             "state",
-            static_cast<int64_t>(AvatarState::Idle),
+            PlainValue<int64_t> { static_cast<int64_t>(AvatarState::Idle) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
             {}, // not exposed to scripting
-            static_cast<int64_t>(-1),
+            PlainValue<int64_t> { static_cast<int64_t>(-1) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AgoraUserId),
             "agoraUserId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsHandIKEnabled),
             "isHandIKEnabled",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
             "targetHandIKTargetLocation",
-            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0.0f, 0.0f, 0.0f } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HandRotation),
             "handRotation",
-            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::HeadRotation),
             "headRotation",
-            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
             "walkRunBlendPercentage",
-            0.0f,
+            PlainValue<float> { 0.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
             "torsoTwistAlpha",
-            0.0f,
+            PlainValue<float> { 0.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarPlayMode),
             "avatarPlayMode",
-            static_cast<int64_t>(AvatarPlayMode::Default),
+            PlainValue<int64_t> { static_cast<int64_t>(AvatarPlayMode::Default) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
             "movementDirection",
-            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0.0f, 0.0f, 0.0f } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::LocomotionModel),
             "locomotionModel",
-            static_cast<int64_t>(LocomotionModel::Grounded),
+            PlainValue<int64_t> { static_cast<int64_t>(LocomotionModel::Grounded) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarUrl),
             "avatarUrl",
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

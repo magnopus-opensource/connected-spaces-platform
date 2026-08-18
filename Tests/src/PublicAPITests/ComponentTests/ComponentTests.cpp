@@ -341,7 +341,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
             csp::multiplayer::ComponentSchema::TypeIdType { SchemaTypeId },
             "Example",
             {
-                { 0, "stringProperty", "DefaultValue" },
+                { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
             },
         },
     };
@@ -442,7 +442,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
         Properties.push_back({
             NextPropertyKey(Properties),
             "extraProperty",
-            csp::common::String { "ExtraDefault" },
+            PlainValue<std::string> { "ExtraDefault" },
         });
 
         return {

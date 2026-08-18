@@ -27,47 +27,47 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Name_DEPRECATED),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::MarkerAssetId),
             "markerAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(FiducialMarkerPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

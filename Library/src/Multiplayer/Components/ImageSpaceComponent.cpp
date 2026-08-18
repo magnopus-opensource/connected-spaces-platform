@@ -26,62 +26,62 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Name_DEPRECATED),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::ImageAssetId),
             "imageAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
             "billboardMode",
-            static_cast<int64_t>(BillboardMode::Off),
+            PlainValue<int64_t> { static_cast<int64_t>(BillboardMode::Off) },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
             "displayMode",
-            static_cast<int64_t>(DisplayMode::DoubleSided),
+            PlainValue<int64_t> { static_cast<int64_t>(DisplayMode::DoubleSided) },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsEmissive),
             "isEmissive",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

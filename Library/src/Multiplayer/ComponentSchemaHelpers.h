@@ -18,8 +18,11 @@
 #include "Multiplayer/ComponentSchema.h"
 
 #include <algorithm>
+#include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <variant>
+#include <vector>
 
 namespace csp::multiplayer
 {
@@ -47,7 +50,7 @@ template <> struct ScriptTypeMap<int64_t>
     using Type = int64_t;
 };
 
-template <> struct ScriptTypeMap<csp::common::String>
+template <> struct ScriptTypeMap<std::string>
 {
     using Type = std::string;
 };
@@ -67,18 +70,88 @@ template <> struct ScriptTypeMap<csp::common::Vector4>
     using Type = std::vector<float>;
 };
 
+template <typename T> struct ReplicatedTypeMap;
+
+template <> struct ReplicatedTypeMap<bool>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Boolean;
+};
+
+template <> struct ReplicatedTypeMap<int64_t>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Integer;
+};
+
+template <> struct ReplicatedTypeMap<float>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Float;
+};
+
+template <> struct ReplicatedTypeMap<std::string>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::String;
+};
+
+template <> struct ReplicatedTypeMap<csp::common::Vector2>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Vector2;
+};
+
+template <> struct ReplicatedTypeMap<csp::common::Vector3>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Vector3;
+};
+
+template <> struct ReplicatedTypeMap<csp::common::Vector4>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Vector4;
+};
+
+template <> struct ReplicatedTypeMap<std::unordered_map<std::string, std::string>>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::StringMap;
+};
+
+inline csp::common::ReplicatedValueType TypeOf(const PropertyValue& Value)
+{
+    return std::visit([](const auto& V) { return ReplicatedTypeMap<std::decay_t<decltype(V.Default)>>::ValueType; }, Value);
+}
+
+inline csp::common::ReplicatedValue ToReplicatedValue(const PropertyValue& Value)
+{
+    return std::visit(
+        [](const auto& V) -> csp::common::ReplicatedValue
+        {
+            using T = std::decay_t<decltype(V.Default)>;
+
+            if constexpr (std::is_same_v<T, std::string>)
+            {
+                return { V.Default.c_str() };
+            }
+            else if constexpr (std::is_same_v<T, std::unordered_map<std::string, std::string>>)
+            {
+                auto Entries = csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {};
+
+                for (const auto& [Key, Entry] : V.Default)
+                {
+                    Entries[Key.c_str()] = Entry.c_str();
+                }
+
+                return { Entries };
+            }
+            else
+            {
+                return { V.Default };
+            }
+        },
+        Value);
+}
+
 inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty(); }
 
 inline bool IsScriptable(const ComponentProperty& Property)
 {
-    return IsScriptable(Property.Name)
-        && std::visit(
-            [](const auto& V)
-            {
-                using T = std::decay_t<decltype(V)>;
-                return IsScriptableV<T>;
-            },
-            Property.DefaultValue.GetValue());
+    return IsScriptable(Property.Name) && std::visit([](const auto& V) { return IsScriptableV<std::decay_t<decltype(V.Default)>>; }, Property.Value);
 }
 
 inline bool IsScriptable(const ComponentSchema& Schema)

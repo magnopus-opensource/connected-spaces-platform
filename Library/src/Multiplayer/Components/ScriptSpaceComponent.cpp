@@ -29,17 +29,17 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptSource),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::OwnerId),
             {}, // not exposed to scripting
-            static_cast<int64_t>(0),
+            PlainValue<int64_t> { static_cast<int64_t>(0) },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
             {}, // not exposed to scripting
-            static_cast<int64_t>(ScriptScope::Owner),
+            PlainValue<int64_t> { static_cast<int64_t>(ScriptScope::Owner) },
         },
     },
 };

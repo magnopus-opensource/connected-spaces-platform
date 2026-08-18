@@ -45,7 +45,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
                     csp::multiplayer::ComponentProperty {
                         csp::multiplayer::ComponentProperty::KeyType { 0 },
                         "value",
-                        "hello",
+                        PlainValue<std::string> { "hello" },
                     },
                 },
             },
