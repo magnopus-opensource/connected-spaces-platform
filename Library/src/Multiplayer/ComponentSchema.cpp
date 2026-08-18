@@ -22,6 +22,9 @@
 
 #include <fmt/format.h>
 #include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/reader.h>
+#include <rapidjson/stringbuffer.h>
 
 #include <algorithm>
 #include <map>
@@ -720,6 +723,19 @@ csp::common::Optional<ComponentSchema> ComponentSchema::FromJson(const csp::comm
     }
 
     return std::move(*Schema);
+}
+
+csp::common::String ComponentSchemasToJson(const csp::common::Array<ComponentSchema>& Schemas)
+{
+    const auto Compact = csp::json::JsonSerializer::Serialize(Schemas);
+
+    auto Stream = rapidjson::StringStream { Compact.c_str() };
+    auto Buffer = rapidjson::StringBuffer {};
+    auto Writer = rapidjson::PrettyWriter<rapidjson::StringBuffer> { Buffer };
+
+    rapidjson::Reader {}.Parse(Stream, Writer);
+
+    return Buffer.GetString();
 }
 
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(

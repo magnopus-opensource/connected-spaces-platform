@@ -64,6 +64,11 @@ struct ComponentSchema final
     bool operator!=(const ComponentSchema& Other) const;
 };
 
+/// @brief Serialises an array of component schemas as a JSON array.
+/// @param Schemas The schemas to serialise.
+/// @return The schemas as a JSON document, which ComponentSchemasFromJson will parse back.
+csp::common::String ComponentSchemasToJson(const csp::common::Array<ComponentSchema>& Schemas);
+
 /// @brief Parses a list of JSON documents into an array of component schemas.
 /// Each document is expected to be a JSON array of schema objects.
 /// Entries that fail to parse are skipped with a warning; valid entries in the same document are still returned.
