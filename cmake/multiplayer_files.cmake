@@ -142,6 +142,7 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentBaseKeys.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentProperty.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchema.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchemaHelpers.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchemaRegistry.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCSComponentPacker.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MultiplayerConstants.h
@@ -161,7 +162,6 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCS/MCSTypes.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptHelpers.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptMacros.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.h
