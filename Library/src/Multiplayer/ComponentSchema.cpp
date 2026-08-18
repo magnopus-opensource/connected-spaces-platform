@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -79,6 +80,21 @@ namespace
 
     // TODO: implement along with map parsing.
     void SerializeDefaultValue(csp::json::JsonSerializer&, const std::unordered_map<std::string, std::string>&) { }
+
+    template <typename T> void SerializeConstraint(csp::json::JsonSerializer&, const PlainValue<T>&)
+    {
+        // Unconstrained, so there is nothing to write.
+    }
+
+    template <typename T> void SerializeConstraint(csp::json::JsonSerializer& Serializer, const BoundedValue<T>& Value)
+    {
+        Serializer.SerializeMember("range", Value.Range);
+    }
+
+    template <typename T> void SerializeConstraint(csp::json::JsonSerializer& Serializer, const EnumeratedValue<T>& Value)
+    {
+        Serializer.SerializeMember("options", Value.Options);
+    }
 
     bool IsFloatArray(const rapidjson::Value& Value, rapidjson::SizeType ExpectedSize)
     {
@@ -254,53 +270,215 @@ namespace
         return ParseResult { std::move(*Parsed) };
     }
 
-    template <typename T> ParseResult<PropertyValue> TryParseDefaultValue(const rapidjson::Value& Object)
+    template <typename T> ParseResult<Range<T>> TryParseRange(const rapidjson::Value& Value)
     {
-        auto Parsed = TryParseRequired<T>(Object, "defaultValue");
-
-        if (!Parsed)
+        if (!Value.IsObject())
         {
-            return std::move(Parsed.GetError());
+            return ParseError { "'range' must be a JSON object" };
         }
 
-        return ParseResult<PropertyValue> { PlainValue<T> { std::move(*Parsed) } };
+        const auto Min = TryParseRequired<T>(Value, "min");
+
+        if (!Min)
+        {
+            return ParseError { fmt::format("range: {}", Min.GetError().Description) };
+        }
+
+        const auto Max = TryParseRequired<T>(Value, "max");
+
+        if (!Max)
+        {
+            return ParseError { fmt::format("range: {}", Max.GetError().Description) };
+        }
+
+        return ParseResult { Range<T> {
+            *Min,
+            *Max,
+        } };
+    }
+
+    template <typename T> ParseResult<SchemaOption<T>> TryParseOption(const rapidjson::Value& Value)
+    {
+        if (!Value.IsObject())
+        {
+            return ParseError { "option must be a JSON object" };
+        }
+
+        auto Name = TryParseRequired<csp::common::String>(Value, "name");
+
+        if (!Name)
+        {
+            return std::move(Name.GetError());
+        }
+
+        auto OptionValue = TryParseRequired<T>(Value, "value");
+
+        if (!OptionValue)
+        {
+            return std::move(OptionValue.GetError());
+        }
+
+        return ParseResult { SchemaOption<T> {
+            std::move(*Name),
+            std::move(*OptionValue),
+        } };
+    }
+
+    template <typename T> ParseResult<std::vector<SchemaOption<T>>> TryParseOptions(const rapidjson::Value& Value)
+    {
+        if (!Value.IsArray())
+        {
+            return ParseError { "'options' must be a JSON array" };
+        }
+
+        auto Options = std::vector<SchemaOption<T>> {};
+        const auto Entries = Value.GetArray();
+
+        for (auto Index = rapidjson::SizeType { 0 }; Index < Entries.Size(); ++Index)
+        {
+            auto Option = TryParseOption<T>(Entries[Index]);
+
+            if (!Option)
+            {
+                return ParseError { fmt::format("options[{}]: {}", Index, Option.GetError().Description) };
+            }
+
+            Options.push_back(std::move(*Option));
+        }
+
+        return ParseResult { std::move(Options) };
+    }
+
+    template <typename T> ParseResult<PropertyValue> TryParsePlainValue(const rapidjson::Value& Object)
+    {
+        auto Default = TryParseRequired<T>(Object, "defaultValue");
+
+        if (!Default)
+        {
+            return std::move(Default.GetError());
+        }
+
+        return ParseResult<PropertyValue> { PlainValue<T> { std::move(*Default) } };
+    }
+
+    template <typename T> ParseResult<PropertyValue> TryParseBoundedValue(const rapidjson::Value& Object)
+    {
+        auto Default = TryParseRequired<T>(Object, "defaultValue");
+
+        if (!Default)
+        {
+            return std::move(Default.GetError());
+        }
+
+        auto Bounds = TryParseRange<T>(Object["range"]);
+
+        if (!Bounds)
+        {
+            return std::move(Bounds.GetError());
+        }
+
+        return ParseResult<PropertyValue> { BoundedValue<T> {
+            std::move(*Default),
+            std::move(*Bounds),
+        } };
+    }
+
+    template <typename T> ParseResult<PropertyValue> TryParseEnumeratedValue(const rapidjson::Value& Object)
+    {
+        auto Default = TryParseRequired<T>(Object, "defaultValue");
+
+        if (!Default)
+        {
+            return std::move(Default.GetError());
+        }
+
+        auto Options = TryParseOptions<T>(Object["options"]);
+
+        if (!Options)
+        {
+            return std::move(Options.GetError());
+        }
+
+        return ParseResult<PropertyValue> { EnumeratedValue<T> {
+            std::move(*Default),
+            std::move(*Options),
+        } };
+    }
+
+    template <typename T> inline constexpr bool SupportsRangeV = std::is_same_v<T, float> || std::is_same_v<T, int64_t>;
+
+    template <typename T>
+    inline constexpr bool SupportsOptionsV = std::is_same_v<T, float> || std::is_same_v<T, int64_t> || std::is_same_v<T, std::string>;
+
+    template <typename T> ParseResult<PropertyValue> TryParseValue(const std::string& Type, const rapidjson::Value& Object)
+    {
+        if (Object.HasMember("range") && Object.HasMember("options"))
+        {
+            return ParseError { "'range' and 'options' cannot both be present" };
+        }
+
+        if (Object.HasMember("range"))
+        {
+            if constexpr (SupportsRangeV<T>)
+            {
+                return TryParseBoundedValue<T>(Object);
+            }
+            else
+            {
+                return ParseError { fmt::format("'range' is not supported for type '{}'", Type) };
+            }
+        }
+
+        if (Object.HasMember("options"))
+        {
+            if constexpr (SupportsOptionsV<T>)
+            {
+                return TryParseEnumeratedValue<T>(Object);
+            }
+            else
+            {
+                return ParseError { fmt::format("'options' is not supported for type '{}'", Type) };
+            }
+        }
+
+        return TryParsePlainValue<T>(Object);
     }
 
     ParseResult<PropertyValue> TryParseValue(const std::string& Type, const rapidjson::Value& Object)
     {
         if (Type == "string")
         {
-            return TryParseDefaultValue<std::string>(Object);
+            return TryParseValue<std::string>(Type, Object);
         }
 
         if (Type == "float")
         {
-            return TryParseDefaultValue<float>(Object);
+            return TryParseValue<float>(Type, Object);
         }
 
         if (Type == "int")
         {
-            return TryParseDefaultValue<int64_t>(Object);
+            return TryParseValue<int64_t>(Type, Object);
         }
 
         if (Type == "bool")
         {
-            return TryParseDefaultValue<bool>(Object);
+            return TryParseValue<bool>(Type, Object);
         }
 
         if (Type == "vec2")
         {
-            return TryParseDefaultValue<csp::common::Vector2>(Object);
+            return TryParseValue<csp::common::Vector2>(Type, Object);
         }
 
         if (Type == "vec3")
         {
-            return TryParseDefaultValue<csp::common::Vector3>(Object);
+            return TryParseValue<csp::common::Vector3>(Type, Object);
         }
 
         if (Type == "vec4")
         {
-            return TryParseDefaultValue<csp::common::Vector4>(Object);
+            return TryParseValue<csp::common::Vector4>(Type, Object);
         }
 
         return ParseError { fmt::format("unknown type '{}'", Type) };
@@ -414,12 +592,30 @@ namespace
 
 } // namespace
 
+template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const Range<T>& Bounds)
+{
+    Serializer.SerializeMember("min", Bounds.Min);
+    Serializer.SerializeMember("max", Bounds.Max);
+}
+
+template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const SchemaOption<T>& Option)
+{
+    Serializer.SerializeMember("name", Option.Name);
+    Serializer.SerializeMember("value", Option.Value);
+}
+
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentProperty& Property)
 {
     Serializer.SerializeMember("key", static_cast<uint32_t>(Property.Key));
     Serializer.SerializeMember("name", Property.Name);
 
-    std::visit([&Serializer](const auto& Value) { SerializeDefaultValue(Serializer, Value.Default); }, Property.Value);
+    std::visit(
+        [&Serializer](const auto& Value)
+        {
+            SerializeDefaultValue(Serializer, Value.Default);
+            SerializeConstraint(Serializer, Value);
+        },
+        Property.Value);
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentSchema& Schema)
