@@ -56,6 +56,11 @@ template <> struct ScriptTypeMap<std::string>
     using Type = std::string;
 };
 
+template <> struct ScriptTypeMap<std::unordered_map<std::string, std::string>>
+{
+    using Type = std::unordered_map<std::string, std::string>;
+};
+
 template <> struct ScriptTypeMap<csp::common::Vector2>
 {
     using Type = std::vector<float>;

@@ -24,6 +24,7 @@
 #include <rapidjson/document.h>
 
 #include <algorithm>
+#include <map>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -78,8 +79,11 @@ namespace
         Serializer.SerializeMember("defaultValue", std::vector<float> { Vector.X, Vector.Y, Vector.Z, Vector.W });
     }
 
-    // TODO: implement along with map parsing.
-    void SerializeDefaultValue(csp::json::JsonSerializer&, const std::unordered_map<std::string, std::string>&) { }
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, const std::unordered_map<std::string, std::string>& Value)
+    {
+        Serializer.SerializeMember("type", "stringToStringMap");
+        Serializer.SerializeMember("defaultValue", std::map<std::string, std::string>(Value.begin(), Value.end()));
+    }
 
     template <typename T> void SerializeConstraint(csp::json::JsonSerializer&, const PlainValue<T>&)
     {
@@ -177,6 +181,29 @@ namespace
         }
 
         return Value.GetUint64();
+    }
+
+    template <>
+    std::optional<std::unordered_map<std::string, std::string>> TryParse<std::unordered_map<std::string, std::string>>(const rapidjson::Value& Value)
+    {
+        if (!Value.IsObject())
+        {
+            return std::nullopt;
+        }
+
+        auto Entries = std::unordered_map<std::string, std::string>();
+
+        for (const auto& Member : Value.GetObject())
+        {
+            if (!Member.value.IsString())
+            {
+                return std::nullopt;
+            }
+
+            Entries.emplace(Member.name.GetString(), Member.value.GetString());
+        }
+
+        return Entries;
     }
 
     template <> std::optional<csp::common::Vector2> TryParse<csp::common::Vector2>(const rapidjson::Value& Value)
@@ -479,6 +506,11 @@ namespace
         if (Type == "vec4")
         {
             return TryParseValue<csp::common::Vector4>(Type, Object);
+        }
+
+        if (Type == "stringToStringMap")
+        {
+            return TryParseValue<std::unordered_map<std::string, std::string>>(Type, Object);
         }
 
         return ParseError { fmt::format("unknown type '{}'", Type) };

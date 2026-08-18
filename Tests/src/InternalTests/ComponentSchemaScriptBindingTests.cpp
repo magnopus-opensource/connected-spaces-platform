@@ -358,6 +358,75 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SetterIgnoresVal
     EXPECT_EQ(Component.GetProperty(0), 0.25f);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, StringToStringMapGetterSetter)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "mapProperty",
+                    PlainValue<std::unordered_map<std::string, std::string>> {
+                        {
+                            { "modelA", "materialA" },
+                            { "modelB", "materialB" },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    auto Entity = Fixture.MakeEntity("Test Entity",
+        {
+            TestFixture::Entity::ComponentCreationArgs {
+                Schema::TypeIdType { 123 },
+                TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
+            },
+        });
+
+    constexpr auto ScriptText = R"(
+        import { assert } from "CSPTest";
+
+        const example = ThisEntity.getExampleComponents()[0];
+
+        assert("mapProperty" in example, "mapProperty exists");
+
+        const initialKeys = Object.keys(example.mapProperty);
+        assert(initialKeys.length === 2, `Initial value of mapProperty has 2 entries, ${initialKeys.length}`);
+        assert(example.mapProperty.modelA === "materialA", `Initial value of mapProperty.modelA === "materialA"`);
+        assert(example.mapProperty.modelB === "materialB", `Initial value of mapProperty.modelB === "materialB"`);
+
+        // Note: the getter returns a new object each time, so mutating it does not modify the property.
+        example.mapProperty.modelA = "Ignored";
+        assert(example.mapProperty.modelA === "materialA", "Mutating the object returned by the getter leaves the property unchanged");
+
+        example.mapProperty = {
+            modelA: "materialA JS!",
+            modelC: "materialC JS!",
+        };
+    )";
+
+    EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
+
+    ASSERT_EQ(Entity.SchemaComponents.size(), 1);
+
+    const auto& Component = Entity.SchemaComponents.front();
+    EXPECT_EQ(Component.GetProperty(0),
+        (csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {
+            {
+                "modelA",
+                "materialA JS!",
+            },
+            {
+                "modelC",
+                "materialC JS!",
+            },
+        }));
+}
+
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothScriptableAndNonScriptableProperties)
 {
     auto Fixture = TestFixture({
@@ -372,7 +441,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
                 },
                 {
                     1,
-                    "unsupportedTypeProperty",
+                    "mapProperty",
                     PlainValue<std::unordered_map<std::string, std::string>> {},
                 },
                 {
@@ -403,7 +472,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
         const mixed = ThisEntity.getMixedComponents()[0];
     
         assert("stringProperty" in mixed, "stringProperty exists");
-        assert(!("unsupportedTypeProperty" in mixed), "unsupportedTypeProperty does not exist");
+        assert("mapProperty" in mixed, "mapProperty exists");
         assert("boolProperty" in mixed, "boolProperty exists");
     )";
 
