@@ -1056,6 +1056,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
                 "name": "vec4Property",
                 "type": "vec4",
                 "defaultValue": [1.0, 2.0, 3.0, 4.0]
+            },
+            {
+                "key": 7,
+                "name": "mapProperty",
+                "type": "stringToStringMap",
+                "defaultValue": { "modelA": "materialA", "modelB": "materialB" }
             }
         ]
     })";
@@ -1099,6 +1105,16 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
                 "vec4Property",
                 PlainValue<csp::common::Vector4> { csp::common::Vector4 { 1.0f, 2.0f, 3.0f, 4.0f } },
             },
+            {
+                7,
+                "mapProperty",
+                PlainValue<std::unordered_map<std::string, std::string>> {
+                    {
+                        { "modelA", "materialA" },
+                        { "modelB", "materialB" },
+                    },
+                },
+            },
         },
     };
 
@@ -1135,6 +1151,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
                     {
                         SchemaOption<int64_t> { "Off", int64_t { 0 } },
                         SchemaOption<int64_t> { "On", int64_t { 1 } },
+                    },
+                },
+            },
+            {
+                3,
+                "mapProperty",
+                PlainValue<std::unordered_map<std::string, std::string>> {
+                    {
+                        { "modelA", "materialA" },
                     },
                 },
             },
@@ -1398,6 +1423,42 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsVec4PropertyWi
     constexpr auto RawJson = R"({
         "typeId": 123, "name": "Example",
         "properties": [{ "key": 0, "name": "prop", "type": "vec4", "defaultValue": [1.0, "hello", 3.0, 4.0] }]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsStringToStringMapPropertyWithMismatchedDefaultValue)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "prop",
+                "type": "stringToStringMap",
+                "defaultValue": 42
+            }
+        ]
+    })";
+    const auto Result = Schema::FromJson(csp::common::String { RawJson });
+    EXPECT_FALSE(Result.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsStringToStringMapPropertyWithNonStringValues)
+{
+    constexpr auto RawJson = R"({
+        "typeId": 123,
+        "name": "Example",
+        "properties": [
+            {
+                "key": 0,
+                "name": "prop",
+                "type": "stringToStringMap",
+                "defaultValue": { "modelA": 42 }
+            }
+        ]
     })";
     const auto Result = Schema::FromJson(csp::common::String { RawJson });
     EXPECT_FALSE(Result.HasValue());
@@ -1726,6 +1787,23 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsRangeOnUnsuppo
         const auto Result = Schema::FromJson(csp::common::String { RawJson });
         EXPECT_FALSE(Result.HasValue());
     }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "stringToStringMap",
+                    "defaultValue": { "modelA": "materialA" },
+                    "range": { "min": "a", "max": "z" }
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsOptionsOnUnsupportedPropertyTypes)
@@ -1800,6 +1878,25 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonRejectsOptionsOnUnsup
                     "defaultValue": [0.0, 0.0, 0.0, 0.0],
                     "options": [
                         { "name": "Identity", "value": [0.0, 0.0, 0.0, 1.0] }
+                    ]
+                }
+            ]
+        })";
+        const auto Result = Schema::FromJson(csp::common::String { RawJson });
+        EXPECT_FALSE(Result.HasValue());
+    }
+    {
+        constexpr auto RawJson = R"({
+            "typeId": 123,
+            "name": "Example",
+            "properties": [
+                {
+                    "key": 0,
+                    "name": "prop",
+                    "type": "stringToStringMap",
+                    "defaultValue": { "modelA": "materialA" },
+                    "options": [
+                        { "name": "Default", "value": { "modelA": "materialA" } }
                     ]
                 }
             ]

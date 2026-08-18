@@ -40,6 +40,85 @@
 #include <unordered_map>
 #include <utility>
 
+namespace qjs
+{
+
+template <typename T> struct js_traits<std::unordered_map<std::string, T>>
+{
+    static JSValue wrap(JSContext* Context, const std::unordered_map<std::string, T>& Map) noexcept
+    {
+        try
+        {
+            auto Object = qjs::Value { Context, JS_NewObject(Context) };
+
+            for (const auto& [Key, Entry] : Map)
+            {
+                Object[Key.c_str()] = Entry;
+            }
+
+            return Object.release();
+        }
+        catch (const qjs::exception&)
+        {
+            return JS_EXCEPTION;
+        }
+        catch (const std::exception& Error)
+        {
+            JS_ThrowInternalError(Context, "%s", Error.what());
+            return JS_EXCEPTION;
+        }
+        catch (...)
+        {
+            JS_ThrowInternalError(Context, "Unknown error");
+            return JS_EXCEPTION;
+        }
+    }
+
+    static std::unordered_map<std::string, T> unwrap(JSContext* Context, JSValueConst Object)
+    {
+        if (!JS_IsObject(Object))
+        {
+            JS_ThrowTypeError(Context, "js_traits<std::unordered_map<std::string, T>>::unwrap expects an object");
+            throw qjs::exception { Context };
+        }
+
+        auto* Properties = static_cast<JSPropertyEnum*>(nullptr);
+        auto Count = uint32_t { 0 };
+
+        if (JS_GetOwnPropertyNames(Context, &Properties, &Count, Object, JS_GPN_ENUM_ONLY | JS_GPN_STRING_MASK) < 0)
+        {
+            throw qjs::exception { Context };
+        }
+
+        struct OwnedPropertyEnum final
+        {
+            ~OwnedPropertyEnum() { js_free_prop_enum(Context, Properties, Count); }
+
+            JSContext* Context;
+            JSPropertyEnum* Properties;
+            uint32_t Count;
+        };
+
+        const auto Owned = OwnedPropertyEnum { Context, Properties, Count };
+
+        auto Result = std::unordered_map<std::string, T>();
+
+        for (decltype(Count) Index = 0; Index < Count; ++Index)
+        {
+            const auto Atom = Properties[Index].atom;
+
+            auto Key = qjs::Value { Context, JS_AtomToString(Context, Atom) }.as<std::string>();
+            auto Entry = qjs::Value { Context, JS_GetProperty(Context, Object, Atom) }.as<T>();
+
+            Result.emplace(std::move(Key), std::move(Entry));
+        }
+
+        return Result;
+    }
+};
+
+} // namespace qjs
+
 namespace csp::multiplayer
 {
 

@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -42,7 +43,8 @@ public:
         float,
         int64_t,
         std::string,
-        std::vector<float>
+        std::vector<float>,
+        std::unordered_map<std::string, std::string>
     >;
 
     ComponentScriptInterface(ComponentBase* InComponent = nullptr);

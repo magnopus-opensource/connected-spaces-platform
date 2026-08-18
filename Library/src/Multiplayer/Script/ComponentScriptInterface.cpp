@@ -136,10 +136,22 @@ std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProp
         {
             return std::vector<float>{Value.X, Value.Y, Value.Z, Value.W};
         }
-        
-        std::optional<Value> operator()(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>&) const
+
+        std::optional<Value> operator()(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value) const
         {
-            return {};
+            auto Mapped = std::unordered_map<std::string, std::string>();
+
+            for (const auto& [Key, Entry] : Value)
+            {
+                if (Entry.GetReplicatedValueType() != csp::common::ReplicatedValueType::String)
+                {
+                    return {};
+                }
+
+                Mapped.emplace(Key.c_str(), Entry.GetString().c_str());
+            }
+
+            return Mapped;
         }
     };
 
@@ -193,6 +205,18 @@ void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
             }
  
             return {};
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(const std::unordered_map<std::string, std::string>& Value) const
+        {
+            auto Mapped = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
+
+            for (const auto& [Key, Entry] : Value)
+            {
+                Mapped[Key.c_str()] = Entry.c_str();
+            }
+
+            return Mapped;
         }
     };
 
