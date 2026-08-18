@@ -91,17 +91,9 @@ namespace
         return std::all_of(Array.begin(), Array.end(), [](const auto& Element) { return Element.IsNumber(); });
     }
 
-    template <typename T> std::optional<PropertyValue> AsPropertyValue(std::optional<T> Value)
-    {
-        if (!Value)
-        {
-            return std::nullopt;
-        }
+    template <typename T> std::optional<T> TryParse(const rapidjson::Value& Value);
 
-        return PropertyValue { PlainValue<T> { std::move(*Value) } };
-    }
-
-    std::optional<std::string> TryParseString(const rapidjson::Value& Value)
+    template <> std::optional<std::string> TryParse<std::string>(const rapidjson::Value& Value)
     {
         if (!Value.IsString())
         {
@@ -111,7 +103,17 @@ namespace
         return std::string { Value.GetString() };
     }
 
-    std::optional<float> TryParseFloat(const rapidjson::Value& Value)
+    template <> std::optional<csp::common::String> TryParse<csp::common::String>(const rapidjson::Value& Value)
+    {
+        if (!Value.IsString())
+        {
+            return std::nullopt;
+        }
+
+        return csp::common::String { Value.GetString() };
+    }
+
+    template <> std::optional<float> TryParse<float>(const rapidjson::Value& Value)
     {
         if (!Value.IsNumber())
         {
@@ -121,7 +123,7 @@ namespace
         return Value.GetFloat();
     }
 
-    std::optional<int64_t> TryParseInt(const rapidjson::Value& Value)
+    template <> std::optional<int64_t> TryParse<int64_t>(const rapidjson::Value& Value)
     {
         if (!Value.IsInt64())
         {
@@ -131,7 +133,7 @@ namespace
         return Value.GetInt64();
     }
 
-    std::optional<bool> TryParseBool(const rapidjson::Value& Value)
+    template <> std::optional<bool> TryParse<bool>(const rapidjson::Value& Value)
     {
         if (!Value.IsBool())
         {
@@ -141,7 +143,27 @@ namespace
         return Value.GetBool();
     }
 
-    std::optional<csp::common::Vector2> TryParseVec2(const rapidjson::Value& Value)
+    template <> std::optional<uint32_t> TryParse<uint32_t>(const rapidjson::Value& Value)
+    {
+        if (!Value.IsUint())
+        {
+            return std::nullopt;
+        }
+
+        return Value.GetUint();
+    }
+
+    template <> std::optional<uint64_t> TryParse<uint64_t>(const rapidjson::Value& Value)
+    {
+        if (!Value.IsUint64())
+        {
+            return std::nullopt;
+        }
+
+        return Value.GetUint64();
+    }
+
+    template <> std::optional<csp::common::Vector2> TryParse<csp::common::Vector2>(const rapidjson::Value& Value)
     {
         if (!IsFloatArray(Value, 2))
         {
@@ -154,7 +176,7 @@ namespace
         };
     }
 
-    std::optional<csp::common::Vector3> TryParseVec3(const rapidjson::Value& Value)
+    template <> std::optional<csp::common::Vector3> TryParse<csp::common::Vector3>(const rapidjson::Value& Value)
     {
         if (!IsFloatArray(Value, 3))
         {
@@ -168,7 +190,7 @@ namespace
         };
     }
 
-    std::optional<csp::common::Vector4> TryParseVec4(const rapidjson::Value& Value)
+    template <> std::optional<csp::common::Vector4> TryParse<csp::common::Vector4>(const rapidjson::Value& Value)
     {
         if (!IsFloatArray(Value, 4))
         {
@@ -183,195 +205,211 @@ namespace
         };
     }
 
-    std::optional<PropertyValue> TryParse(const std::string& Type, const rapidjson::Value& Value)
+    struct ParseError final
+    {
+        std::string Description;
+    };
+
+    template <typename T> class ParseResult final
+    {
+    public:
+        explicit ParseResult(T InValue)
+            : Storage(std::move(InValue))
+        {
+        }
+
+        ParseResult(ParseError InError)
+            : Storage(std::move(InError))
+        {
+        }
+
+        explicit operator bool() const { return std::holds_alternative<T>(Storage); }
+
+        T& operator*() { return *std::get_if<T>(&Storage); }
+
+        const T& operator*() const { return *std::get_if<T>(&Storage); }
+
+        ParseError& GetError() { return *std::get_if<ParseError>(&Storage); }
+
+        const ParseError& GetError() const { return *std::get_if<ParseError>(&Storage); }
+
+    private:
+        std::variant<T, ParseError> Storage;
+    };
+
+    template <typename T> ParseResult<T> TryParseRequired(const rapidjson::Value& Object, const char* Key)
+    {
+        if (!Object.HasMember(Key))
+        {
+            return ParseError { fmt::format("required field '{}' is missing", Key) };
+        }
+
+        auto Parsed = TryParse<T>(Object[Key]);
+
+        if (!Parsed)
+        {
+            return ParseError { fmt::format("required field '{}' has unexpected type", Key) };
+        }
+
+        return ParseResult { std::move(*Parsed) };
+    }
+
+    template <typename T> ParseResult<PropertyValue> TryParseDefaultValue(const rapidjson::Value& Object)
+    {
+        auto Parsed = TryParseRequired<T>(Object, "defaultValue");
+
+        if (!Parsed)
+        {
+            return std::move(Parsed.GetError());
+        }
+
+        return ParseResult<PropertyValue> { PlainValue<T> { std::move(*Parsed) } };
+    }
+
+    ParseResult<PropertyValue> TryParseValue(const std::string& Type, const rapidjson::Value& Object)
     {
         if (Type == "string")
         {
-            return AsPropertyValue(TryParseString(Value));
+            return TryParseDefaultValue<std::string>(Object);
         }
 
         if (Type == "float")
         {
-            return AsPropertyValue(TryParseFloat(Value));
+            return TryParseDefaultValue<float>(Object);
         }
 
         if (Type == "int")
         {
-            return AsPropertyValue(TryParseInt(Value));
+            return TryParseDefaultValue<int64_t>(Object);
         }
 
         if (Type == "bool")
         {
-            return AsPropertyValue(TryParseBool(Value));
+            return TryParseDefaultValue<bool>(Object);
         }
 
         if (Type == "vec2")
         {
-            return AsPropertyValue(TryParseVec2(Value));
+            return TryParseDefaultValue<csp::common::Vector2>(Object);
         }
 
         if (Type == "vec3")
         {
-            return AsPropertyValue(TryParseVec3(Value));
+            return TryParseDefaultValue<csp::common::Vector3>(Object);
         }
 
         if (Type == "vec4")
         {
-            return AsPropertyValue(TryParseVec4(Value));
+            return TryParseDefaultValue<csp::common::Vector4>(Object);
         }
 
-        return std::nullopt;
+        return ParseError { fmt::format("unknown type '{}'", Type) };
     }
 
-    std::optional<ComponentProperty> TryParseProperty(const rapidjson::Value& Value, csp::common::LogSystem* LogSystem = nullptr)
+    ParseResult<ComponentProperty> TryParseProperty(const rapidjson::Value& Value)
     {
         if (!Value.IsObject())
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: not a JSON object");
-            }
-
-            return std::nullopt;
+            return ParseError { "property must be a JSON object" };
         }
 
-        if (!Value.HasMember("key") || !Value["key"].IsUint())
+        const auto Key = TryParseRequired<uint32_t>(Value, "key");
+
+        if (!Key)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'key' must be an unsigned integer");
-            }
-
-            return std::nullopt;
+            return Key.GetError();
         }
 
-        if (!Value.HasMember("name") || !Value["name"].IsString())
+        auto Name = TryParseRequired<csp::common::String>(Value, "name");
+
+        if (!Name)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'name' must be a string");
-            }
-
-            return std::nullopt;
+            return std::move(Name.GetError());
         }
 
-        if (!Value.HasMember("type") || !Value["type"].IsString())
+        const auto Type = TryParseRequired<std::string>(Value, "type");
+
+        if (!Type)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: 'type' must be a string");
-            }
-
-            return std::nullopt;
+            return Type.GetError();
         }
 
-        if (!Value.HasMember("defaultValue"))
+        auto ParsedValue = TryParseValue(*Type, Value);
+
+        if (!ParsedValue)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseProperty: missing 'defaultValue'");
-            }
-
-            return std::nullopt;
+            return std::move(ParsedValue.GetError());
         }
 
-        const auto Key = static_cast<ComponentProperty::KeyType>(Value["key"].GetUint());
-        const auto* Name = Value["name"].GetString();
-        const auto* Type = Value["type"].GetString();
-        const auto DefaultValue = TryParse(Type, Value["defaultValue"]);
-
-        if (!DefaultValue)
-        {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(
-                    csp::common::LogLevel::Warning, fmt::format("TryParseProperty: 'defaultValue' is not valid for type '{}'", Type).c_str());
-            }
-
-            return std::nullopt;
-        }
-
-        return ComponentProperty {
-            Key,
-            Name,
-            *DefaultValue,
-        };
+        return ParseResult { ComponentProperty {
+            static_cast<ComponentProperty::KeyType>(*Key),
+            std::move(*Name),
+            std::move(*ParsedValue),
+        } };
     }
 
-    std::optional<csp::common::Array<ComponentProperty>> TryParseProperties(
-        rapidjson::Value::ConstArray JsonProperties, csp::common::LogSystem* LogSystem = nullptr)
+    ParseResult<csp::common::Array<ComponentProperty>> TryParseProperties(rapidjson::Value::ConstArray JsonProperties)
     {
         auto Properties = std::vector<ComponentProperty> {};
 
-        for (const auto& Element : JsonProperties)
+        for (auto Index = rapidjson::SizeType { 0 }; Index < JsonProperties.Size(); ++Index)
         {
-            const auto Property = TryParseProperty(Element, LogSystem);
+            auto Property = TryParseProperty(JsonProperties[Index]);
 
             if (!Property)
             {
-                return std::nullopt;
+                return ParseError { fmt::format("properties[{}]: {}", Index, Property.GetError().Description) };
             }
 
-            Properties.push_back(*Property);
+            Properties.push_back(std::move(*Property));
         }
 
-        return csp::common::Convert(Properties);
+        return ParseResult { csp::common::Convert(Properties) };
     }
 
-    std::optional<ComponentSchema> TryParseSchema(const rapidjson::Value& Value, csp::common::LogSystem* LogSystem = nullptr)
+    ParseResult<ComponentSchema> TryParseSchema(const rapidjson::Value& Value)
     {
         if (!Value.IsObject())
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: not a JSON object");
-            }
-
-            return std::nullopt;
+            return ParseError { "schema must be a JSON object" };
         }
 
-        if (!Value.HasMember("typeId") || !Value["typeId"].IsUint64())
+        const auto TypeId = TryParseRequired<uint64_t>(Value, "typeId");
+
+        if (!TypeId)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'typeId' must be a uint64");
-            }
-
-            return std::nullopt;
+            return TypeId.GetError();
         }
 
-        if (!Value.HasMember("name") || !Value["name"].IsString())
+        auto Name = TryParseRequired<csp::common::String>(Value, "name");
+
+        if (!Name)
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'name' must be a string");
-            }
-
-            return std::nullopt;
+            return std::move(Name.GetError());
         }
 
-        if (!Value.HasMember("properties") || !Value["properties"].IsArray())
+        if (!Value.HasMember("properties"))
         {
-            if (LogSystem)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Warning, "TryParseSchema: 'properties' must be an array");
-            }
-
-            return std::nullopt;
+            return ParseError { "required field 'properties' is missing" };
         }
 
-        const auto Properties = TryParseProperties(Value["properties"].GetArray(), LogSystem);
+        if (!Value["properties"].IsArray())
+        {
+            return ParseError { "required field 'properties' has unexpected type" };
+        }
+
+        auto Properties = TryParseProperties(Value["properties"].GetArray());
 
         if (!Properties)
         {
-            return std::nullopt;
+            return ParseError { fmt::format("{}: {}", (*Name).c_str(), Properties.GetError().Description) };
         }
 
-        return ComponentSchema {
-            Value["typeId"].GetUint64(),
-            Value["name"].GetString(),
-            *Properties,
-        };
+        return ParseResult { ComponentSchema {
+            *TypeId,
+            std::move(*Name),
+            std::move(*Properties),
+        } };
     }
 
 } // namespace
@@ -403,14 +441,14 @@ csp::common::Optional<ComponentSchema> ComponentSchema::FromJson(const csp::comm
         return {};
     }
 
-    const auto Schema = TryParseSchema(Doc);
+    auto Schema = TryParseSchema(Doc);
 
     if (!Schema)
     {
         return {};
     }
 
-    return *Schema;
+    return std::move(*Schema);
 }
 
 csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
@@ -431,15 +469,16 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 
         for (const auto& Element : Doc.GetArray())
         {
-            const auto Schema = TryParseSchema(Element, &LogSystem);
+            auto Schema = TryParseSchema(Element);
 
             if (!Schema)
             {
-                LogSystem.LogMsg(csp::common::LogLevel::Warning, "ComponentSchemasFromJson: skipping entry, failed to parse schema");
+                LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                    fmt::format("ComponentSchemasFromJson: skipping entry: {}", Schema.GetError().Description).c_str());
                 continue;
             }
 
-            Collected.push_back(*Schema);
+            Collected.push_back(std::move(*Schema));
         }
     }
 
