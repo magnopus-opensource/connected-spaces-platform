@@ -30,18 +30,21 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
-            {}, // not exposed to scripting
+            "isVisible",
             PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
-            {}, // not exposed to scripting
+            "isActive",
             PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
-            {}, // not exposed to scripting
+            "isARVisible",
             PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsEnabled),

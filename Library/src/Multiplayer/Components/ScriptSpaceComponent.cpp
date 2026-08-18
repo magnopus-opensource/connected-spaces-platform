@@ -24,24 +24,25 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ScriptData),
-    {}, // not exposed to scripting
+    "Script", // not exposed to scripting
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptSource),
-            {}, // not exposed to scripting
+            "scriptSource",
             PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::OwnerId),
-            {}, // not exposed to scripting
+            "ownerId",
             PlainValue<int64_t> { static_cast<int64_t>(0) },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
-            {}, // not exposed to scripting
+            "scriptScope",
             PlainValue<int64_t> { static_cast<int64_t>(ScriptScope::Owner) },
         },
     },
+    /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
 };
 
 const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }

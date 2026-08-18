@@ -38,8 +38,9 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
+            "name_DEPRECATED",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::VideoAssetId),
@@ -128,8 +129,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId),
-            {}, // not exposed to scripting
+            "meshComponentId",
             PlainValue<int64_t> { static_cast<int64_t>(0) },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::IsEnabled),
@@ -153,8 +155,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Volume),
-            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
+            "volume", // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
             PlainValue<float> { DefaultVolume },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AudioType),

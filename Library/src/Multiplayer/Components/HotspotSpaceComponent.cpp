@@ -38,8 +38,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
+            "name_DEPRECATED",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsTeleportPoint),

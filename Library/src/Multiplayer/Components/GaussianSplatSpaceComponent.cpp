@@ -61,8 +61,10 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::IsShadowCaster_DEPRECATED),
-            {}, // not exposed to scripting: this is a deprecated property that was never exposed to scripting, so no need to start now.
+            "isShadowCaster_DEPRECATED", // not exposed to scripting: this is a deprecated property that was never exposed to scripting, so no need to
+                                         // start now.
             PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(GaussianSplatPropertyKeys::Tint),

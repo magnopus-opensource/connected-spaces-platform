@@ -45,8 +45,9 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
-            {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
+            "waypoints", // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
             PlainValue<float> { 0.f },
+            /*.IsScriptable =*/false,
         },
     },
 };

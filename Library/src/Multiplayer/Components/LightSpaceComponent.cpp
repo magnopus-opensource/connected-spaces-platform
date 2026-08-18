@@ -90,13 +90,15 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
+            "thirdPartyComponentRef",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightShadowType),
-            {}, // not exposed to scripting
+            "lightShadowType",
             PlainValue<int64_t> { static_cast<int64_t>(LightShadowType::None) },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVirtualVisible),
