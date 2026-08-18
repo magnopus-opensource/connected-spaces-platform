@@ -121,14 +121,12 @@ set(CSP_MULTIPLAYER_SOURCES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.cpp
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/SplineSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.cpp
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRClient.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRConnection.cpp
@@ -167,13 +165,11 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ScriptHelpers.h
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/ISignalRConnection.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRClient.h

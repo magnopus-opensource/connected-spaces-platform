@@ -18,8 +18,6 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/ComponentSchema.h"
 
-#include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
-
 #include <fmt/format.h>
 
 namespace
@@ -92,9 +90,11 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
-            "volume", // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
-            PlainValue<float> { DefaultVolume },
-            /*.IsScriptable =*/false,
+            "volume",
+            BoundedValue<float> {
+                DefaultVolume,
+                { 0.0f, 1.0f },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
@@ -131,7 +131,6 @@ std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
 AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(InSchema, LogSystem, Parent)
 {
-    SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }
 
 const csp::common::Vector3& AudioSpaceComponent::GetPosition() const

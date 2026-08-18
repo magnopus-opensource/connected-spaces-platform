@@ -23,12 +23,10 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
-#include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 
@@ -445,12 +443,8 @@ public:
     {
         switch (ToComponentType(Schema.TypeId).value_or(ComponentType::Invalid))
         {
-        case ComponentType::VideoPlayer:
-            return GetComponents<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::Custom:
             return GetComponents<CustomSpaceComponentScriptInterface>(Context, Entity, Schema);
-        case ComponentType::Audio:
-            return GetComponents<AudioSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::Hotspot:
             return GetComponents<HotspotSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::CinematicCamera:
@@ -527,11 +521,6 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, cs
 
 void BindComponents(qjs::Context::Module* Module)
 {
-    Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
-
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -553,11 +542,6 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&SplineSpaceComponentScriptInterface::SetWaypoints>("setWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
-
-    Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
 
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
