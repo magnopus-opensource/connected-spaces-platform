@@ -36,6 +36,8 @@ namespace
 using Schema = csp::multiplayer::ComponentSchema;
 using Property = csp::multiplayer::ComponentProperty;
 
+template <typename T> using PlainValue = csp::multiplayer::PlainValue<T>;
+
 class TestFixture final
 {
 public:
@@ -190,7 +192,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, GetterAvailableO
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -224,37 +226,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
                 {
                     0,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
                 },
                 {
                     1,
                     "floatProperty",
-                    0.25f,
+                    PlainValue<float> { 0.25f },
                 },
                 {
                     2,
                     "intProperty",
-                    int64_t { 123 },
+                    PlainValue<int64_t> { int64_t { 123 } },
                 },
                 {
                     3,
                     "stringProperty",
-                    "Test!",
+                    PlainValue<std::string> { "Test!" },
                 },
                 {
                     4,
                     "vec2Property",
-                    csp::common::Vector2(1.0f, 2.0f),
+                    PlainValue<csp::common::Vector2> { csp::common::Vector2(1.0f, 2.0f) },
                 },
                 {
                     5,
                     "vec3Property",
-                    csp::common::Vector3(1.0f, 2.0f, 3.0f),
+                    PlainValue<csp::common::Vector3> { csp::common::Vector3(1.0f, 2.0f, 3.0f) },
                 },
                 {
                     6,
                     "vec4Property",
-                    csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f),
+                    PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
             },
         },
@@ -321,22 +323,22 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
                 {
                     0,
                     "stringProperty",
-                    "Hello",
+                    PlainValue<std::string> { "Hello" },
                 },
                 {
                     1,
                     "unsupportedTypeProperty",
-                    csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+                    PlainValue<std::unordered_map<std::string, std::string>> {},
                 },
                 {
                     2,
                     {}, // Note: No property name
-                    csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+                    PlainValue<std::unordered_map<std::string, std::string>> {},
                 },
                 {
                     3,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
                 },
             },
         },
@@ -373,37 +375,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
                 {
                     0,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
                 },
                 {
                     1,
                     "floatProperty",
-                    0.25f,
+                    PlainValue<float> { 0.25f },
                 },
                 {
                     2,
                     "intProperty",
-                    int64_t { 123 },
+                    PlainValue<int64_t> { int64_t { 123 } },
                 },
                 {
                     3,
                     "stringProperty",
-                    "Test!",
+                    PlainValue<std::string> { "Test!" },
                 },
                 {
                     4,
                     "vec2Property",
-                    csp::common::Vector2(1.0f, 2.0f),
+                    PlainValue<csp::common::Vector2> { csp::common::Vector2(1.0f, 2.0f) },
                 },
                 {
                     5,
                     "vec3Property",
-                    csp::common::Vector3(1.0f, 2.0f, 3.0f),
+                    PlainValue<csp::common::Vector3> { csp::common::Vector3(1.0f, 2.0f, 3.0f) },
                 },
                 {
                     6,
                     "vec4Property",
-                    csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f),
+                    PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
             },
         },
@@ -494,7 +496,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, ComponentsOfSame
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -533,7 +535,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, PropertiesAreEnu
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -572,7 +574,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BaseClassFunctio
                 {
                     1,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -634,7 +636,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleComponen
                 {
                     0,
                     "stringProperty",
-                    "",
+                    PlainValue<std::string> { "" },
                 },
             },
         },
@@ -686,7 +688,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
                 {
                     0,
                     "stringProperty",
-                    "",
+                    PlainValue<std::string> { "" },
                 },
             },
         },
@@ -761,7 +763,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleScriptab
                 {
                     0,
                     "value",
-                    "Test",
+                    PlainValue<std::string> { "Test" },
                 },
             },
         },
@@ -772,7 +774,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleScriptab
                 {
                     0,
                     "value",
-                    int64_t { 616 },
+                    PlainValue<int64_t> { int64_t { 616 } },
                 },
             },
         },
@@ -818,7 +820,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                 {
                     0,
                     {}, // Note: Non scriptable
-                    "Non Scriptable",
+                    PlainValue<std::string> { "Non Scriptable" },
                 },
             },
         },
@@ -829,7 +831,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                 {
                     0,
                     "value",
-                    "Hello",
+                    PlainValue<std::string> { "Hello" },
                 },
             },
         },
@@ -868,7 +870,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BindingsAfterSou
                 {
                     0,
                     "value",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -917,7 +919,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BindingsRegister
                 {
                     0,
                     "value",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },

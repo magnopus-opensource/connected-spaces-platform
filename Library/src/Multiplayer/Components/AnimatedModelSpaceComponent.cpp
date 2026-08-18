@@ -29,82 +29,82 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetId),
             "externalResourceAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId),
             "externalResourceAssetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::MaterialOverrides),
             {}, // not exposed to scripting
-            csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+            PlainValue<std::unordered_map<std::string, std::string>> {},
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3 { 1, 1, 1 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1, 1, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsLoopPlayback),
             "isLoopPlayback",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsPlaying),
             "isPlaying",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::AnimationIndex),
             "animationIndex",
-            static_cast<int64_t>(-1),
+            PlainValue<int64_t> { static_cast<int64_t>(-1) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ThirdPartyComponentRef),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsShadowCaster),
             "isShadowCaster",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR),
             "showAsHoldoutInAR",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual),
             "showAsHoldoutInVirtual",
-            false,
+            PlainValue<bool> { false },
         },
     },
 };

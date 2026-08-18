@@ -67,7 +67,7 @@ ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSyst
 
     for (const auto& Property : Schema.Properties)
     {
-        Properties[Property.Key] = Property.DefaultValue;
+        Properties[Property.Key] = ToReplicatedValue(Property.Value);
     }
 
     if (IsScriptable(Schema))
@@ -119,8 +119,7 @@ void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue
         return;
     }
 
-    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key);
-        Property && Value.GetReplicatedValueType() == Property->DefaultValue.GetReplicatedValueType())
+    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key); Property && Value.GetReplicatedValueType() == TypeOf(Property->Value))
     {
         SetPropertyDirect(Key, Value);
     }

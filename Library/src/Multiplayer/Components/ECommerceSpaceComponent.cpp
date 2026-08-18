@@ -27,12 +27,12 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::ProductId),
             "productId",
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

@@ -32,7 +32,7 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(CustomComponentPropertyKeys::ApplicationOrigin),
             "applicationOrigin",
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

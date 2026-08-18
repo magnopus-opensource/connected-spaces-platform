@@ -40,57 +40,57 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
             "playbackState",
-            static_cast<int64_t>(AudioPlaybackState::Reset),
+            PlainValue<int64_t> { static_cast<int64_t>(AudioPlaybackState::Reset) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
             "audioType",
-            static_cast<int64_t>(AudioType::Global),
+            PlainValue<int64_t> { static_cast<int64_t>(AudioType::Global) },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
             "audioAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
             "attenuationRadius",
-            DefaultAttenuationRadius,
+            PlainValue<float> { DefaultAttenuationRadius },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
             "isLoopPlayback",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
             "timeSincePlay",
-            0.f,
+            PlainValue<float> { 0.f },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
             {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
-            DefaultVolume,
+            PlainValue<float> { DefaultVolume },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
             {}, // not exposed to scripting
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

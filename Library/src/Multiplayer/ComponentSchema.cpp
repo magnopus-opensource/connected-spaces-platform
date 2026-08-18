@@ -27,6 +27,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 namespace csp::multiplayer
@@ -34,47 +35,50 @@ namespace csp::multiplayer
 
 namespace
 {
-    void SerializeStringProperty(csp::json::JsonSerializer& Serializer, const csp::common::String& Value)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, const std::string& Value)
     {
         Serializer.SerializeMember("type", "string");
         Serializer.SerializeMember("defaultValue", Value);
     }
 
-    void SerializeFloatProperty(csp::json::JsonSerializer& Serializer, float Value)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, float Value)
     {
         Serializer.SerializeMember("type", "float");
         Serializer.SerializeMember("defaultValue", Value);
     }
 
-    void SerializeIntProperty(csp::json::JsonSerializer& Serializer, int64_t Value)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, int64_t Value)
     {
         Serializer.SerializeMember("type", "int");
         Serializer.SerializeMember("defaultValue", Value);
     }
 
-    void SerializeBoolProperty(csp::json::JsonSerializer& Serializer, bool Value)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, bool Value)
     {
         Serializer.SerializeMember("type", "bool");
         Serializer.SerializeMember("defaultValue", Value);
     }
 
-    void SerializeVec2Property(csp::json::JsonSerializer& Serializer, const csp::common::Vector2& Vector)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, const csp::common::Vector2& Vector)
     {
         Serializer.SerializeMember("type", "vec2");
         Serializer.SerializeMember("defaultValue", std::vector<float> { Vector.X, Vector.Y });
     }
 
-    void SerializeVec3Property(csp::json::JsonSerializer& Serializer, const csp::common::Vector3& Vector)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, const csp::common::Vector3& Vector)
     {
         Serializer.SerializeMember("type", "vec3");
         Serializer.SerializeMember("defaultValue", std::vector<float> { Vector.X, Vector.Y, Vector.Z });
     }
 
-    void SerializeVec4Property(csp::json::JsonSerializer& Serializer, const csp::common::Vector4& Vector)
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, const csp::common::Vector4& Vector)
     {
         Serializer.SerializeMember("type", "vec4");
         Serializer.SerializeMember("defaultValue", std::vector<float> { Vector.X, Vector.Y, Vector.Z, Vector.W });
     }
+
+    // TODO: implement along with map parsing.
+    void SerializeDefaultValue(csp::json::JsonSerializer&, const std::unordered_map<std::string, std::string>&) { }
 
     bool IsFloatArray(const rapidjson::Value& Value, rapidjson::SizeType ExpectedSize)
     {
@@ -87,24 +91,24 @@ namespace
         return std::all_of(Array.begin(), Array.end(), [](const auto& Element) { return Element.IsNumber(); });
     }
 
-    template <typename T> std::optional<csp::common::ReplicatedValue> AsReplicatedValue(std::optional<T> Value)
+    template <typename T> std::optional<PropertyValue> AsPropertyValue(std::optional<T> Value)
     {
         if (!Value)
         {
             return std::nullopt;
         }
 
-        return std::move(*Value);
+        return PropertyValue { PlainValue<T> { std::move(*Value) } };
     }
 
-    std::optional<csp::common::String> TryParseString(const rapidjson::Value& Value)
+    std::optional<std::string> TryParseString(const rapidjson::Value& Value)
     {
         if (!Value.IsString())
         {
             return std::nullopt;
         }
 
-        return csp::common::String { Value.GetString() };
+        return std::string { Value.GetString() };
     }
 
     std::optional<float> TryParseFloat(const rapidjson::Value& Value)
@@ -179,41 +183,41 @@ namespace
         };
     }
 
-    std::optional<csp::common::ReplicatedValue> TryParse(const std::string& Type, const rapidjson::Value& Value)
+    std::optional<PropertyValue> TryParse(const std::string& Type, const rapidjson::Value& Value)
     {
         if (Type == "string")
         {
-            return AsReplicatedValue(TryParseString(Value));
+            return AsPropertyValue(TryParseString(Value));
         }
 
         if (Type == "float")
         {
-            return AsReplicatedValue(TryParseFloat(Value));
+            return AsPropertyValue(TryParseFloat(Value));
         }
 
         if (Type == "int")
         {
-            return AsReplicatedValue(TryParseInt(Value));
+            return AsPropertyValue(TryParseInt(Value));
         }
 
         if (Type == "bool")
         {
-            return AsReplicatedValue(TryParseBool(Value));
+            return AsPropertyValue(TryParseBool(Value));
         }
 
         if (Type == "vec2")
         {
-            return AsReplicatedValue(TryParseVec2(Value));
+            return AsPropertyValue(TryParseVec2(Value));
         }
 
         if (Type == "vec3")
         {
-            return AsReplicatedValue(TryParseVec3(Value));
+            return AsPropertyValue(TryParseVec3(Value));
         }
 
         if (Type == "vec4")
         {
-            return AsReplicatedValue(TryParseVec4(Value));
+            return AsPropertyValue(TryParseVec4(Value));
         }
 
         return std::nullopt;
@@ -374,37 +378,10 @@ namespace
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentProperty& Property)
 {
-    using csp::common::ReplicatedValueType;
-
     Serializer.SerializeMember("key", static_cast<uint32_t>(Property.Key));
     Serializer.SerializeMember("name", Property.Name);
 
-    switch (Property.DefaultValue.GetReplicatedValueType())
-    {
-    case ReplicatedValueType::String:
-        SerializeStringProperty(Serializer, Property.DefaultValue.GetString());
-        break;
-    case ReplicatedValueType::Float:
-        SerializeFloatProperty(Serializer, Property.DefaultValue.GetFloat());
-        break;
-    case ReplicatedValueType::Integer:
-        SerializeIntProperty(Serializer, Property.DefaultValue.GetInt());
-        break;
-    case ReplicatedValueType::Boolean:
-        SerializeBoolProperty(Serializer, Property.DefaultValue.GetBool());
-        break;
-    case ReplicatedValueType::Vector2:
-        SerializeVec2Property(Serializer, Property.DefaultValue.GetVector2());
-        break;
-    case ReplicatedValueType::Vector3:
-        SerializeVec3Property(Serializer, Property.DefaultValue.GetVector3());
-        break;
-    case ReplicatedValueType::Vector4:
-        SerializeVec4Property(Serializer, Property.DefaultValue.GetVector4());
-        break;
-    default:
-        break;
-    }
+    std::visit([&Serializer](const auto& Value) { SerializeDefaultValue(Serializer, Value.Default); }, Property.Value);
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const ComponentSchema& Schema)

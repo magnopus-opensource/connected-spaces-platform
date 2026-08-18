@@ -93,7 +93,7 @@ namespace
 
         auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
         {
-            using T = std::decay_t<decltype(V)>;
+            using T = std::decay_t<decltype(V.Default)>;
 
             if constexpr (IsScriptableV<T>)
             {
@@ -159,7 +159,7 @@ namespace
                 continue;
             }
 
-            auto MaybeAccessors = std::visit(CreateAccessors, Property.DefaultValue.GetValue());
+            auto MaybeAccessors = std::visit(CreateAccessors, Property.Value);
             if (!MaybeAccessors)
             {
                 continue;

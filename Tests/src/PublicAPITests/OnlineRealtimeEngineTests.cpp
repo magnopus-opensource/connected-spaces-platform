@@ -696,7 +696,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructWithCo
                 {
                     ComponentProperty::KeyType { 42 },
                     "value",
-                    "DefaultValue",
+                    PlainValue<std::string> { "DefaultValue" },
                 },
             },
         },
