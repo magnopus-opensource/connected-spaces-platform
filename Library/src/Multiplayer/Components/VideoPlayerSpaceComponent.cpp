@@ -19,8 +19,6 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/ComponentSchema.h"
 
-#include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-
 #include <fmt/format.h>
 
 namespace
@@ -169,9 +167,11 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::Volume),
-            "volume", // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
-            PlainValue<float> { DefaultVolume },
-            /*.IsScriptable =*/false,
+            "volume",
+            BoundedValue<float> {
+                DefaultVolume,
+                { 0.0f, 1.0f },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(VideoPlayerPropertyKeys::AudioType),
@@ -208,7 +208,6 @@ std::unique_ptr<VideoPlayerSpaceComponent> VideoPlayerSpaceComponent::TryMake(
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(InSchema, LogSystem, Parent)
 {
-    SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const
