@@ -198,7 +198,7 @@ void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
 
     if (auto MaybeMappedValue = std::visit(Visitor{}, std::move(DesiredValue)))
     {
-        Component->SetPropertyDirect(Key, std::move(*MaybeMappedValue));
+        Component->SetProperty(Key, std::move(*MaybeMappedValue));
         SendPropertyUpdate();
     }
 }
