@@ -454,6 +454,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
                     "boolProperty",
                     PlainValue<bool> { true },
                 },
+                {
+                    4,
+                    "nonExposedProperty",
+                    PlainValue<std::string> { "" },
+                    /*.IsScriptable =*/false,
+                },
             },
         },
     });
@@ -474,6 +480,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
         assert("stringProperty" in mixed, "stringProperty exists");
         assert("mapProperty" in mixed, "mapProperty exists");
         assert("boolProperty" in mixed, "boolProperty exists");
+        assert(!("nonExposedProperty" in mixed), "nonExposedProperty does not exist");
     )";
 
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));

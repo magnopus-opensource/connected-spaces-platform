@@ -198,7 +198,8 @@ inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty
 
 inline bool IsScriptable(const ComponentProperty& Property)
 {
-    return IsScriptable(Property.Name) && std::visit([](const auto& V) { return IsScriptableV<std::decay_t<decltype(V.Default)>>; }, Property.Value);
+    return IsScriptable(Property.Name) && Property.IsScriptable.value_or(true)
+        && std::visit([](const auto& V) { return IsScriptableV<std::decay_t<decltype(V.Default)>>; }, Property.Value);
 }
 
 inline bool IsScriptable(const ComponentSchema& Schema)
@@ -206,7 +207,7 @@ inline bool IsScriptable(const ComponentSchema& Schema)
     const auto HasScriptableProperties = [&](const auto& Properties)
     { return std::any_of(Properties.begin(), Properties.end(), [](const auto& Property) { return IsScriptable(Property); }); };
 
-    return IsScriptable(Schema.Name) && HasScriptableProperties(Schema.Properties);
+    return IsScriptable(Schema.Name) && Schema.IsScriptable.value_or(true) && HasScriptableProperties(Schema.Properties);
 }
 
 } // namespace csp::multiplayer
