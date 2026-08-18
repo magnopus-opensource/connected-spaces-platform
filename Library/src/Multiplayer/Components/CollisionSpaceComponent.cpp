@@ -33,54 +33,56 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
-    {}, // not exposed to scripting
+    "Collision",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
-            {}, // not exposed to scripting
+            "position",
             PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
-            {}, // not exposed to scripting
+            "rotation",
             PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
-            {}, // not exposed to scripting
+            "scale",
             PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1, 1, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
-            {}, // not exposed to scripting
+            "collisionShape",
             PlainValue<int64_t> { static_cast<int64_t>(CollisionShape::Box) },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
-            {}, // not exposed to scripting
+            "collisionMode",
             PlainValue<int64_t> { static_cast<int64_t>(CollisionMode::Collision) },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
-            {}, // not exposed to scripting
+            "collisionAssetId",
             PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
+            "assetCollectionId",
             PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
+            "thirdPartyComponentRef",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::IsEnabled),
-            {}, // not exposed to scripting
+            "isEnabled",
             PlainValue<bool> { true },
         },
     },
+    /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
 };
 
 const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }

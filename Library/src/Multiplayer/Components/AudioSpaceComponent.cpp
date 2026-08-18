@@ -79,8 +79,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
-            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
+            "volume", // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
             PlainValue<float> { DefaultVolume },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
@@ -89,8 +90,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
+            "thirdPartyComponentRef",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
     },
 };

@@ -40,8 +40,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
-            {}, // not exposed to scripting
+            "avatarMeshIndex_DEPRECATED",
             PlainValue<int64_t> { static_cast<int64_t>(-1) },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AgoraUserId),
@@ -50,8 +51,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
-            {}, // not exposed to scripting
+            "customAvatarUrl_DEPRECATED",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsHandIKEnabled),

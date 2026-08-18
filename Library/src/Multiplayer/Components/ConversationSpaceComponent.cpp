@@ -54,8 +54,9 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::ConversationId),
-            {}, // not exposed to scripting
+            "conversationId",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsVisible),

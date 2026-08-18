@@ -92,8 +92,9 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting,
+            "thirdPartyComponentRef",
             PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
