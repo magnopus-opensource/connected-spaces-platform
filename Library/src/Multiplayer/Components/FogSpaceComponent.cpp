@@ -26,7 +26,14 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::FogMode),
             "fogMode",
-            PlainValue<int64_t> { static_cast<int64_t>(FogMode::Exponential) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(FogMode::Exponential),
+                {
+                    SchemaOption<int64_t> { "Linear", static_cast<int64_t>(FogMode::Linear) },
+                    SchemaOption<int64_t> { "Exponential", static_cast<int64_t>(FogMode::Exponential) },
+                    SchemaOption<int64_t> { "Exponential2", static_cast<int64_t>(FogMode::Exponential2) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(FogPropertyKeys::Position),

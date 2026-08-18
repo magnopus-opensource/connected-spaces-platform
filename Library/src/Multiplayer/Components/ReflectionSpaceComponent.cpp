@@ -55,7 +55,13 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionShape),
             "reflectionShape",
-            PlainValue<int64_t> { static_cast<int64_t>(ReflectionShape::UnitBox) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(ReflectionShape::UnitBox),
+                {
+                    SchemaOption<int64_t> { "UnitSphere", static_cast<int64_t>(ReflectionShape::UnitSphere) },
+                    SchemaOption<int64_t> { "UnitBox", static_cast<int64_t>(ReflectionShape::UnitBox) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ThirdPartyComponentRef),

@@ -71,7 +71,14 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BillboardMode),
             "billboardMode",
-            PlainValue<int64_t> { static_cast<int64_t>(BillboardMode::Off) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(BillboardMode::Off),
+                {
+                    SchemaOption<int64_t> { "Off", static_cast<int64_t>(BillboardMode::Off) },
+                    SchemaOption<int64_t> { "Billboard", static_cast<int64_t>(BillboardMode::Billboard) },
+                    SchemaOption<int64_t> { "YawLockedBillboard", static_cast<int64_t>(BillboardMode::YawLockedBillboard) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVisible),

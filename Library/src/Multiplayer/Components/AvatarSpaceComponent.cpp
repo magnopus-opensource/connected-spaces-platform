@@ -36,7 +36,17 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::State),
             "state",
-            PlainValue<int64_t> { static_cast<int64_t>(AvatarState::Idle) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AvatarState::Idle),
+                {
+                    SchemaOption<int64_t> { "Idle", static_cast<int64_t>(AvatarState::Idle) },
+                    SchemaOption<int64_t> { "Walking", static_cast<int64_t>(AvatarState::Walking) },
+                    SchemaOption<int64_t> { "Running", static_cast<int64_t>(AvatarState::Running) },
+                    SchemaOption<int64_t> { "Flying", static_cast<int64_t>(AvatarState::Flying) },
+                    SchemaOption<int64_t> { "Jumping", static_cast<int64_t>(AvatarState::Jumping) },
+                    SchemaOption<int64_t> { "Falling", static_cast<int64_t>(AvatarState::Falling) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
@@ -88,7 +98,15 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::AvatarPlayMode),
             "avatarPlayMode",
-            PlainValue<int64_t> { static_cast<int64_t>(AvatarPlayMode::Default) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AvatarPlayMode::Default),
+                {
+                    SchemaOption<int64_t> { "Default", static_cast<int64_t>(AvatarPlayMode::Default) },
+                    SchemaOption<int64_t> { "AR", static_cast<int64_t>(AvatarPlayMode::AR) },
+                    SchemaOption<int64_t> { "VR", static_cast<int64_t>(AvatarPlayMode::VR) },
+                    SchemaOption<int64_t> { "Creator", static_cast<int64_t>(AvatarPlayMode::Creator) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::MovementDirection),
@@ -98,7 +116,13 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::LocomotionModel),
             "locomotionModel",
-            PlainValue<int64_t> { static_cast<int64_t>(LocomotionModel::Grounded) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(LocomotionModel::Grounded),
+                {
+                    SchemaOption<int64_t> { "Grounded", static_cast<int64_t>(LocomotionModel::Grounded) },
+                    SchemaOption<int64_t> { "FreeCamera", static_cast<int64_t>(LocomotionModel::FreeCamera) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AvatarComponentPropertyKeys::IsVisible),

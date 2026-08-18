@@ -45,12 +45,25 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
             "playbackState",
-            PlainValue<int64_t> { static_cast<int64_t>(AudioPlaybackState::Reset) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AudioPlaybackState::Reset),
+                {
+                    SchemaOption<int64_t> { "Reset", static_cast<int64_t>(AudioPlaybackState::Reset) },
+                    SchemaOption<int64_t> { "Pause", static_cast<int64_t>(AudioPlaybackState::Pause) },
+                    SchemaOption<int64_t> { "Play", static_cast<int64_t>(AudioPlaybackState::Play) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
             "audioType",
-            PlainValue<int64_t> { static_cast<int64_t>(AudioType::Global) },
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AudioType::Global),
+                {
+                    SchemaOption<int64_t> { "Global", static_cast<int64_t>(AudioType::Global) },
+                    SchemaOption<int64_t> { "Spatial", static_cast<int64_t>(AudioType::Spatial) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
