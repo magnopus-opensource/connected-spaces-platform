@@ -58,13 +58,13 @@ const auto Schema = ComponentSchema {
             PlainValue<std::string> { "" },
         },
         {
-            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsActive),
-            "isActive",
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsVisible),
+            "isVisible",
             PlainValue<bool> { true },
         },
         {
-            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsVisible),
-            "isVisible",
+            static_cast<ComponentProperty::KeyType>(ConversationPropertyKeys::IsActive),
+            "isActive",
             PlainValue<bool> { true },
         },
         {
