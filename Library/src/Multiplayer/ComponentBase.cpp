@@ -22,9 +22,9 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
 #include "Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
-#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <algorithm>
