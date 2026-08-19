@@ -47,6 +47,7 @@ jobs:
           fetch-depth: 0
           # Ensure we fetch tags so our automatic versioning script picks up the version.
           fetch-tags: true
+          persist-credentials: false
 
       - name: Set up MSVC (Windows only)
         if: runner.os == 'Windows'
