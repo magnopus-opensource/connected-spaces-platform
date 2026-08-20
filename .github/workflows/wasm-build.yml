@@ -80,6 +80,7 @@ jobs:
           output_folder: build/wasm-${{ matrix.config.preset_prefix }}
           build_folder: build/wasm-${{ matrix.config.preset_prefix }}/build/${{ matrix.config.build_type }}
           install_prefix: install/wasm/${{ matrix.config.preset_prefix }}
+          package_third_party_libs: ${{ matrix.linkage.name == 'static' && inputs.upload_install }}
 
       - name: Upload install
         if: inputs.upload_install
