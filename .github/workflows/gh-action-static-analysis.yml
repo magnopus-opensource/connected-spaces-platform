@@ -1,0 +1,26 @@
+# Run Zizmor, a tool that performs static-analysis on github actions for security issues.
+# https://github.com/zizmorcore/zizmor
+
+name: Github Actions Static Analysis (Zizmor)
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+
+jobs:
+  zizmor:
+    name: Run zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@6fc4b006235f201fdab3722e17240ab420d580e5 # v0.6.1
+        with: 
+          advanced-security: false
+          min-severity: high # If we can get this down to medium, that would let me sleep easily.
+          min-confidence: medium

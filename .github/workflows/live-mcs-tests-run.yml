@@ -23,6 +23,7 @@ jobs:
       - name: Run Tests
         env:
           MCS_X_WAF_BYPASS: ${{ secrets.MCS_BYPASS }}
+          INPUTS_GTEST_FILTER: ${{ inputs.gtest_filter }}
         shell: bash
         run: |
           set -euxo pipefail
@@ -31,5 +32,5 @@ jobs:
 
           chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
           chmod +x ./csp-tests
-          ./csp-tests --gtest_filter='${{ inputs.gtest_filter }}'
+          ./csp-tests --gtest_filter='${INPUTS_GTEST_FILTER}'
    

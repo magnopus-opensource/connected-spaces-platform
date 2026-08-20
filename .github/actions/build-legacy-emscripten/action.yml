@@ -31,13 +31,15 @@ runs:
     - name: Conan install
       env:
         CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+        INPUTS_OUTPUT_FOLDER: ${{ inputs.output_folder }}
+        INPUTS_BUILD_TYPE: ${{ inputs.build_type }}
       shell: bash
       run: |
         set -euxo pipefail
 
         conan install . \
-          -of "${{ inputs.output_folder }}" \
-          -s build_type="${{ inputs.build_type }}" \
+          -of "${INPUTS_OUTPUT_FOLDER}" \
+          -s build_type="${INPUTS_BUILD_TYPE}" \
           --build=missing \
           --profile:host=profiles/host/emscripten
 
@@ -45,10 +47,14 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        cmake --preset "${{ inputs.configure_preset }}" -DCSP_BUILD_LEGACY_EMSCRIPTEN=1 -DWASM_WITH_NODE=1 -DUSE_LEGACY_WRAPPER_GEN=1
+        cmake --preset "${INPUTS_CONFIGURE_PRESET}" -DCSP_BUILD_LEGACY_EMSCRIPTEN=1 -DWASM_WITH_NODE=1 -DUSE_LEGACY_WRAPPER_GEN=1
+      env:
+        INPUTS_CONFIGURE_PRESET: ${{ inputs.configure_preset }}
 
     - name: Build
       shell: bash
       run: |
         set -euxo pipefail
-        cmake --build --preset "${{ inputs.build_preset }}"
+        cmake --build --preset "${INPUTS_BUILD_PRESET}"
+      env:
+        INPUTS_BUILD_PRESET: ${{ inputs.build_preset }}
