@@ -222,6 +222,30 @@ template <typename T> ValidationResult Validate(const PlainValue<T>&, const csp:
     return ValidationResult::Ok();
 }
 
+template <typename ElementType>
+ValidationResult Validate(const PlainValue<std::unordered_map<std::string, ElementType>>&, const csp::common::ReplicatedValue& Value)
+{
+    static_assert(ReplicatedTypeMap<ElementType>::ValueType != csp::common::ReplicatedValueType::StringMap,
+        "validating nested maps is not currently supported by this implementation, as element validation is not recursive");
+
+    if (!TypeCheck<std::unordered_map<std::string, ElementType>>(Value))
+    {
+        return TypeMismatch<std::unordered_map<std::string, ElementType>>(Value);
+    }
+
+    for (const auto& [Key, Element] : Value.GetStringMap())
+    {
+        if (!TypeCheck<ElementType>(Element))
+        {
+            return ValidationResult::Error {
+                fmt::format("value for key '{}': {}", Key.c_str(), TypeMismatch<ElementType>(Element).Description),
+            };
+        }
+    }
+
+    return ValidationResult::Ok();
+}
+
 template <typename T> ValidationResult Validate(const BoundedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
 {
     const auto ActualValue = ReplicatedTypeMap<T>::From(Value);

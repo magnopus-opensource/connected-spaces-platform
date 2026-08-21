@@ -595,6 +595,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedType
             "Example",
             {
                 { 0, "stringProperty", PlainValue<std::string> { "Value" } },
+                {
+                    1,
+                    "mapProperty",
+                    PlainValue<std::unordered_map<std::string, std::string>> {
+                        {
+                            { "modelA", "materialA" },
+                        },
+                    },
+                },
             },
         },
     });
@@ -605,12 +614,32 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedType
     auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
     ASSERT_NE(Component, nullptr);
 
-    Component->SetProperty(0, int64_t { 42 });
+    {
+        Component->SetProperty(0, int64_t { 42 });
 
-    const auto* Value = Component->GetProperty(0);
-    ASSERT_NE(Value, nullptr);
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
 
-    EXPECT_EQ(*Value, "Value");
+        EXPECT_EQ(*Value, "Value");
+    }
+
+    {
+        Component->SetProperty(1,
+            csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {
+                { "modelA", csp::common::ReplicatedValue { int64_t { 42 } } },
+            });
+
+        const auto* Value = Component->GetProperty(1);
+        ASSERT_NE(Value, nullptr);
+
+        const auto Expected = csp::common::ReplicatedValue {
+            csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {
+                { "modelA", csp::common::ReplicatedValue { "materialA" } },
+            },
+        };
+
+        EXPECT_EQ(*Value, Expected);
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithUnknownKeyHasNoEffect)
@@ -2137,4 +2166,3 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, BuiltInSchemasRoundTripThroug
         EXPECT_EQ(Parsed[i], Original[i]) << "schema " << i << " (" << Original[i].Name.c_str() << ") did not round trip";
     }
 }
-
