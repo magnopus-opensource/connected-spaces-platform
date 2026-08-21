@@ -642,6 +642,9 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
+// This creates a function that can be used to mock `SignalRMock::Invoke`, specifically for tests that
+// deal with entity creation (which is all it knows how to deal with, it'll explicitly fail in other
+// scenarios).
 static auto MakeSingleEntityCreationInvoker(uint64_t ObjectId = 42)
 {
     return [ObjectId](const std::string& Method, const signalr::value& RequestParams,
