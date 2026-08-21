@@ -308,4 +308,9 @@ CSP_API void* GetFunctionAddress(const csp::common::String& Name);
 // Helper function to free allocated memory from wrappers
 CSP_API void Free(void* Pointer);
 
+/// @brief Gets the schemas for the components CSP itself defines, as a JSON array.
+/// Provided as a reference for clients; schemas registered with a realtime engine are not included.
+/// @return csp::common::String : The built-in component schemas as a JSON document.
+CSP_API csp::common::String GetComponentSchemasJson();
+
 } // namespace csp

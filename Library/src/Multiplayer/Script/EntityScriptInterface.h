@@ -27,7 +27,6 @@ class SpaceEntity;
 class ComponentScriptInterface;
 class LightSpaceComponentScriptInterface;
 class ButtonSpaceComponentScriptInterface;
-class VideoPlayerSpaceComponentScriptInterface;
 
 class EntityScriptInterface
 {

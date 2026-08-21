@@ -28,6 +28,7 @@
 #include "Common/Wrappers.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/ComponentSchemaRegistry.h"
 
 #include <filesystem>
 #include <cstdio>
@@ -702,6 +703,8 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 }
 
 void Free(void* Pointer) { std::free(Pointer); }
+
+csp::common::String GetComponentSchemasJson() { return csp::multiplayer::GetBuiltInComponentSchemasJson(); }
 
 void* ModuleHandle = nullptr;
 

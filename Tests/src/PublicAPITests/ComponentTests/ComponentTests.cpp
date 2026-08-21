@@ -17,7 +17,6 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
@@ -50,6 +49,7 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Common/Convert.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -341,7 +341,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
             csp::multiplayer::ComponentSchema::TypeIdType { SchemaTypeId },
             "Example",
             {
-                { 0, "stringProperty", "DefaultValue" },
+                { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
             },
         },
     };
@@ -442,7 +442,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
         Properties.push_back({
             NextPropertyKey(Properties),
             "extraProperty",
-            csp::common::String { "ExtraDefault" },
+            PlainValue<std::string> { "ExtraDefault" },
         });
 
         return {

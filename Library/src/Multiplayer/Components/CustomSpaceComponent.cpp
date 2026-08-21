@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
 #include <algorithm>
@@ -32,7 +32,7 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(CustomComponentPropertyKeys::ApplicationOrigin),
             "applicationOrigin",
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

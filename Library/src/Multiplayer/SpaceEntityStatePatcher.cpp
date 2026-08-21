@@ -321,7 +321,8 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
 }
 
 std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message,
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem)
+    csp::common::IRealtimeEngine& RealtimeEngine, const ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner,
+    csp::common::LogSystem& LogSystem)
 {
     const auto Id = Message.GetId();
     const auto Type = static_cast<SpaceEntityType>(Message.GetType());
@@ -333,7 +334,7 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
     const std::optional<std::map<uint16_t, mcs::ItemComponentData>>& MessageComponents = Message.GetComponents();
 
     std::unique_ptr<csp::multiplayer::SpaceEntity> Entity(new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
+        &RealtimeEngine, Registry, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
 
     if (MessageComponents.has_value())
     {

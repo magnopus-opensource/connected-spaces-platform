@@ -16,9 +16,7 @@
 
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include <fmt/format.h>
 
@@ -40,57 +38,74 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::PlaybackState),
             "playbackState",
-            static_cast<int64_t>(AudioPlaybackState::Reset),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AudioPlaybackState::Reset),
+                {
+                    SchemaOption<int64_t> { "Reset", static_cast<int64_t>(AudioPlaybackState::Reset) },
+                    SchemaOption<int64_t> { "Pause", static_cast<int64_t>(AudioPlaybackState::Pause) },
+                    SchemaOption<int64_t> { "Play", static_cast<int64_t>(AudioPlaybackState::Play) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioType),
             "audioType",
-            static_cast<int64_t>(AudioType::Global),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(AudioType::Global),
+                {
+                    SchemaOption<int64_t> { "Global", static_cast<int64_t>(AudioType::Global) },
+                    SchemaOption<int64_t> { "Spatial", static_cast<int64_t>(AudioType::Spatial) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AudioAssetId),
             "audioAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::AttenuationRadius),
             "attenuationRadius",
-            DefaultAttenuationRadius,
+            PlainValue<float> { DefaultAttenuationRadius },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsLoopPlayback),
             "isLoopPlayback",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::TimeSincePlay),
             "timeSincePlay",
-            0.f,
+            PlainValue<float> { 0.f },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::Volume),
-            {}, // not exposed to scripting via schema: we can't express value ranges (min, max) in schemas yet, so manually bind
-            DefaultVolume,
+            "volume",
+            BoundedValue<float> {
+                DefaultVolume,
+                { 0.0f, 1.0f },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(AudioPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
     },
 };
@@ -116,7 +131,6 @@ std::unique_ptr<AudioSpaceComponent> AudioSpaceComponent::TryMake(
 AudioSpaceComponent::AudioSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(InSchema, LogSystem, Parent)
 {
-    SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }
 
 const csp::common::Vector3& AudioSpaceComponent::GetPosition() const

@@ -15,8 +15,7 @@
  */
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include <memory>
 
@@ -30,67 +29,68 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetId),
             "externalResourceAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId),
             "externalResourceAssetCollectionId",
-            "",
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::MaterialOverrides),
-            {}, // not exposed to scripting
-            csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4::Identity(),
+            PlainValue<csp::common::Vector4> { csp::common::Vector4::Identity() },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsShadowCaster),
             "isShadowCaster",
-            true,
+            PlainValue<bool> { true },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::MaterialOverrides),
+            "materialOverrides",
+            PlainValue<std::unordered_map<std::string, std::string>> {},
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInAR),
             "showAsHoldoutInAR",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual),
             "showAsHoldoutInVirtual",
-            false,
+            PlainValue<bool> { false },
         },
     },
 };

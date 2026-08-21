@@ -18,13 +18,13 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
+#include "Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
-#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <algorithm>
@@ -67,7 +67,7 @@ ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSyst
 
     for (const auto& Property : Schema.Properties)
     {
-        Properties[Property.Key] = Property.DefaultValue;
+        Properties[Property.Key] = ToReplicatedValue(Property.Value);
     }
 
     if (IsScriptable(Schema))
@@ -119,10 +119,29 @@ void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue
         return;
     }
 
-    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key);
-        Property && Value.GetReplicatedValueType() == Property->DefaultValue.GetReplicatedValueType())
+    const auto Reject = [this, Key](const std::string& Reason)
     {
-        SetPropertyDirect(Key, Value);
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("ComponentBase::SetProperty: Rejected value for property {} on component '{}': {}", Key, CachedSchema->Name.c_str(), Reason).c_str());
+        }
+    };
+
+    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key))
+    {
+        if (const auto ValidationResult = Validate(*Property, Value))
+        {
+            SetPropertyDirect(Key, Value);
+        }
+        else
+        {
+            Reject(ValidationResult.GetError().Description);
+        }
+    }
+    else
+    {
+        Reject("the schema declares no such property");
     }
 }
 

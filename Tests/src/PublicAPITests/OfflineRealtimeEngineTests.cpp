@@ -16,7 +16,6 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
@@ -25,6 +24,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "UserSystemTestHelpers.h"
 
 #include "TestHelpers.h"
@@ -964,15 +964,18 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
                 {
                     ComponentProperty::KeyType { 42 },
                     "value",
-                    "DefaultValue",
+                    PlainValue<std::string> { "DefaultValue" },
                 },
             },
         },
     };
 
-    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
+    auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
 
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId), nullptr);
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
+
+    EXPECT_NE(Entity->AddComponentByTypeId(ExampleSchemaId), nullptr);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructFromJsonWithComponentSchemas)
@@ -1059,11 +1062,14 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructFromJsonWithComp
         csp::common::String { RawJsonThirdFile },
     };
 
-    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), JsonSchemas };
+    auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), JsonSchemas };
 
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(AllPropertyTypesSchemaId), nullptr);
-    EXPECT_NE(Engine.GetComponentSchemaRegistry()->Find(EmptySchemaId), nullptr);
-    EXPECT_EQ(Engine.GetComponentSchemaRegistry()->Find(InvalidSchemaId), nullptr);
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
+
+    EXPECT_NE(Entity->AddComponentByTypeId(AllPropertyTypesSchemaId), nullptr);
+    EXPECT_NE(Entity->AddComponentByTypeId(EmptySchemaId), nullptr);
+    EXPECT_EQ(Entity->AddComponentByTypeId(InvalidSchemaId), nullptr);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSchemaBuiltInComponentTakesPrecedence)
@@ -1080,16 +1086,21 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
                 {
                     ComponentProperty::KeyType { 42 },
                     "value",
-                    "DefaultValue",
+                    PlainValue<std::string> { "DefaultValue" },
                 },
             },
         },
     };
 
-    const auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
+    auto Engine = OfflineRealtimeEngine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem(), Components };
 
-    const auto* Schema = Engine.GetComponentSchemaRegistry()->Find(ExampleSchemaId);
-    ASSERT_NE(Schema, nullptr);
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    ASSERT_NE(Entity, nullptr);
 
-    EXPECT_EQ(Schema->Name, "Audio");
+    auto* Component = Entity->AddComponentByTypeId(ExampleSchemaId);
+    ASSERT_NE(Component, nullptr);
+
+    // The built-in Audio component, not the "Example" schema registered against the same TypeId.
+    EXPECT_EQ(Component->GetComponentType(), csp::multiplayer::ComponentType::Audio);
+    EXPECT_EQ(Component->GetProperty(42), nullptr);
 }

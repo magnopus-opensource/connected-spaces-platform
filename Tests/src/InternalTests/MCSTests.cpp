@@ -17,6 +17,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "TestHelpers.h"
@@ -44,7 +45,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
                     csp::multiplayer::ComponentProperty {
                         csp::multiplayer::ComponentProperty::KeyType { 0 },
                         "value",
-                        "hello",
+                        PlainValue<std::string> { "hello" },
                     },
                 },
             },

@@ -4,14 +4,10 @@
 set(CSP_MULTIPLAYER_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP/Multiplayer)
 set(CSP_MULTIPLAYER_SOURCE_DIR  ${CSP_SOURCE_DIR}/Multiplayer)
 
-set(CSP_MULTIPLAYER_PUBLIC_INCLUDES 
+set(CSP_MULTIPLAYER_PUBLIC_INCLUDES
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentBase.h
-    ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentProperty.h
-    ${CSP_MULTIPLAYER_INCLUDE_DIR}/ComponentSchema.h
-    ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/ContinuationUtils.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/CSPSceneDescription.h
-    ${CSP_MULTIPLAYER_INCLUDE_DIR}/IComponentSchemaRegistry.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/MultiPlayerConnection.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/MultiplayerHubMethods.h
     ${CSP_MULTIPLAYER_INCLUDE_DIR}/NetworkEventBus.h
@@ -125,14 +121,12 @@ set(CSP_MULTIPLAYER_SOURCES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.cpp
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/SplineSpaceComponentScriptInterface.cpp
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.cpp
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRClient.cpp
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRConnection.cpp
@@ -142,8 +136,12 @@ set(CSP_MULTIPLAYER_SOURCES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/POCOSignalRClient/POCOSignalRClient.cpp
 )
 
-set(CSP_MULTIPLAYER_PRIVATE_INCLUDES 
+set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentBaseKeys.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentProperty.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchema.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchemaHelpers.h
+    ${CSP_MULTIPLAYER_SOURCE_DIR}/ComponentSchemaRegistry.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCSComponentPacker.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MultiplayerConstants.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/NetworkEventManagerImpl.h
@@ -162,19 +160,16 @@ set(CSP_MULTIPLAYER_PRIVATE_INCLUDES
     ${CSP_MULTIPLAYER_SOURCE_DIR}/MCS/MCSTypes.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptHelpers.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentScriptMacros.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptBinding.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/EntityScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ScriptHelpers.h
 
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h
-    ${CSP_MULTIPLAYER_SOURCE_DIR}/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h
 
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/ISignalRConnection.h
     ${CSP_MULTIPLAYER_SOURCE_DIR}/SignalR/SignalRClient.h

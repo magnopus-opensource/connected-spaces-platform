@@ -15,8 +15,8 @@
  */
 
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -24,44 +24,53 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Reflection),
-    {}, // not exposed to scripting
+    "Reflection",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
+            "name_DEPRECATED",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionAssetId),
-            {}, // not exposed to scripting
-            "",
+            "reflectionAssetId",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
-            "",
+            "assetCollectionId",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Position),
-            {}, // not exposed to scripting
-            csp::common::Vector3::Zero(),
+            "position",
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::Scale),
-            {}, // not exposed to scripting
-            csp::common::Vector3::One(),
+            "scale",
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ReflectionShape),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(ReflectionShape::UnitBox),
+            "reflectionShape",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(ReflectionShape::UnitBox),
+                {
+                    SchemaOption<int64_t> { "UnitSphere", static_cast<int64_t>(ReflectionShape::UnitSphere) },
+                    SchemaOption<int64_t> { "UnitBox", static_cast<int64_t>(ReflectionShape::UnitBox) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ReflectionPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
     },
+    /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
 };
 
 const ComponentSchema& ReflectionSpaceComponent::GetSchema() { return Schema; }

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "CSP/Multiplayer/ComponentProperty.h"
+#include "Multiplayer/ComponentProperty.h"
 
 namespace csp::multiplayer
 {
 
 bool ComponentProperty::operator==(const ComponentProperty& Other) const
 {
-    return Key == Other.Key && Name == Other.Name && DefaultValue == Other.DefaultValue;
+    return Key == Other.Key && Name == Other.Name && Value == Other.Value && IsScriptable == Other.IsScriptable;
 }
 
 bool ComponentProperty::operator!=(const ComponentProperty& Other) const { return !(*this == Other); }

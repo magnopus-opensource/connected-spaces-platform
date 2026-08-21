@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
@@ -27,82 +26,105 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightType),
             "lightType",
-            static_cast<int64_t>(LightType::Point),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(LightType::Point),
+                {
+                    SchemaOption<int64_t> { "Directional", static_cast<int64_t>(LightType::Directional) },
+                    SchemaOption<int64_t> { "Point", static_cast<int64_t>(LightType::Point) },
+                    SchemaOption<int64_t> { "Spot", static_cast<int64_t>(LightType::Spot) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Color),
             "color",
-            csp::common::Vector3 { 255, 255, 255 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 255, 255, 255 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Intensity),
             "Intensity", // Note: exposed as PascalCase for backwards compatibility (casing was wrong when this property was originally exposed)
-            5000.0f,
+            PlainValue<float> { 5000.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Range),
             "range",
-            1000.0f,
+            PlainValue<float> { 1000.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::InnerConeAngle),
             "innerConeAngle",
-            0.0f,
+            PlainValue<float> { 0.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::OuterConeAngle),
             "outerConeAngle",
-            0.78539816339f, // Pi / 4
+            PlainValue<float> { 0.78539816339f }, // Pi / 4
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetId),
             "cookieAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieAssetCollectionId),
             "cookieAssetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightCookieType),
             "lightCookieType",
-            static_cast<int64_t>(LightCookieType::NoCookie),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(LightCookieType::NoCookie),
+                {
+                    SchemaOption<int64_t> { "ImageCookie", static_cast<int64_t>(LightCookieType::ImageCookie) },
+                    SchemaOption<int64_t> { "VideoCookie", static_cast<int64_t>(LightCookieType::VideoCookie) },
+                    SchemaOption<int64_t> { "NoCookie", static_cast<int64_t>(LightCookieType::NoCookie) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::LightShadowType),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(LightShadowType::None),
+            "lightShadowType",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(LightShadowType::None),
+                {
+                    SchemaOption<int64_t> { "None", static_cast<int64_t>(LightShadowType::None) },
+                    SchemaOption<int64_t> { "Static", static_cast<int64_t>(LightShadowType::Static) },
+                    SchemaOption<int64_t> { "Realtime", static_cast<int64_t>(LightShadowType::Realtime) },
+                },
+            },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(LightPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

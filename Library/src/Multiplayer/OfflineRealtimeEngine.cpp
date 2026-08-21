@@ -19,12 +19,12 @@
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/UUIDGenerator.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -97,7 +97,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(const CSPSceneDescription& SceneDes
 {
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
-    auto DeserializedEntities = SceneDescription.CreateEntities(*this, LogSystem, RemoteScriptRunner);
+    auto DeserializedEntities = SceneDescription.CreateEntities(*this, *ComponentRegistry, LogSystem, RemoteScriptRunner);
 
     for (size_t i = 0; i < DeserializedEntities.Size(); ++i)
     {
@@ -128,9 +128,10 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
     const csp::common::Array<ComponentSchema>& AdditionalComponents)
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
-    , ComponentRegistry { std::make_unique<ComponentSchemaRegistryImpl>(*this->LogSystem, AdditionalComponents) }
+    , ComponentRegistry { std::make_unique<ComponentSchemaRegistry>(*this->LogSystem, AdditionalComponents) }
 {
-    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
+    ScriptBinding = std::unique_ptr<EntityScriptBinding>(
+        EntityScriptBinding::BindEntitySystem(this, *ComponentRegistry, *this->LogSystem, *this->ScriptRunner));
 
     // Is this undefined behaviour? Probably only if we actually use the pointer during construction
     EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
@@ -153,8 +154,8 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
     // Some of our interfaces use int64_t ... real bugs here.
     const uint64_t Id = NextId();
 
-    auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(
-        UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode, LocomotionModel);
+    auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ComponentRegistry, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible,
+        0, false, false, AvatarId, State, AvatarPlayMode, LocomotionModel);
 
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
@@ -170,7 +171,7 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
     // Some of our interfaces use int64_t ... real bugs here.
     uint64_t Id = NextId();
 
-    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
+    auto* NewEntity = new SpaceEntity { this, *ComponentRegistry, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
         OfflineRealtimeEngine::LocalClientId(), ParentID, false, false };
 
     std::scoped_lock EntitiesLocker { EntitiesLock };
@@ -340,8 +341,6 @@ ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
         return ModifiableStatus::Modifiable;
     }
 }
-
-const csp::multiplayer::IComponentSchemaRegistry* OfflineRealtimeEngine::GetComponentSchemaRegistry() const { return ComponentRegistry.get(); }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

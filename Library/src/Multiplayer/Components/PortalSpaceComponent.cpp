@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
@@ -25,39 +24,42 @@ const auto Schema = ComponentSchema {
     "Portal",
     csp::common::Array<ComponentProperty> {
         {
+            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
+            "spaceId",
+            PlainValue<std::string> { "" },
+        },
+        {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsVisible),
-            {}, // not exposed to scripting
-            true,
+            "isVisible",
+            PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsActive),
-            {}, // not exposed to scripting
-            true,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::SpaceId),
-            "spaceId",
-            "",
+            "isActive",
+            PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsARVisible),
-            {}, // not exposed to scripting
-            true,
+            "isARVisible",
+            PlainValue<bool> { true },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(PortalPropertyKeys::Radius),
             "radius",
-            1.5f,
+            PlainValue<float> { 1.5f },
         },
     },
 };

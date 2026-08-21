@@ -21,14 +21,12 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
-#include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 
@@ -39,6 +37,85 @@
 
 #include <unordered_map>
 #include <utility>
+
+namespace qjs
+{
+
+template <typename T> struct js_traits<std::unordered_map<std::string, T>>
+{
+    static JSValue wrap(JSContext* Context, const std::unordered_map<std::string, T>& Map) noexcept
+    {
+        try
+        {
+            auto Object = qjs::Value { Context, JS_NewObject(Context) };
+
+            for (const auto& [Key, Entry] : Map)
+            {
+                Object[Key.c_str()] = Entry;
+            }
+
+            return Object.release();
+        }
+        catch (const qjs::exception&)
+        {
+            return JS_EXCEPTION;
+        }
+        catch (const std::exception& Error)
+        {
+            JS_ThrowInternalError(Context, "%s", Error.what());
+            return JS_EXCEPTION;
+        }
+        catch (...)
+        {
+            JS_ThrowInternalError(Context, "Unknown error");
+            return JS_EXCEPTION;
+        }
+    }
+
+    static std::unordered_map<std::string, T> unwrap(JSContext* Context, JSValueConst Object)
+    {
+        if (!JS_IsObject(Object))
+        {
+            JS_ThrowTypeError(Context, "js_traits<std::unordered_map<std::string, T>>::unwrap expects an object");
+            throw qjs::exception { Context };
+        }
+
+        auto* Properties = static_cast<JSPropertyEnum*>(nullptr);
+        auto Count = uint32_t { 0 };
+
+        if (JS_GetOwnPropertyNames(Context, &Properties, &Count, Object, JS_GPN_ENUM_ONLY | JS_GPN_STRING_MASK) < 0)
+        {
+            throw qjs::exception { Context };
+        }
+
+        struct OwnedPropertyEnum final
+        {
+            ~OwnedPropertyEnum() { js_free_prop_enum(Context, Properties, Count); }
+
+            JSContext* Context;
+            JSPropertyEnum* Properties;
+            uint32_t Count;
+        };
+
+        const auto Owned = OwnedPropertyEnum { Context, Properties, Count };
+
+        auto Result = std::unordered_map<std::string, T>();
+
+        for (decltype(Count) Index = 0; Index < Count; ++Index)
+        {
+            const auto Atom = Properties[Index].atom;
+
+            auto Key = qjs::Value { Context, JS_AtomToString(Context, Atom) }.as<std::string>();
+            auto Entry = qjs::Value { Context, JS_GetProperty(Context, Object, Atom) }.as<T>();
+
+            Result.emplace(std::move(Key), std::move(Entry));
+        }
+
+        return Result;
+    }
+};
+
+} // namespace qjs
 
 namespace csp::multiplayer
 {
@@ -93,7 +170,7 @@ namespace
 
         auto CreateAccessors = [](const auto& V) -> std::optional<std::pair<JSCFunctionMagic*, JSCFunctionMagic*>>
         {
-            using T = std::decay_t<decltype(V)>;
+            using T = std::decay_t<decltype(V.Default)>;
 
             if constexpr (IsScriptableV<T>)
             {
@@ -159,7 +236,7 @@ namespace
                 continue;
             }
 
-            auto MaybeAccessors = std::visit(CreateAccessors, Property.DefaultValue.GetValue());
+            auto MaybeAccessors = std::visit(CreateAccessors, Property.Value);
             if (!MaybeAccessors)
             {
                 continue;
@@ -366,12 +443,8 @@ public:
     {
         switch (ToComponentType(Schema.TypeId).value_or(ComponentType::Invalid))
         {
-        case ComponentType::VideoPlayer:
-            return GetComponents<VideoPlayerSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::Custom:
             return GetComponents<CustomSpaceComponentScriptInterface>(Context, Entity, Schema);
-        case ComponentType::Audio:
-            return GetComponents<AudioSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::Hotspot:
             return GetComponents<HotspotSpaceComponentScriptInterface>(Context, Entity, Schema);
         case ComponentType::CinematicCamera:
@@ -416,19 +489,21 @@ private:
     std::unordered_map<ComponentSchema::TypeIdType, qjs::Value> Cache;
 };
 
-EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding::EntityScriptBinding(
+    csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem)
     : SchemaCache(std::make_unique<SchemaCacheImpl>())
     , EntitySystem(InEntitySystem)
+    , SchemaRegistry(Registry)
     , LogSystem(LogSystem)
 {
 }
 
 EntityScriptBinding::~EntityScriptBinding() = default;
 
-EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistry& Registry,
+    csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
-    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, Registry, LogSystem);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
 }
@@ -446,11 +521,6 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, cs
 
 void BindComponents(qjs::Context::Module* Module)
 {
-    Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
-
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -473,11 +543,6 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&SplineSpaceComponentScriptInterface::GetWaypoints>("getWaypoints")
         .fun<&SplineSpaceComponentScriptInterface::GetLocationAlongSpline>("getLocationAlongSpline");
 
-    Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
-        .constructor<>()
-        .base<ComponentScriptInterface>()
-        .PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume"); // we can't express value ranges (min, max) in schemas yet, so manually bind
-
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -493,7 +558,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
     const auto RegisterDynamicComponentGetters = [this, Context](auto Proto)
     {
-        for (const auto& Schema : EntitySystem->GetComponentSchemaRegistry()->GetAll())
+        for (const auto& Schema : SchemaRegistry.GetAll())
         {
             if (IsScriptable(Schema))
             {

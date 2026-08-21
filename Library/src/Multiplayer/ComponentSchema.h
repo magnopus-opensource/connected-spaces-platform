@@ -17,13 +17,13 @@
 
 #include "ComponentProperty.h"
 
-#include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
+#include <optional>
 
 namespace csp::common
 {
@@ -36,13 +36,12 @@ namespace csp::multiplayer
 /// @brief A structural description of a component that can be interrogated at runtime
 /// (i.e. to iterate over the properties) to facilitate registration and hydration (i.e. where a
 /// serialised representation is reconstructed into this structure).
-class CSP_API ComponentSchema
+struct ComponentSchema final
 {
-public:
     using TypeIdType = uint64_t;
 
-    CSP_NO_EXPORT static csp::common::String ToJson(const ComponentSchema& Schema);
-    CSP_NO_EXPORT static csp::common::Optional<ComponentSchema> FromJson(const csp::common::String& Json);
+    static csp::common::String ToJson(const ComponentSchema& Schema);
+    static csp::common::Optional<ComponentSchema> FromJson(const csp::common::String& Json);
 
     /// @brief A globally unique ID for identifiying this component type. Will ultimately be
     /// serialized and used in messages sent over the multiplayer connection.
@@ -57,11 +56,18 @@ public:
     /// @brief The properties of this component
     csp::common::Array<ComponentProperty> Properties;
 
+    /// @brief Whether this component is exposed to scripting. Absent when the schema does not say,
+    /// which means exposed.
+    std::optional<bool> IsScriptable;
+
     bool operator==(const ComponentSchema& Other) const;
     bool operator!=(const ComponentSchema& Other) const;
 };
 
-CSP_START_IGNORE
+/// @brief Serialises an array of component schemas as a JSON array.
+/// @param Schemas The schemas to serialise.
+/// @return The schemas as a JSON document, which ComponentSchemasFromJson will parse back.
+csp::common::String ComponentSchemasToJson(const csp::common::Array<ComponentSchema>& Schemas);
 
 /// @brief Parses a list of JSON documents into an array of component schemas.
 /// Each document is expected to be a JSON array of schema objects.
@@ -83,7 +89,5 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 /// may be relaxed in future to permit changes that are unlikely to cause compatibility issues (e.g. updating a default value or exposing a property
 /// to scripting where it wasn't previously).
 bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated, csp::common::LogSystem* LogSystem = nullptr);
-
-CSP_END_IGNORE
 
 } // namespace csp::multiplayer

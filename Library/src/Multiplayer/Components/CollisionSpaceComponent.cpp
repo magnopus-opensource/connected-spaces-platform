@@ -15,8 +15,8 @@
  */
 
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -33,54 +33,70 @@ namespace csp::multiplayer
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
-    {}, // not exposed to scripting
+    "Collision",
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Position),
-            {}, // not exposed to scripting
-            csp::common::Vector3 { 0, 0, 0 },
+            "position",
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Rotation),
-            {}, // not exposed to scripting
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            "rotation",
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::Scale),
-            {}, // not exposed to scripting
-            csp::common::Vector3 { 1, 1, 1 },
+            "scale",
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1, 1, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionShape),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(CollisionShape::Box),
+            "collisionShape",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(CollisionShape::Box),
+                {
+                    SchemaOption<int64_t> { "Box", static_cast<int64_t>(CollisionShape::Box) },
+                    SchemaOption<int64_t> { "Mesh", static_cast<int64_t>(CollisionShape::Mesh) },
+                    SchemaOption<int64_t> { "Capsule", static_cast<int64_t>(CollisionShape::Capsule) },
+                    SchemaOption<int64_t> { "Sphere", static_cast<int64_t>(CollisionShape::Sphere) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionMode),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(CollisionMode::Collision),
+            "collisionMode",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(CollisionMode::Collision),
+                {
+                    SchemaOption<int64_t> { "Collision", static_cast<int64_t>(CollisionMode::Collision) },
+                    SchemaOption<int64_t> { "Trigger", static_cast<int64_t>(CollisionMode::Trigger) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::CollisionAssetId),
-            {}, // not exposed to scripting
-            "",
+            "collisionAssetId",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::AssetCollectionId),
-            {}, // not exposed to scripting
-            "",
+            "assetCollectionId",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(CollisionPropertyKeys::IsEnabled),
-            {}, // not exposed to scripting
-            true,
+            "isEnabled",
+            PlainValue<bool> { true },
         },
     },
+    /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
 };
 
 const ComponentSchema& CollisionSpaceComponent::GetSchema() { return Schema; }

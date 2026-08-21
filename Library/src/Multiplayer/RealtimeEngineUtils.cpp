@@ -91,13 +91,13 @@ csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& Rea
 }
 
 std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId, csp::common::IRealtimeEngine& RealtimeEngine,
-    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem, uint64_t NetworkId, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
-    const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
-    csp::multiplayer::LocomotionModel LocomotionModel)
+    const csp::multiplayer::ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
+    uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
+    bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
+    csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel)
 {
-    auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
+    auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&RealtimeEngine, Registry, ScriptRunner,
+        &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
 
     auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
     AvatarComponent->SetAvatarId(AvatarId);

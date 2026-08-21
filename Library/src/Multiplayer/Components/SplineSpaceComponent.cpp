@@ -16,8 +16,8 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 
 #include "tinyspline.h"
@@ -45,8 +45,9 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(SplinePropertyKeys::Waypoints),
-            {}, // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
-            0.f,
+            "waypoints", // not exposed to scripting via an auto-generated property (has a legacy manual getter function)
+            PlainValue<float> { 0.f },
+            /*.IsScriptable =*/false,
         },
     },
 };

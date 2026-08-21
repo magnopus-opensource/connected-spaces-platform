@@ -53,8 +53,40 @@
 namespace csp::multiplayer
 {
 
-ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
-    csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
+csp::common::Array<ComponentSchema> GetBuiltInComponentSchemas()
+{
+    return csp::common::Array<ComponentSchema> {
+        StaticModelSpaceComponent::GetSchema(),
+        AnimatedModelSpaceComponent::GetSchema(),
+        VideoPlayerSpaceComponent::GetSchema(),
+        ExternalLinkSpaceComponent::GetSchema(),
+        AvatarSpaceComponent::GetSchema(),
+        LightSpaceComponent::GetSchema(),
+        ButtonSpaceComponent::GetSchema(),
+        ImageSpaceComponent::GetSchema(),
+        ScriptSpaceComponent::GetSchema(),
+        CustomSpaceComponent::GetSchema(),
+        ConversationSpaceComponent::GetSchema(),
+        PortalSpaceComponent::GetSchema(),
+        AudioSpaceComponent::GetSchema(),
+        SplineSpaceComponent::GetSchema(),
+        CollisionSpaceComponent::GetSchema(),
+        ReflectionSpaceComponent::GetSchema(),
+        FogSpaceComponent::GetSchema(),
+        ECommerceSpaceComponent::GetSchema(),
+        FiducialMarkerSpaceComponent::GetSchema(),
+        GaussianSplatSpaceComponent::GetSchema(),
+        TextSpaceComponent::GetSchema(),
+        HotspotSpaceComponent::GetSchema(),
+        CinematicCameraSpaceComponent::GetSchema(),
+        ScreenSharingSpaceComponent::GetSchema(),
+        AIChatbotSpaceComponent::GetSchema(),
+    };
+}
+
+csp::common::String GetBuiltInComponentSchemasJson() { return ComponentSchemasToJson(GetBuiltInComponentSchemas()); }
+
+ComponentSchemaRegistry::ComponentSchemaRegistry(csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
     const auto AddSchema = [this, &LogSystem](const ComponentSchema& Schema)
     {
@@ -68,31 +100,10 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
         }
     };
 
-    AddSchema(StaticModelSpaceComponent::GetSchema());
-    AddSchema(AnimatedModelSpaceComponent::GetSchema());
-    AddSchema(VideoPlayerSpaceComponent::GetSchema());
-    AddSchema(ImageSpaceComponent::GetSchema());
-    AddSchema(ExternalLinkSpaceComponent::GetSchema());
-    AddSchema(AvatarSpaceComponent::GetSchema());
-    AddSchema(LightSpaceComponent::GetSchema());
-    AddSchema(ScriptSpaceComponent::GetSchema());
-    AddSchema(ButtonSpaceComponent::GetSchema());
-    AddSchema(CustomSpaceComponent::GetSchema());
-    AddSchema(PortalSpaceComponent::GetSchema());
-    AddSchema(ConversationSpaceComponent::GetSchema());
-    AddSchema(AudioSpaceComponent::GetSchema());
-    AddSchema(SplineSpaceComponent::GetSchema());
-    AddSchema(CollisionSpaceComponent::GetSchema());
-    AddSchema(ReflectionSpaceComponent::GetSchema());
-    AddSchema(FogSpaceComponent::GetSchema());
-    AddSchema(ECommerceSpaceComponent::GetSchema());
-    AddSchema(CinematicCameraSpaceComponent::GetSchema());
-    AddSchema(FiducialMarkerSpaceComponent::GetSchema());
-    AddSchema(GaussianSplatSpaceComponent::GetSchema());
-    AddSchema(TextSpaceComponent::GetSchema());
-    AddSchema(HotspotSpaceComponent::GetSchema());
-    AddSchema(ScreenSharingSpaceComponent::GetSchema());
-    AddSchema(AIChatbotSpaceComponent::GetSchema());
+    for (const auto& Schema : GetBuiltInComponentSchemas())
+    {
+        AddSchema(Schema);
+    }
 
     for (const auto& Schema : AdditionalComponents)
     {
@@ -107,7 +118,7 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
     }
 }
 
-csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
+csp::common::Array<ComponentSchema> ComponentSchemaRegistry::GetAll() const
 {
     csp::common::Array<ComponentSchema> Result(SchemaMap.size());
     size_t Index = 0;
@@ -120,7 +131,7 @@ csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
     return Result;
 }
 
-const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
+const ComponentSchema* ComponentSchemaRegistry::Find(uint64_t TypeId) const
 {
     const auto It = SchemaMap.find(TypeId);
     return It != SchemaMap.end() ? &It->second : nullptr;

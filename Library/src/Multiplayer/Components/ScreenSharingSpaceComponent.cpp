@@ -15,8 +15,8 @@
  */
 #include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace
 {
@@ -33,57 +33,57 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4::Identity(),
+            PlainValue<csp::common::Vector4> { csp::common::Vector4::Identity() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsShadowCaster),
             "isShadowCaster",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::UserId),
             "userId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
             "defaultImageCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::DefaultImageAssetId),
             "defaultImageAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::AttenuationRadius),
             "attenuationRadius",
-            DefaultAttenuationRadius,
+            PlainValue<float> { DefaultAttenuationRadius },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScreenSharingPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };
