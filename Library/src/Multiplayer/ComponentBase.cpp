@@ -119,9 +119,29 @@ void ComponentBase::SetProperty(uint16_t Key, const csp::common::ReplicatedValue
         return;
     }
 
-    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key); Property && IsValidValue(*Property, Value))
+    const auto Reject = [this, Key](const std::string& Reason)
     {
-        SetPropertyDirect(Key, Value);
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("ComponentBase::SetProperty: Rejected value for property {} on component '{}': {}", Key, CachedSchema->Name.c_str(), Reason).c_str());
+        }
+    };
+
+    if (const auto* Property = FindSchemaProperty(*CachedSchema, Key))
+    {
+        if (const auto ValidationResult = Validate(*Property, Value))
+        {
+            SetPropertyDirect(Key, Value);
+        }
+        else
+        {
+            Reject(ValidationResult.GetError().Description);
+        }
+    }
+    else
+    {
+        Reject("the schema declares no such property");
     }
 }
 
