@@ -65,11 +65,14 @@ runs:
     - name: Conan install
       env:
         CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+        INPUTS_HOST_PROFILE: ${{ inputs.host_profile }}
+        INPUTS_OUTPUT_FOLDER: ${{ inputs.output_folder }}
+        INPUTS_BUILD_TYPE: ${{ inputs.build_type }}
       shell: bash
       run: |
         set -euxo pipefail
 
-        PROFILE_PATH="profiles/host/${{ inputs.host_profile }}"
+        PROFILE_PATH="profiles/host/${INPUTS_HOST_PROFILE}"
 
         if [ ! -f "$PROFILE_PATH" ]; then
           echo "Host profile not found: $PROFILE_PATH"
@@ -78,8 +81,8 @@ runs:
 
         CONAN_ARGS=(
           .
-          -of "${{ inputs.output_folder }}"
-          -s build_type="${{ inputs.build_type }}"
+          -of "${INPUTS_OUTPUT_FOLDER}"
+          -s build_type="${INPUTS_BUILD_TYPE}"
           --build=missing
           --profile:host="$PROFILE_PATH"
         )
@@ -96,19 +99,27 @@ runs:
       shell: bash
       run: |
         set -euxo pipefail
-        cmake --preset "${{ inputs.configure_preset }}"
+        cmake --preset "${INPUTS_CONFIGURE_PRESET}"
+      env:
+        INPUTS_CONFIGURE_PRESET: ${{ inputs.configure_preset }}
 
     - name: Build
       shell: bash
       run: |
         set -euxo pipefail
-        cmake --build --preset "${{ inputs.build_preset }}"
+        cmake --build --preset "${INPUTS_BUILD_PRESET}"
+      env:
+        INPUTS_BUILD_PRESET: ${{ inputs.build_preset }}
 
     - name: Install
       shell: bash
       run: |
         set -euxo pipefail
         cmake --install \
-          "${{ github.workspace }}/${{ inputs.build_folder }}" \
-          --config "${{ inputs.build_type }}" \
-          --prefix "${{ github.workspace }}/${{ inputs.install_prefix }}"
+          "${{ github.workspace }}/${INPUTS_BUILD_FOLDER}" \
+          --config "${INPUTS_BUILD_TYPE}" \
+          --prefix "${{ github.workspace }}/${INPUTS_INSTALL_PREFIX}"
+      env:
+        INPUTS_BUILD_FOLDER: ${{ inputs.build_folder }}
+        INPUTS_BUILD_TYPE: ${{ inputs.build_type }}
+        INPUTS_INSTALL_PREFIX: ${{ inputs.install_prefix }}

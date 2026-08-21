@@ -35,6 +35,7 @@ jobs:
         with:
           repository: magnopus/Magnopus.Services
           ssh-key: ${{ secrets.MSC_DEPLOY_KEY }}
+          persist-credentials: false
 
       - name: Set up Docker
         uses: docker/setup-docker-action@v5
@@ -88,4 +89,6 @@ jobs:
 
           chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
           chmod +x ./csp-tests
-          ./csp-tests --gtest_filter='${{ inputs.gtest_filter }}'
+          ./csp-tests --gtest_filter='${INPUTS_GTEST_FILTER}'
+        env:
+          INPUTS_GTEST_FILTER: ${{ inputs.gtest_filter }}
