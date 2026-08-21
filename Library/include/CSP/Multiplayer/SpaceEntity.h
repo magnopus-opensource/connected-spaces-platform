@@ -49,7 +49,7 @@ class LogSystem;
 
 namespace csp::multiplayer
 {
-class ComponentSchemaRegistryImpl;
+class ComponentSchemaRegistry;
 class EntityScriptInterface;
 class SpaceEntityStatePatcher;
 class EntityProperty;
@@ -120,7 +120,7 @@ public:
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in OnlineRealtimeEngine::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, const ComponentSchemaRegistryImpl& Registry,
+    CSP_NO_EXPORT SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, const ComponentSchemaRegistry& Registry,
         csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
         const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, csp::common::Optional<uint64_t> ParentId,
         bool IsTransferable, bool IsPersistent);
@@ -467,7 +467,7 @@ private:
 
     csp::common::IRealtimeEngine* EntitySystem;
 
-    const ComponentSchemaRegistryImpl* SchemaRegistry = nullptr;
+    const ComponentSchemaRegistry* SchemaRegistry = nullptr;
 
     SpaceEntityType Type;
     uint64_t Id;

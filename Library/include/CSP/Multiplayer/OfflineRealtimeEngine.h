@@ -39,7 +39,7 @@ class LogSystem;
 namespace csp::multiplayer
 {
 struct ComponentSchema;
-class ComponentSchemaRegistryImpl;
+class ComponentSchemaRegistry;
 class CSPSceneDescription;
 class EntityScriptBinding;
 class SpaceEntityStatePatcher;
@@ -295,6 +295,6 @@ private:
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     std::unique_ptr<EntityScriptBinding> ScriptBinding;
 
-    std::unique_ptr<ComponentSchemaRegistryImpl> ComponentRegistry;
+    std::unique_ptr<ComponentSchemaRegistry> ComponentRegistry;
 };
 }

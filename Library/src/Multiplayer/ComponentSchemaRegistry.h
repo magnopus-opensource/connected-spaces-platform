@@ -43,15 +43,15 @@ csp::common::String GetBuiltInComponentSchemasJson();
 bool IsLegacyComponentTypeId(uint64_t TypeId);
 
 /// @brief The engine-wide index of registered component schemas.
-class ComponentSchemaRegistryImpl final
+class ComponentSchemaRegistry final
 {
 public:
-    ComponentSchemaRegistryImpl(csp::common::LogSystem&, const csp::common::Array<ComponentSchema>& AdditionalComponents);
+    ComponentSchemaRegistry(csp::common::LogSystem&, const csp::common::Array<ComponentSchema>& AdditionalComponents);
 
-    ComponentSchemaRegistryImpl(const ComponentSchemaRegistryImpl&) = delete;
-    ComponentSchemaRegistryImpl(ComponentSchemaRegistryImpl&&) = delete;
-    ComponentSchemaRegistryImpl& operator=(const ComponentSchemaRegistryImpl&) = delete;
-    ComponentSchemaRegistryImpl& operator=(ComponentSchemaRegistryImpl&&) = delete;
+    ComponentSchemaRegistry(const ComponentSchemaRegistry&) = delete;
+    ComponentSchemaRegistry(ComponentSchemaRegistry&&) = delete;
+    ComponentSchemaRegistry& operator=(const ComponentSchemaRegistry&) = delete;
+    ComponentSchemaRegistry& operator=(ComponentSchemaRegistry&&) = delete;
 
     /// @brief Returns all registered schemas.
     csp::common::Array<ComponentSchema> GetAll() const;

@@ -20,7 +20,7 @@
 
 namespace csp::multiplayer
 {
-class ComponentSchemaRegistryImpl;
+class ComponentSchemaRegistry;
 
 /// @brief CSPSceneDescription which represents all entities that exists for a scene.
 /// @details This data structure is created through the deserialization of a CSPSceneDescription Json which is retrieved externally.
@@ -42,11 +42,11 @@ public:
     /// This function exists because the construction of SpaceEntites relies on a RealtimeEngine, and the OfflineRealtimeEngine requires a
     /// CSPSceneDescription for construction.
     /// @param RealtimeEngine csp::common::IRealtimeEngine& : The RealtimeEngine for this session.
-    /// @param Registry ComponentSchemaRegistryImpl& : The engine-wide component schema registry for this session.
+    /// @param Registry ComponentSchemaRegistry& : The engine-wide component schema registry for this session.
     /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
     CSP_NO_EXPORT csp::common::Array<csp::multiplayer::SpaceEntity*> CreateEntities(csp::common::IRealtimeEngine& RealtimeEngine,
-        const ComponentSchemaRegistryImpl& Registry, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const;
+        const ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const;
 
 private:
     csp::common::String SceneDescriptionJson;

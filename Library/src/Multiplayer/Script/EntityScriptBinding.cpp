@@ -490,7 +490,7 @@ private:
 };
 
 EntityScriptBinding::EntityScriptBinding(
-    csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistryImpl& Registry, csp::common::LogSystem& LogSystem)
+    csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem)
     : SchemaCache(std::make_unique<SchemaCacheImpl>())
     , EntitySystem(InEntitySystem)
     , SchemaRegistry(Registry)
@@ -500,7 +500,7 @@ EntityScriptBinding::EntityScriptBinding(
 
 EntityScriptBinding::~EntityScriptBinding() = default;
 
-EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistryImpl& Registry,
+EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, const ComponentSchemaRegistry& Registry,
     csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
     EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, Registry, LogSystem);

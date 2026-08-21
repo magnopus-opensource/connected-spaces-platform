@@ -152,7 +152,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     }
 }
 
-SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, const ComponentSchemaRegistryImpl& Registry,
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, const ComponentSchemaRegistry& Registry,
     csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
     const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, csp::common::Optional<uint64_t> ParentId, bool IsTransferable,
     bool IsPersistent)
