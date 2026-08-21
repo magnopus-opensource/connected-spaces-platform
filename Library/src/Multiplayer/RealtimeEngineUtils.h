@@ -40,7 +40,7 @@ class LogSystem;
 
 namespace csp::multiplayer
 {
-class ComponentSchemaRegistryImpl;
+class ComponentSchemaRegistry;
 class SpaceEntity;
 class SpaceTransform;
 class AvatarSpaceComponent;
@@ -72,7 +72,7 @@ csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& Rea
 
 // Creates a space entity with an avatar component.
 std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId, csp::common::IRealtimeEngine& RealtimeEngine,
-    const csp::multiplayer::ComponentSchemaRegistryImpl& Registry, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
+    const csp::multiplayer::ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
     uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
     bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
     csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel);

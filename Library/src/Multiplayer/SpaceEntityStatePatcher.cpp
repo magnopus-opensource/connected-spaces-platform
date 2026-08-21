@@ -321,7 +321,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
 }
 
 std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message,
-    csp::common::IRealtimeEngine& RealtimeEngine, const ComponentSchemaRegistryImpl& Registry, csp::common::IJSScriptRunner& ScriptRunner,
+    csp::common::IRealtimeEngine& RealtimeEngine, const ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner,
     csp::common::LogSystem& LogSystem)
 {
     const auto Id = Message.GetId();

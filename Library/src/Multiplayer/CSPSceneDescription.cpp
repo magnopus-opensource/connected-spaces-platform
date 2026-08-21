@@ -34,7 +34,7 @@ CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::St
 }
 
 csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(csp::common::IRealtimeEngine& RealtimeEngine,
-    const ComponentSchemaRegistryImpl& Registry, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
+    const ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
 {
     mcs::SceneDescription SceneDescription;
     csp::json::JsonDeserializer::Deserialize(SceneDescriptionJson.c_str(), SceneDescription);

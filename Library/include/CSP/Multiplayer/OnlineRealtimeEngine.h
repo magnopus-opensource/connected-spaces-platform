@@ -73,7 +73,7 @@ namespace csp::multiplayer
 {
 
 struct ComponentSchema;
-class ComponentSchemaRegistryImpl;
+class ComponentSchemaRegistry;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -520,7 +520,7 @@ private:
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
-    std::unique_ptr<ComponentSchemaRegistryImpl> ComponentRegistry;
+    std::unique_ptr<ComponentSchemaRegistry> ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

@@ -86,8 +86,7 @@ csp::common::Array<ComponentSchema> GetBuiltInComponentSchemas()
 
 csp::common::String GetBuiltInComponentSchemasJson() { return ComponentSchemasToJson(GetBuiltInComponentSchemas()); }
 
-ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
-    csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
+ComponentSchemaRegistry::ComponentSchemaRegistry(csp::common::LogSystem& LogSystem, const csp::common::Array<ComponentSchema>& AdditionalComponents)
 {
     const auto AddSchema = [this, &LogSystem](const ComponentSchema& Schema)
     {
@@ -119,7 +118,7 @@ ComponentSchemaRegistryImpl::ComponentSchemaRegistryImpl(
     }
 }
 
-csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
+csp::common::Array<ComponentSchema> ComponentSchemaRegistry::GetAll() const
 {
     csp::common::Array<ComponentSchema> Result(SchemaMap.size());
     size_t Index = 0;
@@ -132,7 +131,7 @@ csp::common::Array<ComponentSchema> ComponentSchemaRegistryImpl::GetAll() const
     return Result;
 }
 
-const ComponentSchema* ComponentSchemaRegistryImpl::Find(uint64_t TypeId) const
+const ComponentSchema* ComponentSchemaRegistry::Find(uint64_t TypeId) const
 {
     const auto It = SchemaMap.find(TypeId);
     return It != SchemaMap.end() ? &It->second : nullptr;
