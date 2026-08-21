@@ -15,7 +15,11 @@
  */
 #pragma once
 
+#include "Common/Result.h"
 #include "Multiplayer/ComponentSchema.h"
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <algorithm>
 #include <optional>
@@ -169,29 +173,106 @@ inline csp::common::ReplicatedValue ToReplicatedValue(const PropertyValue& Value
         Value);
 }
 
-template <typename T> bool IsValidValue(const PlainValue<T>&, const csp::common::ReplicatedValue& Value)
+using ValidationResult = csp::common::Result<void>;
+
+template <typename T> ValidationResult::Error TypeMismatch(const csp::common::ReplicatedValue& Value)
+{
+    const auto ToString = [](csp::common::ReplicatedValueType Type)
+    {
+        switch (Type)
+        {
+        case csp::common::ReplicatedValueType::InvalidType:
+            return "ReplicatedValueType::InvalidType";
+        case csp::common::ReplicatedValueType::Boolean:
+            return "ReplicatedValueType::Boolean";
+        case csp::common::ReplicatedValueType::Integer:
+            return "ReplicatedValueType::Integer";
+        case csp::common::ReplicatedValueType::Float:
+            return "ReplicatedValueType::Float";
+        case csp::common::ReplicatedValueType::String:
+            return "ReplicatedValueType::String";
+        case csp::common::ReplicatedValueType::Vector3:
+            return "ReplicatedValueType::Vector3";
+        case csp::common::ReplicatedValueType::Vector4:
+            return "ReplicatedValueType::Vector4";
+        case csp::common::ReplicatedValueType::Vector2:
+            return "ReplicatedValueType::Vector2";
+        case csp::common::ReplicatedValueType::StringMap:
+            return "ReplicatedValueType::StringMap";
+        }
+
+        return "Unknown";
+    };
+
+    return { fmt::format("expected {}, got {}", ToString(ReplicatedTypeMap<T>::ValueType), ToString(Value.GetReplicatedValueType())) };
+}
+
+template <typename T> bool TypeCheck(const csp::common::ReplicatedValue& Value)
 {
     return Value.GetReplicatedValueType() == ReplicatedTypeMap<T>::ValueType;
 }
 
-template <typename T> bool IsValidValue(const BoundedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
+template <typename T> ValidationResult Validate(const PlainValue<T>&, const csp::common::ReplicatedValue& Value)
 {
-    const auto ActualValue = ReplicatedTypeMap<T>::From(Value);
+    if (!TypeCheck<T>(Value))
+    {
+        return TypeMismatch<T>(Value);
+    }
 
-    return ActualValue && *ActualValue >= SchemaValue.Range.Min && *ActualValue <= SchemaValue.Range.Max;
+    return ValidationResult::Ok();
 }
 
-template <typename T> bool IsValidValue(const EnumeratedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
+template <typename T> ValidationResult Validate(const BoundedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
 {
     const auto ActualValue = ReplicatedTypeMap<T>::From(Value);
+
+    if (!ActualValue)
+    {
+        return TypeMismatch<T>(Value);
+    }
+
+    const auto IsValid = *ActualValue >= SchemaValue.Range.Min && *ActualValue <= SchemaValue.Range.Max;
+
+    if (!IsValid)
+    {
+        return ValidationResult::Error { fmt::format(
+            "value {} is outside the range [{}, {}]", *ActualValue, SchemaValue.Range.Min, SchemaValue.Range.Max) };
+    }
+
+    return ValidationResult::Ok();
+}
+
+template <typename T> ValidationResult Validate(const EnumeratedValue<T>& SchemaValue, const csp::common::ReplicatedValue& Value)
+{
+    const auto ActualValue = ReplicatedTypeMap<T>::From(Value);
+
+    if (!ActualValue)
+    {
+        return TypeMismatch<T>(Value);
+    }
+
     const auto Matches = [&ActualValue](const auto& Option) { return Option.Value == *ActualValue; };
+    const auto IsValid = std::all_of(SchemaValue.Options.begin(), SchemaValue.Options.end(), Matches);
 
-    return ActualValue && std::any_of(SchemaValue.Options.begin(), SchemaValue.Options.end(), Matches);
+    if (!IsValid)
+    {
+        const auto ToString = [](const auto& Options)
+        {
+            auto Values = std::vector<T>(Options.size());
+            std::transform(Options.begin(), Options.end(), Values.begin(), [](const auto& Option) { return Option.Value; });
+
+            return fmt::format("{}", fmt::join(Values, ", "));
+        };
+
+        return ValidationResult::Error { fmt::format("value {} is not one of the options [{}]", *ActualValue, ToString(SchemaValue.Options)) };
+    }
+
+    return ValidationResult::Ok();
 }
 
-inline bool IsValidValue(const ComponentProperty& Property, const csp::common::ReplicatedValue& Value)
+inline ValidationResult Validate(const ComponentProperty& Property, const csp::common::ReplicatedValue& Value)
 {
-    return std::visit([&Value](const auto& SchemaValue) { return IsValidValue(SchemaValue, Value); }, Property.Value);
+    return std::visit([&Value](const auto& SchemaValue) { return Validate(SchemaValue, Value); }, Property.Value);
 }
 
 inline bool IsScriptable(const csp::common::String& Name) { return !Name.IsEmpty(); }
