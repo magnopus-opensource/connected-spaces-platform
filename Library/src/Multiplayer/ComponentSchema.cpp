@@ -18,6 +18,7 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/Convert.h"
+#include "Common/Result.h"
 #include "Json/JsonSerializer.h"
 
 #include <fmt/format.h>
@@ -251,37 +252,9 @@ namespace
         };
     }
 
-    struct ParseError final
-    {
-        std::string Description;
-    };
+    using ParseError = csp::common::ResultError;
 
-    template <typename T> class ParseResult final
-    {
-    public:
-        explicit ParseResult(T InValue)
-            : Storage(std::move(InValue))
-        {
-        }
-
-        ParseResult(ParseError InError)
-            : Storage(std::move(InError))
-        {
-        }
-
-        explicit operator bool() const { return std::holds_alternative<T>(Storage); }
-
-        T& operator*() { return *std::get_if<T>(&Storage); }
-
-        const T& operator*() const { return *std::get_if<T>(&Storage); }
-
-        ParseError& GetError() { return *std::get_if<ParseError>(&Storage); }
-
-        const ParseError& GetError() const { return *std::get_if<ParseError>(&Storage); }
-
-    private:
-        std::variant<T, ParseError> Storage;
-    };
+    template <typename T> using ParseResult = csp::common::Result<T>;
 
     template <typename T> ParseResult<T> TryParseRequired(const rapidjson::Value& Object, const char* Key)
     {
@@ -297,7 +270,7 @@ namespace
             return ParseError { fmt::format("required field '{}' has unexpected type", Key) };
         }
 
-        return ParseResult { std::move(*Parsed) };
+        return std::move(*Parsed);
     }
 
     template <typename T> ParseResult<Range<T>> TryParseRange(const rapidjson::Value& Value)
@@ -321,10 +294,10 @@ namespace
             return ParseError { fmt::format("range: {}", Max.GetError().Description) };
         }
 
-        return ParseResult { Range<T> {
+        return Range<T> {
             *Min,
             *Max,
-        } };
+        };
     }
 
     template <typename T> ParseResult<SchemaOption<T>> TryParseOption(const rapidjson::Value& Value)
@@ -348,10 +321,10 @@ namespace
             return std::move(OptionValue.GetError());
         }
 
-        return ParseResult { SchemaOption<T> {
+        return SchemaOption<T> {
             std::move(*Name),
             std::move(*OptionValue),
-        } };
+        };
     }
 
     template <typename T> ParseResult<std::vector<SchemaOption<T>>> TryParseOptions(const rapidjson::Value& Value)
@@ -376,7 +349,7 @@ namespace
             Options.push_back(std::move(*Option));
         }
 
-        return ParseResult { std::move(Options) };
+        return std::move(Options);
     }
 
     template <typename T> ParseResult<std::optional<T>> TryParseOptional(const rapidjson::Value& Object, const char* Key)
@@ -578,12 +551,12 @@ namespace
             return Scriptable.GetError();
         }
 
-        return ParseResult { ComponentProperty {
+        return ComponentProperty {
             static_cast<ComponentProperty::KeyType>(*Key),
             std::move(*Name),
             std::move(*ParsedValue),
             *Scriptable,
-        } };
+        };
     }
 
     ParseResult<csp::common::Array<ComponentProperty>> TryParseProperties(rapidjson::Value::ConstArray JsonProperties)
@@ -602,7 +575,7 @@ namespace
             Properties.push_back(std::move(*Property));
         }
 
-        return ParseResult { csp::common::Convert(Properties) };
+        return csp::common::Convert(Properties);
     }
 
     ParseResult<ComponentSchema> TryParseSchema(const rapidjson::Value& Value)
@@ -650,12 +623,12 @@ namespace
             return Scriptable.GetError();
         }
 
-        return ParseResult { ComponentSchema {
+        return ComponentSchema {
             *TypeId,
             std::move(*Name),
             std::move(*Properties),
             *Scriptable,
-        } };
+        };
     }
 
 } // namespace
