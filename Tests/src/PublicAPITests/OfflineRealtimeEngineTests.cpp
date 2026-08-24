@@ -36,6 +36,7 @@
 
 using namespace csp;
 using namespace csp::multiplayer;
+using namespace csp::multiplayer::schema;
 
 namespace
 {
@@ -956,7 +957,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
 
     const auto ExampleSchemaId = ComponentSchema::TypeIdType { 666 };
 
-    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+    const auto Components = csp::common::Array<ComponentSchema> {
         {
             ExampleSchemaId,
             "Example",
@@ -1078,7 +1079,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructWithComponentSch
 
     const auto ExampleSchemaId = static_cast<ComponentSchema::TypeIdType>(csp::multiplayer::ComponentType::Audio);
 
-    const auto Components = csp::common::Array<csp::multiplayer::ComponentSchema> {
+    const auto Components = csp::common::Array<ComponentSchema> {
         {
             ExampleSchemaId,
             "Example",

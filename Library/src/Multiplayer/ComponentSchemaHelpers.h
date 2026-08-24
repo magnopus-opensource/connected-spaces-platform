@@ -29,7 +29,7 @@
 #include <variant>
 #include <vector>
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 template <typename T> struct ScriptTypeMap;
@@ -315,4 +315,4 @@ inline bool IsScriptable(const ComponentSchema& Schema)
     return IsScriptable(Schema.Name) && Schema.IsScriptable.value_or(true) && HasScriptableProperties(Schema.Properties);
 }
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

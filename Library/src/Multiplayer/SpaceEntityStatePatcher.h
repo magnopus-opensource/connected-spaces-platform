@@ -37,10 +37,14 @@ class IJSScriptRunner;
 class IRealtimeEngine;
 }
 
+namespace csp::multiplayer::schema
+{
+class ComponentSchemaRegistry;
+}
+
 namespace csp::multiplayer
 {
 
-class ComponentSchemaRegistry;
 class SpaceEntity;
 class ComponentBase;
 
@@ -180,7 +184,7 @@ public:
     [[nodiscard]] mcs::ObjectPatch CreateObjectPatch() const;
 
     [[nodiscard]] static std::unique_ptr<csp::multiplayer::SpaceEntity> NewFromObjectMessage(const mcs::ObjectMessage& Message,
-        csp::common::IRealtimeEngine& RealtimeEngine, const ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner,
+        csp::common::IRealtimeEngine& RealtimeEngine, const schema::ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner,
         csp::common::LogSystem& LogSystem);
 
     // Apply the data inside the object patch to the space entity this patcher relates to.

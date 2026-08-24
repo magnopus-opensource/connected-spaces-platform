@@ -37,6 +37,8 @@
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 // Handler to listen to tick events, and do the script update
 class OfflineSpaceEntityEventHandler : public csp::events::EventListener
 {

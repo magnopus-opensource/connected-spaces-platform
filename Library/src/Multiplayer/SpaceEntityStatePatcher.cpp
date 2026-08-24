@@ -25,6 +25,8 @@
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 SpaceEntityStatePatcher::SpaceEntityStatePatcher(csp::common::LogSystem* LogSystem, csp::multiplayer::SpaceEntity& SpaceEntity)
     : TimeOfLastPatch(0)
     , LogSystem(LogSystem)

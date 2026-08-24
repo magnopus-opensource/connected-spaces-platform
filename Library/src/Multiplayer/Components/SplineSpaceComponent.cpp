@@ -24,6 +24,8 @@
 
 namespace csp::multiplayer
 {
+using namespace schema;
+
 namespace
 {
     struct TsSpline

@@ -26,6 +26,8 @@ constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ScreenSharing),
     "ScreenSharing",

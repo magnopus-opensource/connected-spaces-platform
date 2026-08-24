@@ -36,10 +36,14 @@ class LoginState;
 class LogSystem;
 }
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 struct ComponentSchema;
 class ComponentSchemaRegistry;
+}
+
+namespace csp::multiplayer
+{
 class CSPSceneDescription;
 class EntityScriptBinding;
 class SpaceEntityStatePatcher;
@@ -78,7 +82,7 @@ public:
     /// @param RemoteScriptRunner Object capable of running a script.
     /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
     CSP_NO_EXPORT OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner,
-        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+        const csp::common::Array<schema::ComponentSchema>& AdditionalComponents);
 
     /// @brief OfflineRealtimeEngine constructor.
     /// Creates an empty realtime engine, registering additional component schemas from JSON.
@@ -295,6 +299,6 @@ private:
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     std::unique_ptr<EntityScriptBinding> ScriptBinding;
 
-    std::unique_ptr<ComponentSchemaRegistry> ComponentRegistry;
+    std::unique_ptr<schema::ComponentSchemaRegistry> ComponentRegistry;
 };
 }

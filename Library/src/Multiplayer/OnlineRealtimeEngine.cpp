@@ -97,6 +97,8 @@ template class csp::common::List<csp::multiplayer::SpaceEntity*>;
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 constexpr uint64_t ENTITY_PAGE_LIMIT = 100;
 

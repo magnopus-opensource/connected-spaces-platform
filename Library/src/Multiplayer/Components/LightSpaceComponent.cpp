@@ -19,6 +19,8 @@
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Light),
     "Light",

@@ -29,6 +29,8 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 namespace
 {
     bool EnsureValidConversationId(const csp::common::String& ConversationId, csp::common::LogSystem* LogSystem)

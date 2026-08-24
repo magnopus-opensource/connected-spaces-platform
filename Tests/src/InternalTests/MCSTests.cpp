@@ -38,14 +38,14 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
         LogSystem,
         *ScriptSystem,
         {
-            csp::multiplayer::ComponentSchema {
-                csp::multiplayer::ComponentSchema::TypeIdType { LargeTypeId },
+            csp::multiplayer::schema::ComponentSchema {
+                csp::multiplayer::schema::ComponentSchema::TypeIdType { LargeTypeId },
                 "Example",
                 {
-                    csp::multiplayer::ComponentProperty {
-                        csp::multiplayer::ComponentProperty::KeyType { 0 },
+                    csp::multiplayer::schema::ComponentProperty {
+                        csp::multiplayer::schema::ComponentProperty::KeyType { 0 },
                         "value",
-                        PlainValue<std::string> { "hello" },
+                        csp::multiplayer::schema::PlainValue<std::string> { "hello" },
                     },
                 },
             },

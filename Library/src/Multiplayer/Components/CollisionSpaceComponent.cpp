@@ -31,6 +31,8 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Collision),
     "Collision",

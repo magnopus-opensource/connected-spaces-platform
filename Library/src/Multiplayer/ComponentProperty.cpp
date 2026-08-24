@@ -16,7 +16,7 @@
 
 #include "Multiplayer/ComponentProperty.h"
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 bool ComponentProperty::operator==(const ComponentProperty& Other) const
@@ -26,4 +26,4 @@ bool ComponentProperty::operator==(const ComponentProperty& Other) const
 
 bool ComponentProperty::operator!=(const ComponentProperty& Other) const { return !(*this == Other); }
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

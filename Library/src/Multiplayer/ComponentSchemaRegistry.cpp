@@ -50,7 +50,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 csp::common::Array<ComponentSchema> GetBuiltInComponentSchemas()
@@ -188,4 +188,4 @@ std::optional<ComponentType> ToComponentType(uint64_t TypeId)
 
 bool IsLegacyComponentTypeId(uint64_t TypeId) { return ToComponentType(TypeId).has_value(); }
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

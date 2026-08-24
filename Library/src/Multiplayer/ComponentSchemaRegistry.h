@@ -29,7 +29,7 @@ namespace csp::common
 class LogSystem;
 }
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 std::optional<ComponentType> ToComponentType(uint64_t TypeId);
@@ -64,4 +64,4 @@ private:
     std::unordered_map<ComponentSchema::TypeIdType, ComponentSchema> SchemaMap;
 };
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

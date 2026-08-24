@@ -58,7 +58,7 @@ class CSP_API CinematicCameraSpaceComponent : public ComponentBase,
                                               public IEnableableComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -70,9 +70,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new CinematicCameraSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<CinematicCameraSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gived the sensor size and focal length, return the horizonal fov
     /// @return FOV in radians
@@ -209,7 +209,7 @@ public:
     /// @}
 
 private:
-    CinematicCameraSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CinematicCameraSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

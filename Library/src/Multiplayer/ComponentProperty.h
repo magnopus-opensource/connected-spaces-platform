@@ -25,7 +25,7 @@
 #include <variant>
 #include <vector>
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 /// @brief An unconstrained property value, carrying only its default.
@@ -63,7 +63,7 @@ template <typename T> struct BoundedValue
     T Default;
 
     /// @brief The range this property's value is constrained to.
-    csp::multiplayer::Range<T> Range;
+    Range<T> Range;
 
     bool operator==(const BoundedValue& Other) const;
     bool operator!=(const BoundedValue& Other) const;
@@ -150,4 +150,4 @@ struct ComponentProperty
     bool operator!=(const ComponentProperty& Other) const;
 };
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

@@ -58,7 +58,7 @@ enum class AvatarComponentPropertyKeys : uint16_t
 class CSP_API AvatarSpaceComponent : public ComponentBase, public IVisibleComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the avatar space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -70,9 +70,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new AvatarSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<AvatarSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.
@@ -259,7 +259,7 @@ public:
     void SetAvatarUrl(const csp::common::String& Value);
 
 private:
-    AvatarSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    AvatarSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

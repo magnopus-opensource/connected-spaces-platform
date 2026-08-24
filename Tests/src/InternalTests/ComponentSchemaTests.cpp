@@ -33,12 +33,12 @@
 namespace
 {
 
-using Schema = csp::multiplayer::ComponentSchema;
+using Schema = csp::multiplayer::schema::ComponentSchema;
 
-template <typename T> using PlainValue = csp::multiplayer::PlainValue<T>;
-template <typename T> using BoundedValue = csp::multiplayer::BoundedValue<T>;
-template <typename T> using EnumeratedValue = csp::multiplayer::EnumeratedValue<T>;
-template <typename T> using SchemaOption = csp::multiplayer::SchemaOption<T>;
+template <typename T> using PlainValue = csp::multiplayer::schema::PlainValue<T>;
+template <typename T> using BoundedValue = csp::multiplayer::schema::BoundedValue<T>;
+template <typename T> using EnumeratedValue = csp::multiplayer::schema::EnumeratedValue<T>;
+template <typename T> using SchemaOption = csp::multiplayer::schema::SchemaOption<T>;
 
 class TestFixture final
 {
@@ -905,7 +905,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, TypedSetterReflectsInGetPrope
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, ComponentPropertyEquality)
 {
-    using Property = csp::multiplayer::ComponentProperty;
+    using Property = csp::multiplayer::schema::ComponentProperty;
 
     {
         const auto A = Property {
@@ -2155,7 +2155,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsTrueForVal
         },
     };
 
-    EXPECT_TRUE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+    EXPECT_TRUE(csp::multiplayer::schema::IsCompatible(BuiltIn, Updated));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNameMismatch)
@@ -2179,7 +2179,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForNa
         },
     };
 
-    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+    EXPECT_FALSE(csp::multiplayer::schema::IsCompatible(BuiltIn, Updated));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMissingProperty)
@@ -2202,7 +2202,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForMi
         },
     };
 
-    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+    EXPECT_FALSE(csp::multiplayer::schema::IsCompatible(BuiltIn, Updated));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyDefaultMismatch)
@@ -2226,7 +2226,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         },
     };
 
-    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+    EXPECT_FALSE(csp::multiplayer::schema::IsCompatible(BuiltIn, Updated));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPropertyNameMismatch)
@@ -2250,15 +2250,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, IsCompatibleReturnsFalseForPr
         },
     };
 
-    EXPECT_FALSE(csp::multiplayer::IsCompatible(BuiltIn, Updated));
+    EXPECT_FALSE(csp::multiplayer::schema::IsCompatible(BuiltIn, Updated));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, BuiltInSchemasRoundTripThroughJson)
 {
     auto LogSystem = csp::common::LogSystem {};
 
-    const auto Original = csp::multiplayer::GetBuiltInComponentSchemas();
-    const auto Parsed = csp::multiplayer::ComponentSchemasFromJson({ csp::GetComponentSchemasJson() }, LogSystem);
+    const auto Original = csp::multiplayer::schema::GetBuiltInComponentSchemas();
+    const auto Parsed = csp::multiplayer::schema::ComponentSchemasFromJson({ csp::GetComponentSchemasJson() }, LogSystem);
 
     ASSERT_EQ(Parsed.Size(), Original.Size());
 

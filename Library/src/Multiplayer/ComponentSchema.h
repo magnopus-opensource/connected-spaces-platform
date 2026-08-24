@@ -30,7 +30,7 @@ namespace csp::common
 class LogSystem;
 }
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 /// @brief A structural description of a component that can be interrogated at runtime
@@ -90,4 +90,4 @@ csp::common::Array<ComponentSchema> ComponentSchemasFromJson(
 /// to scripting where it wasn't previously).
 bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Updated, csp::common::LogSystem* LogSystem = nullptr);
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

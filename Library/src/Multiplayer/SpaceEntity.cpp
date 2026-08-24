@@ -71,6 +71,8 @@ using namespace std::chrono;
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
 {
     glm::mat4 ParentTranslate = glm::translate(

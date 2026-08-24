@@ -120,6 +120,8 @@ template <typename T> struct js_traits<std::unordered_map<std::string, T>>
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
 namespace

@@ -23,6 +23,8 @@
 
 namespace csp::multiplayer
 {
+using namespace schema;
+
 CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson)
 
 {

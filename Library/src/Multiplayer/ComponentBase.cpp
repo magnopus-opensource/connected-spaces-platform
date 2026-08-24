@@ -33,6 +33,8 @@
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 static const csp::common::ReplicatedValue InvalidValue = csp::common::ReplicatedValue();
 
 ComponentBase::ComponentBase()

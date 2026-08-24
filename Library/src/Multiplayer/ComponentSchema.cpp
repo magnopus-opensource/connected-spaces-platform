@@ -36,7 +36,7 @@
 #include <variant>
 #include <vector>
 
-namespace csp::multiplayer
+namespace csp::multiplayer::schema
 {
 
 namespace
@@ -793,4 +793,4 @@ bool IsCompatible(const ComponentSchema& Original, const ComponentSchema& Update
             }));
 }
 
-} // namespace csp::multiplayer
+} // namespace csp::multiplayer::schema

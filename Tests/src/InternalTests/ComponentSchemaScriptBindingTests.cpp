@@ -33,11 +33,11 @@
 namespace
 {
 
-using Schema = csp::multiplayer::ComponentSchema;
-using Property = csp::multiplayer::ComponentProperty;
+using Schema = csp::multiplayer::schema::ComponentSchema;
+using Property = csp::multiplayer::schema::ComponentProperty;
 
-template <typename T> using PlainValue = csp::multiplayer::PlainValue<T>;
-template <typename T> using BoundedValue = csp::multiplayer::BoundedValue<T>;
+template <typename T> using PlainValue = csp::multiplayer::schema::PlainValue<T>;
+template <typename T> using BoundedValue = csp::multiplayer::schema::BoundedValue<T>;
 
 class TestFixture final
 {

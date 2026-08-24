@@ -68,12 +68,16 @@ namespace csp::common::events
 class Event;
 }
 
+namespace csp::multiplayer::schema
+{
+struct ComponentSchema;
+class ComponentSchemaRegistry;
+}
+
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
 
-struct ComponentSchema;
-class ComponentSchemaRegistry;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
@@ -120,7 +124,7 @@ public:
     /// @param AdditionalComponents Component schemas to register alongside the built-in schemas in the engine-wide registry.
     CSP_NO_EXPORT OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner,
-        const csp::common::Array<ComponentSchema>& AdditionalComponents);
+        const csp::common::Array<schema::ComponentSchema>& AdditionalComponents);
 
     /// @brief OnlineRealtimeEngine constructor.
     /// Creates a realtime engine with additional component schemas from JSON.
@@ -520,7 +524,7 @@ private:
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
-    std::unique_ptr<ComponentSchemaRegistry> ComponentRegistry;
+    std::unique_ptr<schema::ComponentSchemaRegistry> ComponentRegistry;
 };
 
 } // namespace csp::multiplayer

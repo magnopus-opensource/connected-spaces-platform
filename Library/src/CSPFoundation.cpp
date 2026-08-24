@@ -704,7 +704,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 
 void Free(void* Pointer) { std::free(Pointer); }
 
-csp::common::String GetComponentSchemasJson() { return csp::multiplayer::GetBuiltInComponentSchemasJson(); }
+csp::common::String GetComponentSchemasJson() { return csp::multiplayer::schema::GetBuiltInComponentSchemasJson(); }
 
 void* ModuleHandle = nullptr;
 
