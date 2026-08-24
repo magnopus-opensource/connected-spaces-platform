@@ -89,6 +89,6 @@ jobs:
 
           chmod +x ./MultiplayerTestRunner/MultiplayerTestRunner
           chmod +x ./csp-tests
-          ./csp-tests --gtest_filter='${INPUTS_GTEST_FILTER}'
+          ./csp-tests --gtest_filter="${INPUTS_GTEST_FILTER}"
         env:
           INPUTS_GTEST_FILTER: ${{ inputs.gtest_filter }}
