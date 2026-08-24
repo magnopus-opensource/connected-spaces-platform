@@ -110,9 +110,7 @@ void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const csp::common:
 
     if (Key == static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource))
     {
-        // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
-
-        Parent->GetScript().Bind();
+        Parent->GetScript().OnSourceChanged(Value.GetString());
         Parent->GetScript().Invoke();
     }
 }
