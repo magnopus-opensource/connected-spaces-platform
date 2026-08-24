@@ -68,6 +68,8 @@ runs:
         INPUTS_HOST_PROFILE: ${{ inputs.host_profile }}
         INPUTS_OUTPUT_FOLDER: ${{ inputs.output_folder }}
         INPUTS_BUILD_TYPE: ${{ inputs.build_type }}
+        INPUTS_THIRD_PARTY_LIBS: ${{ inputs.package_third_party_libs }}
+        INPUTS_INSTALL_PREFIX: ${{ inputs.install_prefix }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -87,10 +89,10 @@ runs:
           --profile:host="$PROFILE_PATH"
         )
 
-        if [ "${{ inputs.package_third_party_libs }}" = "true" ]; then
+        if [ "${INPUTS_THIRD_PARTY_LIBS}" = "true" ]; then
           CONAN_ARGS+=(
             --deployer=./conan/csp_deployer.py
-            --deployer-folder="${{ inputs.install_prefix }}/lib/third_party"
+            --deployer-folder="${INPUTS_INSTALL_PREFIX}/lib/third_party"
           )
         fi
 
