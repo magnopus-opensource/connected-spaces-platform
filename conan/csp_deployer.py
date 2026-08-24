@@ -26,6 +26,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 from typing import Any
+import filecmp
 
 STATIC_LIBRARY_SUFFIXES = {
     ".lib",
@@ -52,7 +53,7 @@ def _copy_file_unique(source: Path, destination: Path) -> Path:
     output = destination / source.name
 
     if output.exists():
-        if output.read_bytes() != source.read_bytes():
+        if not filecmp.cmp(output, source, shallow=False):
             raise RuntimeError(
                 f"filename collision:\n"
                 f"  Existing: {output}\n"
