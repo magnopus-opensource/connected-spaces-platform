@@ -33,6 +33,11 @@ All notable changes to this project will be documented in this file. For compile
   Additionally, `Image`, `ExternalLink`, and `FiducialMarker` have also been updated to return the `ComponentName` vs the deprecated name in scripts,
   as these were never updated to do so. This is technically a breaking change (without doing a data migration on the server), but should be low impact
   in practice.
+  
+- [OB-5315] fix: Route remote script updates through the same binding path as local script updates go through. (OnSourceChanged). By @MAG-ElliotMorris
+  Prior to this, we were not clearing the `MessageMap` or `PropertyMap` containers as we should, which meant any `subscribeToMessage`
+  events would keep executing if the script was modified on a remote client.
+  This also causes us to call `ResetContext` when the script is modified, which also seems like the right thing to be doing.
 
 ###  🔨 🔨 Chore
 
