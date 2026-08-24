@@ -35,6 +35,7 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "PublicAPITests/SpaceSystemTestHelpers.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
+#include "fmt/format.h"
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 #include <atomic>
@@ -1373,11 +1374,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RemoteClearOfScriptSourceStopsScri
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = fmt::format("{}-{}", TestSpaceName, GetUniqueString());
 
     csp::systems::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
