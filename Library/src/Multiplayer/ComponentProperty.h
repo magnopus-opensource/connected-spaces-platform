@@ -29,7 +29,7 @@ namespace csp::multiplayer
 {
 
 /// @brief An unconstrained property value, carrying only its default.
-template <typename T> struct PlainValue final
+template <typename T> struct PlainValue
 {
     /// @brief The default value of this property, used to initialise it on a newly created component.
     T Default;
@@ -43,7 +43,7 @@ template <typename T> bool PlainValue<T>::operator==(const PlainValue& Other) co
 template <typename T> bool PlainValue<T>::operator!=(const PlainValue& Other) const { return !(*this == Other); }
 
 /// @brief An inclusive range of values, constraining what a bounded property may hold.
-template <typename T> struct Range final
+template <typename T> struct Range
 {
     T Min;
     T Max;
@@ -57,7 +57,7 @@ template <typename T> bool Range<T>::operator==(const Range& Other) const { retu
 template <typename T> bool Range<T>::operator!=(const Range& Other) const { return !(*this == Other); }
 
 /// @brief A property value constrained to an inclusive range.
-template <typename T> struct BoundedValue final
+template <typename T> struct BoundedValue
 {
     /// @brief The default value of this property, used to initialise it on a newly created component.
     T Default;
@@ -74,7 +74,7 @@ template <typename T> bool BoundedValue<T>::operator==(const BoundedValue& Other
 template <typename T> bool BoundedValue<T>::operator!=(const BoundedValue& Other) const { return !(*this == Other); }
 
 /// @brief A named value within the set an enumerated property is constrained to.
-template <typename T> struct SchemaOption final
+template <typename T> struct SchemaOption
 {
     /// @brief A human-readable name for this option, for clients presenting a choice of values.
     /// Carries no meaning at runtime; the value is what is replicated.
@@ -91,7 +91,7 @@ template <typename T> bool SchemaOption<T>::operator==(const SchemaOption& Other
 template <typename T> bool SchemaOption<T>::operator!=(const SchemaOption& Other) const { return !(*this == Other); }
 
 /// @brief A property value constrained to a fixed set of named options.
-template <typename T> struct EnumeratedValue final
+template <typename T> struct EnumeratedValue
 {
     /// @brief The default value of this property, used to initialise it on a newly created component.
     T Default;
@@ -121,7 +121,7 @@ using PropertyValue
 
 /// @brief Represents an individual data field, or "property", within a component schema,
 /// consisting of a stable ID/key, a name, a typed value, and other metadata.
-struct ComponentProperty final
+struct ComponentProperty
 {
     using KeyType = uint16_t;
 

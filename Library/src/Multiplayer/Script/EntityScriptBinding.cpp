@@ -88,7 +88,7 @@ template <typename T> struct js_traits<std::unordered_map<std::string, T>>
             throw qjs::exception { Context };
         }
 
-        struct OwnedPropertyEnum final
+        struct OwnedPropertyEnum
         {
             ~OwnedPropertyEnum() { js_free_prop_enum(Context, Properties, Count); }
 

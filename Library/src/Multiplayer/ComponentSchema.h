@@ -36,7 +36,7 @@ namespace csp::multiplayer
 /// @brief A structural description of a component that can be interrogated at runtime
 /// (i.e. to iterate over the properties) to facilitate registration and hydration (i.e. where a
 /// serialised representation is reconstructed into this structure).
-struct ComponentSchema final
+struct ComponentSchema
 {
     using TypeIdType = uint64_t;
 
