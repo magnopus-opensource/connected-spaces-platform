@@ -5,7 +5,7 @@ This deploys the third-party dependencies required for csp to be linked
 without requiring Conan in the consumer project.
 
 This can be invoked using the following args at the conan install step:
---deployer=csp_sdk_deployer --deployer-folder=<output-directory>
+--deployer=conan/csp_deployer.py --deployer-folder=<output-directory>
 
 This deployer performs the following actions:
 - Copies static libraries
