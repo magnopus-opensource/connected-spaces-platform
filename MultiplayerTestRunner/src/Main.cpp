@@ -18,6 +18,7 @@
 #include "../include/ProcessDescriptors.h"
 #include "CLIArgs.h"
 #include "LoginRAII.h"
+#include "RunnableTests/ClearScriptSource.h"
 #include "RunnableTests/CreateAvatar.h"
 #include "RunnableTests/CreateConversation.h"
 #include "RunnableTests/EventBusPing.h"
@@ -79,6 +80,9 @@ void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_p
         break;
     case TestIdentifier::LEADER_ELECTION_EVENT:
         LeaderElectionEvent::RunTest(SpaceRAII.GetRealtimeEngine());
+        break;
+    case TestIdentifier::CLEAR_SCRIPT_SOURCE:
+        ClearScriptSource::RunTest(SpaceRAII.GetRealtimeEngine());
         break;
     default:
         throw Utils::ExceptionWithCode(
