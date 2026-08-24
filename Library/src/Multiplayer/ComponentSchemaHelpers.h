@@ -276,7 +276,7 @@ template <typename T> ValidationResult Validate(const EnumeratedValue<T>& Schema
     }
 
     const auto Matches = [&ActualValue](const auto& Option) { return Option.Value == *ActualValue; };
-    const auto IsValid = std::all_of(SchemaValue.Options.begin(), SchemaValue.Options.end(), Matches);
+    const auto IsValid = std::any_of(SchemaValue.Options.begin(), SchemaValue.Options.end(), Matches);
 
     if (!IsValid)
     {

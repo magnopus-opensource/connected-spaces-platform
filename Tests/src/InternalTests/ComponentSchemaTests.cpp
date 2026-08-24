@@ -725,6 +725,60 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyIgnoresValueOutsid
     EXPECT_EQ(*Value, 0.5f);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyAppliesValueInsideRange)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "floatProp",
+                    BoundedValue<float> {
+                        0.5f,
+                        { 0.0f, 1.0f },
+                    },
+                },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    {
+        Component->SetProperty(0, 0.75f);
+
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 0.75f);
+    }
+
+    // The bounds themselves are inclusive.
+    {
+        Component->SetProperty(0, 0.0f);
+
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 0.0f);
+    }
+
+    {
+        Component->SetProperty(0, 1.0f);
+
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 1.0f);
+    }
+}
+
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyIgnoresValueNotInOptions)
 {
     auto Fixture = TestFixture({
@@ -759,6 +813,53 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyIgnoresValueNotInO
     ASSERT_NE(Value, nullptr);
 
     EXPECT_EQ(*Value, int64_t { 0 });
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyAppliesValueInOptions)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "intProp",
+                    EnumeratedValue<int64_t> {
+                        int64_t { 0 },
+                        {
+                            SchemaOption<int64_t> { "Off", int64_t { 0 } },
+                            SchemaOption<int64_t> { "On", int64_t { 1 } },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    auto* Entity = Fixture.MakeEntity("Test Entity");
+    ASSERT_NE(Entity, nullptr);
+
+    auto* Component = Entity->AddComponentByTypeId(uint64_t { 123 });
+    ASSERT_NE(Component, nullptr);
+
+    {
+        Component->SetProperty(0, int64_t { 1 });
+
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, int64_t { 1 });
+    }
+
+    {
+        Component->SetProperty(0, int64_t { 0 });
+
+        const auto* Value = Component->GetProperty(0);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, int64_t { 0 });
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyReflectsInTypedGetter)
