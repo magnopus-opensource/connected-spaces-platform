@@ -1389,7 +1389,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RemoteClearOfScriptSourceStopsScri
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntityFetchCompleteFuture.wait_for(3s);
+    ASSERT_EQ(EntityFetchCompleteFuture.wait_for(3s), std::future_status::ready);
 
     // Trailing space is a footgun here, script logger appends a space after every argument for some reason...
     const csp::common::String ScriptTickStr = "ScriptTick ";
