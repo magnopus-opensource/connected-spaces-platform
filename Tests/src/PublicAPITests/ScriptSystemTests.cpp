@@ -1435,7 +1435,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RemoteClearOfScriptSourceStopsScri
     std::future<void> RemoteClientReady = RemoteClient.ReadyForAssertionsFuture();
     RemoteClient.StartProcess();
 
-    // Confirm the empty source has reached us before continuing
+    EXPECT_EQ(RemoteClientReady.wait_for(std::chrono::seconds(20)), std::future_status::ready);
+
+    // Confirm the empty source has reached us before continuing. This is a bit paranoid,
+    // it's just that replication goes over the network so we can't be sure it's here even if the remote client has finished.
     const bool SourceCleared = ResponseWaiter::WaitFor(
         [&ScriptComponent]()
         {
