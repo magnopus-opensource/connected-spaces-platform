@@ -42,7 +42,10 @@ LICENCE_FILE_PREFIXES = (
     "authors",
 )
 
-# Ensures a file doesn't exist at the destination before copying
+# Copy a file into the destination directory without overwriting
+# a different file with the same name.
+# If a file with the same name already exists and has identical contents,
+# the existing file is reused. If the contents differ, a RuntimeError is raised.
 def _copy_file_unique(source: Path, destination: Path) -> Path:
     destination.mkdir(parents=True, exist_ok=True)
 
@@ -97,7 +100,6 @@ def deploy(graph: Any, output_folder: str, **kwargs: Any) -> None:
                     continue
 
                 # Copy into provided deployer-folder
-                # Use # _copy_file_unique to throw if we find libs with the same name
                 deployed = _copy_file_unique(
                     source,
                     library_output,
