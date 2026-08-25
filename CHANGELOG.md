@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.48.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1888] feat!: Extend component schemas with value constraints, string map properties, scripting opt-out, and an API to export built-in schemas as JSON. By @mag-lt.
+
+  Added to component schema:
+  - `range` (`min`/`max`) on `int` and `float` properties, and `options` (distinct set of named values) on `int`, `float` and `string` properties, which provides a way of expressing enum cases in a more general way. These constraints are checked by `ComponentBase::SetProperty`, and non-conforming values are rejected (with a warning in the log)
+  - `stringToStringMap` property type, bound into scripting as a plain JS object (which facilitates exposing `materialOverrides` to scripting).
+  - `scriptable` flag on components and properties to opt out of automatically binding into the script system, true when unspecified. False on a component opts the whole component out.
+
+  Added to public API:
+  - `csp::GetComponentSchemasJson()`, which dumps the built-in schemas as pretty printed JSON.
+
+  Breaking API changes:
+  - Removed `IRealtimeEngine::GetComponentSchemaRegistry()` and `IComponentSchemaRegistry`. 
+  - `ComponentSchema` and `ComponentProperty` are no longer public types. Schema types are now internal. JSON is the only way to define a component schema.
+  - The realtime engine constructors taking `Array<ComponentSchema>` are now `CSP_NO_EXPORT`. Use the `List<String>` JSON overloads instead.
+  - No clients had adopted the above, so this shouldn't have any practical impact
+
 ## [6.47.0]
 
 ### 🐛 🔨 Bug Fixes

@@ -15,12 +15,14 @@
  */
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Hotspot),
@@ -29,42 +31,43 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
+            "name_DEPRECATED",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsTeleportPoint),
             "isTeleportPoint",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsSpawnPoint),
             "isSpawnPoint",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(HotspotPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

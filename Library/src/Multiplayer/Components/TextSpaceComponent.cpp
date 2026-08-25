@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Text),
@@ -27,67 +28,74 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Text),
             "text",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::TextColor),
             "textColor",
-            csp::common::Vector3(1.0f, 1.0f, 1.0f),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3(1.0f, 1.0f, 1.0f) },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BackgroundColor),
             "backgroundColor",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsBackgroundVisible),
             "isBackgroundVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Width),
             "width",
-            1.0f,
+            PlainValue<float> { 1.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::Height),
             "height",
-            1.0f,
+            PlainValue<float> { 1.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::BillboardMode),
             "billboardMode",
-            static_cast<int64_t>(BillboardMode::Off),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(BillboardMode::Off),
+                {
+                    SchemaOption<int64_t> { "Off", static_cast<int64_t>(BillboardMode::Off) },
+                    SchemaOption<int64_t> { "Billboard", static_cast<int64_t>(BillboardMode::Billboard) },
+                    SchemaOption<int64_t> { "YawLockedBillboard", static_cast<int64_t>(BillboardMode::YawLockedBillboard) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(TextPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

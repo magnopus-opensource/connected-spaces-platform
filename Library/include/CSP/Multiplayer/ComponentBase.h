@@ -37,11 +37,15 @@ namespace csp::common
 class LogSystem;
 }
 
+namespace csp::multiplayer::schema
+{
+struct ComponentSchema;
+}
+
 namespace csp::multiplayer
 {
 
 class SpaceEntity;
-class ComponentSchema;
 class ComponentScriptInterface;
 
 /// @brief Represents the type of component.
@@ -109,7 +113,7 @@ public:
     // The LogSystem input may be null, components do not _have_ to log.
     ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    CSP_NO_EXPORT ComponentBase(const ComponentSchema&, csp::common::LogSystem*, SpaceEntity* Parent);
+    CSP_NO_EXPORT ComponentBase(const schema::ComponentSchema&, csp::common::LogSystem*, SpaceEntity* Parent);
 
     /// @brief Virtual destructor for the component.
     virtual ~ComponentBase();
@@ -237,7 +241,7 @@ protected:
 
     csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
 
-    std::unique_ptr<ComponentSchema> CachedSchema;
+    std::unique_ptr<schema::ComponentSchema> CachedSchema;
 
 private:
     void InitialiseProperties();

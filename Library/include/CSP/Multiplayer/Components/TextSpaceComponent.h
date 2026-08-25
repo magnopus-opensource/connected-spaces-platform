@@ -53,7 +53,7 @@ enum class TextPropertyKeys : uint16_t
 class CSP_API TextSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the text space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -65,9 +65,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new TextSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<TextSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the text  this text component refers to.
     /// @return The text this text component refers to.
@@ -159,7 +159,7 @@ public:
     /// @}
 
 private:
-    TextSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    TextSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

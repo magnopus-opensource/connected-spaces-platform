@@ -48,7 +48,7 @@ enum class FiducialMarkerPropertyKeys : uint16_t
 class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the fiducial marker space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -60,9 +60,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new FiducialMarkerSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<FiducialMarkerSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the name of this fiducial marker space component.
     /// @return The name of this fiducial marker space component.
@@ -127,7 +127,7 @@ public:
     /// @}
 
 private:
-    FiducialMarkerSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    FiducialMarkerSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

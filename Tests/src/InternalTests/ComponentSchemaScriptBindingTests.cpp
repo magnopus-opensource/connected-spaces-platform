@@ -21,6 +21,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 
 #include "quickjspp.hpp"
 
@@ -32,8 +33,11 @@
 namespace
 {
 
-using Schema = csp::multiplayer::ComponentSchema;
-using Property = csp::multiplayer::ComponentProperty;
+using Schema = csp::multiplayer::schema::ComponentSchema;
+using Property = csp::multiplayer::schema::ComponentProperty;
+
+template <typename T> using PlainValue = csp::multiplayer::schema::PlainValue<T>;
+template <typename T> using BoundedValue = csp::multiplayer::schema::BoundedValue<T>;
 
 class TestFixture final
 {
@@ -76,21 +80,16 @@ public:
             auto* Entity
                 = std::get<0>(AWAIT(&Fixture.Engine, CreateEntity, Name, csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {}));
 
-            const auto FindSchema = [&](auto TypeId) -> const Schema* { return Fixture.Engine.GetComponentSchemaRegistry()->Find(TypeId); };
-
             auto SchemaComponents = std::vector<Component>();
 
             for (const auto& [TypeId, InstanceCount] : ComponentsToAdd)
             {
-                if (const auto* Schema = FindSchema(TypeId))
+                for (uint16_t Count = 0; Count < InstanceCount; ++Count)
                 {
-                    for (uint16_t Count = 0; Count < InstanceCount; ++Count)
+                    // ownership: SpaceEntity is presumably supposed to take ownership, but it currently leaks all components
+                    if (auto* SchemaComponent = Entity->AddComponentByTypeId(TypeId))
                     {
-                        // ownership: SpaceEntity is presumably supposed to take ownership, but it currently leaks all components
-                        if (auto* SchemaComponent = Entity->AddComponentByTypeId(TypeId))
-                        {
-                            SchemaComponents.push_back({ *SchemaComponent });
-                        }
+                        SchemaComponents.push_back({ *SchemaComponent });
                     }
                 }
             }
@@ -194,7 +193,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, GetterAvailableO
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -228,37 +227,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
                 {
                     0,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
                 },
                 {
                     1,
                     "floatProperty",
-                    0.25f,
+                    PlainValue<float> { 0.25f },
                 },
                 {
                     2,
                     "intProperty",
-                    int64_t { 123 },
+                    PlainValue<int64_t> { int64_t { 123 } },
                 },
                 {
                     3,
                     "stringProperty",
-                    "Test!",
+                    PlainValue<std::string> { "Test!" },
                 },
                 {
                     4,
                     "vec2Property",
-                    csp::common::Vector2(1.0f, 2.0f),
+                    PlainValue<csp::common::Vector2> { csp::common::Vector2(1.0f, 2.0f) },
                 },
                 {
                     5,
                     "vec3Property",
-                    csp::common::Vector3(1.0f, 2.0f, 3.0f),
+                    PlainValue<csp::common::Vector3> { csp::common::Vector3(1.0f, 2.0f, 3.0f) },
                 },
                 {
                     6,
                     "vec4Property",
-                    csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f),
+                    PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
             },
         },
@@ -315,6 +314,119 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
     EXPECT_EQ(Component.GetProperty(6), csp::common::Vector4(2.f, 3.f, 4.f, 5.f));
 }
 
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SetterIgnoresValueOutsideRange)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "floatProperty",
+                    BoundedValue<float> {
+                        0.25f,
+                        { 0.0f, 1.0f },
+                    },
+                },
+            },
+        },
+    });
+
+    auto Entity = Fixture.MakeEntity("Test Entity",
+        {
+            TestFixture::Entity::ComponentCreationArgs {
+                Schema::TypeIdType { 123 },
+                TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
+            },
+        });
+
+    constexpr auto ScriptText = R"(
+        import { assert } from "CSPTest";
+
+        const example = ThisEntity.getExampleComponents()[0];
+        assert(example.floatProperty === 0.25, "Initial value of floatProperty === 0.25");
+
+        example.floatProperty = 2.0;
+    )";
+
+    EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
+
+    ASSERT_EQ(Entity.SchemaComponents.size(), 1);
+
+    const auto& Component = Entity.SchemaComponents.front();
+    EXPECT_EQ(Component.GetProperty(0), 0.25f);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, StringToStringMapGetterSetter)
+{
+    auto Fixture = TestFixture({
+        Schema {
+            Schema::TypeIdType { 123 },
+            "Example",
+            {
+                {
+                    0,
+                    "mapProperty",
+                    PlainValue<std::unordered_map<std::string, std::string>> {
+                        {
+                            { "modelA", "materialA" },
+                            { "modelB", "materialB" },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    auto Entity = Fixture.MakeEntity("Test Entity",
+        {
+            TestFixture::Entity::ComponentCreationArgs {
+                Schema::TypeIdType { 123 },
+                TestFixture::Entity::ComponentCreationArgs::InstanceCount { 1 },
+            },
+        });
+
+    constexpr auto ScriptText = R"(
+        import { assert } from "CSPTest";
+
+        const example = ThisEntity.getExampleComponents()[0];
+
+        assert("mapProperty" in example, "mapProperty exists");
+
+        const initialKeys = Object.keys(example.mapProperty);
+        assert(initialKeys.length === 2, `Initial value of mapProperty has 2 entries, ${initialKeys.length}`);
+        assert(example.mapProperty.modelA === "materialA", `Initial value of mapProperty.modelA === "materialA"`);
+        assert(example.mapProperty.modelB === "materialB", `Initial value of mapProperty.modelB === "materialB"`);
+
+        // Note: the getter returns a new object each time, so mutating it does not modify the property.
+        example.mapProperty.modelA = "Ignored";
+        assert(example.mapProperty.modelA === "materialA", "Mutating the object returned by the getter leaves the property unchanged");
+
+        example.mapProperty = {
+            modelA: "materialA JS!",
+            modelC: "materialC JS!",
+        };
+    )";
+
+    EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
+
+    ASSERT_EQ(Entity.SchemaComponents.size(), 1);
+
+    const auto& Component = Entity.SchemaComponents.front();
+    EXPECT_EQ(Component.GetProperty(0),
+        (csp::common::Map<csp::common::String, csp::common::ReplicatedValue> {
+            {
+                "modelA",
+                "materialA JS!",
+            },
+            {
+                "modelC",
+                "materialC JS!",
+            },
+        }));
+}
+
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothScriptableAndNonScriptableProperties)
 {
     auto Fixture = TestFixture({
@@ -325,22 +437,28 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
                 {
                     0,
                     "stringProperty",
-                    "Hello",
+                    PlainValue<std::string> { "Hello" },
                 },
                 {
                     1,
-                    "unsupportedTypeProperty",
-                    csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+                    "mapProperty",
+                    PlainValue<std::unordered_map<std::string, std::string>> {},
                 },
                 {
                     2,
                     {}, // Note: No property name
-                    csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+                    PlainValue<std::unordered_map<std::string, std::string>> {},
                 },
                 {
                     3,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
+                },
+                {
+                    4,
+                    "nonExposedProperty",
+                    PlainValue<std::string> { "" },
+                    /*.IsScriptable =*/false,
                 },
             },
         },
@@ -360,8 +478,9 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SchemaWithBothSc
         const mixed = ThisEntity.getMixedComponents()[0];
     
         assert("stringProperty" in mixed, "stringProperty exists");
-        assert(!("unsupportedTypeProperty" in mixed), "unsupportedTypeProperty does not exist");
+        assert("mapProperty" in mixed, "mapProperty exists");
         assert("boolProperty" in mixed, "boolProperty exists");
+        assert(!("nonExposedProperty" in mixed), "nonExposedProperty does not exist");
     )";
 
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
@@ -377,37 +496,37 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
                 {
                     0,
                     "boolProperty",
-                    true,
+                    PlainValue<bool> { true },
                 },
                 {
                     1,
                     "floatProperty",
-                    0.25f,
+                    PlainValue<float> { 0.25f },
                 },
                 {
                     2,
                     "intProperty",
-                    int64_t { 123 },
+                    PlainValue<int64_t> { int64_t { 123 } },
                 },
                 {
                     3,
                     "stringProperty",
-                    "Test!",
+                    PlainValue<std::string> { "Test!" },
                 },
                 {
                     4,
                     "vec2Property",
-                    csp::common::Vector2(1.0f, 2.0f),
+                    PlainValue<csp::common::Vector2> { csp::common::Vector2(1.0f, 2.0f) },
                 },
                 {
                     5,
                     "vec3Property",
-                    csp::common::Vector3(1.0f, 2.0f, 3.0f),
+                    PlainValue<csp::common::Vector3> { csp::common::Vector3(1.0f, 2.0f, 3.0f) },
                 },
                 {
                     6,
                     "vec4Property",
-                    csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f),
+                    PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
             },
         },
@@ -498,7 +617,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, ComponentsOfSame
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -537,7 +656,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, PropertiesAreEnu
                 {
                     0,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -576,7 +695,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BaseClassFunctio
                 {
                     1,
                     "stringProperty",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -638,7 +757,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleComponen
                 {
                     0,
                     "stringProperty",
-                    "",
+                    PlainValue<std::string> { "" },
                 },
             },
         },
@@ -690,7 +809,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleEntityIn
                 {
                     0,
                     "stringProperty",
-                    "",
+                    PlainValue<std::string> { "" },
                 },
             },
         },
@@ -765,7 +884,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleScriptab
                 {
                     0,
                     "value",
-                    "Test",
+                    PlainValue<std::string> { "Test" },
                 },
             },
         },
@@ -776,7 +895,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleScriptab
                 {
                     0,
                     "value",
-                    int64_t { 616 },
+                    PlainValue<int64_t> { int64_t { 616 } },
                 },
             },
         },
@@ -822,7 +941,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                 {
                     0,
                     {}, // Note: Non scriptable
-                    "Non Scriptable",
+                    PlainValue<std::string> { "Non Scriptable" },
                 },
             },
         },
@@ -833,7 +952,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, MultipleSchemaCo
                 {
                     0,
                     "value",
-                    "Hello",
+                    PlainValue<std::string> { "Hello" },
                 },
             },
         },
@@ -872,7 +991,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BindingsAfterSou
                 {
                     0,
                     "value",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },
@@ -921,7 +1040,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, BindingsRegister
                 {
                     0,
                     "value",
-                    "Value",
+                    PlainValue<std::string> { "Value" },
                 },
             },
         },

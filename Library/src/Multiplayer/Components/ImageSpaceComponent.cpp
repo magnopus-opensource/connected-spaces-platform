@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Image),
@@ -26,63 +27,78 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
+            "name_DEPRECATED",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::ImageAssetId),
             "imageAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::Scale),
             "scale",
-            csp::common::Vector3::One(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::One() },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BillboardMode),
             "billboardMode",
-            static_cast<int64_t>(BillboardMode::Off),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(BillboardMode::Off),
+                {
+                    SchemaOption<int64_t> { "Off", static_cast<int64_t>(BillboardMode::Off) },
+                    SchemaOption<int64_t> { "Billboard", static_cast<int64_t>(BillboardMode::Billboard) },
+                    SchemaOption<int64_t> { "YawLockedBillboard", static_cast<int64_t>(BillboardMode::YawLockedBillboard) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::DisplayMode),
             "displayMode",
-            static_cast<int64_t>(DisplayMode::DoubleSided),
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(DisplayMode::DoubleSided),
+                {
+                    SchemaOption<int64_t> { "SingleSided", static_cast<int64_t>(DisplayMode::SingleSided) },
+                    SchemaOption<int64_t> { "DoubleSided", static_cast<int64_t>(DisplayMode::DoubleSided) },
+                    SchemaOption<int64_t> { "DoubleSidedReversed", static_cast<int64_t>(DisplayMode::DoubleSidedReversed) },
+                },
+            },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsEmissive),
             "isEmissive",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

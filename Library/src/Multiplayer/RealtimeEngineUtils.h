@@ -38,6 +38,11 @@ class LogSystem;
     as OnlineRealtimeEngine is essentially and extension of Offline, adding replication functionality.
 */
 
+namespace csp::multiplayer::schema
+{
+class ComponentSchemaRegistry;
+}
+
 namespace csp::multiplayer
 {
 class SpaceEntity;
@@ -71,10 +76,10 @@ csp::multiplayer::SpaceEntity* FindSpaceObject(csp::common::IRealtimeEngine& Rea
 
 // Creates a space entity with an avatar component.
 std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId, csp::common::IRealtimeEngine& RealtimeEngine,
-    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem, uint64_t NetworkId, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
-    const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
-    csp::multiplayer::LocomotionModel LocomotionModel);
+    const csp::multiplayer::schema::ComponentSchemaRegistry& Registry, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
+    uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
+    bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
+    csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel);
 
 // Checks if an entity exists within the root hierarchy array
 bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, SpaceEntity* Entity);

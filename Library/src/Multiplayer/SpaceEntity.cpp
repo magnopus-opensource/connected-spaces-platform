@@ -71,6 +71,8 @@ using namespace std::chrono;
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
 {
     glm::mat4 ParentTranslate = glm::translate(
@@ -152,11 +154,13 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     }
 }
 
-SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
-    SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
-    csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent)
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, const ComponentSchemaRegistry& Registry,
+    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
+    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, csp::common::Optional<uint64_t> ParentId, bool IsTransferable,
+    bool IsPersistent)
     : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
 {
+    this->SchemaRegistry = &Registry;
     this->Id = Id;
     this->Type = Type;
     this->Name = Name;
@@ -520,8 +524,7 @@ template <typename T> static ComponentBase* TryMakeOrDefault(const ComponentSche
 
 ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, uint64_t TypeId)
 {
-    const auto* Registry = EntitySystem != nullptr ? EntitySystem->GetComponentSchemaRegistry() : nullptr;
-    const auto* Schema = Registry != nullptr ? Registry->Find(TypeId) : nullptr;
+    const auto* Schema = SchemaRegistry != nullptr ? SchemaRegistry->Find(TypeId) : nullptr;
 
     if (!IsLegacyComponentTypeId(TypeId))
     {

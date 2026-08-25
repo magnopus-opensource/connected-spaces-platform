@@ -17,32 +17,40 @@
 
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
 
+using namespace schema;
+
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ScriptData),
-    {}, // not exposed to scripting
+    "Script", // not exposed to scripting
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptSource),
-            {}, // not exposed to scripting
-            "",
+            "scriptSource",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::OwnerId),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(0),
+            "ownerId",
+            PlainValue<int64_t> { static_cast<int64_t>(0) },
         },
         {
             static_cast<ComponentProperty::KeyType>(ScriptComponentPropertyKeys::ScriptScope),
-            {}, // not exposed to scripting
-            static_cast<int64_t>(ScriptScope::Owner),
+            "scriptScope",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(ScriptScope::Owner),
+                {
+                    SchemaOption<int64_t> { "Local", static_cast<int64_t>(ScriptScope::Local) },
+                    SchemaOption<int64_t> { "Owner", static_cast<int64_t>(ScriptScope::Owner) },
+                },
+            },
         },
     },
+    /*.IsScriptable =*/false, // not exposed to scripting historically, so honouring that for now
 };
 
 const ComponentSchema& ScriptSpaceComponent::GetSchema() { return Schema; }

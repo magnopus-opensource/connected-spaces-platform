@@ -41,7 +41,7 @@ enum class ECommercePropertyKeys : uint16_t
 class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -53,9 +53,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new ECommerceSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<ECommerceSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup ITransformComponent
     /// @{
@@ -74,7 +74,7 @@ public:
     void SetProductId(csp::common::String Value);
 
 private:
-    ECommerceSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    ECommerceSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

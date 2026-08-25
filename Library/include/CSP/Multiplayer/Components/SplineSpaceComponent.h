@@ -38,7 +38,7 @@ enum class SplinePropertyKeys : uint16_t
 class CSP_API SplineSpaceComponent : public ComponentBase
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the spline space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -50,9 +50,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new SplineSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<SplineSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Generate a vector3 at a chosen position along the spline
     /// Note: Generates a cubic spline position from current Waypoints
@@ -71,7 +71,7 @@ public:
     void SetWaypoints(const csp::common::List<csp::common::Vector3>& Waypoints);
 
 private:
-    SplineSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    SplineSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 };
 
 } // namespace csp::multiplayer

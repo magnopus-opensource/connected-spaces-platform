@@ -26,19 +26,25 @@ class IJSScriptRunner;
 class IRealtimeEngine;
 }
 
+namespace csp::multiplayer::schema
+{
+class ComponentSchemaRegistry;
+}
+
 namespace csp::multiplayer
 {
 
 class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
-    EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem);
+    EntityScriptBinding(
+        csp::common::IRealtimeEngine* InEntitySystem, const schema::ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem);
     ~EntityScriptBinding();
 
     void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
 
-    static EntityScriptBinding* BindEntitySystem(
-        csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+    static EntityScriptBinding* BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, const schema::ComponentSchemaRegistry& Registry,
+        csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
     static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
@@ -46,6 +52,7 @@ private:
     std::unique_ptr<SchemaCacheImpl> SchemaCache;
 
     csp::common::IRealtimeEngine* EntitySystem;
+    const schema::ComponentSchemaRegistry& SchemaRegistry;
     csp::common::LogSystem& LogSystem;
 };
 

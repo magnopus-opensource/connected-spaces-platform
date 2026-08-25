@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ExternalLink),
@@ -26,53 +27,54 @@ const auto Schema = ComponentSchema {
     csp::common::Array<ComponentProperty> {
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Name_DEPRECATED),
-            {}, // not exposed to scripting
-            "",
+            "name_DEPRECATED",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::LinkUrl),
             "linkUrl",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3 { 1, 1, 1 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1, 1, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::DisplayText),
             "displayText",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ExternalLinkPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

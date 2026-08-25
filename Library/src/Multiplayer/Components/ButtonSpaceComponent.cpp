@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::Button),
@@ -27,52 +28,52 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::LabelText),
             "labelText",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IconAssetId),
             "iconAssetId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::AssetCollectionId),
             "assetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4 { 0, 0, 0, 1 },
+            PlainValue<csp::common::Vector4> { csp::common::Vector4 { 0, 0, 0, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::Scale),
             "scale",
-            csp::common::Vector3 { 1, 1, 1 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 1, 1, 1 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVisible),
             "isVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsARVisible),
             "isARVisible",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(ButtonPropertyKeys::IsVirtualVisible),
             "isVirtualVisible",
-            true,
+            PlainValue<bool> { true },
         },
     },
 };

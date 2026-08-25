@@ -41,7 +41,7 @@ enum class CustomComponentPropertyKeys : uint16_t
 class CSP_API CustomSpaceComponent : public ComponentBase
 {
 public:
-    CSP_NO_EXPORT static const ComponentSchema& GetSchema();
+    CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
 
     /// @brief Constructs the custom space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -53,9 +53,9 @@ public:
     /// @param Parent The space entity that owns this component.
     /// @return A new CustomSpaceComponent if the schema is compatible, nullptr otherwise.
     ///
-    /// @see csp::multiplayer::IsCompatible
+    /// @see csp::multiplayer::schema::IsCompatible
     CSP_NO_EXPORT static std::unique_ptr<CustomSpaceComponent> TryMake(
-        const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+        const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets a string that identifies the application origin.
     /// @return The application origin for which this component has been generated.
@@ -98,7 +98,7 @@ public:
     uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& Key) const;
 
 private:
-    CustomSpaceComponent(const ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+    CustomSpaceComponent(const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
     void AddKey(const csp::common::String& Key);
     void RemoveKey(const csp::common::String& Key);
 };

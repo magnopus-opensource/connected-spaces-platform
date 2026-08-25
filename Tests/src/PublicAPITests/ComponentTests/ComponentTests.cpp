@@ -17,7 +17,6 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
@@ -50,6 +49,7 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Common/Convert.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -58,6 +58,7 @@
 #include <limits>
 
 using namespace csp::multiplayer;
+using namespace csp::multiplayer::schema;
 
 namespace
 {
@@ -336,12 +337,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
 
     constexpr auto SchemaTypeId = std::numeric_limits<uint64_t>::max();
 
-    const auto ComponentSchemas = csp::common::Array<csp::multiplayer::ComponentSchema> {
-        csp::multiplayer::ComponentSchema {
-            csp::multiplayer::ComponentSchema::TypeIdType { SchemaTypeId },
+    const auto ComponentSchemas = csp::common::Array<ComponentSchema> {
+        ComponentSchema {
+            ComponentSchema::TypeIdType { SchemaTypeId },
             "Example",
             {
-                { 0, "stringProperty", "DefaultValue" },
+                { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
             },
         },
     };
@@ -428,7 +429,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
 
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProperty)
 {
-    const auto WithExtraProperty = [](const csp::multiplayer::ComponentSchema& Original) -> csp::multiplayer::ComponentSchema
+    const auto WithExtraProperty = [](const ComponentSchema& Original) -> ComponentSchema
     {
         const auto NextPropertyKey = [](const auto& Properties) -> uint16_t
         {
@@ -442,7 +443,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
         Properties.push_back({
             NextPropertyKey(Properties),
             "extraProperty",
-            csp::common::String { "ExtraDefault" },
+            PlainValue<std::string> { "ExtraDefault" },
         });
 
         return {
@@ -452,7 +453,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, UpdatedLegacySchemaExposesExtraProper
         };
     };
 
-    const auto AllUpdated = std::vector<csp::multiplayer::ComponentSchema> {
+    const auto AllUpdated = std::vector<ComponentSchema> {
         WithExtraProperty(csp::multiplayer::StaticModelSpaceComponent::GetSchema()),
         WithExtraProperty(csp::multiplayer::AnimatedModelSpaceComponent::GetSchema()),
         WithExtraProperty(csp::multiplayer::VideoPlayerSpaceComponent::GetSchema()),

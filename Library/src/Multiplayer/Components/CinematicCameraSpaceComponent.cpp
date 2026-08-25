@@ -15,14 +15,16 @@
  */
 
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
+#include "Multiplayer/ComponentSchema.h"
 
-#include "CSP/Multiplayer/ComponentSchema.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
 #include <cmath>
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::CinematicCamera),
@@ -31,79 +33,80 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Rotation),
             "rotation",
-            csp::common::Vector4::Identity(),
+            PlainValue<csp::common::Vector4> { csp::common::Vector4::Identity() },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsEnabled),
             "isEnabled",
-            true,
+            PlainValue<bool> { true },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocalLength),
             "focalLength",
-            0.035f,
+            PlainValue<float> { 0.035f },
         },
         // 16:9
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::AspectRatio),
             "aspectRatio",
-            1.778f,
+            PlainValue<float> { 1.778f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::SensorSize),
             "sensorSize",
-            csp::common::Vector2 { 0.036f, 0.024f },
+            PlainValue<csp::common::Vector2> { csp::common::Vector2 { 0.036f, 0.024f } },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::NearClip),
             "nearClip",
-            0.1f,
+            PlainValue<float> { 0.1f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FarClip),
             "farClip",
-            20000.0f,
+            PlainValue<float> { 20000.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Iso),
             "iso",
-            400.0f,
+            PlainValue<float> { 400.0f },
         },
         // 60 FPS
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ShutterSpeed),
             "shutterSpeed",
-            0.0167f,
+            PlainValue<float> { 0.0167f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::Aperture),
             "aperture",
-            4.0f,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
-            "focusDistance",
-            5.0f,
-        },
-        {
-            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::DepthOfFieldEnabled),
-            "depthOfFieldEnabled",
-            false,
+            PlainValue<float> { 4.0f },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::IsViewerCamera),
             "isViewerCamera",
-            false,
+            PlainValue<bool> { false },
         },
         {
             static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::ThirdPartyComponentRef),
-            {}, // not exposed to scripting,
-            "",
+            "thirdPartyComponentRef",
+            PlainValue<std::string> { "" },
+            /*.IsScriptable =*/false,
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::FocusDistance),
+            "focusDistance",
+            PlainValue<float> { 5.0f },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(CinematicCameraPropertyKeys::DepthOfFieldEnabled),
+            "depthOfFieldEnabled",
+            PlainValue<bool> { false },
         },
     },
 };

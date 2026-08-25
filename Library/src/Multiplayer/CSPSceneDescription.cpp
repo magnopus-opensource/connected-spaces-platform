@@ -23,6 +23,8 @@
 
 namespace csp::multiplayer
 {
+using namespace schema;
+
 CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson)
 
 {
@@ -33,8 +35,8 @@ CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::St
     this->SceneDescriptionJson = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
 }
 
-csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
+csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(csp::common::IRealtimeEngine& RealtimeEngine,
+    const ComponentSchemaRegistry& Registry, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
 {
     mcs::SceneDescription SceneDescription;
     csp::json::JsonDeserializer::Deserialize(SceneDescriptionJson.c_str(), SceneDescription);
@@ -44,7 +46,7 @@ csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEn
     size_t ObjectsIndex = 0;
     for (const auto& Object : SceneDescription.Objects)
     {
-        auto Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, RemoteScriptRunner, LogSystem);
+        auto Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, Registry, RemoteScriptRunner, LogSystem);
 
         Entities[ObjectsIndex] = Entity.release();
         ObjectsIndex++;

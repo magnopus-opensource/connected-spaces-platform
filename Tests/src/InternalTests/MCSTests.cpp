@@ -17,6 +17,7 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "TestHelpers.h"
@@ -37,14 +38,14 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
         LogSystem,
         *ScriptSystem,
         {
-            csp::multiplayer::ComponentSchema {
-                csp::multiplayer::ComponentSchema::TypeIdType { LargeTypeId },
+            csp::multiplayer::schema::ComponentSchema {
+                csp::multiplayer::schema::ComponentSchema::TypeIdType { LargeTypeId },
                 "Example",
                 {
-                    csp::multiplayer::ComponentProperty {
-                        csp::multiplayer::ComponentProperty::KeyType { 0 },
+                    csp::multiplayer::schema::ComponentProperty {
+                        csp::multiplayer::schema::ComponentProperty::KeyType { 0 },
                         "value",
-                        "hello",
+                        csp::multiplayer::schema::PlainValue<std::string> { "hello" },
                     },
                 },
             },

@@ -15,11 +15,12 @@
  */
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::ECommerce),
@@ -28,12 +29,12 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::Position),
             "position",
-            csp::common::Vector3 { 0, 0, 0 },
+            PlainValue<csp::common::Vector3> { csp::common::Vector3 { 0, 0, 0 } },
         },
         {
             static_cast<ComponentProperty::KeyType>(ECommercePropertyKeys::ProductId),
             "productId",
-            "",
+            PlainValue<std::string> { "" },
         },
     },
 };

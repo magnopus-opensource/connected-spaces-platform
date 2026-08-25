@@ -23,8 +23,6 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
-#include "CSP/Multiplayer/IComponentSchemaRegistry.h"
-
 namespace csp::multiplayer
 {
 class SpaceTransform;
@@ -396,10 +394,6 @@ public:
         // Avoiding unused params, see comment in top method
         (void)SpaceEntity;
     }
-
-    /// @brief Get the registry of component schemas, for enquiring about known components and their shape.
-    /// @return A non-owning pointer to the registry. Despite being pointer vs a reference, this is contractually non-null.
-    virtual const csp::multiplayer::IComponentSchemaRegistry* GetComponentSchemaRegistry() const = 0;
 
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.

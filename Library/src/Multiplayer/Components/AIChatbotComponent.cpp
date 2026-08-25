@@ -15,11 +15,12 @@
  */
 
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
-
-#include "CSP/Multiplayer/ComponentSchema.h"
+#include "Multiplayer/ComponentSchema.h"
 
 namespace csp::multiplayer
 {
+
+using namespace schema;
 
 const auto Schema = ComponentSchema {
     static_cast<ComponentSchema::TypeIdType>(ComponentType::AIChatbot),
@@ -28,22 +29,22 @@ const auto Schema = ComponentSchema {
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Position),
             "position",
-            csp::common::Vector3::Zero(),
+            PlainValue<csp::common::Vector3> { csp::common::Vector3::Zero() },
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::Voice),
             "voice",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
             "guardrailAssetCollectionId",
-            "",
+            PlainValue<std::string> { "" },
         },
         {
             static_cast<ComponentProperty::KeyType>(AIChatbotPropertyKeys::VisualState),
             "visualState",
-            static_cast<int64_t>(0),
+            PlainValue<int64_t> { static_cast<int64_t>(0) },
         },
     },
 };
