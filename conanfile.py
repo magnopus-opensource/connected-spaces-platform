@@ -30,7 +30,7 @@ class CSP(ConanFile):
         self.requires("msgpack-cxx/7.0.0")
         self.requires("tinyspline/0.6.0")
         self.requires("glm/1.0.1")
-        self.requires("gtest/1.11.0")
+        self.test_requires("gtest/1.11.0")
         self.requires("sole/1.0.4")
 
         # We use the Emscripten WebSockets API for Emscripten

@@ -32,6 +32,11 @@ inputs:
     required: false
     default: "install"
 
+  package_third_party_libs:
+    description: "Whether to copy all of csp's third party dependencies into the package."
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
 
@@ -63,6 +68,8 @@ runs:
         INPUTS_HOST_PROFILE: ${{ inputs.host_profile }}
         INPUTS_OUTPUT_FOLDER: ${{ inputs.output_folder }}
         INPUTS_BUILD_TYPE: ${{ inputs.build_type }}
+        INPUTS_THIRD_PARTY_LIBS: ${{ inputs.package_third_party_libs }}
+        INPUTS_INSTALL_PREFIX: ${{ inputs.install_prefix }}
       shell: bash
       run: |
         set -euxo pipefail
@@ -74,12 +81,22 @@ runs:
           exit 1
         fi
 
-        conan install . \
-          -of "${INPUTS_OUTPUT_FOLDER}" \
-          -s build_type="${INPUTS_BUILD_TYPE}" \
-          --build=missing \
+        CONAN_ARGS=(
+          .
+          -of "${INPUTS_OUTPUT_FOLDER}"
+          -s build_type="${INPUTS_BUILD_TYPE}"
+          --build=missing
           --profile:host="$PROFILE_PATH"
+        )
 
+        if [ "${INPUTS_THIRD_PARTY_LIBS}" = "true" ]; then
+          CONAN_ARGS+=(
+            --deployer=./conan/csp_deployer.py
+            --deployer-folder="${INPUTS_INSTALL_PREFIX}/lib/third_party"
+          )
+        fi
+
+        conan install "${CONAN_ARGS[@]}"
     - name: Configure CMake
       shell: bash
       run: |
