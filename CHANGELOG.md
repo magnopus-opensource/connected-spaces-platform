@@ -22,6 +22,13 @@ All notable changes to this project will be documented in this file. For compile
   - The realtime engine constructors taking `Array<ComponentSchema>` are now `CSP_NO_EXPORT`. Use the `List<String>` JSON overloads instead.
   - No clients had adopted the above, so this shouldn't have any practical impact
 
+### 🐛 🔨 Bug Fixes
+  
+- [OB-5315] fix: Route remote script updates through the same binding path as local script updates go through. (OnSourceChanged). By @MAG-ElliotMorris
+  Prior to this, we were not clearing the `MessageMap` or `PropertyMap` containers as we should, which meant any `subscribeToMessage`
+  events would keep executing if the script was modified on a remote client.
+  This also causes us to call `ResetContext` when the script is modified, which also seems like the right thing to be doing.
+
 ## [6.47.0]
 
 ### 🐛 🔨 Bug Fixes

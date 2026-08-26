@@ -26,6 +26,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "MultiplayerTestRunnerProcess.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
@@ -34,6 +35,7 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "PublicAPITests/SpaceSystemTestHelpers.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
+#include "fmt/format.h"
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 #include <atomic>
@@ -1349,6 +1351,115 @@ TEST_P(ModifyExistingScript, ModifyExistingScriptTest)
     DeleteSpace(SpaceSystem, Space.Id);
 
     // Log out
+    LogOut(UserSystem);
+}
+
+// Regression test for https://magnopus.atlassian.net/browse/OB-5315
+CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RemoteClearOfScriptSourceStopsScriptTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    csp::systems::Profile LocalUser = CreateTestUser();
+    csp::systems::Profile RemoteUser = CreateTestUser();
+
+    // Log in local user
+    csp::common::String UserId;
+    LogIn(UserSystem, UserId, LocalUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    const auto UniqueSpaceName = fmt::format("{}-{}", TestSpaceName, GetUniqueString());
+
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    // Don't proceed with the test until we've fully entered the space, we want a clean slate for script ticking.
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    ASSERT_EQ(EntityFetchCompleteFuture.wait_for(3s), std::future_status::ready);
+
+    // Trailing space is a footgun here, script logger appends a space after every argument for some reason...
+    const csp::common::String ScriptTickStr = "ScriptTick ";
+    // A script that logs on tick, we can assert this via testing the mock logger.
+    const std::string ScriptText = R"xx(
+        globalThis.onTick = () => {
+            CSP.Log('ScriptTick');
+        }
+
+        ThisEntity.subscribeToMessage("entityTick", "onTick");
+    )xx";
+
+    // Name must match the multiplayer test runner test
+    csp::multiplayer::SpaceEntity* Entity = CreateTestObject(RealtimeEngine.get(), "ScriptEntity");
+    ASSERT_TRUE(Entity != nullptr);
+
+    auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(Entity->AddComponent(ComponentType::ScriptData));
+    ScriptComponent->SetScriptSource(ScriptText.c_str());
+    Entity->GetScript().Invoke();
+    ASSERT_FALSE(Entity->GetScript().HasError());
+
+    // Replicate the entity and its script, so the remote client picks it up in its initial fetch.
+    Entity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    // Assert the script is actually running
+    {
+        RAIIMockLogger MockLogger;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ScriptTickStr)).Times(testing::AtLeast(1));
+        csp::CSPFoundation::Tick();
+    }
+
+    // Launch the multiplayer test runner process, it will clear the script source, and we'll recieve the replication back here
+    MultiplayerTestRunnerProcess RemoteClient
+        = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CLEAR_SCRIPT_SOURCE)
+              .SetSpaceId(Space.Id.c_str())
+              .SetLoginEmail(RemoteUser.Email.c_str())
+              .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
+              .SetTimeoutInSeconds(60);
+
+    std::future<void> RemoteClientReady = RemoteClient.ReadyForAssertionsFuture();
+    RemoteClient.StartProcess();
+
+    EXPECT_EQ(RemoteClientReady.wait_for(std::chrono::seconds(20)), std::future_status::ready);
+
+    // Confirm the empty source has reached us before continuing. This is a bit paranoid,
+    // it's just that replication goes over the network so we can't be sure it's here even if the remote client has finished.
+    const bool SourceCleared = ResponseWaiter::WaitFor(
+        [&ScriptComponent]()
+        {
+            csp::CSPFoundation::Tick();
+            return ScriptComponent->GetScriptSource().IsEmpty();
+        },
+        std::chrono::seconds(20));
+
+    ASSERT_TRUE(SourceCleared) << "The remote client's empty ScriptSource patch never arrived.";
+
+    {
+        // A tick should not cause the script behavior
+        RAIIMockLogger MockLogger;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ScriptTickStr)).Times(0);
+        csp::CSPFoundation::Tick();
+    }
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    EXPECT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
 

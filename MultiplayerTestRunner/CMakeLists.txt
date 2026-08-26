@@ -21,6 +21,8 @@ target_sources(MultiplayerTestRunner
         src/InternalUnitTests/Test_RunnableTests.cpp
         src/InternalUnitTests/Test_SpaceRAII.cpp
 
+        src/RunnableTests/ClearScriptSource.cpp
+        src/RunnableTests/ClearScriptSource.h
         src/RunnableTests/CreateAvatar.cpp
         src/RunnableTests/CreateAvatar.h
         src/RunnableTests/CreateConversation.cpp
