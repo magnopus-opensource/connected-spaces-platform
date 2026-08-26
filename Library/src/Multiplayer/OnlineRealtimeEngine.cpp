@@ -15,6 +15,8 @@
  */
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 
+#include "CSP/CSPFoundation.h" //Not great for modularity, wants removed
+
 #include "CSP/Common/List.h"
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/StringFormat.h"
@@ -1093,7 +1095,15 @@ void OnlineRealtimeEngine::DisableLeaderElection()
 
     if (LeaderElectionManager != nullptr)
     {
-        NetworkEventBus->StopListenCustomNetworkEvent("CSPInternal::ScriptEvent", RemoteRunScriptMessage);
+        /*
+         * This isn't true safety. In threaded destruction contexts, there is still a window where
+         * this remains unsynchronized. Doing this guard closes the window significantly however until we
+         * can actually sort out our initialization and de-initialization to make them bulletproof
+         */
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
+            NetworkEventBus->StopListenCustomNetworkEvent("CSPInternal::ScriptEvent", RemoteRunScriptMessage);
+        }
 
         LeaderElectionManager.reset(nullptr);
     }

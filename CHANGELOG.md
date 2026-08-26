@@ -28,6 +28,8 @@ All notable changes to this project will be documented in this file. For compile
   Prior to this, we were not clearing the `MessageMap` or `PropertyMap` containers as we should, which meant any `subscribeToMessage`
   events would keep executing if the script was modified on a remote client.
   This also causes us to call `ResetContext` when the script is modified, which also seems like the right thing to be doing.
+  
+- [OF-1882] fix: Guard RealtimeEngine destruction pathway against null NetworkEventBus, which could cause crashes on out-of-order teardown in GC'd langauges. By @MAG-ElliotMorris
 
 ## [6.47.0]
 

@@ -816,10 +816,20 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, ConstructFromJs
 
     EXPECT_CALL(*SignalRMock, Invoke).WillRepeatedly(MakeSingleEntityCreationInvoker());
 
-    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform {}, csp::common::Optional<uint64_t> {});
+    auto [Entity] = AWAIT(&Engine, CreateEntity, "SchemaEntity", csp::multiplayer::SpaceTransform { }, csp::common::Optional<uint64_t> { });
     ASSERT_NE(Entity, nullptr);
 
     EXPECT_NE(Entity->AddComponentByTypeId(AllPropertyTypesSchemaId), nullptr);
     EXPECT_NE(Entity->AddComponentByTypeId(EmptySchemaId), nullptr);
     EXPECT_EQ(Entity->AddComponentByTypeId(InvalidSchemaId), nullptr);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, RealtimeEngineCanBeDestructedAfterSystemsShutdown)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    csp::multiplayer::OnlineRealtimeEngine* RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->EnableLeaderElection(); // Neccesary to make LeaderElectionManager not null internally, such that we trigger the appropriate
+                                            // destruction path in realtime engine
+    csp::CSPFoundation::Shutdown();
+    delete RealtimeEngine; // Should not crash
 }
