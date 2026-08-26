@@ -35,9 +35,6 @@ fi
 
 python3 -m pip install -r teamcity/requirements.txt
 
-git config core.hooksPath .githooks
-git config commit.template .githooks/commit-template.txt
-
 XCODE_VERSION=$(softwareupdate --history | awk '/Command Line Tools for Xcode/ {print $6}' | tail -1)
 
 if [ ! -f /modules/premake/README.md ]

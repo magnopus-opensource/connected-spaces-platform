@@ -4,9 +4,6 @@ REM *** Command Line Arguments ***
 REM [1] - Configuration - release || debug
 REM [2] - Optional, append withNode to build with Node support, example ./EmscriptenFullBuildAndConfigure debug withNode
 
-git config core.hooksPath .githooks
-git config commit.template .githooks/commit-template.txt
-
 IF NOT EXIST "../../modules/premake/README.md" (
 	git submodule update --recursive
 )
