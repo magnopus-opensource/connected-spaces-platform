@@ -44,6 +44,7 @@ Documentation on processes and principles that the library adheres to.
 
    documentation/programming_guidelines
    documentation/adding_components
+   documentation/data_driven_components
    documentation/branching_strategy
    documentation/wrapper_generator_specs
    documentation/script_system

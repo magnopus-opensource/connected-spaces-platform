@@ -1,4 +1,10 @@
 # Adding Components to CSP
+
+```eval_rst
+.. warning::
+   Before adding a new component this way, consider whether it can instead be a :doc:`data-driven component <data_driven_components>`. This code-based approach is only warranted when the component needs bespoke runtime behaviour that a data-driven component cannot provide.
+```
+
 A common practice when developing in CSP is adding new Component classes to the library. This page details this process so that all the relevant steps are tackled and the new feature contains all the functionality expected of a new component.
 
 ## Add a new Component class
