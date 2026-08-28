@@ -58,7 +58,7 @@ A data-driven component conforms to the JSON structure detailed below
 
 | Field | | |
 |---|---|---|
-| `typeId` | required | Integer (`uint64_t` on the wire, but as this is JSON we're limited to 53 bits). Must be unique across everything registered with an engine. |
+| `typeId` | required | Integer (`uint64_t` on the wire, but as this is JSON we're limited to 53 bits). Must be unique across everything registered with an engine (discussed further [below](#component-typeid-allocation)). |
 | `name` | required | String, `PascalCase`. Must be unique across registered components. Names the script binding: `Example` gives `ThisEntity.getExampleComponents()`. |
 | `scriptable` | optional | Bool, default `true`. Whether to register the component with the embedded script system. |
 | `properties` | required | Array of property objects. |
