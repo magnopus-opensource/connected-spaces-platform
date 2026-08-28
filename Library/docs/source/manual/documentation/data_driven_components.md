@@ -1,8 +1,8 @@
 # Data-Driven Components
 
-In contrast to adding a new component by writing code [in C++](adding_components), which necessitates modifying the CSP library itself, building and distributing a new release etc, a "data-driven" component is one described by a schema, specifically a JSON document, that can be defined externally from the library and injected at runtime, allowing clients to author their own components for use in their connected applications.
+In contrast to adding a new component by writing code [in C++](adding_components), which necessitates modifying the CSP library itself, a "data-driven" component is one described by a schema, specifically a JSON document, that can be defined externally from the library and injected at runtime. This allows clients to author their own components specific to their connected applications, without modifying the library.
 
-The schema describes the component, its properties, their types, any constraints on values, names for exposing to the script system etc, and then CSP takes care of replicating the component state as it always has, and provides a dynamic runtime API for reading and writing properties, ensuring that values conform to those described in the schema when set programmatically. 
+The schema describes the component, its properties, their types, any constraints on values, names for exposing to the script system etc, and then CSP takes care of replicating the component state as it always has. A dynamic runtime API is provided for reading and writing properties, ensuring values conform to the schema when set programmatically.
 
 Below is an example of such a component which we'll reference throughout:
 
