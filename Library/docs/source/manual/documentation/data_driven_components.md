@@ -75,7 +75,7 @@ A data-driven component conforms to the JSON structure detailed below
 | `options` | optional | Array of `{ "name": string, "value": v }`. `int`, `float` and `string` only. Mainly for enums, whose cases are usually ints. |
 | `scriptable` | optional | Bool, default `true`. Whether to register the property with the embedded script system. If `scriptable` is false at the component level, that takes precedence. |
 
-`range` and `options` are currently mutually exclusive. A value is unconstrained, bounded (has a `range`) or enumerated (has `options`), and declaring both is a parse error. The `value` of an option is what replicates, and its `name` is a label for a client presenting a choice (i.e. in a UI).
+`range` and `options` are currently mutually exclusive. A value is unconstrained, bounded (has a `range`) or enumerated (has `options`), and declaring both is a parse error. The `value` of an option is what replicates, and its `name` is a label for a client presenting a choice (i.e. in a UI). More broadly, only property keys and their values go over the wire. The rest is metadata, used to drive script bindings and validate values on the client, and may be useful for other purposes such as generating property editor UIs.
 
 How `defaultValue` is written follows from `type`:
 
