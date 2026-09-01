@@ -1,6 +1,3 @@
-git config core.hooksPath .githooks
-git config commit.template .githooks/commit-template.txt
-
 # Example usage, ./EmscriptenFullBuildAndConfigure debug withNode
 
 if ! test -f "../../modules/premake/README.md"; then

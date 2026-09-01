@@ -39,9 +39,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 XCODE_VERSION=$(softwareupdate --history | awk '/Command Line Tools for Xcode/ {print $6}' | tail -1)
 cd "${DIR}"
 
-git config core.hooksPath .githooks
-git config commit.template .githooks/commit-template.txt
-
 if [ ! -f ./modules/premake/README.md ]
 then
 	git submodule update --recursive
