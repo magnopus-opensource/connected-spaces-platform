@@ -60,7 +60,7 @@ public:
     void SetSystemLevel(const csp::common::LogLevel InSystemLevel);
 
     /// @brief Retreive the log verbosity level.
-    csp::common::LogLevel GetSystemLevel();
+    csp::common::LogLevel GetSystemLevel() const;
 
     /// @brief Check if we currently log a specified log verbosity level.
     /// @param Level The level to check.
