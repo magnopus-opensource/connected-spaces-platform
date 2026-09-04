@@ -4,6 +4,8 @@
 #   - Runs the MCS Docker container
 #   - Downloads the Linux, ReleaseWithDebugInfo, Static build
 #   - Runs tests against local services.
+#   - Uploads the MCS container logs as an artifact, so failures inside the
+#     container can be diagnosed after the job finishes.
 
 name: Run Tests (Local MCS) Linux
 
@@ -92,3 +94,38 @@ jobs:
           ./csp-tests --gtest_filter="${INPUTS_GTEST_FILTER}"
         env:
           INPUTS_GTEST_FILTER: ${{ inputs.gtest_filter }}
+
+      - name: Collect Docker logs
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          LOG_DIR="${{ github.workspace }}/docker-logs"
+          mkdir -p "$LOG_DIR"
+
+          # Overview of every container the MCS stack created, running or not,
+          # so a container that exited before the tests ran is still visible.
+          docker ps -a > "$LOG_DIR/docker-ps.txt" 2>&1
+          docker compose ls --all > "$LOG_DIR/docker-compose-ls.txt" 2>&1
+
+          for id in $(docker ps -aq); do
+            name="$(docker inspect --format '{{ .Name }}' "$id" | sed 's|^/||')"
+            # Container names can contain characters that are invalid in artifact
+            # paths, so normalise them before using them as filenames.
+            safe_name="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '_')"
+
+            docker logs --timestamps "$id" > "$LOG_DIR/$safe_name.log" 2>&1
+            docker inspect "$id" > "$LOG_DIR/$safe_name.inspect.json" 2>&1
+          done
+
+          echo "Collected logs for $(docker ps -aq | wc -l) container(s)."
+
+      - name: Upload Docker logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-mcs-docker-logs-${{ github.run_attempt }}
+          path: docker-logs
+          if-no-files-found: warn
+          retention-days: 7
