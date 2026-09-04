@@ -58,7 +58,7 @@ void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { C
 
 void LogSystem::SetSystemLevel(const csp::common::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
 
-csp::common::LogLevel LogSystem::GetSystemLevel() { return SystemLevel; }
+csp::common::LogLevel LogSystem::GetSystemLevel() const { return SystemLevel; }
 
 bool LogSystem::LoggingEnabled(const csp::common::LogLevel Level) { return Level <= SystemLevel; }
 
