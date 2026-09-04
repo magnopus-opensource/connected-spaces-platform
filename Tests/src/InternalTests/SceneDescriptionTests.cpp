@@ -468,13 +468,6 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
         JsonChars.Append(csp::common::String(line.c_str()));
     }
 
-    MockScriptRunner ScriptRunner;
-    csp::common::LogSystem LogSystem;
-
-    CSPSceneDescription SceneDescription { JsonChars };
-    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(SceneDescription, LogSystem, ScriptRunner);
-    const auto& Entities = *RealtimeEngine.GetAllEntities();
-
     CSPSceneData SceneData { JsonChars };
 
     // Just do a minimal check, we don't need to fully validate everything here, we're just checking the string concatanation works.
