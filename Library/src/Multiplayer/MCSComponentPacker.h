@@ -84,6 +84,7 @@ mcs::ItemComponentData ToItemComponentData(bool Value);
 mcs::ItemComponentData ToItemComponentData(uint64_t Value);
 mcs::ItemComponentData ToItemComponentData(int64_t Value);
 mcs::ItemComponentData ToItemComponentData(float Value);
+mcs::ItemComponentData ToItemComponentData(double Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value);

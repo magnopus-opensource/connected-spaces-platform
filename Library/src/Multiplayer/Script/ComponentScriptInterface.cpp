@@ -112,6 +112,12 @@ std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProp
             return Value;
         }
 
+        // TODO: implement in the context of working `double` through the schema
+        std::optional<Value> operator()(double) const
+        {
+            return std::nullopt;
+        }
+
         std::optional<Value> operator()(int64_t Value) const
         {
             return Value;

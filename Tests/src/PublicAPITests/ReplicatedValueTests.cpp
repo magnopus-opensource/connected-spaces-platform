@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValueException.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
+
+#include <limits>
 
 using namespace csp::multiplayer;
 
@@ -106,6 +109,60 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, FloatAssignmentTest)
 
     EXPECT_TRUE(MyValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float);
     EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, DoubleConstructorTest)
+{
+    const auto DoubleValue = csp::common::ReplicatedValue { 12345.6789 };
+
+    EXPECT_EQ(DoubleValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Double);
+    EXPECT_EQ(DoubleValue.GetDouble(), 12345.6789);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetDoubleTest)
+{
+    auto DoubleValue = csp::common::ReplicatedValue {};
+    DoubleValue.SetDouble(12345.6789);
+
+    EXPECT_EQ(DoubleValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Double);
+    EXPECT_EQ(DoubleValue.GetDouble(), 12345.6789);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, DoubleAssignmentTest)
+{
+    auto DoubleValue = csp::common::ReplicatedValue {};
+    DoubleValue = 12345.6789;
+
+    EXPECT_EQ(DoubleValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Double);
+    EXPECT_EQ(DoubleValue.GetDouble(), 12345.6789);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, DoubleRetainsPrecisionBeyondFloat)
+{
+    const auto Original = 1.0 + std::numeric_limits<double>::epsilon();
+    const auto DoubleValue = csp::common::ReplicatedValue { Original };
+
+    EXPECT_EQ(DoubleValue.GetDouble(), Original);
+    EXPECT_NE(DoubleValue.GetDouble(), 1.0);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, DoubleIsDistinctFromFloat)
+{
+    const auto FloatValue = csp::common::ReplicatedValue { 1.5f };
+    const auto DoubleValue = csp::common::ReplicatedValue { 1.5 };
+
+    EXPECT_EQ(FloatValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Float);
+    EXPECT_EQ(DoubleValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Double);
+    EXPECT_NE(FloatValue, DoubleValue);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, DoubleAndFloatAccessorsDoNotCoerce)
+{
+    const auto FloatValue = csp::common::ReplicatedValue { 1.5f };
+    const auto DoubleValue = csp::common::ReplicatedValue { 1.5 };
+
+    EXPECT_THROW(DoubleValue.GetFloat(), csp::common::ReplicatedValueException);
+    EXPECT_THROW(FloatValue.GetDouble(), csp::common::ReplicatedValueException);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector3ConstructorTest)

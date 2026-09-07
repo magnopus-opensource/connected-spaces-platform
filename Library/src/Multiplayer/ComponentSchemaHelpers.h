@@ -199,6 +199,8 @@ template <typename T> ValidationResult::Error TypeMismatch(const csp::common::Re
             return "ReplicatedValueType::Vector2";
         case csp::common::ReplicatedValueType::StringMap:
             return "ReplicatedValueType::StringMap";
+        case csp::common::ReplicatedValueType::Double:
+            return "ReplicatedValueType::Double";
         }
 
         return "Unknown";
