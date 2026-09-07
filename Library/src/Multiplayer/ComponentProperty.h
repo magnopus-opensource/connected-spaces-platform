@@ -114,10 +114,10 @@ template <typename T> bool EnumeratedValue<T>::operator!=(const EnumeratedValue&
 /// is initialised with, and the constraint it is subject to, which may be nothing, an inclusive range,
 /// or a set of named options. The set of declarations is closed, so only valid combinations of type,
 /// default and constraint can be expressed.
-using PropertyValue
-    = std::variant<PlainValue<bool>, PlainValue<int64_t>, PlainValue<float>, PlainValue<std::string>, PlainValue<csp::common::Vector2>,
-        PlainValue<csp::common::Vector3>, PlainValue<csp::common::Vector4>, PlainValue<std::unordered_map<std::string, std::string>>,
-        BoundedValue<int64_t>, BoundedValue<float>, EnumeratedValue<int64_t>, EnumeratedValue<float>, EnumeratedValue<std::string>>;
+using PropertyValue = std::variant<PlainValue<bool>, PlainValue<int64_t>, PlainValue<float>, PlainValue<std::string>,
+    PlainValue<csp::common::Vector2>, PlainValue<csp::common::Vector3>, PlainValue<csp::common::Vector4>,
+    PlainValue<std::unordered_map<std::string, std::string>>, BoundedValue<int64_t>, BoundedValue<float>, EnumeratedValue<int64_t>,
+    EnumeratedValue<float>, EnumeratedValue<std::string>, PlainValue<double>, BoundedValue<double>, EnumeratedValue<double>>;
 
 /// @brief Represents an individual data field, or "property", within a component schema,
 /// consisting of a stable ID/key, a name, a typed value, and other metadata.

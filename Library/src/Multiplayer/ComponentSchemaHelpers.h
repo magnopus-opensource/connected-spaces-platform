@@ -50,6 +50,11 @@ template <> struct ScriptTypeMap<float>
     using Type = float;
 };
 
+template <> struct ScriptTypeMap<double>
+{
+    using Type = double;
+};
+
 template <> struct ScriptTypeMap<int64_t>
 {
     using Type = int64_t;
@@ -108,6 +113,18 @@ template <> struct ReplicatedTypeMap<float>
         const auto* ActualValue = std::get_if<float>(&Value.GetValue());
 
         return ActualValue != nullptr ? std::optional<float> { *ActualValue } : std::nullopt;
+    }
+};
+
+template <> struct ReplicatedTypeMap<double>
+{
+    static constexpr auto ValueType = csp::common::ReplicatedValueType::Double;
+
+    static std::optional<double> From(const csp::common::ReplicatedValue& Value)
+    {
+        const auto* ActualValue = std::get_if<double>(&Value.GetValue());
+
+        return ActualValue != nullptr ? std::optional<double> { *ActualValue } : std::nullopt;
     }
 };
 

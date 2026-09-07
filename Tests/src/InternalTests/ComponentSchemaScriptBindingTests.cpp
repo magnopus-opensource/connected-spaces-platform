@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -259,6 +260,11 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
                     "vec4Property",
                     PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
+                {
+                    7,
+                    "doubleProperty",
+                    PlainValue<double> { 1.0 + std::numeric_limits<double>::epsilon() },
+                },
             },
         },
     });
@@ -281,6 +287,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
         assert(example.floatProperty === 0.25, "Initial value of floatProperty === 0.25");
         assert(example.intProperty === 123, "Initial value of intProperty === 123");
         assert(example.stringProperty === "Test!", `Initial value of stringProperty === "Test!"`);
+        assert(example.doubleProperty === 1 + Number.EPSILON, "Initial value of doubleProperty === 1 + Number.EPSILON");
 
         const areEqual = (lhs, rhs) => {
             return lhs.length === rhs.length
@@ -298,6 +305,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
         example.vec2Property = [2, 3];
         example.vec3Property = [2, 3, 4];
         example.vec4Property = [2, 3, 4, 5];
+        example.doubleProperty = 1 + 2 * Number.EPSILON;
     )";
 
     EXPECT_TRUE(Fixture.InvokeScript(Entity, ScriptText));
@@ -312,6 +320,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SupportedTypesGe
     EXPECT_EQ(Component.GetProperty(4), csp::common::Vector2(2.f, 3.f));
     EXPECT_EQ(Component.GetProperty(5), csp::common::Vector3(2.f, 3.f, 4.f));
     EXPECT_EQ(Component.GetProperty(6), csp::common::Vector4(2.f, 3.f, 4.f, 5.f));
+    EXPECT_EQ(Component.GetProperty(7), 1.0 + 2 * std::numeric_limits<double>::epsilon());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, SetterIgnoresValueOutsideRange)
@@ -528,6 +537,11 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
                     "vec4Property",
                     PlainValue<csp::common::Vector4> { csp::common::Vector4(1.0f, 2.0f, 3.0f, 4.0f) },
                 },
+                {
+                    7,
+                    "doubleProperty",
+                    PlainValue<double> { 0.25 },
+                },
             },
         },
     });
@@ -557,6 +571,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
 
         assert(!throws(() => example.boolProperty = ""), "Setting boolProperty to different type applies JS type conversion rules");
         assert(!throws(() => example.floatProperty = ""), "Setting floatProperty to different type applies JS type conversion rules");
+        assert(!throws(() => example.doubleProperty = ""), "Setting doubleProperty to different type applies JS type conversion rules");
         assert(!throws(() => example.intProperty = ""), "Setting intProperty to applies JS type conversion rules");
         assert(!throws(() => example.stringProperty = false), "Setting stringProperty to applies JS type conversion rules");
         assert(throws(() => example.vec2Property = ""), "Setting vec2Property to different type should throw");
@@ -586,6 +601,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
     EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(4)), csp::common::ReplicatedValueType::Vector2);
     EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(5)), csp::common::ReplicatedValueType::Vector3);
     EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(6)), csp::common::ReplicatedValueType::Vector4);
+    EXPECT_EQ(GetReplicatedValueType(Component.GetProperty(7)), csp::common::ReplicatedValueType::Double);
 
     // Note: we might consider changing the setters to always prevent setting the value when the type
     // differs, but currently we get the default quickjspp behaviour, which is consistent with our
@@ -599,6 +615,7 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, CoercesOrThrowsW
     EXPECT_EQ(Component.GetProperty(4), csp::common::Vector2(1.f, 2.f));
     EXPECT_EQ(Component.GetProperty(5), csp::common::Vector3(1.f, 2.f, 3.f));
     EXPECT_EQ(Component.GetProperty(6), csp::common::Vector4(1.f, 2.f, 3.f, 4.f));
+    EXPECT_EQ(Component.GetProperty(7), 0.0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaScriptBindingTests, ComponentsOfSameTypeHaveSamePrototype)
