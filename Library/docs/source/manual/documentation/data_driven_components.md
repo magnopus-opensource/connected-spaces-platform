@@ -69,10 +69,10 @@ A data-driven component conforms to the JSON structure detailed below
 |---|---|---|
 | `key` | required | Integer (`uint16_t` on the wire), `0` to `64510`. The library reserves the keys above that. Identifies the property within its component on the wire. Unique within the component, though not globally. |
 | `name` | required | String, `camelCase`, unique within the component. Names the property in scripts: `example.propertyName`. |
-| `type` | required | One of `bool`, `int`, `float`, `string`, `vec2`, `vec3`, `vec4`, `stringToStringMap`. |
+| `type` | required | One of `bool`, `int`, `float`, `double`, `string`, `vec2`, `vec3`, `vec4`, `stringToStringMap`. |
 | `defaultValue` | required | A value matching `type`. New instances are initialised from it. |
-| `range` | optional | `{ "min": n, "max": n }`, inclusive. `int` and `float` only. |
-| `options` | optional | Array of `{ "name": string, "value": v }`. `int`, `float` and `string` only. Mainly for enums, whose cases are usually ints. |
+| `range` | optional | `{ "min": n, "max": n }`, inclusive. `int`, `float` and `double` only. |
+| `options` | optional | Array of `{ "name": string, "value": v }`. `int`, `float`, `double` and `string` only. Mainly for enums, whose cases are usually ints. |
 | `scriptable` | optional | Bool, default `true`. Whether to register the property with the embedded script system. If `scriptable` is false at the component level, that takes precedence. |
 
 `range` and `options` are currently mutually exclusive. A value is unconstrained, bounded (has a `range`) or enumerated (has `options`), and declaring both is a parse error. The `value` of an option is what replicates, and its `name` is a label for a client presenting a choice (i.e. in a UI). More broadly, only property keys and their values go over the wire. The rest is metadata, used to drive script bindings and validate values on the client, and may be useful for other purposes such as generating property editor UIs.
@@ -84,11 +84,14 @@ How `defaultValue` is written follows from `type`:
 | `bool` | a bool | `true` |
 | `int` | an integer | `42` |
 | `float` | a number | `0.25` |
+| `double` | a number | `0.25` |
 | `string` | a string | `"soft"` |
 | `vec2` | an array of exactly 2 numbers | `[1.0, 2.0]` |
 | `vec3` | an array of exactly 3 numbers | `[1.0, 2.0, 3.0]` |
 | `vec4` | an array of exactly 4 numbers | `[1.0, 2.0, 3.0, 4.0]` |
 | `stringToStringMap` | an object whose values are all strings | `{ "modelA": "materialA" }` |
+
+`float` and `double` are single and double precision respectively, and are distinct types: a value of one is rejected where the other is declared. Note that both JSON and JavaScript numbers are doubles, so a `float` property rounds values as they are parsed from a schema or assigned in a script. Prefer `double` where that matters.
 
 ## Usage
 
