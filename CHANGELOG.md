@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.49.0]
+
+### 🍰 🙌 New Features
+
+- [OF-1896] feat!: Add double support to `ReplicatedValue`. By @mag-lt.
+  `ReplicatedValue` can now hold a `double` as well as a `float`, via `SetDouble`/`GetDouble` and a new `Double`
+  case on the `ReplicatedValueType` enum. Component schemas can declare `double` properties, which behave as the
+  other primitive types do.
+
+  This is a **breaking change** to custom events sent via the `NetworkEventBus`. Float event arguments were previously
+  sent using the wire type for doubles, leaving no way to tell the two apart. Each is now sent using the
+  corresponding wire type.
+  Clients need to be updated together. Entity and component replication are unaffected.
+
 ## [6.48.0]
 
 ### 🍰 🙌 New Features
