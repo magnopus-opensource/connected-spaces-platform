@@ -31,6 +31,7 @@
 #include <chrono>
 #include <fmt/format.h>
 #include <future>
+#include <limits>
 
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
@@ -556,8 +557,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
     std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise;
     std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture = NetworkEventPromise.get_future();
 
-    const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
-        = { csp::common::ReplicatedValue { TestValValue }, csp::common::ReplicatedValue { 1.0f } };
+    const auto TestDoubleValue = 1.0 + std::numeric_limits<double>::epsilon();
+
+    const csp::common::Array<csp::common::ReplicatedValue> ValsToSend = {
+        csp::common::ReplicatedValue { TestValValue },
+        csp::common::ReplicatedValue { 1.0f },
+        csp::common::ReplicatedValue { TestDoubleValue },
+    };
 
     SystemsManager.GetEventBus()->ListenCustomNetworkEvent(ReceiverId, EventName,
         [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
@@ -566,11 +572,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
     const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
-    EXPECT_EQ(ReceivedVals.Size(), 2);
+    EXPECT_EQ(ReceivedVals.Size(), 3);
     EXPECT_EQ(ReceivedVals[0].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
     EXPECT_EQ(ReceivedVals[1].GetReplicatedValueType(), csp::common::ReplicatedValueType::Float);
+    EXPECT_EQ(ReceivedVals[2].GetReplicatedValueType(), csp::common::ReplicatedValueType::Double);
     EXPECT_EQ(ReceivedVals[0].GetString(), TestValValue);
     EXPECT_EQ(ReceivedVals[1].GetFloat(), 1.0f);
+    EXPECT_EQ(ReceivedVals[2].GetDouble(), TestDoubleValue);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleRecieverAsyncCallCompleted)
