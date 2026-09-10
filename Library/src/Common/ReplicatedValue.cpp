@@ -41,6 +41,12 @@ ReplicatedValue::ReplicatedValue(float InValue)
 {
 }
 
+ReplicatedValue::ReplicatedValue(double InValue)
+    : Value { InValue }
+    , ReplicatedType(ReplicatedValueType::Double)
+{
+}
+
 ReplicatedValue::ReplicatedValue(int64_t InValue)
     : Value { InValue }
     , ReplicatedType(ReplicatedValueType::Integer)
@@ -151,6 +157,22 @@ float ReplicatedValue::GetFloat() const
     }
 
     return Get<float>();
+}
+
+void ReplicatedValue::SetDouble(double InValue)
+{
+    Value = InValue;
+    ReplicatedType = ReplicatedValueType::Double;
+}
+
+double ReplicatedValue::GetDouble() const
+{
+    if (ReplicatedType != ReplicatedValueType::Double)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Double, ReplicatedType);
+    }
+
+    return Get<double>();
 }
 
 void ReplicatedValue::SetInt(int64_t InValue)

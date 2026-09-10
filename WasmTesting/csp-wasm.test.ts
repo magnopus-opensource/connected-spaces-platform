@@ -3,7 +3,7 @@ import { CreatePublicTestSpace, CreateTestUser, LoginAsUser, LaunchTestPage, Del
 
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import { CSPFoundation, ready, Systems } from 'connected-spaces-platform.web';
+import { Common, CSPFoundation, ready, Systems } from 'connected-spaces-platform.web';
 import { initializeCSP } from './shared/csp-initializer.js';
 
 //Initialize CSPFoundation before the tests run
@@ -147,6 +147,24 @@ test('EnterSpaceFromCheckpoint', async () => {
   assert.ok(consoleMessages.some(e => e.includes('Exiting Space Offline Space')));
   assert.ok(consoleMessages.some(e => e.includes('Multiplayer connection not connected when exiting space, skipping disconnect.')));
   assert.ok(errors.length == 0); //Should be no errors
+})
+
+test('ReplicatedValueDoubleRetainsPrecision', () => {
+  const value = 1 + Number.EPSILON;
+
+  const doubleValue = Common.ReplicatedValue.create_doubleValue(value);
+  const floatValue = Common.ReplicatedValue.create_floatValue(value);
+
+  try {
+    assert.is(doubleValue.getReplicatedValueType(), Common.ReplicatedValueType.Double);
+    assert.is(doubleValue.getDouble(), value);
+
+    assert.is(floatValue.getReplicatedValueType(), Common.ReplicatedValueType.Float);
+    assert.is(floatValue.getFloat(), 1); // `value` is too precise for a float, so it rounds back to 1.
+  } finally {
+    doubleValue.delete();
+    floatValue.delete();
+  }
 })
 
 test.after(async () => {

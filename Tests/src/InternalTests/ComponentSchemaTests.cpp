@@ -604,6 +604,8 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedType
                         },
                     },
                 },
+                { 2, "floatProperty", PlainValue<float> { 0.5f } },
+                { 3, "doubleProperty", PlainValue<double> { 0.5 } },
             },
         },
     });
@@ -639,6 +641,25 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyWithMismatchedType
         };
 
         EXPECT_EQ(*Value, Expected);
+    }
+
+    // A float and a double are distinct types, and neither is coerced into the other.
+    {
+        Component->SetProperty(2, 1.5);
+
+        const auto* Value = Component->GetProperty(2);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 0.5f);
+    }
+
+    {
+        Component->SetProperty(3, 1.5f);
+
+        const auto* Value = Component->GetProperty(3);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 0.5);
     }
 }
 
@@ -740,6 +761,14 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyAppliesValueInside
                         { 0.0f, 1.0f },
                     },
                 },
+                {
+                    1,
+                    "doubleProperty",
+                    BoundedValue<double> {
+                        0.5,
+                        { 0.0, 1.0 },
+                    },
+                },
             },
         },
     });
@@ -757,6 +786,15 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, SetPropertyAppliesValueInside
         ASSERT_NE(Value, nullptr);
 
         EXPECT_EQ(*Value, 0.75f);
+    }
+
+    {
+        Component->SetProperty(1, 0.75);
+
+        const auto* Value = Component->GetProperty(1);
+        ASSERT_NE(Value, nullptr);
+
+        EXPECT_EQ(*Value, 0.75);
     }
 
     // The bounds themselves are inclusive.
@@ -1223,6 +1261,12 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
                 "name": "mapProperty",
                 "type": "stringToStringMap",
                 "defaultValue": { "modelA": "materialA", "modelB": "materialB" }
+            },
+            {
+                "key": 8,
+                "name": "doubleProperty",
+                "type": "double",
+                "defaultValue": 1.5
             }
         ]
     })";
@@ -1275,6 +1319,11 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, FromJsonParsesAllPropertyType
                         { "modelB", "materialB" },
                     },
                 },
+            },
+            {
+                8,
+                "doubleProperty",
+                PlainValue<double> { 1.5 },
             },
         },
     };
@@ -1335,6 +1384,30 @@ CSP_INTERNAL_TEST(CSPEngine, ComponentSchemaTests, JsonSerializationRoundTrip)
                 "nonScriptableProperty",
                 PlainValue<std::string> { "value" },
                 /*.IsScriptable =*/false,
+            },
+            {
+                6,
+                "doubleProperty",
+                PlainValue<double> { 1.0 + std::numeric_limits<double>::epsilon() },
+            },
+            {
+                7,
+                "boundedDoubleProperty",
+                BoundedValue<double> {
+                    0.5,
+                    { 0.0, 1.0 },
+                },
+            },
+            {
+                8,
+                "enumeratedDoubleProperty",
+                EnumeratedValue<double> {
+                    0.0,
+                    {
+                        SchemaOption<double> { "Off", 0.0 },
+                        SchemaOption<double> { "On", 1.0 },
+                    },
+                },
             },
         },
         /*.IsScriptable =*/false,

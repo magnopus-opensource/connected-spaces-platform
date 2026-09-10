@@ -44,6 +44,8 @@ inline csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedVa
         return "Vector2";
     case csp::common::ReplicatedValueType::StringMap:
         return "StringMap";
+    case csp::common::ReplicatedValueType::Double:
+        return "Double";
     default:
         return "UnknownType";
     }

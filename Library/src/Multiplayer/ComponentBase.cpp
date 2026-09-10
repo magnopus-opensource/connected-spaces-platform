@@ -215,6 +215,23 @@ float ComponentBase::GetFloatProperty(uint32_t Key) const
     return 0.0f;
 }
 
+double ComponentBase::GetDoubleProperty(uint32_t Key) const
+{
+    const auto& RepVal = GetPropertyDirect(Key);
+
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Double)
+    {
+        return RepVal.GetDouble();
+    }
+
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Double type");
+    }
+
+    return 0.0;
+}
+
 const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 {
     const auto& RepVal = GetPropertyDirect(Key);

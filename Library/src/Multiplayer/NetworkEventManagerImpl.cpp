@@ -50,7 +50,12 @@ signalr::value SerialiseReplicatedValueToSignalRValue(const csp::common::Replica
     case csp::common::ReplicatedValueType::Float:
     {
         std::vector<signalr::value> Fields { Value.GetFloat() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), Fields };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT), Fields };
+    }
+    case csp::common::ReplicatedValueType::Double:
+    {
+        std::vector<signalr::value> Fields { Value.GetDouble() };
+        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::DOUBLE), Fields };
     }
     case csp::common::ReplicatedValueType::String:
     {

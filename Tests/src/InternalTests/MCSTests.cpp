@@ -78,6 +78,31 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
     EXPECT_EQ(Packer.GetComponents(), Expected);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesDoublePrecision)
+{
+    constexpr auto Key = uint16_t { 0 };
+    const auto TestValue = 1.0 + std::numeric_limits<double>::epsilon();
+    const auto DoubleValue = csp::common::ReplicatedValue { TestValue };
+
+    auto Packer = MCSComponentPacker {};
+    Packer.WriteValue(Key, DoubleValue);
+
+    const auto Packed = Packer.GetComponents();
+
+    const auto Expected = std::map<uint16_t, mcs::ItemComponentData> {
+        { Key, mcs::ItemComponentData { TestValue } },
+    };
+
+    EXPECT_EQ(Packed, Expected);
+
+    const auto Unpacker = MCSComponentUnpacker { Packed };
+
+    auto Unpacked = csp::common::ReplicatedValue {};
+    EXPECT_TRUE(Unpacker.TryReadValue(Key, Unpacked));
+
+    EXPECT_EQ(Unpacked, DoubleValue);
+}
+
 // Test constructor values of ObjectMessage are correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageConstructorTest)
 {

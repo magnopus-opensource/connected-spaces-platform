@@ -343,6 +343,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
             "Example",
             {
                 { 0, "stringProperty", PlainValue<std::string> { "DefaultValue" } },
+                { 1, "doubleProperty", PlainValue<double> { 0.0 } },
             },
         },
     };
@@ -378,6 +379,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
         ASSERT_NE(Component, nullptr);
 
         Component->SetProperty(0, csp::common::String { "RoundtripValue" });
+        Component->SetProperty(1, 1.0 + std::numeric_limits<double>::epsilon());
 
         Entity->QueueUpdate();
         Engine.ProcessPendingEntityOperations();
@@ -416,9 +418,17 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SchemaComponentRoundtrip)
         const auto* SchemaComponent = Components->begin()->second;
         ASSERT_EQ(SchemaComponent->GetTypeId(), SchemaTypeId);
 
-        const auto* Value = SchemaComponent->GetProperty(0);
-        ASSERT_NE(Value, nullptr);
-        EXPECT_EQ(Value->GetString(), csp::common::String { "RoundtripValue" });
+        {
+            const auto* Value = SchemaComponent->GetProperty(0);
+            ASSERT_NE(Value, nullptr);
+            EXPECT_EQ(Value->GetString(), csp::common::String { "RoundtripValue" });
+        }
+
+        {
+            const auto* Value = SchemaComponent->GetProperty(1);
+            ASSERT_NE(Value, nullptr);
+            EXPECT_EQ(Value->GetDouble(), 1.0 + std::numeric_limits<double>::epsilon());
+        }
 
         AWAIT(SpaceSystem, ExitSpace);
     }

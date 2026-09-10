@@ -112,6 +112,11 @@ std::optional<ComponentScriptInterface::Value> ComponentScriptInterface::GetProp
             return Value;
         }
 
+        std::optional<Value> operator()(double Value) const
+        {
+            return Value;
+        }
+
         std::optional<Value> operator()(int64_t Value) const
         {
             return Value;
@@ -173,6 +178,11 @@ void ComponentScriptInterface::SetProperty(uint16_t Key, Value DesiredValue)
         }
 
         std::optional<csp::common::ReplicatedValue> operator()(float Value) const
+        {
+            return Value;
+        }
+
+        std::optional<csp::common::ReplicatedValue> operator()(double Value) const
         {
             return Value;
         }

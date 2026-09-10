@@ -78,7 +78,7 @@ enum class ItemComponentDataType : uint64_t
     FLOAT_ARRAY = 26,
     NULLABLE_FLOAT_ARRAY = 27, // Currently only implemented for EntityTransformComponents
     DOUBLE = 28,
-    NULLABLE_DOUBLE = 29, // Currently only implemented for NetworkEventManager visibility.
+    // NULLABLE_DOUBLE = 29,
     // DOUBLE_ARRAY = 30,
     // NULLABLE_DOUBLE_ARRAY = 31,
     STRING = 32,

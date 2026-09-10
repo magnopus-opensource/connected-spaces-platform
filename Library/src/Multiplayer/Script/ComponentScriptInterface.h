@@ -44,7 +44,8 @@ public:
         int64_t,
         std::string,
         std::vector<float>,
-        std::unordered_map<std::string, std::string>
+        std::unordered_map<std::string, std::string>,
+        double
     >;
 
     ComponentScriptInterface(ComponentBase* InComponent = nullptr);

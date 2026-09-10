@@ -30,7 +30,7 @@ namespace csp::common
 CSP_START_IGNORE
 class ReplicatedValue;
 using ReplicatedValueImplType = std::variant<bool, float, int64_t, csp::common::String, csp::common::Vector2, csp::common::Vector3,
-    csp::common::Vector4, csp::common::Map<csp::common::String, ReplicatedValue>>;
+    csp::common::Vector4, csp::common::Map<csp::common::String, ReplicatedValue>, double>;
 CSP_END_IGNORE
 
 /// @brief Enum representing the type of a replicated value.
@@ -46,7 +46,8 @@ enum class ReplicatedValueType
     Vector3 = 5,
     Vector4 = 6,
     Vector2 = 7,
-    StringMap = 8
+    StringMap = 8,
+    Double = 9
 };
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
@@ -78,6 +79,10 @@ public:
     /// @brief Construct a ReplicatedValue based on a float type.
     /// @param InFloatValue float : Initial value.
     ReplicatedValue(float InFloatValue);
+
+    /// @brief Construct a ReplicatedValue based on a double type.
+    /// @param InDoubleValue double : Initial value.
+    ReplicatedValue(double InDoubleValue);
 
     /// @brief Construct a ReplicatedValue based on a Long (uint64_t) type.
     /// @param InLongValue int64_t : Initial value.
@@ -153,6 +158,14 @@ public:
     /// @brief Get a float value from this replicated value, will assert if not a float type.
     /// @return float value
     float GetFloat() const;
+
+    /// @brief Sets a double value for this replicated value, will overwrite any previous value.
+    /// @param InValue
+    void SetDouble(double InValue);
+
+    /// @brief Get a double value from this replicated value, will assert if not a double type.
+    /// @return double value
+    double GetDouble() const;
 
     /// @brief Sets a int64 value for this replicated value, will overwrite any previous value.
     /// @param InValue

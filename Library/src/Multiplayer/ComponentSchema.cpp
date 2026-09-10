@@ -53,6 +53,12 @@ namespace
         Serializer.SerializeMember("defaultValue", Value);
     }
 
+    void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, double Value)
+    {
+        Serializer.SerializeMember("type", "double");
+        Serializer.SerializeMember("defaultValue", Value);
+    }
+
     void SerializeDefaultValue(csp::json::JsonSerializer& Serializer, int64_t Value)
     {
         Serializer.SerializeMember("type", "int");
@@ -145,6 +151,16 @@ namespace
         }
 
         return Value.GetFloat();
+    }
+
+    template <> std::optional<double> TryParse<double>(const rapidjson::Value& Value)
+    {
+        if (!Value.IsNumber())
+        {
+            return std::nullopt;
+        }
+
+        return Value.GetDouble();
     }
 
     template <> std::optional<int64_t> TryParse<int64_t>(const rapidjson::Value& Value)
@@ -425,10 +441,11 @@ namespace
         } };
     }
 
-    template <typename T> inline constexpr bool SupportsRangeV = std::is_same_v<T, float> || std::is_same_v<T, int64_t>;
+    template <typename T> inline constexpr bool SupportsRangeV = std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, int64_t>;
 
     template <typename T>
-    inline constexpr bool SupportsOptionsV = std::is_same_v<T, float> || std::is_same_v<T, int64_t> || std::is_same_v<T, std::string>;
+    inline constexpr bool SupportsOptionsV
+        = std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, int64_t> || std::is_same_v<T, std::string>;
 
     template <typename T> ParseResult<PropertyValue> TryParseValue(const std::string& Type, const rapidjson::Value& Object)
     {
@@ -474,6 +491,11 @@ namespace
         if (Type == "float")
         {
             return TryParseValue<float>(Type, Object);
+        }
+
+        if (Type == "double")
+        {
+            return TryParseValue<double>(Type, Object);
         }
 
         if (Type == "int")

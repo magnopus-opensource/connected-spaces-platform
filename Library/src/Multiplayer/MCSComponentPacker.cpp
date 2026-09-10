@@ -42,7 +42,7 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
 
 const std::map<uint16_t, mcs::ItemComponentData>& MCSComponentPacker::GetComponents() const { return Components; }
 
-csp::common::ReplicatedValue ToReplicatedValue(double) { throw std::runtime_error("Unsupported"); }
+csp::common::ReplicatedValue ToReplicatedValue(double Value) { return csp::common::ReplicatedValue { Value }; }
 
 csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value) { return csp::common::ReplicatedValue { static_cast<int64_t>(Value) }; }
 
@@ -123,6 +123,8 @@ mcs::ItemComponentData ToItemComponentData(uint64_t Value) { return mcs::ItemCom
 mcs::ItemComponentData ToItemComponentData(int64_t Value) { return mcs::ItemComponentData { Value }; }
 
 mcs::ItemComponentData ToItemComponentData(float Value) { return mcs::ItemComponentData { Value }; }
+
+mcs::ItemComponentData ToItemComponentData(double Value) { return mcs::ItemComponentData { Value }; }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value) { return mcs::ItemComponentData { std::string { Value.c_str() } }; }
 
