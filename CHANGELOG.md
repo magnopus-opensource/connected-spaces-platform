@@ -45,6 +45,10 @@ All notable changes to this project will be documented in this file. For compile
   
 - [OF-1882] fix: Guard RealtimeEngine destruction pathway against null NetworkEventBus, which could cause crashes on out-of-order teardown in GC'd langauges. By @MAG-ElliotMorris
 
+###  🔨 🔨 Chore
+
+- [NT-0] chore: Remove unreferenced `multiplayer::ExternalLinkActions` enum.
+
 ## [6.47.0]
 
 ### 🐛 🔨 Bug Fixes

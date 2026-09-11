@@ -29,13 +29,6 @@
 namespace csp::multiplayer
 {
 
-/// @brief The type of actions that can be performed by an external link component.
-enum class ExternalLinkActions
-{
-    LinkClicked,
-    Num
-};
-
 /// @brief The list of properties defined within an external link component.
 enum class ExternalLinkPropertyKeys : uint16_t
 {
