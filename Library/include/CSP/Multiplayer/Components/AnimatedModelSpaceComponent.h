@@ -33,15 +33,6 @@
 namespace csp::multiplayer
 {
 
-/// @brief Enumerates the actions that can be performed on an animated model component.
-enum class AnimatedModelActions
-{
-    Play,
-    Pause,
-    Restart,
-    Num
-};
-
 /// @brief Enumerates the list of properties that can be replicated for an animated model component.
 enum class AnimatedModelPropertyKeys : uint16_t
 {
