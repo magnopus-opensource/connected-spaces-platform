@@ -21,13 +21,13 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IAudioControlComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
-#include "CSP/Common/SharedEnums.h"
 
 namespace csp::multiplayer
 {
@@ -38,14 +38,6 @@ enum class VideoPlayerPlaybackState
     Reset = 0,
     Pause,
     Play,
-    Num
-};
-
-/// @brief Enumerates the actions that can be performed on a video player.
-enum class VideoPlayerActions
-{
-    VideoBegin,
-    VideoEnd,
     Num
 };
 
@@ -96,7 +88,11 @@ enum class VideoPlayerPropertyKeys : uint16_t
 ///
 /// You can use it to stream videos from a URL or play videos stored as assets in CSP, allowing users to watch videos directly within the virtual
 /// environment.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase,
+                                          public IAudioControlComponent,
+                                          public IEnableableComponent,
+                                          public ITransformComponent,
+                                          public IVisibleComponent
 {
 public:
     CSP_NO_EXPORT static const schema::ComponentSchema& GetSchema();
@@ -264,7 +260,7 @@ public:
     /// @copydoc IAudioControlComponent::SetVolume()
     void SetVolume(float Value) override;
     /// @}
- 
+
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()

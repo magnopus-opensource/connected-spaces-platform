@@ -47,7 +47,7 @@ All notable changes to this project will be documented in this file. For compile
 
 ###  🔨 🔨 Chore
 
-- [NT-0] chore: Remove unreferenced `multiplayer::ExternalLinkActions` enum. By @MAG-ElliotMorris
+- [NT-0] chore: Remove unreferenced `multiplayer::ExternalLinkActions`, `multiplayer::VideoPlayerActions` and `multiplayer::AnimatedModelActions` enums. By @MAG-ElliotMorris
 
 ## [6.47.0]
 
