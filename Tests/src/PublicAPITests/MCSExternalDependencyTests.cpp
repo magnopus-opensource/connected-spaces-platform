@@ -168,7 +168,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     auto Methods = Array<String>(MultiplayerHubMethodMap.size());
 
     // Construct a csp::common::Array of all available multiplayer hub methods
-    for (auto const Method : MultiplayerHubMethodMap)
+    for (auto const& Method : MultiplayerHubMethodMap)
         Methods[static_cast<int>(Method.first)] = String(Method.second.c_str());
 
     auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
