@@ -125,7 +125,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                 {
                     std::rethrow_exception(Result.get_exception());
                 }
-                catch (std::runtime_error error)
+                catch (const std::runtime_error& error)
                 {
                     EXPECT_EQ(std::string(error.what()), std::string("Multiplayer Error. mock exception"));
                 }
@@ -212,7 +212,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
                 {
                     std::rethrow_exception(Id.get_exception());
                 }
-                catch (std::runtime_error error)
+                catch (const std::runtime_error& error)
                 {
                     EXPECT_EQ(std::string(error.what()), std::string("Multiplayer Error. mock exception"));
                 }
