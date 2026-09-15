@@ -258,10 +258,16 @@ size_t Variant::GetSizeOfInternalValue() { return sizeof(InternalValue); }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
 Variant::InternalValue::InternalValue() { memset(this, 0x0, sizeof(InternalValue)); }
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
 Variant::InternalValue::~InternalValue() { }
