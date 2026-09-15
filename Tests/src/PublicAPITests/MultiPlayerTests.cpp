@@ -569,6 +569,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     }
 
     auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    EXPECT_EQ(FlagSetResult2, csp::multiplayer::ErrorCode::None);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -627,6 +628,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.GetUserId(), UserTransform, IsVisible,
         UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
+    EXPECT_NE(Avatar, nullptr);
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
@@ -887,6 +889,7 @@ void RunParentEntityReplicationTest(bool Local)
 
     // If local is false, test DeserialiseFromPatch functionality
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     // Create Entities
     csp::common::String ParentEntityName = "ParentEntity";
@@ -1059,6 +1062,7 @@ void RunParentEntityReplicationTest(bool Local)
     if (!Local)
     {
         auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+        EXPECT_EQ(FlagSetResult2, csp::multiplayer::ErrorCode::None);
     }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -1684,6 +1688,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptedTest)
     auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.GetUserId(), UserTransform, IsVisible,
         UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
+    EXPECT_NE(Avatar, nullptr);
 
     // Set network interrupted callback
     bool Interrupted = false;

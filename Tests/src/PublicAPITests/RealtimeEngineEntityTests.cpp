@@ -1879,6 +1879,7 @@ TEST_P(ParentDeletion, ParentDeletionTest)
     {
         // If local is false, test DeserialiseFromPatch functionality
         auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
     }
 
     // Create Entities
@@ -2119,6 +2120,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
     {
         // If local is false, test DeserialiseFromPatch functionality
         auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
     }
 
     // Create Entities
@@ -2248,6 +2250,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
             if (!Local)
             {
                 auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+                EXPECT_EQ(FlagSetResult2, csp::multiplayer::ErrorCode::None);
             }
         }
 

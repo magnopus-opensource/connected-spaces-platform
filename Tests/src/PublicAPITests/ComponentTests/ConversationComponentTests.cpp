@@ -999,6 +999,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Allow us to receive and test our own conversation messages
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     // Create object to represent the conversation
     csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
@@ -1870,6 +1871,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
     // Allow us to receive and test our own conversation messages
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     // Create object to represent the conversation
     csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());

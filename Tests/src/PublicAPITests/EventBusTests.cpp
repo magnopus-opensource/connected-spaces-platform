@@ -548,6 +548,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -600,6 +601,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleRecieverAsyncCallComp
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -648,6 +650,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiReciever)
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -704,6 +707,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiRecieverAsyncCallCompl
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -761,6 +765,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -821,6 +826,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiAsyncCallCompletedEventSingleRece
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
@@ -995,6 +1001,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventDispatchReplicatedValueException)
     LogInAsNewTestUser(UserSystem, UserId);
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
 
