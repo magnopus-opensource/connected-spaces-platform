@@ -110,7 +110,7 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 
     EXPECT_CALL(*ExternalServiceProxyMock, service_proxyPost)
         .WillOnce(
-            [ExpectedResponseCode, ExpectedOperationResultJsonString, JsonIsValid](
+            [ExpectedResponseCode, ExpectedOperationResultJsonString](
                 const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
                 csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )

@@ -1753,8 +1753,7 @@ TEST_P(EntityLock, EntityLockTest)
             bool EntityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&EntityUpdated](SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
@@ -1793,8 +1792,7 @@ TEST_P(EntityLock, EntityLockTest)
             bool EntityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&EntityUpdated](SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {

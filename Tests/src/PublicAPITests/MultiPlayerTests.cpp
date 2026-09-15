@@ -1623,8 +1623,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestMultiplayerDisconnectionWhenNew
     // Intercept the 'OnRequestToDisconnect' event and dummy expected response for new user login on different client
     ON_CALL(*SignalRMock, On)
         .WillByDefault(
-            [&Connection](
-                const std::string& EventName, const ISignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& /*LogSystem*/)
+            [](const std::string& EventName, const ISignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& /*LogSystem*/)
             {
                 if (EventName == "OnRequestToDisconnect")
                 {

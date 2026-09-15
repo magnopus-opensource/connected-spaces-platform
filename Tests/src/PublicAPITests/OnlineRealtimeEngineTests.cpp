@@ -462,7 +462,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
-            [&SendObjectPatchesCalled, &RealtimeEngine, &MockLogger](
+            [&SendObjectPatchesCalled, &RealtimeEngine](
                 const std::string& Method, const signalr::value&, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
                 // Create a method map to get the correct hub method string value
