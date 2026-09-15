@@ -229,8 +229,6 @@ target_compile_options(csp-lib
 	    -Wno-braced-scalar-init
 	    # Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
 	    -Wno-missing-field-initializers
-	    # Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
-	    -Wno-ignored-qualifiers
     >
 
     $<$<CXX_COMPILER_ID:GNU>:
@@ -240,7 +238,6 @@ target_compile_options(csp-lib
       -Wno-error=changes-meaning
       -Wno-error=deprecated-declarations
       -Wno-missing-field-initializers
-      -Wno-ignored-qualifiers
 
       # Needed to compile with the Linux Unreal Toolchain
       -Wno-error=attributes
@@ -435,7 +432,6 @@ if(BUILD_TESTING)
       -Wno-error=uninitialized
       -Wno-error=maybe-uninitialized
       -Wno-missing-field-initializers
-      -Wno-ignored-qualifiers
       -fpermissive
     >
   )

@@ -333,7 +333,7 @@ public:
 
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
-    const size_t Size() const { return CurrentSize; }
+    size_t Size() const { return CurrentSize; }
 
     /// @brief Removes all elements in the list.
     void Clear()

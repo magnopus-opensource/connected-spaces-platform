@@ -205,7 +205,7 @@ public:
 
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
-    const size_t Size() const { return ArraySize; }
+    size_t Size() const { return ArraySize; }
 
     /// @brief Checks if the array has any elements.
     /// @return bool
