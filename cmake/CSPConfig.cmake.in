@@ -10,14 +10,6 @@ set(CSP_BUILT_SHARED @CSP_BUILD_SHARED@)
 
 include(CMakeFindDependencyMacro)
 
-# Public-API dependencies: appear in installed headers
-# (CSPAsyncScheduler.h, fmt_Formatters.h, ReplicatedValueException.h).
-# Required regardless of whether CSP was built shared or static.
-# We should endevour to remove these as neccesary dependencies.
-find_dependency(fmt)
-find_dependency(RapidJSON)
-find_dependency(Async++)
-
 # Private link-only dependencies. Currently, for a STATIC CSP, 
 # all dependencies are required to be resolved.
 # For a SHARED CSP, these deps are baked into the DLL and do NOT appear on
@@ -27,6 +19,10 @@ if(NOT CSP_BUILT_SHARED)
   find_dependency(tinyspline)
   find_dependency(glm)
   find_dependency(msgpack-cxx)
+
+  find_dependency(fmt)
+  find_dependency(RapidJSON)
+  find_dependency(Async++)
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     find_dependency(Poco)
