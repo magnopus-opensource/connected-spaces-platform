@@ -3073,10 +3073,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateMessage
         ConversationId = Result.GetValue();
     }
 
-    static const csp::common::Vector3 TestConversationAuthorCameraPosition { 1.f, 2.f, 3.f };
-    static const csp::common::Vector4 TestConversationAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
-    static constexpr const float TestConversationFov = 90.f;
-
     std::vector<char> TestAnnotationDataV = PngHeader;
     TestAnnotationDataV.push_back('1');
     std::vector<char> TestAnnotationThumbnailDataV = PngHeader;

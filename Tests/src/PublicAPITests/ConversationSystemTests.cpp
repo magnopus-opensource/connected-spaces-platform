@@ -38,30 +38,6 @@ using namespace csp::multiplayer;
 namespace
 {
 
-void OnConnect();
-void OnDisconnect(bool ok);
-void OnDelete();
-
-std::atomic_bool IsTestComplete;
-std::atomic_bool IsDisconnected;
-std::atomic_bool IsReadyForUpdate;
-SpaceEntity* TestUser;
-SpaceEntity* TestObject;
-
-int WaitForTestTimeoutCountMs;
-const int WaitForTestTimeoutLimit = 20000;
-const int NumberOfEntityUpdateTicks = 5;
-int ReceivedEntityUpdatesCount;
-
-bool EventReceived = false;
-
-csp::common::ReplicatedValue ObjectFloatProperty;
-csp::common::ReplicatedValue ObjectBoolProperty;
-csp::common::ReplicatedValue ObjectIntProperty;
-csp::common::ReplicatedValue ObjectStringProperty;
-
-csp::common::String ConversationId;
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 } // namespace
 

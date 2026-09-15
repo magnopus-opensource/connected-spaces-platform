@@ -58,7 +58,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     const csp::common::String UserName = "Player 1";
-    const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
     const csp::common::String UserAvatarId = "MyCoolAvatar";
 
     {

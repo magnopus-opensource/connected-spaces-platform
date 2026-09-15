@@ -54,7 +54,6 @@ SpaceEntity* TestSpaceEntity;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit = 20000;
-const int NumberOfEntityUpdateTicks = 5;
 int ReceivedEntityUpdatesCount;
 
 bool EventSent = false;
