@@ -43,12 +43,12 @@ class CSP_API GraphQLResult : public csp::systems::ResultBase
     CSP_END_IGNORE
     /** @endcond */
 public:
-    GraphQLResult() {};
-    GraphQLResult(void*) {};
+    GraphQLResult() { };
+    GraphQLResult(void*) { };
 
     /// @brief Retrieves response data from the GraphQL Server
     /// @return String : Data String as described above
-    [[nodiscard]] const csp::common::String& GetResponse();
+    [[nodiscard]] const csp::common::String& GetResponse() const;
 
 private:
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;

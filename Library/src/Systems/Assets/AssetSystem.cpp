@@ -479,14 +479,14 @@ async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection
     }
 
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        [](const NullResult& /*s*/) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+        [](const NullResult& /*s*/) { }, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete({ PrototypeId }, ResponseHandler);
 
     return OnCompleteTask;
 }
 
-void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& SourceAssetCollectionIDs, NullResultCallback Callback)
+void AssetSystem::DeleteMultipleAssetCollections(const csp::common::Array<AssetCollection>& SourceAssetCollectionIDs, NullResultCallback Callback)
 {
     if (SourceAssetCollectionIDs.Size() == 0)
     {
@@ -517,8 +517,8 @@ void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollect
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesDelete({ AssetCollectionIds }, ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
-void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections, const csp::common::String& DestSpaceId,
-    bool CopyAsync, AssetCollectionsResultCallback Callback)
+void AssetSystem::CopyAssetCollectionsToSpace(const csp::common::Array<AssetCollection>& SourceAssetCollections,
+    const csp::common::String& DestSpaceId, bool CopyAsync, AssetCollectionsResultCallback Callback)
 {
     if (SourceAssetCollections.Size() == 0)
     {
@@ -1401,7 +1401,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
 }
 
 void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType, const csp::common::String& SpaceId,
-    csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
+    csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String>& AssetTags,
     MaterialResultCallback Callback)
 {
     // 1. Create asset collection

@@ -22,7 +22,7 @@ using namespace csp::systems::graphqlservice;
 
 namespace csp::systems
 {
-const csp::common::String& GraphQLResult::GetResponse() { return GraphQLResponse; }
+const csp::common::String& GraphQLResult::GetResponse() const { return GraphQLResponse; }
 void GraphQLResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);

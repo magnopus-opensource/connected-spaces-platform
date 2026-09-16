@@ -15,6 +15,12 @@ All notable changes to this project will be documented in this file. For compile
   sent using the wire type for doubles, leaving no way to tell the two apart. Each is now sent using the
   corresponding wire type.
   Clients need to be updated together. Entity and component replication are unaffected.
+  
+- [NT-0] chore: Various bindings-motivated const correctness changes by @ElliotMorris
+    - `Array<AssetCollection>&` arg made `const Array<AssetCollections>&` in `DeleteMultipleAssetCollections` and `CopyAssetcollectionsToSpace`
+    - `Map<String,String>&` arg made `Map<String,String>` in `CreateMaterial`
+    - `const String& GraphQLResult::GetResponse()` made `const String& GraphQLResult::GetResponse() const`
+    - `Site&` made `Site` in `AddSiteInfo` and `RemoveSiteInfo`
 
 ## [6.48.0]
 

@@ -1082,7 +1082,7 @@ void SpaceSystem::RemoveUserFromSpace(const String& SpaceId, const String& UserI
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdUsersUserIdDelete({ SpaceId, UserId }, ResponseHandler);
 }
 
-void SpaceSystem::AddSiteInfo(const String& SpaceId, Site& SiteInfo, SiteResultCallback Callback)
+void SpaceSystem::AddSiteInfo(const String& SpaceId, Site SiteInfo, SiteResultCallback Callback)
 {
     auto& SystemsManager = SystemsManager::Get();
     auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
@@ -1091,7 +1091,7 @@ void SpaceSystem::AddSiteInfo(const String& SpaceId, Site& SiteInfo, SiteResultC
     POIInternalSystem->CreateSite(SiteInfo, Callback);
 }
 
-void SpaceSystem::RemoveSiteInfo(const String& SpaceId, Site& SiteInfo, NullResultCallback Callback)
+void SpaceSystem::RemoveSiteInfo(const String& SpaceId, Site SiteInfo, NullResultCallback Callback)
 {
     auto& SystemsManager = SystemsManager::Get();
     auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
