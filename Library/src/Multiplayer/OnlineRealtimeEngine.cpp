@@ -1447,6 +1447,7 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
     else
     {
         bool EntityFound = false;
+        csp::common::String EntityName = "";
 
         // Update
         for (SpaceEntity* Entity : Entities)
@@ -1455,13 +1456,14 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
             {
                 Entity->GetStatePatcher()->ApplyPatchFromObjectPatch(Patch);
                 EntityFound = true;
+                EntityName = Entity->GetName();
             }
         }
 
         if (!EntityFound)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Failed to find an entity with ID {} when received a patch message.", Patch.GetId()).c_str());
+                fmt::format("Failed to find an entity with ID {} and name {} when received a patch message.", Patch.GetId(), EntityName).c_str());
         }
     }
 }
