@@ -332,7 +332,7 @@ public:
     }
 
     /// @brief Returns the number of elements in the array.
-    /// @return const size_t
+    /// @return size_t
     size_t Size() const { return CurrentSize; }
 
     /// @brief Removes all elements in the list.
