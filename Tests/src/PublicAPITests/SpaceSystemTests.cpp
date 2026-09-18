@@ -157,8 +157,9 @@ void AddSiteInfo(::SpaceSystem* SpaceSystem, const char* Name, const String& Spa
     SiteInfo.Name = SiteName;
     SiteInfo.Location = SiteLocation;
     SiteInfo.Rotation = SiteRotation;
+    SiteInfo.SpaceId = SpaceId;
 
-    auto [Result] = AWAIT_PRE(SpaceSystem, AddSiteInfo, RequestPredicate, SpaceId, SiteInfo);
+    auto [Result] = AWAIT_PRE(SpaceSystem, AddSiteInfo, RequestPredicate, SiteInfo);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -173,9 +174,9 @@ void DeleteSpace(::SpaceSystem* SpaceSystem, const String& SpaceId)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-void RemoveSiteInfo(::SpaceSystem* SpaceSystem, const String& SpaceId, ::Site& Site)
+void RemoveSiteInfo(::SpaceSystem* SpaceSystem, ::Site& Site)
 {
-    auto [Result] = AWAIT_PRE(SpaceSystem, RemoveSiteInfo, RequestPredicate, SpaceId, Site);
+    auto [Result] = AWAIT_PRE(SpaceSystem, RemoveSiteInfo, RequestPredicate, Site);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1379,7 +1380,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, AddSiteInfoTest)
     Site SiteInfo;
     AddSiteInfo(SpaceSystem, nullptr, Space.Id, SiteInfo);
 
-    RemoveSiteInfo(SpaceSystem, Space.Id, SiteInfo);
+    RemoveSiteInfo(SpaceSystem, SiteInfo);
 
     DeleteSpace(SpaceSystem, Space.Id);
 
@@ -1435,8 +1436,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
 
     EXPECT_TRUE(Site1Found && Site2Found);
 
-    RemoveSiteInfo(SpaceSystem, Space.Id, SiteInfo1);
-    RemoveSiteInfo(SpaceSystem, Space.Id, SiteInfo2);
+    RemoveSiteInfo(SpaceSystem, SiteInfo1);
+    RemoveSiteInfo(SpaceSystem, SiteInfo2);
 
     DeleteSpace(SpaceSystem, Space.Id);
 
