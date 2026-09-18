@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.49.0]
 
+### 🔥 ❗Breaking Changes
+
+- [NT-0] chore!: Remove SpaceID args from SiteInfo functions by @ElliotMorris
+           - `AddSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `AddSiteInfo(const SiteInfo&, Callback)`
+           - `RemoveSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `RemoveSiteInfo(const SiteInfo&, Callback)` 
+        The mutable input param was confusing and breaking const correctness assumptions, we always just put the spaceID provided
+        into the siteinfo anyway. Callers should now populate the space ID field in the site info object before passing to the function.           
+
 ### 🍰 🙌 New Features
 
 - [OF-1896] feat!: Add double support to `ReplicatedValue`. By @mag-lt.
@@ -20,7 +28,6 @@ All notable changes to this project will be documented in this file. For compile
     - `Array<AssetCollection>&` arg made `const Array<AssetCollections>&` in `DeleteMultipleAssetCollections` and `CopyAssetcollectionsToSpace`
     - `Map<String,String>&` arg made `Map<String,String>` in `CreateMaterial`
     - `const String& GraphQLResult::GetResponse()` made `const String& GraphQLResult::GetResponse() const`
-    - `Site&` made `Site` in `AddSiteInfo` and `RemoveSiteInfo`
 
 ## [6.48.0]
 
