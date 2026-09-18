@@ -125,7 +125,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                 {
                     std::rethrow_exception(Result.get_exception());
                 }
-                catch (std::runtime_error error)
+                catch (const std::runtime_error& error)
                 {
                     EXPECT_EQ(std::string(error.what()), std::string("Multiplayer Error. mock exception"));
                 }
@@ -212,7 +212,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
                 {
                     std::rethrow_exception(Id.get_exception());
                 }
-                catch (std::runtime_error error)
+                catch (const std::runtime_error& error)
                 {
                     EXPECT_EQ(std::string(error.what()), std::string("Multiplayer Error. mock exception"));
                 }
@@ -462,7 +462,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
-            [&SendObjectPatchesCalled, &RealtimeEngine, &MockLogger](
+            [&SendObjectPatchesCalled, &RealtimeEngine](
                 const std::string& Method, const signalr::value&, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
                 // Create a method map to get the correct hub method string value

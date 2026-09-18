@@ -32,13 +32,6 @@ using namespace std::chrono_literals;
 
 using namespace csp::systems;
 
-namespace
-{
-
-bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
-
-} // namespace
-
 csp::common::String CreateTimeString(system_clock::time_point tp)
 {
     std::time_t now_c = std::chrono::system_clock::to_time_t(tp);

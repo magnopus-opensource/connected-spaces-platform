@@ -31,7 +31,7 @@ CSP_INTERNAL_TEST(CSPEngine, SchedulerTests, SchedulerTest)
     std::chrono::system_clock::time_point test = std::chrono::system_clock::now() + std::chrono::system_clock::duration(5s);
     csp::common::DateTime RefreshTime(test);
 
-    csp::GetScheduler()->ScheduleAt(RefreshTime, [this, &ScheduleCallback]() { ScheduleCallback = true; });
+    csp::GetScheduler()->ScheduleAt(RefreshTime, [&ScheduleCallback]() { ScheduleCallback = true; });
 
     while (WaitForTestTimeoutCountMs < KeepAliveInterval)
     {

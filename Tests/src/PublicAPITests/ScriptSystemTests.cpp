@@ -861,7 +861,7 @@ TEST_P(AddSecondScript, AddSecondScriptTest)
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
     CreatedObject->GetScript().Invoke();
 
-    auto WaitForPatchFuture = [&CreatedObject]()
+    auto WaitForPatchFuture = [&CreatedObject = CreatedObject]()
     {
         std::shared_ptr<std::promise<void>> PatchPromise = std::make_shared<std::promise<void>>();
         std::shared_future<void> PatchFuture = PatchPromise->get_future().share();

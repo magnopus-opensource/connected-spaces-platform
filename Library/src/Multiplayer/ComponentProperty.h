@@ -144,7 +144,7 @@ struct ComponentProperty
 
     /// @brief Whether this property is exposed to scripting. Absent when the schema does not say,
     /// which means exposed.
-    std::optional<bool> IsScriptable;
+    std::optional<bool> IsScriptable = std::nullopt;
 
     bool operator==(const ComponentProperty& Other) const;
     bool operator!=(const ComponentProperty& Other) const;

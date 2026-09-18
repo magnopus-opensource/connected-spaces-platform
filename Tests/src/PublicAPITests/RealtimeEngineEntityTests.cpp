@@ -54,7 +54,6 @@ SpaceEntity* TestSpaceEntity;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit = 20000;
-const int NumberOfEntityUpdateTicks = 5;
 int ReceivedEntityUpdatesCount;
 
 bool EventSent = false;
@@ -1753,8 +1752,7 @@ TEST_P(EntityLock, EntityLockTest)
             bool EntityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&EntityUpdated](SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
@@ -1793,8 +1791,7 @@ TEST_P(EntityLock, EntityLockTest)
             bool EntityUpdated = false;
 
             CreatedEntity->SetUpdateCallback(
-                [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                [&EntityUpdated](SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
@@ -1882,6 +1879,7 @@ TEST_P(ParentDeletion, ParentDeletionTest)
     {
         // If local is false, test DeserialiseFromPatch functionality
         auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
     }
 
     // Create Entities
@@ -2122,6 +2120,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
     {
         // If local is false, test DeserialiseFromPatch functionality
         auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
     }
 
     // Create Entities
@@ -2251,6 +2250,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
             if (!Local)
             {
                 auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+                EXPECT_EQ(FlagSetResult2, csp::multiplayer::ErrorCode::None);
             }
         }
 

@@ -49,7 +49,7 @@ public:
     {
     }
 
-    virtual const ExceptionType GetExceptionType() const = 0;
+    virtual ExceptionType GetExceptionType() const = 0;
 };
 
 /**
@@ -68,7 +68,7 @@ public:
     {
     }
 
-    const ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
+    ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
 
     const csp::systems::ResultBase& GetResult() const { return *Result; }
 
@@ -105,7 +105,7 @@ public:
     {
     }
 
-    const ExceptionType GetExceptionType() const override { return ExceptionType::Multiplayer; }
+    ExceptionType GetExceptionType() const override { return ExceptionType::Multiplayer; }
 
     csp::multiplayer::ErrorCode Code() const noexcept { return m_Code; }
 

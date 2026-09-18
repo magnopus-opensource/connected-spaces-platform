@@ -204,8 +204,8 @@ public:
     bool operator!=(const Array<T>& Other) const { return !(*this == Other); }
 
     /// @brief Returns the number of elements in the array.
-    /// @return const size_t
-    const size_t Size() const { return ArraySize; }
+    /// @return size_t
+    size_t Size() const { return ArraySize; }
 
     /// @brief Checks if the array has any elements.
     /// @return bool

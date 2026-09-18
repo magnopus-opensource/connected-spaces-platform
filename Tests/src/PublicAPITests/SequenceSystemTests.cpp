@@ -950,8 +950,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueUpdatedSequenceName[256];
     SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
-    auto UpdateCallback
-        = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
+    auto UpdateCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
         EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
         EXPECT_EQ(NetworkEventData.NewKey, std::string(UniqueUpdatedSequenceName).c_str());
