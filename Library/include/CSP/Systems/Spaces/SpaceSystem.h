@@ -244,16 +244,14 @@ public:
     CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const SpaceResult& Result, const csp::common::String& UserId);
 
     /// @brief Creates new Site information and associates it with the Space.
-    /// @param SpaceId csp::common::String : Space ID to associate the Site information with
-    /// @param SiteInfo Site : Site information to be added
+    /// @param SiteInfo Site : Site information to be added, the space ID in the SiteInfo object defines the space the site is associated with.
     /// @param Callback SiteResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void AddSiteInfo(const csp::common::String& SpaceId, Site& SiteInfo, SiteResultCallback Callback);
+    CSP_ASYNC_RESULT void AddSiteInfo(const Site& SiteInfo, SiteResultCallback Callback);
 
     /// @brief Removes the Site information from the Space.
-    /// @param SpaceId csp::common::String : Space ID for which to remove the associated Site information
-    /// @param SiteInfo Site : Site information to be removed
+    /// @param SiteInfo Site : Site information to be removed, the space ID in the SiteInfo object should be the space the site is associated with.
     /// @param Callback NullResultCallback : callback when asynchronous task
-    CSP_ASYNC_RESULT void RemoveSiteInfo(const csp::common::String& SpaceId, Site& SiteInfo, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveSiteInfo(const Site& SiteInfo, NullResultCallback Callback);
 
     /// @brief Retrieves the Sites information associated with a Space.
     /// @param SpaceId csp::common::String : Space ID to be queried for Site information
