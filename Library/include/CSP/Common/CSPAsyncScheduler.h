@@ -42,10 +42,19 @@ inline CSPAsyncScheduler& default_scheduler();
 #define LIBASYNC_CUSTOM_DEFAULT_SCHEDULER
 #endif
 
+#if defined( _MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+
 // Include async++.h.
 // This should be the first time that async++ is included in the translation unit. For safety, just always include this file rather
 // then async++.h directly.
 #include <async++.h>
+
+#if defined( _MSC_VER)
+#pragma warning(pop)
+#endif
 
 // Define the actual async scheduler, after the declaration such that we can avoid including "async++" before declaring the default scheduler override
 class CSPAsyncScheduler

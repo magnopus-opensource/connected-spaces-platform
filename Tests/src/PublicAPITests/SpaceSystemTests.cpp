@@ -3839,7 +3839,7 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
         ::Space QueriedSpace;
         GetSpace(SpaceSystem, CreatedSpace.Id, QueriedSpace);
         EXPECT_FALSE(std::any_of(QueriedSpace.UserIds.cbegin(), QueriedSpace.UserIds.cend(),
-            [&EnterResult](const csp::common::String& UserId) { return UserId == EnterResult.GetSpace().CreatedBy; }));
+            [&EnterResult = EnterResult](const csp::common::String& UserId) { return UserId == EnterResult.GetSpace().CreatedBy; }));
     }
 
     LogOut(UserSystem);

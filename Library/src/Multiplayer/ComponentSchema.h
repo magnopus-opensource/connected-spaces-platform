@@ -58,7 +58,7 @@ struct ComponentSchema
 
     /// @brief Whether this component is exposed to scripting. Absent when the schema does not say,
     /// which means exposed.
-    std::optional<bool> IsScriptable;
+    std::optional<bool> IsScriptable = std::nullopt;
 
     bool operator==(const ComponentSchema& Other) const;
     bool operator!=(const ComponentSchema& Other) const;

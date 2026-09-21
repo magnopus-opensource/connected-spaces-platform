@@ -145,10 +145,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
     // Create test properties for our entity.
     const common::String TestName = "TestName";
     const SpaceTransform Transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
-    static constexpr const bool IsVisible = false;
-    static constexpr const auto State = AvatarState::Running;
-    const common::String AvatarId = "Id";
-    static constexpr const auto PlayMode = AvatarPlayMode::Creator;
 
     SpaceEntity* CreatedEntity = nullptr;
 

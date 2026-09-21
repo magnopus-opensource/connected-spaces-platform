@@ -193,17 +193,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapUpdateTest)
     EXPECT_EQ(MyMap.Size(), 3);
 }
 
+template <typename T> static auto Adopt(T* Unowned) { return std::unique_ptr<T> { Unowned }; }
+
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysTest)
 {
     Map<int, String> MyMap;
     MyMap = { { 1, "One" }, { 2, "Two" }, { 3, "Three" } };
 
-    const auto* MyKeys = MyMap.Keys();
+    const auto MyKeys = Adopt(MyMap.Keys());
 
     EXPECT_EQ(MyKeys->Size(), 3);
     EXPECT_FALSE(MyKeys->Data() == nullptr);
-
-    std::free(const_cast<Array<int>*>(MyKeys));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
@@ -211,12 +211,10 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
     Map<int, String> MyMap;
     MyMap = { { 1, "One" }, { 2, "Two" }, { 3, "Three" } };
 
-    const auto* MyValues = MyMap.Values();
+    const auto MyValues = Adopt(MyMap.Values());
 
     EXPECT_EQ(MyValues->Size(), 3);
     EXPECT_FALSE(MyValues->Data() == nullptr);
-
-    std::free(const_cast<Array<String>*>(MyValues));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)

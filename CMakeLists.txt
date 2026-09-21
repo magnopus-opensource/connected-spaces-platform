@@ -221,6 +221,7 @@ target_compile_options(csp-lib
     >
 
     $<$<CXX_COMPILER_ID:AppleClang,Clang>:
+	    -Wall
 	    -Wextra
 	    # --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code,
 	    # which has deprecation warnings for some unused but still generated endpoints.
@@ -229,21 +230,24 @@ target_compile_options(csp-lib
 	    -Wno-braced-scalar-init
 	    # Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
 	    -Wno-missing-field-initializers
-	    # Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
-	    -Wno-ignored-qualifiers
+      # Don't error on unknown pragma warnings, specifically working around pragmas in `signalr_value.h`
+      -Wno-error=unknown-pragmas
     >
 
     $<$<CXX_COMPILER_ID:GNU>:
+      -Wall
       -Werror
       -Wextra
       # Don't error when naming members the same as class
       -Wno-error=changes-meaning
       -Wno-error=deprecated-declarations
       -Wno-missing-field-initializers
-      -Wno-ignored-qualifiers
 
       # Needed to compile with the Linux Unreal Toolchain
       -Wno-error=attributes
+
+      # Don't error on unknown pragma warnings, specifically working around pragmas in `signalr_value.h`
+      -Wno-error=unknown-pragmas
 
       -fpermissive
     >
@@ -422,11 +426,37 @@ if(BUILD_TESTING)
         MULTIPLAYER_TEST_RUNNER_PATH="$<TARGET_FILE:MultiplayerTestRunner>"
   )
 
+  # Warnings as errors flag
+  # Sets WX/Werror
+  set_target_properties(csp-tests PROPERTIES
+    COMPILE_WARNING_AS_ERROR ON
+  )
+
   target_compile_options(csp-tests PRIVATE
+    # strict standard compliance
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
 
+    # Set warning level and exceptions for msvc
+    $<$<CXX_COMPILER_ID:MSVC>:
+      /W4       # Sets warning level 4 (high)
+      /wd4996   # Function maybe unsafe warnings
+    >
+
+    $<$<CXX_COMPILER_ID:AppleClang,Clang>:
+      -Wall
+      -Wextra
+
+      # Don't error on unknown pragma warnings, specifically working around pragmas in `signalr_value.h`
+      -Wno-error=unknown-pragmas
+
+      # Don't error on warnings about deprecated in tests.
+      # At the time of writing, this specfically relates to sprintf use in the tests.
+      # We should fix the code, but for now demote back to a warning.
+      -Wno-error=deprecated-declarations
+    >
+
     $<$<CXX_COMPILER_ID:GNU>:
-      -Werror
+      -Wall
       -Wextra
       -Wno-error=changes-meaning
       -Wno-error=deprecated-declarations
@@ -435,8 +465,10 @@ if(BUILD_TESTING)
       -Wno-error=uninitialized
       -Wno-error=maybe-uninitialized
       -Wno-missing-field-initializers
-      -Wno-ignored-qualifiers
       -fpermissive
+
+      # Don't error on unknown pragma warnings, specifically working around pragmas in `signalr_value.h`
+      -Wno-error=unknown-pragmas
     >
   )
 

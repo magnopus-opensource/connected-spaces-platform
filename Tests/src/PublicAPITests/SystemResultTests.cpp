@@ -115,8 +115,7 @@ void NullResultTestFunction(NullResultCallback Callback)
 
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, NullResultTest)
 {
-    NullResultCallback NullTestCallback
-        = [this](const NullResult& _Result) { EXPECT_EQ(_Result.GetResultCode(), csp::systems::EResultCode::Success); };
+    NullResultCallback NullTestCallback = [](const NullResult& _Result) { EXPECT_EQ(_Result.GetResultCode(), csp::systems::EResultCode::Success); };
     NullResultTestFunction(NullTestCallback);
 }
 
