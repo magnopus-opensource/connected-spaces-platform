@@ -117,15 +117,14 @@ template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N
 namespace csp::web
 {
 
-EmscriptenWebClient::EmscriptenWebClient(
-    const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(Tp, AuthContext, LogSystem, AutoRefresh)
+EmscriptenWebClient::EmscriptenWebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(AuthContext, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
 }
 
-EmscriptenWebClient::EmscriptenWebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(Tp, LogSystem, AutoRefresh)
+EmscriptenWebClient::EmscriptenWebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
 }

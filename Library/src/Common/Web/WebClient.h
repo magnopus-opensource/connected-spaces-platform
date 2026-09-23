@@ -54,13 +54,6 @@ namespace csp::web
 /// Maximum concurrent requests supported by the Web Request system
 constexpr int CSP_MAX_CONCURRENT_REQUESTS = 4;
 
-
-enum class ETransferProtocol : uint8_t
-{
-    HTTP,
-    HTTPS
-};
-
 /// @addtogroup web
 /// @brief Web Client Base Class
 ///
@@ -72,8 +65,8 @@ class WebClient
     friend class HttpRequest;
 
 public:
-    WebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    WebClient(const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    WebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    WebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
     virtual ~WebClient();
 
     /// @brief Main method for sending a Http Request

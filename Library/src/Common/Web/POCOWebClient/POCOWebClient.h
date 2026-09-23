@@ -63,8 +63,8 @@ public:
         const char* Version, const csp::common::String& MediaType) override;
 
     // Instances of POCOWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    POCOWebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    POCOWebClient(const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    POCOWebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    POCOWebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
 protected:
     void SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version);

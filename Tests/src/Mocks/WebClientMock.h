@@ -45,8 +45,8 @@ public:
 class WebClientMock : public csp::web::WebClient
 {
 public:
-    WebClientMock(const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-        : WebClient(Tp, LogSystem, AutoRefresh)
+    WebClientMock(csp::common::LogSystem* LogSystem, bool AutoRefresh)
+        : WebClient(LogSystem, AutoRefresh)
     {
     }
 

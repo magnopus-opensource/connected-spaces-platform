@@ -29,7 +29,7 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+WebClient::WebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : AuthContext { &AuthContext }
     , LogSystem(LogSystem)
     , RefreshNeeded(false)
@@ -42,7 +42,7 @@ WebClient::WebClient(const ETransferProtocol /*Tp*/, csp::common::IAuthContext& 
 {
 }
 
-WebClient::WebClient(const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+WebClient::WebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : AuthContext(nullptr)
     , LogSystem(LogSystem)
     , RefreshNeeded(false)

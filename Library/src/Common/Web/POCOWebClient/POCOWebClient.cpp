@@ -157,8 +157,8 @@ std::istream& POCOWebClient::ReceiveResponse(Poco::Net::HTTPClientSession* Clien
     return ResponseStream;
 }
 
-POCOWebClient::POCOWebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(Tp, LogSystem, AutoRefresh)
+POCOWebClient::POCOWebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 
@@ -177,8 +177,8 @@ POCOWebClient::POCOWebClient(const ETransferProtocol Tp, csp::common::LogSystem*
     Cookies = new std::remove_pointer_t<decltype(Cookies)>();
 }
 
-POCOWebClient::POCOWebClient(const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : POCOWebClient(Tp, LogSystem, AutoRefresh)
+POCOWebClient::POCOWebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : POCOWebClient(LogSystem, AutoRefresh)
 {
     SetAuthContext(AuthContext);
 }

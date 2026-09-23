@@ -138,9 +138,9 @@ CSPHttpClient::CSPHttpClient(csp::common::IAuthContext& AuthContext)
 {
 // Passing null for the LogSystem to the POCO/Emscripten web client ctor to avoid logging high frequency multiplayer API exchange.
 #ifdef CSP_WASM
-    WebClientHttps = new csp::web::EmscriptenWebClient(csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
+    WebClientHttps = new csp::web::EmscriptenWebClient(AuthContext, nullptr);
 #else
-    WebClientHttps = new csp::web::POCOWebClient(csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
+    WebClientHttps = new csp::web::POCOWebClient(AuthContext, nullptr);
 #endif
 }
 

@@ -183,9 +183,9 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     else
     {
 #ifdef CSP_WASM
-        WebClient = new csp::web::EmscriptenWebClient(csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::EmscriptenWebClient(LogSystem);
 #else
-        WebClient = new csp::web::POCOWebClient(csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::POCOWebClient(LogSystem);
 #endif
     }
 
