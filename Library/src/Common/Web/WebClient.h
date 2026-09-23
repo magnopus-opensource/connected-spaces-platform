@@ -54,7 +54,6 @@ namespace csp::web
 /// Maximum concurrent requests supported by the Web Request system
 constexpr int CSP_MAX_CONCURRENT_REQUESTS = 4;
 
-using Port = uint32_t;
 
 enum class ETransferProtocol : uint8_t
 {
@@ -73,9 +72,8 @@ class WebClient
     friend class HttpRequest;
 
 public:
-    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem,
-        bool AutoRefresh = true);
+    WebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    WebClient(const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
     virtual ~WebClient();
 
     /// @brief Main method for sending a Http Request
@@ -106,8 +104,6 @@ protected:
     /// @param Request Details of the web request headers and payload
     /// @return Response code and payload
     virtual void Send(HttpRequest& Request) = 0;
-
-    const Port RootPort;
 
 private:
     void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));

@@ -45,8 +45,8 @@ public:
 class WebClientMock : public csp::web::WebClient
 {
 public:
-    WebClientMock(const uint32_t InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-        : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+    WebClientMock(const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+        : WebClient(Tp, LogSystem, AutoRefresh)
     {
     }
 

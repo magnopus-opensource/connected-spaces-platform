@@ -29,10 +29,8 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(
-    const Port InPort, const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : RootPort(InPort)
-    , AuthContext { &AuthContext }
+WebClient::WebClient(const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : AuthContext { &AuthContext }
     , LogSystem(LogSystem)
     , RefreshNeeded(false)
     , RefreshStarted(false)
@@ -44,9 +42,8 @@ WebClient::WebClient(
 {
 }
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : RootPort(InPort)
-    , AuthContext(nullptr)
+WebClient::WebClient(const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : AuthContext(nullptr)
     , LogSystem(LogSystem)
     , RefreshNeeded(false)
     , RefreshStarted(false)

@@ -43,7 +43,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockClient = WebClientMock(ETransferProtocol::HTTP, nullptr, true);
     auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
@@ -104,7 +104,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockClient = WebClientMock(ETransferProtocol::HTTP, nullptr, true);
     auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 

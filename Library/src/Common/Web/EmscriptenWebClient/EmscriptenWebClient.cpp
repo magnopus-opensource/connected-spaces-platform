@@ -118,14 +118,14 @@ namespace csp::web
 {
 
 EmscriptenWebClient::EmscriptenWebClient(
-    const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(InPort, Tp, AuthContext, LogSystem, AutoRefresh)
+    const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(Tp, AuthContext, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
 }
 
-EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+EmscriptenWebClient::EmscriptenWebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(Tp, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
 }

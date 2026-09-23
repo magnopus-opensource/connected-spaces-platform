@@ -61,7 +61,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientSendRequestTest)
 
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+    WebClientMock* MockClient = new WebClientMock(ETransferProtocol::HTTP, LogSystem, true);
     MockHttpResponseHandler MockHandler;
 
     HttpResponse Response;
@@ -122,7 +122,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
         csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
         LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
 
-        WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+        WebClientMock* MockClient = new WebClientMock(ETransferProtocol::HTTP, LogSystem, true);
 
         // Request/Response logs we expect to receive for our HTTP calls.
         // We are only checking against a substring of the request/response logs.

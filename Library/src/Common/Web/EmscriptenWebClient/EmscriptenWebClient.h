@@ -36,9 +36,9 @@ public:
         const char* Version, const csp::common::String& MediaType) override;
 
     // Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem,
-        bool AutoRefresh = true);
-    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    EmscriptenWebClient(
+        const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    EmscriptenWebClient(const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
 private:
     void Send(HttpRequest& Request) override;

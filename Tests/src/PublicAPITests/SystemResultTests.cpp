@@ -48,9 +48,8 @@ typedef std::function<void(const NullResult& Result)> NullResultCallback;
 class TestWebClient : public csp::web::EmscriptenWebClient
 {
 public:
-    TestWebClient(
-        const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
-        : EmscriptenWebClient(InPort, Tp, AuthContext, LogSystem, false)
+    TestWebClient(const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : EmscriptenWebClient(Tp, AuthContext, LogSystem, false)
     {
     }
 };
@@ -60,9 +59,8 @@ public:
 class TestWebClient : public csp::web::POCOWebClient
 {
 public:
-    TestWebClient(
-        const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
-        : POCOWebClient(InPort, Tp, AuthContext, LogSystem, false)
+    TestWebClient(const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : POCOWebClient(Tp, AuthContext, LogSystem, false)
     {
     }
 };
@@ -127,7 +125,7 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
     const csp::common::String MyTestPayload = "1234";
     TestAuthContext AuthContext;
-    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, AuthContext, LogSystem);
+    auto* WebClient = new TestWebClient(csp::web::ETransferProtocol::HTTP, AuthContext, LogSystem);
     EXPECT_TRUE(WebClient != nullptr);
 
     ResponseReceiver Receiver;
