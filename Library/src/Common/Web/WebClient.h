@@ -86,7 +86,6 @@ public:
     virtual void SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
         csp::common::CancellationToken& CancellationToken);
 
-    virtual std::string MD5Hash(const void* Data, const size_t Size) = 0;
     virtual void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
         = 0;
     virtual void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,

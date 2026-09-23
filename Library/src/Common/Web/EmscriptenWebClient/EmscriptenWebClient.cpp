@@ -117,7 +117,8 @@ template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N
 namespace csp::web
 {
 
-EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+EmscriptenWebClient::EmscriptenWebClient(
+    const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : WebClient(InPort, Tp, AuthContext, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
@@ -127,12 +128,6 @@ EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProto
     : WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
-}
-
-std::string EmscriptenWebClient::MD5Hash(const void* /*Data*/, const size_t /*Size*/)
-{
-    assert(false && "Not implemented!");
-    return "MD5Hash Not Implemented";
 }
 
 void EmscriptenWebClient::SetFileUploadContentFromFile(

@@ -57,8 +57,6 @@ public:
 
     MOCK_METHOD(void, SetAuthContext, (csp::common::IAuthContext & AuthContext), (override));
 
-    MOCK_METHOD(std::string, MD5Hash, (const void* Data, const size_t Size), (override));
-
     MOCK_METHOD(void, SetFileUploadContentFromFile,
         (csp::web::HttpPayload * Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType), (override));
 

@@ -38,7 +38,6 @@ struct CookieData
     std::string Domain;
 };
 
-
 class PocoPrivateKeyHandler : public Poco::Net::PrivateKeyPassphraseHandler
 {
 public:
@@ -57,8 +56,6 @@ public:
 
     using WebClient::WebClient;
 
-    std::string MD5Hash(const void* Data, const size_t Size) override;
-
     void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType) override;
     void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
         const char* Version, const csp::common::String& MediaType) override;
@@ -67,7 +64,8 @@ public:
 
     // Instances of POCOWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
     POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem,
+        bool AutoRefresh = true);
 
 protected:
     void SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version);
@@ -107,8 +105,7 @@ private:
     bool PrepareAndSendRequest(
         HttpRequest& Request, Poco::Net::HTTPRequest PocoRequest, Poco::Net::HTTPClientSession* ClientSession, ERequestBodyMode SendBodyMode);
 
-    std::istream& ReceiveResponse(
-        Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request);
+    std::istream& ReceiveResponse(Poco::Net::HTTPClientSession* ClientSession, Poco::Net::HTTPResponse& PocoResponse, HttpRequest& Request);
 };
 
 } // namespace csp::web

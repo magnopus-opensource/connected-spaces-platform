@@ -501,18 +501,6 @@ void POCOWebClient::ProcessRequestAsync(
     }
 }
 
-std::string POCOWebClient::MD5Hash(const void* Data, const size_t Size)
-{
-    Poco::MD5Engine MD5Hasher;
-
-    MD5Hasher.update(Data, Size);
-
-    const Poco::DigestEngine::Digest& Digest = MD5Hasher.digest();
-
-    std::string DigestHex = Poco::DigestEngine::digestToHex(Digest);
-    return DigestHex;
-}
-
 void POCOWebClient::SetFileUploadContentFromFile(
     HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
 {
@@ -588,7 +576,7 @@ void POCOWebClient::SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSo
     Poco::MD5Engine MD5Hasher;
 
     Source->stream().seekg(0);
-    std::string FileAsString(std::istreambuf_iterator<char>(Source->stream()), {});
+    std::string FileAsString(std::istreambuf_iterator<char>(Source->stream()), { });
     MD5Hasher.update(FileAsString);
 
     const Poco::DigestEngine::Digest& Digest = MD5Hasher.digest();
