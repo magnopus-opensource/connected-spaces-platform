@@ -83,25 +83,16 @@ public:
     /// @param InUri The Uri of the request relative to the base Uri
     /// @param Payload Headers and body content
     /// @param ResponseCallback Pointer to callback for the response
-    /// @param AsyncResponse Flag to indicate if the response should be issued asynchronously as soon as it's received
     virtual void SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
-        csp::common::CancellationToken& CancellationToken, bool AsyncResponse = true);
-
-#ifndef CSP_WASM
-    /// @brief Manually poll for responses that have been flagged as non-async
-    /// @param MaxNumResponses Maximum number of responses to process in this call
-    void ProcessResponses(const uint32_t MaxNumResponses = 64);
-#endif
+        csp::common::CancellationToken& CancellationToken);
 
     virtual std::string MD5Hash(const void* Data, const size_t Size) = 0;
     virtual void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
         = 0;
     virtual void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType)
-        = 0;
+        const char* Version, const csp::common::String& MediaType) = 0;
     virtual void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
-        const char* Version, const csp::common::String& MediaType)
-        = 0;
+        const char* Version, const csp::common::String& MediaType) = 0;
 
     /// @brief Sets the authentication object to reason about authentication information, and refresh the authentication token.
     /// @details This setter needs to exist due to order of initialization. At the time of writing, the AuthContext has a WebClient dependency,
@@ -130,7 +121,6 @@ protected:
     csp::common::LogSystem* LogSystem = nullptr;
 
 private:
-
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
     std::optional<std::string> WAFBypassValue;
@@ -144,7 +134,6 @@ private:
 
     std::atomic_uint32_t RequestCount;
     csp::ThreadPool ThreadPool;
-    csp::Queue<HttpRequest*> PollRequests;
     std::unordered_set<HttpRequest*> Requests;
     std::mutex RequestsMutex;
 #endif

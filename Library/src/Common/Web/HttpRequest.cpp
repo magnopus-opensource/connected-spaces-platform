@@ -21,14 +21,13 @@ namespace csp::web
 {
 
 HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload,
-    IHttpResponseHandler* ResponseCallback, csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync)
+    IHttpResponseHandler* ResponseCallback, csp::common::CancellationToken& CancellationToken)
     : Client(InClient)
     , Verb(InVerb)
     , Uri(InUri)
     , Payload(InPayload)
     , Callback(ResponseCallback)
     , Response(this)
-    , IsCallbackAsync(CallbackIsAsync)
     , IsAutoRetryEnabled(true)
     , RetryCount(0)
     , RefCount(0)
@@ -72,8 +71,6 @@ HttpResponse& HttpRequest::GetMutableResponse() { return Response; }
 const HttpResponse& HttpRequest::GetResponse() const { return Response; }
 
 IHttpResponseHandler* HttpRequest::GetCallback() const { return Callback; }
-
-bool HttpRequest::GetIsCallbackAsync() const { return IsCallbackAsync; }
 
 void HttpRequest::SetResponseCode(EResponseCodes InReponseCode) { Response.SetResponseCode(InReponseCode); }
 

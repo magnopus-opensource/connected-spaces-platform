@@ -64,7 +64,7 @@ class HttpRequest
 {
 public:
     HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload, IHttpResponseHandler* ResponseCallback,
-        csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync = true);
+        csp::common::CancellationToken& CancellationToken);
     ~HttpRequest();
 
     ERequestVerb GetVerb() const;
@@ -75,7 +75,6 @@ public:
     const HttpResponse& GetResponse() const;
 
     IHttpResponseHandler* GetCallback() const;
-    bool GetIsCallbackAsync() const;
 
     void SetResponseCode(EResponseCodes InReponseCode);
     void SetResponseData(const char* Data, size_t DataLength);
@@ -116,7 +115,6 @@ private:
     IHttpResponseHandler* Callback;
     HttpResponse Response;
 
-    bool IsCallbackAsync;
     bool IsAutoRetryEnabled;
     uint32_t RetryCount;
     std::atomic_uint32_t RefCount;

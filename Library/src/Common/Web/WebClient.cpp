@@ -96,24 +96,10 @@ WebClient::~WebClient()
         ++WaitCounter;
     }
 
-    // Process all outstanding responses
-    WaitCounter = 0;
-
-    while ((RequestCount > 0) && (WaitCounter < kMaxWaitCounter))
-    {
-        ProcessResponses(RequestCount);
-
-        // Guard against exiting while Requests are still in flight
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ++WaitCounter;
-    }
-
     if (WaitCounter == kMaxWaitCounter)
     {
         CSP_LOG_WARN_MSG("Web client timed out waiting for outstanding request on exit\n");
     }
-
-    PollRequests.Close();
 
     ThreadPool.Shutdown();
 #endif
@@ -174,14 +160,14 @@ void WebClient::RefreshIfExpired()
 }
 
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
-    csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
+    csp::common::CancellationToken& CancellationToken)
 {
     if (WAFBypassValue.has_value())
     {
         Payload.AddHeader(CSP_TEXT("X-WAF-Bypass"), CSP_TEXT(WAFBypassValue->c_str()));
     }
 
-    auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+    auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken);
 
     if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
     {
@@ -267,30 +253,6 @@ void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::m
 }
 
 #ifndef CSP_WASM
-void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
-{
-    uint32_t ResponseCount = 0;
-
-    while ((PollRequests.IsEmpty() == false) && (ResponseCount < MaxNumResponses))
-    {
-        auto PollRequest = PollRequests.Dequeue();
-
-        HttpRequest* Request = PollRequest.value();
-        IHttpResponseHandler* Callback = Request->GetCallback();
-
-        if (!Request->Cancelled() && Callback)
-        {
-            auto& Response = Request->GetMutableResponse();
-            Callback->OnHttpResponse(Response);
-        }
-
-        DestroyRequest(Request);
-
-        // In case responses are being constantly queued from another
-        // thread, make sure we don't keep polling forever
-        ++ResponseCount;
-    }
-}
 
 void WebClient::ProcessRequest(HttpRequest* Request)
 {
@@ -341,36 +303,18 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 
         if (Request->GetCallback())
         {
-            if (Request->GetIsCallbackAsync())
+            if (!RetryIssued)
             {
-                if (!RetryIssued)
+                const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
+                if (ResponseCode >= 400)
                 {
-                    const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-                    if (ResponseCode >= 400)
-                    {
-                        PrintClientErrorResponseMessages(Response);
-                    }
-
-                    Request->GetCallback()->OnHttpResponse(Response);
+                    PrintClientErrorResponseMessages(Response);
                 }
 
-                DestroyRequest(Request);
+                Request->GetCallback()->OnHttpResponse(Response);
             }
-            else
-            {
-                if (!RetryIssued)
-                {
-                    const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-                    if (ResponseCode >= 400)
-                    {
-                        PrintClientErrorResponseMessages(Response);
-                    }
 
-                    // This request is marked to be polled, so add to the queue
-                    // to be issued on the next call to WebClient::ProcessResponses()
-                    PollRequests.Enqueue({ Request });
-                }
-            }
+            DestroyRequest(Request);
         }
         else
         {

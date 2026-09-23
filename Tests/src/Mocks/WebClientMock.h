@@ -28,8 +28,8 @@ class MockHttpResponseHandler : public csp::web::IHttpResponseHandler
 public:
     MockHttpResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest & Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse & Response), (override));
     MOCK_METHOD(bool, ShouldDelete, (), (const, override));
 };
 
@@ -38,8 +38,8 @@ class MockApiResponseHandler : public csp::services::ApiResponseHandlerBase
 public:
     MockApiResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest & Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse & Response), (override));
 };
 
 class WebClientMock : public csp::web::WebClient
@@ -52,7 +52,7 @@ public:
 
     MOCK_METHOD(void, SendRequest,
         (csp::web::ERequestVerb Verb, const csp::web::Uri& InUri, csp::web::HttpPayload& Payload, csp::web::IHttpResponseHandler* ResponseCallback,
-            csp::common::CancellationToken& CancellationToken, bool AsyncResponse),
+            csp::common::CancellationToken& CancellationToken),
         (override));
 
     MOCK_METHOD(void, SetAuthContext, (csp::common::IAuthContext & AuthContext), (override));

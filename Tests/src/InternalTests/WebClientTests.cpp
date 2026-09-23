@@ -72,7 +72,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientSendRequestTest)
     EXPECT_CALL(*MockClient, SendRequest)
         .WillOnce(
             [](ERequestVerb /*Verb*/, const Uri& /*InUri*/, HttpPayload& /*Payload*/, IHttpResponseHandler* ResponseCallback,
-                const csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
+                const csp::common::CancellationToken& /*CancellationToken*/)
             {
                 HttpResponse MockResponse;
                 MockResponse.SetResponseCode(EResponseCodes::ResponseOK);
@@ -99,7 +99,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientSendRequestTest)
     Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
     MockClient->SendRequest(
-        csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), Payload, &MockHandler, csp::common::CancellationToken::Dummy(), true);
+        csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), Payload, &MockHandler, csp::common::CancellationToken::Dummy());
 
     OnHttpResponseFuture.wait();
     EXPECT_TRUE(OnHttpResponseFuture.get() == true);
@@ -117,7 +117,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
     InitialiseFoundation();
 
     {
-        RAIIMockLogger MockLogger {};
+        RAIIMockLogger MockLogger { };
 
         csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
         LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
@@ -149,14 +149,13 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
 
         EXPECT_CALL(*MockClient, SendRequest)
             .WillRepeatedly(testing::DoAll(
-                // Capture: Verb (0), Uri (1), Payload (2), ResponseCallback (3), CancellationToken (4), AsyncResponse (5)
-                testing::WithArgs<0, 1, 2, 3, 4, 5>(
+                // Capture: Verb (0), Uri (1), Payload (2), ResponseCallback (3), CancellationToken (4)
+                testing::WithArgs<0, 1, 2, 3, 4>(
                     [&MockClient, &LogSystem](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
-                        csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
+                        csp::common::CancellationToken& CancellationToken)
                     {
                         // Mimic the logging behaviour of the WebClient SendRequest method
-                        auto Request = std::make_unique<csp::web::HttpRequest>(
-                            MockClient, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+                        auto Request = std::make_unique<csp::web::HttpRequest>(MockClient, Verb, InUri, Payload, ResponseCallback, CancellationToken);
 
                         LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("{}", *(Request.get())).c_str());
                     }),
@@ -186,8 +185,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
 
         PayloadGet.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), PayloadGet, &MockHandlerGet,
-            csp::common::CancellationToken::Dummy(), true);
+        MockClient->SendRequest(
+            csp::web::ERequestVerb::Get, Uri("https://mock.service/api/users"), PayloadGet, &MockHandlerGet, csp::common::CancellationToken::Dummy());
 
         // PUT request
         MockHttpResponseHandler MockHandlerPut;
@@ -200,8 +199,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
         PayloadPut.SetContent(JsonDocPut);
         PayloadPut.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
-        MockClient->SendRequest(csp::web::ERequestVerb::Put, Uri("https://mock.service/api/users"), PayloadPut, &MockHandlerPut,
-            csp::common::CancellationToken::Dummy(), true);
+        MockClient->SendRequest(
+            csp::web::ERequestVerb::Put, Uri("https://mock.service/api/users"), PayloadPut, &MockHandlerPut, csp::common::CancellationToken::Dummy());
 
         // POST request
         MockHttpResponseHandler MockHandlerPost;
@@ -217,7 +216,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
         PayloadPost.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
         MockClient->SendRequest(csp::web::ERequestVerb::Post, Uri("https://mock.service/api/login"), PayloadPost, &MockHandlerPost,
-            csp::common::CancellationToken::Dummy(), true);
+            csp::common::CancellationToken::Dummy());
 
         // Delete request
         MockHttpResponseHandler MockHandlerDelete;
@@ -225,7 +224,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
         PayloadDelete.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("MockApiKey"));
 
         MockClient->SendRequest(csp::web::ERequestVerb::Delete, Uri("https://mock.service/api/users"), PayloadDelete, &MockHandlerDelete,
-            csp::common::CancellationToken::Dummy(), true);
+            csp::common::CancellationToken::Dummy());
 
         delete MockClient;
     }
