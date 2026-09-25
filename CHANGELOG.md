@@ -14,6 +14,33 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🍰 🙌 New Features
 
+- [OF-1890] feat: Two step material retrieval. By @mag-lt.
+  Clients already fetch most asset data themselves, from an `Asset`'s `Uri`. Materials were the exception, where CSP
+  did the downloading and the parsing on their behalf. This brings materials in line with the rest.
+
+  Retrieving a material is now a two step process. `AssetSystem::GetMaterialInfo` and `AssetSystem::GetMaterialInfos`
+  report where materials can be downloaded from, as a `MaterialInfo`. Clients fetch those uris themselves, and pass
+  the data to `AssetSystem::ParseMaterial` along with the info it came from, to get a `Material`.
+
+  The payload is passed back as a `BufferAssetDataSource`, as used elsewhere in the asset APIs. It is opaque to
+  clients, who only need to hand back the bytes they fetched.
+
+  Migrating from the material APIs, all of which are deprecated:
+  - `GetMaterial` becomes `GetMaterialInfo`, a fetch of the info's `Uri`, then `ParseMaterial`. In languages with
+    async/await that is two lines either side of the fetch, otherwise it is another level of nested callbacks.
+  - `GetMaterials` becomes `GetMaterialInfos`, then that same fetch and parse for each info. This one is more
+    involved, as CSP previously ran every download and joined the results. Clients now decide how to run them, and
+    get finer control over failures, which were previously logged and silently dropped from the results.
+  - `GetMaterialFromUri` becomes a fetch of the uri, then `ParseMaterialFromAssetCollection`. That covers material
+    data located without asking CSP, such as from a scene description, where there is no `MaterialInfo` to be had.
+
+  Separately, CSP is getting out of downloading asset data altogether, so the remaining APIs that do it are
+  deprecated too:
+  - `DownloadAssetData` and `DownloadAssetDataEx` become a fetch of `Asset::Uri`.
+  - `GetAssetDataSize` becomes a HEAD request for `Asset::Uri`, reading its content-length.
+
+  Everything deprecated here will be removed in a future release.
+
 - [OF-1896] feat!: Add double support to `ReplicatedValue`. By @mag-lt.
   `ReplicatedValue` can now hold a `double` as well as a `float`, via `SetDouble`/`GetDouble` and a new `Double`
   case on the `ReplicatedValueType` enum. Component schemas can declare `double` properties, which behave as the
