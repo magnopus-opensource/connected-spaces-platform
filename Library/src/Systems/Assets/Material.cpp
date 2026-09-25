@@ -95,4 +95,17 @@ MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16
 
 const MaterialInfo& MaterialInfoResult::GetMaterialInfo() const { return Info; }
 
+MaterialInfosResult::MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+{
+}
+
+MaterialInfosResult::MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::common::Array<MaterialInfo> Infos)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+    , Infos(std::move(Infos))
+{
+}
+
+const csp::common::Array<MaterialInfo>& MaterialInfosResult::GetMaterialInfos() const { return Infos; }
+
 } // namespace csp::systems

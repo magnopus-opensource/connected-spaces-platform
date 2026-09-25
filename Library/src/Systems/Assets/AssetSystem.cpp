@@ -1619,23 +1619,20 @@ static std::vector<MaterialInfo> CollectMaterialInfos(
     return Infos;
 }
 
-std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::DownloadAllMaterials(
-    const csp::common::Array<AssetCollection>& AssetCollections)
+std::function<async::task<MaterialsResult>(const MaterialInfosResult&)> AssetSystem::DownloadAllMaterials()
 {
-    return [this, AssetCollections](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
+    return [this](const MaterialInfosResult& GetMaterialInfosResult) -> async::task<MaterialsResult>
     {
-        const auto& Assets = GetAssetsResult.GetAssets();
+        const auto& Infos = GetMaterialInfosResult.GetMaterialInfos();
 
-        if (Assets.IsEmpty())
+        if (Infos.IsEmpty())
         {
             // There are no material assets in this space
-            return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+            return async::make_task(MaterialsResult(GetMaterialInfosResult.GetResultCode(), GetMaterialInfosResult.GetHttpResultCode()));
         }
 
-        const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
-
         auto DownloadTasks = std::vector<async::task<MaterialResult>>();
-        DownloadTasks.reserve(Infos.size());
+        DownloadTasks.reserve(Infos.Size());
 
         for (const auto& Info : Infos)
         {
@@ -1684,9 +1681,9 @@ std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::Do
     };
 }
 
-void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId)
 {
-    auto FetchMaterials = [this](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
+    auto FetchMaterialInfos = [this](const AssetCollectionsResult& Result) -> async::task<MaterialInfosResult>
     {
         if (Result.GetResultCode() != EResultCode::Success)
         {
@@ -1697,7 +1694,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
 
         if (AssetCollections.IsEmpty())
         {
-            return async::make_task(MaterialsResult(Result.GetResultCode(), Result.GetHttpResultCode()));
+            return async::make_task(MaterialInfosResult(Result.GetResultCode(), Result.GetHttpResultCode()));
         }
 
         auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
@@ -1708,11 +1705,30 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         }
 
         return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
-            .then(DownloadAllMaterials(AssetCollections));
+            .then(
+                [AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
+                {
+                    const auto& Assets = GetAssetsResult.GetAssets();
+                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
+
+                    if (!Assets.IsEmpty() && Infos.empty())
+                    {
+                        // There are material assets in this space, but none of them could be resolved
+                        return MakeInvalid<MaterialInfosResult>();
+                    }
+
+                    return { GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode(), Convert(Infos) };
+                });
     };
 
-    FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
-        .then(std::move(FetchMaterials))
+    return FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
+        .then(std::move(FetchMaterialInfos));
+}
+
+void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+{
+    GetMaterialInfos(SpaceId)
+        .then(DownloadAllMaterials())
         .then(
             [Callback](async::task<MaterialsResult> Result)
             {

@@ -374,8 +374,9 @@ private:
 
     async::task<MaterialResult> DownloadMaterial(const MaterialInfo& Info);
 
-    std::function<async::task<MaterialsResult>(const AssetsResult&)> DownloadAllMaterials(
-        const csp::common::Array<AssetCollection>& AssetCollections);
+    async::task<MaterialInfosResult> GetMaterialInfos(const csp::common::String& SpaceId);
+
+    std::function<async::task<MaterialsResult>(const MaterialInfosResult&)> DownloadAllMaterials();
 
     csp::services::ApiBase* PrototypeAPI;
     csp::services::ApiBase* AssetDetailAPI;
