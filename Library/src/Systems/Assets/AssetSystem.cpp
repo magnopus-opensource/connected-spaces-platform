@@ -1762,6 +1762,11 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         AssetId,
     };
 
+    DownloadMaterial(Info, Callback);
+}
+
+void AssetSystem::DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback)
+{
     auto DownloadMaterialCallback = [Callback, Info](const AssetDataResult& DownloadResult)
     {
         if (DownloadResult.GetResultCode() != EResultCode::Success)
