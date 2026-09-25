@@ -82,4 +82,17 @@ void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMateri
 
 void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
+MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+{
+}
+
+MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, MaterialInfo Info)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+    , Info(std::move(Info))
+{
+}
+
+const MaterialInfo& MaterialInfoResult::GetMaterialInfo() const { return Info; }
+
 } // namespace csp::systems

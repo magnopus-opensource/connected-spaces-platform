@@ -1711,37 +1711,65 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             });
 }
 
-void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
+static std::optional<MaterialInfo> MakeMaterialInfo(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+
+void AssetSystem::GetMaterialInfo(
+    const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialInfoResultCallback Callback)
 {
     // 1. Get asset collection
     auto GetAssetCollectionCB = [this, AssetCollectionId, AssetId, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
     {
         if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
+            Callback({ CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode() });
             return;
         }
 
         // 2. Get asset
         const AssetCollection& FoundAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [this, Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
+        auto GetAssetCB = [Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
-                Callback(MaterialResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
+                Callback({ CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode() });
                 return;
             }
 
-            // 3. Download material
+            // 3. Resolve the material info
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
-            GetMaterialFromUri(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, Callback);
+            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri);
+
+            if (!Info.has_value())
+            {
+                CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
+                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialInfoResult>());
+                return;
+            }
+
+            Callback({ CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode(), *Info });
         };
 
         GetAssetById(AssetCollectionId, AssetId, GetAssetCB);
     };
 
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
+}
+
+void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
+{
+    GetMaterialInfo(AssetCollectionId, AssetId,
+        [this, Callback](const MaterialInfoResult& Result)
+        {
+            if (Result.GetResultCode() != EResultCode::Success)
+            {
+                Callback({ Result.GetResultCode(), Result.GetHttpResultCode() });
+                return;
+            }
+
+            DownloadMaterial(Result.GetMaterialInfo(), Callback);
+        });
 }
 
 static std::optional<MaterialInfo> MakeMaterialInfo(

@@ -237,9 +237,30 @@ public:
     csp::common::String MaterialId;
 };
 
+/// @ingroup Asset System
+/// @brief Result data class that contains a MaterialInfo.
+class CSP_API MaterialInfoResult : public csp::systems::ResultBase
+{
+public:
+    /// @brief Retrieves the MaterialInfo from the result.
+    const MaterialInfo& GetMaterialInfo() const;
+
+    CSP_NO_EXPORT MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+
+    CSP_NO_EXPORT MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, MaterialInfo Info);
+
+private:
+    MaterialInfoResult() = delete;
+
+    MaterialInfo Info;
+};
+
 /// @brief Callback containing requested material data.
 /// @param Result const MaterialResult& : Material result class.
 typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;
+
+/// @brief Callback containing a requested MaterialInfo.
+typedef std::function<void(const MaterialInfoResult& Result)> MaterialInfoResultCallback;
 
 /// @brief Callback containing a collection of requested material data.
 /// @param Result const MaterialsResult& : Material result class containing a collection of materials.
