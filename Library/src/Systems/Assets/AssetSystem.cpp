@@ -1565,14 +1565,13 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
     DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
-async::task<MaterialResult> AssetSystem::DownloadMaterial(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+async::task<MaterialResult> AssetSystem::DownloadMaterial(const MaterialInfo& Info)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
     auto OnCompleteTask = OnCompleteEvent->get_task();
 
-    GetMaterialFromUri(AssetCollection, AssetId, Uri,
-        [OnCompleteEvent, AssetId](const auto& Result)
+    DownloadMaterial(Info,
+        [OnCompleteEvent, AssetId = Info.MaterialId](const auto& Result)
         {
             if (Result.GetResultCode() == EResultCode::Failed)
             {
@@ -1591,6 +1590,35 @@ async::task<MaterialResult> AssetSystem::DownloadMaterial(
     return OnCompleteTask;
 }
 
+static std::optional<MaterialInfo> MakeMaterialInfo(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+
+static std::vector<MaterialInfo> CollectMaterialInfos(
+    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets)
+{
+    auto Infos = std::vector<MaterialInfo>();
+    Infos.reserve(Assets.Size());
+
+    for (const auto& Asset : Assets)
+    {
+        if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
+                [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
+            AssetCollection != std::end(AssetCollections))
+        {
+            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri))
+            {
+                Infos.push_back(*Info);
+            }
+        }
+        else
+        {
+            CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+        }
+    }
+
+    return Infos;
+}
+
 std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::DownloadAllMaterials(
     const csp::common::Array<AssetCollection>& AssetCollections)
 {
@@ -1604,21 +1632,14 @@ std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::Do
             return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
         }
 
-        auto DownloadTasks = std::vector<async::task<MaterialResult>>();
-        DownloadTasks.reserve(Assets.Size());
+        const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
 
-        for (const auto& Asset : Assets)
+        auto DownloadTasks = std::vector<async::task<MaterialResult>>();
+        DownloadTasks.reserve(Infos.size());
+
+        for (const auto& Info : Infos)
         {
-            if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
-                    [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
-                AssetCollection != std::end(AssetCollections))
-            {
-                DownloadTasks.push_back(DownloadMaterial(*AssetCollection, Asset.Id, Asset.Uri));
-            }
-            else
-            {
-                CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
-            }
+            DownloadTasks.push_back(DownloadMaterial(Info));
         }
 
         return async::when_all(DownloadTasks)
@@ -1711,9 +1732,6 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             });
 }
 
-static std::optional<MaterialInfo> MakeMaterialInfo(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
-
 void AssetSystem::GetMaterialInfo(
     const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialInfoResultCallback Callback)
 {
@@ -1743,7 +1761,6 @@ void AssetSystem::GetMaterialInfo(
 
             if (!Info.has_value())
             {
-                CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialInfoResult>());
                 return;
             }
@@ -1779,6 +1796,7 @@ static std::optional<MaterialInfo> MakeMaterialInfo(
 
     if (!ShaderType.has_value())
     {
+        CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
         return {};
     }
 
@@ -1797,7 +1815,6 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
 
     if (!Info.has_value())
     {
-        CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
         return;
     }

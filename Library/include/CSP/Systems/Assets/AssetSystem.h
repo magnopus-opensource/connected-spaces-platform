@@ -372,8 +372,7 @@ private:
 
     void DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback);
 
-    async::task<MaterialResult> DownloadMaterial(
-        const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+    async::task<MaterialResult> DownloadMaterial(const MaterialInfo& Info);
 
     std::function<async::task<MaterialsResult>(const AssetsResult&)> DownloadAllMaterials(
         const csp::common::Array<AssetCollection>& AssetCollections);
