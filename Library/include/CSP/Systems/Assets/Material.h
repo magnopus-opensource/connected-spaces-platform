@@ -220,7 +220,10 @@ private:
 };
 
 /// @ingroup Asset System
-/// @brief Identifies a material and where to download it from.
+/// @brief Describes where a material can be downloaded from, and what is needed to parse it.
+/// @details Getting a material is a two step process. CSP resolves a MaterialInfo, the caller fetches its
+/// Uri, and passes the data back to AssetSystem::ParseMaterial along with the info it came from. Only the
+/// Uri is of use to the caller, the rest is passed back unchanged.
 class CSP_API MaterialInfo
 {
 public:
@@ -235,6 +238,9 @@ public:
 
     /// @brief The asset the material data is stored in.
     csp::common::String MaterialId;
+
+    bool operator==(const MaterialInfo& Other) const;
+    bool operator!=(const MaterialInfo& Other) const;
 };
 
 /// @ingroup Asset System
@@ -279,6 +285,9 @@ typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback
 
 /// @brief Callback containing a requested MaterialInfo.
 typedef std::function<void(const MaterialInfoResult& Result)> MaterialInfoResultCallback;
+
+/// @brief Callback containing a collection of requested MaterialInfos.
+typedef std::function<void(const MaterialInfosResult& Result)> MaterialInfosResultCallback;
 
 /// @brief Callback containing a collection of requested material data.
 /// @param Result const MaterialsResult& : Material result class containing a collection of materials.

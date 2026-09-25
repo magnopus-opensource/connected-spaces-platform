@@ -1725,6 +1725,27 @@ async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common
         .then(std::move(FetchMaterialInfos));
 }
 
+void AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId, MaterialInfosResultCallback Callback)
+{
+    GetMaterialInfos(SpaceId).then(
+        [Callback](async::task<MaterialInfosResult> Result)
+        {
+            try
+            {
+                Callback(Result.get());
+            }
+            catch (const std::exception& Exception)
+            {
+                CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterialInfos failed: %s", Exception.what());
+                Callback(MakeInvalid<MaterialInfosResult>());
+            }
+            catch (...)
+            {
+                Callback(MakeInvalid<MaterialInfosResult>());
+            }
+        });
+}
+
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
     GetMaterialInfos(SpaceId)
@@ -1822,6 +1843,19 @@ static std::optional<MaterialInfo> MakeMaterialInfo(
         AssetCollection.Id,
         AssetId,
     };
+}
+
+Material* AssetSystem::ParseMaterial(const MaterialInfo& Info, const BufferAssetDataSource& MaterialData)
+{
+    if (MaterialData.Buffer == nullptr || MaterialData.BufferLength == 0)
+    {
+        return nullptr;
+    }
+
+    // Copied so that it is null terminated for the json parser, which the buffer makes no promise of being
+    const auto SerializedData = csp::common::String(static_cast<const char*>(MaterialData.Buffer), MaterialData.BufferLength);
+
+    return DeserializeMaterial(Info, SerializedData.c_str()).release();
 }
 
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,

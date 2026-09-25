@@ -82,6 +82,13 @@ void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMateri
 
 void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
+bool MaterialInfo::operator==(const MaterialInfo& Other) const
+{
+    return Uri == Other.Uri && ShaderType == Other.ShaderType && MaterialCollectionId == Other.MaterialCollectionId && MaterialId == Other.MaterialId;
+}
+
+bool MaterialInfo::operator!=(const MaterialInfo& Other) const { return !(*this == Other); }
+
 MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
     : csp::systems::ResultBase(ResCode, HttpResCode)
 {

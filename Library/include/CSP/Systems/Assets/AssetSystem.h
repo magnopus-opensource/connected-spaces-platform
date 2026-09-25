@@ -338,6 +338,34 @@ public:
     CSP_ASYNC_RESULT void GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
         const csp::common::String& Uri, MaterialResultCallback Callback);
 
+    /// @brief Gets what is needed to download and parse a material.
+    /// @details The material itself is not downloaded. Fetch the info's Uri and pass the data back to
+    /// ParseMaterial along with the info.
+    /// @param AssetCollectionId The asset collection the material belongs to.
+    /// @param AssetId The asset the material data is stored in.
+    /// @param Callback Callback when asynchronous task finishes.
+    /// @see ParseMaterial
+    CSP_ASYNC_RESULT void GetMaterialInfo(
+        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialInfoResultCallback Callback);
+
+    /// @brief Gets what is needed to download and parse the materials in a space.
+    /// @details The materials themselves are not downloaded. Each info must be fetched from its own Uri and
+    /// parsed separately, by passing the data back to ParseMaterial along with the info it came from.
+    /// @param SpaceId The space to get material info for.
+    /// @param Callback Callback when asynchronous task finishes.
+    /// @see ParseMaterial
+    CSP_ASYNC_RESULT void GetMaterialInfos(const csp::common::String& SpaceId, MaterialInfosResultCallback Callback);
+
+    /// @brief Parses a material from the data downloaded from a MaterialInfo's Uri.
+    /// @details The info must be the one the data was downloaded for, as it describes how to parse it. The mime
+    /// type of MaterialData is not used.
+    /// @param Info The info the data was downloaded for.
+    /// @param MaterialData The data downloaded from the info's Uri.
+    /// @return A pointer to the Material, or null if the data could not be parsed. The caller should take
+    /// ownership of the pointer.
+    /// @see GetMaterialInfo
+    Material* ParseMaterial(const MaterialInfo& Info, const BufferAssetDataSource& MaterialData);
+
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
     typedef std::function<void(const csp::common::AssetDetailBlobChangedNetworkEventData&)> AssetDetailBlobChangedCallbackHandler;
 
@@ -367,8 +395,6 @@ private:
     CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
     CSP_ASYNC_RESULT void DeleteAssetById(
         const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
-
-    void GetMaterialInfo(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialInfoResultCallback Callback);
 
     void DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback);
 
