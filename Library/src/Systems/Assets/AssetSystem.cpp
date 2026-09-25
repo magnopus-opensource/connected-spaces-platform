@@ -1858,6 +1858,22 @@ Material* AssetSystem::ParseMaterial(const MaterialInfo& Info, const BufferAsset
     return DeserializeMaterial(Info, SerializedData.c_str()).release();
 }
 
+Material* AssetSystem::ParseMaterialFromAssetCollection(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const BufferAssetDataSource& MaterialData)
+{
+    // A uri is only needed to fetch the data, which the caller has already done
+    const auto UnusedUri = csp::common::String();
+
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri);
+
+    if (!Info.has_value())
+    {
+        return nullptr;
+    }
+
+    return ParseMaterial(*Info, MaterialData);
+}
+
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
     const csp::common::String& Uri, MaterialResultCallback Callback)
 {
