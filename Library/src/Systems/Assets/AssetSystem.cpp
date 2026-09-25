@@ -298,6 +298,18 @@ std::optional<Material*> DeserializeIntoMaterialOfType(
     return Result;
 }
 
+static std::unique_ptr<Material> DeserializeMaterial(const MaterialInfo& Info, const char* SerializedData)
+{
+    auto MaybeMaterial = std::unique_ptr<Material>(InstantiateMaterialOfType(Info.ShaderType, "", Info.MaterialCollectionId, Info.MaterialId));
+
+    if (MaybeMaterial && DeserializeIntoMaterialOfType(SerializedData, Info.ShaderType, MaybeMaterial.get()))
+    {
+        return MaybeMaterial;
+    }
+
+    return nullptr;
+}
+
 void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, csp::common::String& OutMaterialJson)
 {
     switch (ShaderType)
@@ -1760,13 +1772,9 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
 
         const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-        // Create material of the specific derived type.
-        Material* FoundMaterial = InstantiateMaterialOfType(Info.ShaderType, "", Info.MaterialCollectionId, Info.MaterialId);
+        auto DeserializationResult = DeserializeMaterial(Info, MaterialData);
 
-        // Deserialse material data.
-        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, Info.ShaderType, FoundMaterial);
-
-        if (!DeserializationResult.has_value())
+        if (!DeserializationResult)
         {
             CSP_LOG_ERROR_MSG("Failed to deserialize material");
 
@@ -1776,7 +1784,7 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         }
 
         MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-        Result.SetMaterial(DeserializationResult.value());
+        Result.SetMaterial(DeserializationResult.release());
 
         Callback(Result);
     };
