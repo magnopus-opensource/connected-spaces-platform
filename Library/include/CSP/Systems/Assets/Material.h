@@ -219,6 +219,24 @@ private:
     csp::common::Array<Material*> Materials;
 };
 
+/// @ingroup Asset System
+/// @brief Identifies a material and where to download it from.
+class CSP_API MaterialInfo
+{
+public:
+    /// @brief The url to download the material data from.
+    csp::common::String Uri;
+
+    /// @brief The type of shader model the material is associated with.
+    EShaderType ShaderType = EShaderType::Standard;
+
+    /// @brief The asset collection the material belongs to.
+    csp::common::String MaterialCollectionId;
+
+    /// @brief The asset the material data is stored in.
+    csp::common::String MaterialId;
+};
+
 /// @brief Callback containing requested material data.
 /// @param Result const MaterialResult& : Material result class.
 typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;

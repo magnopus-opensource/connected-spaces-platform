@@ -1743,8 +1743,14 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         return;
     }
 
-    auto DownloadMaterialCallback
-        = [Callback, AssetId, AssetCollectionId = AssetCollection.Id, ShaderType = *ShaderType](const AssetDataResult& DownloadResult)
+    const auto Info = MaterialInfo {
+        Uri,
+        *ShaderType,
+        AssetCollection.Id,
+        AssetId,
+    };
+
+    auto DownloadMaterialCallback = [Callback, Info](const AssetDataResult& DownloadResult)
     {
         if (DownloadResult.GetResultCode() != EResultCode::Success)
         {
@@ -1755,10 +1761,10 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
         // Create material of the specific derived type.
-        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId);
+        Material* FoundMaterial = InstantiateMaterialOfType(Info.ShaderType, "", Info.MaterialCollectionId, Info.MaterialId);
 
         // Deserialse material data.
-        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
+        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, Info.ShaderType, FoundMaterial);
 
         if (!DeserializationResult.has_value())
         {
@@ -1776,7 +1782,7 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
     };
 
     Asset Asset;
-    Asset.Uri = Uri;
+    Asset.Uri = Info.Uri;
 
     DownloadAssetData(Asset, DownloadMaterialCallback);
 }
