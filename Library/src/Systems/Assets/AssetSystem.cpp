@@ -1744,25 +1744,37 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
+static std::optional<MaterialInfo> MakeMaterialInfo(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+{
+    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+
+    if (!ShaderType.has_value())
+    {
+        return {};
+    }
+
+    return MaterialInfo {
+        Uri,
+        *ShaderType,
+        AssetCollection.Id,
+        AssetId,
+    };
+}
+
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
     const csp::common::String& Uri, MaterialResultCallback Callback)
 {
-    std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
-    if (!ShaderType.has_value())
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri);
+
+    if (!Info.has_value())
     {
         CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
         return;
     }
 
-    const auto Info = MaterialInfo {
-        Uri,
-        *ShaderType,
-        AssetCollection.Id,
-        AssetId,
-    };
-
-    DownloadMaterial(Info, Callback);
+    DownloadMaterial(*Info, Callback);
 }
 
 void AssetSystem::DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback)
