@@ -1,0 +1,137 @@
+# This workflow builds, installs, and optionally uploads CSP artifacts for every supported
+# combination of build configuration, and linkage type:
+#
+# [Release, RelWithDebInfo]
+# [Static, Shared]
+#
+# The path generated for this artifact is:
+#   build/linux_unreal-{CONFIG_LOWERCASE}-{LINKAGE}/build/{CONFIG}
+#
+# Example:
+#   build/linux_unreal-release-static/build/Release
+#
+# The name generated for this artifact is:
+#   linux_unreal-{CONFIG_LOWERCASE}-{LINKAGE}-build
+#
+# Example:
+#   linux_unreal-release-static-build
+#
+# upload_install - If this is true, artifacts will be created for each of the above combinations.
+# These are stored and named as follows:
+#
+# The path generated for this artifact is:
+#   install/linux_unreal/{CONFIG_LOWERCASE}-{LINKAGE}
+#
+# Example:
+#   install/linux_unreal/release-static
+#
+# The name generated for this artifact is:
+#   linux_unreal-{CONFIG_LOWERCASE}-{LINKAGE}-install
+#
+# Example:
+#   linux_unreal-release-static-install
+#
+# config.preset_prefix - Used to select a CMake preset based on the build type.
+# This value is also substituted for {CONFIG_LOWERCASE} to create the artifact path and name shown above.
+name: Build Unreal Linux
+
+on:
+  workflow_call:
+    inputs:
+      upload_install:
+        description: "If true, the install will be uploaded as an artifact. These artifacts are used for releases."
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build-unreal-linux:
+    name: Build Linux Unreal ${{ matrix.config.build_type }} ${{ matrix.linkage.name }}
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - build_type: Release
+            preset_prefix: release
+
+          - build_type: RelWithDebInfo
+            preset_prefix: relwithdebinfo
+        
+        linkage:
+          - name: static
+            shared: false
+
+          - name: shared
+            shared: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Ensure we fetch tags so our automatic versioning script picks up the version.
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: Resolve LFS
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          git lfs ls-files
+          git lfs pull
+          git lfs checkout
+
+      - name: Install Unreal Linux toolchain
+        shell: bash
+        env:
+          UE_TOOLCHAIN_URL: "https://cdn.unrealengine.com/Toolchain_Linux/native-linux-v25_clang-18.1.0-rockylinux8.tar.gz"
+        run: |
+          mkdir -p "$RUNNER_TEMP/unreal-toolchain"
+
+          curl -fL \
+            "$UE_TOOLCHAIN_URL" \
+            -o "$RUNNER_TEMP/unreal-toolchain.tar.gz"
+
+          tar -xf "$RUNNER_TEMP/unreal-toolchain.tar.gz" \
+            -C "$RUNNER_TEMP/unreal-toolchain"
+
+          TOOLCHAIN_ROOT=$(find "$RUNNER_TEMP/unreal-toolchain" \
+            -type d \
+            -path "*/x86_64-unknown-linux-gnu" \
+            | head -n 1)
+
+          if [ -z "$TOOLCHAIN_ROOT" ]; then
+            echo "Could not find x86_64 Unreal Linux toolchain"
+            exit 1
+          fi
+
+          echo "Using Unreal toolchain: $TOOLCHAIN_ROOT"
+
+          test -x "$TOOLCHAIN_ROOT/bin/clang"
+          test -x "$TOOLCHAIN_ROOT/bin/clang++"
+
+          "$TOOLCHAIN_ROOT/bin/clang" --version
+
+          echo "UE_LINUX_TOOLCHAIN_ROOT=$TOOLCHAIN_ROOT" >> "$GITHUB_ENV"
+
+      - name: Build and install
+        uses: ./.github/actions/build-and-install
+        with:
+          host_profile: linux_unreal_56
+          build_type: ${{ matrix.config.build_type }}
+          configure_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_preset: ${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          output_folder: build/linux_unreal-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          build_folder: build/linux_unreal-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}/build/${{ matrix.config.build_type }}
+          install_prefix: install/linux_unreal/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          package_third_party_libs: ${{ matrix.linkage.name == 'static' && inputs.upload_install }}
+
+      - name: Upload install
+        if: inputs.upload_install
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_unreal-${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}-install
+          path: install/linux_unreal/${{ matrix.config.preset_prefix }}-${{ matrix.linkage.name }}
+          if-no-files-found: error

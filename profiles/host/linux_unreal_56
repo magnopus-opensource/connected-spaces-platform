@@ -1,3 +1,8 @@
+{% set toolchain_root = os.getenv("UE_LINUX_TOOLCHAIN_ROOT") %}
+{% if not toolchain_root %}
+    {{ raise("UE_LINUX_TOOLCHAIN_ROOT environment variable is not set") }}
+{% endif %}
+
 [settings]
 os=Linux
 arch=x86_64
@@ -15,11 +20,8 @@ ninja/1.11.1
 # You will need to override set UE_LINUX_TOOLCHAIN_ROOT from the command line.
 # Unreals toolchain can be found here:
 # https://dev.epicgames.com/documentation/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.7#version-history
-tools.build:sysroot=$env(UE_LINUX_TOOLCHAIN_ROOT)
-tools.build:compiler_executables={"c":"$env(UE_LINUX_TOOLCHAIN_ROOT)/bin/clang","cpp":"$env(UE_LINUX_TOOLCHAIN_ROOT)/bin/clang++"}
+tools.build:compiler_executables={'c': '{{ toolchain_root }}/bin/clang', 'cpp': '{{ toolchain_root }}/bin/clang++'}
+
+tools.build:sysroot={{ toolchain_root }}
 
 tools.cmake.cmaketoolchain:generator=Ninja
-
-# Unreal expects the C++ runtime to be linked statically.
-tools.build:sharedlinkflags=["-static-libstdc++"]
-tools.build:exelinkflags=["-static-libstdc++"]
