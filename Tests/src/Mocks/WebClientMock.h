@@ -28,8 +28,8 @@ class MockHttpResponseHandler : public csp::web::IHttpResponseHandler
 public:
     MockHttpResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest & Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse & Response), (override));
     MOCK_METHOD(bool, ShouldDelete, (), (const, override));
 };
 
@@ -38,26 +38,24 @@ class MockApiResponseHandler : public csp::services::ApiResponseHandlerBase
 public:
     MockApiResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest & Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse & Response), (override));
 };
 
 class WebClientMock : public csp::web::WebClient
 {
 public:
-    WebClientMock(const uint32_t InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-        : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+    WebClientMock(csp::common::LogSystem* LogSystem, bool AutoRefresh)
+        : WebClient(LogSystem, AutoRefresh)
     {
     }
 
     MOCK_METHOD(void, SendRequest,
         (csp::web::ERequestVerb Verb, const csp::web::Uri& InUri, csp::web::HttpPayload& Payload, csp::web::IHttpResponseHandler* ResponseCallback,
-            csp::common::CancellationToken& CancellationToken, bool AsyncResponse),
+            csp::common::CancellationToken& CancellationToken),
         (override));
 
     MOCK_METHOD(void, SetAuthContext, (csp::common::IAuthContext & AuthContext), (override));
-
-    MOCK_METHOD(std::string, MD5Hash, (const void* Data, const size_t Size), (override));
 
     MOCK_METHOD(void, SetFileUploadContentFromFile,
         (csp::web::HttpPayload * Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType), (override));

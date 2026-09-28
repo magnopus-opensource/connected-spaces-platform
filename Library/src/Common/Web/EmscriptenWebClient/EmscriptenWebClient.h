@@ -27,9 +27,8 @@ namespace csp::web
 class EmscriptenWebClient : public WebClient
 {
 public:
-    virtual ~EmscriptenWebClient() {};
+    virtual ~EmscriptenWebClient() { };
 
-    std::string MD5Hash(const void* Data, const size_t Size) override;
     void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType) override;
     void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
         const char* Version, const csp::common::String& MediaType) override;
@@ -37,8 +36,8 @@ public:
         const char* Version, const csp::common::String& MediaType) override;
 
     // Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
-    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    EmscriptenWebClient(csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    EmscriptenWebClient(csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
 private:
     void Send(HttpRequest& Request) override;

@@ -56,7 +56,7 @@ void PublicTestBase::TearDown()
 void PublicTestBaseWithMocks::SetUp()
 {
     SignalRMock = new SignalRConnectionMock();
-    WebClientMock = new ::WebClientMock(80, csp::web::ETransferProtocol::HTTPS, nullptr, true);
+    WebClientMock = new ::WebClientMock(nullptr, true);
 
     ::testing::Test::SetUp();
 

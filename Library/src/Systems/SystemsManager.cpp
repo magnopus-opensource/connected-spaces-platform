@@ -137,7 +137,7 @@ void SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::Str
         throw std::logic_error("SystemsManager must be initialized before setting WAF bypass.");
     }
 
-     WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
+    WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
 }
 
 SystemsManager::SystemsManager()
@@ -183,9 +183,9 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     else
     {
 #ifdef CSP_WASM
-        WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::EmscriptenWebClient(LogSystem);
 #else
-        WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::POCOWebClient(LogSystem);
 #endif
     }
 

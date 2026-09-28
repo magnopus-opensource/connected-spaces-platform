@@ -43,7 +43,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockClient = WebClientMock(nullptr, true);
     auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
@@ -61,7 +61,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
     EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
             [&FileUrl, &LoginState](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
-                csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
+                csp::common::CancellationToken& /*CancellationToken*/)
             {
                 EXPECT_EQ(Verb, ERequestVerb::GET);
 
@@ -104,7 +104,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockClient = WebClientMock(nullptr, true);
     auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
@@ -122,7 +122,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
     EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
             [&FileUrl, &LoginState](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
-                csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
+                csp::common::CancellationToken& /*CancellationToken*/)
             {
                 EXPECT_EQ(Verb, ERequestVerb::HEAD);
 
@@ -172,5 +172,5 @@ INSTANTIATE_TEST_SUITE_P(RemoteFileManagerTests, GetFile,
 INSTANTIATE_TEST_SUITE_P(RemoteFileManagerTests, GetResponseHeaders,
     testing::Values(
         std::make_tuple(csp::common::ELoginState::LoggedOut, ""), std::make_tuple(csp::common::ELoginState::LoggedIn, "MockAccessToken")));
-        
+
 }
