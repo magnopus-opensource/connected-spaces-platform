@@ -61,6 +61,12 @@ on:
         required: true
         default: true
 
+      build_linux_unreal:
+        type: boolean
+        description: Build Linux Unreal packages
+        required: true
+        default: true
+
       build_legacy_wasm:
         type: boolean
         description: Build legacy WASM/NPM package
@@ -90,6 +96,12 @@ jobs:
   ios-visionos:
     if: inputs.build_ios_visionos
     uses: ./.github/workflows/ios-visionos-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
+  linux-unreal:
+    if: inputs.build_linux_unreal
+    uses: ./.github/workflows/linux-unreal-build.yml
     with:
       upload_install: ${{ inputs.create_release }}
 
