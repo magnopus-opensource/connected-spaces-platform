@@ -134,6 +134,7 @@ jobs:
     - legacy-wasm
     - android
     - ios-visionos
+    - linux-unreal
 
     if: |
       always() &&
@@ -143,6 +144,7 @@ jobs:
       (!inputs.build_legacy_wasm || needs.legacy-wasm.result == 'success') &&
       (!inputs.build_android || needs.android.result == 'success') &&
       (!inputs.build_ios_visionos || needs.ios-visionos.result == 'success') &&
+      (!inputs.build_linux_unreal || needs.linux-unreal.result == 'success') &&
       (
         inputs.skip_tests ||
         needs.live-desktop-tests.result == 'success'
