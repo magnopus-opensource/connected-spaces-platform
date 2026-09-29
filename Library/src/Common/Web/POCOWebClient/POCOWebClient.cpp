@@ -50,11 +50,10 @@ namespace
 
 template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N - 1; }
 
-void LogHttpResponseIfLoglevelVeryVerbose(
+void LogHttpResponse(
     csp::common::LogSystem* LogSystem, const char* Verb, const csp::web::HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
 {
-    // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
-    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    if (LogSystem != nullptr)
     {
         LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
             fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), static_cast<int>(PocoResponse.getStatus()),
@@ -275,7 +274,7 @@ void POCOWebClient::Get(HttpRequest& Request)
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "GET", Request, PocoResponse);
 }
 
 void POCOWebClient::Post(HttpRequest& Request)
@@ -304,7 +303,7 @@ void POCOWebClient::Post(HttpRequest& Request)
     // Get all response headers
     CopyResponseHeaders(PocoResponse, Payload);
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "POST", Request, PocoResponse);
 }
 
 void POCOWebClient::Put(HttpRequest& Request)
@@ -332,7 +331,7 @@ void POCOWebClient::Put(HttpRequest& Request)
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PUT", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "PUT", Request, PocoResponse);
 }
 
 void POCOWebClient::Delete(HttpRequest& Request)
@@ -357,7 +356,7 @@ void POCOWebClient::Delete(HttpRequest& Request)
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "DELETE", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "DELETE", Request, PocoResponse);
 }
 
 void POCOWebClient::Head(HttpRequest& Request)
@@ -380,7 +379,7 @@ void POCOWebClient::Head(HttpRequest& Request)
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "HEAD", Request, PocoResponse);
 }
 
 void POCOWebClient::Patch(HttpRequest& Request)
@@ -409,7 +408,7 @@ void POCOWebClient::Patch(HttpRequest& Request)
     // Get all response headers
     CopyResponseHeaders(PocoResponse, Payload);
 
-    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PATCH", Request, PocoResponse);
+    LogHttpResponse(LogSystem, "PATCH", Request, PocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(
