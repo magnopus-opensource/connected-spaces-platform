@@ -61,6 +61,12 @@ on:
         required: true
         default: true
 
+      build_linux_unreal:
+        type: boolean
+        description: Build Linux Unreal packages
+        required: true
+        default: true
+
       build_legacy_wasm:
         type: boolean
         description: Build legacy WASM/NPM package
@@ -93,6 +99,12 @@ jobs:
     with:
       upload_install: ${{ inputs.create_release }}
 
+  linux-unreal:
+    if: inputs.build_linux_unreal
+    uses: ./.github/workflows/linux-unreal-build.yml
+    with:
+      upload_install: ${{ inputs.create_release }}
+
   legacy-wasm:
     if: inputs.build_legacy_wasm
     uses: ./.github/workflows/legacy-wasm-build.yml
@@ -122,6 +134,7 @@ jobs:
     - legacy-wasm
     - android
     - ios-visionos
+    - linux-unreal
 
     if: |
       always() &&
@@ -131,6 +144,7 @@ jobs:
       (!inputs.build_legacy_wasm || needs.legacy-wasm.result == 'success') &&
       (!inputs.build_android || needs.android.result == 'success') &&
       (!inputs.build_ios_visionos || needs.ios-visionos.result == 'success') &&
+      (!inputs.build_linux_unreal || needs.linux-unreal.result == 'success') &&
       (
         inputs.skip_tests ||
         needs.live-desktop-tests.result == 'success'

@@ -42,6 +42,11 @@ jobs:
       upload_package: false
       run_tests: true
 
+  linux-unreal:
+    uses: ./.github/workflows/linux-unreal-build.yml
+    with:
+      upload_install: false
+
   local-mcs-tests:
     uses: ./.github/workflows/local-mcs-tests-run.yml
     secrets: inherit
