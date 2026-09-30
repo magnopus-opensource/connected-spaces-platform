@@ -235,7 +235,7 @@ test('Failing status codes are retried', async ({ user }) => {
   const userSystem = Systems.SystemsManager.get().getUserSystem();
   let loginResult: Systems.LoginStateResult;
   try {
-    loginResult = await userSystem.login(user.getProfile().email, TEST_ACCOUNT_PASSWORD, false, true, null);
+    loginResult = await userSystem.login('IrreleventEmail@woah.com', TEST_ACCOUNT_PASSWORD, false, true, null);
   } finally {
     // Unset the intercepting request for any subsequent tests
     (globalThis as any).XMLHttpRequest = RealXMLHttpRequest;
@@ -316,7 +316,7 @@ test('Network failures are retried', async ({ user }) => {
   const userSystem = Systems.SystemsManager.get().getUserSystem();
   let loginResult: Systems.LoginStateResult;
   try {
-    loginResult = await userSystem.login(user.getProfile().email, TEST_ACCOUNT_PASSWORD, false, true, null);
+    loginResult = await userSystem.login('IrreleventEmail@woah.com', TEST_ACCOUNT_PASSWORD, false, true, null);
   } finally {
     // Unset the intercepting request for any subsequent tests
     (globalThis as any).XMLHttpRequest = RealXMLHttpRequest;
@@ -394,7 +394,7 @@ test('Successful network responses are not retried', async ({ user }) => {
   const userSystem = Systems.SystemsManager.get().getUserSystem();
   let loginResult: Systems.LoginStateResult;
   try {
-    loginResult = await userSystem.login(user.getProfile().email, TEST_ACCOUNT_PASSWORD, false, true, null);
+    loginResult = await userSystem.login('IrreleventEmail@woah.com', TEST_ACCOUNT_PASSWORD, false, true, null);
   } finally {
     // Unset the intercepting request for any subsequent tests
     (globalThis as any).XMLHttpRequest = RealXMLHttpRequest;
