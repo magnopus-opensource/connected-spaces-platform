@@ -635,6 +635,450 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
     EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard3"));
 }
 
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfos)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // Resolves the shader type of each material
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestPrototypeIdStandard",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdAlphaVideo",
+                            "metadata": {
+                                "ShaderType": "AlphaVideo"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdUnsupportedShaderType",
+                            "metadata": {
+                                "ShaderType": "FutureTypeThatOldClientsDoNotSupport"
+                            }
+                        }
+                    ])");
+                }
+                // Resolves the uri of each material
+                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestIdStandard",
+                            "prototypeId": "TestPrototypeIdStandard",
+                            "uri": "https://example.com/standard.json"
+                        },
+                        {
+                            "id": "TestIdAlphaVideo",
+                            "prototypeId": "TestPrototypeIdAlphaVideo",
+                            "uri": "https://example.com/alphavideo.json"
+                        },
+                        {
+                            "id": "TestIdUnsupportedShaderType",
+                            "prototypeId": "TestPrototypeIdUnsupportedShaderType",
+                            "uri": "https://example.com/unsupported.json"
+                        }
+                    ])");
+                }
+            });
+
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfos, RequestPredicate, csp::common::String("TestSpaceId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& Infos = Result.GetMaterialInfos();
+    EXPECT_EQ(Infos.Size(), 2);
+
+    const auto Contains = [&Infos](const auto& Info) { return std::find(std::begin(Infos), std::end(Infos), Info) != std::end(Infos); };
+
+    EXPECT_TRUE(Contains(MaterialInfo {
+        "https://example.com/standard.json",
+        csp::systems::EShaderType::Standard,
+        "TestPrototypeIdStandard",
+        "TestIdStandard",
+    }));
+
+    EXPECT_TRUE(Contains(MaterialInfo {
+        "https://example.com/alphavideo.json",
+        csp::systems::EShaderType::AlphaVideo,
+        "TestPrototypeIdAlphaVideo",
+        "TestIdAlphaVideo",
+    }));
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfosWhenSpaceHasNone)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // The space has no asset collections, so no materials
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent("[]");
+                }
+            });
+
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfos, RequestPredicate, csp::common::String("TestSpaceId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EXPECT_TRUE(Result.GetMaterialInfos().IsEmpty());
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfo)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // Resolves the uri of the material
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes/TestPrototypeId/asset-details/TestId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"({
+                        "id": "TestId",
+                        "prototypeId": "TestPrototypeId",
+                        "uri": "https://example.com/standard.json"
+                    })");
+                }
+                // Resolves the shader type of the material
+                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/TestPrototypeId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"({
+                        "id": "TestPrototypeId",
+                        "metadata": {
+                            "ShaderType": "Standard"
+                        }
+                    })");
+                }
+            });
+
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfo, RequestPredicate, csp::common::String("TestPrototypeId"), csp::common::String("TestId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto Expected = MaterialInfo {
+        "https://example.com/standard.json",
+        csp::systems::EShaderType::Standard,
+        "TestPrototypeId",
+        "TestId",
+    };
+
+    EXPECT_EQ(Result.GetMaterialInfo(), Expected);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfoWhenMaterialIsMissing)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    // Nothing resolves, starting with the asset collection the lookup begins at
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request) { Request.GetMutableResponse().SetResponseCode(csp::web::EResponseCodes::ResponseNotFound); });
+
+    auto [Result]
+        = AWAIT_PRE(AssetSystem, GetMaterialInfo, RequestPredicate, csp::common::String("MissingPrototypeId"), csp::common::String("MissingId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfosWhenNoneResolve)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // Resolves a shader type this build does not know about, for the only material in the space
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestPrototypeIdUnsupportedShaderType",
+                            "metadata": {
+                                "ShaderType": "FutureTypeThatOldClientsDoNotSupport"
+                            }
+                        }
+                    ])");
+                }
+                // Resolves the uri of each material
+                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestIdUnsupportedShaderType",
+                            "prototypeId": "TestPrototypeIdUnsupportedShaderType",
+                            "uri": "https://example.com/unsupported.json"
+                        }
+                    ])");
+                }
+            });
+
+    // The space has materials, none of which resolve, which is distinct from it having none at all
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfos, RequestPredicate, csp::common::String("TestSpaceId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    EXPECT_TRUE(Result.GetMaterialInfos().IsEmpty());
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfoWhenShaderTypeIsUnrecognised)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // Resolves the uri of the material
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes/TestPrototypeId/asset-details/TestId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"({
+                        "id": "TestId",
+                        "prototypeId": "TestPrototypeId",
+                        "uri": "https://example.com/standard.json"
+                    })");
+                }
+                // Resolves a shader type this build does not know about
+                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/TestPrototypeId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"({
+                        "id": "TestPrototypeId",
+                        "metadata": {
+                            "ShaderType": "FutureTypeThatOldClientsDoNotSupport"
+                        }
+                    })");
+                }
+            });
+
+    // Unlike GetMaterialInfos, there is nothing else to report, so the whole request fails
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfo, RequestPredicate, csp::common::String("TestPrototypeId"), csp::common::String("TestId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMaterialInfoWhenAssetIsMissing)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Request.GetUri().GetAsString());
+
+                // Resolves the shader type, leaving the asset itself not found
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes/TestPrototypeId") && !RawUri.Contains("/asset-details/"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"({
+                        "id": "TestPrototypeId",
+                        "metadata": {
+                            "ShaderType": "Standard"
+                        }
+                    })");
+                }
+            });
+
+    auto [Result] = AWAIT_PRE(AssetSystem, GetMaterialInfo, RequestPredicate, csp::common::String("TestPrototypeId"), csp::common::String("TestId"));
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, ParseMaterial)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    const auto Info = MaterialInfo {
+        "https://example.com/standard.json",
+        csp::systems::EShaderType::Standard,
+        "TestPrototypeId",
+        "TestId",
+    };
+
+    auto Payload = std::string(R"({"name":"TestMaterial","shaderType":0,"version":2})");
+
+    auto MaterialData = BufferAssetDataSource();
+    MaterialData.Buffer = Payload.data();
+    MaterialData.BufferLength = Payload.size();
+
+    const auto Parsed = std::unique_ptr<Material>(AssetSystem->ParseMaterial(Info, MaterialData));
+    ASSERT_NE(Parsed, nullptr);
+
+    EXPECT_EQ(Parsed->GetName(), "TestMaterial");
+    EXPECT_EQ(Parsed->GetShaderType(), csp::systems::EShaderType::Standard);
+    EXPECT_EQ(Parsed->GetVersion(), 2);
+    EXPECT_EQ(Parsed->GetMaterialCollectionId(), "TestPrototypeId");
+    EXPECT_EQ(Parsed->GetMaterialId(), "TestId");
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, ParseMaterialStopsAtBufferLength)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    const auto Info = MaterialInfo {
+        "https://example.com/standard.json",
+        csp::systems::EShaderType::Standard,
+        "TestPrototypeId",
+        "TestId",
+    };
+
+    // The buffer is not null terminated where the payload ends, so parsing past it would fail
+    const auto Payload = std::string(R"({"name":"TestMaterial","shaderType":0,"version":2})");
+    auto Buffer = Payload + "trailing";
+
+    auto MaterialData = BufferAssetDataSource();
+    MaterialData.Buffer = Buffer.data();
+    MaterialData.BufferLength = Payload.size();
+
+    const auto Parsed = std::unique_ptr<Material>(AssetSystem->ParseMaterial(Info, MaterialData));
+    EXPECT_NE(Parsed, nullptr);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, ParseMaterialWhenDataIsNotValid)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    const auto Info = MaterialInfo {
+        "https://example.com/standard.json",
+        csp::systems::EShaderType::Standard,
+        "TestPrototypeId",
+        "TestId",
+    };
+
+    auto Payload = std::string("not json");
+
+    auto MaterialData = BufferAssetDataSource();
+    MaterialData.Buffer = Payload.data();
+    MaterialData.BufferLength = Payload.size();
+
+    EXPECT_EQ(AssetSystem->ParseMaterial(Info, MaterialData), nullptr);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetGLTFMaterialTest)
 {
     SetRandSeed();
@@ -908,7 +1352,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space so we can get the material events
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1024,7 +1468,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space so we can get the material and asset events
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

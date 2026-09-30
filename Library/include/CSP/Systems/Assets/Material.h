@@ -219,9 +219,75 @@ private:
     csp::common::Array<Material*> Materials;
 };
 
+/// @ingroup Asset System
+/// @brief Describes where a material can be downloaded from, and what is needed to parse it.
+/// @details Getting a material is a two step process. CSP resolves a MaterialInfo, the caller fetches its
+/// Uri, and passes the data back to AssetSystem::ParseMaterial along with the info it came from. Only the
+/// Uri is of use to the caller, the rest is passed back unchanged.
+class CSP_API MaterialInfo
+{
+public:
+    /// @brief The url to download the material data from.
+    csp::common::String Uri;
+
+    /// @brief The type of shader model the material is associated with.
+    EShaderType ShaderType = EShaderType::Standard;
+
+    /// @brief The asset collection the material belongs to.
+    csp::common::String MaterialCollectionId;
+
+    /// @brief The asset the material data is stored in.
+    csp::common::String MaterialId;
+
+    bool operator==(const MaterialInfo& Other) const;
+    bool operator!=(const MaterialInfo& Other) const;
+};
+
+/// @ingroup Asset System
+/// @brief Result data class that contains a MaterialInfo.
+class CSP_API MaterialInfoResult : public csp::systems::ResultBase
+{
+public:
+    /// @brief Retrieves the MaterialInfo from the result.
+    const MaterialInfo& GetMaterialInfo() const;
+
+    CSP_NO_EXPORT MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+
+    CSP_NO_EXPORT MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, MaterialInfo Info);
+
+private:
+    MaterialInfoResult() = delete;
+
+    MaterialInfo Info;
+};
+
+/// @ingroup Asset System
+/// @brief Result data class that contains a collection of MaterialInfos.
+class CSP_API MaterialInfosResult : public csp::systems::ResultBase
+{
+public:
+    /// @brief Retrieves the MaterialInfos from the result.
+    const csp::common::Array<MaterialInfo>& GetMaterialInfos() const;
+
+    CSP_NO_EXPORT MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+
+    CSP_NO_EXPORT MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::common::Array<MaterialInfo> Infos);
+
+private:
+    MaterialInfosResult() = delete;
+
+    csp::common::Array<MaterialInfo> Infos;
+};
+
 /// @brief Callback containing requested material data.
 /// @param Result const MaterialResult& : Material result class.
 typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;
+
+/// @brief Callback containing a requested MaterialInfo.
+typedef std::function<void(const MaterialInfoResult& Result)> MaterialInfoResultCallback;
+
+/// @brief Callback containing a collection of requested MaterialInfos.
+typedef std::function<void(const MaterialInfosResult& Result)> MaterialInfosResultCallback;
 
 /// @brief Callback containing a collection of requested material data.
 /// @param Result const MaterialsResult& : Material result class containing a collection of materials.

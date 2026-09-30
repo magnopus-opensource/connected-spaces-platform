@@ -298,6 +298,18 @@ std::optional<Material*> DeserializeIntoMaterialOfType(
     return Result;
 }
 
+static std::unique_ptr<Material> DeserializeMaterial(const MaterialInfo& Info, const char* SerializedData)
+{
+    auto MaybeMaterial = std::unique_ptr<Material>(InstantiateMaterialOfType(Info.ShaderType, "", Info.MaterialCollectionId, Info.MaterialId));
+
+    if (MaybeMaterial && DeserializeIntoMaterialOfType(SerializedData, Info.ShaderType, MaybeMaterial.get()))
+    {
+        return MaybeMaterial;
+    }
+
+    return nullptr;
+}
+
 void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, csp::common::String& OutMaterialJson)
 {
     switch (ShaderType)
@@ -1553,14 +1565,13 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
     DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
-async::task<MaterialResult> AssetSystem::DownloadMaterial(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+async::task<MaterialResult> AssetSystem::DownloadMaterial(const MaterialInfo& Info)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
     auto OnCompleteTask = OnCompleteEvent->get_task();
 
-    GetMaterialFromUri(AssetCollection, AssetId, Uri,
-        [OnCompleteEvent, AssetId](const auto& Result)
+    DownloadMaterial(Info,
+        [OnCompleteEvent, AssetId = Info.MaterialId](const auto& Result)
         {
             if (Result.GetResultCode() == EResultCode::Failed)
             {
@@ -1579,34 +1590,53 @@ async::task<MaterialResult> AssetSystem::DownloadMaterial(
     return OnCompleteTask;
 }
 
-std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::DownloadAllMaterials(
-    const csp::common::Array<AssetCollection>& AssetCollections)
-{
-    return [this, AssetCollections](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
-    {
-        const auto& Assets = GetAssetsResult.GetAssets();
+static std::optional<MaterialInfo> MakeMaterialInfo(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
 
-        if (Assets.IsEmpty())
+static std::vector<MaterialInfo> CollectMaterialInfos(
+    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets)
+{
+    auto Infos = std::vector<MaterialInfo>();
+    Infos.reserve(Assets.Size());
+
+    for (const auto& Asset : Assets)
+    {
+        if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
+                [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
+            AssetCollection != std::end(AssetCollections))
+        {
+            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri))
+            {
+                Infos.push_back(*Info);
+            }
+        }
+        else
+        {
+            CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+        }
+    }
+
+    return Infos;
+}
+
+std::function<async::task<MaterialsResult>(const MaterialInfosResult&)> AssetSystem::DownloadAllMaterials()
+{
+    return [this](const MaterialInfosResult& GetMaterialInfosResult) -> async::task<MaterialsResult>
+    {
+        const auto& Infos = GetMaterialInfosResult.GetMaterialInfos();
+
+        if (Infos.IsEmpty())
         {
             // There are no material assets in this space
-            return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+            return async::make_task(MaterialsResult(GetMaterialInfosResult.GetResultCode(), GetMaterialInfosResult.GetHttpResultCode()));
         }
 
         auto DownloadTasks = std::vector<async::task<MaterialResult>>();
-        DownloadTasks.reserve(Assets.Size());
+        DownloadTasks.reserve(Infos.Size());
 
-        for (const auto& Asset : Assets)
+        for (const auto& Info : Infos)
         {
-            if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
-                    [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
-                AssetCollection != std::end(AssetCollections))
-            {
-                DownloadTasks.push_back(DownloadMaterial(*AssetCollection, Asset.Id, Asset.Uri));
-            }
-            else
-            {
-                CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
-            }
+            DownloadTasks.push_back(DownloadMaterial(Info));
         }
 
         return async::when_all(DownloadTasks)
@@ -1651,9 +1681,9 @@ std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::Do
     };
 }
 
-void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId)
 {
-    auto FetchMaterials = [this](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
+    auto FetchMaterialInfos = [this](const AssetCollectionsResult& Result) -> async::task<MaterialInfosResult>
     {
         if (Result.GetResultCode() != EResultCode::Success)
         {
@@ -1664,7 +1694,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
 
         if (AssetCollections.IsEmpty())
         {
-            return async::make_task(MaterialsResult(Result.GetResultCode(), Result.GetHttpResultCode()));
+            return async::make_task(MaterialInfosResult(Result.GetResultCode(), Result.GetHttpResultCode()));
         }
 
         auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
@@ -1675,11 +1705,51 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         }
 
         return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
-            .then(DownloadAllMaterials(AssetCollections));
+            .then(
+                [AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
+                {
+                    const auto& Assets = GetAssetsResult.GetAssets();
+                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
+
+                    if (!Assets.IsEmpty() && Infos.empty())
+                    {
+                        // There are material assets in this space, but none of them could be resolved
+                        return MakeInvalid<MaterialInfosResult>();
+                    }
+
+                    return { GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode(), Convert(Infos) };
+                });
     };
 
-    FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
-        .then(std::move(FetchMaterials))
+    return FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
+        .then(std::move(FetchMaterialInfos));
+}
+
+void AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId, MaterialInfosResultCallback Callback)
+{
+    GetMaterialInfos(SpaceId).then(
+        [Callback](async::task<MaterialInfosResult> Result)
+        {
+            try
+            {
+                Callback(Result.get());
+            }
+            catch (const std::exception& Exception)
+            {
+                CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterialInfos failed: %s", Exception.what());
+                Callback(MakeInvalid<MaterialInfosResult>());
+            }
+            catch (...)
+            {
+                Callback(MakeInvalid<MaterialInfosResult>());
+            }
+        });
+}
+
+void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+{
+    GetMaterialInfos(SpaceId)
+        .then(DownloadAllMaterials())
         .then(
             [Callback](async::task<MaterialsResult> Result)
             {
@@ -1699,31 +1769,40 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             });
 }
 
-void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
+void AssetSystem::GetMaterialInfo(
+    const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialInfoResultCallback Callback)
 {
     // 1. Get asset collection
     auto GetAssetCollectionCB = [this, AssetCollectionId, AssetId, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
     {
         if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
+            Callback({ CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode() });
             return;
         }
 
         // 2. Get asset
         const AssetCollection& FoundAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [this, Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
+        auto GetAssetCB = [Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
-                Callback(MaterialResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
+                Callback({ CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode() });
                 return;
             }
 
-            // 3. Download material
+            // 3. Resolve the material info
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
-            GetMaterialFromUri(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, Callback);
+            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri);
+
+            if (!Info.has_value())
+            {
+                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialInfoResult>());
+                return;
+            }
+
+            Callback({ CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode(), *Info });
         };
 
         GetAssetById(AssetCollectionId, AssetId, GetAssetCB);
@@ -1732,19 +1811,86 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
-void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
-    const csp::common::String& Uri, MaterialResultCallback Callback)
+void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
 {
-    std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+    GetMaterialInfo(AssetCollectionId, AssetId,
+        [this, Callback](const MaterialInfoResult& Result)
+        {
+            if (Result.GetResultCode() != EResultCode::Success)
+            {
+                Callback({ Result.GetResultCode(), Result.GetHttpResultCode() });
+                return;
+            }
+
+            DownloadMaterial(Result.GetMaterialInfo(), Callback);
+        });
+}
+
+static std::optional<MaterialInfo> MakeMaterialInfo(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+{
+    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+
     if (!ShaderType.has_value())
     {
         CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
+        return {};
+    }
+
+    return MaterialInfo {
+        Uri,
+        *ShaderType,
+        AssetCollection.Id,
+        AssetId,
+    };
+}
+
+Material* AssetSystem::ParseMaterial(const MaterialInfo& Info, const BufferAssetDataSource& MaterialData)
+{
+    if (MaterialData.Buffer == nullptr || MaterialData.BufferLength == 0)
+    {
+        return nullptr;
+    }
+
+    // Copied so that it is null terminated for the json parser, which the buffer makes no promise of being
+    const auto SerializedData = csp::common::String(static_cast<const char*>(MaterialData.Buffer), MaterialData.BufferLength);
+
+    return DeserializeMaterial(Info, SerializedData.c_str()).release();
+}
+
+Material* AssetSystem::ParseMaterialFromAssetCollection(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const BufferAssetDataSource& MaterialData)
+{
+    // A uri is only needed to fetch the data, which the caller has already done
+    const auto UnusedUri = csp::common::String();
+
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri);
+
+    if (!Info.has_value())
+    {
+        return nullptr;
+    }
+
+    return ParseMaterial(*Info, MaterialData);
+}
+
+void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
+    const csp::common::String& Uri, MaterialResultCallback Callback)
+{
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri);
+
+    if (!Info.has_value())
+    {
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
         return;
     }
 
-    auto DownloadMaterialCallback
-        = [Callback, AssetId, AssetCollectionId = AssetCollection.Id, ShaderType = *ShaderType](const AssetDataResult& DownloadResult)
+    DownloadMaterial(*Info, Callback);
+}
+
+void AssetSystem::DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback)
+{
+    auto DownloadMaterialCallback = [Callback, Info](const AssetDataResult& DownloadResult)
     {
         if (DownloadResult.GetResultCode() != EResultCode::Success)
         {
@@ -1754,13 +1900,9 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
 
         const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-        // Create material of the specific derived type.
-        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId);
+        auto DeserializationResult = DeserializeMaterial(Info, MaterialData);
 
-        // Deserialse material data.
-        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
-
-        if (!DeserializationResult.has_value())
+        if (!DeserializationResult)
         {
             CSP_LOG_ERROR_MSG("Failed to deserialize material");
 
@@ -1770,13 +1912,13 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         }
 
         MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-        Result.SetMaterial(DeserializationResult.value());
+        Result.SetMaterial(DeserializationResult.release());
 
         Callback(Result);
     };
 
     Asset Asset;
-    Asset.Uri = Uri;
+    Asset.Uri = Info.Uri;
 
     DownloadAssetData(Asset, DownloadMaterialCallback);
 }

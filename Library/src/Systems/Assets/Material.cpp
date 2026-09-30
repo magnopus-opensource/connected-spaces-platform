@@ -82,4 +82,37 @@ void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMateri
 
 void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
+bool MaterialInfo::operator==(const MaterialInfo& Other) const
+{
+    return Uri == Other.Uri && ShaderType == Other.ShaderType && MaterialCollectionId == Other.MaterialCollectionId && MaterialId == Other.MaterialId;
+}
+
+bool MaterialInfo::operator!=(const MaterialInfo& Other) const { return !(*this == Other); }
+
+MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+{
+}
+
+MaterialInfoResult::MaterialInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, MaterialInfo Info)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+    , Info(std::move(Info))
+{
+}
+
+const MaterialInfo& MaterialInfoResult::GetMaterialInfo() const { return Info; }
+
+MaterialInfosResult::MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+{
+}
+
+MaterialInfosResult::MaterialInfosResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::common::Array<MaterialInfo> Infos)
+    : csp::systems::ResultBase(ResCode, HttpResCode)
+    , Infos(std::move(Infos))
+{
+}
+
+const csp::common::Array<MaterialInfo>& MaterialInfosResult::GetMaterialInfos() const { return Infos; }
+
 } // namespace csp::systems
