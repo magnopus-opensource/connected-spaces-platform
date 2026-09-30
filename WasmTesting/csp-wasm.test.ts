@@ -172,6 +172,87 @@ test.after(async () => {
 });
 
 
+test('Failing status codes are retried', async ({ user }) => {
+
+  const DEFAULT_NUM_REQUEST_RETRIES = 4; // This is just the number of retries CSP is supposed to do.
+  let loginAttempts = 0;
+
+  let loginAttemptInFlight = false;
+  let overlappingLoginAttempts = 0;
+
+  // See pretend-to-be-a-browser.ts, we use xhr2 to enable web requests in node, and can intercept requests by substituting our own implementation.
+  const RealXMLHttpRequest = (globalThis as any).XMLHttpRequest;
+
+  // Request that checks if it is a login request via URL inspection
+  class LoginUnavailableXMLHttpRequest extends RealXMLHttpRequest {
+    isLoginRequest = false;
+
+    open(method: string, url: string, ...rest: any[]) {
+      this.isLoginRequest = new URL(url).pathname.endsWith('/users/login');
+      super.open(method, url, ...rest);
+    }
+
+    send(body?: any) {
+      // If we're not a login request, just passthrough
+      if (!this.isLoginRequest) {
+        super.send(body);
+        return;
+      }
+
+      // Otherwise, pretend that the service is unavailable to trigger retries
+      this.readyState = RealXMLHttpRequest.DONE;
+      this.status = 503;
+      this.statusText = 'Service Unavailable';
+      this.response = new ArrayBuffer(0);
+      ++loginAttempts;
+
+      // This is paranoid. I just want to assert that we don't send 4 retries all at once, but rather wait for the 
+      // response before sending another. The web retry mechanism does not do delays currently.
+      if (loginAttemptInFlight) {
+        ++overlappingLoginAttempts;
+      }
+      loginAttemptInFlight = true;
+      
+      // This is effectively "resolving the promise", but we don't do it
+      // here, because we'd deadlock if we did it "on-thread", remember we're
+      // in an event loop. setTimeout isn't delaying anything, it's just moving something
+      // into the queue so it's not on-thread.
+      // This is what a real XHR does, apparently, can't say I fully understand. 
+      setTimeout(() => {
+        loginAttemptInFlight = false;
+        this.onload?.({});
+      });
+    }
+  }
+
+  // The test framework logs in for each test, and we want to re-login.
+  await LogoutUser(user);
+
+  // Set the intercepting request to be the global request so it's used on the next login.
+  (globalThis as any).XMLHttpRequest = LoginUnavailableXMLHttpRequest;
+
+  // Perform the intercepted login
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+  let loginResult: Systems.LoginStateResult;
+  try {
+    loginResult = await userSystem.login(user.getProfile().email, TEST_ACCOUNT_PASSWORD, false, true, null);
+  } finally {
+    // Unset the intercepting request for any subsequent tests
+    (globalThis as any).XMLHttpRequest = RealXMLHttpRequest;
+  }
+
+  try {
+    assert.ok(loginAttempts > 0, 'Login request was never intercepted');
+    assert.is(loginAttempts, 1 + DEFAULT_NUM_REQUEST_RETRIES, 'Expected the initial request plus additional retries');
+    assert.is(loginResult.getResultCode(), Systems.EResultCode.Failed);
+    assert.is(loginResult.getHttpResultCode(), 503);
+    assert.is(overlappingLoginAttempts, 0, 'Expected each retry to be sent only after the previous attempt received its response');
+  } finally {
+    loginResult.delete();
+  }
+})
+
+
 test.run();
 
 /*
