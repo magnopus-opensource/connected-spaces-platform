@@ -166,7 +166,7 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken);
 
-    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    if (LogSystem != nullptr)
     {
         LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("{}", *Request).c_str());
     }
