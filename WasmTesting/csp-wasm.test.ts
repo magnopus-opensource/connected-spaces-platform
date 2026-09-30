@@ -334,6 +334,82 @@ test('Network failures are retried', async ({ user }) => {
 })
 
 
+test('Successful network responses are not retried', async ({ user }) => {
+
+  let loginAttempts = 0;
+
+  let overlappingLoginAttempts = 0;
+
+  // See pretend-to-be-a-browser.ts, we use xhr2 to enable web requests in node, and can intercept requests by substituting our own implementation.
+  const RealXMLHttpRequest = (globalThis as any).XMLHttpRequest;
+
+  // Request that checks if it is a login request via URL inspection
+  class LoginAvailableXMLHttpRequest extends RealXMLHttpRequest {
+    isLoginRequest = false;
+
+    open(method: string, url: string, ...rest: any[]) {
+      this.isLoginRequest = new URL(url).pathname.endsWith('/users/login');
+      super.open(method, url, ...rest);
+    }
+
+    send(body?: any) {
+      // If we're not a login request, just passthrough
+      if (!this.isLoginRequest) {
+        super.send(body);
+        return;
+      }
+
+      // Otherwise, pretend that the login succeeded
+      this.readyState = RealXMLHttpRequest.DONE;
+      this.status = 200;
+      this.statusText = 'OK';
+      this.response = new TextEncoder().encode(JSON.stringify({
+        accessToken: 'IrrelevantAccessToken',
+        accessTokenExpiresAt: '2999-01-01T00:00:00.000+00:00',
+        refreshToken: 'IrrelevantRefreshToken',
+        refreshTokenExpiresAt: '2999-01-01T00:00:00.000+00:00',
+        userId: 'IrrelevantUserId',
+        deviceId: 'IrrelevantDeviceId',
+      })).buffer;
+      ++loginAttempts;
+
+      // This is effectively "resolving the promise", but we don't do it
+      // here, because we'd deadlock if we did it "on-thread", remember we're
+      // in an event loop. setTimeout isn't delaying anything, it's just moving something
+      // into the queue so it's not on-thread.
+      // This is what a real XHR does, apparently, can't say I fully understand. 
+      setTimeout(() => {
+        this.onload?.({});
+      });
+    }
+  }
+
+  // The test framework logs in for each test, and we want to re-login.
+  await LogoutUser(user);
+
+  // Set the intercepting request to be the global request so it's used on the next login.
+  (globalThis as any).XMLHttpRequest = LoginAvailableXMLHttpRequest;
+
+  // Perform the intercepted login
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+  let loginResult: Systems.LoginStateResult;
+  try {
+    loginResult = await userSystem.login(user.getProfile().email, TEST_ACCOUNT_PASSWORD, false, true, null);
+  } finally {
+    // Unset the intercepting request for any subsequent tests
+    (globalThis as any).XMLHttpRequest = RealXMLHttpRequest;
+  }
+
+  try {
+    assert.ok(loginAttempts > 0, 'Login request was never intercepted');
+    assert.is(loginAttempts, 1, 'Expected only the initial request');
+    assert.is(loginResult.getResultCode(), Systems.EResultCode.Success);
+    assert.is(loginResult.getHttpResultCode(), 200);
+  } finally {
+    loginResult.delete();
+  }
+})
+
 test.run();
 
 /*

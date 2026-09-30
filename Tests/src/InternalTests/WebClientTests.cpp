@@ -237,8 +237,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreRetriedTest)
 {
-    SetRandSeed();
-
     auto AuthContext = TestAuthContext();
     WebClientMock->WebClient::SetAuthContext(AuthContext);
 
@@ -274,7 +272,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
 
     // Perform the intercepted login
     auto [LoginResult]
-        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrreleventEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
               .Await();
 
     EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
@@ -294,8 +292,6 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetriedTest)
 {
-    SetRandSeed();
-
     auto AuthContext = TestAuthContext();
     WebClientMock->WebClient::SetAuthContext(AuthContext);
 
@@ -328,7 +324,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetr
 
     // Perform the intercepted login
     auto [LoginResult]
-        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrreleventEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
               .Await();
 
     EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
@@ -347,4 +343,49 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetr
         const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
         EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
     }
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, SuccessfulNetworkResponsesAreNotRetried)
+{
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::atomic<size_t> LoginAttempts = 0;
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginAttempts](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    auto& Response = Request.GetMutableResponse();
+                    Response.SetResponseCode(EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent(R"({
+                          "accessToken": "IrrelevantAccessToken",
+                          "accessTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "refreshToken": "IrrelevantRefreshToken",
+                          "refreshTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "userId": "IrrelevantUserId",
+                          "deviceId": "IrrelevantDeviceId"
+                      })");
+                    ++LoginAttempts;
+                }
+            });
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Perform the intercepted login
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
+    EXPECT_EQ(LoginAttempts.load(), 1) << "Expected only the initial request";
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseOK));
 }
