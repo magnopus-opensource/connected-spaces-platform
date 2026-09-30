@@ -111,9 +111,10 @@ HttpProgress& HttpRequest::GetProgress() { return Progress; }
 
 bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 {
-    return (Status == csp::web::EResponseCodes::ResponseTooManyRequests // 429
+    return (static_cast<int>(Status) == 0 // Means the network request has failed, probably due to a bad connection
+        || Status == csp::web::EResponseCodes::ResponseTooManyRequests // 429 (suspicious that this should imply a retry no?)
         || Status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
-        || static_cast<int>(Status) >= 500 // 500
+        || static_cast<int>(Status) >= 500 // Anything above 500 means internal server error.
     );
 }
 

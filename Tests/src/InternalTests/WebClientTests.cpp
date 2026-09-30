@@ -249,7 +249,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
 
     // Want to make sure there's a delay between the retry attempts
     // We should honesty be more subtle with our retry timing. Just blasting the server 5 times
-    // irregardless of status code or any try_after data set on the response is rude.
+    // regardless of status code or any try_after data set on the response is rude.
     // The status code could very well be saying "Stop! I'm overloaded!".
     std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
 
@@ -282,6 +282,63 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
     EXPECT_EQ(LoginAttempts.load(), 1 + DefaultNumRequestRetries) << "Expected the initial request plus additional retries";
     EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseServiceUnavailable));
+
+    // Each retry should wait at least the flat retry delay after the previous attempt failed.
+    // DefaultRetriesDelayInMs is also in HttpRequest.h.
+    for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
+    {
+        const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
+        EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+    }
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetriedTest)
+{
+    SetRandSeed();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::atomic<size_t> LoginAttempts = 0;
+
+    // Want to make sure there's a delay between the retry attempts
+    // We should honesty be more subtle with our retry timing. Just blasting the server 5 times
+    // regardless of status code or any try_after data set on the response is rude.
+    // The status code could very well be saying "Stop! I'm overloaded!".
+    std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginAttempts, &LoginAttemptTimes](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    ++LoginAttempts;
+                    LoginAttemptTimes.push_back(std::chrono::steady_clock::now());
+                    throw csp::web::WebClientException("Simulated network failure");
+                }
+            });
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Perform the intercepted login
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrreleventEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
+    // DefaultNumRequestRetries is in HttpRequest.h, accessible from hre.
+    EXPECT_EQ(LoginAttempts.load(), 1 + DefaultNumRequestRetries) << "Expected the initial request plus additional retries";
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Failed);
+    EXPECT_EQ(LoginResult.GetHttpResultCode(),
+        static_cast<uint16_t>(EResponseCodes::ResponseServiceUnavailable)); // Internally, network failure is converted to 503. I'm not sure about
+                                                                            // this, I won't port this behaviour to the web retry mechanism as it they
+                                                                            // care about codes much more in that domain.
 
     // Each retry should wait at least the flat retry delay after the previous attempt failed.
     // DefaultRetriesDelayInMs is also in HttpRequest.h.
