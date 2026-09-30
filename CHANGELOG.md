@@ -57,6 +57,14 @@ All notable changes to this project will be documented in this file. For compile
   CSP has a retry mechanism for certain failing requests, but it appears on web platforms, that mechanism has not been working since 2023,
   ater [this](https://github.com/magnopus-opensource/connected-spaces-platform/commit/a73e98d559eb16771f1b8bf6254704ad082161e0) commit. 
   Re-enable the retry mechanism as intended for web platforms. Non-web platforms are not effected, and have always had a retry mechanism.
+  
+  Codes that are retried are : 
+    - 0 (Network error)
+    - 429
+    - 408
+    - Anything above 500.
+  
+  This is historical, and could probably use some refinement.
 
 ###  🔨 🔨 Chore
   
