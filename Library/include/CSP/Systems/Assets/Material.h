@@ -284,9 +284,11 @@ private:
 typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;
 
 /// @brief Callback containing a requested MaterialInfo.
+/// @param Result The result of requesting the info. Check the result code, as the info is only valid on EResultCode::Success.
 typedef std::function<void(const MaterialInfoResult& Result)> MaterialInfoResultCallback;
 
 /// @brief Callback containing a collection of requested MaterialInfos.
+/// @param Result The result of requesting the infos. Check the result code, as the infos are only valid on EResultCode::Success.
 typedef std::function<void(const MaterialInfosResult& Result)> MaterialInfosResultCallback;
 
 /// @brief Callback containing a collection of requested material data.
