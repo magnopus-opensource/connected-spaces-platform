@@ -205,13 +205,6 @@ test('Failing status codes are retried', async ({ user }) => {
       this.statusText = 'Service Unavailable';
       this.response = new ArrayBuffer(0);
       ++loginAttempts;
-
-      // This is paranoid. I just want to assert that we don't send 4 retries all at once, but rather wait for the 
-      // response before sending another. The web retry mechanism does not do delays currently.
-      if (loginAttemptInFlight) {
-        ++overlappingLoginAttempts;
-      }
-      loginAttemptInFlight = true;
       
       // This is effectively "resolving the promise", but we don't do it
       // here, because we'd deadlock if we did it "on-thread", remember we're
@@ -219,7 +212,6 @@ test('Failing status codes are retried', async ({ user }) => {
       // into the queue so it's not on-thread.
       // This is what a real XHR does, apparently, can't say I fully understand. 
       setTimeout(() => {
-        loginAttemptInFlight = false;
         this.onload?.({});
       });
     }
@@ -286,13 +278,6 @@ test('Network failures are retried', async ({ user }) => {
       this.statusText = '';
       this.response = null;
       ++loginAttempts;
-
-      // This is paranoid. I just want to assert that we don't send 4 retries all at once, but rather wait for the 
-      // response before sending another. The web retry mechanism does not do delays currently.
-      if (loginAttemptInFlight) {
-        ++overlappingLoginAttempts;
-      }
-      loginAttemptInFlight = true;
       
       // This is effectively "resolving the promise", but we don't do it
       // here, because we'd deadlock if we did it "on-thread", remember we're
@@ -300,7 +285,6 @@ test('Network failures are retried', async ({ user }) => {
       // into the queue so it's not on-thread.
       // This is what a real XHR does, apparently, can't say I fully understand. 
       setTimeout(() => {
-        loginAttemptInFlight = false;
         this.onerror?.({});
       });
     }
@@ -337,8 +321,6 @@ test('Network failures are retried', async ({ user }) => {
 test('Successful network responses are not retried', async ({ user }) => {
 
   let loginAttempts = 0;
-
-  let overlappingLoginAttempts = 0;
 
   // See pretend-to-be-a-browser.ts, we use xhr2 to enable web requests in node, and can intercept requests by substituting our own implementation.
   const RealXMLHttpRequest = (globalThis as any).XMLHttpRequest;
