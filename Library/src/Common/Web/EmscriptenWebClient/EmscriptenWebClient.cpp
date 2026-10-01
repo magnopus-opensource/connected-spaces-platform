@@ -91,9 +91,13 @@ void OnFetchError(emscripten_fetch_t* Fetch)
 {
     auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
 
-    if (Request->Retry())
+    if (Request->Retry(static_cast<csp::web::EResponseCodes>(Fetch->status)))
     {
         CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
+        // Delete the fetch memory, otherwise we'd leak every retry. This was a patch job as this was forgotten about initially.
+        // You might think we also should be deleting Request like OnFetchSuccessOrError does but we don't that's allocated in SendRequest and
+        // should only be deallocated when the entire request is finished, retries and all.
+        emscripten_fetch_close(Fetch);
     }
     else
     {
