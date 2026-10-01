@@ -250,15 +250,17 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
     // regardless of status code or any try_after data set on the response is rude.
     // The status code could very well be saying "Stop! I'm overloaded!".
     std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
+    std::mutex LoginResponseMutex;
 
     EXPECT_CALL(*WebClientMock, Send)
         .WillRepeatedly(
-            [&LoginAttempts, &LoginAttemptTimes](csp::web::HttpRequest& Request)
+            [&LoginAttempts, &LoginAttemptTimes, &LoginResponseMutex](csp::web::HttpRequest& Request)
             {
                 const auto Uri = csp::common::String(Request.GetUri().GetAsString());
 
                 if (Uri.EndsWith("/users/login"))
                 {
+                    std::lock_guard<std::mutex> Guard { LoginResponseMutex };
                     auto& Response = Request.GetMutableResponse();
                     // This is one of the status codes that will trigger a retry
                     Response.SetResponseCode(EResponseCodes::ResponseServiceUnavailable);
@@ -283,10 +285,13 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreR
 
     // Each retry should wait at least the flat retry delay after the previous attempt failed.
     // DefaultRetriesDelayInMs is also in HttpRequest.h.
-    for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
     {
-        const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
-        EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+        for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
+        {
+            const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
+            EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        }
     }
 }
 
@@ -305,15 +310,17 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetr
     // regardless of status code or any try_after data set on the response is rude.
     // The status code could very well be saying "Stop! I'm overloaded!".
     std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
+    std::mutex LoginResponseMutex;
 
     EXPECT_CALL(*WebClientMock, Send)
         .WillRepeatedly(
-            [&LoginAttempts, &LoginAttemptTimes](csp::web::HttpRequest& Request)
+            [&LoginAttempts, &LoginAttemptTimes, &LoginResponseMutex](csp::web::HttpRequest& Request)
             {
                 const auto Uri = csp::common::String(Request.GetUri().GetAsString());
 
                 if (Uri.EndsWith("/users/login"))
                 {
+                    std::lock_guard<std::mutex> Guard { LoginResponseMutex };
                     ++LoginAttempts;
                     LoginAttemptTimes.push_back(std::chrono::steady_clock::now());
                     throw csp::web::WebClientException("Simulated network failure");
@@ -338,10 +345,13 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetr
 
     // Each retry should wait at least the flat retry delay after the previous attempt failed.
     // DefaultRetriesDelayInMs is also in HttpRequest.h.
-    for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
     {
-        const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
-        EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+        for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
+        {
+            const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
+            EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        }
     }
 }
 
