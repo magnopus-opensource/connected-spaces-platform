@@ -314,6 +314,32 @@ install(TARGETS csp-lib
   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+if(MSVC)
+    if(CSP_BUILD_SHARED)
+        # Install linker generated PDB.
+        install(
+            FILES $<TARGET_PDB_FILE:csp-lib>
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            CONFIGURATIONS Debug RelWithDebInfo
+            OPTIONAL
+        )
+    else()
+        # Install compiler generated PDB.
+        set_target_properties(csp-lib PROPERTIES
+            COMPILE_PDB_NAME "ConnectedSpacesPlatform"
+            COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/pdb/$<CONFIG>"
+        )
+
+        install(
+            FILES
+                "${CMAKE_CURRENT_BINARY_DIR}/pdb/$<CONFIG>/ConnectedSpacesPlatform.pdb"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            CONFIGURATIONS Debug RelWithDebInfo
+            OPTIONAL
+        )
+    endif()
+endif()
+
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
