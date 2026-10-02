@@ -150,7 +150,7 @@ jobs:
         needs.live-desktop-tests.result == 'success'
       )
 
-  publish-npm-sandbox:
+  publish-npm:
     uses: ./.github/workflows/publish-legacy-npm.yml
 
     needs:

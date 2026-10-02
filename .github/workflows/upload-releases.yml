@@ -78,7 +78,7 @@ jobs:
           tag_name: ${{ inputs.release_number }}
           name: CSP ${{ inputs.release_number }}
           target_commitish: ${{ github.sha }}
-          draft: true
+          draft: false
           prerelease: false
           generate_release_notes: true
           fail_on_unmatched_files: true
