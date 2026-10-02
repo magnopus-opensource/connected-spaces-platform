@@ -56,6 +56,8 @@ All notable changes to this project will be documented in this file. For compile
     - `Map<String,String>&` arg made `Map<String,String>` in `CreateMaterial`
     - `const String& GraphQLResult::GetResponse()` made `const String& GraphQLResult::GetResponse() const`
 
+- [NT-0] feat: PDB files are now installed for Debug and RelWithDebInfo builds by @MAG-mv
+
 ## [6.48.0]
 
 ### 🍰 🙌 New Features
