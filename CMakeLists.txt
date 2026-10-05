@@ -314,6 +314,26 @@ install(TARGETS csp-lib
   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+if(MSVC)
+    if(CSP_BUILD_SHARED)
+        # Install linker generated PDB.
+        install(
+            FILES $<TARGET_PDB_FILE:csp-lib>
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            CONFIGURATIONS Debug RelWithDebInfo
+            OPTIONAL
+        )
+    else()
+    
+         # Embed debug information in object files for static builds.
+        set_property(
+            TARGET csp-lib
+            PROPERTY MSVC_DEBUG_INFORMATION_FORMAT
+            "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>"
+        )
+    endif()
+endif()
+
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CSPConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSPConfig.cmake
