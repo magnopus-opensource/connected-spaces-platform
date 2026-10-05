@@ -29,11 +29,11 @@ CSP was also difficult to consume from other CMake projects. Instead of using th
 
 ## Conan
 
-Conan was chosen because CSP has a alot of dependencies and needs to support multiple platforms, compilers, and toolchains.
+Conan was chosen because CSP has a lot of dependencies and needs to support multiple platforms, compilers, and toolchains.
 
 Keeping environment configuration and dependency retrieval separate from the core build logic makes the build system easier to understand, maintain, and extend. It allows platform and dependency concerns to be handled seperatly from how CSP is built.
 
-Conan profiles allow us to seperate the enviornment and toolchain configuration seperate, while our Conan package file allows us to seperate dependency configurations.
+Conan profiles allow us to separate the environment and toolchain configuration, while our Conan package file allows us to seperate dependency configurations.
 
 ## Further reading
 
