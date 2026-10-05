@@ -324,18 +324,12 @@ if(MSVC)
             OPTIONAL
         )
     else()
-        # Install compiler generated PDB.
-        set_target_properties(csp-lib PROPERTIES
-            COMPILE_PDB_NAME "ConnectedSpacesPlatform"
-            COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/pdb/$<CONFIG>"
-        )
-
-        install(
-            FILES
-                "${CMAKE_CURRENT_BINARY_DIR}/pdb/$<CONFIG>/ConnectedSpacesPlatform.pdb"
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            CONFIGURATIONS Debug RelWithDebInfo
-            OPTIONAL
+    
+         # Embed debug information in object files for static builds.
+        set_property(
+            TARGET csp-lib
+            PROPERTY MSVC_DEBUG_INFORMATION_FORMAT
+            "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>"
         )
     endif()
 endif()
