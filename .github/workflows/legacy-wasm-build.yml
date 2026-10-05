@@ -23,6 +23,12 @@ on:
         type: boolean
         required: false
         default: false
+
+      release_number:
+        description: "The csp version used in the package metadata."
+        type: string
+        required: false
+        default: "0.0.0"
       
       run_tests:
         description: "If true, csp wasm tests will be ran against live services"
@@ -30,9 +36,10 @@ on:
         required: false
         default: false
 
+
 jobs:
   build-legacy-wasm:
-    name: Build legacy emscripten ${{ matrix.config.build_type }}
+    name: Build legacy emscripten
     runs-on: windows-latest
     
     env:
@@ -86,9 +93,11 @@ jobs:
 
       - name: Build Package
         shell: bash
+        env:
+          CSP_VERSION: ${{ inputs.release_number }}
         run: |
           set -euxo pipefail
-          python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
+          python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False --version="${CSP_VERSION}"
       
       - name: Create Debug Package
         shell: bash

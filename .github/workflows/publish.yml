@@ -112,6 +112,7 @@ jobs:
     with:
       upload_package: ${{ inputs.create_release }}
       run_tests: ${{ !inputs.skip_tests }}
+      release_number: ${{ release_number }}
 
   live-desktop-tests:
     if: inputs.build_desktop && !inputs.skip_tests
@@ -150,7 +151,7 @@ jobs:
         needs.live-desktop-tests.result == 'success'
       )
 
-  publish-npm-sandbox:
+  publish-npm:
     uses: ./.github/workflows/publish-legacy-npm.yml
 
     needs:
