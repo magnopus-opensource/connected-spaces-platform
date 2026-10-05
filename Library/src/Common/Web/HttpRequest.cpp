@@ -111,9 +111,10 @@ HttpProgress& HttpRequest::GetProgress() { return Progress; }
 
 bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 {
-    return (Status == csp::web::EResponseCodes::ResponseTooManyRequests // 429
+    return (static_cast<int>(Status) == 0 // Means the network request has failed, probably due to a bad connection
+        || Status == csp::web::EResponseCodes::ResponseTooManyRequests // 429 (suspicious that this should imply a retry no?)
         || Status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
-        || static_cast<int>(Status) >= 500 // 500
+        || static_cast<int>(Status) >= 500 // Anything above 500 means internal server error.
     );
 }
 
@@ -125,13 +126,14 @@ bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 ///
 /// @param MaxRetries Maximum number of times to retry before giving up
 /// @return true if retry succeeded, false if retry limit was reached
-bool HttpRequest::Retry(const uint32_t MaxRetries)
+bool HttpRequest::Retry(EResponseCodes previousAttemptResponse, const uint32_t MaxRetries)
 {
-    if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries)
+    if (ResultCodeValidForRetry(previousAttemptResponse) && RetryCount < MaxRetries)
     {
         ++RetryCount;
 
-        // Re-issue the request
+        // Re-issue the request. We could easily add a map  {responseCode, retryCount} -> retryTime to get less rude timings here, we should do
+        // falloff, and also do different things if the code is signalling an overload.
         Client->AddRequest(this, std::chrono::milliseconds(DefaultRetriesDelayInMs));
 
         return true;
@@ -156,7 +158,7 @@ bool HttpRequest::CheckForAutoRetry(const uint32_t MaxRetries)
     if (IsAutoRetryEnabled && (ErrorCodeValue != EResponseCodes::ResponseOK) && (ErrorCodeValue != EResponseCodes::ResponseCreated)
         && (ErrorCodeValue != EResponseCodes::ResponseNoContent))
     {
-        RetryIssued = Retry(MaxRetries);
+        RetryIssued = Retry(ErrorCodeValue, MaxRetries);
     }
 
     return RetryIssued;

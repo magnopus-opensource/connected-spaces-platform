@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -24,11 +25,13 @@
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <atomic>
 #include <chrono>
 #include <future>
 #include <gmock/gmock.h>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
+#include <vector>
 
 #include "Mocks/WebClientMock.h"
 
@@ -230,4 +233,169 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, MockWebClientRequestResponseVeryVer
     }
 
     csp::CSPFoundation::Shutdown();
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, FailingStatusCodesAreRetriedTest)
+{
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::atomic<size_t> LoginAttempts = 0;
+
+    // Want to make sure there's a delay between the retry attempts
+    // We should honesty be more subtle with our retry timing. Just blasting the server 5 times
+    // regardless of status code or any try_after data set on the response is rude.
+    // The status code could very well be saying "Stop! I'm overloaded!".
+    std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
+    std::mutex LoginResponseMutex;
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginAttempts, &LoginAttemptTimes, &LoginResponseMutex](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+                    auto& Response = Request.GetMutableResponse();
+                    // This is one of the status codes that will trigger a retry
+                    Response.SetResponseCode(EResponseCodes::ResponseServiceUnavailable);
+                    Response.GetMutablePayload().SetContent("");
+                    ++LoginAttempts;
+                    LoginAttemptTimes.push_back(std::chrono::steady_clock::now());
+                }
+            });
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Perform the intercepted login
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
+    // DefaultNumRequestRetries is in HttpRequest.h, accessible from hre.
+    EXPECT_EQ(LoginAttempts.load(), 1 + DefaultNumRequestRetries) << "Expected the initial request plus additional retries";
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Failed);
+    EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseServiceUnavailable));
+
+    // Each retry should wait at least the flat retry delay after the previous attempt failed.
+    // DefaultRetriesDelayInMs is also in HttpRequest.h.
+    {
+        std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+        for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
+        {
+            const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
+            EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        }
+    }
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, NetworkFailuresAreRetriedTest)
+{
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::atomic<size_t> LoginAttempts = 0;
+
+    // Want to make sure there's a delay between the retry attempts
+    // We should honesty be more subtle with our retry timing. Just blasting the server 5 times
+    // regardless of status code or any try_after data set on the response is rude.
+    // The status code could very well be saying "Stop! I'm overloaded!".
+    std::vector<std::chrono::steady_clock::time_point> LoginAttemptTimes;
+    std::mutex LoginResponseMutex;
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginAttempts, &LoginAttemptTimes, &LoginResponseMutex](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+                    ++LoginAttempts;
+                    LoginAttemptTimes.push_back(std::chrono::steady_clock::now());
+                    throw csp::web::WebClientException("Simulated network failure");
+                }
+            });
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Perform the intercepted login
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
+    // DefaultNumRequestRetries is in HttpRequest.h, accessible from hre.
+    EXPECT_EQ(LoginAttempts.load(), 1 + DefaultNumRequestRetries) << "Expected the initial request plus additional retries";
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Failed);
+    EXPECT_EQ(LoginResult.GetHttpResultCode(),
+        static_cast<uint16_t>(EResponseCodes::ResponseServiceUnavailable)); // Internally, network failure is converted to 503. I'm not sure about
+                                                                            // this, I won't port this behaviour to the web retry mechanism as it they
+                                                                            // care about codes much more in that domain.
+
+    // Each retry should wait at least the flat retry delay after the previous attempt failed.
+    // DefaultRetriesDelayInMs is also in HttpRequest.h.
+    {
+        std::lock_guard<std::mutex> Guard { LoginResponseMutex };
+        for (size_t i = 1; i < LoginAttemptTimes.size(); ++i)
+        {
+            const auto RetryGap = std::chrono::duration_cast<std::chrono::milliseconds>(LoginAttemptTimes[i] - LoginAttemptTimes[i - 1]);
+            EXPECT_GE(RetryGap.count(), static_cast<int64_t>(DefaultRetriesDelayInMs)) << "Retry " << i << " was sent sooner than the retry delay";
+        }
+    }
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, SuccessfulNetworkResponsesAreNotRetried)
+{
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::atomic<size_t> LoginAttempts = 0;
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginAttempts](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    auto& Response = Request.GetMutableResponse();
+                    Response.SetResponseCode(EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent(R"({
+                          "accessToken": "IrrelevantAccessToken",
+                          "accessTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "refreshToken": "IrrelevantRefreshToken",
+                          "refreshTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "userId": "IrrelevantUserId",
+                          "deviceId": "IrrelevantDeviceId"
+                      })");
+                    ++LoginAttempts;
+                }
+            });
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    // Perform the intercepted login
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_GT(LoginAttempts.load(), 0) << "Login request was never intercepted";
+    EXPECT_EQ(LoginAttempts.load(), 1) << "Expected only the initial request";
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseOK));
 }

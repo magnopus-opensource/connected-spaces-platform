@@ -88,7 +88,7 @@ public:
     HttpProgress& GetProgress();
 
     bool CheckForAutoRetry(const uint32_t MaxRetries = csp::web::DefaultNumRequestRetries);
-    bool Retry(const uint32_t MaxRetries = csp::web::DefaultNumRequestRetries);
+    bool Retry(EResponseCodes previousAttemptResponse, const uint32_t MaxRetries = csp::web::DefaultNumRequestRetries);
 
     void EnableAutoRetry(bool Enable);
 
