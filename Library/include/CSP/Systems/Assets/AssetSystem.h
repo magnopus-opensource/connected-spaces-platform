@@ -301,7 +301,7 @@ public:
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType,
-        const csp::common::String& SpaceId, csp::common::Map<csp::common::String, csp::common::String> Metadata,
+        const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
         const csp::common::Array<csp::common::String>& AssetTags, MaterialResultCallback Callback);
 
     /// @brief Updates an existing material's properties.
