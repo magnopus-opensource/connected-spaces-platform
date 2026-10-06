@@ -70,7 +70,7 @@ All notable changes to this project will be documented in this file. For compile
   
 - [NT-0] chore: Various bindings-motivated const correctness changes by @ElliotMorris
     - `Array<AssetCollection>&` arg made `const Array<AssetCollections>&` in `DeleteMultipleAssetCollections` and `CopyAssetcollectionsToSpace`
-    - `Map<String,String>&` arg made `Map<String,String>` in `CreateMaterial`
+    - `Map<String,String>&` arg made const `Map<String,String>`& in `CreateMaterial`
     - `const String& GraphQLResult::GetResponse()` made `const String& GraphQLResult::GetResponse() const`
 
 - [NT-0] feat: PDB files are now installed for Debug and RelWithDebInfo builds by @MAG-mv
