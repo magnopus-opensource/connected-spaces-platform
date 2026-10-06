@@ -1413,7 +1413,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
 }
 
 void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType, const csp::common::String& SpaceId,
-    csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String>& AssetTags,
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
     MaterialResultCallback Callback)
 {
     // 1. Create asset collection
@@ -1480,11 +1480,15 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
 
     const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
 
+    // Copy the metadata so we can mutate it (shadowing it).
+    // Can just take a value param once the new interop layer lets us do it.
+    auto MetadataCopy = Metadata;
+
     std::optional<String> ConvertedShaderType = ConvertShaderTypeToString(ShaderType);
     if (ConvertedShaderType.has_value())
     {
         // Set the shader type in the material collection metadata - this is required to deserialize a material to the correct type.
-        Metadata[MATERIAL_SHADERTYPE_METADATA_KEY] = ConvertedShaderType.value();
+        MetadataCopy[MATERIAL_SHADERTYPE_METADATA_KEY] = ConvertedShaderType.value();
     }
     else
     {
@@ -1493,7 +1497,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
         return;
     }
 
-    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, Metadata, EAssetCollectionType::DEFAULT, AssetTags, CreateAssetCollectionCB);
+    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, MetadataCopy, EAssetCollectionType::DEFAULT, AssetTags, CreateAssetCollectionCB);
 }
 
 void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Callback)
