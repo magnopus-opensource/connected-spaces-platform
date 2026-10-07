@@ -3609,12 +3609,18 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Verify that Stderr contains expected message.
     std::string OutStdErr = testing::internal::GetCapturedStderr();
