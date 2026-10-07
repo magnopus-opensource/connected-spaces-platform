@@ -460,7 +460,7 @@ private:
     void AddPendingEntity(SpaceEntity* EntityToAdd);
     void RemovePendingEntity(SpaceEntity* EntityToRemove);
     void ApplyIncomingPatch(const signalr::value*);
-    void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
+    bool HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
