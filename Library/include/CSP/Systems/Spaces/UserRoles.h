@@ -48,10 +48,6 @@ enum class SpaceUserRole
 class CSP_API UserRoleInfo
 {
 public:
-    UserRoleInfo() = default;
-    UserRoleInfo(const UserRoleInfo& Other) = default;
-    UserRoleInfo& operator=(const UserRoleInfo& other) = default;
-
     csp::common::String UserId;
     SpaceUserRole UserRole;
 
