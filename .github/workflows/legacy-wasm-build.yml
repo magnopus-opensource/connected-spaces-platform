@@ -97,7 +97,7 @@ jobs:
           CSP_VERSION: ${{ inputs.release_number }}
         run: |
           set -euxo pipefail
-          python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False --version="${CSP_VERSION}"
+          python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False --version="${CSP_VERSION}" --name=connected-spaces-platform.web --display_name=connected-spaces-platform.web --registry=https://registry.npmjs.org --license="Apache-2.0" --scope=""
       
       - name: Create Debug Package
         shell: bash
