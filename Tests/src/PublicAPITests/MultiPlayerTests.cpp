@@ -343,14 +343,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

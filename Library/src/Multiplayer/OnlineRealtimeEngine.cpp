@@ -718,7 +718,11 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 {
     const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
     {
-        HandleException(Except, "Failed to retrieve paged entities.");
+        if (HandleException(Except, "Failed to retrieve paged entities.") == false)
+        {
+            FetchCompleteCallback(0);
+            return;
+        }
 
         const auto& Results = Result.as_array();
         const auto& Items = Results[0].as_array();
@@ -1466,7 +1470,7 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
     }
 }
 
-void OnlineRealtimeEngine::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
+bool OnlineRealtimeEngine::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
 {
     try
     {
@@ -1474,10 +1478,13 @@ void OnlineRealtimeEngine::HandleException(const std::exception_ptr& Except, con
         {
             std::rethrow_exception(Except);
         }
+
+        return true;
     }
     catch (const std::exception& e)
     {
         LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("{0} Exception: {1}", ExceptionDescription.c_str(), e.what()).c_str());
+        return false;
     }
 }
 } // namespace csp::multiplayer
