@@ -269,7 +269,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     auto FilePath = std::filesystem::absolute("assets/checkpoint-empty.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
@@ -324,7 +324,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 
     auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
@@ -450,7 +450,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 
     auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
@@ -484,7 +484,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeM
 
     auto FilePath = std::filesystem::absolute("assets/checkpoint-material.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {

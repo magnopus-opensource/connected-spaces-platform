@@ -656,7 +656,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentLoadTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
     auto FilePath = std::filesystem::absolute("assets/checkpoint-parents.json");
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
@@ -795,7 +795,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest
     // Get checkpoint file
     auto FilePath = std::filesystem::absolute("assets/checkpoint-empty.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
@@ -852,7 +852,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest
     // Get checkpoint file
     auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
 
-    std::ifstream Stream { FilePath.u8string().c_str() };
+    std::ifstream Stream { FilePath };
 
     if (!Stream)
     {
