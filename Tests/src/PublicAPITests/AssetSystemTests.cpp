@@ -1176,7 +1176,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
     const csp::common::String& FileNoMimeType = "";
     const csp::common::String& FileMimeType = "application/json";
 
@@ -1296,7 +1296,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     auto FilePath = std::filesystem::absolute("assets/Incorrect_File.jpg");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     // Upload data
     auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
@@ -1349,7 +1349,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
     const csp::common::String& FileNoMimeType = "";
     const csp::common::String& FileMimeType = "application/json";
 
@@ -1463,7 +1463,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     auto FilePath = std::filesystem::absolute("assets/TestWith Space.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     // Upload data
     auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
@@ -1531,7 +1531,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
     CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
     auto FilePath = std::filesystem::absolute("assets/TestWithEncoded%20Space.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     // Upload data
     auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
@@ -1691,7 +1691,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
     // Upload data
     auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     Source.SetMimeType("application/json");
 
@@ -1708,7 +1708,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 
     // Replace data
     FilePath = std::filesystem::absolute("assets/Test2.json");
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     printf("Uploading new asset data...\n");
 
@@ -1780,7 +1780,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
     // Upload data
     auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     Source.SetMimeType("application/json");
 
@@ -2106,7 +2106,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     // Upload data
     auto FilePath = std::filesystem::absolute("assets/Test.json");
     csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
+    Source.FilePath = ToString(FilePath);
 
     Source.SetMimeType("application/json");
 
@@ -2279,7 +2279,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
         // Upload data for the source asset we have created
         csp::systems::FileAssetDataSource Source;
-        Source.FilePath = FilePath.u8string().c_str();
+        Source.FilePath = ToString(FilePath);
         Source.SetMimeType("application/json");
 
         printf("Uploading source asset data...\n");

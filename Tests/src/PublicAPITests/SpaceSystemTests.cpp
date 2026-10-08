@@ -363,7 +363,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithThumbnailTest)
     FileAssetDataSource SpaceThumbnail;
     const std::string LocalFileName = "OKO.png";
     const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.FilePath = ToString(FilePath);
     SpaceThumbnail.SetMimeType("image/png");
 
     ::Space Space;
@@ -403,7 +403,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest
     FileAssetDataSource SpaceThumbnail;
     const std::string LocalFileName = "OKO.png";
     const auto FilePath = std::filesystem::absolute("assets/badpath/" + LocalFileName);
-    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.FilePath = ToString(FilePath);
     SpaceThumbnail.SetMimeType("image/png");
 
     auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, TestSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr,
@@ -1850,7 +1850,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
         FileAssetDataSource SpaceThumbnail;
         const std::string LocalFileName = "OKO.png";
         const auto FilePath = std::filesystem::absolute("assets/badpath/" + LocalFileName);
-        SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+        SpaceThumbnail.FilePath = ToString(FilePath);
         SpaceThumbnail.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnail, RequestPredicate, Space.Id, SpaceThumbnail);
@@ -1862,7 +1862,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
         FileAssetDataSource SpaceThumbnail;
         const std::string LocalFileName = "OKO.png";
         const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-        SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+        SpaceThumbnail.FilePath = ToString(FilePath);
         SpaceThumbnail.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnail, RequestPredicate, Space.Id, SpaceThumbnail);
@@ -2287,7 +2287,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
     FileAssetDataSource SpaceThumbnail;
     const std::string LocalFileName = "Test.json";
     const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.FilePath = ToString(FilePath);
     SpaceThumbnail.SetMimeType("application/json");
 
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
@@ -2347,7 +2347,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
     FileAssetDataSource SpaceThumbnail;
     const std::string LocalFileName = "Test.json";
     auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.FilePath = ToString(FilePath);
     SpaceThumbnail.SetMimeType("application/json");
 
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
@@ -2359,7 +2359,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 
     FileAssetDataSource UpdatedSpaceThumbnail;
     FilePath = std::filesystem::absolute("assets/Fox.glb");
-    UpdatedSpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    UpdatedSpaceThumbnail.FilePath = ToString(FilePath);
     UpdatedSpaceThumbnail.SetMimeType("model/gltf-binary");
 
     {
