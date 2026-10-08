@@ -2066,13 +2066,18 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
+
     RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;

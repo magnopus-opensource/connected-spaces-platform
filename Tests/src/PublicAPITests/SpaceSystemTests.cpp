@@ -1490,11 +1490,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
     // Ensure alt test account can join space
     {
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-
         ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -2128,10 +2132,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
     LogIn(UserSystem, User1Id, User1.Email, GeneratedTestAccountPassword);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Log back in as Space Creator to check the accepted invites
     LogOut(UserSystem);
@@ -2230,11 +2239,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
     LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-
     ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Get metadata for public space
     Map<String, String> RetrievedMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
@@ -2246,9 +2259,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
     // Exit and re-enter space to verify its OK to always add self to public space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     {
-        auto [Result2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        std::promise<void> EntityFetchCompletePromise2;
+        std::future<void> EntityFetchCompleteFuture2 = EntityFetchCompletePromise2.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise2](uint32_t) { EntityFetchCompletePromise2.set_value(); });
 
+        auto [Result2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
         EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture2.wait_for(std::chrono::seconds { 10 });
 
         auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -2537,11 +2555,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
         EXPECT_FALSE(SpaceSystem->IsInSpace());
 
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
-
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         EXPECT_TRUE(SpaceSystem->IsInSpace());
 
@@ -2558,11 +2580,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
     {
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
-
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
     }
 
     LogOut(UserSystem);
@@ -2603,11 +2629,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 
     {
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
-
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
     }
 
     LogOut(UserSystem);
@@ -2661,11 +2691,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
     // Note the space is now out of date and does not have the new user in its lists
     {
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
-
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -3201,10 +3235,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
         // Ensure we can enter the newly duplicated Space
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, NewSpace.Id, RealtimeEngine.get());
         ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
         ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -3302,10 +3341,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
     // Ensure we can enter the newly duplicated Space
     {
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, NewSpaceId, RealtimeEngine.get());
         ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
         ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -3363,18 +3407,21 @@ TEST_P(ExitSpaceRealtimeEngine, ExitSpaceRealtimeEngineTest)
     }
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
-
     ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
     ASSERT_TRUE(SpaceSystem->IsInSpace());
 
     if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
         ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
     }
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -3451,7 +3498,10 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     LogInAsGuest(UserSystem, GuestUserId);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
@@ -3462,6 +3512,8 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     // Verify that Stderr contains expected message.
     std::string OutStdErr = testing::internal::GetCapturedStderr();
     EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Log out
     LogOut(UserSystem);
@@ -3504,7 +3556,10 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     LogIn(UserSystem, UninvitedUserId, UninvitedUser.Email, GeneratedTestAccountPassword);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
@@ -3514,6 +3569,8 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     // Verify that Stderr contains expected message.
     std::string OutStdErr = testing::internal::GetCapturedStderr();
     EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Log out
     LogOut(UserSystem);
@@ -3563,12 +3620,17 @@ TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
     LogIn(UserSystem, InvitedUserId, InvitedUser.Email, GeneratedTestAccountPassword);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Verify that Stderr contains expected message.
     std::string OutStdErr = testing::internal::GetCapturedStderr();
@@ -3619,7 +3681,6 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
 
-    
     EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // Verify that Stderr contains expected message.
@@ -3672,11 +3733,17 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
 
     {
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         // In order to ban the user, they have to have entered the space. (This seems like an underthought limitation)
         auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
         ASSERT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
+
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
         ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
         LogOut(UserSystem);
@@ -3685,6 +3752,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
         LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
         auto [Result] = AWAIT_PRE(SpaceSystem, AddUserToSpaceBanList, RequestPredicate, CreatedSpace.Id, BannedUser.UserId);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
         LogOut(UserSystem);
     }
     {
@@ -3692,7 +3760,10 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
         LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
 
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        std::promise<void> EntityFetchCompletePromise;
+        std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+        RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
         testing::internal::CaptureStderr();
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
@@ -3701,6 +3772,8 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
         // Verify that Stderr contains expected message.
         std::string OutStdErr = testing::internal::GetCapturedStderr();
         EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+        EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
         // Log out
         LogOut(UserSystem);
@@ -3823,7 +3896,10 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     LogInAsGuest(UserSystem, GuestUserId, LoginWithMultiplayerConnection);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    std::promise<void> EntityFetchCompletePromise;
+    std::future<void> EntityFetchCompleteFuture = EntityFetchCompletePromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback([&EntityFetchCompletePromise](uint32_t) { EntityFetchCompletePromise.set_value(); });
 
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
@@ -3836,6 +3912,8 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     // Verify that Stderr contains expected message.
     std::string OutStdErr = testing::internal::GetCapturedStderr();
     EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    EntityFetchCompleteFuture.wait_for(std::chrono::seconds { 10 });
 
     // If we're offline, check that we havn't actually entered the space as far as CHS is concerned
     // This is a bit of an encapsulation break, as this depends on knowing that the local user ID and the logged in one are different.
