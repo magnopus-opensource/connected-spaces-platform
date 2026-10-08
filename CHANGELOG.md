@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [7.1.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OF-1885] fix: CSP no longer crashes when entity fetching internally fails with an exception by @MAG-mv
+  We found this issue specifically when a space is deleted before SetEntityFetchCompleteCallback had complete. However, if this call failed internally for other reasons,
+  CSP could still crash. If a failure is found SetEntityFetchCompleteCallback will be called with 0 entities passed, and an error log callback will be fired.
+
 ## [6.49.0]
 
 ### 🔥 ❗Breaking Changes
