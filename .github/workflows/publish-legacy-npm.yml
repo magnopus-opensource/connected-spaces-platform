@@ -52,6 +52,19 @@ jobs:
 
           npm pack --dry-run
 
+      - name: Check npm access
+        working-directory: npm-package/connected-spaces-platform.web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+      
+          npm whoami --registry=https://registry.npmjs.org
+      
+          npm owner ls connected-spaces-platform.web \
+            --registry=https://registry.npmjs.org
+
       - name: Publish npm package
         working-directory: npm-package/connected-spaces-platform.web
         env:
