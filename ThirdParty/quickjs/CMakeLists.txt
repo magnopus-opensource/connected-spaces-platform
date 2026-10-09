@@ -14,7 +14,7 @@ include(GNUInstallDirs)
 
 add_library(csp-quickjs STATIC)
 
-target_compile_features(csp-quickjs PUBLIC cxx_std_17)
+target_compile_features(csp-quickjs PUBLIC cxx_std_20)
 
 file(GLOB_RECURSE QUICKJS_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c

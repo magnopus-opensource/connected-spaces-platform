@@ -5,7 +5,7 @@ os.version=1.0
 arch=armv8
 compiler=apple-clang
 compiler.version=15
-compiler.cppstd=17
+compiler.cppstd=20
 compiler.libcxx=libc++
 
 [buildenv]
