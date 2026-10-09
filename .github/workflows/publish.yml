@@ -153,6 +153,7 @@ jobs:
 
   publish-npm:
     uses: ./.github/workflows/publish-legacy-npm.yml
+    secrets: inherit
 
     needs:
     - legacy-wasm
