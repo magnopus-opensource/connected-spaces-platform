@@ -365,7 +365,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
         csp::systems::FileAssetDataSource AvatarPortrait;
         const std::string LocalFileName = "OKO.png";
         const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-        AvatarPortrait.FilePath = FilePath.u8string().c_str();
+        AvatarPortrait.FilePath = ToString(FilePath);
         AvatarPortrait.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
@@ -380,7 +380,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
         csp::systems::FileAssetDataSource AvatarPortrait;
         const std::string LocalFileName = "OKO.png";
         const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
-        AvatarPortrait.FilePath = FilePath.u8string().c_str();
+        AvatarPortrait.FilePath = ToString(FilePath);
         AvatarPortrait.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);

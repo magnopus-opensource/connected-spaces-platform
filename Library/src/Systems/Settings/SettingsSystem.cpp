@@ -178,7 +178,7 @@ void SettingsSystem::GetNewsletterStatus(BooleanResultCallback Callback)
 
 void SettingsSystem::AddRecentlyVisitedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetRecentSpacesCallback = [=](StringArrayResult Result)
+    StringArrayResultCallback GetRecentSpacesCallback = [this, InSpaceID, Callback](StringArrayResult Result)
     {
         if (Result.GetResultCode() == EResultCode::Failed)
         {
@@ -251,7 +251,7 @@ void SettingsSystem::ClearRecentlyVisitedSpaces(NullResultCallback Callback) { S
 
 void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
+    StringArrayResultCallback GetBlockedSpacesCallback = [this, InSpaceID, Callback](StringArrayResult Result)
     {
         if (Result.GetResultCode() == EResultCode::Failed)
         {
@@ -288,7 +288,7 @@ void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback 
 
 void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
+    StringArrayResultCallback GetBlockedSpacesCallback = [this, InSpaceID, Callback](StringArrayResult Result)
     {
         if (Result.GetResultCode() == EResultCode::Failed)
         {
@@ -363,7 +363,8 @@ void SettingsSystem::ClearBlockedSpaces(NullResultCallback Callback) { SetSettin
 
 void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPortrait, NullResultCallback Callback)
 {
-    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback
+        = [this, NewAvatarPortrait, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::Success)
         {
@@ -424,7 +425,7 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 
 void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback)
 {
-    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [this, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::Success)
         {
@@ -483,7 +484,7 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriRe
 
 void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource& NewAvatarPortrait, NullResultCallback Callback)
 {
-    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [this, NewAvatarPortrait, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::Success)
         {
@@ -732,7 +733,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 {
     const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [this, AssetSystem, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
