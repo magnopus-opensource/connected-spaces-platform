@@ -53,7 +53,7 @@ namespace
 class RaceTestWebSocketRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    // This mimics the logic in CSPWebSocketClientPOCO::ReceiveThreadFunc()
+    // This roughly mirrors the logic in CSPWebSocketClientPOCO::ReceiveThreadFunc()
     void handleRequest(Poco::Net::HTTPServerRequest& Request, Poco::Net::HTTPServerResponse& Response) override
     {
         try
@@ -122,17 +122,40 @@ private:
 
 } // namespace
 
-// The following is a regression test for OB-5497.
-// The bug was caused by connection_impl::send() only checking 'connection_state == connected' before calling Send.
-// - transport->send() > CSPWebsocketClient::send > CSPWebSocketClientPOCO::Send()
-// However, ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader() and entity creation both use the main thread via CSPFoundation::Tick().
-// The issue occurs when that connection state check in CSPWebSocketClientPOCO::Stop() passes while ReceiveThread is mid teardown. It is only after
-// the call to CSPWebsocketClient::Stop() returns that the connection state is changed. This test replicates the behaviour by having multiple threads
-// call Send in a loop and then calling Stop, which ultimately deletes and nulls the PocoWebSocket. Once Send/Stop are made to coordinate their access
-// to PocoWebSocket, this test should pass consistently.
+// Regression test for OB-5497: Send() racing Stop() in CSPWebSocketClientPOCO.
+//
+// The bug was caused by connection_impl::send() only checking that the connection state is 'connected' before calling Send(). That state isn't set to
+// 'disconnected' until Stop() has returned (via the m_close_callback, which is set in `connection_impl::start_transport`), so a Send() on one thread
+// could pass the check while Stop() on another thread was closing and deleting the PocoWebSocket. Send() could then use a closed, deleted or null
+// socket. Separately, it was observed in the Unreal client that concurrent Send() calls could interleave SSL_write calls on the same connection,
+// which corrupted the SSL session ("ssl3_write_bytes: bad length").
+//
+// In production, Send() can be called concurrently from the main thread (e.g. ScopeLeadershipManager heartbeats and entity updates via
+// CSPFoundation::Tick()), from the ReceiveThread (Invoke continuations) and from the SignalR scheduler (keep-alive pings). Stop() can be
+// called from the ReceiveThread after a receive error, or from the SignalR scheduler when the server timeout elapses.
+//
+// This test performs multiple iterations, in which it connects a client to a local loopback WebSocket server, before several threads call Send() in a
+// loop. Once a minimum number of sends have succeeded, Stop() is called while those sends are still in progress. We continue sending for a short
+// period after Stop() has returned.
+//
+// The test passes if:
+//  - No Error/Fatal messages are logged. Before the fix, a Send() that lost the race logged "Error: Failed to send data to socket.".
+//  - No Send() that started after Stop() returned reports success.
+//  - Stop() reports success.
+//
+// Stop() is called from the test thread, so it takes the join() branch, the same branch as a Stop() triggered by the server timeout.
+// The detach() branch, where Stop() is called on the ReceiveThread, shares the same locked StopFlag and close/delete steps that race with
+// Send(), so the branch taken doesn't affect what this test checks.
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressionTest)
 {
     csp::common::LogSystem LogSystem;
+
+    // Prior to the fix, a Send() racing Stop() would log "Error: Failed to send data to socket." (or crash).
+    // With the fix, a Send() that loses the race exits quietly, so any Error/Fatal log from the client is treated as a failure.
+    std::atomic_int ErrorLogCount { 0 };
+    LogSystem.SetSystemLevel(csp::common::LogLevel::Error);
+    LogSystem.SetLogCallback([&ErrorLogCount](csp::common::LogLevel, const csp::common::String&) { ++ErrorLogCount; });
+
     // Construct a loopback-only WebSocket server that drains incoming data via the request handler.
     // The same server port is used by the client defined in each iteration below.
     LocalWebSocketTestServer Server;
@@ -141,57 +164,115 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressi
 
     constexpr int Iterations = 10;
     constexpr int SenderThreadCount = 4;
+    constexpr int MinSuccessesBeforeStop = 50;
+    constexpr int MinSendsAfterStop = 50;
+    constexpr std::chrono::milliseconds WaitTimeout { 5000 };
+
+    // Spins until Predicate returns true or Timeout elapses. Returns whether Predicate was satisfied.
+    const auto WaitUntil = [](const auto& Predicate, std::chrono::milliseconds Timeout)
+    {
+        const auto Deadline = std::chrono::steady_clock::now() + Timeout;
+
+        while (!Predicate())
+        {
+            if (std::chrono::steady_clock::now() >= Deadline)
+            {
+                return false;
+            }
+
+            std::this_thread::yield();
+        }
+
+        return true;
+    };
 
     // Loop over the connect and teardown cycle multiple times to increase the likelihood of encountering an issue.
     for (int Iteration = 0; Iteration < Iterations; ++Iteration)
     {
         CSPWebSocketClientPOCO Client(Uri, "", "", LogSystem);
 
-        // Start client and wait for the handshake to complete successfully.
+        // Start client and wait for the handshake to complete suc
         std::promise<bool> StartedPromise;
         Client.Start(Uri, [&StartedPromise](bool Result) { StartedPromise.set_value(Result); });
         ASSERT_TRUE(StartedPromise.get_future().get());
 
         std::atomic_bool KeepSending { true };
+        std::atomic_bool StopReturned { false };
+        std::atomic_int SuccessCount { 0 };
+        std::atomic_int SendsAfterStop { 0 };
+        std::atomic_int SuccessesAfterStop { 0 };
         std::vector<std::thread> SenderThreads;
 
         // Launch multiple threads which repeatedly call Send() with a 512 byte payload while KeepSending == true
         for (int ThreadIndex = 0; ThreadIndex < SenderThreadCount; ++ThreadIndex)
         {
             SenderThreads.emplace_back(
-                [&Client, &KeepSending]()
+                [&]()
                 {
                     const std::string Payload(512, 'x');
 
                     while (KeepSending)
                     {
-                        // Prior to the fix for OB-5497, this Send() will hit the Assert in CSPWebSocketClientPOCO::Send() and throw an exception in
-                        // the try/catch block that follows it. In release builds this assert will be compiled out.
-                        // This results in the following error being logged, which matches what is being seen in the bug ticket logs:
-                        // "Error: Failed to send data to socket."
-                        Client.Send(Payload, [](bool) { });
+                        // Set before calling Send(), rather than inside the callback. Send() releases its lock before invoking the callback,
+                        // so a Send() which completed before Stop() can invoke its callback after Stop() has returned.
+                        const bool CalledAfterStop = StopReturned;
+
+                        Client.Send(Payload,
+                            [&, CalledAfterStop](bool Result)
+                            {
+                                if (!Result)
+                                {
+                                    return;
+                                }
+
+                                ++SuccessCount;
+
+                                if (CalledAfterStop)
+                                {
+                                    ++SuccessesAfterStop;
+                                }
+                            });
+
+                        if (CalledAfterStop)
+                        {
+                            ++SendsAfterStop;
+                        }
                     }
                 });
         }
 
-        // Give the sending threads a moment to ensure calls are in-flight before calling Stop().
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        // Wait until sends are succeeding, so we know Stop() will be racing in-flight Send() calls.
+        const bool SendsWereInFlight = WaitUntil([&]() { return SuccessCount >= MinSuccessesBeforeStop; }, WaitTimeout);
 
-        // Call stop and block until it completes.
-        // This is equivalent to the ReceiveThread calling Stop(), resulting in close() being called and the PocoWebSocket being deleted while
-        // ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader or entity creation are calling Send on the main thread.
+        // Call Stop() and block until it completes, while the sender threads are still calling Send().
+        // In production, Stop() is usually called on the ReceiveThread (from websocket_transport::receive_loop() after a receive error),
+        // which takes the detach() branch, whereas here it is called from the test thread and takes the join() branch.
+        // That difference doesn't matter for this test: both branches share the parts of Stop() that race with Send(), ie setting
+        // the StopFlag, then closing and deleting the PocoWebSocket under PocoWebSocketMutex. The race being tested is between those steps.
+        // Send() does call from other threads, such as ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader() or entity creation via
+        // CSPFoundation::Tick() on the main thread.
         std::promise<bool> StoppedPromise;
         Client.Stop([&StoppedPromise](bool Result) { StoppedPromise.set_value(Result); });
-        StoppedPromise.get_future().get();
+        const bool StopResult = StoppedPromise.get_future().get();
+        StopReturned = true;
 
-        // Now that Client Stop call has returned, signal threads to stop calling send and join them.
+        // Keep sending after Stop() has returned to exercise the stopped path. Prior to the fix, this is where Send() would use a deleted
+        // PocoWebSocket.
+        const bool SentAfterStop = WaitUntil([&]() { return SendsAfterStop >= MinSendsAfterStop; }, WaitTimeout);
+
         KeepSending = false;
 
-        // Prior to addressing the issues this is the window in which the call to Send() dereferences a freed or dangling PocoWebSocket.
         for (std::thread& SenderThread : SenderThreads)
         {
             SenderThread.join();
         }
+
+        // Assertions are made only after the sender threads have been joined, as a failed ASSERT would otherwise destroy joinable threads.
+        ASSERT_TRUE(SendsWereInFlight) << "Timed out waiting for Send() to succeed before calling Stop()";
+        EXPECT_TRUE(StopResult);
+        ASSERT_TRUE(SentAfterStop) << "Timed out waiting for Send() calls after Stop() returned";
+        EXPECT_EQ(SuccessesAfterStop, 0) << "Send() reported success after Stop() had returned";
+        EXPECT_EQ(ErrorLogCount, 0) << "The client logged an error while Send() was racing Stop()";
     }
 }
 
