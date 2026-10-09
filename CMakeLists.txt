@@ -16,6 +16,9 @@ set(CSP_ROOT        ${CMAKE_CURRENT_SOURCE_DIR}/Library)
 set(CSP_INCLUDE_DIR ${CSP_ROOT}/include)
 set(CSP_SOURCE_DIR  ${CSP_ROOT}/src)
 
+# Disable scanning for C++20 modules, we don't use them.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/common_files.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/core_files.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/multiplayer_files.cmake)
@@ -150,8 +153,8 @@ set(TINYSPLINE_BUILD_TESTS OFF)
 set(TINYSPLINE_BUILD_EXAMPLES OFF)
 set(TINYSPLINE_BUILD_DOCS OFF)
 
-# Public as it is a requiremnt that consumers also be >= c++17
-target_compile_features(csp-lib PUBLIC cxx_std_17)
+# Public as it is a requiremnt that consumers also be >= c++20
+target_compile_features(csp-lib PUBLIC cxx_std_20)
 
 target_compile_definitions(csp-lib
   PRIVATE
@@ -435,7 +438,7 @@ if(BUILD_TESTING)
       ${CSP_SERVICES_DIR}
   )
 
-  target_compile_features(csp-tests PRIVATE cxx_std_17)
+  target_compile_features(csp-tests PRIVATE cxx_std_20)
 
   target_compile_definitions(csp-tests
     PRIVATE
