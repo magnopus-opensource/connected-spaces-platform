@@ -66,7 +66,9 @@ private:
     Poco::Net::WebSocket* PocoWebSocket;
 
     std::thread ReceiveThread;
-    std::mutex Mutex;
+    // Controls access to the PocoWebSocket pointer which may be destroyed in Stop() on one thread, while another thread is using it to Send.
+    // It also prevents overlapping calls to Stop() from different threads.
+    std::mutex PocoWebSocketMutex;
     std::atomic_bool ReceiveReady;
     ReceiveHandler ReceiveCallback;
     std::atomic_bool StopFlag;

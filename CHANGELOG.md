@@ -10,7 +10,22 @@ All notable changes to this project will be documented in this file. For compile
   We found this issue specifically when a space is deleted before SetEntityFetchCompleteCallback had complete. However, if this call failed internally for other reasons,
   CSP could still crash. If a failure is found SetEntityFetchCompleteCallback will be called with 0 entities passed, and an error log callback will be fired.
 
-## [6.49.0]
+- [OB-5497] fix: Introduce mutex to control access to PocoWebSocket ptr by @MAG-AdamThorn
+  Fix an issue whereby one thread may be trying to Send on the `PocoWebSocket` while it is being teared down by another thread. This was caused by `connection_impl::send()` only checking `connection_state == connected` before calling Send. However, it is only after the call to `CSPWebsocketClient::Stop()` returns that the connection state is changed. However, `ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader()` and entity creation both use the main thread via `CSPFoundation::Tick()`. The issue occurs when the connection state check made via send() passes while ReceiveThread is mid teardown.
+
+  To fix this issue I have introduced a new mutex (PocoWebSocketMutex) to control access to the PocoWebSocket pointer.
+
+  A regression test has also been added (`SendStopRaceConditionRegressionTest`) which replicates the behaviour by having multiple threads call Send in a loop and then calling Stop, which ultimately deletes and nulls the `PocoWebSocket`. This test was failing as expected, but after making the changes to ensure Send/Stop coordinate their access to `PocoWebSocket`, it now passes reliably.
+
+## [6.49.0] / [7.0.0]
+
+### 🔩 🔧 Ci
+
+- Completed the migration of our build pipeline from TeamCity to GitHub Actions.
+  - `v6.49.0` is the final release produced via TeamCity.
+  - `v7.0.0` is the first release produced via GitHub Actions.
+  
+  Both releases contain identical changes.
 
 ### 🔥 ❗Breaking Changes
 
