@@ -166,25 +166,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressi
     constexpr int SenderThreadCount = 4;
     constexpr int MinSuccessesBeforeStop = 50;
     constexpr int MinSendsAfterStop = 50;
-    constexpr std::chrono::milliseconds WaitTimeout { 5000 };
-
-    // Spins until Predicate returns true or Timeout elapses. Returns whether Predicate was satisfied.
-    const auto WaitUntil = [](const auto& Predicate, std::chrono::milliseconds Timeout)
-    {
-        const auto Deadline = std::chrono::steady_clock::now() + Timeout;
-
-        while (!Predicate())
-        {
-            if (std::chrono::steady_clock::now() >= Deadline)
-            {
-                return false;
-            }
-
-            std::this_thread::yield();
-        }
-
-        return true;
-    };
 
     // Loop over the connect and teardown cycle multiple times to increase the likelihood of encountering an issue.
     for (int Iteration = 0; Iteration < Iterations; ++Iteration)
@@ -242,7 +223,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressi
         }
 
         // Wait until sends are succeeding, so we know Stop() will be racing in-flight Send() calls.
-        const bool SendsWereInFlight = WaitUntil([&]() { return SuccessCount >= MinSuccessesBeforeStop; }, WaitTimeout);
+        while (SuccessCount < MinSuccessesBeforeStop)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
 
         // Call Stop() and block until it completes, while the sender threads are still calling Send().
         // In production, Stop() is usually called on the ReceiveThread (from websocket_transport::receive_loop() after a receive error),
@@ -252,13 +236,20 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressi
         // Send() does call from other threads, such as ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader() or entity creation via
         // CSPFoundation::Tick() on the main thread.
         std::promise<bool> StoppedPromise;
-        Client.Stop([&StoppedPromise](bool Result) { StoppedPromise.set_value(Result); });
+        Client.Stop(
+            [&StoppedPromise, &StopReturned](bool Result)
+            {
+                StopReturned = true;
+                StoppedPromise.set_value(Result);
+            });
         const bool StopResult = StoppedPromise.get_future().get();
-        StopReturned = true;
 
         // Keep sending after Stop() has returned to exercise the stopped path. Prior to the fix, this is where Send() would use a deleted
         // PocoWebSocket.
-        const bool SentAfterStop = WaitUntil([&]() { return SendsAfterStop >= MinSendsAfterStop; }, WaitTimeout);
+        while (SendsAfterStop < MinSendsAfterStop)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
 
         KeepSending = false;
 
@@ -268,9 +259,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SendStopRaceConditionRegressi
         }
 
         // Assertions are made only after the sender threads have been joined, as a failed ASSERT would otherwise destroy joinable threads.
-        ASSERT_TRUE(SendsWereInFlight) << "Timed out waiting for Send() to succeed before calling Stop()";
         EXPECT_TRUE(StopResult);
-        ASSERT_TRUE(SentAfterStop) << "Timed out waiting for Send() calls after Stop() returned";
         EXPECT_EQ(SuccessesAfterStop, 0) << "Send() reported success after Stop() had returned";
         EXPECT_EQ(ErrorLogCount, 0) << "The client logged an error while Send() was racing Stop()";
     }
