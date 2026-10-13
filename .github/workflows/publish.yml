@@ -30,7 +30,7 @@ on:
         type: boolean
         description: 'Whether a Github release should be created'
         required: true
-        default: false
+        default: true
 
       release_number:
         type: string
