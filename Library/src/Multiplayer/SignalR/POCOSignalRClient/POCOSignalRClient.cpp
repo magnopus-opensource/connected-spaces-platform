@@ -213,79 +213,55 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 {
     CSP_PROFILE_SCOPED();
 
-    // Ensures that another thread is not trying to call Stop() and destroy the PocoWebSocket while this thread is calling Send().
-    // It also ensures that only one one thread at a time is able to write to the socket. Previously this was causing a POCO SSLException
-    // (ssl3_write_bytes: bad length) to be thrown in clients which resulted in a corrupted SSL session and a websocket disconnect.
-    auto ShouldProceed = [this]()
+    int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
+    auto Length = static_cast<int>(Message.size());
+    auto Succeeded = false;
+
     {
+        // Ensures that another thread is not trying to call Stop() and destroy the PocoWebSocket while this thread is calling Send().
+        // It also ensures that only one one thread at a time is able to write to the socket. Previously this was causing a POCO SSLException
+        // (ssl3_write_bytes: bad length) to be thrown in clients which resulted in a corrupted SSL session and a websocket disconnect.
         std::scoped_lock Lock(PocoWebSocketMutex);
 
         if (StopFlag)
         {
             LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "Multiplayer web socket connection is being stopped, aborting Send operation.");
-
-            return false;
         }
-
-        if (!PocoWebSocket)
+        else if (!PocoWebSocket)
         {
             LogSystem.LogMsg(csp::common::LogLevel::Error, "Web socket not created! Please call Start() before calling Send().");
-
-            return false;
         }
-
-        return true;
-    };
-
-    if (!ShouldProceed())
-    {
-        if (Callback)
+        else
         {
-            Callback(false);
-        }
-
-        return;
-    }
-
-    int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
-    auto Length = static_cast<int>(Message.size());
-    auto Succeeded = true;
-
-    {
-        std::scoped_lock Lock(PocoWebSocketMutex);
-
-        try
-        {
-            if (Length > 0)
+            try
             {
-                // The websocket is configured to be blocking (SocketImpl::SocketImpl() : _blocking(true)). This means this call will block until all data
-                // has been sent. If a failure occurs this method will throw an exception.
-                Succeeded = PocoWebSocket->sendFrame(Message.data(), Length, Flags) == Length;
+                Succeeded = true;
+
+                if (Length > 0)
+                {
+                    // The websocket is configured to be blocking (SocketImpl::SocketImpl() : _blocking(true)). This means this call will block until
+                    // all data has been sent. If a failure occurs this method will throw an exception.
+                    Succeeded = PocoWebSocket->sendFrame(Message.data(), Length, Flags) == Length;
+                }
             }
-        }
-        catch (const Poco::Net::InvalidSocketException& InvalidSocketEx)
-        {
-            Succeeded = false;
-
-            LogSystem.LogMsg(csp::common::LogLevel::Error,
-                fmt::format("InvalidSocketException sending data to socket. Code: {}, Message: \"{}\", DisplayText: \"{}\"", InvalidSocketEx.code(),
-                    InvalidSocketEx.message(), InvalidSocketEx.displayText())
-                    .c_str());
-        }
-        catch (const Poco::Exception& PocoEx)
-        {
-            Succeeded = false;
-
-            LogSystem.LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Exception sending data to socket: {}. Code: {}, Message: \"{}\", DisplayText: \"{}\"", PocoEx.className(), PocoEx.code(),
-                    PocoEx.message(), PocoEx.displayText())
-                    .c_str());
-        }
-        catch (const std::exception& e)
-        {
-            Succeeded = false;
-
-            LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("std::exception during Send(): {}", e.what()).c_str());
+            catch (const Poco::Net::InvalidSocketException& InvalidSocketEx)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("InvalidSocketException sending data to socket. Code: {}, Message: \"{}\", DisplayText: \"{}\"",
+                        InvalidSocketEx.code(), InvalidSocketEx.message(), InvalidSocketEx.displayText())
+                        .c_str());
+            }
+            catch (const Poco::Exception& PocoEx)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("Exception sending data to socket: {}. Code: {}, Message: \"{}\", DisplayText: \"{}\"", PocoEx.className(),
+                        PocoEx.code(), PocoEx.message(), PocoEx.displayText())
+                        .c_str());
+            }
+            catch (const std::exception& e)
+            {
+                LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("std::exception during Send(): {}", e.what()).c_str());
+            }
         }
     }
 
