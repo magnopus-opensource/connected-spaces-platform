@@ -107,10 +107,11 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
         snprintf(Str, 1024, "Bearer %s", AccessToken.c_str());
         request.set("Authorization", Str);
 
-        // Ensures another thread does not try to use the PocoWebSocket pointer (for Send or Stop) while this thread is creating it.
+        auto* NewSocket = new Poco::Net::WebSocket(*cs, request, response);
         {
-            std::scoped_lock<std::mutex> Lock(PocoWebSocketMutex);
-            PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
+            // Lock whilst we assign the pointer. Do not reassign the pointer whilst another action (Start or Stop) is in process.
+            std::scoped_lock Lock(PocoWebSocketMutex);
+            PocoWebSocket = NewSocket;
             StopFlag = false;
         }
 
