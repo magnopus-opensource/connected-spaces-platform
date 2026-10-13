@@ -18,6 +18,15 @@ All notable changes to this project will be documented in this file. For compile
   vendored dependencies CMake doesn't use. CMake + Conan is now the only way to build CSP, see the
   [build system guide](Library/docs/source/manual/building/build-system.md).
 
+- [OF-1864] feat!: Upgrade to C++20 by @mag-lt.
+  The CMake build now compiles CSP as C++20, which is now the minimum standard required to build and consume CSP.
+  The premake build has not been updated, as it is being phased out.
+
+  `cxx_std_20` is a public usage requirement of the library target, so CMake consumers move to C++20 automatically.
+
+  No C++20 features are used yet, in the public headers or internally, but we intend to start using them soon.
+  Clients consuming the C++ headers directly should upgrade now.
+
 ### 🔩 🔧 Ci
 
 - [OF-1894] ci: Remove the remaining TeamCity scripts and workflows by @mag-lt
