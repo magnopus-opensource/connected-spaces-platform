@@ -174,6 +174,7 @@ private:
 /// @brief Represents an MCS object patch.
 /// @details This should be used when an object needs to be update, and needs to be replicated to MCS and other clients.
 /// More information about this type can be found here:
+/// https://github.com/magnopus/Magnopus.Services/blob/e7fff2e1171bbe185c0ad1f50fadc1ec64a30a6a/Source/Magnopus.Service.Multiplayer.Contracts/Messages/ObjectMessagePatch.cs
 class ObjectPatch : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
@@ -199,6 +200,31 @@ private:
     bool Destroy = false;
     bool ShouldUpdateParent = false;
     std::optional<uint64_t> ParentId;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
+};
+
+/// @brief Represents an MCS eveent message.
+/// More information about this type can be found here:
+/// https://github.com/magnopus/Magnopus.Services/blob/e7fff2e1171bbe185c0ad1f50fadc1ec64a30a6a/Source/Magnopus.Service.Multiplayer.Contracts/Messages/EventMessage.cs
+class EventMessage : public ISignalRSerializable, public ISignalRDeserializable
+{
+public:
+    EventMessage();
+    EventMessage(const std::string& EventType, uint32_t SenderClientId, std::optional<uint32_t> RecipientClientId,
+        const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components);
+
+    void Serialize(SignalRSerializer& Serializer) const override;
+    void Deserialize(SignalRDeserializer& Deserializer) override;
+
+    const std::string& GetEventType() const;
+    uint32_t GetSenderClientId() const;
+    std::optional<uint32_t> GetRecipientClientId() const;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
+
+private:
+    std::string EventType;
+    uint32_t SenderClientId = 0;
+    std::optional<uint32_t> RecipientClientId;
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 
