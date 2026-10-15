@@ -1,7 +1,0 @@
-{%- macro assert_are_equal(use_epsilon, var_name, expected_value) -%}
-    {% if use_epsilon %}
-        Assert.IsTrue({{ var_name }}.NearlyEquals({{ expected_value }}));
-    {% else %}
-        Assert.AreEqual({{ expected_value }}, {{ var_name }});
-    {% endif %}
-{%- endmacro -%}
