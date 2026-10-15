@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.1.0]
 
+### 🔥 ❗Breaking Changes
+
+- [OF-1902] refac!: Remove redundant SSO flows by @MAG-AdamThorn
+  Now that we have federated login, we no-longer require a means by which users can authenticate directly using third party SSO.
+  
+  The following public UserSystem methods have been removed.
+  - `UserSystem::GetThirdPartyProviderAuthorizeURL()`
+  - `UserSystem::LoginToThirdPartyAuthenticationProvider()`
+
 ### 🐛 🔨 Bug Fixes
 
 - [OF-1885] fix: CSP no longer crashes when entity fetching internally fails with an exception by @MAG-mv
