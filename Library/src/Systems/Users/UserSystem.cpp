@@ -628,7 +628,8 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProv
         return;
     }
 
-    ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback = [=](const ProviderDetailsResult& ProviderDetailsRes)
+    ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback
+        = [this, AuthProvider, RedirectURL, Callback](const ProviderDetailsResult& ProviderDetailsRes)
     {
         if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
         {

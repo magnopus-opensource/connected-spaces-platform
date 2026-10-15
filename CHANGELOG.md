@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.1.0]
 
+### 🔥 ❗Breaking Changes
+
+- [OF-1864] feat!: Upgrade to C++20 by @mag-lt.
+  The CMake build now compiles CSP as C++20, which is now the minimum standard required to build and consume CSP.
+  The premake build has not been updated, as it is being phased out.
+
+  If you consume CSP via CMake, you should not need to do anything. `cxx_std_20` is a public usage requirement of the
+  library target, so your targets are moved to C++20 automatically. Otherwise, you need to compile any code that
+  includes CSP's headers as C++20.
+
+  No C++20 features are used yet, in the public headers or internally, but we intend to start using them soon.
+
 ### 🐛 🔨 Bug Fixes
 
 - [OF-1885] fix: CSP no longer crashes when entity fetching internally fails with an exception by @MAG-mv

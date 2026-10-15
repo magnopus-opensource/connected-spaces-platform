@@ -297,6 +297,12 @@ inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEng
     return CreatedObject;
 }
 
+inline csp::common::String ToString(const std::filesystem::path& Path)
+{
+    const auto Utf8 = Path.u8string();
+    return csp::common::String(reinterpret_cast<const char*>(Utf8.c_str()));
+}
+
 inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
 {
     auto AbsoluteFilePath = std::filesystem::absolute(FilePath);
