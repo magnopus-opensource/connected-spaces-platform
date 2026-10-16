@@ -65,7 +65,7 @@ csp::common::ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateT
     return SequenceUpdateType;
 }
 
-csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
+csp::common::String DecodeSequenceKey(const csp::common::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
     return csp::common::Decode::URI(RawValue.GetString());
@@ -234,6 +234,35 @@ csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, 
     return ParentIdString.c_str();
 }
 
+csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem)
+{
+    csp::common::AssetDetailBlobChangedNetworkEventData ParsedEvent {};
+
+    ParsedEvent.ChangeType = csp::common::EAssetChangeType::Invalid;
+
+    if (Event.EventValues[0].GetInt() < static_cast<int64_t>(csp::common::EAssetChangeType::Num))
+    {
+        ParsedEvent.ChangeType = static_cast<csp::common::EAssetChangeType>(Event.EventValues[0].GetInt());
+    }
+    else
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
+    }
+
+    ParsedEvent.AssetId = Event.EventValues[1].GetString();
+    ParsedEvent.Version = Event.EventValues[2].GetString();
+    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(Event.EventValues[3].GetString());
+    ParsedEvent.AssetCollectionId = Event.EventValues[4].GetString();
+
+    // Temporarily set redundant data to not break tests
+    ParsedEvent.EventName = Event.EventName;
+    ParsedEvent.EventValues = Event.EventValues;
+    ParsedEvent.SenderClientId = Event.SenderClientId;
+
+    return ParsedEvent;
+}
+
 csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
     csp::common::NetworkEventData ParsedEvent {};
@@ -241,53 +270,30 @@ csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<s
     return ParsedEvent;
 }
 
-csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
-{
-    csp::common::AssetDetailBlobChangedNetworkEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
-
-    ParsedEvent.ChangeType = csp::common::EAssetChangeType::Invalid;
-
-    if (ParsedEvent.EventValues[0].GetInt() < static_cast<int64_t>(csp::common::EAssetChangeType::Num))
-    {
-        ParsedEvent.ChangeType = static_cast<csp::common::EAssetChangeType>(ParsedEvent.EventValues[0].GetInt());
-    }
-    else
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
-    }
-
-    ParsedEvent.AssetId = ParsedEvent.EventValues[1].GetString();
-    ParsedEvent.Version = ParsedEvent.EventValues[2].GetString();
-    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(ParsedEvent.EventValues[3].GetString());
-    ParsedEvent.AssetCollectionId = ParsedEvent.EventValues[4].GetString();
-
-    return ParsedEvent;
-}
-
-csp::common::ConversationNetworkEventData DeserializeConversationEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::ConversationNetworkEventData DeserializeConversationEvent(const csp::common::NetworkEventData& Event, csp::common::LogSystem&)
 {
     csp::common::ConversationNetworkEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
-    ParsedEvent.MessageType = static_cast<ConversationEventType>(ParsedEvent.EventValues[0].GetInt());
-    ParsedEvent.MessageInfo.ConversationId = ParsedEvent.EventValues[1].GetString();
-    ParsedEvent.MessageInfo.CreatedTimestamp = ParsedEvent.EventValues[2].GetString();
-    ParsedEvent.MessageInfo.EditedTimestamp = ParsedEvent.EventValues[3].GetString();
-    ParsedEvent.MessageInfo.UserId = ParsedEvent.EventValues[4].GetString();
-    ParsedEvent.MessageInfo.Message = ParsedEvent.EventValues[5].GetString();
-    ParsedEvent.MessageInfo.MessageId = ParsedEvent.EventValues[6].GetString();
+    ParsedEvent.MessageType = static_cast<ConversationEventType>(Event.EventValues[0].GetInt());
+    ParsedEvent.MessageInfo.ConversationId = Event.EventValues[1].GetString();
+    ParsedEvent.MessageInfo.CreatedTimestamp = Event.EventValues[2].GetString();
+    ParsedEvent.MessageInfo.EditedTimestamp = Event.EventValues[3].GetString();
+    ParsedEvent.MessageInfo.UserId = Event.EventValues[4].GetString();
+    ParsedEvent.MessageInfo.Message = Event.EventValues[5].GetString();
+    ParsedEvent.MessageInfo.MessageId = Event.EventValues[6].GetString();
+
+    // Temporarily set redundant data to not break tests
+    ParsedEvent.EventName = Event.EventName;
+    ParsedEvent.EventValues = Event.EventValues;
+    ParsedEvent.SenderClientId = Event.SenderClientId;
 
     return ParsedEvent;
 }
 
 csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+    const csp::common::NetworkEventData&, csp::common::LogSystem&)
 {
     csp::common::AccessControlChangedNetworkEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     /*
      * [3] map<uint, vec> Components, where Components is structured as follows:
@@ -300,147 +306,145 @@ csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChange
      * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
      */
 
-    if (!EventValues[3].is_null())
-    {
-        const uint64_t SPACE_ID = 1;
-        const uint64_t GROUP_ROLES_ID = 100;
-        const uint64_t CHANGE_TYPE_ID = 101;
-        const uint64_t USER_ID = 102;
-        const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
+    /* const uint64_t SPACE_ID = 1;
+     const uint64_t GROUP_ROLES_ID = 100;
+     const uint64_t CHANGE_TYPE_ID = 101;
+     const uint64_t USER_ID = 102;
 
-        {
-            const std::vector<signalr::value>& SpaceIdComponent(Components.at(SPACE_ID).as_array());
-            ParsedEvent.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0], LogSystem).GetString();
-        }
+     {
+         const std::vector<signalr::value>& SpaceIdComponent(Components.at(SPACE_ID).as_array());
+         ParsedEvent.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0], LogSystem).GetString();
+     }
 
-        {
-            // Group Roles - needs specialised handling as the payload here contains an array of strings, which is atypical for events
-            const std::vector<signalr::value>& RolesComponent(Components.at(GROUP_ROLES_ID).as_array());
-            if (RolesComponent[0].as_uinteger() == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING_ARRAY))
-            {
-                const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
+     {
+         // Group Roles - needs specialised handling as the payload here contains an array of strings, which is atypical for events
+         const std::vector<signalr::value>& RolesComponent(Components.at(GROUP_ROLES_ID).as_array());
+         if (RolesComponent[0].as_uinteger() == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING_ARRAY))
+         {
+             const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
 
-                int i = 0;
-                ParsedEvent.UserRoles = csp::common::Array<csp::systems::SpaceUserRole>(RolesArrayComponent.size());
-                for (auto& RoleValue : RolesArrayComponent)
-                {
-                    csp::systems::SpaceUserRole NewRole = csp::systems::SpaceUserRole::Invalid;
-                    const std::string& RoleValueString = RoleValue.as_string();
+             int i = 0;
+             ParsedEvent.UserRoles = csp::common::Array<csp::systems::SpaceUserRole>(RolesArrayComponent.size());
+             for (auto& RoleValue : RolesArrayComponent)
+             {
+                 csp::systems::SpaceUserRole NewRole = csp::systems::SpaceUserRole::Invalid;
+                 const std::string& RoleValueString = RoleValue.as_string();
 
-                    if (RoleValueString == "viewer")
-                    {
-                        NewRole = csp::systems::SpaceUserRole::User;
-                    }
-                    else if (RoleValueString == "creator")
-                    {
-                        NewRole = csp::systems::SpaceUserRole::Moderator;
-                    }
-                    else if (RoleValueString == "owner")
-                    {
-                        NewRole = csp::systems::SpaceUserRole::Owner;
-                    }
-                    else
-                    {
-                        LogSystem.LogMsg(csp::common::LogLevel::Error,
-                            "UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
-                    }
+                 if (RoleValueString == "viewer")
+                 {
+                     NewRole = csp::systems::SpaceUserRole::User;
+                 }
+                 else if (RoleValueString == "creator")
+                 {
+                     NewRole = csp::systems::SpaceUserRole::Moderator;
+                 }
+                 else if (RoleValueString == "owner")
+                 {
+                     NewRole = csp::systems::SpaceUserRole::Owner;
+                 }
+                 else
+                 {
+                     LogSystem.LogMsg(csp::common::LogLevel::Error,
+                         "UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
+                 }
 
-                    ParsedEvent.UserRoles[i++] = NewRole;
-                }
-            }
-            else
-            {
-                LogSystem.LogMsg(csp::common::LogLevel::Error,
-                    "UserPermissionsChangedEvent - Failed to find the expected array of roles for a user when an event was received.");
-            }
-        }
+                 ParsedEvent.UserRoles[i++] = NewRole;
+             }
+         }
+         else
+         {
+             LogSystem.LogMsg(csp::common::LogLevel::Error,
+                 "UserPermissionsChangedEvent - Failed to find the expected array of roles for a user when an event was received.");
+         }
+     }
 
-        {
-            const std::vector<signalr::value>& ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
-            const csp::common::String ChangeTypeString(
-                ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0], LogSystem).GetString());
+     {
+         const std::vector<signalr::value>& ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
+         const csp::common::String ChangeTypeString(
+             ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0], LogSystem).GetString());
 
-            ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Invalid;
+         ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Invalid;
 
-            if (ChangeTypeString == "Created")
-            {
-                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Created;
-            }
-            else if (ChangeTypeString == "Updated")
-            {
-                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Updated;
-            }
-            else if (ChangeTypeString == "Removed")
-            {
-                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Removed;
-            }
-            else
-            {
-                LogSystem.LogMsg(csp::common::LogLevel::Error,
-                    "UserPermissionsChangedEvent - Detected an unsupported kind of role change. Defaulting to kind of change.");
-            }
-        }
+         if (ChangeTypeString == "Created")
+         {
+             ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Created;
+         }
+         else if (ChangeTypeString == "Updated")
+         {
+             ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Updated;
+         }
+         else if (ChangeTypeString == "Removed")
+         {
+             ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Removed;
+         }
+         else
+         {
+             LogSystem.LogMsg(csp::common::LogLevel::Error,
+                 "UserPermissionsChangedEvent - Detected an unsupported kind of role change. Defaulting to kind of change.");
+         }
+     }
 
-        {
-            const std::vector<signalr::value>& UserIdComponent(Components.at(USER_ID).as_array());
-            ParsedEvent.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0], LogSystem).GetString();
-        }
-    }
-    else
-    {
-        throw std::invalid_argument("Unexpected null eventvalues in DeserializeAccessControlChangedEvent");
-    }
+     {
+         const std::vector<signalr::value>& UserIdComponent(Components.at(USER_ID).as_array());
+         ParsedEvent.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0], LogSystem).GetString();
+     }*/
 
     return ParsedEvent;
 }
 
-csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem)
 {
     csp::common::SequenceChangedNetworkEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
-    if (ParsedEvent.EventValues.Size() != 3)
+    if (Event.EventValues.Size() != 3)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", Event.EventValues.Size()).c_str());
         throw std::invalid_argument(
-            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", Event.EventValues.Size()).c_str());
     }
 
-    int64_t UpdateType = ParsedEvent.EventValues[0].GetInt();
+    int64_t UpdateType = Event.EventValues[0].GetInt();
 
     ParsedEvent.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
 
-    ParsedEvent.Key = DecodeSequenceKey(ParsedEvent.EventValues[1]);
+    ParsedEvent.Key = DecodeSequenceKey(Event.EventValues[1]);
 
     // Optional parameter for when a key is changed
     if (ParsedEvent.EventValues[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
         // Sequence keys are URI encoded to support reserved characters.
-        ParsedEvent.NewKey = csp::common::Decode::URI(ParsedEvent.EventValues[2].GetString());
+        ParsedEvent.NewKey = csp::common::Decode::URI(Event.EventValues[2].GetString());
     }
+
+    // Temporarily set redundant data to not break tests
+    ParsedEvent.EventName = Event.EventName;
+    ParsedEvent.EventValues = Event.EventValues;
+    ParsedEvent.SenderClientId = Event.SenderClientId;
 
     return ParsedEvent;
 }
 
-csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(const csp::common::NetworkEventData& Event, csp::common::LogSystem&)
 {
     csp::common::AsyncCallCompletedEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
-    ParsedEvent.OperationName = ParsedEvent.EventValues[0].GetString();
+    ParsedEvent.OperationName = Event.EventValues[0].GetString();
 
-    const auto& ReferencesStringMap = ParsedEvent.EventValues[1].GetStringMap();
+    const auto& ReferencesStringMap = Event.EventValues[1].GetStringMap();
 
     for (const auto& [Key, ReplicatedValue] : ReferencesStringMap)
     {
         ParsedEvent.References[Key] = ReplicatedValue.GetString();
     }
 
-    ParsedEvent.Success = ParsedEvent.EventValues[2].GetBool();
-    ParsedEvent.StatusReason = ParsedEvent.EventValues[3].GetString();
+    ParsedEvent.Success = Event.EventValues[2].GetBool();
+    ParsedEvent.StatusReason = Event.EventValues[3].GetString();
+
+    // Temporarily set redundant data to not break tests
+    ParsedEvent.EventName = Event.EventName;
+    ParsedEvent.EventValues = Event.EventValues;
+    ParsedEvent.SenderClientId = Event.SenderClientId;
 
     return ParsedEvent;
 }

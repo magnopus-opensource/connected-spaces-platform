@@ -18,7 +18,9 @@
 
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "MCS/MCSTypes.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
@@ -147,25 +149,28 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
         }
     };
 
-    std::map<uint64_t, signalr::value> Components;
+    MCSComponentPacker ComponentPacker;
 
     for (size_t i = 0; i < Arguments.Size(); ++i)
     {
-        Components.insert({ i, SerialiseReplicatedValueToSignalRValue(Arguments[i]) });
+        ComponentPacker.WriteValue(static_cast<uint16_t>(i), Arguments[i]);
     }
 
-    /*
-     * class EventMessage
-     * [0] string EventType
-     * [1] uint SenderClientId
-     * [2] uint? RecipientClientId
-     * [3] map<uint, vec> Components
-     */
-    std::vector<signalr::value> EventMessage { EventName.c_str(), (uint64_t)MultiplayerConnectionInst->GetClientId(),
-        (TargetClientId == ALL_CLIENTS_ID) ? signalr::value_type::null : signalr::value(TargetClientId), Components };
+    std::optional<uint32_t> EventTargetClientId;
+
+    if ((TargetClientId != ALL_CLIENTS_ID))
+    {
+        EventTargetClientId = std::make_optional(static_cast<uint32_t>(TargetClientId));
+    }
+
+    mcs::EventMessage Event { EventName.c_str(), static_cast<uint32_t>(MultiplayerConnectionInst->GetClientId()), EventTargetClientId,
+        ComponentPacker.GetComponents() };
+
+    SignalRSerializer Serializer;
+    Event.Serialize(Serializer);
 
     std::vector<signalr::value> InvokeArguments;
-    InvokeArguments.push_back(EventMessage);
+    InvokeArguments.push_back(Serializer.Get());
 
     ISignalRConnectionPtr->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), InvokeArguments, LocalCallback);
