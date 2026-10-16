@@ -56,14 +56,7 @@ For more information about tenants and tenant IDs, visit our [FAQ](https://www.m
 
 ## 🔨 Build Instructions
 
-CSP build instructions for each supported language are below.
-
-- [Building for Web](https://connected-spaces-platform.net/manual/building/web.html)
-- [Building for Windows](https://connected-spaces-platform.net/manual/building/windows.html)
-- [Building for C#](https://connected-spaces-platform.net/manual/building/csharp.html)
-- [Building for Android](https://connected-spaces-platform.net/manual/building/android.html)
-- [Building for MacOS](https://connected-spaces-platform.net/manual/building/macos.html)
-- [Building for IOS](https://connected-spaces-platform.net/manual/building/ios.html)
+CSP is built with CMake and Conan. See the [build system guide](/Library/docs/source/manual/building/build-system.md) for how to install dependencies, configure, build and install for each supported platform.
 
 ## 👷‍♂️ Contributions
 
