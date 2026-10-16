@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.1.0]
 
+### 🔩 🔧 Ci
+
+- [OF-1894] ci: Remove the remaining TeamCity scripts and workflows by @mag-lt
+  These relied on premake, so they're retired alongside it. CSP is now built and packaged only with GitHub Actions.
+
+### 🔥 ❗Breaking Changes
+
+- [OF-1894] build!: Remove the legacy premake build system by @mag-lt
+  Removes the premake scripts and `generate_solution*`, along with premake-only tooling, all submodules, and the
+  vendored dependencies CMake doesn't use. CMake + Conan is now the only way to build CSP, see the
+  [build system guide](Library/docs/source/manual/building/build-system.md).
+
 ### 🐛 🔨 Bug Fixes
 
 - [OF-1885] fix: CSP no longer crashes when entity fetching internally fails with an exception by @MAG-mv

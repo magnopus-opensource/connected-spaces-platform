@@ -42,8 +42,6 @@ Each generator then runs the resulting code through a code prettifier.
 Some (currently limited) unit tests are in [tests](./tests/).
 Unit tests should be written using [unittest] and test coverage may be measured using [coverage].
 
-A suite of integration tests is available in the [UnitTesting](../../UnitTesting/README.md) directory.
-
 [Chevron]: https://github.com/noahmorrison/chevron
 [coverage]: https://coverage.readthedocs.io/
 [Mustache]: https://mustache.github.io/mustache.5.html
