@@ -1,7 +1,5 @@
 # CSP Build System
 
-> ⚠️ **Warning:** This build system is still in development. We do not recommend using it for production or active development.
-
 This guide explains how to configure and build CSP for supported platforms.
 
 ---
