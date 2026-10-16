@@ -41,23 +41,23 @@ csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<s
 
 // Specialized deserializataion for events triggered when an asset referenced by the space changes.
 csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a conversation event happens.
 csp::common::ConversationNetworkEventData DeserializeConversationEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a user in the space's access permissions change.
 csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a sequence in the space changes.
 csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when an async call completes.
 // Some methods take an AsyncCall boolean argument that allows the operation to be completed asyncronously rather than syncronously.
 csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const csp::common::NetworkEventData& Event, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer

@@ -19,8 +19,11 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemBase.h"
+#include "MCSComponentPacker.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
+#include "Multiplayer/SignalRSerializer.h"
 #include "NetworkEventManagerImpl.h"
 
 #include "CSP/Common/CSPAsyncScheduler.h"
@@ -56,7 +59,9 @@ void RegisterEventCallback(csp::common::LogSystem& LogSystem, const csp::common:
     if (!Callback)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, EventReceiverId).c_str());
+            fmt::format(
+                "NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, EventReceiverId)
+                .c_str());
 
         return;
     }
@@ -90,11 +95,6 @@ bool TryDeserializeEventData(
         OutEventData = Deserialize();
         return true;
     }
-    catch (const signalr::signalr_exception& e)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("NetworkEventBus: SignalR type mismatch encountered in Event {}: {}", EventTypeStr.c_str(), e.what()).c_str());
-    }
     catch (const csp::common::ReplicatedValueException& e)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("NetworkEventBus: ReplicatedValue type mismatch: {}", e.what()).c_str());
@@ -108,6 +108,83 @@ bool TryDeserializeEventData(
         fmt::format("NetworkEventBus: Failed to deserialize event '{}'. Registered events will not be fired.", EventTypeStr).c_str());
 
     return false;
+}
+
+bool TryDeserializeEvent(const signalr::value& Result, csp::common::LogSystem& LogSystem, csp::common::NetworkEventData& OutEventData)
+{
+    // Peak into event before deserialization to ensure it's a valid event structure.
+    if (Result.is_null())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus: Event message received with null data.");
+        return false;
+    }
+
+    if (!Result.is_array() || Result.as_array().empty())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message expected to be a non-empty array.");
+        return false;
+    }
+
+    if (!Result.as_array()[0].is_array())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "NetworkEventBus: Event message expected to be an array with an array at element[0] but the element was of a different type.");
+        return false;
+    }
+
+    // Deserialize SignalR values to MCS event.
+    std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
+    csp::multiplayer::mcs::EventMessage Event;
+
+    try
+    {
+        csp::multiplayer::SignalRDeserializer Deserializer { Result.as_array()[0] };
+        Deserializer.ReadValue(Event);
+    }
+    catch (...)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Unknown error encountered during event deserialisation.");
+        return false;
+    }
+
+    if (Event.GetComponents().has_value() == false)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message missing components");
+        return false;
+    }
+
+    // Convert MCS event to CSP event/
+    csp::common::NetworkEventData EventData;
+    EventData.EventName = Event.GetEventType().c_str();
+    EventData.SenderClientId = Event.GetSenderClientId();
+
+    // Convert MCS ItemComponentData to ReplicatedValue.
+    csp::multiplayer::MCSComponentUnpacker ComponentUnpacker { Event.GetComponents().value() };
+    EventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(ComponentUnpacker.GetRuntimeComponentsCount());
+
+    try
+    {
+        for (uint64_t i = 0; i < ComponentUnpacker.GetRuntimeComponentsCount(); i++)
+        {
+            csp::common::ReplicatedValue Value;
+            ComponentUnpacker.TryReadValue(static_cast<uint16_t>(i), Value);
+
+            EventData.EventValues[i] = Value;
+        }
+    }
+    catch (const csp::common::ReplicatedValueException& e)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("NetworkEventBus: ReplicatedValue type mismatch: {}", e.what()).c_str());
+        return false;
+    }
+    catch (...)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Unknown error encountered during event deserialisation.");
+        return false;
+    }
+
+    OutEventData = EventData;
+    return true;
 }
 
 } // namespace
@@ -363,41 +440,18 @@ bool NetworkEventBus::StartEventMessageListening()
         return false;
     }
 
-    std::function<void(signalr::value)> EventDispatchCallback = [this](signalr::value Result)
+    std::function<void(signalr::value)> EventDispatchCallback = [this](const signalr::value& Result)
     {
-        if (Result.is_null())
+        csp::common::NetworkEventData Event;
+        if (!TryDeserializeEvent(Result, LogSystem, Event))
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus: Event message received with null data.");
             return;
         }
 
-        if (!Result.is_array() || Result.as_array().empty())
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message expected to be a non-empty array.");
-            return;
-        }
-
-        if (!Result.as_array()[0].is_array())
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error,
-                "NetworkEventBus: Event message expected to be an array with an array at element[0] but the element was of a different type.");
-            return;
-        }
-
-        std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
-
-        if (EventValues.empty() || !EventValues[0].is_string())
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message missing EventType string at index 0.");
-            return;
-        }
-
-        const csp::common::String EventTypeStr(EventValues[0].as_string().c_str());
         // For custom events registered via ListenCustomNetworkEvent, the EventTypeStr will be the name of the event. In this case the
-        // NetworkEventFromString() method call below will return NetworkEvent::GeneralPurposeEvent, and the EventTypeStr will be used to look up the
-        // registered callback.
-        auto EventType = NetworkEventFromString(EventTypeStr);
-
+        // NetworkEventFromString() method call below will return NetworkEvent::GeneralPurposeEvent, and the EventTypeStr will be used to look up
+        // the registered callback.
+        auto EventType = NetworkEventFromString(Event.EventName);
         bool HasMatchingRegistrations = false;
 
         switch (EventType)
@@ -409,7 +463,7 @@ bool NetworkEventBus::StartEventMessageListening()
                 csp::common::AssetDetailBlobChangedNetworkEventData AssetDetailBlobChangedEventData;
 
                 if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(EventValues, LogSystem); },
+                        LogSystem, Event.EventName, [&] { return csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(Event, LogSystem); },
                         AssetDetailBlobChangedEventData))
                 {
                     return;
@@ -432,7 +486,7 @@ bool NetworkEventBus::StartEventMessageListening()
                 csp::common::ConversationNetworkEventData ConversationEventData;
 
                 if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem); },
+                        LogSystem, Event.EventName, [&] { return csp::multiplayer::DeserializeConversationEvent(Event, LogSystem); },
                         ConversationEventData))
                 {
                     return;
@@ -455,7 +509,7 @@ bool NetworkEventBus::StartEventMessageListening()
                 csp::common::SequenceChangedNetworkEventData SequenceChangedEventData;
 
                 if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem); },
+                        LogSystem, Event.EventName, [&] { return csp::multiplayer::DeserializeSequenceChangedEvent(Event, LogSystem); },
                         SequenceChangedEventData))
                 {
                     return;
@@ -496,7 +550,7 @@ bool NetworkEventBus::StartEventMessageListening()
                 csp::common::AccessControlChangedNetworkEventData AccessControlChangedEventData;
 
                 if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem); },
+                        LogSystem, Event.EventName, [&] { return csp::multiplayer::DeserializeAccessControlChangedEvent(Event, LogSystem); },
                         AccessControlChangedEventData))
                 {
                     return;
@@ -519,7 +573,7 @@ bool NetworkEventBus::StartEventMessageListening()
                 csp::common::AsyncCallCompletedEventData AsyncCallCompletedEventData;
 
                 if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeAsyncCallCompletedEvent(EventValues, LogSystem); },
+                        LogSystem, Event.EventName, [&] { return csp::multiplayer::DeserializeAsyncCallCompletedEvent(Event, LogSystem); },
                         AsyncCallCompletedEventData))
                 {
                     return;
@@ -542,20 +596,11 @@ bool NetworkEventBus::StartEventMessageListening()
         {
             if (RegisteredCustomEvents.size() > 0)
             {
-                csp::common::NetworkEventData GeneralPurposeEventData;
-
-                if (!TryDeserializeEventData(
-                        LogSystem, EventTypeStr, [&] { return csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem); },
-                        GeneralPurposeEventData))
-                {
-                    return;
-                }
-
                 for (auto const& [Registration, Callback] : RegisteredCustomEvents)
                 {
-                    if (Registration.EventName == EventTypeStr)
+                    if (Registration.EventName == Event.EventName)
                     {
-                        Callback(GeneralPurposeEventData);
+                        Callback(Event);
 
                         HasMatchingRegistrations = true;
                     }
@@ -568,7 +613,7 @@ bool NetworkEventBus::StartEventMessageListening()
         if (!HasMatchingRegistrations)
         {
             LogSystem.LogMsg(
-                csp::common::LogLevel::Verbose, fmt::format("Received event {} has no registrations, discarding...", EventTypeStr).c_str());
+                csp::common::LogLevel::Verbose, fmt::format("Received event {} has no registrations, discarding...", Event.EventName).c_str());
         }
     };
 

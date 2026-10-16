@@ -147,9 +147,9 @@ namespace
                 catch (const std::exception&)
                 {
                 }
-                catch(...)
+                catch (...)
                 {
-                    /* This sort of exception management isn't really advisable, we need to emit a callback when we find old data, 
+                    /* This sort of exception management isn't really advisable, we need to emit a callback when we find old data,
                        it's a serious compatibility issue. This catch block is added just to unblock Unity, which has done something
                        funky with sentry integration making derived exceptions not catch for them on iOS.
                        Sort of good it happened though, as it revealed the poor error management here:
@@ -364,5 +364,49 @@ bool ObjectPatch::GetShouldUpdateParent() const { return ShouldUpdateParent; }
 std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
 
 const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
+
+EventMessage::EventMessage() { }
+
+EventMessage::EventMessage(const std::string& EventType, uint32_t SenderClientId, std::optional<uint32_t> RecipientClientId,
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
+    : EventType { EventType }
+    , SenderClientId { SenderClientId }
+    , RecipientClientId { RecipientClientId }
+    , Components { Components }
+{
+}
+
+void EventMessage::Serialize(SignalRSerializer& Serializer) const
+{
+    Serializer.StartWriteArray();
+    {
+        Serializer.WriteValue(EventType);
+        Serializer.WriteValue(SenderClientId);
+        Serializer.WriteValue(RecipientClientId);
+        Serializer.WriteValue(Components);
+    }
+    Serializer.EndWriteArray();
+}
+
+void EventMessage::Deserialize(SignalRDeserializer& Deserializer)
+{
+    size_t ArraySize = 0;
+    Deserializer.StartReadArray(ArraySize);
+    {
+        Deserializer.ReadValue(EventType);
+        Deserializer.ReadValue(SenderClientId);
+        Deserializer.ReadValue(RecipientClientId);
+        DeserializeComponents(Deserializer, Components);
+    }
+    Deserializer.EndReadArray();
+}
+
+const std::string& EventMessage::GetEventType() const { return EventType; }
+
+uint32_t EventMessage::GetSenderClientId() const { return SenderClientId; }
+
+std::optional<uint32_t> EventMessage::GetRecipientClientId() const { return RecipientClientId; }
+
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& EventMessage::GetComponents() const { return Components; }
 
 }
