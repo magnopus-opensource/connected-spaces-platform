@@ -147,20 +147,13 @@ private:
     csp::common::LoginState State;
 };
 
-#if defined CSP_WINDOWS
-#define SPRINTF sprintf_s
-#else
-#define SPRINTF sprintf
-#endif
-
 inline void PrintProgress(float Progress)
 {
     unsigned int ProgressPercent = (unsigned int)(Progress + 0.5f);
 
-    char ProgressString[256];
-    SPRINTF(ProgressString, "Progress=%d%%\n", ProgressPercent);
+    const auto ProgressString = fmt::format("Progress={}%\n", ProgressPercent);
 
-    for (size_t i = 0; i < strlen(ProgressString); ++i)
+    for (size_t i = 0; i < ProgressString.size(); ++i)
         std::cerr << "\b";
 
     std::cerr << ProgressString;
