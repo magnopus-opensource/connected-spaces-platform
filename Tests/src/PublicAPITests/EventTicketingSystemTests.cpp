@@ -54,8 +54,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -93,8 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -132,8 +130,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -186,8 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -239,8 +235,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -278,8 +273,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -317,8 +311,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -349,8 +342,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -394,8 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -430,8 +421,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -474,8 +464,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -553,10 +542,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName1[256];
-    SPRINTF(UniqueSpaceName1, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueSpaceName2[256];
-    SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName1 = MakeUniqueName(TestSpaceName);
+    const auto UniqueSpaceName2 = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -639,8 +626,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -838,8 +824,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicket
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in as attendee just to get their UserId and log out again
     csp::common::String EventAttendeeUserId;
@@ -925,8 +910,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicket
     const char* TestSpaceName = "CSP-UNITTEST-SPACE";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in as attendee just to get their UserId and log out again
     csp::common::String EventAttendeeUserId;

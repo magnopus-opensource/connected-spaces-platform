@@ -390,8 +390,7 @@ TEST_P(ObjectCreate, ObjectCreateTest)
 
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 

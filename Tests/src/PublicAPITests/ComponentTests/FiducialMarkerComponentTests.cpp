@@ -92,11 +92,9 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
     auto& Components = *Object->GetComponents();
     EXPECT_EQ(Components.Size(), 1);
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+    const auto UniqueAssetName = MakeUniqueName(TestAssetName);
 
     // Create asset collection
     csp::systems::AssetCollection AssetCollection;

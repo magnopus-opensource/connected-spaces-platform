@@ -51,8 +51,7 @@ csp::systems::Space CreateTestSpaceAndEnterScope(csp::systems::SpaceSystem* Spac
     const char* TestSpaceName = "CSP_UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP_UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::systems::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);

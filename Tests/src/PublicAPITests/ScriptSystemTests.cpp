@@ -174,8 +174,7 @@ TEST_P(CreateScript, CreateScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -255,8 +254,7 @@ TEST_P(RunScript, RunScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -396,8 +394,7 @@ TEST_P(AvatarScript, AvatarScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -496,8 +493,7 @@ TEST_P(ScriptLog, ScriptLogTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -585,8 +581,7 @@ TEST_P(DeleteScript, DeleteScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in
     csp::common::String UserId;
@@ -697,8 +692,7 @@ TEST_P(DeleteAndChangeComponent, DeleteAndChangeComponentTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in
     csp::common::String UserId;
@@ -807,8 +801,7 @@ TEST_P(AddSecondScript, AddSecondScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in
     csp::common::String UserId;
@@ -936,8 +929,7 @@ TEST_P(ScriptDeltaTime, ScriptDeltaTimeTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -1036,8 +1028,7 @@ TEST_P(CustomComponentScriptInterfaceSubscription, CustomComponentScriptInterfac
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     // Log in
     csp::common::String UserId;
@@ -1179,8 +1170,7 @@ TEST_P(MultipleScriptComponent, MultipleScriptComponentTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 
@@ -1260,8 +1250,7 @@ TEST_P(ModifyExistingScript, ModifyExistingScriptTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
     csp::common::String UserId;
 

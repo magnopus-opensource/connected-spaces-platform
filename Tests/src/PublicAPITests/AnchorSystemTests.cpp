@@ -41,8 +41,7 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem, const csp::common::S
     const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
     const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
-    char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
+    const auto UniqueThirdPartyAnchorId = MakeUniqueName("CSP-UNITTEST-ID");
 
     auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
     auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -70,8 +69,7 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem, const csp::co
     const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpatialKeyValue,
     const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
-    char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
+    const auto UniqueThirdPartyAnchorId = MakeUniqueName("CSP-UNITTEST-ID");
 
     auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
     auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -151,8 +149,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -189,10 +186,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -250,12 +245,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName1[256];
-    SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName2[256];
-    SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
+    const auto UniqueAssetCollectionName1 = MakeUniqueName(TestAssetCollectionName);
+    const auto UniqueAssetCollectionName2 = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -329,10 +321,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -458,12 +448,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName1[256];
-    SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName2[256];
-    SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
+    const auto UniqueAssetCollectionName1 = MakeUniqueName(TestAssetCollectionName);
+    const auto UniqueAssetCollectionName2 = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -542,10 +529,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", "CSP-UNITTEST-SPACE-MAG", GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", "CSP-UNITTEST-ASSET-COLLECTION-MAG", GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName("CSP-UNITTEST-SPACE-MAG");
+    const auto UniqueAssetCollectionName = MakeUniqueName("CSP-UNITTEST-ASSET-COLLECTION-MAG");
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -606,10 +591,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);

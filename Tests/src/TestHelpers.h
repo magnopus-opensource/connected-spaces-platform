@@ -23,6 +23,7 @@
 #include "PublicTestBase.h"
 
 #include <chrono>
+#include <fmt/format.h>
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -189,6 +190,9 @@ inline double RandomRangeDouble(double Min, double Max)
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 std::string GetUniqueString();
+
+// Returns "<Prefix>-<unique string>", for naming resources created during a test so they don't collide with existing ones
+inline csp::common::String MakeUniqueName(const char* Prefix) { return fmt::format("{}-{}", Prefix, GetUniqueString()).c_str(); }
 
 inline void LogFatal(std::string Message)
 {

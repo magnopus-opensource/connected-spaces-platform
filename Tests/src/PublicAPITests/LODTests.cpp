@@ -67,11 +67,9 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     // Log in
     csp::common::String UserId;
@@ -113,17 +111,13 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
     const char* TestAssetName1 = "CSP-UNITTEST-ASSET1-MAG";
     const char* TestAssetName2 = "CSP-UNITTEST-ASSET2-MAG";
 
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
-    char UniqueAssetName1[256];
-    SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueString().c_str());
+    const auto UniqueAssetName1 = MakeUniqueName(TestAssetName1);
 
-    char UniqueAssetName2[256];
-    SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueString().c_str());
+    const auto UniqueAssetName2 = MakeUniqueName(TestAssetName2);
 
     // Log in
     csp::common::String UserId;
