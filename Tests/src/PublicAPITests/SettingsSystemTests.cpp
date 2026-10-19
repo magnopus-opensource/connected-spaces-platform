@@ -320,10 +320,9 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
     for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
     {
-        char BlockedSpaceName[256];
-        SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
+        const auto BlockedSpaceName = fmt::format("BlockSpace{}", SpaceIndex);
 
-        auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpaceName);
+        auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpaceName.c_str());
         EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
@@ -335,8 +334,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
     for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
     {
-        char BlockedSpaceName[256];
-        SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
+        const auto BlockedSpaceName = fmt::format("BlockSpace{}", SpaceIndex);
 
         // Note that spaces come back in reverse order
         EXPECT_EQ(ReturnedStringArray[NUM_BLOCKED_SPACES - SpaceIndex - 1].c_str(), std::string(BlockedSpaceName));

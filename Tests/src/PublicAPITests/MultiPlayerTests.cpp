@@ -101,9 +101,8 @@ void SetRandomProperties(SpaceEntity* User, OnlineRealtimeEngine* RealtimeEngine
 
     IsReadyForUpdate = false;
 
-    char NameBuffer[10];
-    SPRINTF(NameBuffer, "MyName%i", rand() % 100);
-    User->SetName(NameBuffer);
+    const auto Name = fmt::format("MyName{}", rand() % 100);
+    User->SetName(Name.c_str());
 
     csp::common::Vector3 Position = { static_cast<float>(rand() % 100), static_cast<float>(rand() % 100), static_cast<float>(rand() % 100) };
     User->SetPosition(Position);

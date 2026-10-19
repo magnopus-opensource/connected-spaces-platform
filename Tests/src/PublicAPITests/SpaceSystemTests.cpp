@@ -817,21 +817,20 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceDescriptionTest)
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     // Update space description
-    char UpdatedDescription[256];
-    SPRINTF(UpdatedDescription, "%s-Updated", TestSpaceDescription);
+    const auto UpdatedDescription = fmt::format("{}-Updated", TestSpaceDescription);
 
     BasicSpace UpdatedBasicSpace;
-    UpdateSpace(SpaceSystem, Space.Id, nullptr, UpdatedDescription, nullptr, nullptr, UpdatedBasicSpace);
+    UpdateSpace(SpaceSystem, Space.Id, nullptr, UpdatedDescription.c_str(), nullptr, nullptr, UpdatedBasicSpace);
 
     EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
-    EXPECT_EQ(UpdatedBasicSpace.Description, UpdatedDescription);
+    EXPECT_EQ(UpdatedBasicSpace.Description, UpdatedDescription.c_str());
     EXPECT_EQ(UpdatedBasicSpace.Attributes, Space.Attributes);
 
     ::Space UpdatedSpace;
     GetSpace(SpaceSystem, Space.Id, UpdatedSpace);
 
     EXPECT_EQ(UpdatedSpace.Name, Space.Name);
-    EXPECT_EQ(UpdatedSpace.Description, UpdatedDescription);
+    EXPECT_EQ(UpdatedSpace.Description, UpdatedDescription.c_str());
     EXPECT_EQ(UpdatedSpace.Attributes, Space.Attributes);
 
     // Delete space

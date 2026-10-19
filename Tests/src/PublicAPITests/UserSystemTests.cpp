@@ -955,8 +955,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     const char* TestUserName = "CSP-TEST-NAME";
 
-    char UniqueUserName[256];
-    SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
+    const auto UniqueUserName = fmt::format("{}-{}-{}", TestUserName, GetUniqueString(), GetUniqueString());
 
     char UniqueEmail[256];
     SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());

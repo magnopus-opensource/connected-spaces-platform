@@ -476,20 +476,18 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 
     // Get sequence with invalid / key
     const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
-    char UniqueSequenceName[256];
     std::string Unique = GetUniqueString();
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, Unique.c_str());
+    const auto UniqueSequenceName = fmt::format("{}-{}", TestSequenceKey, Unique);
 
     csp::systems::Sequence RetrievedSequence;
-    GetSequence(SequenceSystem, UniqueSequenceName, RetrievedSequence, csp::systems::EResultCode::Failed,
+    GetSequence(SequenceSystem, UniqueSequenceName.c_str(), RetrievedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // get sequence with invalid % key
     const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
-    char UniqueSequenceNameMod[256];
-    SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, Unique.c_str());
+    const auto UniqueSequenceNameMod = fmt::format("{}-{}", TestSequenceKeyMod, Unique);
 
-    GetSequence(SequenceSystem, UniqueSequenceNameMod, RetrievedSequence, csp::systems::EResultCode::Failed,
+    GetSequence(SequenceSystem, UniqueSequenceNameMod.c_str(), RetrievedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -682,25 +680,22 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
     // Any attempt to get a sequence with key containing an / or % will result in a failure
     // Rename sequence
     const char* TestUpdatedSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceName[256];
-    SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceName = fmt::format("{}-{}", TestUpdatedSequenceKey, UniqueString);
 
     const char* TestUpdatedSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceNameSpace[256];
-    SPRINTF(UniqueUpdatedSequenceNameSpace, "%s-%s", TestUpdatedSequenceKeySpace, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceNameSpace = fmt::format("{}-{}", TestUpdatedSequenceKeySpace, UniqueString);
 
     const char* TestUpdatedSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceNameMod[256];
-    SPRINTF(UniqueUpdatedSequenceNameMod, "%s-%s", TestUpdatedSequenceKeyMod, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceNameMod = fmt::format("{}-{}", TestUpdatedSequenceKeyMod, UniqueString);
 
     csp::systems::Sequence UpdatedSequence;
 
     // sequence name with a / fails
-    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed,
+    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName.c_str(), UpdatedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // sequence name with a % fails
-    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceNameMod, UpdatedSequence, csp::systems::EResultCode::Failed,
+    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceNameMod.c_str(), UpdatedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // Delete sequence
