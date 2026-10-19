@@ -44,6 +44,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+csp::common::String MakeUniqueTestAccountEmail() { return fmt::format("testnopus.pokemon+{}@magnopus.com", GetUniqueString()).c_str(); }
+
 } // namespace
 
 csp::systems::Profile CreateTestUser()
@@ -53,8 +55,7 @@ csp::systems::Profile CreateTestUser()
 
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    const auto UniqueEmail = MakeUniqueTestAccountEmail();
 
     // Create new user
     auto [Result] = AWAIT_PRE(
@@ -907,8 +908,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    const auto UniqueEmail = MakeUniqueTestAccountEmail();
 
     csp::common::String CreatedUserId;
 
@@ -957,8 +957,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     const auto UniqueUserName = fmt::format("{}-{}-{}", TestUserName, GetUniqueString(), GetUniqueString());
 
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    const auto UniqueEmail = MakeUniqueTestAccountEmail();
 
     csp::common::String CreatedUserId;
 
@@ -998,8 +997,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    const auto UniqueEmail = MakeUniqueTestAccountEmail();
 
     csp::common::String CreatedUserId;
 

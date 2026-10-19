@@ -18,7 +18,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
 
-const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
 // The implementation for all this is in UserSystemTests.cpp, if you can believe it.
