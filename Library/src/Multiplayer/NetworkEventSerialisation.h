@@ -18,12 +18,16 @@
 
 #include "CSP/Common/Array.h"
 #include "CSP/Common/NetworkEventData.h"
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 
 #include <signalrclient/signalr_value.h>
 #include <type_traits>
+
+namespace csp::multiplayer::mcs
+{
+class EventMessage;
+}
 
 namespace csp::common
 {
@@ -36,28 +40,22 @@ namespace csp::multiplayer
 // Utility method to extract the sequence key index, used in a few places for understanding sequence events.
 csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
-// Deserialize the data general purpose event that requires no special custom deserialization.
-csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
-
 // Specialized deserializataion for events triggered when an asset referenced by the space changes.
 csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a conversation event happens.
-csp::common::ConversationNetworkEventData DeserializeConversationEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+csp::common::ConversationNetworkEventData DeserializeConversationEvent(const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a user in the space's access permissions change.
 csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+    const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a sequence in the space changes.
-csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when an async call completes.
 // Some methods take an AsyncCall boolean argument that allows the operation to be completed asyncronously rather than syncronously.
-csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer

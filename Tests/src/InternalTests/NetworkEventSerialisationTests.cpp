@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/NetworkEventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "TestHelpers.h"
 
+#include <Debug/Logging.h>
 #include <gtest/gtest.h>
 #include <signalrclient/signalr_value.h>
-#include <Debug/Logging.h>
 
 using namespace csp::multiplayer;
 using namespace csp::common;
@@ -84,13 +85,17 @@ CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCal
     // Construct EventValues vector: [ EventName, SenderClientId, Recipient (null), Components(uint map) ]
     std::vector<signalr::value> EventValues = ConstructEventValues(Components);
 
-    csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(EventValues, LogSystem);
+    csp::multiplayer::mcs::EventMessage Event;
+    csp::multiplayer::SignalRDeserializer Deserializer { EventValues };
+    Deserializer.ReadValue(Event);
+
+    csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(Event, LogSystem);
 
     // Verify event structure was parsed corrctly
     EXPECT_EQ(Parsed.OperationName, OperationName);
     EXPECT_TRUE(Parsed.Success);
     EXPECT_EQ(Parsed.StatusReason, StatusReason);
-    
+
     ASSERT_TRUE(Parsed.References.HasKey("SpaceId"));
     ASSERT_TRUE(Parsed.References.HasKey("OriginalSpaceId"));
     EXPECT_EQ(Parsed.References["SpaceId"], NewSpaceId);

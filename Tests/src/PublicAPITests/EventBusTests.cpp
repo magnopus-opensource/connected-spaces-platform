@@ -188,17 +188,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMultiAsyncCallComple
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = SystemsManager.GetEventBus()->AllRegistrations();
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId, OperationName1, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId, OperationName1, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId, OperationName2, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId, OperationName2, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId, OperationName3, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId, OperationName3, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId2, OperationName1, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId2, OperationName1, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId2, OperationName2, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId2, OperationName2, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId2, OperationName3, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId2, OperationName3, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
 
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = SystemsManager.GetEventBus()->AllRegistrations();
 
@@ -307,8 +307,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullReceiverIdForEventRegistrati
     const char* EventName = "TestEventName";
 
     const csp::common::String Error
-        = fmt::format("NetworkEventBus: Expected non-empty EventReceiverId for event {}. Registration denied.", EventName)
-              .c_str();
+        = fmt::format("NetworkEventBus: Expected non-empty EventReceiverId for event {}. Registration denied.", EventName).c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     SystemsManager.GetEventBus()->ListenCustomNetworkEvent(ReceiverId, EventName, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
@@ -328,9 +327,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullCallback)
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
 
-    const csp::common::String Error
-        = fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, ReceiverId)
-              .c_str();
+    const csp::common::String Error = fmt::format(
+        "NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", EventName, ReceiverId)
+                                          .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     SystemsManager.GetEventBus()->ListenCustomNetworkEvent(ReceiverId, EventName, nullptr);
@@ -350,9 +349,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullCallbackAsyncCallCompleted)
     const char* ReceiverId = "TestReceiverId";
     const char* OperationName = "DuplicateSpaceAsync";
 
-    const csp::common::String Error
-        = fmt::format("NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", OperationName, ReceiverId)
-              .c_str();
+    const csp::common::String Error = fmt::format(
+        "NetworkEventBus: Expected non-null callback for event {} with EventReceiverId: {}. Registration denied.", OperationName, ReceiverId)
+                                          .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName, nullptr);
@@ -457,20 +456,20 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistrationAsyncCallCo
     const auto StartSize = SystemsManager.GetEventBus()->AllRegistrations().Size();
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId, OperationName1, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId, OperationName1, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 1);
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId2, OperationName1, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId2, OperationName1, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 2);
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId, OperationName2, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId, OperationName2, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 3);
 
     // This one should be rejected
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(
-        ReceiverId2, OperationName1, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        ReceiverId2, OperationName1, [](const csp::common::AsyncCallCompletedEventData& /*NetworkEventData*/) { });
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 3);
 }
 
@@ -607,8 +606,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleRecieverAsyncCallComp
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture = NetworkEventPromise.get_future();
+    std::promise<csp::common::AsyncCallCompletedEventData> NetworkEventPromise;
+    std::future<csp::common::AsyncCallCompletedEventData> NetworkEventFuture = NetworkEventPromise.get_future();
 
     const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
         = { csp::common::ReplicatedValue { OperationName }, csp::common::ReplicatedValue { ReferencesStringMap },
@@ -616,20 +615,19 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleRecieverAsyncCallComp
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName,
         [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
+        { NetworkEventPromise.set_value(NetworkEventData); });
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
-    const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
-    EXPECT_EQ(ReceivedVals.Size(), 4);
-    EXPECT_EQ(ReceivedVals[0].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals[1].GetReplicatedValueType(), csp::common::ReplicatedValueType::StringMap);
-    EXPECT_EQ(ReceivedVals[2].GetReplicatedValueType(), csp::common::ReplicatedValueType::Boolean);
-    EXPECT_EQ(ReceivedVals[3].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals[0].GetString(), OperationName);
-    EXPECT_EQ(ReceivedVals[1].GetStringMap(), ReferencesStringMap);
-    EXPECT_EQ(ReceivedVals[2].GetBool(), Success);
-    EXPECT_EQ(ReceivedVals[3].GetString(), StatusReason);
+    const csp::common::AsyncCallCompletedEventData ReceivedEvent = NetworkEventFuture.get();
+
+    EXPECT_EQ(ReceivedEvent.OperationName, OperationName);
+
+    ASSERT_EQ(ReceivedEvent.References.Size(), ReferencesStringMap.Size());
+    EXPECT_EQ(ReceivedEvent.References["SpaceId"], ReferencesStringMap["SpaceId"].GetString());
+
+    EXPECT_EQ(ReceivedEvent.Success, Success);
+    EXPECT_EQ(ReceivedEvent.StatusReason, StatusReason);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiReciever)
@@ -713,8 +711,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiRecieverAsyncCallCompl
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture = NetworkEventPromise.get_future();
+    std::promise<csp::common::AsyncCallCompletedEventData> NetworkEventPromise;
+    std::future<csp::common::AsyncCallCompletedEventData> NetworkEventFuture = NetworkEventPromise.get_future();
 
     const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
         = { csp::common::ReplicatedValue { OperationName }, csp::common::ReplicatedValue { ReferencesStringMap },
@@ -722,29 +720,26 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiRecieverAsyncCallCompl
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName,
         [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
+        { NetworkEventPromise.set_value(NetworkEventData); });
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise1;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture1 = NetworkEventPromise1.get_future();
+    std::promise<csp::common::AsyncCallCompletedEventData> NetworkEventPromise1;
+    std::future<csp::common::AsyncCallCompletedEventData> NetworkEventFuture1 = NetworkEventPromise1.get_future();
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId2, OperationName,
         [&NetworkEventPromise1](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
+        { NetworkEventPromise1.set_value(NetworkEventData); });
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
     // Both recievers should recieve this event
-    const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
-    const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals1 = NetworkEventFuture1.get();
-    EXPECT_EQ(ReceivedVals.Size(), ReceivedVals1.Size());
-    EXPECT_EQ(ReceivedVals[0].GetReplicatedValueType(), ReceivedVals1[0].GetReplicatedValueType());
-    EXPECT_EQ(ReceivedVals[1].GetReplicatedValueType(), ReceivedVals1[1].GetReplicatedValueType());
-    EXPECT_EQ(ReceivedVals[2].GetReplicatedValueType(), ReceivedVals1[2].GetReplicatedValueType());
-    EXPECT_EQ(ReceivedVals[3].GetReplicatedValueType(), ReceivedVals1[3].GetReplicatedValueType());
-    EXPECT_EQ(ReceivedVals[0].GetString(), ReceivedVals1[0].GetString());
-    EXPECT_EQ(ReceivedVals[1].GetStringMap(), ReceivedVals1[1].GetStringMap());
-    EXPECT_EQ(ReceivedVals[2].GetBool(), ReceivedVals1[2].GetBool());
-    EXPECT_EQ(ReceivedVals[3].GetString(), ReceivedVals1[3].GetString());
+    const csp::common::AsyncCallCompletedEventData ReceivedEvent = NetworkEventFuture.get();
+    const csp::common::AsyncCallCompletedEventData ReceivedEvent1 = NetworkEventFuture1.get();
+
+    EXPECT_EQ(ReceivedEvent.OperationName, ReceivedEvent1.OperationName);
+    ASSERT_EQ(ReceivedEvent.References.Size(), ReceivedEvent1.References.Size());
+    EXPECT_EQ(ReceivedEvent.References["SpaceId"], ReceivedEvent1.References["SpaceId"]);
+    EXPECT_EQ(ReceivedEvent.Success, ReceivedEvent1.Success);
+    EXPECT_EQ(ReceivedEvent.StatusReason, ReceivedEvent1.StatusReason);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
@@ -832,11 +827,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiAsyncCallCompletedEventSingleRece
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture = NetworkEventPromise.get_future();
+    std::promise<csp::common::AsyncCallCompletedEventData> NetworkEventPromise;
+    std::future<csp::common::AsyncCallCompletedEventData> NetworkEventFuture = NetworkEventPromise.get_future();
 
-    std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise1;
-    std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture1 = NetworkEventPromise1.get_future();
+    std::promise<csp::common::AsyncCallCompletedEventData> NetworkEventPromise1;
+    std::future<csp::common::AsyncCallCompletedEventData> NetworkEventFuture1 = NetworkEventPromise1.get_future();
 
     const csp::common::Array<csp::common::ReplicatedValue> Event1ValsToSend
         = { csp::common::ReplicatedValue { OperationName1 }, csp::common::ReplicatedValue { ReferencesStringMap },
@@ -848,40 +843,34 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiAsyncCallCompletedEventSingleRece
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName1,
         [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
+        { NetworkEventPromise.set_value(NetworkEventData); });
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, OperationName2,
         [&NetworkEventPromise1](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
+        { NetworkEventPromise1.set_value(NetworkEventData); });
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, Event1ValsToSend, Connection->GetClientId(), ErrorCallback);
 
-    const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
-    EXPECT_EQ(ReceivedVals.Size(), 4);
-    EXPECT_EQ(ReceivedVals[0].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals[1].GetReplicatedValueType(), csp::common::ReplicatedValueType::StringMap);
-    EXPECT_EQ(ReceivedVals[2].GetReplicatedValueType(), csp::common::ReplicatedValueType::Boolean);
-    EXPECT_EQ(ReceivedVals[3].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals[0].GetString(), OperationName1);
-    EXPECT_EQ(ReceivedVals[1].GetStringMap(), ReferencesStringMap);
-    EXPECT_EQ(ReceivedVals[2].GetBool(), Success);
-    EXPECT_EQ(ReceivedVals[3].GetString(), StatusReason);
+    const csp::common::AsyncCallCompletedEventData ReceivedEvent = NetworkEventFuture.get();
+
+    EXPECT_EQ(ReceivedEvent.OperationName, OperationName1);
+    ASSERT_EQ(ReceivedEvent.References.Size(), ReferencesStringMap.Size());
+    EXPECT_EQ(ReceivedEvent.References["SpaceId"], ReferencesStringMap["SpaceId"].GetString());
+    EXPECT_EQ(ReceivedEvent.Success, Success);
+    EXPECT_EQ(ReceivedEvent.StatusReason, StatusReason);
 
     // The other event should not have been recieved as it has not been fired
     EXPECT_TRUE(NetworkEventFuture1.wait_for(std::chrono::milliseconds { 0 }) != std::future_status::ready);
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, Event2ValsToSend, Connection->GetClientId(), ErrorCallback);
 
-    const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals1 = NetworkEventFuture1.get();
-    EXPECT_EQ(ReceivedVals1.Size(), 4);
-    EXPECT_EQ(ReceivedVals1[0].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals1[1].GetReplicatedValueType(), csp::common::ReplicatedValueType::StringMap);
-    EXPECT_EQ(ReceivedVals1[2].GetReplicatedValueType(), csp::common::ReplicatedValueType::Boolean);
-    EXPECT_EQ(ReceivedVals1[3].GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
-    EXPECT_EQ(ReceivedVals1[0].GetString(), OperationName2);
-    EXPECT_EQ(ReceivedVals1[1].GetStringMap(), ReferencesStringMap);
-    EXPECT_EQ(ReceivedVals1[2].GetBool(), Success);
-    EXPECT_EQ(ReceivedVals1[3].GetString(), StatusReason);
+    const csp::common::AsyncCallCompletedEventData ReceivedEvent1 = NetworkEventFuture1.get();
+
+    EXPECT_EQ(ReceivedEvent1.OperationName, OperationName2);
+    ASSERT_EQ(ReceivedEvent1.References.Size(), ReferencesStringMap.Size());
+    EXPECT_EQ(ReceivedEvent1.References["SpaceId"], ReferencesStringMap["SpaceId"].GetString());
+    EXPECT_EQ(ReceivedEvent1.Success, Success);
+    EXPECT_EQ(ReceivedEvent1.StatusReason, StatusReason);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestNoConnectionRegistration)
@@ -1020,8 +1009,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventDispatchReplicatedValueException)
     const csp::common::Array<csp::common::ReplicatedValue> EventData = { csp::common::ReplicatedValue { TestValue } };
 
     SystemsManager.GetEventBus()->ListenAsyncCallCompletedEvent(ReceiverId, EventName,
-        [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& /* NetworkEventData */)
-        { NetworkEventPromise.set_value(); });
+        [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& /* NetworkEventData */) { NetworkEventPromise.set_value(); });
 
     SystemsManager.GetEventBus()->SendNetworkEventToClient(EventName, EventData, Connection->GetClientId(), ErrorCallback);
 
