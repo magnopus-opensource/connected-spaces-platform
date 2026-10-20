@@ -1,7 +1,7 @@
 [settings]
 arch=x86_64
 compiler=msvc
-compiler.cppstd=17
+compiler.cppstd=20
 compiler.runtime=dynamic
 # MSVC toolset version
 # We may need to update this if the toolset changes for our recommended version of Visual Studio
