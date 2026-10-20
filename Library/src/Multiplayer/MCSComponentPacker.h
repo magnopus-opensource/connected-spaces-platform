@@ -70,10 +70,15 @@ template <typename T> std::enable_if_t<std::is_enum_v<T>, csp::common::Replicate
     return csp::common::ReplicatedValue { static_cast<int64_t>(Value) };
 }
 
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<bool> Value);
 csp::common::ReplicatedValue ToReplicatedValue(double);
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<int64_t> Value);
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<uint16_t> Value);
 csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value);
 csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::vector<std::string>& Value);
 csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::optional<std::vector<float>>& Value);
 csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Value);
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&);
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value);

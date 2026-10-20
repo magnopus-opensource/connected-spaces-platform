@@ -23,22 +23,32 @@ namespace
     // Convert from type to enum
     // Creating global functions gives us compile-time checking of types to ensure conversions are created for new types.
     ItemComponentDataType GetComponentEnum(bool) { return ItemComponentDataType::BOOL; }
+    ItemComponentDataType GetComponentEnum(std::optional<bool>) { return ItemComponentDataType::NULLABLE_BOOL; }
     ItemComponentDataType GetComponentEnum(int64_t) { return ItemComponentDataType::INT64; }
+    ItemComponentDataType GetComponentEnum(std::optional<int64_t>) { return ItemComponentDataType::NULLABLE_INT64; }
     ItemComponentDataType GetComponentEnum(uint64_t) { return ItemComponentDataType::UINT64; }
     ItemComponentDataType GetComponentEnum(float) { return ItemComponentDataType::FLOAT; }
     ItemComponentDataType GetComponentEnum(const std::vector<float>&) { return ItemComponentDataType::FLOAT_ARRAY; }
+    ItemComponentDataType GetComponentEnum(const std::optional<std::vector<float>>&) { return ItemComponentDataType::NULLABLE_FLOAT_ARRAY; }
     ItemComponentDataType GetComponentEnum(double) { return ItemComponentDataType::DOUBLE; }
     ItemComponentDataType GetComponentEnum(const std::string&) { return ItemComponentDataType::STRING; }
+    ItemComponentDataType GetComponentEnum(const std::vector<std::string>&) { return ItemComponentDataType::STRING_ARRAY; }
+    ItemComponentDataType GetComponentEnum(std::optional<uint16_t>) { return ItemComponentDataType::NULLABLE_UINT16; }
     ItemComponentDataType GetComponentEnum(const std::map<uint16_t, ItemComponentData>&) { return ItemComponentDataType::UINT16_DICTIONARY; }
     ItemComponentDataType GetComponentEnum(const std::map<std::string, ItemComponentData>&) { return ItemComponentDataType::STRING_DICTIONARY; }
 
     void SerializeComponentData(SignalRSerializer& Serializer, bool Value) { Serializer.WriteValue(Value); }
+    void SerializeComponentData(SignalRSerializer& Serializer, std::optional<bool> Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, int64_t Value) { Serializer.WriteValue(Value); }
+    void SerializeComponentData(SignalRSerializer& Serializer, std::optional<int64_t> Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, uint64_t Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, float Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, const std::vector<float>& Value) { Serializer.WriteValue(Value); }
+    void SerializeComponentData(SignalRSerializer& Serializer, const std::optional<std::vector<float>>& Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, double Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, const std::string& Value) { Serializer.WriteValue(Value); }
+    void SerializeComponentData(SignalRSerializer& Serializer, const std::vector<std::string>& Value) { Serializer.WriteValue(Value); }
+    void SerializeComponentData(SignalRSerializer& Serializer, std::optional<uint16_t> Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, const std::map<uint16_t, ItemComponentData>& Value) { Serializer.WriteValue(Value); }
     void SerializeComponentData(SignalRSerializer& Serializer, const std::map<std::string, ItemComponentData>& Value)
     {
@@ -61,6 +71,9 @@ namespace
         case ItemComponentDataType::BOOL:
             DeserializeComponentDataInternal<bool>(Deserializer, OutVal);
             break;
+        case ItemComponentDataType::NULLABLE_BOOL:
+            DeserializeComponentDataInternal<std::optional<bool>>(Deserializer, OutVal);
+            break;
         case ItemComponentDataType::INT64:
             // We can't guarantee MCS will give us back a signed integer, even if one is sent.
             if (Deserializer.NextValueIsInt())
@@ -71,6 +84,10 @@ namespace
             {
                 DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
             }
+            break;
+
+        case ItemComponentDataType::NULLABLE_INT64:
+             DeserializeComponentDataInternal<std::optional<int64_t>>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::UINT64:
             // Due to us changing some of our types from int64->uint64, we may receive some unexpected int64 values here.
@@ -94,8 +111,24 @@ namespace
         case ItemComponentDataType::FLOAT_ARRAY:
             DeserializeComponentDataInternal<std::vector<float>>(Deserializer, OutVal);
             break;
+        case ItemComponentDataType::NULLABLE_FLOAT_ARRAY:
+            DeserializeComponentDataInternal<std::optional<std::vector<float>>>(Deserializer, OutVal);
+            break;
         case ItemComponentDataType::STRING:
+            if (Deserializer.NextValueIsNull())
+            {
+                // MCS doesn't support a NULLABLE_STRING type, and in some EventMessages, 
+                // string components can sometimes be null, so account for this here by skipping.
+                Deserializer.Skip();
+                return;
+            }
             DeserializeComponentDataInternal<std::string>(Deserializer, OutVal);
+            break;
+        case ItemComponentDataType::STRING_ARRAY:
+            DeserializeComponentDataInternal<std::vector<std::string>>(Deserializer, OutVal);
+            break;
+        case ItemComponentDataType::NULLABLE_UINT16:
+            DeserializeComponentDataInternal<std::optional<uint16_t>>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::UINT16_DICTIONARY:
             // If a dictionary is empty, we will receive null from MCS.

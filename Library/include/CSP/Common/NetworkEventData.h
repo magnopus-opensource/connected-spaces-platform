@@ -64,7 +64,7 @@ public:
 };
 
 /// @brief Describes the changes an asset has undergone when the client application is connected to a space.
-class CSP_API AssetDetailBlobChangedNetworkEventData : public NetworkEventData
+class CSP_API AssetDetailBlobChangedNetworkEventData
 {
 public:
     /// @brief The type of change this asset has undergone.
@@ -84,7 +84,7 @@ public:
 };
 
 /// @brief Class used to provide details of a conversation message that has been received whilst the client application is connected to a space.
-class CSP_API ConversationNetworkEventData : public NetworkEventData
+class CSP_API ConversationNetworkEventData
 {
 public:
     csp::multiplayer::ConversationEventType MessageType;
@@ -92,7 +92,7 @@ public:
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.
-class CSP_API AccessControlChangedNetworkEventData : public NetworkEventData
+class CSP_API AccessControlChangedNetworkEventData
 {
 public:
     /// @brief The unique identifier of the space for which a user's permissions have changed.
@@ -125,7 +125,7 @@ enum class ESequenceType
     Hotspot = 1
 };
 
-class CSP_API SequenceChangedNetworkEventData : public NetworkEventData
+class CSP_API SequenceChangedNetworkEventData
 {
 public:
     /// @brief The type of update to the sequence.
@@ -146,7 +146,7 @@ public:
 
 // @brief Data for an event signalling the completion of an async operation.
 // This is general purpose event data that can be used by any system exposing async operations.
-class CSP_API AsyncCallCompletedEventData : public NetworkEventData
+class CSP_API AsyncCallCompletedEventData
 {
 public:
     /// @brief The name of the async operation that has been completed.

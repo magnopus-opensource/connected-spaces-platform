@@ -50,7 +50,7 @@ namespace csp::multiplayer::mcs
 enum class ItemComponentDataType : uint64_t
 {
     BOOL = 0,
-    NULLABLE_BOOL = 1, // Currently only implemented for NetworkEventManager visibility.
+    NULLABLE_BOOL = 1,
     // BOOL_ARRAY = 2,
     // NULLABLE_BOOL_ARRAY = 3,
     // UINT8 = 4,
@@ -66,7 +66,7 @@ enum class ItemComponentDataType : uint64_t
     // UINT32_ARRAY = 14,
     // NULLABLE_UINT32_ARRAY = 15,
     INT64 = 16,
-    NULLABLE_INT64 = 17, // Currently only implemented for NetworkEventManager visibility.
+    NULLABLE_INT64 = 17,
     // INT64_ARRAY = 18,
     // NULLABLE_INT64_ARRAY = 19,
     UINT64 = 20,
@@ -76,13 +76,13 @@ enum class ItemComponentDataType : uint64_t
     FLOAT = 24,
     // NULLABLE_FLOAT = 25,
     FLOAT_ARRAY = 26,
-    NULLABLE_FLOAT_ARRAY = 27, // Currently only implemented for EntityTransformComponents
+    NULLABLE_FLOAT_ARRAY = 27,
     DOUBLE = 28,
     // NULLABLE_DOUBLE = 29,
     // DOUBLE_ARRAY = 30,
     // NULLABLE_DOUBLE_ARRAY = 31,
     STRING = 32,
-    STRING_ARRAY = 33, // Currently only implemented for EventSerialisation visibility.
+    STRING_ARRAY = 33,
     // DATETIMEOFFSET = 34,
     // NULLABLE_DATETIMEOFFSET = 35,
     // DATETIMEOFFSET_ARRAY = 36,
@@ -100,7 +100,7 @@ enum class ItemComponentDataType : uint64_t
     // INT16_ARRAY = 48,
     // NULLABLE_INT16_ARRAY = 49,
     // UINT16 = 50,
-    NULLABLE_UINT16 = 51, // Currently only implemented for NetworkEventManager visibility.
+    NULLABLE_UINT16 = 51,
     // UINT16_ARRAY = 52,
     // NULLABLE_UINT16_ARRAY = 53,
     UINT16_DICTIONARY = 54,
@@ -112,8 +112,9 @@ class ItemComponentData;
 /// @brief Variant that holds all currently implemented MCS types by CSP.
 /// @details This should be updated if we need to support more of the above types in the future.
 /// All of our variant types must match the supported signalr serializer values, or we will get a compile error.
-using ItemComponentDataVariant = std::variant<bool, int64_t, uint64_t, float, std::vector<float>, double, std::string,
-    std::map<uint16_t, ItemComponentData>, std::map<std::string, ItemComponentData>>;
+using ItemComponentDataVariant = std::variant<bool, std::optional<bool>, int64_t, std::optional<int64_t>, uint64_t, float, std::vector<float>,
+    std::optional<std::vector<float>>, double, std::string, std::vector<std::string>, std::optional<uint16_t>, std::map<uint16_t, ItemComponentData>,
+    std::map<std::string, ItemComponentData>>;
 
 using PropertyKeyType = uint16_t;
 
