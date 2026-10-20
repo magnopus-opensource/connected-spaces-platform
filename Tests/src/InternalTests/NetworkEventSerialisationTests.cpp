@@ -68,19 +68,19 @@ CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCal
     std::map<uint64_t, signalr::value> Components;
 
     // OperationName
-    Components[0] = ConstructComponentElement(DataTypeString, signalr::value(OperationName.c_str()));
+    Components[1] = ConstructComponentElement(DataTypeString, signalr::value(OperationName.c_str()));
 
     // References
     std::map<std::string, signalr::value> RefsMap;
     RefsMap["SpaceId"] = ConstructComponentElement(DataTypeString, signalr::value(NewSpaceId.c_str()));
     RefsMap["OriginalSpaceId"] = ConstructComponentElement(DataTypeString, signalr::value(OriginalSpaceId.c_str()));
-    Components[1] = ConstructComponentElement(DataTypeStringDictionary, signalr::value(RefsMap));
+    Components[2] = ConstructComponentElement(DataTypeStringDictionary, signalr::value(RefsMap));
 
     // Success
-    Components[2] = ConstructComponentElement(DataTypeNullableBool, signalr::value(true));
+    Components[3] = ConstructComponentElement(DataTypeNullableBool, signalr::value(true));
 
     // StatusReason
-    Components[3] = ConstructComponentElement(DataTypeString, signalr::value(StatusReason.c_str()));
+    Components[4] = ConstructComponentElement(DataTypeString, signalr::value(StatusReason.c_str()));
 
     // Construct EventValues vector: [ EventName, SenderClientId, Recipient (null), Components(uint map) ]
     std::vector<signalr::value> EventValues = ConstructEventValues(Components);
