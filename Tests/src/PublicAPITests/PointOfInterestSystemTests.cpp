@@ -72,8 +72,7 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
         POIAssetCollection.Id = "CSP-UNITTEST-ASSET-COLLECTION-ID";
     }
 
-    char UniquePOIName[256];
-    SPRINTF(UniquePOIName, "%s-%s", POITitle, GetUniqueString().c_str());
+    const auto UniquePOIName = MakeUniqueName(POITitle);
 
     auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::CreatePOI, POISystem, POITitle, POIDescription, UniquePOIName, Tags, POIType,
         POIOwner, POILocation, POIAssetCollection)
@@ -352,9 +351,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    char UniqueAssetCollectionName[256];
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
     csp::systems::AssetCollection AssetCollection;
     CreateAssetCollection(AssetSystem, Space, UniqueAssetCollectionName, AssetCollection);

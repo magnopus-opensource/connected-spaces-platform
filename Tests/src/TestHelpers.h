@@ -23,6 +23,7 @@
 #include "PublicTestBase.h"
 
 #include <chrono>
+#include <fmt/format.h>
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -146,20 +147,13 @@ private:
     csp::common::LoginState State;
 };
 
-#if defined CSP_WINDOWS
-#define SPRINTF sprintf_s
-#else
-#define SPRINTF sprintf
-#endif
-
 inline void PrintProgress(float Progress)
 {
     unsigned int ProgressPercent = (unsigned int)(Progress + 0.5f);
 
-    char ProgressString[256];
-    SPRINTF(ProgressString, "Progress=%d%%\n", ProgressPercent);
+    const auto ProgressString = fmt::format("Progress={}%\n", ProgressPercent);
 
-    for (size_t i = 0; i < strlen(ProgressString); ++i)
+    for (size_t i = 0; i < ProgressString.size(); ++i)
         std::cerr << "\b";
 
     std::cerr << ProgressString;
@@ -189,6 +183,9 @@ inline double RandomRangeDouble(double Min, double Max)
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 std::string GetUniqueString();
+
+// Returns "<Prefix>-<unique string>", for naming resources created during a test so they don't collide with existing ones
+inline csp::common::String MakeUniqueName(const char* Prefix) { return fmt::format("{}-{}", Prefix, GetUniqueString()).c_str(); }
 
 inline void LogFatal(std::string Message)
 {

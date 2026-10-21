@@ -249,9 +249,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -259,8 +257,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
     // Create sequence
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Success,
@@ -268,8 +265,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 
     // Create sequence with reserved characters in the sequenceID (which is allowed).
     const char* TestReservedCharsSequenceKey = "CSP UNITTEST SEQUENCE MAG";
-    char UniqueReservedCharsSequenceName[256];
-    SPRINTF(UniqueReservedCharsSequenceName, "%s-%s", TestReservedCharsSequenceKey, GetUniqueString().c_str());
+    const auto UniqueReservedCharsSequenceName = MakeUniqueName(TestReservedCharsSequenceKey);
 
     csp::systems::Sequence ReservedCharsSequence;
     CreateSequence(SequenceSystem, UniqueReservedCharsSequenceName, "GroupId", Space.Id, SequenceItems, {}, ReservedCharsSequence,
@@ -303,9 +299,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -314,8 +308,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
     // Create sequence with / character
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
     const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Failed,
@@ -323,8 +316,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 
     // Create sequence with % in the name
     const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
-    char UniqueSequenceNameMod[256];
-    SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+    const auto UniqueSequenceNameMod = MakeUniqueName(TestSequenceKeyMod);
     CreateSequence(SequenceSystem, UniqueSequenceNameMod, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
@@ -352,9 +344,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -362,8 +352,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
     // Create sequence
     csp::common::Array<csp::common::String> SequenceItems;
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -393,8 +382,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
     // Create sequence
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
 
@@ -424,8 +412,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     csp::systems::Space Space;
@@ -439,8 +426,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
     // We expect CSP to correctly handle the encoding and decoding of these characters for us.
     const char* TestSequenceKey = "**CSP UNITTEST SEQUENCE MAG**";
 
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -477,8 +463,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     csp::systems::Space Space;
@@ -491,20 +476,18 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 
     // Get sequence with invalid / key
     const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
-    char UniqueSequenceName[256];
     std::string Unique = GetUniqueString();
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, Unique.c_str());
+    const auto UniqueSequenceName = fmt::format("{}-{}", TestSequenceKey, Unique);
 
     csp::systems::Sequence RetrievedSequence;
-    GetSequence(SequenceSystem, UniqueSequenceName, RetrievedSequence, csp::systems::EResultCode::Failed,
+    GetSequence(SequenceSystem, UniqueSequenceName.c_str(), RetrievedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // get sequence with invalid % key
     const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
-    char UniqueSequenceNameMod[256];
-    SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, Unique.c_str());
+    const auto UniqueSequenceNameMod = fmt::format("{}-{}", TestSequenceKeyMod, Unique);
 
-    GetSequence(SequenceSystem, UniqueSequenceNameMod, RetrievedSequence, csp::systems::EResultCode::Failed,
+    GetSequence(SequenceSystem, UniqueSequenceNameMod.c_str(), RetrievedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -530,9 +513,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -540,8 +521,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
     // Create sequence
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     csp::common::Map<csp::common::String, csp::common::String> MetaData;
@@ -581,22 +561,17 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
     const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
-    char UniqueSequenceNameSpace[256];
-    SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, GetUniqueString().c_str());
+    const auto UniqueSequenceNameSpace = MakeUniqueName(TestSequenceKeySpace);
     const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
-    char UniqueSequenceNameMod[256];
-    SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+    const auto UniqueSequenceNameMod = MakeUniqueName(TestSequenceKeyMod);
 
     csp::common::Map<csp::common::String, csp::common::String> MetaData;
 
@@ -639,9 +614,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -650,16 +623,14 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
 
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
 
     // Rename sequence
     const char* TestUpdatedSequenceKey = "*CSP UNITTEST SEQUENCE MAG*-UPDATED";
-    char UniqueUpdatedSequenceName[256];
-    SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+    const auto UniqueUpdatedSequenceName = MakeUniqueName(TestUpdatedSequenceKey);
 
     csp::systems::Sequence UpdatedSequence;
     RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence);
@@ -691,9 +662,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -702,8 +671,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
 
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -712,25 +680,22 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
     // Any attempt to get a sequence with key containing an / or % will result in a failure
     // Rename sequence
     const char* TestUpdatedSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceName[256];
-    SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceName = fmt::format("{}-{}", TestUpdatedSequenceKey, UniqueString);
 
     const char* TestUpdatedSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceNameSpace[256];
-    SPRINTF(UniqueUpdatedSequenceNameSpace, "%s-%s", TestUpdatedSequenceKeySpace, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceNameSpace = fmt::format("{}-{}", TestUpdatedSequenceKeySpace, UniqueString);
 
     const char* TestUpdatedSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG-UPDATED";
-    char UniqueUpdatedSequenceNameMod[256];
-    SPRINTF(UniqueUpdatedSequenceNameMod, "%s-%s", TestUpdatedSequenceKeyMod, UniqueString.c_str());
+    const auto UniqueUpdatedSequenceNameMod = fmt::format("{}-{}", TestUpdatedSequenceKeyMod, UniqueString);
 
     csp::systems::Sequence UpdatedSequence;
 
     // sequence name with a / fails
-    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed,
+    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName.c_str(), UpdatedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // sequence name with a % fails
-    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceNameMod, UpdatedSequence, csp::systems::EResultCode::Failed,
+    RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceNameMod.c_str(), UpdatedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::InvalidSequenceKey, 0);
 
     // Delete sequence
@@ -760,9 +725,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -770,16 +733,14 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
     // Create sequences
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "Group1", Space.Id, SequenceItems, {}, Sequence);
 
     csp::common::Array<csp::common::String> SequenceItems2 { "Hotspot4", "Hotspot5", "Hotspot6" };
     const char* TestSequenceKey2 = "*CSP UNITTEST SEQUENCE MAG*2";
-    char UniqueSequenceName2[256];
-    SPRINTF(UniqueSequenceName2, "%s-%s", TestSequenceKey2, GetUniqueString().c_str());
+    const auto UniqueSequenceName2 = MakeUniqueName(TestSequenceKey2);
 
     csp::systems::Sequence Sequence2;
     CreateSequence(SequenceSystem, UniqueSequenceName2, "Group2", Space.Id, SequenceItems2, {}, Sequence2);
@@ -852,9 +813,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -864,14 +823,11 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 
     // Test Sequence key search
     const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
     const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
-    char UniqueSequenceNameSpace[256];
-    SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, GetUniqueString().c_str());
+    const auto UniqueSequenceNameSpace = MakeUniqueName(TestSequenceKeySpace);
     const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
-    char UniqueSequenceNameMod[256];
-    SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+    const auto UniqueSequenceNameMod = MakeUniqueName(TestSequenceKeyMod);
 
     // Any attempt to get a sequence with key containing an / or % will result in a failure.
     // verify get fails when using a key name with a / character
@@ -905,8 +861,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     csp::systems::Space Space;
@@ -925,8 +880,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
 
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
@@ -947,8 +901,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 
     // Rename sequence
     const char* TestUpdatedSequenceKey = "*CSP UNITTEST SEQUENCE MAG*-UPDATED";
-    char UniqueUpdatedSequenceName[256];
-    SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+    const auto UniqueUpdatedSequenceName = MakeUniqueName(TestUpdatedSequenceKey);
 
     auto UpdateCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
@@ -1013,9 +966,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -1024,8 +975,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
 
     const char* TestSequenceKey = "*CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName[256];
-    SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+    const auto UniqueSequenceName = MakeUniqueName(TestSequenceKey);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -1051,8 +1001,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 
     // Rename sequence
     const char* TestUpdatedSequenceKey = "*CSP UNITTEST SEQUENCE MAG*-UPDATED";
-    char UniqueUpdatedSequenceName[256];
-    SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+    const auto UniqueUpdatedSequenceName = MakeUniqueName(TestUpdatedSequenceKey);
 
     RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed,
         csp::systems::ERequestFailureReason::None, 403);
@@ -1093,9 +1042,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    char UniqueSpaceName[256];
-
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    const auto UniqueSpaceName = MakeUniqueName(TestSpaceName);
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -1104,16 +1051,14 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
     csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2", "Hotspot3" };
 
     const char* TestSequenceKey1 = "CSP UNITTEST SEQUENCE MAG*";
-    char UniqueSequenceName1[256];
-    SPRINTF(UniqueSequenceName1, "%s-%s", TestSequenceKey1, GetUniqueString().c_str());
+    const auto UniqueSequenceName1 = MakeUniqueName(TestSequenceKey1);
 
     csp::systems::Sequence Sequence;
     CreateSequence(SequenceSystem, UniqueSequenceName1, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Success,
         csp::systems::ERequestFailureReason::None, 200);
 
     const char* TestSequenceKey2 = "CSP UNITTEST SEQUENCE MAG2";
-    char UniqueSequenceName2[256];
-    SPRINTF(UniqueSequenceName2, "%s-%s", TestSequenceKey2, GetUniqueString().c_str());
+    const auto UniqueSequenceName2 = MakeUniqueName(TestSequenceKey2);
 
     csp::systems::Sequence Sequence2;
     CreateSequence(SequenceSystem, UniqueSequenceName2, "GroupId", Space.Id, SequenceItems, {}, Sequence2, csp::systems::EResultCode::Success,
@@ -1122,8 +1067,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
     csp::common::Array<csp::common::String> SequenceItems3 { "Hotspot1", "Hotspot2" };
 
     const char* TestSequenceKey3 = "CSP UNITTEST SEQUENCE MAG3";
-    char UniqueSequenceName3[256];
-    SPRINTF(UniqueSequenceName3, "%s-%s", TestSequenceKey3, GetUniqueString().c_str());
+    const auto UniqueSequenceName3 = MakeUniqueName(TestSequenceKey3);
 
     csp::systems::Sequence Sequence3;
     CreateSequence(SequenceSystem, UniqueSequenceName3, "GroupId", Space.Id, SequenceItems3, {}, Sequence3, csp::systems::EResultCode::Success,

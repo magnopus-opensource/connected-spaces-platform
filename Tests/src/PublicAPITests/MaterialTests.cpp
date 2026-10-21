@@ -1453,11 +1453,9 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
     const char* TestAssetName = "CSP-UNITTEST-ASSET";
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    const auto UniqueAssetCollectionName = MakeUniqueName(TestAssetCollectionName);
 
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+    const auto UniqueAssetName = MakeUniqueName(TestAssetName);
 
     // Log in
     csp::common::String UserId;
