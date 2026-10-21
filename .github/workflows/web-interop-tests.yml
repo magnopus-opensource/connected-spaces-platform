@@ -12,7 +12,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   # Creates the per-branch binding branch from csp-development, or reuses it if it already
   # exists (so commits contributors have pushed to it survive re-runs). Any other failure
   # (e.g. bad credentials, missing base branch) fails the job so it isn't silently swallowed.
@@ -39,6 +38,10 @@ jobs:
   run-web-interop-layer-integration:
     needs: create-binding-branch
     uses: magnopus-opensource/connected-spaces-platform-web/.github/workflows/build-bindings.yml@csp-development
+    secrets:
+      MCS_DEPLOY_KEY: ${{ secrets.MSC_DEPLOY_KEY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     with:
       csp_branch: >-
         ${{ github.event_name == 'pull_request'
