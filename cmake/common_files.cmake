@@ -111,7 +111,6 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     ${CSP_COMMON_SOURCE_DIR}/Convert.h
     ${CSP_COMMON_SOURCE_DIR}/DateTime.h
     ${CSP_COMMON_SOURCE_DIR}/Encode.h
-    ${CSP_COMMON_SOURCE_DIR}/Logger.h
     ${CSP_COMMON_SOURCE_DIR}/LoginStateData.h
     ${CSP_COMMON_SOURCE_DIR}/NumberFormatter.h
     ${CSP_COMMON_SOURCE_DIR}/Queue.h
