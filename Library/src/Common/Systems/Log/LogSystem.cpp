@@ -15,6 +15,9 @@
  */
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
+#include <cstdio>
+#include <utility>
+
 #if defined(CSP_ANDROID)
 #include <android/log.h>
 #endif
