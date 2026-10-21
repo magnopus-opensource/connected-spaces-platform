@@ -15,7 +15,8 @@
  */
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Common/Logger.h"
+#include <cstdio>
+#include <utility>
 
 #if defined(CSP_ANDROID)
 #include <android/log.h>
@@ -69,9 +70,6 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
         return;
     }
 
-    // Log to our Connected Spaces Platform file system.
-    LogToFile(Level, InMessage);
-
     if (Callbacks->LogCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
@@ -115,8 +113,6 @@ void LogSystem::EndMarker()
         Callbacks->EndMarkerCallback(nullptr);
     }
 }
-
-void LogSystem::LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage) { CSP_LOG(Level, InMessage.c_str()); }
 
 void LogSystem::ClearAllCallbacks() { Callbacks->Clear(); }
 

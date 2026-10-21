@@ -85,8 +85,6 @@ public:
 private:
     csp::common::LogLevel SystemLevel = LogLevel::All;
 
-    void LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage);
-
     // Allocate internally to avoid warning C4251 'needs to have dll-interface to be used by clients'
     struct LogCallbacks* Callbacks;
 };
