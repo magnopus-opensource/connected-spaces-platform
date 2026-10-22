@@ -60,8 +60,8 @@ public:
     void SetBearerToken();
     // Returns whenther this requires a CHS bearer token header
     bool GetRequiresBearerToken() const;
-    /// Ensures that the bearer token header is set, if required, with the latest access token
-    void RefreshBearerToken();
+    /// Updates the bearer token header with a new access token
+    void RefreshBearerToken(std::string_view Token);
 
     /// Reset the Payload, clearing all content and headers
     void Reset();

@@ -16,7 +16,6 @@
 #include "Web/GraphQLApi/GraphQLApi.h"
 
 #include "CSP/CSPFoundation.h"
-#include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
 

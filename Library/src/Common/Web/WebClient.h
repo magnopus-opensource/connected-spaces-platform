@@ -17,7 +17,6 @@
 
 #include "CSP/Common/CancellationToken.h"
 #include "Common/Queue.h"
-#include "HttpAuth.h"
 #include "HttpRequest.h"
 #include "Uri.h"
 

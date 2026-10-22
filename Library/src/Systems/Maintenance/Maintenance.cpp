@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Systems/Maintenance/Maintenance.h"
+#include "Common/DateTime.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Json/JsonParseHelper.h"
 
