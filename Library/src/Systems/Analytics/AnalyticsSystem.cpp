@@ -18,6 +18,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CallHelpers.h"
+#include "Common/DateTime.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "Services/UserService/Api.h"
@@ -101,7 +102,7 @@ void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
         if (CurrentTime - _AnalyticsSystem->GetTimeSinceLastQueueSend() >= _AnalyticsSystem->GetQueueSendRate()
             || _AnalyticsSystem->GetCurrentQueueSize() >= _AnalyticsSystem->GetMaxQueueSize())
         {
-            _AnalyticsSystem->FlushAnalyticsEventsQueue([](const NullResult& /*Result*/) {});
+            _AnalyticsSystem->FlushAnalyticsEventsQueue([](const NullResult& /*Result*/) { });
         }
     }
 }
