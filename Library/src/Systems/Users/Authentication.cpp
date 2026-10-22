@@ -75,9 +75,6 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
             State->SetLoginStateDataThreadSafe(Data);
 
-            web::HttpAuth::SetAccessToken(AuthResponse->GetAccessToken(), AuthResponse->GetAccessTokenExpiresAt(), AuthResponse->GetRefreshToken(),
-                AuthResponse->GetRefreshTokenExpiresAt());
-
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
             LoginEvent->AddString("UserId", AuthResponse->GetUserId());
@@ -90,8 +87,6 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     {
         if (State)
         {
-            web::HttpAuth::SetAccessToken("", "", "", "");
-
             State->ReinitializeResponseLoginState(ELoginState::Error);
         }
     }
@@ -118,8 +113,6 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
         {
             State->ReinitializeResponseLoginState(ELoginState::LoggedOut);
 
-            web::HttpAuth::SetAccessToken("", "", "", "");
-
             // Send logout event
             events::Event* LogoutEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGOUT_EVENT_ID);
             events::EventSystem::Get().EnqueueEvent(LogoutEvent);
@@ -130,8 +123,6 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
         if (State)
         {
             State->ReinitializeResponseLoginState(ELoginState::Error);
-
-            web::HttpAuth::SetAccessToken("", "", "", "");
         }
     }
 }

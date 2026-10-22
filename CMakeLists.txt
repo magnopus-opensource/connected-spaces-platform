@@ -66,7 +66,7 @@ include(FetchContent)
 FetchContent_Declare(
   csp-services
   GIT_REPOSITORY https://github.com/magnopus-opensource/csp-services.git
-  GIT_TAG        v2.0-d20260421.r0e1d359b9.Release
+  GIT_TAG        v2.0-d20261021.r94427c1cc.Release+1
   GIT_SHALLOW    TRUE
   GIT_PROGRESS   TRUE
 )

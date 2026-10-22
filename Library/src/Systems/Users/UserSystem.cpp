@@ -727,9 +727,6 @@ void UserSystem::FederatedLogin(
 
     CurrentLoginState->SetLoginStateDataThreadSafe(Data);
 
-    web::HttpAuth::SetAccessToken(
-        AuthDetails.GetAccessToken(), AuthDetails.GetAccessTokenExpiresAt(), AuthDetails.GetRefreshToken(), AuthDetails.GetRefreshTokenExpiresAt());
-
     // Signal login to anyone interested
     events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
     LoginEvent->AddString("UserId", AuthDetails.GetUserId());
@@ -1013,8 +1010,8 @@ void UserSystem::NotifyRefreshTokenHasChanged()
     if (RefreshTokenChangedCallback)
     {
         LoginTokenInfoResult InternalResult;
-        InternalResult.FillLoginTokenInfo(csp::web::HttpAuth::GetAccessToken(), csp::web::HttpAuth::GetTokenExpiry(),
-            csp::web::HttpAuth::GetRefreshToken(), csp::web::HttpAuth::GetRefreshTokenExpiry());
+        InternalResult.FillLoginTokenInfo(GetLoginState().GetAccessToken(), GetLoginState().GetAccessTokenExpiryLength(), GetLoginState().GetRefreshToken(),
+            GetLoginState().GetRefreshTokenExpiryLength());
 
         RefreshTokenChangedCallback(InternalResult);
     }

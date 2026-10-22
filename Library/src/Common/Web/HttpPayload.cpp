@@ -17,7 +17,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Common/Web/HttpAuth.h"
 #include "Debug/Logging.h"
 
 #include <cstdio>
@@ -134,19 +133,15 @@ void HttpPayload::SetBearerToken() { RequiresBearerToken = true; }
 
 bool HttpPayload::GetRequiresBearerToken() const { return RequiresBearerToken; }
 
-void HttpPayload::RefreshBearerToken()
+void HttpPayload::RefreshBearerToken(std::string_view Token)
 {
     if (!RequiresBearerToken)
     {
         return;
     }
 
-    if (HttpAuth::GetAccessToken().c_str() != nullptr)
-    {
-        char Str[1024];
-        snprintf(Str, 1024, "Bearer %s", HttpAuth::GetAccessToken().c_str());
-        AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(Str));
-    }
+    std::string Header = std::format("Bearer {}", Token);
+    AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(Header.c_str()));
 }
 
 void HttpPayload::Reset()

@@ -238,8 +238,9 @@ void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::m
                 {
                     RefreshStarted = true;
                 }
-
-                Request->RefreshAccessToken();
+                
+                csp::common::String AccessToken = AuthContext->GetLoginState().GetAccessToken();
+                Request->RefreshAccessToken(AccessToken.c_str());
 
                 ProcessRequest(Request);
 

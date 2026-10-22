@@ -182,6 +182,6 @@ void HttpRequest::Cancel() { CancellationToken->Cancel(); }
 
 bool HttpRequest::Cancelled() { return CancellationToken->Cancelled(); }
 
-void HttpRequest::RefreshAccessToken() { Payload.RefreshBearerToken(); }
+void HttpRequest::RefreshAccessToken(std::string_view Token) { Payload.RefreshBearerToken(Token); }
 
 } // namespace csp::web

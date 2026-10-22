@@ -103,7 +103,7 @@ public:
     void Cancel();
     bool Cancelled();
 
-    void RefreshAccessToken();
+    void RefreshAccessToken(std::string_view Token);
 
 private:
     WebClient* Client;
