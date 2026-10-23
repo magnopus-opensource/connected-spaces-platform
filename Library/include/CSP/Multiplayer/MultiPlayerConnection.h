@@ -140,7 +140,8 @@ public:
 
     /// @brief Create a default SignalRConnection configured to the configured MultiplayerServiceURI
     /// @return ISignalRConnection* Pointer to SignalR connection. The caller should take ownership of the pointer.
-    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection(csp::common::IAuthContext& AuthContext);
+    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection(
+        const csp::common::String& MultiplayerConnectionURI, csp::common::IAuthContext& AuthContext);
 
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.

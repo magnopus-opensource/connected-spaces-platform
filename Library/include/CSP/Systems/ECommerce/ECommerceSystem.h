@@ -35,6 +35,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 /// @ingroup ECommerce System
@@ -115,7 +120,8 @@ public:
 
 private:
     ECommerceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ECommerceSystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem);
     ~ECommerceSystem();
 
     csp::services::ApiBase* ShopifyAPI;

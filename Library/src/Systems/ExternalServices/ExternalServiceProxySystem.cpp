@@ -59,9 +59,10 @@ ExternalServiceProxySystem::ExternalServiceProxySystem()
 {
 }
 
-ExternalServiceProxySystem::ExternalServiceProxySystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+ExternalServiceProxySystem::ExternalServiceProxySystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
-    , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient) }
+    , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient, AggregationServiceDefinition) }
 {
 }
 

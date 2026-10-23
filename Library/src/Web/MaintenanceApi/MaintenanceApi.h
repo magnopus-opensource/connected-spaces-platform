@@ -37,7 +37,7 @@ namespace csp::systems::maintenanceservice
 class MaintenanceApi : public csp::services::ApiBase
 {
 public:
-    MaintenanceApi(csp::web::WebClient* InWebClient);
+    MaintenanceApi(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition);
     ~MaintenanceApi();
 
     void Query(const csp::common::String& MaintenanceUrl, csp::services::ApiResponseHandlerBase* ResponseHandler,

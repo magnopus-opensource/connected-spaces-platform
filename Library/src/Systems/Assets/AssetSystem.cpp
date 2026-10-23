@@ -362,12 +362,12 @@ AssetSystem::AssetSystem()
 {
 }
 
-AssetSystem::AssetSystem(
-    web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem)
+AssetSystem::AssetSystem(web::WebClient* WebClient, const csp::ServiceDefinition& PrototypeServiceDefinition, multiplayer::NetworkEventBus& EventBus,
+    const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
 {
-    PrototypeAPI = new chs::PrototypeApi(WebClient);
-    AssetDetailAPI = new chs::AssetDetailApi(WebClient);
+    PrototypeAPI = new chs::PrototypeApi(WebClient, PrototypeServiceDefinition);
+    AssetDetailAPI = new chs::AssetDetailApi(WebClient, PrototypeServiceDefinition);
 
     FileManager = new web::RemoteFileManager(WebClient, InAuthContext);
 

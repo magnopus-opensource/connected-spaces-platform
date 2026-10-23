@@ -52,6 +52,11 @@ template <typename T> class task;
 CSP_END_IGNORE
 }
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 
@@ -395,8 +400,9 @@ public:
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SpaceSystem(
-        csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem, csp::common::LogSystem& LogSystem);
+    SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
+        const csp::ServiceDefinition& AggregationServiceDefinition, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem,
+        csp::common::LogSystem& LogSystem);
     ~SpaceSystem();
 
     // Space Metadata

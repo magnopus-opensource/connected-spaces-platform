@@ -26,8 +26,9 @@ namespace csp::systems
 class PointOfInterestInternalSystem : public PointOfInterestSystem
 {
 public:
-    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-        : PointOfInterestSystem(InWebClient, LogSystem) {};
+    PointOfInterestInternalSystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem)
+        : PointOfInterestSystem(InWebClient, SpatialDataServiceDefinition, LogSystem) { };
 
     void CreateSite(const Site& Site, SiteResultCallback Callback) { PointOfInterestSystem::CreateSite(Site, Callback); };
 

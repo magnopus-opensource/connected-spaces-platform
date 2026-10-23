@@ -31,10 +31,11 @@ AnchorSystem::AnchorSystem()
 {
 }
 
-AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+AnchorSystem::AnchorSystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    AnchorsAPI = new chs::AnchorsApi(InWebClient);
+    AnchorsAPI = new chs::AnchorsApi(InWebClient, SpatialDataServiceDefinition);
 }
 
 AnchorSystem::~AnchorSystem() { delete (AnchorsAPI); }

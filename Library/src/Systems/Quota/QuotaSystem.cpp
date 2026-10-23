@@ -35,13 +35,14 @@ QuotaSystem::QuotaSystem()
 {
 }
 
-QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context)
+QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& TrackingServiceDefinition, csp::common::LogSystem& LogSystem,
+    const csp::common::IAuthContext& Context)
     : SystemBase(InWebClient, nullptr, &LogSystem)
     , Context { &Context }
 {
-    QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient);
-    QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);
-    QuotaActivityAPI = new chs::QuotaActivityApi(InWebClient);
+    QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient, TrackingServiceDefinition);
+    QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient, TrackingServiceDefinition);
+    QuotaActivityAPI = new chs::QuotaActivityApi(InWebClient, TrackingServiceDefinition);
 }
 
 QuotaSystem::~QuotaSystem()

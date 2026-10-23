@@ -35,6 +35,7 @@ CSP_END_IGNORE
 
 namespace csp
 {
+class ServiceDefinition;
 class ClientUserAgent;
 } // namespace csp
 
@@ -171,7 +172,8 @@ public:
 
 private:
     AnalyticsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
+        const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
     ~AnalyticsSystem();
 
     void SetTimeSinceLastQueueSend(std::chrono::milliseconds NewTimeSinceLastQueueSend);

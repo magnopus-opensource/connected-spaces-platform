@@ -32,10 +32,11 @@ GraphQLSystem::GraphQLSystem()
 {
 }
 
-GraphQLSystem::GraphQLSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+GraphQLSystem::GraphQLSystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    GraphQLAPI = new chs::GraphQLApi(InWebClient);
+    GraphQLAPI = new chs::GraphQLApi(InWebClient, AggregationServiceDefinition);
 }
 
 GraphQLSystem::~GraphQLSystem() { delete (GraphQLAPI); }

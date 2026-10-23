@@ -37,10 +37,11 @@ PointOfInterestSystem::PointOfInterestSystem(csp::common::LogSystem& LogSystem)
 {
 }
 
-PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+PointOfInterestSystem::PointOfInterestSystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    POIApiPtr = new chs::PointOfInterestApi(InWebClient);
+    POIApiPtr = new chs::PointOfInterestApi(InWebClient, SpatialDataServiceDefinition);
 }
 
 PointOfInterestSystem::~PointOfInterestSystem() { delete (POIApiPtr); }
