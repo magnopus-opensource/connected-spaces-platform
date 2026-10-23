@@ -204,7 +204,7 @@ private:
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 
-/// @brief Represents an MCS eveent message.
+/// @brief Represents an MCS event message.
 /// More information about this type can be found here:
 /// https://github.com/magnopus/Magnopus.Services/blob/e7fff2e1171bbe185c0ad1f50fadc1ec64a30a6a/Source/Magnopus.Service.Multiplayer.Contracts/Messages/EventMessage.cs
 class EventMessage : public ISignalRSerializable, public ISignalRDeserializable
