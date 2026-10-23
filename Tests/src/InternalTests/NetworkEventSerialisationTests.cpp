@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/NetworkEventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "TestHelpers.h"
 
+#include <Debug/Logging.h>
 #include <gtest/gtest.h>
 #include <signalrclient/signalr_value.h>
-#include <Debug/Logging.h>
 
 using namespace csp::multiplayer;
 using namespace csp::common;
@@ -67,30 +68,34 @@ CSP_INTERNAL_TEST(CSPEngine, NetworkEventSerialisationTests, DeserializeAsyncCal
     std::map<uint64_t, signalr::value> Components;
 
     // OperationName
-    Components[0] = ConstructComponentElement(DataTypeString, signalr::value(OperationName.c_str()));
+    Components[1] = ConstructComponentElement(DataTypeString, signalr::value(OperationName.c_str()));
 
     // References
     std::map<std::string, signalr::value> RefsMap;
     RefsMap["SpaceId"] = ConstructComponentElement(DataTypeString, signalr::value(NewSpaceId.c_str()));
     RefsMap["OriginalSpaceId"] = ConstructComponentElement(DataTypeString, signalr::value(OriginalSpaceId.c_str()));
-    Components[1] = ConstructComponentElement(DataTypeStringDictionary, signalr::value(RefsMap));
+    Components[2] = ConstructComponentElement(DataTypeStringDictionary, signalr::value(RefsMap));
 
     // Success
-    Components[2] = ConstructComponentElement(DataTypeNullableBool, signalr::value(true));
+    Components[3] = ConstructComponentElement(DataTypeNullableBool, signalr::value(true));
 
     // StatusReason
-    Components[3] = ConstructComponentElement(DataTypeString, signalr::value(StatusReason.c_str()));
+    Components[4] = ConstructComponentElement(DataTypeString, signalr::value(StatusReason.c_str()));
 
     // Construct EventValues vector: [ EventName, SenderClientId, Recipient (null), Components(uint map) ]
     std::vector<signalr::value> EventValues = ConstructEventValues(Components);
 
-    csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(EventValues, LogSystem);
+    csp::multiplayer::mcs::EventMessage Event;
+    csp::multiplayer::SignalRDeserializer Deserializer { EventValues };
+    Deserializer.ReadValue(Event);
+
+    csp::common::AsyncCallCompletedEventData Parsed = DeserializeAsyncCallCompletedEvent(Event, LogSystem);
 
     // Verify event structure was parsed corrctly
     EXPECT_EQ(Parsed.OperationName, OperationName);
     EXPECT_TRUE(Parsed.Success);
     EXPECT_EQ(Parsed.StatusReason, StatusReason);
-    
+
     ASSERT_TRUE(Parsed.References.HasKey("SpaceId"));
     ASSERT_TRUE(Parsed.References.HasKey("OriginalSpaceId"));
     EXPECT_EQ(Parsed.References["SpaceId"], NewSpaceId);

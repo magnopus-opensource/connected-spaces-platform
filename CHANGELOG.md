@@ -28,6 +28,10 @@ All notable changes to this project will be documented in this file. For compile
 
   No C++20 features are used yet, in the public headers or internally, but we intend to start using them soon.
 
+- [OF-1666] feat!: Refactor CSP event deserialization by @MAG-mv
+  This is mostly an internal refactor of the way CSP deserializes server events.
+  This also removes the NetworkEventData base class from our events (e.g AssetDetailBlobChangedNetworkEventData), making this a breaking change. The data that was removed is technically unneeded, as it gets deserialized into the strongly typed values on the event.
+
 ### 🔩 🔧 Ci
 
 - [OF-1894] ci: Remove the remaining TeamCity scripts and workflows by @mag-lt

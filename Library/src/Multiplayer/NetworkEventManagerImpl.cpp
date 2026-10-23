@@ -18,7 +18,8 @@
 
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "Multiplayer/MCS/MCSTypes.h"
+#include "MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
@@ -26,79 +27,6 @@
 #include <iostream>
 #include <limits>
 #include <signalrclient/signalr_value.h>
-
-namespace
-{
-
-// Serialises a single ReplicatedValue into a [TypeId, [Field]] signalr::value that is expected by the MCS ItemComponentData wire format.
-signalr::value SerialiseReplicatedValueToSignalRValue(const csp::common::ReplicatedValue& Value)
-{
-    using namespace csp::multiplayer;
-
-    switch (Value.GetReplicatedValueType())
-    {
-    case csp::common::ReplicatedValueType::Boolean:
-    {
-        std::vector<signalr::value> Fields { Value.GetBool() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), Fields };
-    }
-    case csp::common::ReplicatedValueType::Integer:
-    {
-        std::vector<signalr::value> Fields { Value.GetInt() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), Fields };
-    }
-    case csp::common::ReplicatedValueType::Float:
-    {
-        std::vector<signalr::value> Fields { Value.GetFloat() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT), Fields };
-    }
-    case csp::common::ReplicatedValueType::Double:
-    {
-        std::vector<signalr::value> Fields { Value.GetDouble() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::DOUBLE), Fields };
-    }
-    case csp::common::ReplicatedValueType::String:
-    {
-        std::vector<signalr::value> Fields { Value.GetString().c_str() };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), Fields };
-    }
-    case csp::common::ReplicatedValueType::Vector2:
-    {
-        auto Vector = Value.GetVector2();
-        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y } };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-    }
-    case csp::common::ReplicatedValueType::Vector3:
-    {
-        auto Vector = Value.GetVector3();
-        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z } };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-    }
-    case csp::common::ReplicatedValueType::Vector4:
-    {
-        auto Vector = Value.GetVector4();
-        std::vector<signalr::value> Fields { std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W } };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
-    }
-    case csp::common::ReplicatedValueType::StringMap:
-    {
-        std::map<std::string, signalr::value> StringMap;
-
-        for (const auto& [Key, MapValue] : Value.GetStringMap())
-        {
-            StringMap[Key.c_str()] = SerialiseReplicatedValueToSignalRValue(MapValue);
-        }
-
-        std::vector<signalr::value> Fields { StringMap };
-        return std::vector<signalr::value> { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING_DICTIONARY), Fields };
-    }
-    default:
-        assert(false && "Argument csp::common::ReplicatedValueType is unsupported.");
-        return signalr::value();
-    }
-}
-
-} // namespace
 
 namespace csp::multiplayer
 {
@@ -147,25 +75,28 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
         }
     };
 
-    std::map<uint64_t, signalr::value> Components;
+    MCSComponentPacker ComponentPacker;
 
     for (size_t i = 0; i < Arguments.Size(); ++i)
     {
-        Components.insert({ i, SerialiseReplicatedValueToSignalRValue(Arguments[i]) });
+        ComponentPacker.WriteValue(static_cast<uint16_t>(i), Arguments[i]);
     }
 
-    /*
-     * class EventMessage
-     * [0] string EventType
-     * [1] uint SenderClientId
-     * [2] uint? RecipientClientId
-     * [3] map<uint, vec> Components
-     */
-    std::vector<signalr::value> EventMessage { EventName.c_str(), (uint64_t)MultiplayerConnectionInst->GetClientId(),
-        (TargetClientId == ALL_CLIENTS_ID) ? signalr::value_type::null : signalr::value(TargetClientId), Components };
+    std::optional<uint32_t> EventTargetClientId;
+
+    if ((TargetClientId != ALL_CLIENTS_ID))
+    {
+        EventTargetClientId = std::make_optional(static_cast<uint32_t>(TargetClientId));
+    }
+
+    mcs::EventMessage Event { EventName.c_str(), static_cast<uint32_t>(MultiplayerConnectionInst->GetClientId()), EventTargetClientId,
+        ComponentPacker.GetComponents() };
+
+    SignalRSerializer Serializer;
+    Event.Serialize(Serializer);
 
     std::vector<signalr::value> InvokeArguments;
-    InvokeArguments.push_back(EventMessage);
+    InvokeArguments.push_back(Serializer.Get());
 
     ISignalRConnectionPtr->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), InvokeArguments, LocalCallback);
