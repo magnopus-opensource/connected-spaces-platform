@@ -66,7 +66,7 @@ include(FetchContent)
 FetchContent_Declare(
   csp-services
   GIT_REPOSITORY https://github.com/magnopus-opensource/csp-services.git
-  GIT_TAG        v2.0-d20261021.r94427c1cc.Release
+  GIT_TAG        3d3dbf242b695e390f2ee4a69056500e91a49ecc # TODO: change to tag from csp-services one dependent PR merged (and before merging this PR)
   GIT_SHALLOW    TRUE
   GIT_PROGRESS   TRUE
 )
