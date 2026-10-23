@@ -580,18 +580,15 @@ bool NetworkEventBus::StartEventMessageListening()
 
                 if (Event.GetComponents().has_value())
                 {
-                    csp::multiplayer::MCSComponentUnpacker ComponentUnpacker { Event.GetComponents().value() };
-
-                    EventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(ComponentUnpacker.GetRuntimeComponentsCount());
+                    EventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(Event.GetComponents().value().size());
 
                     try
                     {
-                        for (uint64_t i = 0; i < ComponentUnpacker.GetRuntimeComponentsCount(); i++)
+                        size_t i = 0;
+                        
+                        for (const auto& [Key, Value] : Event.GetComponents().value())
                         {
-                            csp::common::ReplicatedValue Value;
-                            ComponentUnpacker.TryReadValue(static_cast<uint16_t>(i), Value);
-
-                            EventData.EventValues[i] = Value;
+                            EventData.EventValues[i++] = ToReplicatedValue(Value);
                         }
                     }
                     catch (const std::exception& e)
