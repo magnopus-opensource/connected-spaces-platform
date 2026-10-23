@@ -39,9 +39,9 @@ QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSyste
     : SystemBase(InWebClient, nullptr, &LogSystem)
     , Context { &Context }
 {
-    QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient);
-    QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);
-    QuotaActivityAPI = new chs::QuotaActivityApi(InWebClient);
+    QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient, csp::CSPFoundation::GetEndpoints().TrackingService);
+    QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient, csp::CSPFoundation::GetEndpoints().TrackingService);
+    QuotaActivityAPI = new chs::QuotaActivityApi(InWebClient, csp::CSPFoundation::GetEndpoints().TrackingService);
 }
 
 QuotaSystem::~QuotaSystem()

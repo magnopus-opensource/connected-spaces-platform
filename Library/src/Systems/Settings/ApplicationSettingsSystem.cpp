@@ -40,7 +40,7 @@ ApplicationSettingsSystem::ApplicationSettingsSystem()
 ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    ApplicationSettingsAPI = new chs::ApplicationSettingsApi(InWebClient);
+    ApplicationSettingsAPI = new chs::ApplicationSettingsApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService);
 }
 
 ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (ApplicationSettingsAPI); }

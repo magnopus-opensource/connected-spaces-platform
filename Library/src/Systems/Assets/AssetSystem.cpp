@@ -366,8 +366,8 @@ AssetSystem::AssetSystem(
     web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
 {
-    PrototypeAPI = new chs::PrototypeApi(WebClient);
-    AssetDetailAPI = new chs::AssetDetailApi(WebClient);
+    PrototypeAPI = new chs::PrototypeApi(WebClient, csp::CSPFoundation::GetEndpoints().PrototypeService);
+    AssetDetailAPI = new chs::AssetDetailApi(WebClient, csp::CSPFoundation::GetEndpoints().PrototypeService);
 
     FileManager = new web::RemoteFileManager(WebClient, InAuthContext);
 

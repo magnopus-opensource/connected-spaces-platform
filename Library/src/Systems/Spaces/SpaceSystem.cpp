@@ -106,8 +106,8 @@ SpaceSystem::SpaceSystem(
     , UserSystem(UserSystem)
     , CurrentSpace()
 {
-    GroupAPI = new chs::GroupApi(WebClient);
-    SpaceAPI = new chsaggregation::SpaceApi(WebClient);
+    GroupAPI = new chs::GroupApi(WebClient, csp::CSPFoundation::GetEndpoints().UserService);
+    SpaceAPI = new chsaggregation::SpaceApi(WebClient, csp::CSPFoundation::GetEndpoints().AggregationService);
 }
 
 SpaceSystem::~SpaceSystem()

@@ -288,10 +288,10 @@ UserSystem::UserSystem()
 
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)
-    , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient) }
-    , ProfileAPI { new chs_user::ProfileApi(InWebClient) }
-    , PingAPI { new chs_user::PingApi(InWebClient) }
-    , StripeAPI { new chs_user::StripeApi(InWebClient) }
+    , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService) }
+    , ProfileAPI { new chs_user::ProfileApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService) }
+    , PingAPI { new chs_user::PingApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService) }
+    , StripeAPI { new chs_user::StripeApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService) }
     , CurrentLoginState(std::make_shared<csp::common::LoginState>())
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState }

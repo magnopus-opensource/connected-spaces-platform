@@ -64,7 +64,7 @@ ECommerceSystem::ECommerceSystem()
 ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    ShopifyAPI = new chs::ShopifyApi(InWebClient);
+    ShopifyAPI = new chs::ShopifyApi(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService);
 }
 
 ECommerceSystem::~ECommerceSystem() { delete (ShopifyAPI); }

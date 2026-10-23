@@ -239,7 +239,7 @@ public:
     }
 
     csp::web::WebClient* WebClient;
-    const ServiceDefinition& ServiceDefinition;
+    ServiceDefinition ServiceDefinition;
 };
 
 //
