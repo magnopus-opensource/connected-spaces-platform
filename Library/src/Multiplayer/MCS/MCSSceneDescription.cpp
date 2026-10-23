@@ -37,37 +37,37 @@ static constexpr const char* StringDictionaryType = "ComponentData[[Dictionary[[
 namespace
 {
     std::string GetComponentString(bool) { return BooleanType; }
-    std::string GetComponentString(std::optional<bool>) { throw std::runtime_error("Not implemented"); }
+    std::string GetComponentString(std::optional<bool>) { throw std::runtime_error("std::optional<bool> Not implemented"); }
     std::string GetComponentString(int64_t) { return Int64Type; }
-    std::string GetComponentString(std::optional<int64_t>) { throw std::runtime_error("Not implemented"); }
+    std::string GetComponentString(std::optional<int64_t>) { throw std::runtime_error("std::optional<int64_t> Not implemented"); }
     std::string GetComponentString(uint64_t) { return UInt64Type; }
     std::string GetComponentString(float) { return SinglePrecisionType; }
     std::string GetComponentString(const std::vector<float>&) { return SinglePrecisionArrayType; }
-    std::string GetComponentString(const std::optional<std::vector<float>>&) { throw std::runtime_error("Not implemented"); }
+    std::string GetComponentString(const std::optional<std::vector<float>>&) { throw std::runtime_error("std::optional<std::vector<float>> Not implemented"); }
     std::string GetComponentString(double) { return DoubleType; }
     std::string GetComponentString(const std::string&) { return StringType; }
-    std::string GetComponentString(const std::vector<std::string>&) { throw std::runtime_error("Not implemented"); }
-    std::string GetComponentString(std::optional<uint16_t>) { throw std::runtime_error("Not implemented"); }
+    std::string GetComponentString(const std::vector<std::string>&) { throw std::runtime_error("std::vector<std::string> Not implemented"); }
+    std::string GetComponentString(std::optional<uint16_t>) { throw std::runtime_error("std::optional<uint16_t> Not implemented"); }
     std::string GetComponentString(const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>&) { return UInt16DictionaryType; }
     std::string GetComponentString(const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>&) { return StringDictionaryType; }
 
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, bool Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<bool>) { throw std::runtime_error("Not implemented"); }
+    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<bool>) { throw std::runtime_error("std::optional<bool> Not implemented"); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, int64_t Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<int64_t>) { throw std::runtime_error("Not implemented"); }
+    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<int64_t>) { throw std::runtime_error("std::optional<int64_t> Not implemented"); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, uint64_t Value) { Serializer.SerializeMember("item", Value); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, float Value) { Serializer.SerializeMember("item", Value); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::vector<float>& Value) { Serializer.SerializeMember("item", Value); }
-    void SerializeComponentData(csp::json::JsonSerializer&, const std::optional<std::vector<float>>&) { throw std::runtime_error("Not implemented"); }
+    void SerializeComponentData(csp::json::JsonSerializer&, const std::optional<std::vector<float>>&) { throw std::runtime_error("std::optional<std::vector<float>> Not implemented"); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, double Value) { Serializer.SerializeMember("item", Value); }
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::string& Value)
     {
         Serializer.SerializeMember("item", csp::common::String { Value.c_str() });
     }
 
-    void SerializeComponentData(csp::json::JsonSerializer&, const std::vector<std::string>&) { throw std::runtime_error("Not implemented"); }
+    void SerializeComponentData(csp::json::JsonSerializer&, const std::vector<std::string>&) { throw std::runtime_error("std::vector<std::string> Not implemented"); }
 
-    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<uint16_t>) { throw std::runtime_error("Not implemented"); }
+    void SerializeComponentData(csp::json::JsonSerializer&, std::optional<uint16_t>) { throw std::runtime_error("std::optional<uint16_t> Not implemented"); }
 
     void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
     {

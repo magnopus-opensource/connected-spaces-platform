@@ -42,11 +42,11 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
 
 const std::map<uint16_t, mcs::ItemComponentData>& MCSComponentPacker::GetComponents() const { return Components; }
 
-csp::common::ReplicatedValue ToReplicatedValue(std::optional<bool>) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<bool>) { throw std::runtime_error("std::optional<bool> Not yet implemented"); }
 
-csp::common::ReplicatedValue ToReplicatedValue(std::optional<int64_t>) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<int64_t>) { throw std::runtime_error("std::optional<int64_t> Not yet implemented"); }
 
-csp::common::ReplicatedValue ToReplicatedValue(std::optional<uint16_t>) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(std::optional<uint16_t>) { throw std::runtime_error("std::optional<uint16_t> Not yet implemented"); }
 
 csp::common::ReplicatedValue ToReplicatedValue(double Value) { return csp::common::ReplicatedValue { Value }; }
 
@@ -57,7 +57,7 @@ csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value)
     return csp::common::ReplicatedValue { csp::common::String { Value.c_str() } };
 }
 
-csp::common::ReplicatedValue ToReplicatedValue(const std::vector<std::string>&) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(const std::vector<std::string>&) { throw std::runtime_error("std::vector<std::string> Not yet implemented"); }
 
 csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value)
 {
@@ -79,14 +79,14 @@ csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value)
     }
 }
 
-csp::common::ReplicatedValue ToReplicatedValue(const std::optional<std::vector<float>>&) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(const std::optional<std::vector<float>>&) { throw std::runtime_error("std::optional<std::vector<float>> Not yet implemented"); }
 
 csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Value)
 {
     return std::visit([](const auto& ValueType) { return ToReplicatedValue(ValueType); }, Value.GetValue());
 }
 
-csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&) { throw std::runtime_error("Not yet implemented"); }
+csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&) { throw std::runtime_error("std::map<uint16_t, mcs::ItemComponentData> Not yet implemented"); }
 
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value)
 {
