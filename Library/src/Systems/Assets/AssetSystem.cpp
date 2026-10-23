@@ -681,8 +681,8 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
                 std::nullopt, // PrototypeOwnerIds
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
-                std::nullopt, // OrganizationIds (no longer used)
                 std::nullopt, // ExcludedTypes
+                std::nullopt, // Scope
                 Skip, // Skip
                 Limit, // Limit
                 std::nullopt, // SortBy
@@ -751,8 +751,8 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
                 std::nullopt, // PrototypeOwnerIds
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
-                std::nullopt, // OrganizationIds (no longer used)
                 std::nullopt, // ExcludedTypes
+                std::nullopt, // Scope
                 Skip, // Skip
                 Limit, // Limit
                 std::nullopt, // SortBy
@@ -843,8 +843,8 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
                 std::nullopt, // PrototypeOwnerIds
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
-                std::nullopt, // OrganizationIds
-                std::nullopt // ExcludedTypes
+                std::nullopt, // ExcludedTypes
+                std::nullopt // Scope
             },
             ResponseHandler);
 }
@@ -1019,7 +1019,8 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
-                std::nullopt // TagsAll
+                std::nullopt, // TagsAll
+                std::nullopt // Scope
             },
             ResponseHandler);
 }
@@ -1109,7 +1110,8 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, c
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
-                std::nullopt // TagsAll
+                std::nullopt, // TagsAll
+                std::nullopt // Scope
             },
             ResponseHandler);
 }
@@ -1195,7 +1197,8 @@ async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Ar
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
-                std::nullopt // TagsAll
+                std::nullopt, // TagsAll
+                std::nullopt // Scope
             },
             ResponseHandler);
 
@@ -1238,7 +1241,8 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
                 std::nullopt, // PrototypeParentNames
                 std::nullopt, // Tags
                 std::nullopt, // ExcludedTags
-                std::nullopt // TagsAll
+                std::nullopt, // TagsAll
+                std::nullopt // Scope
             },
             ResponseHandler);
 }
