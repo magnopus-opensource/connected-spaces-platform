@@ -34,7 +34,7 @@ AnchorSystem::AnchorSystem()
 AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    AnchorsAPI = new chs::AnchorsApi(InWebClient);
+    AnchorsAPI = new chs::AnchorsApi(InWebClient, csp::CSPFoundation::GetEndpoints().SpatialDataService);
 }
 
 AnchorSystem::~AnchorSystem() { delete (AnchorsAPI); }

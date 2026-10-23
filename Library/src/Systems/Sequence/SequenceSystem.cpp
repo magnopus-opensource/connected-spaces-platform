@@ -307,7 +307,7 @@ SequenceSystem::SequenceSystem()
 SequenceSystem::SequenceSystem(web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
 {
-    SequenceAPI = new chs::SequenceApi(WebClient);
+    SequenceAPI = new chs::SequenceApi(WebClient, csp::CSPFoundation::GetEndpoints().AggregationService);
 
     RegisterSystemCallback();
 }

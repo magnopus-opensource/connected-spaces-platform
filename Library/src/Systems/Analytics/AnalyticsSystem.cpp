@@ -121,7 +121,7 @@ AnalyticsSystem::AnalyticsSystem()
 
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
-    , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient))
+    , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient, csp::CSPFoundation::GetEndpoints().UserService))
     , EventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
     , AnalyticsQueueLock()
     , AnalyticsRecordQueue()

@@ -15,8 +15,8 @@ MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::syst
     : SystemBase(InWebClient, nullptr, &LogSystem)
     , SpaceSystem { &SpaceSystem }
 {
-    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient);
-    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient);
+    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient, csp::CSPFoundation::GetEndpoints().MultiplayerService);
+    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient, csp::CSPFoundation::GetEndpoints().MultiplayerService);
 }
 
 MultiplayerSystem::MultiplayerSystem()

@@ -55,7 +55,7 @@ SettingsSystem::SettingsSystem()
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    SettingsAPI = new chs::SettingsApi(InWebClient);
+    SettingsAPI = new chs::SettingsApi(InWebClient, csp::CSPFoundation::GetEndpoints().UserService);
 }
 
 SettingsSystem::~SettingsSystem() { delete (SettingsAPI); }
