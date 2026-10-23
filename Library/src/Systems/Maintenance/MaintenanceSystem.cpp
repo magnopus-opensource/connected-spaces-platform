@@ -35,10 +35,11 @@ MaintenanceSystem::MaintenanceSystem()
     AllowMaintenanceInfoRequests = true;
 }
 
-MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+MaintenanceSystem::MaintenanceSystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    MaintenanceAPI = new chs::MaintenanceApi(InWebClient);
+    MaintenanceAPI = new chs::MaintenanceApi(InWebClient, AggregationServiceDefinition);
     AllowMaintenanceInfoRequests = true;
 }
 

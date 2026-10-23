@@ -11,12 +11,13 @@ namespace chs = csp::services::generated;
 
 namespace csp::systems
 {
-MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem)
+MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& MultiplayerServiceDefinition,
+    csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
     , SpaceSystem { &SpaceSystem }
 {
-    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient, csp::CSPFoundation::GetEndpoints().MultiplayerService);
-    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient, csp::CSPFoundation::GetEndpoints().MultiplayerService);
+    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient, MultiplayerServiceDefinition);
+    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient, MultiplayerServiceDefinition);
 }
 
 MultiplayerSystem::MultiplayerSystem()

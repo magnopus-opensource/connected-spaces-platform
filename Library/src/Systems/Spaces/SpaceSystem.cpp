@@ -100,14 +100,15 @@ SpaceSystem::SpaceSystem()
 {
 }
 
-SpaceSystem::SpaceSystem(
-    csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem, csp::common::LogSystem& LogSystem)
+SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
+    const csp::ServiceDefinition& AggregationServiceDefinition, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem,
+    csp::common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
     , UserSystem(UserSystem)
     , CurrentSpace()
 {
-    GroupAPI = new chs::GroupApi(WebClient, csp::CSPFoundation::GetEndpoints().UserService);
-    SpaceAPI = new chsaggregation::SpaceApi(WebClient, csp::CSPFoundation::GetEndpoints().AggregationService);
+    GroupAPI = new chs::GroupApi(WebClient, UserServiceDefinition);
+    SpaceAPI = new chsaggregation::SpaceApi(WebClient, AggregationServiceDefinition);
 }
 
 SpaceSystem::~SpaceSystem()
