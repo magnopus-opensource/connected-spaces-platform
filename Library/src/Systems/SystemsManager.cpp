@@ -171,7 +171,8 @@ SystemsManager::~SystemsManager() { DestroySystems(); }
 
 ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
 
-void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::CreateSystems(
+    const csp::EndpointURIs& Endpoints, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     // Create Log system first, so we can log any startup issues in other systems
     LogSystem = new csp::common::LogSystem();
@@ -191,7 +192,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
-    UserSystem = new csp::systems::UserSystem(WebClient, nullptr, *LogSystem);
+    UserSystem = new csp::systems::UserSystem(WebClient, Endpoints.UserService, Endpoints.MultiplayerConnection.GetURI(), nullptr, *LogSystem);
 
     WebClient->SetAuthContext(UserSystem->GetAuthContext());
 
@@ -199,8 +200,9 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     ScriptSystem->Initialise();
 
     // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.
-    auto* SignalRConnection
-        = (SignalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(UserSystem->GetAuthContext()) : SignalRInject;
+    auto* SignalRConnection = (SignalRInject == nullptr)
+        ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(Endpoints.MultiplayerConnection.GetURI(), UserSystem->GetAuthContext())
+        : SignalRInject;
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 
@@ -211,24 +213,27 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
-    AssetSystem = new csp::systems::AssetSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem->GetAuthContext(), *LogSystem);
-    AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
-    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
-    ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, *LogSystem);
-    SettingsSystem = new csp::systems::SettingsSystem(WebClient, *LogSystem);
-    GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, *LogSystem);
-    MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, *LogSystem);
-    EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, *LogSystem);
-    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, *LogSystem);
-    QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem, UserSystem->GetAuthContext());
-    SequenceSystem = new csp::systems::SequenceSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
+    SpaceSystem = new csp::systems::SpaceSystem(
+        WebClient, Endpoints.UserService, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
+    AssetSystem = new csp::systems::AssetSystem(
+        WebClient, Endpoints.PrototypeService, MultiplayerConnection->GetEventBus(), UserSystem->GetAuthContext(), *LogSystem);
+    AnchorSystem = new csp::systems::AnchorSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
+    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
+    ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
+    SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
+    GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    QuotaSystem = new csp::systems::QuotaSystem(WebClient, Endpoints.TrackingService, *LogSystem, UserSystem->GetAuthContext());
+    SequenceSystem = new csp::systems::SequenceSystem(WebClient, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
         = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
-    AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
-    ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
-    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
+    AnalyticsSystem
+        = new csp::systems::AnalyticsSystem(WebClient, Endpoints.UserService, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
+    ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, Endpoints.MultiplayerService, *SpaceSystem, *LogSystem);
     SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
 }
 
@@ -261,10 +266,11 @@ void SystemsManager::DestroySystems()
     delete LogSystem;
 }
 
-void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::Instantiate(
+    const csp::EndpointURIs& Endpoints, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     Instance = new SystemsManager();
-    Instance->CreateSystems(SignalRInject, WebClientInject);
+    Instance->CreateSystems(Endpoints, SignalRInject, WebClientInject);
 }
 
 void SystemsManager::Destroy()

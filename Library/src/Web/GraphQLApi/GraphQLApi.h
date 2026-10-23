@@ -38,7 +38,7 @@ namespace csp::systems::graphqlservice
 class GraphQLApi : public csp::services::ApiBase
 {
 public:
-    GraphQLApi(csp::web::WebClient* InWebClient);
+    GraphQLApi(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition);
     ~GraphQLApi();
 
     void Query(csp::common::String QueryText, csp::services::ApiResponseHandlerBase* ResponseHandler,

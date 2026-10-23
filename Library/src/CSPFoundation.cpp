@@ -482,7 +482,7 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     // Apply feature flag overrides
     ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
 
-    csp::systems::SystemsManager::Instantiate(SignalRInject, WebClientInject);
+    csp::systems::SystemsManager::Instantiate(*Endpoints, SignalRInject, WebClientInject);
 
     std::optional<std::string> NewDeviceId = LoadDeviceId();
     assert(NewDeviceId.has_value());

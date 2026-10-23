@@ -37,6 +37,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 class UserSystem;
@@ -297,7 +302,8 @@ public:
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+    UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
+        const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
@@ -314,6 +320,8 @@ private:
     csp::services::ApiBase* ProfileAPI;
     csp::services::ApiBase* PingAPI;
     csp::services::ApiBase* StripeAPI;
+
+    csp::common::String MultiplayerConnectionURI;
 
     std::shared_ptr<csp::common::LoginState> CurrentLoginState;
 

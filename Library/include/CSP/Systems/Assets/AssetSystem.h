@@ -59,6 +59,11 @@ class NetworkEventBus;
 
 } // namespace csp::multiplayer
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 
@@ -405,8 +410,8 @@ public:
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus,
-        const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& PrototypeServiceDefinition,
+        csp::multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem);
     ~AssetSystem();
 
     CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);

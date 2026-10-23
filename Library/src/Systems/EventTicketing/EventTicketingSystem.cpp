@@ -36,10 +36,11 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
 namespace csp::systems
 {
 
-EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+EventTicketingSystem::EventTicketingSystem(
+    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    EventTicketingAPI = new chs::TicketedSpaceApi(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService);
+    EventTicketingAPI = new chs::TicketedSpaceApi(InWebClient, AggregationServiceDefinition);
 }
 
 EventTicketingSystem::~EventTicketingSystem() { delete (EventTicketingAPI); }
