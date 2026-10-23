@@ -104,13 +104,19 @@ csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, 
 csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
     const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem)
 {
+    const uint16_t CHANGE_TYPE = 1;
+    const uint16_t ASSET_ID = 100;
+    const uint16_t VERSION = 101;
+    const uint16_t ASSET_TYPE = 102;
+    const uint16_t ASSET_COLLECTION_ID = 200;
+
     csp::common::AssetDetailBlobChangedNetworkEventData ParsedEvent {};
 
     ParsedEvent.ChangeType = csp::common::EAssetChangeType::Invalid;
 
     const auto& Components = Event.GetComponents().value();
 
-    auto ChangeTypeV = std::get<std::optional<uint16_t>>(Components.at(1).GetValue());
+    auto ChangeTypeV = std::get<std::optional<uint16_t>>(Components.at(CHANGE_TYPE).GetValue());
 
     if (ChangeTypeV.has_value() == false)
     {
@@ -130,27 +136,35 @@ csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobCh
         }
     }
 
-    ParsedEvent.AssetId = std::get<std::string>(Components.at(100).GetValue()).c_str();
-    ParsedEvent.Version = std::get<std::string>(Components.at(101).GetValue()).c_str();
-    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(std::get<std::string>(Components.at(102).GetValue()).c_str());
-    ParsedEvent.AssetCollectionId = std::get<std::string>(Components.at(200).GetValue()).c_str();
+    ParsedEvent.AssetId = std::get<std::string>(Components.at(ASSET_ID).GetValue()).c_str();
+    ParsedEvent.Version = std::get<std::string>(Components.at(VERSION).GetValue()).c_str();
+    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(std::get<std::string>(Components.at(ASSET_TYPE).GetValue()).c_str());
+    ParsedEvent.AssetCollectionId = std::get<std::string>(Components.at(ASSET_COLLECTION_ID).GetValue()).c_str();
 
     return ParsedEvent;
 }
 
 csp::common::ConversationNetworkEventData DeserializeConversationEvent(const mcs::EventMessage& Event, csp::common::LogSystem&)
 {
+    const uint16_t MESSAGE_TYPE = 0;
+    const uint16_t CONVERSATION_ID = 1;
+    const uint16_t CREATED_TIMESTAMP = 2;
+    const uint16_t EDITED_TIMESTAMP = 3;
+    const uint16_t USER_ID = 4;
+    const uint16_t MESSAGE = 5;
+    const uint16_t MESSAGE_ID = 6;
+
     csp::common::ConversationNetworkEventData ParsedEvent {};
 
     const auto& Components = Event.GetComponents().value();
 
-    ParsedEvent.MessageType = static_cast<ConversationEventType>(std::get<uint64_t>(Components.at(0).GetValue()));
-    ParsedEvent.MessageInfo.ConversationId = std::get<std::string>(Components.at(1).GetValue()).c_str();
-    ParsedEvent.MessageInfo.CreatedTimestamp = std::get<std::string>(Components.at(2).GetValue()).c_str();
-    ParsedEvent.MessageInfo.EditedTimestamp = std::get<std::string>(Components.at(3).GetValue()).c_str();
-    ParsedEvent.MessageInfo.UserId = std::get<std::string>(Components.at(4).GetValue()).c_str();
-    ParsedEvent.MessageInfo.Message = std::get<std::string>(Components.at(5).GetValue()).c_str();
-    ParsedEvent.MessageInfo.MessageId = std::get<std::string>(Components.at(6).GetValue()).c_str();
+    ParsedEvent.MessageType = static_cast<ConversationEventType>(std::get<uint64_t>(Components.at(MESSAGE_TYPE).GetValue()));
+    ParsedEvent.MessageInfo.ConversationId = std::get<std::string>(Components.at(CONVERSATION_ID).GetValue()).c_str();
+    ParsedEvent.MessageInfo.CreatedTimestamp = std::get<std::string>(Components.at(CREATED_TIMESTAMP).GetValue()).c_str();
+    ParsedEvent.MessageInfo.EditedTimestamp = std::get<std::string>(Components.at(EDITED_TIMESTAMP).GetValue()).c_str();
+    ParsedEvent.MessageInfo.UserId = std::get<std::string>(Components.at(USER_ID).GetValue()).c_str();
+    ParsedEvent.MessageInfo.Message = std::get<std::string>(Components.at(MESSAGE).GetValue()).c_str();
+    ParsedEvent.MessageInfo.MessageId = std::get<std::string>(Components.at(MESSAGE_ID).GetValue()).c_str();
 
     return ParsedEvent;
 }
@@ -245,11 +259,15 @@ csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChange
 
 csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const mcs::EventMessage& Event, csp::common::LogSystem& LogSystem)
 {
+    const uint16_t UPDATE_TYPE = 1;
+    const uint16_t SEQUENCE_KEY = 100;
+    const uint16_t NEW_KEY = 101;
+
     csp::common::SequenceChangedNetworkEventData ParsedEvent {};
 
     const auto& Components = Event.GetComponents().value();
 
-    auto UpdateTypeV = std::get<std::optional<uint16_t>>(Components.at(1).GetValue());
+    auto UpdateTypeV = std::get<std::optional<uint16_t>>(Components.at(UPDATE_TYPE).GetValue());
 
     if (UpdateTypeV.has_value() == false)
     {
@@ -261,13 +279,13 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(con
         ParsedEvent.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
     }
 
-    ParsedEvent.Key = DecodeSequenceKey(Components.at(100).GetValue());
+    ParsedEvent.Key = DecodeSequenceKey(Components.at(SEQUENCE_KEY).GetValue());
 
     // Optional parameter for when a key is changed
-    if (Components.size() == 3 && std::holds_alternative<std::string>(Components.at(101).GetValue()))
+    if (Components.size() == 3 && std::holds_alternative<std::string>(Components.at(NEW_KEY).GetValue()))
     {
         // Sequence keys are URI encoded to support reserved characters.
-        ParsedEvent.NewKey = csp::common::Decode::URI(std::get<std::string>(Components.at(101).GetValue()).c_str());
+        ParsedEvent.NewKey = csp::common::Decode::URI(std::get<std::string>(Components.at(NEW_KEY).GetValue()).c_str());
     }
 
     return ParsedEvent;
@@ -275,21 +293,26 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(con
 
 csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(const mcs::EventMessage& Event, csp::common::LogSystem&)
 {
+    const uint16_t OPERATION_NAME = 1;
+    const uint16_t REFERENCES = 2;
+    const uint16_t SUCCESS = 3;
+    const uint16_t STATUS_REASON = 4;
+
     csp::common::AsyncCallCompletedEventData ParsedEvent {};
 
     const auto& Components = Event.GetComponents().value();
 
-    ParsedEvent.OperationName = std::get<std::string>(Components.at(1).GetValue()).c_str();
+    ParsedEvent.OperationName = std::get<std::string>(Components.at(OPERATION_NAME).GetValue()).c_str();
 
-    const auto& ReferencesStringMap = std::get<std::map<std::string, mcs::ItemComponentData>>(Components.at(2).GetValue());
+    const auto& ReferencesStringMap = std::get<std::map<std::string, mcs::ItemComponentData>>(Components.at(REFERENCES).GetValue());
 
     for (const auto& [Key, Component] : ReferencesStringMap)
     {
         ParsedEvent.References[Key.c_str()] = std::get<std::string>(Component.GetValue()).c_str();
     }
 
-    ParsedEvent.Success = std::get<std::optional<bool>>(Components.at(3).GetValue()).value_or(false);
-    ParsedEvent.StatusReason = std::get<std::string>(Components.at(4).GetValue()).c_str();
+    ParsedEvent.Success = std::get<std::optional<bool>>(Components.at(SUCCESS).GetValue()).value_or(false);
+    ParsedEvent.StatusReason = std::get<std::string>(Components.at(STATUS_REASON).GetValue()).c_str();
 
     return ParsedEvent;
 }
