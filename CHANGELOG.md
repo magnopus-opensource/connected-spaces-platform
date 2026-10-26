@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1666] feat!: Refactor CSP event deserialization by @MAG-mv
   This is mostly an internal refactor of the way CSP deserializes server events.
   This also removes the NetworkEventData base class from our events (e.g AssetDetailBlobChangedNetworkEventData), making this a breaking change. The data that was removed is technically unneeded, as it gets deserialized into the strongly typed values on the event.
+  Internal event types have also been changed, due to this, events are now incompatible for older clients.
 
 ### 🔩 🔧 Ci
 
