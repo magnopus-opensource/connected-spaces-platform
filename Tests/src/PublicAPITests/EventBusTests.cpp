@@ -70,6 +70,19 @@ csp::systems::Space CreateTestSpaceAndEnterScope(csp::systems::SpaceSystem* Spac
     return Space;
 }
 
+mcs::EventMessage CreateAsyncCallCompleteEventMessage(const std::string& EventName, uint32_t SenderClientId,
+    std::optional<uint32_t> RecipientClientId, const std::string& OperationName, std::map<std::string, mcs::ItemComponentData> References,
+    std::optional<bool> Success, const std::string& StatusReason)
+{
+    std::map<uint16_t, mcs::ItemComponentData> Components;
+    Components[1] = mcs::ItemComponentData { OperationName };
+    Components[2] = mcs::ItemComponentData { References };
+    Components[3] = mcs::ItemComponentData { Success };
+    Components[4] = mcs::ItemComponentData { StatusReason };
+
+    return mcs::EventMessage { EventName, SenderClientId, RecipientClientId, Components };
+}
+
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregister)
@@ -611,14 +624,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleRecieverAsyncCallComp
         [&NetworkEventPromise](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData); });
 
-    std::map<uint16_t, mcs::ItemComponentData> Components;
-    Components[1] = mcs::ItemComponentData { OperationName };
-    Components[2] = mcs::ItemComponentData { ReferencesStringMap };
-    Components[3] = mcs::ItemComponentData { Success };
-    Components[4] = mcs::ItemComponentData { StatusReason };
-
-    mcs::EventMessage Event { EventName, static_cast<uint32_t>(Connection->GetClientId()), static_cast<uint32_t>(Connection->GetClientId()),
-        Components };
+    mcs::EventMessage Event = CreateAsyncCallCompleteEventMessage(EventName, static_cast<uint32_t>(Connection->GetClientId()),
+        static_cast<uint32_t>(Connection->GetClientId()), OperationName, ReferencesStringMap, Success, StatusReason);
 
     SignalRSerializer Serializer;
     Serializer.WriteValue(Event);
@@ -725,14 +732,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiRecieverAsyncCallCompl
         [&NetworkEventPromise1](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
         { NetworkEventPromise1.set_value(NetworkEventData); });
 
-    std::map<uint16_t, mcs::ItemComponentData> Components;
-    Components[1] = mcs::ItemComponentData { OperationName };
-    Components[2] = mcs::ItemComponentData { ReferencesStringMap };
-    Components[3] = mcs::ItemComponentData { Success };
-    Components[4] = mcs::ItemComponentData { StatusReason };
-
-    mcs::EventMessage Event { EventName, static_cast<uint32_t>(Connection->GetClientId()), static_cast<uint32_t>(Connection->GetClientId()),
-        Components };
+    mcs::EventMessage Event = CreateAsyncCallCompleteEventMessage(EventName, static_cast<uint32_t>(Connection->GetClientId()),
+        static_cast<uint32_t>(Connection->GetClientId()), OperationName, ReferencesStringMap, Success, StatusReason);
 
     SignalRSerializer Serializer;
     Serializer.WriteValue(Event);
@@ -848,14 +849,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiAsyncCallCompletedEventSingleRece
         { NetworkEventPromise1.set_value(NetworkEventData); });
 
     {
-        std::map<uint16_t, mcs::ItemComponentData> Components;
-        Components[1] = mcs::ItemComponentData { OperationName1 };
-        Components[2] = mcs::ItemComponentData { ReferencesStringMap };
-        Components[3] = mcs::ItemComponentData { Success };
-        Components[4] = mcs::ItemComponentData { StatusReason };
-
-        mcs::EventMessage Event { EventName, static_cast<uint32_t>(Connection->GetClientId()), static_cast<uint32_t>(Connection->GetClientId()),
-            Components };
+        mcs::EventMessage Event = CreateAsyncCallCompleteEventMessage(EventName, static_cast<uint32_t>(Connection->GetClientId()),
+            static_cast<uint32_t>(Connection->GetClientId()), OperationName1, ReferencesStringMap, Success, StatusReason);
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(Event);
@@ -877,14 +872,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiAsyncCallCompletedEventSingleRece
     EXPECT_TRUE(NetworkEventFuture1.wait_for(std::chrono::milliseconds { 0 }) != std::future_status::ready);
 
     {
-        std::map<uint16_t, mcs::ItemComponentData> Components;
-        Components[1] = mcs::ItemComponentData { OperationName2 };
-        Components[2] = mcs::ItemComponentData { ReferencesStringMap };
-        Components[3] = mcs::ItemComponentData { Success };
-        Components[4] = mcs::ItemComponentData { StatusReason };
-
-        mcs::EventMessage Event { EventName, static_cast<uint32_t>(Connection->GetClientId()), static_cast<uint32_t>(Connection->GetClientId()),
-            Components };
+        mcs::EventMessage Event = CreateAsyncCallCompleteEventMessage(EventName, static_cast<uint32_t>(Connection->GetClientId()),
+            static_cast<uint32_t>(Connection->GetClientId()), OperationName2, ReferencesStringMap, Success, StatusReason);
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(Event);
