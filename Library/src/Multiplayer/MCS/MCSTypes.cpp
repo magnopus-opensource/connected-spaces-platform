@@ -87,7 +87,7 @@ namespace
             break;
 
         case ItemComponentDataType::NULLABLE_INT64:
-             DeserializeComponentDataInternal<std::optional<int64_t>>(Deserializer, OutVal);
+            DeserializeComponentDataInternal<std::optional<int64_t>>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::UINT64:
             // Due to us changing some of our types from int64->uint64, we may receive some unexpected int64 values here.
@@ -117,9 +117,10 @@ namespace
         case ItemComponentDataType::STRING:
             if (Deserializer.NextValueIsNull())
             {
-                // MCS doesn't support a NULLABLE_STRING type, and in some EventMessages, 
+                // MCS doesn't support a NULLABLE_STRING type, and in some EventMessages,
                 // string components can sometimes be null, so account for this here by skipping.
                 Deserializer.Skip();
+                OutVal = ItemComponentDataVariant { std::string {} };
                 return;
             }
             DeserializeComponentDataInternal<std::string>(Deserializer, OutVal);
