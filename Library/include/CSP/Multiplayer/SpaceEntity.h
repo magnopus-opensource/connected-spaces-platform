@@ -152,49 +152,49 @@ public:
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetName(const csp::common::String& Value);
 
-    /// @brief Get the SpaceTransform of the SpaceEntity.
+    /// @brief Get the local transform of the SpaceEntity.
     /// @return SpaceTransform.
     const SpaceTransform& GetTransform() const;
 
-    /// @brief Get the Global SpaceTransform of the SpaceEntity, derived from it's parent.
+    /// @brief Get the global transform of the SpaceEntity.
     /// @return SpaceTransform.
     SpaceTransform GetGlobalTransform() const;
 
-    /// @brief Get the position of the SpaceEntity, in world space.
+    /// @brief Get the local position of the SpaceEntity.
     /// @return Position.
     const csp::common::Vector3& GetPosition() const;
 
-    /// @brief Get the Global position of the SpaceEntity, in world space, derived from it's parent.
+    /// @brief Get the global position of the SpaceEntity.
     /// @return Position.
     csp::common::Vector3 GetGlobalPosition() const;
 
-    /// @brief Set the position of the SpaceEntity, in world space.
+    /// @brief Set the local position of the SpaceEntity.
     /// @param Value csp::common::Vector3 : The position to set.
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetPosition(const csp::common::Vector3& Value);
 
-    /// @brief Get the rotation of the SpaceEntity.
+    /// @brief Get the local rotation of the SpaceEntity.
     /// @return Rotation.
     const csp::common::Vector4& GetRotation() const;
 
-    /// @brief Get the Global rotation of the SpaceEntity, derived from it's parent.
+    /// @brief Get the global rotation of the SpaceEntity.
     /// @return Rotation.
     csp::common::Vector4 GetGlobalRotation() const;
 
-    /// @brief Set the rotation of the SpaceEntity.
+    /// @brief Set the local rotation of the SpaceEntity.
     /// @param Value csp::common::Vector4 : The rotation to set.
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetRotation(const csp::common::Vector4& Value);
 
-    /// @brief Get the scale of the SpaceEntity.
+    /// @brief Get the local scale of the SpaceEntity.
     /// @return Scale.
     const csp::common::Vector3& GetScale() const;
 
-    /// @brief Get the Global scale of the SpaceEntity, derived from it's parent.
+    /// @brief Get the global scale of the SpaceEntity.
     /// @return Scale.
     csp::common::Vector3 GetGlobalScale() const;
 
-    /// @brief Set the scale of the SpaceEntity.
+    /// @brief Set the local scale of the SpaceEntity.
     /// @param Value csp::common::Vector3 : The scale to set.
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetScale(const csp::common::Vector3& Value);
@@ -231,7 +231,7 @@ public:
 
     /// @brief Create a new entity with this entity as it's parent
     /// @param InName csp::common::String : The name to give the new SpaceEntity.
-    /// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param InSpaceTransform SpaceTransform : The initial local transform to set the SpaceEntity to.
     /// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT void CreateChildEntity(

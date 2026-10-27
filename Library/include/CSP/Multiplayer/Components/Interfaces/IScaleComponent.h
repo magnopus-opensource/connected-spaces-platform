@@ -22,11 +22,11 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the 3D scale of the component.
+/// @brief Controls the local 3D scale of the component.
 CSP_INTERFACE class CSP_API IScaleComponent
 {
 public:
-    /// @brief Gets the scale of the origin of this component in world space.
+    /// @brief Gets the local scale of the origin of this component.
     /// @note The coordinate system used follows the glTF 2.0 specification.
     ///       - Right handed coordinate system
     ///       - +Y is UP
@@ -35,7 +35,7 @@ public:
     /// @return csp::common::Vector3 : The 3D scale as a vector (left, up, forward).
     virtual const csp::common::Vector3& GetScale() const = 0;
 
-    /// @brief Sets the scale of the origin of this component in world space to the specified value.
+    /// @brief Sets the local scale of the origin of this component.
     /// @note The coordinate system used follows the glTF 2.0 specification.
     ///       - Right handed coordinate system
     ///       - +Y is UP

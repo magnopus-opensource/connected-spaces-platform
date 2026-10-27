@@ -22,11 +22,11 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the 3D rotation of the component.
+/// @brief Controls the local 3D rotation of the component.
 CSP_INTERFACE class CSP_API IRotationComponent
 {
 public:
-    /// @brief Gets a quaternion representing the rotation of the origin of this component, expressed in radians.
+    /// @brief Gets a quaternion representing the local rotation of the origin of this component, expressed in radians.
     /// @note The coordinate system respects the following conventions:
     ///       - Right handed coordinate system
     ///       - Positive rotation is counterclockwise
@@ -38,7 +38,7 @@ public:
     /// @return csp::common::Vector4 : The 3D rotation as a quaternion.
     virtual const csp::common::Vector4& GetRotation() const = 0;
 
-    /// @brief Sets the rotation of the origin of this component according to the specified quaternion "Value", expressed in radians.
+    /// @brief Sets the local rotation of the origin of this component according to the specified quaternion "Value", expressed in radians.
     /// @note The coordinate system respects the following conventions:
     ///       - Right handed coordinate system
     ///       - Positive rotation is counterclockwise

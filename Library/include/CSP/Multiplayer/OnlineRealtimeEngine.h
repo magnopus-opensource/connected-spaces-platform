@@ -155,7 +155,7 @@ public:
     /// @brief Create and add a SpaceEntity with type Avatar, and relevant components and default states as specified.
     /// @param Name csp::common::String : The entity name of the newly created avatar entity.
     /// @param UserId csp::common::String : The Id of the user creating the avatar. This can be fetched from csp::systems::UserSystem::GetLoginState
-    /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the Avatar to.
     /// @param State csp::multiplayer::AvatarState : The initial Avatar State to set.
     /// @param AvatarId csp::common::String : The ID to be set on the AvatarSpaceComponent
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
@@ -169,7 +169,7 @@ public:
 
     /// @brief Create and add a SpaceEntity, with relevant default values.
     /// @param Name csp::common::String : The name of the newly created SpaceEntity.
-    /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial local transform to set the SpaceEntity to.
     /// @param ParentID csp::common::Optional<int64_t> : ID of another entity in the space that this entity should be created as a child to. If empty,
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
