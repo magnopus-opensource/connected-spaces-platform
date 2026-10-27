@@ -31,7 +31,7 @@
 namespace csp::multiplayer
 {
 
-constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
+constexpr const uint32_t ALL_CLIENTS_ID = std::numeric_limits<uint32_t>::max();
 
 NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
     : MultiplayerConnectionInst(InMultiplayerConnection)
@@ -42,7 +42,7 @@ NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultip
 void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection& InConnection) { Connection = &InConnection; }
 
 void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName,
-    const csp::common::Array<csp::common::ReplicatedValue>& Arguments, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
+    const csp::common::Array<csp::common::ReplicatedValue>& Arguments, uint32_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
     if (Connection == nullptr)
     {
@@ -86,10 +86,10 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     if ((TargetClientId != ALL_CLIENTS_ID))
     {
-        EventTargetClientId = std::make_optional(static_cast<uint32_t>(TargetClientId));
+        EventTargetClientId = std::make_optional(TargetClientId);
     }
 
-    mcs::EventMessage Event { EventName.c_str(), static_cast<uint32_t>(MultiplayerConnectionInst->GetClientId()), EventTargetClientId,
+    mcs::EventMessage Event { EventName.c_str(), MultiplayerConnectionInst->GetClientId(), EventTargetClientId,
         ComponentPacker.GetComponents() };
 
     SignalRSerializer Serializer;

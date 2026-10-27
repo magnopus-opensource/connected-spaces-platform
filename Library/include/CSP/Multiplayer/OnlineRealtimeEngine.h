@@ -351,7 +351,7 @@ public:
     /// @note It is safe to assume that server-side leader election is always enabled. While an internal endpoint does exist to disable leader
     /// election, it is only used for testing and is not exported as part of the public interop API surface.
     /// @return The id of the leader if a leader is set, 0 if it is not.
-    uint64_t GetLeaderId() const;
+    uint32_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
@@ -401,7 +401,7 @@ public:
     CSP_NO_EXPORT void TickEntities();
 
     CSP_START_IGNORE
-    CSP_NO_EXPORT void RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId);
+    CSP_NO_EXPORT void RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint32_t>& LeaderId);
 
     // Updates server-side leader election to make this client the leader of the specified scope.
     // This should only be used in testing.
@@ -467,7 +467,7 @@ private:
     // Called when another client sends us this event.
     // This will happen when a client wants to run a script for a scope that this client is the leader of.
     void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
-    void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
+    void SendRemoteRunScriptEvent(uint32_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
 
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 
