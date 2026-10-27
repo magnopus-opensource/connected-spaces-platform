@@ -35,6 +35,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 
@@ -57,7 +62,8 @@ public:
 
 private:
     MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT MaintenanceSystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem);
     ~MaintenanceSystem();
 
     csp::services::ApiBase* MaintenanceAPI;

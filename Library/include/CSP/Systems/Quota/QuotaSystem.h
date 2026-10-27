@@ -38,6 +38,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 /// @ingroup Quota System
@@ -104,7 +109,8 @@ public:
 
 private:
     QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context);
+    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& TrackingServiceDefinition,
+        csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context);
     ~QuotaSystem();
 
     csp::services::ApiBase* QuotaTierAssignmentAPI;

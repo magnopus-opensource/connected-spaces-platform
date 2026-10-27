@@ -42,6 +42,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 
@@ -148,7 +153,8 @@ public:
 
 private:
     SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT SettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT SettingsSystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem);
     ~SettingsSystem();
 
     void SetSettingValue(const csp::common::String& InContext, const csp::common::String& InKey, const csp::common::String& InValue,

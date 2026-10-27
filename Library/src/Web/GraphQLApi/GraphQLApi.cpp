@@ -23,8 +23,8 @@
 namespace csp::systems::graphqlservice
 {
 
-GraphQLApi::GraphQLApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
+GraphQLApi::GraphQLApi(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition)
+    : ApiBase(InWebClient, InServiceDefinition)
 {
 }
 

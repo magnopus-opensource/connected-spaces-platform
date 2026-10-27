@@ -28,6 +28,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 /// @ingroup Sequence System
@@ -125,7 +130,8 @@ public:
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SequenceSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
+    SequenceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& AggregationServiceDefinition,
+        csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
     ~SequenceSystem();
 
     csp::services::ApiBase* SequenceAPI;

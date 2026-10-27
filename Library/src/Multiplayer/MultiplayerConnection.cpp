@@ -133,10 +133,11 @@ namespace
     constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 }
 
-ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(csp::common::IAuthContext& AuthContext)
+ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(
+    const csp::common::String& MultiplayerConnectionURI, csp::common::IAuthContext& AuthContext)
 {
-    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
-        std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext);
+    return new csp::multiplayer::SignalRConnection(
+        MultiplayerConnectionURI.c_str(), KEEP_ALIVE_INTERVAL, std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext);
 }
 
 MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection)

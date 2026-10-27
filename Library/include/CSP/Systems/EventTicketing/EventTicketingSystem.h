@@ -20,6 +20,11 @@
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/SystemBase.h"
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 
@@ -98,7 +103,8 @@ public:
 private:
     EventTicketingSystem(
         csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT EventTicketingSystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem);
     ~EventTicketingSystem();
 
     csp::services::ApiBase* EventTicketingAPI;

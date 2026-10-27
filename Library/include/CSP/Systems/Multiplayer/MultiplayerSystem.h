@@ -45,6 +45,11 @@ template <typename T> class task;
 CSP_END_IGNORE
 }
 
+namespace csp
+{
+class ServiceDefinition;
+} // namespace csp
+
 namespace csp::systems
 {
 class SpaceSystem;
@@ -55,7 +60,8 @@ class SpaceSystem;
 class CSP_API CSP_NO_DISPOSE MultiplayerSystem : public SystemBase
 {
 public:
-    CSP_NO_EXPORT MultiplayerSystem(csp::web::WebClient* WebClient, csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT MultiplayerSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& MultiplayerServiceDefinition,
+        csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem);
     MultiplayerSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     ~MultiplayerSystem();
 

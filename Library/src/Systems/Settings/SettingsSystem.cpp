@@ -52,10 +52,10 @@ SettingsSystem::SettingsSystem()
 {
 }
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+SettingsSystem::SettingsSystem(web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    SettingsAPI = new chs::SettingsApi(InWebClient);
+    SettingsAPI = new chs::SettingsApi(InWebClient, UserServiceDefinition);
 }
 
 SettingsSystem::~SettingsSystem() { delete (SettingsAPI); }

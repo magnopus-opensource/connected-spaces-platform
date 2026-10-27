@@ -26,6 +26,7 @@
 
 namespace csp
 {
+class ServiceDefinition;
 class ClientUserAgent;
 } // namespace csp
 
@@ -123,7 +124,8 @@ public:
 
 private:
     ExternalServiceProxySystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT ExternalServiceProxySystem(csp::web::WebClient* InWebClient, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ExternalServiceProxySystem(
+        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, common::LogSystem& LogSystem);
     ~ExternalServiceProxySystem();
 
     csp::services::ApiBase* ExternalServiceProxyApi;
