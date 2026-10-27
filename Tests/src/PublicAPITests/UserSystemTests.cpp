@@ -534,16 +534,16 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
 
-
+    const auto Snapshot = UserSystem->GetLoginState().GetSnapshotThreadSafe();
 
     // Assemble the AuthDTO
     csp::services::generated::userservice::AuthDto AuthDetails;
     AuthDetails.SetUserId(UserId.c_str());
     AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
-    AuthDetails.SetAccessToken(UserSystem->GetLoginState().GetAccessToken().c_str());
-    AuthDetails.SetAccessTokenExpiresAt(UserSystem->GetLoginState().GetAccessTokenExpiryLength().c_str());
-    AuthDetails.SetRefreshToken(UserSystem->GetLoginState().GetRefreshToken().c_str());
-    AuthDetails.SetRefreshTokenExpiresAt(UserSystem->GetLoginState().GetRefreshTokenExpiryLength().c_str());
+    AuthDetails.SetAccessToken(Snapshot->AccessToken.c_str());
+    AuthDetails.SetAccessTokenExpiresAt(Snapshot->AccessTokenExpiresAt.c_str());
+    AuthDetails.SetRefreshToken(Snapshot->RefreshToken.c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(Snapshot->RefreshTokenExpiresAt.c_str());
 
     const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
 
@@ -574,15 +574,17 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTestBadJson)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
 
+    const auto Snapshot = UserSystem->GetLoginState().GetSnapshotThreadSafe();
+
     // Assemble the AuthDTO
     csp::services::generated::userservice::AuthDto AuthDetails;
     AuthDetails.SetUserId(UserId.c_str());
     AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
     // Deliberately don't set the access token to trigger a failure
-    //AuthDetails.SetAccessToken(UserSystem->GetLoginState().GetAccessToken().c_str());
-    AuthDetails.SetAccessTokenExpiresAt(UserSystem->GetLoginState().GetAccessTokenExpiryLength().c_str());
-    AuthDetails.SetRefreshToken(UserSystem->GetLoginState().GetRefreshToken().c_str());
-    AuthDetails.SetRefreshTokenExpiresAt(UserSystem->GetLoginState().GetRefreshTokenExpiryLength().c_str());
+    //AuthDetails.SetAccessToken(Snapshot->AccessToken.c_str());
+    AuthDetails.SetAccessTokenExpiresAt(Snapshot->AccessTokenExpiresAt);
+    AuthDetails.SetRefreshToken(Snapshot->RefreshToken.c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(Snapshot->RefreshTokenExpiresAt.c_str());
 
     const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
 

@@ -18,6 +18,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Debug/Logging.h"
+#include <fmt/format.h>
 
 #include <cstdio>
 #include <rapidjson/stringbuffer.h>
@@ -140,7 +141,7 @@ void HttpPayload::RefreshBearerToken(std::string_view Token)
         return;
     }
 
-    std::string Header = std::format("Bearer {}", Token);
+    std::string Header = fmt::format("Bearer {}", Token);
     AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(Header.c_str()));
 }
 

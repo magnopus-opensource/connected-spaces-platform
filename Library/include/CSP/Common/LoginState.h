@@ -89,17 +89,9 @@ public:
     /// @return The access token, or an empty string if not logged in.
     csp::common::String GetAccessToken() const;
 
-    /// @brief Get the access token expiry length for the currently logged-in user.
-    /// @return The access token expiry length, or an empty string if not logged in.
-    csp::common::String GetAccessTokenExpiryLength() const;
-
     /// @brief Get the refresh token for the currently logged-in user.
     /// @return The refresh token, or an empty string if not logged in.
     csp::common::String GetRefreshToken() const;
-
-    /// @brief Get the refresh token expiry length for the currently logged-in user.
-    /// @return The refresh token expiry length, or an empty string if not logged in.
-    csp::common::String GetRefreshTokenExpiryLength() const;
 
     /// @brief Get the current login state value.
     /// @return The current login state value.

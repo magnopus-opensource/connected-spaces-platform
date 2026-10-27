@@ -1008,9 +1008,10 @@ void UserSystem::NotifyRefreshTokenHasChanged()
 {
     if (RefreshTokenChangedCallback)
     {
+        auto Snapshot = GetLoginState().GetSnapshotThreadSafe();
+
         LoginTokenInfoResult InternalResult;
-        InternalResult.FillLoginTokenInfo(GetLoginState().GetAccessToken(), GetLoginState().GetAccessTokenExpiryLength(), GetLoginState().GetRefreshToken(),
-            GetLoginState().GetRefreshTokenExpiryLength());
+        InternalResult.FillLoginTokenInfo(Snapshot->AccessToken, Snapshot->AccessTokenExpiresAt, Snapshot->RefreshToken, Snapshot->RefreshTokenExpiresAt);
 
         RefreshTokenChangedCallback(InternalResult);
     }

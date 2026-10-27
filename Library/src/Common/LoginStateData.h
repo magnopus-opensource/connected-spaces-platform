@@ -82,8 +82,10 @@ public:
 
     ELoginState State = ELoginState::LoggedOut;
     csp::common::String AccessToken;
+    csp::common::String AccessTokenExpiresAt;
     csp::common::String AccessTokenExpiryLength;
     csp::common::String RefreshToken;
+    csp::common::String RefreshTokenExpiresAt;
     csp::common::String RefreshTokenExpiryLength;
     csp::common::String UserId;
     csp::common::String DeviceId;

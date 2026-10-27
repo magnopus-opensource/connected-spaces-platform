@@ -145,25 +145,11 @@ csp::common::String LoginState::GetAccessToken() const
     return Data->AccessToken;
 }
 
-csp::common::String LoginState::GetAccessTokenExpiryLength() const
-{
-    std::scoped_lock lock(LoginStateMutex);
-
-    return Data->AccessTokenExpiryLength;
-}
-
 csp::common::String LoginState::GetRefreshToken() const
 {
     std::scoped_lock lock(LoginStateMutex);
 
     return Data->RefreshToken;
-}
-
-csp::common::String LoginState::GetRefreshTokenExpiryLength() const
-{
-    std::scoped_lock lock(LoginStateMutex);
-
-    return Data->RefreshTokenExpiryLength;
 }
 
 csp::common::ELoginState LoginState::GetLoginStateValue() const
