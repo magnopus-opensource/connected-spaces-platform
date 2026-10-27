@@ -47,8 +47,10 @@ public:
     LoginStateData(const LoginStateData& Other)
         : State(Other.State)
         , AccessToken(Other.AccessToken)
+        , AccessTokenExpiresAt(Other.AccessTokenExpiresAt)
         , AccessTokenExpiryLength(Other.AccessTokenExpiryLength)
         , RefreshToken(Other.RefreshToken)
+        , RefreshTokenExpiresAt(Other.RefreshTokenExpiresAt)
         , RefreshTokenExpiryLength(Other.RefreshTokenExpiryLength)
         , UserId(Other.UserId)
         , DeviceId(Other.DeviceId)
@@ -67,8 +69,10 @@ public:
 
         State                       = Other.State;
         AccessToken                 = Other.AccessToken;
+        AccessTokenExpiresAt        = Other.AccessTokenExpiresAt;
         AccessTokenExpiryLength     = Other.AccessTokenExpiryLength;
         RefreshToken                = Other.RefreshToken;
+        RefreshTokenExpiresAt       = Other.RefreshTokenExpiresAt;
         RefreshTokenExpiryLength    = Other.RefreshTokenExpiryLength;
         UserId                      = Other.UserId;
         DeviceId                    = Other.DeviceId;
