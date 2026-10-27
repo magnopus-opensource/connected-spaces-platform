@@ -132,7 +132,8 @@ void WebClient::RefreshIfExpired()
                         while (!WasmRequests.IsEmpty())
                         {
                             auto WasmRequest = WasmRequests.Dequeue().value();
-                            WasmRequest->RefreshAccessToken();
+                            csp::common::String AccessToken = AuthContext->GetLoginState().GetAccessToken();
+                            WasmRequest->RefreshAccessToken(AccessToken.c_str());
                             Send(*WasmRequest);
                         }
 
@@ -182,7 +183,8 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
         }
         else
         {
-            Request->RefreshAccessToken();
+            csp::common::String AccessToken = AuthContext->GetLoginState().GetAccessToken();
+            Request->RefreshAccessToken(AccessToken.c_str());
             Send(*Request);
         }
     }
@@ -211,7 +213,8 @@ void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::m
             }
             else
             {
-                Request->RefreshAccessToken();
+                csp::common::String AccessToken = AuthContext->GetLoginState().GetAccessToken();
+                Request->RefreshAccessToken(AccessToken.c_str());
                 Send(*Request);
             }
         }
