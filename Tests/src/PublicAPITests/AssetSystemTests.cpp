@@ -20,6 +20,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 #include "RAIIMockLogger.h"
 #include "Services/PrototypeService/PrototypeServiceApiMock.h"
 #include "SpaceSystemTestHelpers.h"
@@ -2120,15 +2121,22 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
-    csp::common::ReplicatedValue Param1 = static_cast<int64_t>(csp::common::EAssetChangeType::Invalid);
-    csp::common::ReplicatedValue Param2 = "";
-    csp::common::ReplicatedValue Param3 = "";
-    csp::common::ReplicatedValue Param4 = "";
-    csp::common::ReplicatedValue Param5 = "";
+    std::map<uint16_t, mcs::ItemComponentData> Components;
+    Components[1] = mcs::ItemComponentData { std::optional<uint16_t> { static_cast<uint16_t>(csp::common::EAssetChangeType::Invalid) } };
+    Components[100] = mcs::ItemComponentData { std::string { "" } };
+    Components[101] = mcs::ItemComponentData { std::string { "" } };
+    Components[102] = mcs::ItemComponentData { std::string { "" } };
+    Components[200] = mcs::ItemComponentData { std::string { "" } };
 
-    SystemsManager.GetEventBus()->SendNetworkEventToClient(
-        NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged), { Param1, Param2, Param3, Param4, Param5 },
-        Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
+    mcs::EventMessage Event { NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged).c_str(),
+        static_cast<uint32_t>(Connection->GetClientId()), static_cast<uint32_t>(Connection->GetClientId()), Components };
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(Event);
+
+    std::vector<signalr::value> Params { Serializer.Get() };
+
+    Connection->GetSignalRConnection()->Send("SendEventMessage", Params);
 
     // Wait for message
     WaitForCallback(AssetDetailBlobChangedCallbackCalled);
