@@ -56,7 +56,7 @@ jobs:
             Thanks again for taking the time to review this Pull Request.
             
             ## 🌊 Downstream Integration Tests
-            This repository integrates with two downstream repositories hosting .NET(https://github.com/magnopus-opensource/connected-spaces-platform-unity) and [JS/TS](https://github.com/magnopus-opensource/connected-spaces-platform-web) binding surfaces. 
+            This repository integrates with two downstream repositories hosting [.NET](https://github.com/magnopus-opensource/connected-spaces-platform-unity) and [JS/TS](https://github.com/magnopus-opensource/connected-spaces-platform-web) binding surfaces. 
             
             - When a PR is opened, a branch is made automatically on each of these repos, named `csp-development-MY-BRANCH-NAME`.
             
