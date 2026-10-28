@@ -165,11 +165,6 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
         Payload.AddHeader(Key.c_str(), Value.c_str());
     }
 
-    if (WAFBypassValue.has_value())
-    {
-        Payload.AddHeader(CSP_TEXT("X-WAF-Bypass"), CSP_TEXT(WAFBypassValue->c_str()));
-    }
-
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken);
 
     if (LogSystem != nullptr)
@@ -212,8 +207,6 @@ void WebClient::SetDefaultHeader(const std::string& Key, const std::optional<std
         DefaultHeaders.erase(Key);
     }
 }
-
-void WebClient::SetWAFBypass(const std::optional<std::string>& Value) { WAFBypassValue = Value; }
 
 void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {

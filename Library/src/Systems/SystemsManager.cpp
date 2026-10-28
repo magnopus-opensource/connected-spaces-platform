@@ -137,7 +137,7 @@ void SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::Str
         throw std::logic_error("SystemsManager must be initialized before setting WAF bypass.");
     }
 
-    WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
+    WebClient->SetDefaultHeader("X-WAF-Bypass", Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
 }
 
 SystemsManager::SystemsManager()
