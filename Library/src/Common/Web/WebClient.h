@@ -95,8 +95,6 @@ public:
     /// @param Value The header value, or empty to stop adding the header.
     void SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value);
 
-    void SetWAFBypass(const std::optional<std::string>& Value);
-
 protected:
     /// @brief Send a http request
     /// @param Request Details of the web request headers and payload
@@ -117,7 +115,6 @@ private:
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
     HttpPayload::HeadersMap DefaultHeaders;
-    std::optional<std::string> WAFBypassValue;
 
 #ifdef CSP_WASM
     csp::Queue<HttpRequest*> WasmRequests;
