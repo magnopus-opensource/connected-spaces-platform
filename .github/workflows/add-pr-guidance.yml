@@ -57,9 +57,12 @@ jobs:
             
             ## 🌊 Downstream Integration Tests
             This repository integrates with two downstream repositories hosting .NET(https://github.com/magnopus-opensource/connected-spaces-platform-unity) and [JS/TS](https://github.com/magnopus-opensource/connected-spaces-platform-web) binding surfaces. 
-            When a PR is opened, a branch is made automatically on each of these repos, named `csp-development-MY-BRANCH-NAME`.
-            The bindings build and test against these branches. If they fail to build or complete their tests, you may need to commit changes to these branches to unblock yourself, which you may do directly without the need for review or PR.
-            If you have done this, after you have merged this branch, you should also merge the changes you made on those binding repo branches back into `csp-development`, which is what our tracker branch is called on each of those repos. You may do this directly without a review or PR. You should also be polite and delete `csp-development-MY-BRANCH-NAME`.
+            
+            - When a PR is opened, a branch is made automatically on each of these repos, named `csp-development-MY-BRANCH-NAME`.
+            
+            - The bindings build and test against these branches. If they fail to build or complete their tests, you may need to commit changes to these branches to unblock failing checks, which you may do directly without the need for review or PR.
+            
+            - If you have done this, after you have merged this branch, you should also merge the changes you made on those binding repo branches back into `csp-development`, which is what our tracker branch is called on each of those repos. You may do this directly without a review or PR. You should also be polite and delete `csp-development-MY-BRANCH-NAME`.
             
           # An optional string to identify the comment. If a comment with this ID already exists,
           # it will be updated instead of a new one being created.
