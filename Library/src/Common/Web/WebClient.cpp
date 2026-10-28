@@ -160,6 +160,11 @@ void WebClient::RefreshIfExpired()
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
     csp::common::CancellationToken& CancellationToken)
 {
+    for (const auto& [Key, Value] : DefaultHeaders)
+    {
+        Payload.AddHeader(Key.c_str(), Value.c_str());
+    }
+
     if (WAFBypassValue.has_value())
     {
         Payload.AddHeader(CSP_TEXT("X-WAF-Bypass"), CSP_TEXT(WAFBypassValue->c_str()));
@@ -195,6 +200,18 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 }
 
 void WebClient::SetAuthContext(csp::common::IAuthContext& InAuthContext) { AuthContext = &InAuthContext; }
+
+void WebClient::SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value)
+{
+    if (Value.has_value())
+    {
+        DefaultHeaders[Key] = *Value;
+    }
+    else
+    {
+        DefaultHeaders.erase(Key);
+    }
+}
 
 void WebClient::SetWAFBypass(const std::optional<std::string>& Value) { WAFBypassValue = Value; }
 
