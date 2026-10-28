@@ -27,15 +27,15 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the 3D position (in world space), rotation, and scale of the component.
+/// @brief Controls the local 3D position, rotation, and scale of the component.
 CSP_INTERFACE class CSP_API ITransformComponent : public IPositionComponent, public IRotationComponent, public IScaleComponent
 {
 public:
-    /// @brief Gets the transform of this component in world space.
+    /// @brief Gets the local transform of this component.
     /// @return SpaceTransform : The 3D transform as an object containing position, rotation, and scale.
     virtual SpaceTransform GetTransform() const = 0;
 
-    /// @brief Sets the transform of this component in world space to the specified value.
+    /// @brief Sets the local transform of this component.
     /// @param InValue SpaceTransform : The new value expressed as a SpaceTransform.
     virtual void SetTransform(const SpaceTransform& InValue) = 0;
 

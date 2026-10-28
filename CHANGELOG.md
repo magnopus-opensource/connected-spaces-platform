@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [7.2.0]
+
+### 📔 📔 Documentation
+
+- [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
+
 ## [7.1.0]
 
 ### 🔥 ❗Breaking Changes
@@ -55,7 +61,6 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] refac: Remove logger.h by @MAG-AdamThorn
   The CSP_LOG macro was used internally by the LogSystem to log to the debugger output on Windows and logcat on Android as well as to write the log to disk. As all clients register a logging callback, debugger output is not necessary and no-one was using the log file. In addition one of the internal teams encountered an issue whereby their deadline render machines were trying to write the logs to somewhere they did not have access and failing as a result. After removing the call to `SaveLogToFile()` and working it through it became clear we did not need the `logger.h` file at all so it has been removed.
-
 
 ## [6.49.0] / [7.0.0]
 

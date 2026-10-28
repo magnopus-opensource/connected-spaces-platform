@@ -22,11 +22,11 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the 3D position of the component in world space.
+/// @brief Controls the local 3D position of the component.
 CSP_INTERFACE class CSP_API IPositionComponent
 {
 public:
-    /// @brief Gets the position of the origin of this component in world space.
+    /// @brief Gets the local position of the origin of this component.
     /// @note The coordinate system used follows the glTF 2.0 specification, in meters.
     ///       - Right handed coordinate system
     ///       - +Y is UP
@@ -35,7 +35,7 @@ public:
     /// @return csp::common::Vector3 : The 3D position as a vector (left, up, forward) in meters.
     virtual const csp::common::Vector3& GetPosition() const = 0;
 
-    /// @brief Sets the position of the origin of this component in world space.
+    /// @brief Sets the local position of the origin of this component.
     /// @note The coordinate system used follows the glTF 2.0 specification, in meters.
     ///       - Right handed coordinate system
     ///       - +Y is UP
