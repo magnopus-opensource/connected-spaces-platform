@@ -15,7 +15,6 @@
  */
 #include "Common/Web/HttpPayload.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Debug/Logging.h"
 #include <fmt/format.h>
@@ -28,14 +27,6 @@
 
 namespace csp::web
 {
-
-HttpPayload::HttpPayload()
-{
-    std::string ResponseContent = csp::CSPFoundation::GetClientUserAgentString().c_str();
-
-    // Using custom header as User-Agent is protected on web SKUs
-    AddHeader(CSP_TEXT("X-AssetPlatform"), csp::common::String(ResponseContent.c_str()));
-}
 
 HttpPayload::HttpPayload(const char* InContent)
     : Content(InContent)

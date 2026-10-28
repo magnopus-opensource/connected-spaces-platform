@@ -130,9 +130,8 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 
                 if (LoginState.GetLoginStateValue() == csp::common::ELoginState::LoggedIn)
                 {
-                    // The X-AssetPlatform header is added to all HTTP requests. In addition the Authorization header should have been set
                     const auto& Headers = Payload.GetHeaders();
-                    EXPECT_EQ(Headers.size(), 2) << "Expected exactly two headers to be present in the request";
+                    EXPECT_EQ(Headers.size(), 1) << "Expected exactly one header to be present in the request";
 
                     // Verify that the Authorization header is present
                     auto AuthIt = Headers.find("x-auth-token");
@@ -150,9 +149,8 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
                 }
                 else
                 {
-                    // The X-AssetPlatform header is added to all HTTP requests. There should be no additional Authorization header set
                     const auto& Headers = Payload.GetHeaders();
-                    EXPECT_EQ(Headers.size(), 1) << "Expected exactly one header to be present in the request";
+                    EXPECT_TRUE(Headers.empty()) << "Expected no headers to be present in the request";
                 }
             });
 
