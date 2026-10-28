@@ -10,7 +10,7 @@
 
 🖥️ Current Supported Platforms : Windows, Android, iOS, VisionOS and MacOS
 
-📜 See the [Changelog](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/.github/CHANGELOG.md) for details of notable changes for each release.
+📜 See the [Changelog](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/CHANGELOG.md) for details of notable changes for each release.
 
 💾 In November 2025 we migrated to continuous nightly deployments. Please see the [releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases) section of the `connected-spaces-platform` repo for changelogs associated with earlier releases.
 
