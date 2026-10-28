@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, SuccessfulNetworkRespo
     EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseOK));
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, RequestsIncludeClientUserAgentHeader)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, RequestsIncludeDefaultHeaders)
 {
     auto AuthContext = TestAuthContext();
     WebClientMock->WebClient::SetAuthContext(AuthContext);
@@ -434,6 +434,9 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, RequestsIncludeClientU
                 }
             });
 
+    const auto WAFBypassValue = csp::common::String("TestWAFBypassValue");
+    csp::systems::SystemsManager::Get().__SetWAFBypass(WAFBypassValue);
+
     auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
     auto [LoginResult]
@@ -445,7 +448,11 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, RequestsIncludeClientU
     ASSERT_TRUE(WaitForFuture(LoginHeadersFuture)) << "Login request was never intercepted";
     const auto LoginHeaders = LoginHeadersFuture.get();
 
-    const auto HeaderIt = LoginHeaders.find("X-AssetPlatform");
-    ASSERT_NE(HeaderIt, LoginHeaders.end()) << "X-AssetPlatform header was not sent";
-    EXPECT_EQ(HeaderIt->second, csp::CSPFoundation::GetClientUserAgentString().c_str());
+    const auto UserAgentIt = LoginHeaders.find("X-AssetPlatform");
+    ASSERT_NE(UserAgentIt, LoginHeaders.end()) << "X-AssetPlatform header was not sent";
+    EXPECT_EQ(UserAgentIt->second, csp::CSPFoundation::GetClientUserAgentString().c_str());
+
+    const auto WAFBypassIt = LoginHeaders.find("X-WAF-Bypass");
+    ASSERT_NE(WAFBypassIt, LoginHeaders.end()) << "X-WAF-Bypass header was not sent";
+    EXPECT_EQ(WAFBypassIt->second, WAFBypassValue.c_str());
 }
