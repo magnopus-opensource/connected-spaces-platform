@@ -399,3 +399,60 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, SuccessfulNetworkRespo
     EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(LoginResult.GetHttpResultCode(), static_cast<uint16_t>(EResponseCodes::ResponseOK));
 }
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, WebClientMockTests, RequestsIncludeDefaultHeaders)
+{
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    std::promise<HttpPayload::HeadersMap> LoginHeadersPromise;
+    auto LoginHeadersFuture = LoginHeadersPromise.get_future();
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [&LoginHeadersPromise](csp::web::HttpRequest& Request)
+            {
+                const auto Uri = csp::common::String(Request.GetUri().GetAsString());
+
+                if (Uri.EndsWith("/users/login"))
+                {
+                    LoginHeadersPromise.set_value(Request.GetPayload().GetHeaders());
+
+                    auto& Response = Request.GetMutableResponse();
+                    Response.SetResponseCode(EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent(R"({
+                          "accessToken": "IrrelevantAccessToken",
+                          "accessTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "refreshToken": "IrrelevantRefreshToken",
+                          "refreshTokenExpiresAt": "2999-01-01T00:00:00.000+00:00",
+                          "userId": "IrrelevantUserId",
+                          "deviceId": "IrrelevantDeviceId"
+                      })");
+                }
+            });
+
+    const auto WAFBypassValue = csp::common::String("TestWAFBypassValue");
+    csp::systems::SystemsManager::Get().__SetWAFBypass(WAFBypassValue);
+
+    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+
+    auto [LoginResult]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "IrrelevantEmail@woah.com", GeneratedTestAccountPassword, false, true, nullptr)
+              .Await();
+
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    ASSERT_TRUE(WaitForFuture(LoginHeadersFuture)) << "Login request was never intercepted";
+    const auto LoginHeaders = LoginHeadersFuture.get();
+
+    const auto UserAgentIt = LoginHeaders.find("X-AssetPlatform");
+    ASSERT_NE(UserAgentIt, LoginHeaders.end()) << "X-AssetPlatform header was not sent";
+    EXPECT_EQ(UserAgentIt->second, csp::CSPFoundation::GetClientUserAgentString().c_str());
+
+    const auto WAFBypassIt = LoginHeaders.find("X-WAF-Bypass");
+    ASSERT_NE(WAFBypassIt, LoginHeaders.end()) << "X-WAF-Bypass header was not sent";
+    EXPECT_EQ(WAFBypassIt->second, WAFBypassValue.c_str());
+}

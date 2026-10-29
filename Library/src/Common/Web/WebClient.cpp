@@ -160,9 +160,9 @@ void WebClient::RefreshIfExpired()
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
     csp::common::CancellationToken& CancellationToken)
 {
-    if (WAFBypassValue.has_value())
+    for (const auto& [Key, Value] : DefaultHeaders)
     {
-        Payload.AddHeader(CSP_TEXT("X-WAF-Bypass"), CSP_TEXT(WAFBypassValue->c_str()));
+        Payload.AddHeader(Key.c_str(), Value.c_str());
     }
 
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken);
@@ -196,7 +196,17 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 
 void WebClient::SetAuthContext(csp::common::IAuthContext& InAuthContext) { AuthContext = &InAuthContext; }
 
-void WebClient::SetWAFBypass(const std::optional<std::string>& Value) { WAFBypassValue = Value; }
+void WebClient::SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value)
+{
+    if (Value.has_value())
+    {
+        DefaultHeaders[Key] = *Value;
+    }
+    else
+    {
+        DefaultHeaders.erase(Key);
+    }
+}
 
 void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {

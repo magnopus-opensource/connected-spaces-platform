@@ -137,7 +137,7 @@ void SystemsManager::__SetWAFBypass(const csp::common::Optional<csp::common::Str
         throw std::logic_error("SystemsManager must be initialized before setting WAF bypass.");
     }
 
-    WebClient->SetWAFBypass(Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
+    WebClient->SetDefaultHeader("X-WAF-Bypass", Value.HasValue() ? std::make_optional(std::string { Value->c_str() }) : std::nullopt);
 }
 
 SystemsManager::SystemsManager()
@@ -171,8 +171,8 @@ SystemsManager::~SystemsManager() { DestroySystems(); }
 
 ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
 
-void SystemsManager::CreateSystems(
-    const csp::EndpointURIs& Endpoints, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp::common::String& ClientUserAgent,
+    csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     // Create Log system first, so we can log any startup issues in other systems
     LogSystem = new csp::common::LogSystem();
@@ -189,6 +189,9 @@ void SystemsManager::CreateSystems(
         WebClient = new csp::web::POCOWebClient(LogSystem);
 #endif
     }
+
+    // Using custom header as User-Agent is protected on web SKUs
+    WebClient->SetDefaultHeader("X-AssetPlatform", ClientUserAgent.c_str());
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
@@ -266,11 +269,11 @@ void SystemsManager::DestroySystems()
     delete LogSystem;
 }
 
-void SystemsManager::Instantiate(
-    const csp::EndpointURIs& Endpoints, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
+void SystemsManager::Instantiate(const csp::EndpointURIs& Endpoints, const csp::common::String& ClientUserAgent,
+    csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     Instance = new SystemsManager();
-    Instance->CreateSystems(Endpoints, SignalRInject, WebClientInject);
+    Instance->CreateSystems(Endpoints, ClientUserAgent, SignalRInject, WebClientInject);
 }
 
 void SystemsManager::Destroy()
