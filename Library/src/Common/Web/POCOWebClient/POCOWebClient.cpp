@@ -18,10 +18,10 @@
 
 #include "POCOWebClient.h"
 
-#include "Debug/Logging.h"
-
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "Common/Systems/Log/LogFormat.h"
+#include "Debug/Logging.h"
 
 #include <Poco/File.h>
 #include <Poco/MD5Engine.h>
@@ -509,9 +509,9 @@ void POCOWebClient::SetFileUploadContentFromFile(
         Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
         SetFileUploadContent(Payload, Source, Version);
     }
-    else
+    else if (LogSystem != nullptr)
     {
-        CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
+        LogFormat(*LogSystem, csp::common::LogLevel::Warning, "File not found. Path given: {}", FilePath);
     }
 }
 

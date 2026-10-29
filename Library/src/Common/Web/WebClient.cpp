@@ -17,6 +17,7 @@
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Json.h"
 #include "Services/ApiBase/ApiBase.h"
 
@@ -93,9 +94,9 @@ WebClient::~WebClient()
         ++WaitCounter;
     }
 
-    if (WaitCounter == kMaxWaitCounter)
+    if (WaitCounter == kMaxWaitCounter && LogSystem != nullptr)
     {
-        CSP_LOG_WARN_MSG("Web client timed out waiting for outstanding request on exit\n");
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Web client timed out waiting for outstanding request on exit\n");
     }
 
     ThreadPool.Shutdown();
@@ -147,7 +148,10 @@ void WebClient::RefreshIfExpired()
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Fatal, "User authentication token refresh failed!");
+                    if (LogSystem != nullptr)
+                    {
+                        LogSystem->LogMsg(csp::common::LogLevel::Fatal, "User authentication token refresh failed!");
+                    }
 
                     // reset the state of the web client to prevent indefinite freeze when enqueuing a request
                     RefreshNeeded = true;
@@ -298,7 +302,10 @@ void WebClient::ProcessRequest(HttpRequest* Request)
         }
         catch (const WebClientException& Ex)
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Error, Ex.what());
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error, Ex.what());
+            }
 
             Request->SetRequestProgress(100.0f);
             Request->SetResponseCode(EResponseCodes::ResponseServiceUnavailable);
@@ -356,6 +363,11 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 // logging the full error response if it cannot find the structured errors.
 void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 {
+    if (LogSystem == nullptr)
+    {
+        return;
+    }
+
     const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
     const csp::common::String& ResponsePayload = Response.GetPayload().GetContent();
 
@@ -386,7 +398,8 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 
     if (ResponsePayload.IsEmpty())
     {
-        CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.", Verb.c_str(),
+        LogFormat(*LogSystem, csp::common::LogLevel::Error,
+            "Services request {} {} has returned a failed response ({}) but with no payload/error message.", Verb.c_str(),
             Response.GetRequest()->GetUri().GetAsString(), ResponseCode);
         return;
     }
@@ -437,14 +450,16 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     // If the response was not JSON or errors were not found as expected, log the full response payload.
     if (Errors.Size() == 0)
     {
-        CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
+        LogFormat(*LogSystem, csp::common::LogLevel::Error,
+            "Services request {} {} has returned a failed response ({}) with payload/error message: {}", Verb.c_str(),
             Response.GetRequest()->GetUri().GetAsString(), ResponseCode, ResponsePayload.c_str());
     }
     else
     {
         for (size_t i = 0; i < Errors.Size(); ++i)
         {
-            CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
+            LogFormat(*LogSystem, csp::common::LogLevel::Error,
+                "Services request {} {} has returned a failed response ({}) with payload/error message: {}", Verb.c_str(),
                 Response.GetRequest()->GetUri().GetAsString(), ResponseCode, Errors[i].c_str());
         }
     }
