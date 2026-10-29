@@ -27,7 +27,6 @@
 #include "CSP/version.h"
 #include "Common/UUIDGenerator.h"
 #include "Common/Wrappers.h"
-#include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 
@@ -523,8 +522,6 @@ void CSPFoundation::Tick()
     {
         return;
     }
-
-    CSP_PROFILE_SCOPED();
 
     csp::events::Event* TickEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::FOUNDATION_TICK_EVENT_ID);
     csp::events::EventSystem::Get().EnqueueEvent(TickEvent);

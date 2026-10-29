@@ -32,7 +32,6 @@
 #include "Common/Convert.h"
 #include "Common/LoginStateData.h"
 #include "Common/Systems/Log/LogFormat.h"
-#include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
@@ -771,8 +770,6 @@ void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Nam
     const Optional<SpaceAttributes>& Attributes, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
     BasicSpaceResultCallback Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     auto LiteGroupInfo = std::make_shared<chs::GroupLiteDto>();
 
     if (Name.HasValue())
@@ -812,8 +809,6 @@ void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Nam
 
 void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseNoContent);
 

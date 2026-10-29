@@ -150,7 +150,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
+CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, MarkerAndEventCallbackTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
@@ -188,30 +188,14 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
             std::cout << InMessage << std::endl;
         });
 
-#if CSP_PROFILING_ENABLED
-    const int TestValue = 12345;
-
-    CSP_PROFILE_SCOPED_TAG(TestTag);
-
-    CSP_PROFILE_BEGIN(TestTag);
-    CSP_PROFILE_END();
-
-    CSP_PROFILE_BEGIN_FORMAT("Marker %d", TestValue);
-    CSP_PROFILE_END();
-
-    CSP_PROFILE_SCOPED_FORMAT("Marker %d", TestValue);
-
-    CSP_PROFILE_EVENT_TAG(TestEvent);
-    CSP_PROFILE_EVENT_FORMAT("Event %d", TestValue)
+    LogSystem.BeginMarker(TestTag);
+    LogSystem.EndMarker();
+    LogSystem.LogEvent(TestEvent);
 
     EXPECT_TRUE(BeginConfirmed);
     EXPECT_TRUE(EndConfirmed);
     EXPECT_TRUE(EventConfirmed);
-#else
-    EXPECT_FALSE(BeginConfirmed);
-    EXPECT_FALSE(EndConfirmed);
-    EXPECT_FALSE(EventConfirmed);
-#endif
+
     LogSystem.ClearAllCallbacks();
 
     csp::CSPFoundation::Shutdown();

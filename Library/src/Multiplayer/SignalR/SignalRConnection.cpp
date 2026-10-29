@@ -114,8 +114,6 @@ void SignalRConnection::SetDisconnected(const std::function<void(std::exception_
 
 bool SignalRConnection::On(const std::string& EventName, const SignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem)
 {
-    CSP_PROFILE_SCOPED();
-
     // A bit of a hack, the signalr lib can neither unbind events, nor handle duplicate events being bound
     // This checks if an event has been bound, and dosen't attempt to bind if it has.
     // By doing this, we can move some of the api to be instantiable and not on SystemsManager without having to move the connection with it, (as
@@ -138,8 +136,6 @@ bool SignalRConnection::On(const std::string& EventName, const SignalRConnection
 async::task<std::tuple<signalr::value, std::exception_ptr>> SignalRConnection::Invoke(
     const std::string& MethodName, const signalr::value& Arguments, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     auto InvokeOnCompleteEvent = std::make_shared<async::event_task<std::tuple<signalr::value, std::exception_ptr>>>();
     auto InvokeOnCompleteContinuation = InvokeOnCompleteEvent->get_task();
 
@@ -174,8 +170,6 @@ async::task<std::tuple<signalr::value, std::exception_ptr>> SignalRConnection::I
 
 void SignalRConnection::Send(const std::string& MethodName, const signalr::value& Arguments, std::function<void(std::exception_ptr)> Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     Connection.send(MethodName, Arguments, Callback);
 }
 
