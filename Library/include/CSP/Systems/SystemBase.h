@@ -78,7 +78,7 @@ protected:
     csp::common::LogSystem* LogSystem;
 
 private:
-    SystemBase(); // This constructor is only provided to appease the wrapper generator and should not be used
+    SystemBase() = delete;
 };
 
 } // namespace csp::systems

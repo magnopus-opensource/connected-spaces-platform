@@ -409,7 +409,7 @@ public:
     CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData);
 
 private:
-    AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    AssetSystem() = delete;
     CSP_NO_EXPORT AssetSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& PrototypeServiceDefinition,
         csp::multiplayer::NetworkEventBus& EventBus, const csp::common::IAuthContext& InAuthContext, common::LogSystem& LogSystem);
     ~AssetSystem();

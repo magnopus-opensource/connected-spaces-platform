@@ -21,13 +21,6 @@
 namespace csp::systems
 {
 
-SystemBase::SystemBase()
-    : WebClient(nullptr)
-    , EventBusPtr(nullptr)
-    , LogSystem(nullptr)
-{
-}
-
 SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
     : WebClient(InWebClient)
     , EventBusPtr(EventBus)

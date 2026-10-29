@@ -53,12 +53,6 @@ void InvokeOperationWithResult(
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(InExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
 }
 
-ExternalServiceProxySystem::ExternalServiceProxySystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , ExternalServiceProxyApi(nullptr)
-{
-}
-
 ExternalServiceProxySystem::ExternalServiceProxySystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)

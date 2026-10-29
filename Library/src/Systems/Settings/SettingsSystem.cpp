@@ -46,12 +46,6 @@ namespace chs = csp::services::generated::userservice;
 namespace csp::systems
 {
 
-SettingsSystem::SettingsSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , SettingsAPI(nullptr)
-{
-}
-
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {

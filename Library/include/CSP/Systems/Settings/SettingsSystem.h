@@ -152,7 +152,7 @@ public:
     CSP_ASYNC_RESULT void GetAvatarInfo(AvatarInfoResultCallback Callback);
 
 private:
-    SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    SettingsSystem() = delete;
     CSP_NO_EXPORT SettingsSystem(
         csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem);
     ~SettingsSystem();

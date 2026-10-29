@@ -91,14 +91,6 @@ std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOp
 
 namespace csp::systems
 {
-SpaceSystem::SpaceSystem()
-    : SystemBase { nullptr, nullptr, nullptr }
-    , UserSystem(nullptr)
-    , GroupAPI { nullptr }
-    , SpaceAPI { nullptr }
-    , MultiplayerSystem { nullptr }
-{
-}
 
 SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::ServiceDefinition& AggregationServiceDefinition, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem,

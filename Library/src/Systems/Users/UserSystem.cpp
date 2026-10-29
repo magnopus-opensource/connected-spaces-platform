@@ -274,18 +274,6 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost({ Request }, ResponseHandler);
 }
 
-UserSystem::UserSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , AuthenticationAPI(nullptr)
-    , ProfileAPI(nullptr)
-    , PingAPI(nullptr)
-    , StripeAPI { nullptr }
-    , CurrentLoginState(std::make_shared<csp::common::LoginState>())
-    , RefreshTokenChangedCallback(nullptr)
-    , Auth { AuthenticationAPI, CurrentLoginState }
-{
-}
-
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)

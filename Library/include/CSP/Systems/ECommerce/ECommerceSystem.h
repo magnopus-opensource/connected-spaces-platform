@@ -119,7 +119,7 @@ public:
     CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback);
 
 private:
-    ECommerceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    ECommerceSystem() = delete;
     CSP_NO_EXPORT ECommerceSystem(
         csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem);
     ~ECommerceSystem();

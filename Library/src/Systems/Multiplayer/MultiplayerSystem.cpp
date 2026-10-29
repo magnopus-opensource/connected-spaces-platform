@@ -20,12 +20,6 @@ MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, const csp
     ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient, MultiplayerServiceDefinition);
 }
 
-MultiplayerSystem::MultiplayerSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , SpaceSystem { nullptr }
-{
-}
-
 MultiplayerSystem::~MultiplayerSystem() { }
 
 void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback)

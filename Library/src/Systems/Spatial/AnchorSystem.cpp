@@ -25,12 +25,6 @@ namespace chs = csp::services::generated::spatialdataservice;
 namespace csp::systems
 {
 
-AnchorSystem::AnchorSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , AnchorsAPI(nullptr)
-{
-}
-
 AnchorSystem::AnchorSystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)

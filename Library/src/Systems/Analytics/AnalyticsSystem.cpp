@@ -107,19 +107,6 @@ void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
     }
 }
 
-AnalyticsSystem::AnalyticsSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , AnalyticsApi(nullptr)
-    , EventHandler(nullptr)
-    , AnalyticsQueueLock()
-    , AnalyticsRecordQueue()
-    , UserAgentInfo(nullptr)
-    , AnalyticsQueueSendRate(std::chrono::seconds(60))
-    , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxQueueSize(25)
-{
-}
-
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
