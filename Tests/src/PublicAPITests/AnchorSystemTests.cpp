@@ -15,7 +15,6 @@
  */
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"

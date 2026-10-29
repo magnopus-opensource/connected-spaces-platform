@@ -15,7 +15,6 @@
  */
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/ReplicatedValue.h"

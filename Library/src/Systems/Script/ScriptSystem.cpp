@@ -15,7 +15,6 @@
  */
 #include "CSP/Systems/Script/ScriptSystem.h"
 
-#include "CSP/CSPFoundation.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"

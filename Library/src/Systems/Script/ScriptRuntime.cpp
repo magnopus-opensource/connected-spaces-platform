@@ -15,7 +15,6 @@
  */
 #include "Systems/Script/ScriptRuntime.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
 #include "Systems/Script/ScriptContext.h"

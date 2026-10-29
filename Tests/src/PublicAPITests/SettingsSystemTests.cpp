@@ -15,7 +15,6 @@
  */
 
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/SystemsManager.h"
