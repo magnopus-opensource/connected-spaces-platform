@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
 
+### 💫 💥 Code Refactors
+
+- [OF-1923] fix!: Update ClientId to uint32 by @MAG-mv
+  Usage of ClientId has been changed from uint64_t to uint32_t to match mcs.
+  This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
+  No client changes should have to be made to account for this.
+
+
 ## [7.1.0]
 
 ### 🔥 ❗Breaking Changes
@@ -38,11 +46,6 @@ All notable changes to this project will be documented in this file. For compile
   This is mostly an internal refactor of the way CSP deserializes server events.
   This also removes the NetworkEventData base class from our events (e.g AssetDetailBlobChangedNetworkEventData), making this a breaking change. The data that was removed is technically unneeded, as it gets deserialized into the strongly typed values on the event.
   Internal event types have also been changed, due to this, events are now incompatible for older clients.
-
-- [OF-1923] fix!: Update ClientId to uint32 by @MAG-mv
-  Usage of ClientId has been changed from uint64_t to uint32_t to match mcs.
-  This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
-  No client changes should have to be made to account for this.
 
 ### 🔩 🔧 Ci
 
