@@ -29,11 +29,6 @@
 	#include <filesystem>
 #endif
 
-//!!!! Absolutely catastrophic, introduces a reverse dependency in a LIBRARY FILE.
-// All modification to this file must be removed. (This dependency was transient before ... can you believe it?!)
-// (We could maybe make this _less_ bad by using JS_SetRuntimeOpaque to psuedo inject the logger ... but why would you))
-#include "Debug/Logging.h"
-
 
 #if defined(__cpp_rtti)
 	#define QJSPP_TYPENAME(...) (typeid(__VA_ARGS__).name())
@@ -41,51 +36,6 @@
 	#define QJSPP_TYPENAME(...) #__VA_ARGS__
 #endif
 
-// See class Value
-static void csp_dump_obj(JSContext* ctx, FILE* f, JSValueConst val)
-{
-	const char* str;
-
-	str = JS_ToCString(ctx, val);
-	if (str)
-	{
-		CSP_LOG_ERROR_FORMAT("%s\n", str);
-		JS_FreeCString(ctx, str);
-	}
-	else
-	{
-		CSP_LOG_ERROR_MSG("[exception]\n");
-	}
-}
-
-static void csp_dump_error1(JSContext* ctx, JSValueConst exception_val)
-{
-	JSValue val;
-	bool is_error;
-
-	is_error = JS_IsError(ctx, exception_val);
-	csp_dump_obj(ctx, stderr, exception_val);
-	if (is_error)
-	{
-		val = JS_GetPropertyStr(ctx, exception_val, "stack");
-		if (!JS_IsUndefined(val))
-		{
-			csp_dump_obj(ctx, stderr, val);
-		}
-		JS_FreeValue(ctx, val);
-	}
-}
-
-inline void csp_dump_error(JSContext* ctx)
-{
-	JSValue exception_val;
-
-	CSP_LOG_ERROR_MSG("csp_dump_error...\n");
-
-	exception_val = JS_GetException(ctx);
-	csp_dump_error1(ctx, exception_val);
-	JS_FreeValue(ctx, exception_val);
-}
 
 extern "C" JSModuleDef* js_get_aliased_module(JSContext* ctx, const char* base_cname, const char* cname1);
 
@@ -1347,14 +1297,6 @@ public:
 	template <typename T> Value(JSContext* ctx, T&& val) : ctx(ctx)
 	{
 		v = js_traits<std::decay_t<T>>::wrap(ctx, std::forward<T>(val));
-		if (JS_IsException(v))
-		{
-			// *************************
-			// Oly - Remove exception so we can parse any errors
-			csp_dump_error(ctx);
-			// throw exception {ctx};
-			// *************************
-		}
 	}
 
 	Value(JSValue&& v) noexcept : v(std::move(v)), ctx(nullptr)
