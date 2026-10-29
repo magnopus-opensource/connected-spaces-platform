@@ -20,6 +20,7 @@
 #endif
 
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/ServiceStatus.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -312,7 +313,7 @@ namespace
     /// @brief Tries to find the ServiceStatus for a given reverse proxy.
     /// @return csp::systems::ServiceStatus* : nullptr if not found, otherwise a pointer to the ServiceStatus.
     const csp::systems::ServiceStatus* FindServiceStatus(
-        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI)
+        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI, csp::common::LogSystem& LogSystem)
     {
         // Finds the reverse proxy in the service's URI.
         // The reverse proxy is a unique identifier used to locate the service's deployment status.
@@ -324,7 +325,7 @@ namespace
         if (ServiceStatusIt == ServicesDeploymentStatus.Services.end())
         {
             const auto Message = fmt::format("Unable to resolve {} in Status Info", URI);
-            CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Error, Message.c_str());
             return nullptr;
         }
         return &(*ServiceStatusIt);
@@ -347,24 +348,24 @@ namespace
 
     /// @brief Handles validation for the "retired" state of a service.
     /// @return bool : true if the service is retired (and logs fatal), false otherwise.
-    bool HandleRetiredState(const csp::systems::ServiceStatus& ServiceStatus, uint32_t CurrentVersion)
+    bool HandleRetiredState(const csp::systems::ServiceStatus& ServiceStatus, uint32_t CurrentVersion, csp::common::LogSystem& LogSystem)
     {
         const auto Message = fmt::format("{} v{} has been retired, the latest version is {}. For more information please visit: {}",
             ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
-        CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+        LogSystem.LogMsg(csp::common::LogLevel::Fatal, Message.c_str());
         return true;
     }
 
     /// @brief Handles validation for the "deprecated" state of a service.
     /// @return bool : true if the service is deprecated (and logs warning), false otherwise.
-    bool HandleDeprecatedState(
-        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& versionMetadata, uint32_t CurrentVersion)
+    bool HandleDeprecatedState(const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& versionMetadata,
+        uint32_t CurrentVersion, csp::common::LogSystem& LogSystem)
     {
         if (!versionMetadata.DeprecationDatetime.IsEmpty())
         {
             const auto Message = fmt::format("{} v{} will be deprecated as of {}, the latest version is {}. For more information please visit: {}",
                 ServiceStatus.Name, CurrentVersion, versionMetadata.DeprecationDatetime, ServiceStatus.CurrentApiVersion, DocumentationUri);
-            CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Warning, Message.c_str());
             return true;
         }
         return false;
@@ -372,14 +373,14 @@ namespace
 
     /// @brief Handles validation for the "available (older version)" state of a service.
     /// @return bool : true if a newer version is available (and logs info), false otherwise.
-    bool HandleOlderVersionAvailableState(
-        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata, uint32_t CurrentVersion)
+    bool HandleOlderVersionAvailableState(const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata,
+        uint32_t CurrentVersion, csp::common::LogSystem& LogSystem)
     {
         if (VersionMetadata.Version != ServiceStatus.CurrentApiVersion)
         {
             const auto Message = fmt::format("{} v{} is not the latest available, the latest version is {}. For more information please visit: {}",
                 ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
-            CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Log, Message.c_str());
             return true;
         }
         return false;
@@ -606,14 +607,15 @@ void CSPFoundation::__AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled
 
 void CSPFoundation::__ResetFeatureFlagsForTesting() { CSPFoundation::FeatureFlags = csp::common::Array<csp::FeatureFlag>(); }
 
-bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
+bool ServiceDefinition::CheckPrerequisites(
+    const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, csp::common::LogSystem& LogSystem) const
 {
     // Evaluate State: Service Not Found (Highest Priority)
     // Attempt to find the overall status of the service within the provided deployment status.
     // If the service's reverse proxy is not found in the deployment status,
     // it implies the service is not deployed or recognized by the system.
     // This is a critical failure, and the prerequisite check immediately returns false.
-    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, this->GetURI());
+    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, this->GetURI(), LogSystem);
     if (!ServiceStatus)
     {
         return false;
@@ -630,7 +632,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // This is a fatal condition, and the prerequisite check immediately returns false.
     if (!VersionMetadata)
     {
-        HandleRetiredState(*ServiceStatus, this->GetVersion());
+        HandleRetiredState(*ServiceStatus, this->GetVersion(), LogSystem);
         return false;
     }
 
@@ -641,7 +643,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // and clients should migrate to a newer version.
     // For prerequisite checks, a deprecated service is generally still considered
     // 'valid enough to run', but a warning is logged to inform the user.
-    if (HandleDeprecatedState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
+    if (HandleDeprecatedState(*ServiceStatus, *VersionMetadata, this->GetVersion(), LogSystem))
     {
         return true;
     }
@@ -651,7 +653,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     // but is not the absolute latest version available on the live system.
     // It implies there's a newer, fully supported version that clients could upgrade to.
     // This is typically an informational message, not a blocking error for prerequisites.
-    if (HandleOlderVersionAvailableState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
+    if (HandleOlderVersionAvailableState(*ServiceStatus, *VersionMetadata, this->GetVersion(), LogSystem))
     {
         return true;
     }
@@ -666,7 +668,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymen
     }
 
     // Fallback in the event that the service's state could not be definitively validated.
-    CSP_LOG_MSG(csp::common::LogLevel::Error, "ServiceDefinition::CheckPrerequisites: Unable to validate service state.");
+    LogSystem.LogMsg(csp::common::LogLevel::Error, "ServiceDefinition::CheckPrerequisites: Unable to validate service state.");
     return false;
 }
 

@@ -76,7 +76,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
         = CreateServiceStatus("mag-user", "User Service", { VersionMetadata }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
     auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("2.0.1-{GUID}", { UserServiceServiceStatus });
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_TRUE(result);
 }
 
@@ -94,7 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     // Create a dummy response for ServicesDeploymentStatus containing the invalid information
     auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("", {});
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_FALSE(result);
 }
 
@@ -115,7 +115,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_FALSE(result);
 }
 
@@ -137,7 +137,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "please visit: https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_TRUE(result);
 }
 
@@ -158,7 +158,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_TRUE(result);
 }
 
@@ -171,7 +171,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     for (auto const& Method : MultiplayerHubMethodMap)
         Methods[static_cast<int>(Method.first)] = String(Method.second.c_str());
 
-    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_TRUE(result);
 }
 
@@ -186,7 +186,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> {};
-    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_FALSE(result);
 }
 
@@ -201,6 +201,6 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> { "DeleteObjects", "SendEventMessage", "StopListening" };
-    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods, *csp::systems::SystemsManager::Get().GetLogSystem());
     EXPECT_FALSE(result);
 }
