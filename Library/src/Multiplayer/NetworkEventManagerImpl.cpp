@@ -86,7 +86,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     if ((TargetClientId != ALL_CLIENTS_ID))
     {
-        EventTargetClientId = std::make_optional(TargetClientId);
+        EventTargetClientId = TargetClientId;
     }
 
     mcs::EventMessage Event { EventName.c_str(), MultiplayerConnectionInst->GetClientId(), EventTargetClientId,
