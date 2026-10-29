@@ -15,7 +15,6 @@
  */
 
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"

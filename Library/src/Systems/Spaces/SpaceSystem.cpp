@@ -16,7 +16,6 @@
 
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/LoginState.h"
 #include "Common/LoginStateData.h"
 #include "CSP/Common/SharedConstants.h"

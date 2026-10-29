@@ -54,7 +54,6 @@ class CSP_API MaintenanceInfoResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
-    friend class CSPFoundation;
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
     CSP_END_IGNORE
     /** @endcond */

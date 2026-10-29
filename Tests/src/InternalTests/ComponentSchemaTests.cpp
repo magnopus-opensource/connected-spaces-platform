@@ -16,7 +16,6 @@
 
 #include "TestHelpers.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"

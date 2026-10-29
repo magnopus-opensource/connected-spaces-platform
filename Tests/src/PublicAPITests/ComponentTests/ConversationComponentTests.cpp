@@ -18,7 +18,6 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"

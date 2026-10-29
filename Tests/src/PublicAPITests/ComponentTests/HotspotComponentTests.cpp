@@ -17,7 +17,6 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"

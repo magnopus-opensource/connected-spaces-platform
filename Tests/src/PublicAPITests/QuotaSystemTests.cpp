@@ -16,7 +16,6 @@
 
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
