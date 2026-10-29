@@ -33,7 +33,7 @@ namespace csp::systems
 
 ApplicationSettingsSystem::ApplicationSettingsSystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     ApplicationSettingsAPI = new chs::ApplicationSettingsApi(InWebClient, UserServiceDefinition);
 }
@@ -48,7 +48,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
             {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }
@@ -62,7 +62,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }
@@ -74,7 +74,7 @@ void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSetting
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
             {}, {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<ApplicationSettingsResult>(exception)); }));
 }

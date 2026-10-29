@@ -27,7 +27,7 @@ namespace csp::systems
 
 AnchorSystem::AnchorSystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     AnchorsAPI = new chs::AnchorsApi(InWebClient, SpatialDataServiceDefinition);
 }

@@ -125,13 +125,13 @@ std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common:
 // Contains shared logic for logging in with a 3rd party provider - used by both LoginToThirdPartyAuthenticationProvider and
 // LoginToThirdPartyAuthenticationProviderWithToken.
 void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> CurrentLoginState,
-    csp::common::LogSystem* LogSystem, const csp::common::String& MultiplayerConnectionURI,
+    csp::common::LogSystem& LogSystem, const csp::common::String& MultiplayerConnectionURI,
     const std::shared_ptr<chs_user::LoginSocialRequest>& Request, bool CreateMultiplayerConnection, csp::systems::LoginStateResultCallback Callback)
 {
     // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
     // ResponseHandler.
     csp::systems::LoginStateResultCallback LoginStateResCallback
-        = [LogSystem, MultiplayerConnectionURI, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](
+        = [&LogSystem, MultiplayerConnectionURI, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState](
               const csp::systems::LoginStateResult& LoginStateRes)
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
@@ -148,7 +148,7 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
             };
 
             StartMultiplayerConnection(*csp::systems::SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback,
-                LoginStateRes, *LogSystem, CreateMultiplayerConnection);
+                LoginStateRes, LogSystem, CreateMultiplayerConnection);
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
@@ -276,7 +276,7 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, InEventBus, &LogSystem)
+    : SystemBase(InWebClient, InEventBus, LogSystem)
     , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient, UserServiceDefinition) }
     , ProfileAPI { new chs_user::ProfileApi(InWebClient, UserServiceDefinition) }
     , PingAPI { new chs_user::PingApi(InWebClient, UserServiceDefinition) }
@@ -370,7 +370,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
             };
 
             StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
-                *LogSystem, CreateMultiplayerConnection);
+                LogSystem, CreateMultiplayerConnection);
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
@@ -437,7 +437,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
             };
 
             StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
-                *LogSystem, CreateMultiplayerConnection);
+                LogSystem, CreateMultiplayerConnection);
         }
         else
         {
@@ -500,7 +500,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             };
 
             StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
-                *LogSystem, CreateMultiplayerConnection);
+                LogSystem, CreateMultiplayerConnection);
         }
         else
         {
@@ -557,7 +557,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
             // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
             StartMultiplayerConnection(
-                *SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, *LogSystem, false);
+                *SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, false);
         }
         else
         {
@@ -739,7 +739,7 @@ void UserSystem::FederatedLogin(
         Callback(SuccessResult);
     };
 
-    StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, Result, *LogSystem,
+    StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), MultiplayerConnectionURI, ConnectionCallback, Result, LogSystem,
         CreateMultiplayerConnection);
 }
 

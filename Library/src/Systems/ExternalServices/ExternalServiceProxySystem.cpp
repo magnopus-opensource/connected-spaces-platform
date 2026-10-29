@@ -55,7 +55,7 @@ void InvokeOperationWithResult(
 
 ExternalServiceProxySystem::ExternalServiceProxySystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
     , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient, AggregationServiceDefinition) }
 {
 }

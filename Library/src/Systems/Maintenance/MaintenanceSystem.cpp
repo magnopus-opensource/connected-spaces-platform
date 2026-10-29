@@ -30,7 +30,7 @@ namespace csp::systems
 
 MaintenanceSystem::MaintenanceSystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     MaintenanceAPI = new chs::MaintenanceApi(InWebClient, AggregationServiceDefinition);
     AllowMaintenanceInfoRequests = true;

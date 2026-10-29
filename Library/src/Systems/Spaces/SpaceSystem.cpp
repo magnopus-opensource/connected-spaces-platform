@@ -95,7 +95,7 @@ namespace csp::systems
 SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::ServiceDefinition& AggregationServiceDefinition, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem,
     csp::common::LogSystem& LogSystem)
-    : SystemBase(WebClient, &EventBus, &LogSystem)
+    : SystemBase(WebClient, &EventBus, LogSystem)
     , UserSystem(UserSystem)
     , CurrentSpace()
 {
@@ -307,7 +307,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes.Size() < 1)
                     {
-                        this->LogSystem->LogMsg(csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope.");
+                        this->LogSystem.LogMsg(csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space doesn't have a scope", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
@@ -315,7 +315,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes.Size() > 1)
                     {
-                        this->LogSystem->LogMsg(csp::common::LogLevel::Error,
+                        this->LogSystem.LogMsg(csp::common::LogLevel::Error,
                             "SpaceSystem::RegisterScopesInSpace: Multiple scopes found. This version of CSP only supports spaces that have only a "
                             "single global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
@@ -325,7 +325,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     if (Scopes[0].PubSubType != PubSubModelType::Global)
                     {
-                        this->LogSystem->LogMsg(
+                        this->LogSystem.LogMsg(
                             csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't contain a global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space doesn't contain a global scope.", MakeInvalid<csp::systems::SpaceResult>())));
@@ -605,7 +605,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
             .then(async::inline_scheduler(), [MultiplayerConnection]() { MultiplayerConnection->SetOnlineRealtimeEngine(nullptr); })
             .then(systems::continuations::ReportSuccess(Callback, "Successfully exited space."))
-            .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+            .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
                 [Callback, MultiplayerConnection]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                 {
                     csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(

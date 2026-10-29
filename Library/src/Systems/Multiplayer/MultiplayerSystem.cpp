@@ -13,7 +13,7 @@ namespace csp::systems
 {
 MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& MultiplayerServiceDefinition,
     csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
     , SpaceSystem { &SpaceSystem }
 {
     ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient, MultiplayerServiceDefinition);
@@ -32,7 +32,7 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
     // Ensure we're in the space we want to get scopes for.
     if (SpaceSystem->GetCurrentSpace().Id != SpaceId)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "GetScopesBySpace: You must have entered the space you want to get scopes for");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "GetScopesBySpace: You must have entered the space you want to get scopes for");
         Callback(MakeInvalid<ScopesResult>());
         return;
     }
@@ -81,7 +81,7 @@ void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, cons
         PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT);
         break;
     default:
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "UpdateScopeById: Invalid PubSubModel type specified");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UpdateScopeById: Invalid PubSubModel type specified");
         Callback(MakeInvalid<ScopeResult>());
         return;
     }

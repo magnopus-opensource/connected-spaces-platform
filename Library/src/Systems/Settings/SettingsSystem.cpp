@@ -47,7 +47,7 @@ namespace csp::systems
 {
 
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     SettingsAPI = new chs::SettingsApi(InWebClient, UserServiceDefinition);
 }

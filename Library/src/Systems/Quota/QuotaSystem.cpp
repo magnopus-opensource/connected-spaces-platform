@@ -29,7 +29,7 @@ namespace csp::systems
 
 QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& TrackingServiceDefinition, csp::common::LogSystem& LogSystem,
     const csp::common::IAuthContext& Context)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
     , Context { &Context }
 {
     QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient, TrackingServiceDefinition);
@@ -50,7 +50,7 @@ void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
 
     if (Data->State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTotalSpacesOwnedByUser: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<FeatureLimitResult>());
         return;
     }
@@ -89,7 +89,7 @@ void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFea
 
     if (Data->State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "QuotaSystem::GetTierFeatureProgressForUser: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<FeaturesLimitResult>());
         return;
     }
@@ -131,7 +131,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 
     if (Data->State != common::ELoginState::LoggedIn)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "QuotaSystem::GetCurrentUserTier: User is not logged in. Aborting operation.");
         Callback(MakeInvalid<UserTierResult>());
         return;
     }
