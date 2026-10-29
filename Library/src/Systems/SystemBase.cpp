@@ -29,9 +29,7 @@ SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::Netwo
 }
 
 SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
-    : WebClient(nullptr)
-    , EventBusPtr(EventBus)
-    , LogSystem(LogSystem)
+    : SystemBase(nullptr, EventBus, LogSystem)
 {
 }
 
