@@ -169,7 +169,7 @@ bool TryDeserializeEvent(const signalr::value& Result, csp::common::LogSystem& L
 namespace csp::multiplayer
 {
 
-constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
+constexpr const uint32_t ALL_CLIENTS_ID = std::numeric_limits<uint32_t>::max();
 
 NetworkEventBus::~NetworkEventBus()
 {
@@ -659,7 +659,7 @@ async::task<std::optional<csp::multiplayer::ErrorCode>> NetworkEventBus::SendNet
 }
 
 void NetworkEventBus::SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
-    uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
+    uint32_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
     MultiplayerConnectionInst->GetNetworkEventManager()->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
 }

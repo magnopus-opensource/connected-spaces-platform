@@ -358,8 +358,8 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                             const ScopeLeader& Leader = LeaderResult.GetScopeLeader();
 
-                            std::optional<uint64_t> LeaderUserId
-                                = (Leader.ScopeClientId != 0) ? std::make_optional<uint64_t>(Leader.ScopeClientId) : std::nullopt;
+                            std::optional<uint32_t> LeaderUserId
+                                = (Leader.ScopeClientId != 0) ? std::make_optional<uint32_t>(Leader.ScopeClientId) : std::nullopt;
 
                             static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)
                                 ->RegisterDefaultScope(Leader.ScopeId.c_str(), LeaderUserId);

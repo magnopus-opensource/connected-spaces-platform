@@ -442,7 +442,7 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
 
     std::vector<signalr::value> ObjectPatches;
 
-    const std::vector<signalr::value> DeletionPatch { Entity->GetId(), MultiplayerConnectionInst->GetClientId(), true,
+    const std::vector<signalr::value> DeletionPatch { Entity->GetId(), static_cast<uint64_t>(MultiplayerConnectionInst->GetClientId()), true,
         std::vector<signalr::value> {
             false,
             signalr::value_type::null,
@@ -454,7 +454,8 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
     // Move children to the root in the same patch
     for (size_t i = 0; i < Children.Size(); ++i)
     {
-        const std::vector<signalr::value> ChildParentIdPatch { Children[i]->GetId(), MultiplayerConnectionInst->GetClientId(), false,
+        const std::vector<signalr::value> ChildParentIdPatch { Children[i]->GetId(), static_cast<uint64_t>(MultiplayerConnectionInst->GetClientId()),
+            false,
             std::vector<signalr::value> {
                 true, // Update Parent
                 signalr::value_type::null, // Move to root
@@ -654,9 +655,9 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However, I
-    // decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -666,7 +667,7 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
     const std::string ScopeId = ParamsV[0].as_string();
     const std::string UserId = ParamsV[1].as_string();
-    const uint64_t ClientId = ParamsV[2].as_uinteger();
+    const uint32_t ClientId = static_cast<uint32_t>(ParamsV[2].as_uinteger());
 
     LeaderElectionManager->OnElectedScopeLeader(ScopeId, ClientId);
 
@@ -678,10 +679,9 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
-    // DisableLeadershipElection.
-    // These checks could be removed if the election events were bound inside the ScopeLeadershipManager.
-    // However, I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by
+    // calling DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However,
+    // I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
     {
         return;
@@ -808,7 +808,7 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     // This should definitely be true at this point, but be defensive.
     assert(SpaceEntity->GetStatePatcher() != nullptr);
 
-    // In order to unlock an entity, we need to modify it. 
+    // In order to unlock an entity, we need to modify it.
     // So we need to check if we are about to unlock the entity, and treat it as modifiabe if so, otherwise we cannot unlock a locked entity.
     // Note : This will stop working if we ever add another lock type
     const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
@@ -851,7 +851,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) {});
+            DestroyEntity(Entity, [](bool /*Ok*/) { });
         }
         // Otherwise we clear up all all locally represented entities
         else
@@ -957,7 +957,7 @@ void OnlineRealtimeEngine::TickEntities()
     }
 }
 
-void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
+void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint32_t>& LeaderId)
 {
     if (IsLeaderElectionEnabled())
     {
@@ -1041,7 +1041,7 @@ void OnlineRealtimeEngine::OnRemoteRunScriptEvent(const csp::common::Array<csp::
     }
 }
 
-void OnlineRealtimeEngine::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
+void OnlineRealtimeEngine::SendRemoteRunScriptEvent(uint32_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
 {
     const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [&LogSystem = this->LogSystem](ErrorCode Error)
     {
@@ -1115,9 +1115,9 @@ void OnlineRealtimeEngine::DisableLeaderElection()
 
 bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return LeaderElectionManager.get() != nullptr; }
 
-uint64_t OnlineRealtimeEngine::GetLeaderId() const
+uint32_t OnlineRealtimeEngine::GetLeaderId() const
 {
-    std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+    std::optional<uint32_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
     return LeaderId.has_value() ? *LeaderId : 0;
 }
 
@@ -1162,12 +1162,11 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
     // Run script on a remote leader...
     LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnlineRealtimeEngine::RunScriptRemotely Script='{}'", ScriptText).c_str());
 
-    std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+    std::optional<uint32_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
 
     if (LeaderId.has_value())
     {
-        // Note: This is cast to an int64. This is because we only support sending signed integers over the network.
-        SendRemoteRunScriptEvent(static_cast<int64_t>(*LeaderId), ContextId, ScriptText);
+        SendRemoteRunScriptEvent(*LeaderId, ContextId, ScriptText);
     }
     else
     {

@@ -47,13 +47,13 @@ public:
     // Adds a scope to the ScopeLeadershipManager to track events for.
     // Scopes should be registered on space entry and when new scopes are created.
     // If a scope is accessed for a scope that hasn't been registered, an error will be logged to the log system.
-    void RegisterScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId);
+    void RegisterScope(const std::string& ScopeId, const std::optional<uint32_t>& LeaderId);
 
     void DeregisterScope(const std::string& ScopeId);
 
     // Called when we receive a leader election event for a scope.
     // This will happen after a server-side election is completed.
-    void OnElectedScopeLeader(const std::string& ScopeId, uint64_t ClientId);
+    void OnElectedScopeLeader(const std::string& ScopeId, uint32_t ClientId);
     // Called when we receive a leader vacated event.
     // This will happen if an election is manually triggered for a scope that already has a leader,
     // or the current leader becomes unavailable (heartbeat not sent within a time, or the client disconnects).
@@ -64,7 +64,7 @@ public:
     void SendHeartbeatIfElectedScopeLeader();
 
     // Returns std::nullopt if not valid
-    std::optional<uint64_t> GetLeaderClientId(const std::string& ScopeId) const;
+    std::optional<uint32_t> GetLeaderClientId(const std::string& ScopeId) const;
     bool IsLocalClientLeader(const std::string& ScopeId) const;
 
 private:
@@ -77,7 +77,7 @@ private:
 
     struct ScopeLeaderData
     {
-        uint64_t LeaderClientId;
+        uint32_t LeaderClientId;
 
         CSP_START_IGNORE
         std::chrono::steady_clock::time_point LastHeartbeatTime;

@@ -158,7 +158,7 @@ public:
     /// @param TargetClientId : The client ID to send the event to.
     /// @param Callback : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
-        uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
+        uint32_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
     /// @brief Register interest in a custom network event, such that the NetworkEventBus will call the provided callback when it arrives.
     /// @note This is for registration of custom events. To register for an event specializations, please use one of the dedicated

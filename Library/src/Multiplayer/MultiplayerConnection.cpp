@@ -279,7 +279,7 @@ auto MultiplayerConnection::RequestClientId()
     return [this]()
     {
         // Shared pointer to keep alive in local callback
-        auto ClientIdRequestedEvent = std::make_shared<async::event_task<uint64_t>>();
+        auto ClientIdRequestedEvent = std::make_shared<async::event_task<uint32_t>>();
         auto ClientIdRequestedContinuation = ClientIdRequestedEvent->get_task();
 
         if (!Connected)
@@ -301,7 +301,7 @@ auto MultiplayerConnection::RequestClientId()
 
             LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("ClientId={}", Result.as_uinteger()).c_str());
 
-            ClientIdRequestedEvent->set(Result.as_uinteger());
+            ClientIdRequestedEvent->set(static_cast<uint32_t>(Result.as_uinteger()));
         };
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling GetClientId");
@@ -370,7 +370,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
         .then(async::inline_scheduler(), [this]() { Connected = true; })
         .then(async::inline_scheduler(), DeleteEntities(ALL_ENTITIES_ID))
         .then(async::inline_scheduler(), RequestClientId())
-        .then(async::inline_scheduler(), [this](uint64_t RetrievedClientId) { ClientId = RetrievedClientId; })
+        .then(async::inline_scheduler(), [this](uint32_t RetrievedClientId) { ClientId = RetrievedClientId; })
         .then(async::inline_scheduler(), [this]() { return StartListening(); })
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
         .then(async::inline_scheduler(),
@@ -512,7 +512,7 @@ async::task<std::tuple<signalr::value, std::exception_ptr>> MultiplayerConnectio
     return Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::STOP_LISTENING), signalr::value(signalr::value_type::array));
 }
 
-uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
+uint32_t MultiplayerConnection::GetClientId() const { return ClientId; }
 
 ConnectionState MultiplayerConnection::GetConnectionState() const { return static_cast<ConnectionState>(Connection->GetConnectionState()); }
 

@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
 
+### 💫 💥 Code Refactors
+
+- [OF-1923] fix!: Update ClientId to uint32 by @MAG-mv
+  Usage of ClientId has been changed from uint64_t to uint32_t to match mcs.
+  This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
+  No client changes should have to be made to account for this.
+
+
 ## [7.1.0]
 
 ### 🔥 ❗Breaking Changes
