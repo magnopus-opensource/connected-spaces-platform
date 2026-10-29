@@ -808,27 +808,27 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
     AssetSystem->GetAssetCollectionById(ConversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved message asset collection",
-            "Failed to get message asset collection.", {}, {}, {}))
+            "Failed to get message asset collection.", {}, {}, {}, LogSystem))
         .then(ValidateAnnotationMetadata())
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then(SetAnnotationAssetFromAssets(AnnotationAsset))
         // 4. Get annotation thumbnail asset
         .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation thumbnail asset",
-            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+            "Failed to get annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
         // 5. Process result
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
@@ -858,39 +858,39 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
     AssetSystem->GetAssetCollectionById(ConversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully retrieved message asset collection",
-            "Failed to get message asset collection.", {}, {}, {}))
+            "Failed to get message asset collection.", {}, {}, {}, LogSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 2. Create Annotation asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then(SetAnnotationAsset(AnnotationAsset))
         // 3. Upload Annotation asset data
         .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation asset data",
-            "Failed to upload annotation asset data.", {}, {}, {}))
+            "Failed to upload annotation asset data.", {}, {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationAsset))
         // 4. Create Annotation thumbnail asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation thumbnail asset",
-            "Failed to create annotation thumbnail asset.", {}, {}, {}))
+            "Failed to create annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(SetAnnotationAsset(AnnotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
         .then(UploadAnnotationAssetData(
             AssetSystem, ConversationAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation thumbnail asset data",
-            "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
+            "Failed to upload annotation thumbnail asset data.", {}, {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationThumbnailAsset))
         // 6. Update asset collection metadata
         .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
         .then(AppendCommentMetadata(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully updated message asset collection metadata",
-            "Failed to update message asset collection metadata.", {}, {}, {}))
+            "Failed to update message asset collection metadata.", {}, {}, {}, LogSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 7. Send multiplayer event
         .then(
@@ -900,7 +900,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             MakeInvalid<multiplayer::AnnotationResult>(), LogSystem))
         // 8. Process result
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(systems::continuations::SendResult(Callback, "Successfully set annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
@@ -915,7 +915,8 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
     // 1. Get conversation asset collection
     AssetSystem->GetAssetCollectionById(ConversationId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
-            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {},
+            LogSystem))
         .then(ValidateAnnotationMetadata())
         // 2. Remove annotation metadata
         .then(RemoveAnnotationMetadata(AssetSystem))
@@ -928,21 +929,23 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         // 4. Delete annoation asset
         .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {},
+            LogSystem))
         .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {},
+            LogSystem))
         // 5. Delete annoation thumbnail asset
         .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
-            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+            "Failed to get annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
-            "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
+            "Failed to deleted annotation thumbnail asset.", {}, {}, {}, LogSystem))
         // 6. Process result
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
+        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
@@ -961,26 +964,28 @@ void ConversationSystemInternal::GetAnnotation(
     AssetSystem->GetAssetCollectionById(MessageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
-            {}, {}, {}))
+            {}, {}, {}, LogSystem))
         .then(ValidateMessageAssetCollection(ConversationId))
         .then(ValidateAnnotationMetadata())
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {},
+            LogSystem))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {},
+            LogSystem))
         .then(SetAnnotationAssetFromAssets(AnnotationAsset))
         // 4. Get annotation thumbnail asset
         .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
-            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+            "Failed to get annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
         // 5. Process result
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
@@ -1010,39 +1015,40 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     AssetSystem->GetAssetCollectionById(MessageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
-            {}, {}, {}))
+            {}, {}, {}, LogSystem))
         .then(ValidateMessageAssetCollection(ConversationId))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 2. Create Annotation asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
-            "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {},
+            LogSystem))
         .then(SetAnnotationAsset(AnnotationAsset))
         // 3. Upload Annotation asset data
         .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationAsset))
         // 4. Create Annotation thumbnail asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
-            "Failed to create annotation thumbnail asset.", {}, {}, {}))
+            "Failed to create annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(SetAnnotationAsset(AnnotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
         .then(UploadAnnotationAssetData(
             AssetSystem, MessageAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
-            "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
+            "Failed to upload annotation thumbnail asset data.", {}, {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationThumbnailAsset))
         // 6. Update asset collection metadata
         .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
         .then(AppendCommentMetadata(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
             "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",
-            "Failed to update message asset collection metadata.", {}, {}, {}))
+            "Failed to update message asset collection metadata.", {}, {}, {}, LogSystem))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 7. Send multiplayer event
         .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr, LogSystem))
@@ -1051,7 +1057,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             LogSystem))
         // 8. Process result
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(systems::continuations::SendResult(Callback, "Successfully set annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(
             LogSystem, [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
@@ -1068,7 +1074,8 @@ void ConversationSystemInternal::DeleteAnnotation(
     // 1. Get message asset collection
     AssetSystem->GetAssetCollectionById(MessageId)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
-            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {},
+            LogSystem))
         .then(ValidateMessageAssetCollection(ConversationId))
         .then(ValidateAnnotationMetadata())
         // 2. Remove annotation metadata
@@ -1081,21 +1088,23 @@ void ConversationSystemInternal::DeleteAnnotation(
         // 4. Delete annoation asset
         .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {},
+            LogSystem))
         .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {},
+            LogSystem))
         // 5. Delete annoation thumbnail asset
         .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
-            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+            "Failed to get annotation thumbnail asset.", {}, {}, {}, LogSystem))
         .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
-            "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
+            "Failed to deleted annotation thumbnail asset.", {}, {}, {}, LogSystem))
         // 6. Process result
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
+        .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
@@ -1110,16 +1119,16 @@ void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
     FindMessageAssetCollections(AssetSystem, ConversationId, SpaceId)()
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(
             "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved message asset collections",
-            "Failed to get message asset collections.", {}, {}, {}))
+            "Failed to get message asset collections.", {}, {}, {}, LogSystem))
         // 2. Get all annotation thumbnail assets
         .then(GetAnnotationAssetIdsFromCollections())
         .then(GetThumbnailAssetsFromMap(AssetSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
             "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved thumbnail assets",
-            "Failed to get thumbnail assets.", {}, {}, {}))
+            "Failed to get thumbnail assets.", {}, {}, {}, LogSystem))
         // 3. Process result
         .then(CreateAnnotationThumbnailCollectionResult())
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails.", LogSystem))
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));

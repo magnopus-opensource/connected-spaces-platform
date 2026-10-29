@@ -46,7 +46,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
     GetSettingsByContext(ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -60,7 +60,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
     GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
-            "Failed to get application settings", {}, {}, {}))
+            "Failed to get application settings", {}, {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -72,7 +72,7 @@ void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSetting
     CreateSettingsByContext(ApplicationSettings)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
-            {}, {}, {}))
+            {}, {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
