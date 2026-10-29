@@ -77,19 +77,19 @@ public:
     /// @return Is the token expired.
     [[nodiscard]] bool RefreshNeeded() const;
 
-    /// @brief Get the user ID of the currently logged-in user.
+    /// @brief Get the user ID for the currently logged-in user.
     /// @return The user ID, or an empty string if not logged in.
     csp::common::String GetUserId() const;
 
-    /// @brief Get the device ID of the currently logged-in user.
+    /// @brief Get the device ID for the currently logged-in user.
     /// @return The device ID, or an empty string if not logged in.
     csp::common::String GetDeviceId() const;
 
-    /// @brief Get the access token the currently logged-in user.
+    /// @brief Get the access token for the currently logged-in user.
     /// @return The access token, or an empty string if not logged in.
     csp::common::String GetAccessToken() const;
 
-    /// @brief Get the refresh token the currently logged-in user.
+    /// @brief Get the refresh token for the currently logged-in user.
     /// @return The refresh token, or an empty string if not logged in.
     csp::common::String GetRefreshToken() const;
 

@@ -47,8 +47,10 @@ public:
     LoginStateData(const LoginStateData& Other)
         : State(Other.State)
         , AccessToken(Other.AccessToken)
+        , AccessTokenExpiresAt(Other.AccessTokenExpiresAt)
         , AccessTokenExpiryLength(Other.AccessTokenExpiryLength)
         , RefreshToken(Other.RefreshToken)
+        , RefreshTokenExpiresAt(Other.RefreshTokenExpiresAt)
         , RefreshTokenExpiryLength(Other.RefreshTokenExpiryLength)
         , UserId(Other.UserId)
         , DeviceId(Other.DeviceId)
@@ -67,8 +69,10 @@ public:
 
         State                       = Other.State;
         AccessToken                 = Other.AccessToken;
+        AccessTokenExpiresAt        = Other.AccessTokenExpiresAt;
         AccessTokenExpiryLength     = Other.AccessTokenExpiryLength;
         RefreshToken                = Other.RefreshToken;
+        RefreshTokenExpiresAt       = Other.RefreshTokenExpiresAt;
         RefreshTokenExpiryLength    = Other.RefreshTokenExpiryLength;
         UserId                      = Other.UserId;
         DeviceId                    = Other.DeviceId;
@@ -82,8 +86,10 @@ public:
 
     ELoginState State = ELoginState::LoggedOut;
     csp::common::String AccessToken;
+    csp::common::String AccessTokenExpiresAt;
     csp::common::String AccessTokenExpiryLength;
     csp::common::String RefreshToken;
+    csp::common::String RefreshTokenExpiresAt;
     csp::common::String RefreshTokenExpiryLength;
     csp::common::String UserId;
     csp::common::String DeviceId;

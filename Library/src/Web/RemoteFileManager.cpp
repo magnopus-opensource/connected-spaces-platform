@@ -18,7 +18,6 @@
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/LoginState.h"
 #include "Common/LoginStateData.h"
-#include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
 

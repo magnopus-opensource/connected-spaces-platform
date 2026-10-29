@@ -24,7 +24,6 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
 #include "Common/LoginStateData.h"
-#include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "RAIIMockLogger.h"
 #include "Services/UserService/Dto.h"
@@ -345,7 +344,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginWithRefreshToken)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
 
-    const auto RefreshToken = csp::web::HttpAuth::GetRefreshToken();
+    const auto RefreshToken = UserSystem->GetLoginState().GetRefreshToken();
 
     // Shutdown and restart CSP. To simulate closing the app/tab and wanting to auto-login via refresh
     // This is just taken from the fixture code we run at the start of every test.
@@ -535,14 +534,16 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
 
+    const auto Snapshot = UserSystem->GetLoginState().GetSnapshotThreadSafe();
+
     // Assemble the AuthDTO
     csp::services::generated::userservice::AuthDto AuthDetails;
     AuthDetails.SetUserId(UserId.c_str());
     AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
-    AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
-    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
-    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
-    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+    AuthDetails.SetAccessToken(Snapshot->AccessToken.c_str());
+    AuthDetails.SetAccessTokenExpiresAt(Snapshot->AccessTokenExpiresAt.c_str());
+    AuthDetails.SetRefreshToken(Snapshot->RefreshToken.c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(Snapshot->RefreshTokenExpiresAt.c_str());
 
     const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
 
@@ -573,15 +574,17 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, FederatedLoginTestBadJson)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, false); // No need to create a multiplayer connection here
 
+    const auto Snapshot = UserSystem->GetLoginState().GetSnapshotThreadSafe();
+
     // Assemble the AuthDTO
     csp::services::generated::userservice::AuthDto AuthDetails;
     AuthDetails.SetUserId(UserId.c_str());
     AuthDetails.SetDeviceId(csp::CSPFoundation::GetDeviceId().c_str());
     // Deliberately don't set the access token to trigger a failure
-    // AuthDetails.SetAccessToken(csp::web::HttpAuth::GetAccessToken().c_str());
-    AuthDetails.SetAccessTokenExpiresAt(csp::web::HttpAuth::GetTokenExpiry().c_str());
-    AuthDetails.SetRefreshToken(csp::web::HttpAuth::GetRefreshToken().c_str());
-    AuthDetails.SetRefreshTokenExpiresAt(csp::web::HttpAuth::GetRefreshTokenExpiry().c_str());
+    //AuthDetails.SetAccessToken(Snapshot->AccessToken.c_str());
+    AuthDetails.SetAccessTokenExpiresAt(Snapshot->AccessTokenExpiresAt);
+    AuthDetails.SetRefreshToken(Snapshot->RefreshToken.c_str());
+    AuthDetails.SetRefreshTokenExpiresAt(Snapshot->RefreshTokenExpiresAt.c_str());
 
     const csp::common::String FederatedLoginDetailsJson(AuthDetails.ToJson().c_str());
 

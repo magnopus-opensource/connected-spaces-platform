@@ -55,7 +55,9 @@ std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::gener
 
     Data.State = ELoginState::LoggedIn;
     Data.AccessToken = AuthResponse->GetAccessToken();
+    Data.AccessTokenExpiresAt = AuthResponse->GetAccessTokenExpiresAt();
     Data.RefreshToken = AuthResponse->GetRefreshToken();
+    Data.RefreshTokenExpiresAt = AuthResponse->GetRefreshTokenExpiresAt();
     Data.UserId = AuthResponse->GetUserId();
     Data.DeviceId = AuthResponse->GetDeviceId();
 
