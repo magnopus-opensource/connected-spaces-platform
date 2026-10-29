@@ -72,6 +72,8 @@ const HttpResponse& HttpRequest::GetResponse() const { return Response; }
 
 IHttpResponseHandler* HttpRequest::GetCallback() const { return Callback; }
 
+WebClient* HttpRequest::GetClient() const { return Client; }
+
 void HttpRequest::SetResponseCode(EResponseCodes InReponseCode) { Response.SetResponseCode(InReponseCode); }
 
 void HttpRequest::SetResponseData(const char* Data, size_t DataLength) { Response.GetMutablePayload().SetContent(Data, DataLength); }

@@ -200,6 +200,8 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 
 void WebClient::SetAuthContext(csp::common::IAuthContext& InAuthContext) { AuthContext = &InAuthContext; }
 
+csp::common::LogSystem* WebClient::GetLogSystem() const { return LogSystem; }
+
 void WebClient::SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value)
 {
     if (Value.has_value())
