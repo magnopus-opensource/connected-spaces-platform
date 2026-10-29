@@ -13,7 +13,7 @@
 #include "Multiplayer/NetworkEventSerialisation.h"
 
 #include "CallHelpers.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Systems/ResultHelpers.h"
 
 // This is temporary whilst we do the modularisation effort. This file needs rended in two to split the multiplayer/signalR logic from the REST logic.
@@ -37,7 +37,8 @@ namespace
 
     // Temp utility function until we adapt the new continuation pattern
     template <class InResultType, class OutResultType>
-    bool HandleConversationResult(const InResultType& Result, const char* ErrorMessage, std::function<void(const OutResultType&)> FailCallback)
+    bool HandleConversationResult(const InResultType& Result, const char* ErrorMessage, std::function<void(const OutResultType&)> FailCallback,
+        csp::common::LogSystem& LogSystem)
     {
         if (Result.GetResultCode() == EResultCode::InProgress)
         {
@@ -46,8 +47,8 @@ namespace
 
         if (Result.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_ERROR_FORMAT(
-                (std::string(ErrorMessage) + "ResCode: %d, HttpResCode: %d").c_str(), (int)Result.GetResultCode(), Result.GetHttpResultCode());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "{}ResCode: {}, HttpResCode: {}", ErrorMessage, (int)Result.GetResultCode(),
+                Result.GetHttpResultCode());
 
             const OutResultType InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(FailCallback, InternalResult);
@@ -57,17 +58,18 @@ namespace
         return true;
     }
 
-    bool EnsureUserHasPermission(const common::String& UserId, const common::String& ConversationUserId, bool IsConversation)
+    bool EnsureUserHasPermission(
+        const common::String& UserId, const common::String& ConversationUserId, bool IsConversation, csp::common::LogSystem& LogSystem)
     {
         if (UserId != ConversationUserId)
         {
             if (IsConversation)
             {
-                CSP_LOG_ERROR_MSG("User does not have permission to modify this conversation.");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "User does not have permission to modify this conversation.");
             }
             else
             {
-                CSP_LOG_ERROR_MSG("User does not have permission to modify this message.");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "User does not have permission to modify this message.");
             }
 
             return false;
@@ -198,14 +200,14 @@ namespace
         };
     }
 
-    std::function<async::task<AssetResult>()> GetOrCreateAnnotationAsset(
-        AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type)
+    std::function<async::task<AssetResult>()> GetOrCreateAnnotationAsset(AssetSystem* AssetSystem,
+        std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type, csp::common::LogSystem& LogSystem)
     {
-        return [AssetSystem, Collection, Name, Type]()
+        return [&LogSystem, AssetSystem, Collection, Name, Type]()
         {
             return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { Type })
                 .then(
-                    [AssetSystem, Collection, Name, Type](const AssetsResult& Result)
+                    [&LogSystem, AssetSystem, Collection, Name, Type](const AssetsResult& Result)
                     {
                         if (Result.GetAssets().Size() == 0)
                         {
@@ -213,7 +215,7 @@ namespace
                         }
                         else if (Result.GetAssets().Size() == 1)
                         {
-                            CSP_LOG_MSG(
+                            LogSystem.LogMsg(
                                 csp::common::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
 
                             async::event_task<AssetResult> OnCompleteEvent;
@@ -360,7 +362,8 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
     const AssetCollectionResultCallback AddCommentContainerCallback
         = [this, Callback, UserId, Message](const AssetCollectionResult& AddCommentContainerResult)
     {
-        if (HandleConversationResult(AddCommentContainerResult, "The Comment Container asset collection creation was not successful.", Callback)
+        if (HandleConversationResult(
+                AddCommentContainerResult, "The Comment Container asset collection creation was not successful.", Callback, LogSystem)
             == false)
         {
             return;
@@ -403,7 +406,8 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
     // 1. Get asset collection
     AssetCollectionResultCallback GetConversationCallback = [this, ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -423,10 +427,10 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
             }
 
             // 3. Delete the asset colleciton associated with this conversation
-            NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
+            NullResultCallback DeleteAssetCollectionCallback = [&LogSystem = LogSystem, Callback](const NullResult& DeleteAssetCollectionResult)
             {
                 if (HandleConversationResult(
-                        DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback)
+                        DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback, LogSystem)
                     == false)
                 {
                     return;
@@ -455,7 +459,7 @@ void ConversationSystemInternal::AddMessage(
     const multiplayer::MessageResultCallback MessageResultCallback
         = [this, Callback, ConversationId, UserId, Message](const multiplayer::MessageResult& MessageResultCallbackResult)
     {
-        if (HandleConversationResult(MessageResultCallbackResult, "Failed to store conversation message.", Callback) == false)
+        if (HandleConversationResult(MessageResultCallbackResult, "Failed to store conversation message.", Callback, LogSystem) == false)
         {
             return;
         }
@@ -490,7 +494,8 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
     // 1. Get asset collection
     AssetCollectionResultCallback GetMessageCallback = [this, ConversationId, MessageId, Callback](const AssetCollectionResult& GetMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetMessageResult, "The retrieval of Message asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -499,7 +504,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
         multiplayer::MessageInfo Info
             = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection(), LogSystem);
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false, LogSystem) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
             return;
@@ -521,9 +526,9 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             AssetCollection MessageAssetCollection;
             MessageAssetCollection.Id = MessageId;
 
-            const NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
+            const NullResultCallback DeleteAssetCollectionCallback = [&LogSystem = LogSystem, Callback](const NullResult& DeleteAssetCollectionResult)
             {
-                if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback) == false)
+                if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback, LogSystem) == false)
                 {
                     return;
                 }
@@ -546,7 +551,8 @@ void ConversationSystemInternal::GetMessagesFromConversation(const common::Strin
     // 1. Find asset collections
     AssetCollectionsResultCallback GetMessagesCallback = [this, Callback](const AssetCollectionsResult& GetMessagesResult)
     {
-        if (HandleConversationResult(GetMessagesResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetMessagesResult, "The retrieval of Message asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -569,7 +575,8 @@ void ConversationSystemInternal::GetConversationInfo(const common::String& Conve
     // 1. Get asset collection
     AssetCollectionResultCallback GetConversationCallback = [this, ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -590,7 +597,9 @@ void ConversationSystemInternal::UpdateConversation(
     AssetCollectionResultCallback GetConversationCallback
         = [this, Callback, ConversationId, NewData](const AssetCollectionResult& GetConversationResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(
+                GetConversationResult, "The retrieval of Conversation asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -599,7 +608,7 @@ void ConversationSystemInternal::UpdateConversation(
         multiplayer::MessageInfo Info = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
             GetConversationResult.GetAssetCollection(), LogSystem);
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, true) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, true, LogSystem) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
             return;
@@ -608,7 +617,8 @@ void ConversationSystemInternal::UpdateConversation(
         // 2. Update the conversations asset collection
         AssetCollectionResultCallback GetUpdatedConversationCallback = [this, Callback](const AssetCollectionResult& GetUpdatedConversationResult)
         {
-            if (HandleConversationResult(GetUpdatedConversationResult, "The Update of Conversation asset collections was not successful.", Callback)
+            if (HandleConversationResult(
+                    GetUpdatedConversationResult, "The Update of Conversation asset collections was not successful.", Callback, LogSystem)
                 == false)
             {
                 return;
@@ -663,7 +673,8 @@ void ConversationSystemInternal::GetMessageInfo(
 {
     const AssetCollectionResultCallback GetMessageCallback = [this, Callback](const AssetCollectionResult& GetMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of the Message asset collection was not successful.", Callback) == false)
+        if (HandleConversationResult(GetMessageResult, "The retrieval of the Message asset collection was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -682,7 +693,8 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
     // 1. Get message asset collection
     AssetCollectionResultCallback GetMessageCallback = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetMessageResult)
     {
-        if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback, LogSystem)
+            == false)
         {
             return;
         }
@@ -691,7 +703,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
         multiplayer::MessageInfo Info
             = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection(), LogSystem);
 
-        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false, LogSystem) == false)
         {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
             return;
@@ -702,7 +714,8 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
             = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetUpdatedMessageResult)
 
         {
-            if (HandleConversationResult(GetUpdatedMessageResult, "The Update of Message asset collections was not successful.", Callback) == false)
+            if (HandleConversationResult(GetUpdatedMessageResult, "The Update of Message asset collections was not successful.", Callback, LogSystem)
+                == false)
             {
                 return;
             }
@@ -751,7 +764,7 @@ void ConversationSystemInternal::StoreConversationMessage(
 {
     const AssetCollectionResultCallback AddCommentCallback = [=, this](const AssetCollectionResult& AddCommentResult)
     {
-        if (HandleConversationResult(AddCommentResult, "The Comment asset collection creation was not successful.", Callback) == false)
+        if (HandleConversationResult(AddCommentResult, "The Comment asset collection creation was not successful.", Callback, LogSystem) == false)
         {
             return;
         }
@@ -846,9 +859,9 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
     const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType(), LogSystem);
     const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType(), LogSystem);
 
     auto ConversationAssetCollection = std::make_shared<AssetCollection>();
     auto AnnotationAsset = std::make_shared<Asset>();
@@ -861,7 +874,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to get message asset collection.", {}, {}, {}, LogSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 2. Create Annotation asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION, LogSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {},
             {}, {}, LogSystem))
@@ -873,7 +886,8 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to upload annotation asset data.", {}, {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationAsset))
         // 4. Create Annotation thumbnail asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(GetOrCreateAnnotationAsset(
+            AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL, LogSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}, LogSystem))
@@ -1003,9 +1017,9 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
     const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType(), LogSystem);
     const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
-        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType(), LogSystem);
 
     auto MessageAssetCollection = std::make_shared<AssetCollection>();
     auto AnnotationAsset = std::make_shared<Asset>();
@@ -1019,7 +1033,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(ValidateMessageAssetCollection(ConversationId))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 2. Create Annotation asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION, LogSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {},
             LogSystem))
@@ -1031,7 +1045,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             {}, {}, LogSystem))
         .then(SetAssetUri(AnnotationAsset))
         // 4. Create Annotation thumbnail asset
-        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL, LogSystem))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(
             "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}, LogSystem))

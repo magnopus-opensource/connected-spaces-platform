@@ -176,10 +176,11 @@ std::function<async::task<AssetResult>()> SpaceSystem::CreateSpaceThumbnailAsset
 std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAsset(
     const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data)
 {
-    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [&LogSystem = LogSystem, AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
-        UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
+        UploadAsset.FileName
+            = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType(), LogSystem));
         UploadAsset.MimeType = Data.GetMimeType();
         auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
@@ -191,10 +192,11 @@ std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::Up
 std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAssetWithBuffer(
     const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data)
 {
-    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [&LogSystem = LogSystem, AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
-        UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
+        UploadAsset.FileName
+            = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType(), LogSystem));
         UploadAsset.MimeType = Data.GetMimeType();
         auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
@@ -1395,8 +1397,8 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
             };
 
             auto& ThumbnailAsset = ((csp::systems::AssetsResult&)AssetsResult).GetAssets()[0];
-            ThumbnailAsset.FileName
-                = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(NewThumbnail.GetMimeType()));
+            ThumbnailAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(
+                SpaceSystemHelpers::GetAssetFileExtension(NewThumbnail.GetMimeType(), LogSystem));
             ThumbnailAsset.MimeType = NewThumbnail.GetMimeType();
             const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
             AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewThumbnail, UploadCallback);
@@ -1670,8 +1672,8 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
             Asset ThumbnailAsset = CreateAssetResult.GetAsset();
 
-            ThumbnailAsset.FileName
-                = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType()));
+            ThumbnailAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(
+                SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType(), LogSystem));
             ThumbnailAsset.MimeType = ImageDataSource.GetMimeType();
             AssetSystem->UploadAssetData(ThumbnailAssetColl, ThumbnailAsset, ImageDataSource, UploadCallback);
         };

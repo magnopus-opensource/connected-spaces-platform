@@ -335,7 +335,8 @@ void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, c
     }
 }
 
-std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::systems::AssetCollection& AssetCollection)
+std::optional<EShaderType> GetShaderTypeFromMaterialCollection(
+    const csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
     std::optional<EShaderType> Result = {};
 
@@ -348,7 +349,7 @@ std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::system
     {
         // Please note: Older Spaces built when only GLTF materials were supported will not have stored
         // shader type metadata in the Material Asset Collection. We therefore default to a standard shader type.
-        CSP_LOG_MSG(LogLevel::Verbose, "Shader type metadata missing from Material Asset Collection, defaulting to Standard shader type.");
+        LogSystem.LogMsg(LogLevel::Verbose, "Shader type metadata missing from Material Asset Collection, defaulting to Standard shader type.");
         Result = EShaderType::Standard;
     }
 
@@ -1596,10 +1597,10 @@ async::task<MaterialResult> AssetSystem::DownloadMaterial(const MaterialInfo& In
 }
 
 static std::optional<MaterialInfo> MakeMaterialInfo(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri, csp::common::LogSystem& LogSystem);
 
 static std::vector<MaterialInfo> CollectMaterialInfos(
-    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets)
+    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets, csp::common::LogSystem& LogSystem)
 {
     auto Infos = std::vector<MaterialInfo>();
     Infos.reserve(Assets.Size());
@@ -1610,14 +1611,14 @@ static std::vector<MaterialInfo> CollectMaterialInfos(
                 [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
             AssetCollection != std::end(AssetCollections))
         {
-            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri))
+            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri, LogSystem))
             {
                 Infos.push_back(*Info);
             }
         }
         else
         {
-            CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "A Material Collection with the specified Id was not found.");
         }
     }
 
@@ -1711,10 +1712,10 @@ async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common
 
         return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
             .then(
-                [AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
+                [&LogSystem = LogSystem, AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
                 {
                     const auto& Assets = GetAssetsResult.GetAssets();
-                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
+                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets, LogSystem);
 
                     if (!Assets.IsEmpty() && Infos.empty())
                     {
@@ -1789,7 +1790,7 @@ void AssetSystem::GetMaterialInfo(
         // 2. Get asset
         const AssetCollection& FoundAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
+        auto GetAssetCB = [&LogSystem = LogSystem, Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
@@ -1799,7 +1800,7 @@ void AssetSystem::GetMaterialInfo(
 
             // 3. Resolve the material info
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
-            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri);
+            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, LogSystem);
 
             if (!Info.has_value())
             {
@@ -1832,13 +1833,13 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 }
 
 static std::optional<MaterialInfo> MakeMaterialInfo(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri, csp::common::LogSystem& LogSystem)
 {
-    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection, LogSystem);
 
     if (!ShaderType.has_value())
     {
-        CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Material contains an invalid shader type.");
         return {};
     }
 
@@ -1869,7 +1870,7 @@ Material* AssetSystem::ParseMaterialFromAssetCollection(
     // A uri is only needed to fetch the data, which the caller has already done
     const auto UnusedUri = csp::common::String();
 
-    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri);
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri, LogSystem);
 
     if (!Info.has_value())
     {
@@ -1882,7 +1883,7 @@ Material* AssetSystem::ParseMaterialFromAssetCollection(
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
     const csp::common::String& Uri, MaterialResultCallback Callback)
 {
-    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri);
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri, LogSystem);
 
     if (!Info.has_value())
     {

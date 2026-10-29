@@ -21,6 +21,11 @@
 #include "CSP/Common/String.h"
 #include "Services/UserService/Dto.h"
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems
 {
 
@@ -49,7 +54,7 @@ namespace SpaceSystemHelpers
     csp::common::String GetUniqueSpaceThumbnailAssetName(const csp::common::String& SpaceId);
     csp::common::String GetUniqueAvatarThumbnailAssetName(const csp::common::String& Extension);
 
-    csp::common::String GetAssetFileExtension(const csp::common::String& MimeType);
+    csp::common::String GetAssetFileExtension(const csp::common::String& MimeType, csp::common::LogSystem& LogSystem);
 
     bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids);
 

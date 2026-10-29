@@ -75,7 +75,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
  * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
  *
  * "HHH:MM:SS" supports durations greater than 4 days */
-bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
+bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength, csp::common::LogSystem& LogSystem)
 {
     if (ExpiryLength.IsEmpty())
     {
@@ -88,7 +88,7 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
         return true;
     }
 
-    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
+    LogSystem.LogMsg(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
 }
 
@@ -137,11 +137,12 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                        csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
                 }
 
                 Callback(LoginStateRes);
@@ -152,7 +153,7 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Login Failed. Code: {}", LoginStateRes.GetHttpResultCode());
             Callback(LoginStateRes);
         }
     };
@@ -164,15 +165,15 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
 }
 
 void SetTokenOptions(const csp::common::Optional<csp::systems::TokenOptions>& TokenOptions, std::shared_ptr<chs_user::TokenOptions> Options,
-    std::shared_ptr<csp::common::LoginState> LoginState)
+    std::shared_ptr<csp::common::LoginState> LoginState, csp::common::LogSystem& LogSystem)
 {
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength, LogSystem))
     {
         Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
         LoginState->UpdateAccessTokenExpiry(TokenOptions->AccessTokenExpiryLength);
     }
 
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength, LogSystem))
     {
         Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
         LoginState->UpdateRefreshTokenExpiry(TokenOptions->RefreshTokenExpiryLength);
@@ -186,7 +187,7 @@ namespace csp::systems
 
 const char* EMPTY_SPACE_STRING = " ";
 
-csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticationProviders Provider)
+csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticationProviders Provider, csp::common::LogSystem& LogSystem)
 {
     switch (Provider)
     {
@@ -200,7 +201,7 @@ csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticati
         return "Netflix";
     default:
     {
-        CSP_LOG_FORMAT(common::LogLevel::Error, "Unsupported Provider Type requested: %d, returning Google", static_cast<uint8_t>(Provider));
+        LogFormat(LogSystem, common::LogLevel::Error, "Unsupported Provider Type requested: {}, returning Google", static_cast<uint8_t>(Provider));
         return "Google";
     }
     }
@@ -338,7 +339,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -412,7 +413,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::RefreshRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -472,7 +473,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -640,7 +641,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
 
     const auto Request = std::make_shared<chs_user::LoginSocialRequest>();
     Request->SetDeviceId(DeviceId.c_str());
-    Request->SetProvider(ConvertExternalAuthProvidersToString(AuthProvider));
+    Request->SetProvider(ConvertExternalAuthProvidersToString(AuthProvider, LogSystem));
     Request->SetToken(ThirdPartyToken);
     Request->SetTenant(Tenant.c_str());
 

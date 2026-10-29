@@ -82,7 +82,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
         POIInfo->SetTags(DTOTags);
     }
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT, LogSystem);
     POIInfo->SetType(TypeString);
 
     POIInfo->SetOwner(Owner);
@@ -119,7 +119,7 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
     std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
     if (Type.HasValue())
     {
-        TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
+        TypeOption = PointOfInterestHelpers::TypeToString(*Type, LogSystem).c_str();
     }
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
@@ -146,7 +146,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
     uniqueName.Append(Site.SpaceId);
     POIInfo->SetName(uniqueName);
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT, LogSystem);
     POIInfo->SetType(TypeString);
 
     POIInfo->SetOwner(Site.SpaceId);
@@ -204,7 +204,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 {
     auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
     POIInfo->SetType(TypeString);
 
     chs::LocalizedString POITitle;
@@ -314,7 +314,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 {
     auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
     POIInfo->SetType(TypeString);
 
     chs::LocalizedString POITitle;
@@ -421,7 +421,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
 void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
-    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
 
     std::vector<csp::common::String> SpaceIds({ SpaceId });
 

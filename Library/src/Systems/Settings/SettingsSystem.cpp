@@ -514,7 +514,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 
                         auto& ThumbnailAsset = ((AssetsResult&)ThumbnailResult).GetAssets()[0];
                         ThumbnailAsset.FileName = SpaceSystemHelpers::GetUniqueAvatarThumbnailAssetName(
-                            SpaceSystemHelpers::GetAssetFileExtension(NewAvatarPortrait.GetMimeType()));
+                            SpaceSystemHelpers::GetAssetFileExtension(NewAvatarPortrait.GetMimeType(), LogSystem));
                         ThumbnailAsset.MimeType = NewAvatarPortrait.GetMimeType();
                         const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
                         AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewAvatarPortrait, UploadCallback);
@@ -651,7 +651,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
                     Asset AvatarPortraitAsset = CreateAssetResult.GetAsset();
 
                     AvatarPortraitAsset.FileName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId()
-                        + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
+                        + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType(), LogSystem);
                     AvatarPortraitAsset.MimeType = ImageDataSource.GetMimeType();
                     AssetSystem->UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
                 }
