@@ -368,12 +368,12 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
 
         // 2.Send multiplayer event
         const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
+            = [&LogSystem = LogSystem, Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
                 const auto ErrorMsg = fmt::format("Create Conversation: SignalR connection error: {}", ErrorCodeToString(Error));
-                CSP_LOG_ERROR_MSG(ErrorMsg.c_str());
+                LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMsg.c_str());
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
                 return;
@@ -416,7 +416,7 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
         {
             if (Error != multiplayer::ErrorCode::None)
             {
-                CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "DeleteConversation: SignalR connection: Error");
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
                 return;
@@ -461,11 +461,11 @@ void ConversationSystemInternal::AddMessage(
         }
 
         // 2. Send multiplayer event
-        const auto SignalRCallback = [Callback, MessageResultCallbackResult](multiplayer::ErrorCode Error)
+        const auto SignalRCallback = [&LogSystem = LogSystem, Callback, MessageResultCallbackResult](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
-                CSP_LOG_ERROR_MSG("AddMessage: SignalR connection: Error");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "AddMessage: SignalR connection: Error");
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
                 return;
@@ -511,7 +511,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
         {
             if (Error != multiplayer::ErrorCode::None)
             {
-                CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "DeleteMessage: SignalR connection: Error");
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
                 return;
@@ -620,7 +620,7 @@ void ConversationSystemInternal::UpdateConversation(
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_MSG("SetConversationInfo: SignalR connection: Error");
+                    LogSystem.LogMsg(csp::common::LogLevel::Error, "SetConversationInfo: SignalR connection: Error");
 
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
                     return;
@@ -712,11 +712,11 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
 
             // 3. Send multiplayer event
             const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedMessageResult, NewData, Result](multiplayer::ErrorCode Error)
+                = [&LogSystem = LogSystem, Callback, GetUpdatedMessageResult, NewData, Result](multiplayer::ErrorCode Error)
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_MSG("SetMessageInfo: SignalR connection: Error");
+                    LogSystem.LogMsg(csp::common::LogLevel::Error, "SetMessageInfo: SignalR connection: Error");
 
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
                     return;
@@ -1137,7 +1137,7 @@ void ConversationSystemInternal::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG(
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Error: Failed to register ConversationSystemInternal. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }

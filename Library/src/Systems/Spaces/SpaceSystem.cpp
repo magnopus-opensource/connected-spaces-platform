@@ -17,7 +17,6 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
 #include "CSP/Common/LoginState.h"
-#include "Common/LoginStateData.h"
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
@@ -31,6 +30,8 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
+#include "Common/LoginStateData.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Services/AggregationService/Api.h"
@@ -365,9 +366,9 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 /* EnterSpace Continuations */
 auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem)
 {
-    return [Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
+    return [&LogSystem = LogSystem, Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNecessary");
+        LogSystem.LogMsg(csp::common::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNecessary");
 
         /* Once we have permissions to discover a space, attempt to enter it */
         const auto& SpaceToJoin = GetSpaceResult.GetSpace();
@@ -395,7 +396,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
         // Branch so we always continue, using an event so we can forward the continuation no matter what branch.
         if (!UserIsRecognizedBySpace)
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Log, "Adding user to space.");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "Adding user to space.");
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
             SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
@@ -404,7 +405,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
         }
         else
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Log, "No need to add user to space.");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "No need to add user to space.");
 
             // Just pass along the previous result
             UserAddedToSpaceChainStartEvent->set(GetSpaceResult);
@@ -416,9 +417,9 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
 
 auto SpaceSystem::FireEnterSpaceEvent(Space& OutCurrentSpace)
 {
-    return [&OutCurrentSpace](const SpaceResult& SpaceResult)
+    return [&LogSystem = LogSystem, &OutCurrentSpace](const SpaceResult& SpaceResult)
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::FireEnterSpaceEvent");
+        LogSystem.LogMsg(csp::common::LogLevel::Log, "SpaceSystem::FireEnterSpaceEvent");
 
         /* We're here. The space knows about us. We're definately in the allowed users. Let's join! */
         csp::events::Event* EnterSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
@@ -447,7 +448,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 {
     if (RealtimeEngine == nullptr)
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Error, "RealtimeEngine pointer passed to EnterSpace cannot be null");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "RealtimeEngine pointer passed to EnterSpace cannot be null");
         Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
         return;
     }
@@ -456,7 +457,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     {
         // Would be better if this were a type-invariant on RealtimeEngine, rather than a function precondition, but wrapper gen dosen't let us
         // pass callbacks in constructors.
-        CSP_LOG_MSG(csp::common::LogLevel::Error,
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Provided RealtimeEngine has a null EntityFetchCompleteCallback. Set one prior to calling EnterSpace by calling "
             "`SetSetEntityFetchCompleteCallback`");
         Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
@@ -467,7 +468,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     if ((RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         && (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->IsConnected()))
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Error,
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Cannot enter an online space without an established multiplayer connection. Did you create one when logging in?");
         Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
         return;
@@ -482,7 +483,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
             static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
     }
 
-    CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
+    LogSystem.LogMsg(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
 
     // If online, get the space, add the user to it. If offline, create a local space and forward a local result through.
     auto UpstreamConnectionTask = (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
@@ -516,10 +517,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
               .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
               .then(async::inline_scheduler(), this->RegisterScopesInSpace(RealtimeEngine))
         : async::spawn(async::inline_scheduler(),
-              [SpaceId]()
+              [&LogSystem = LogSystem, SpaceId]()
               {
                   // Offline, build a local space result
-                  CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
+                  LogSystem.LogMsg(csp::common::LogLevel::Log, "Entering Offline Space");
 
                   Space LocalSpace {};
 
@@ -579,7 +580,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
             })
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
         .then(async::inline_scheduler(),
-            csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
+            csp::common::continuations::InvokeIfExceptionInChain(LogSystem,
                 [Callback, &CurrentSpace = CurrentSpace]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& Except)
                 {
                     CurrentSpace = {};
@@ -589,7 +590,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
+    LogFormat(LogSystem, csp::common::LogLevel::Log, "Exiting Space {}", CurrentSpace.Name.c_str());
 
     // As the user is exiting the space, we now clear all scopes that they are registered to.
     auto& SystemsManager = systems::SystemsManager::Get();
@@ -605,10 +606,10 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
             .then(async::inline_scheduler(), [MultiplayerConnection]() { MultiplayerConnection->SetOnlineRealtimeEngine(nullptr); })
             .then(systems::continuations::ReportSuccess(Callback, "Successfully exited space."))
             .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
-                [Callback, MultiplayerConnection]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+                [&LogSystem = LogSystem, Callback, MultiplayerConnection](
+                    [[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                 {
-                    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(
-                        csp::common::LogLevel::Fatal, fmt::format("Error on exiting spaces: {}", exception.what()).c_str());
+                    LogSystem.LogMsg(csp::common::LogLevel::Fatal, fmt::format("Error on exiting spaces: {}", exception.what()).c_str());
 
                     // Null the realtime engine pointer in the multiplayer connection such that it stops dispatching signalR updates.
                     // (Error paths are messy, what does failing to leave a space mean memory wise? This is why owned types with RAII work so
@@ -619,8 +620,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     }
     else
     {
-        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(
-            csp::common::LogLevel::Verbose, "Multiplayer connection not connected when exiting space, skipping disconnect.");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Multiplayer connection not connected when exiting space, skipping disconnect.");
 
         const NullResult Result(EResultCode::Success, 200);
         INVOKE_IF_NOT_NULL(Callback, Result);
@@ -672,15 +672,15 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invite users to space.", {}, {}, {}))
         .then(
-            [CurrentSpaceResult, Callback]()
+            [&LogSystem = LogSystem, CurrentSpaceResult, Callback]()
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log,
+                LogSystem.LogMsg(csp::common::LogLevel::Log,
                     csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
                 INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            *csp::systems::SystemsManager::Get().GetLogSystem(),
+            LogSystem,
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
                 auto NullResultCallback
@@ -735,15 +735,15 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invite users to space.", {}, {}, {}))
         .then(
-            [CurrentSpaceResult, Callback]()
+            [&LogSystem = LogSystem, CurrentSpaceResult, Callback]()
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log,
+                LogSystem.LogMsg(csp::common::LogLevel::Log,
                     csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
                 INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            *csp::systems::SystemsManager::Get().GetLogSystem(),
+            LogSystem,
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
                 auto NullResultCallback
@@ -839,7 +839,8 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
 
     if (InResultsMax.HasValue() && *InResultsMax > MAX_SPACES_RESULTS)
     {
-        CSP_LOG_WARN_FORMAT("Provided value `%i` for ResultsMax exceeded max value and was reduced to `%i`.", *InResultsMax, MAX_SPACES_RESULTS);
+        LogFormat(LogSystem, csp::common::LogLevel::Warning, "Provided value `{}` for ResultsMax exceeded max value and was reduced to `{}`.",
+            *InResultsMax, MAX_SPACES_RESULTS);
     }
 
     auto Tags
@@ -879,7 +880,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
 {
     if (RequestedSpaceIDs.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("No space ids given");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "No space ids given");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpacesResult>());
 
@@ -914,7 +915,7 @@ void SpaceSystem::GetSpace(const String& SpaceId, SpaceResultCallback Callback)
 {
     if (SpaceId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("No space id given");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "No space id given");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceResult>());
         return;
     }
@@ -932,7 +933,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
 
     if (SpaceId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("No space id given");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "No space id given");
         OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
@@ -1136,7 +1137,7 @@ void SpaceSystem::UpdateUserRole(const String& SpaceId, const UserRoleInfo& NewU
     }
     else
     {
-        CSP_LOG_ERROR_MSG("SpaceSystem::UpdateUserRole failed: Unsupported User Role!");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "SpaceSystem::UpdateUserRole failed: Unsupported User Role!");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
     }
@@ -1169,7 +1170,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 {
     if (SpaceId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UpdateSpaceMetadata called with empty SpaceId. Aborting call.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UpdateSpaceMetadata called with empty SpaceId. Aborting call.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -1241,7 +1242,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 {
     if (SpaceId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("GetSpaceMetadata called with empty SpaceId. Aborting call.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "GetSpaceMetadata called with empty SpaceId. Aborting call.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceMetadataResult>());
 
@@ -1294,7 +1295,8 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback
+            = [&LogSystem = LogSystem, Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1309,11 +1311,11 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
                 return;
             }
 
-            UriResultCallback UploadCallback = [Callback](const UriResult& UploadResult)
+            UriResultCallback UploadCallback = [&LogSystem = LogSystem, Callback](const UriResult& UploadResult)
             {
                 if (UploadResult.GetResultCode() == EResultCode::Failed)
                 {
-                    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}",
                         (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                 }
 
@@ -1363,7 +1365,8 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback
+            = [&LogSystem = LogSystem, Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1378,11 +1381,11 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
                 return;
             }
 
-            UriResultCallback UploadCallback = [Callback](const UriResult& UploadResult)
+            UriResultCallback UploadCallback = [&LogSystem = LogSystem, Callback](const UriResult& UploadResult)
             {
                 if (UploadResult.GetResultCode() == EResultCode::Failed)
                 {
-                    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}",
                         (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                 }
 
@@ -1496,7 +1499,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
 {
     if (SpaceId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("RemoveMetadata called with empty SpaceId. Aborting call.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "RemoveMetadata called with empty SpaceId. Aborting call.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -1536,7 +1539,7 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
     AssetCollectionResultCallback CreateAssetCollCallback
-        = [Callback, AssetSystem, SpaceId, ImageDataSource](const AssetCollectionResult& AssetCollResult)
+        = [&LogSystem = LogSystem, Callback, AssetSystem, SpaceId, ImageDataSource](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1545,8 +1548,8 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 
         if (AssetCollResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Log,
-                "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, csp::common::LogLevel::Log,
+                "The Space thumbnail asset collection creation was not successful. ResCode: {}, HttpResCode: {}",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
             NullResult InternalResult(AssetCollResult);
@@ -1557,7 +1560,8 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 
         const auto& ThumbnailAssetColl = AssetCollResult.GetAssetCollection();
 
-        AssetResultCallback CreateAssetCallback = [Callback, AssetSystem, ThumbnailAssetColl, ImageDataSource](const AssetResult& CreateAssetResult)
+        AssetResultCallback CreateAssetCallback
+            = [&LogSystem = LogSystem, Callback, AssetSystem, ThumbnailAssetColl, ImageDataSource](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1566,8 +1570,9 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 
             if (CreateAssetResult.GetResultCode() == EResultCode::Failed)
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
-                    (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
+                LogFormat(LogSystem, csp::common::LogLevel::Log,
+                    "The Space thumbnail asset creation was not successful. ResCode: {}, HttpResCode: {}", (int)CreateAssetResult.GetResultCode(),
+                    CreateAssetResult.GetHttpResultCode());
 
                 NullResult InternalResult(CreateAssetResult);
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1575,11 +1580,11 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
                 return;
             }
 
-            UriResultCallback UploadCallback = [Callback](const UriResult& UploadResult)
+            UriResultCallback UploadCallback = [&LogSystem = LogSystem, Callback](const UriResult& UploadResult)
             {
                 if (UploadResult.GetResultCode() == EResultCode::Failed)
                 {
-                    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}",
                         (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                 }
 
@@ -1609,7 +1614,7 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
     AssetCollectionResultCallback CreateAssetCollCallback
-        = [Callback, SpaceId, ImageDataSource, AssetSystem](const AssetCollectionResult& AssetCollResult)
+        = [&LogSystem = LogSystem, Callback, SpaceId, ImageDataSource, AssetSystem](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1618,8 +1623,8 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
         if (AssetCollResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Log,
-                "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, csp::common::LogLevel::Log,
+                "The Space thumbnail asset collection creation was not successful. ResCode: {}, HttpResCode: {}",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
             NullResult InternalResult(AssetCollResult);
@@ -1630,7 +1635,8 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
         const auto& ThumbnailAssetColl = AssetCollResult.GetAssetCollection();
 
-        AssetResultCallback CreateAssetCallback = [Callback, ImageDataSource, ThumbnailAssetColl, AssetSystem](const AssetResult& CreateAssetResult)
+        AssetResultCallback CreateAssetCallback
+            = [&LogSystem = LogSystem, Callback, ImageDataSource, ThumbnailAssetColl, AssetSystem](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1639,8 +1645,9 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
             if (CreateAssetResult.GetResultCode() == EResultCode::Failed)
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
-                    (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
+                LogFormat(LogSystem, csp::common::LogLevel::Log,
+                    "The Space thumbnail asset creation was not successful. ResCode: {}, HttpResCode: {}", (int)CreateAssetResult.GetResultCode(),
+                    CreateAssetResult.GetHttpResultCode());
 
                 NullResult InternalResult(CreateAssetResult);
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1648,11 +1655,11 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
                 return;
             }
 
-            UriResultCallback UploadCallback = [Callback](const UriResult& UploadResult)
+            UriResultCallback UploadCallback = [&LogSystem = LogSystem, Callback](const UriResult& UploadResult)
             {
                 if (UploadResult.GetResultCode() == EResultCode::Failed)
                 {
-                    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}",
                         (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                 }
 
@@ -1681,7 +1688,7 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
 void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& SpaceId, AssetCollectionsResultCallback Callback)
 {
-    AssetCollectionsResultCallback GetAssetCollCallback = [Callback](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback GetAssetCollCallback = [&LogSystem = LogSystem, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1690,8 +1697,9 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
 
         if (AssetCollResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
-                (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
+            LogFormat(LogSystem, csp::common::LogLevel::Log,
+                "The Space thumbnail asset collection retrieval has failed. ResCode: {}, HttpResCode: {}", (int)AssetCollResult.GetResultCode(),
+                AssetCollResult.GetHttpResultCode());
         }
 
         INVOKE_IF_NOT_NULL(Callback, AssetCollResult);
@@ -1709,11 +1717,11 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
 
 void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback)
 {
-    AssetsResultCallback ThumbnailAssetCallback = [Callback](const AssetsResult& AssetsResult)
+    AssetsResultCallback ThumbnailAssetCallback = [&LogSystem = LogSystem, Callback](const AssetsResult& AssetsResult)
     {
         if (AssetsResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail asset retrieval has failed. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, csp::common::LogLevel::Log, "The Space thumbnail asset retrieval has failed. ResCode: {}, HttpResCode: {}",
                 (int)AssetsResult.GetResultCode(), AssetsResult.GetHttpResultCode());
         }
         else if (AssetsResult.GetResultCode() == EResultCode::Success)
@@ -1761,7 +1769,8 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, AssetSystem, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback
+            = [&LogSystem = LogSystem, Callback, AssetSystem, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1776,7 +1785,8 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                 return;
             }
 
-            NullResultCallback DeleteAssetCallback = [Callback, AssetSystem, ThumbnailAssetCollection](const NullResult& DeleteAssetResult)
+            NullResultCallback DeleteAssetCallback
+                = [&LogSystem = LogSystem, Callback, AssetSystem, ThumbnailAssetCollection](const NullResult& DeleteAssetResult)
             {
                 if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -1785,8 +1795,9 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
                 if (DeleteAssetResult.GetResultCode() == EResultCode::Failed)
                 {
-                    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail asset deletion was not successful. ResCode: %d, HttpResCode: %d",
-                        (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
+                    LogFormat(LogSystem, csp::common::LogLevel::Log,
+                        "The Space thumbnail asset deletion was not successful. ResCode: {}, HttpResCode: {}", (int)DeleteAssetResult.GetResultCode(),
+                        DeleteAssetResult.GetHttpResultCode());
 
                     NullResult InternalResult(DeleteAssetResult);
                     INVOKE_IF_NOT_NULL(Callback, DeleteAssetResult);
@@ -1794,7 +1805,8 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     return;
                 }
 
-                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
+                NullResultCallback DeleteAssetCollCallback
+                    = [&LogSystem = LogSystem, Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
                 {
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -1803,8 +1815,8 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::Failed)
                     {
-                        CSP_LOG_FORMAT(csp::common::LogLevel::Log,
-                            "The Space thumbnail asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
+                        LogFormat(LogSystem, csp::common::LogLevel::Log,
+                            "The Space thumbnail asset collection deletion has failed. ResCode: {}, HttpResCode: {}",
                             (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
                     }
 

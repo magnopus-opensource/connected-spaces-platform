@@ -89,7 +89,8 @@ void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, cons
     std::string CharacterCheck = CartId.c_str();
     if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
     {
-        CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Error, "Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CheckoutInfoResult>());
 
@@ -187,7 +188,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 {
     if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "SpaceId and CartId inside CartInformation must be populated.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
 

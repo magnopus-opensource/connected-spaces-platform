@@ -144,7 +144,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
 {
     if (ProductContextSection.IsEmpty() || Category.IsEmpty() || InteractionType.IsEmpty())
     {
-        CSP_LOG_MSG(common::LogLevel::Error,
+        LogSystem.LogMsg(common::LogLevel::Error,
             "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -186,7 +186,7 @@ void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, c
 {
     if (ProductContextSection.IsEmpty() || Category.IsEmpty() || InteractionType.IsEmpty())
     {
-        CSP_LOG_MSG(common::LogLevel::Error,
+        LogSystem.LogMsg(common::LogLevel::Error,
             "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.");
 
         return;

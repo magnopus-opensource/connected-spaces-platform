@@ -20,6 +20,7 @@
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
@@ -71,8 +72,8 @@ void SequenceSystem::CreateSequence(const String& SequenceKey, const String& Ref
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Cannot create Sequence. Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
@@ -98,8 +99,8 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Cannot create Sequence. Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
@@ -124,15 +125,15 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 {
     if (!ValidateKey(OldSequenceKey))
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", OldSequenceKey.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Cannot rename Sequence. Old Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", OldSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
     if (!ValidateKey(NewSequenceKey))
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", NewSequenceKey.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Cannot rename Sequence. New Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", NewSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
@@ -175,8 +176,8 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
     {
         if (!ValidateKey(InSequenceKeys[i]))
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", InSequenceKeys[i].c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error,
+                "Cannot get Sequence. Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", InSequenceKeys[i].c_str());
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
             return;
         }
@@ -194,7 +195,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 
     if ((InReferenceType.HasValue() && InReferenceIds.IsEmpty()) || (!InReferenceIds.IsEmpty() && !InReferenceType.HasValue()))
     {
-        CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "InReferenceType and InReferenceIds need to be used together");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
@@ -257,8 +258,8 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-            "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Cannot get Sequence. Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
@@ -279,9 +280,8 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
     {
         if (!ValidateKey(InSequenceKeys[i]))
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                "Cannot delete Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"",
-                InSequenceKeys[i].c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error,
+                "Cannot delete Sequence. Key: {} contains invalid characters. Invalid characters are \"/\", \"#\", \"%\"", InSequenceKeys[i].c_str());
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
             return;
         }
@@ -321,7 +321,8 @@ void SequenceSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Error: Failed to register SequenceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
