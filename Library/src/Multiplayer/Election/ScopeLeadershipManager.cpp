@@ -14,7 +14,7 @@ ScopeLeadershipManager::ScopeLeadershipManager(MultiplayerConnection& Connection
 {
 }
 
-void ScopeLeadershipManager::RegisterScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
+void ScopeLeadershipManager::RegisterScope(const std::string& ScopeId, const std::optional<uint32_t>& LeaderId)
 {
     if (LeaderId.has_value())
     {
@@ -35,7 +35,7 @@ void ScopeLeadershipManager::RegisterScope(const std::string& ScopeId, const std
 
 void ScopeLeadershipManager::DeregisterScope(const std::string& ScopeId) { Scopes.erase(ScopeId); }
 
-void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& ScopeId, uint64_t ClientId)
+void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& ScopeId, uint32_t ClientId)
 {
     auto ScopeIt = Scopes.find(ScopeId);
 
@@ -118,7 +118,7 @@ void ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader()
     }
 }
 
-std::optional<uint64_t> ScopeLeadershipManager::GetLeaderClientId(const std::string& ScopeId) const
+std::optional<uint32_t> ScopeLeadershipManager::GetLeaderClientId(const std::string& ScopeId) const
 {
     auto ScopeIt = Scopes.find(ScopeId);
 

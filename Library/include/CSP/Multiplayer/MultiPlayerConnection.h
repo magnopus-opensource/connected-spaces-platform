@@ -111,7 +111,7 @@ public:
 
     /// @brief Requests the ClientID.
     /// @return uint64_t the ClientID for this connection.
-    uint64_t GetClientId() const;
+    uint32_t GetClientId() const;
 
     /// @brief Gets the current connection state.
     /// @return A ConnectionState enum value.
@@ -267,7 +267,7 @@ private:
 
     csp::common::LogSystem& LogSystem;
 
-    uint64_t ClientId;
+    uint32_t ClientId;
 
     DisconnectionCallbackHandler DisconnectionCallback;
     ConnectionCallbackHandler ConnectionCallback;

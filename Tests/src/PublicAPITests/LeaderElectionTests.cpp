@@ -95,7 +95,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, IsLocalClientLead
     auto& Connection = *SystemsManager.GetMultiplayerConnection();
     auto& LogSystem = *SystemsManager.GetLogSystem();
 
-    static constexpr uint64_t TestClientId2 = 2;
+    static constexpr uint32_t TestClientId2 = 2;
     static constexpr const char* TestScopeId1 = "TestScopeId1";
     static constexpr const char* TestScopeId2 = "TestScopeId2";
 
@@ -237,7 +237,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, NonLeaderUpdateTe
     auto& Connection = *SystemsManager.GetMultiplayerConnection();
     auto& LogSystem = *SystemsManager.GetLogSystem();
 
-    static constexpr uint64_t TestClientId2 = 2;
+    static constexpr uint32_t TestClientId2 = 2;
     static constexpr const char* TestScopeId = "TestScopeId";
 
     csp::multiplayer::ScopeLeadershipManager Manager { Connection, LogSystem };
@@ -369,7 +369,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, InvalidEventTest)
     auto& Connection = *SystemsManager.GetMultiplayerConnection();
     auto& LogSystem = *SystemsManager.GetLogSystem();
 
-    static constexpr const uint64_t TestClientId2 = 2;
+    static constexpr const uint32_t TestClientId2 = 2;
 
     static constexpr const char* TestScopeId = "TestScopeId";
 
