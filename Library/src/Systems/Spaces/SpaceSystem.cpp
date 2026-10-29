@@ -1146,7 +1146,7 @@ void SpaceSystem::UpdateUserRole(const String& SpaceId, const UserRoleInfo& NewU
 
 void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& RequestedUserIds, UserRoleCollectionCallback Callback)
 {
-    SpaceResultCallback GetSpaceCallback = [Callback, RequestedUserIds](const SpaceResult& SpaceResult)
+    SpaceResultCallback GetSpaceCallback = [&LogSystem = LogSystem, Callback, RequestedUserIds](const SpaceResult& SpaceResult)
     {
         if (SpaceResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1158,7 +1158,7 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
         if (SpaceResult.GetResultCode() == EResultCode::Success)
         {
             auto& Space = SpaceResult.GetSpace();
-            InternalResult.FillUsersRoles(Space, RequestedUserIds);
+            InternalResult.FillUsersRoles(Space, RequestedUserIds, LogSystem);
         }
 
         INVOKE_IF_NOT_NULL(Callback, InternalResult);

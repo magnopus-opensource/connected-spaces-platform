@@ -30,6 +30,11 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems
 {
 
@@ -110,7 +115,7 @@ private:
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
     UserRoleCollectionResult() {};
 
-    void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);
+    void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds, csp::common::LogSystem& LogSystem);
 
     csp::common::Array<UserRoleInfo> UserRoles;
 };
