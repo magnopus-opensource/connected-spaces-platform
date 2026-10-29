@@ -15,7 +15,6 @@
  */
 
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Systems/Spaces/Space.h"

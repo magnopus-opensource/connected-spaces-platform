@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "AssetSystemTestHelpers.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
