@@ -19,6 +19,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"
+#include "Systems/Script/ScriptErrorUtils.h"
 #include "Systems/Script/ScriptRuntime.h"
 #include "quickjspp.hpp"
 
@@ -70,9 +71,7 @@ namespace csp::systems
 
 std::shared_ptr<ScriptSystem> ScriptSystem::MakeInitialised()
 {
-    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* Ptr) {
-        delete Ptr;
-    });
+    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* Ptr) { delete Ptr; });
 
     Instance->Initialise();
 
@@ -138,24 +137,21 @@ bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& Scrip
         ScriptName = TheScriptContext->ScriptNameProvider();
     }
 
-    qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), ScriptName.c_str(), JS_EVAL_TYPE_MODULE);
+    csp::common::String FileName = "Script_" + ScriptName;
+
+    qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), FileName.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
+        JSContext* Ctx = TheScriptContext->Context->ctx;
+        // This will call JS_GetException which copies the exception from the shared exception slot on the JSRuntime (rt->current_exception) and then
+        // clears it. qjs::Value will free the value on destruction.
         qjs::Value Exception = TheScriptContext->Context->getException();
 
-        // TODO:
-        // Format an error message and log it.
-        // The following operations to extract the 'Message' and 'Stack' can both throw exceptions for example if JS_GetPropertyStr is called on null.
-        // A try/catch here won't be sufficient. It would stop the crash but a failed conversion leaves behind a JS exception 
-        // in JSRuntime.current_exception. The JSRuntime exception slot is shared by every context which could result in 
-        // another script error reporting this dangling exception instead of its own.
-        // We will therefore need to ensure we discard this pending exception.
+        // Utility function to safely construct a one line log from the exception QuickJS has thrown.
+        // Operations to extract elements such as the 'message' and 'stack' can throw exceptions so this fuction ensures they are safely discarded.
+        const std::string ErrorText = ScriptErrorUtils::FormatScriptError(Ctx, Exception.v, ScriptName.c_str(), FileName.c_str());
 
-        //std::string Message = Exception.as<std::string>();
-        //std::string Stack = (std::string)Exception["stack"];
-
-        // Temp log
-        CSP_LOG_FORMAT(common::LogLevel::Error, "RunScript Error encountered in: %s", ScriptName.c_str());
+        CSP_LOG_ERROR_MSG(ErrorText.c_str());
 
         // TODO: Return the formatted error message so that it can be stored as the last error in EntityScript which calls this method.
         return false;
