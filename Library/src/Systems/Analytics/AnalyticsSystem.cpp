@@ -107,22 +107,9 @@ void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
     }
 }
 
-AnalyticsSystem::AnalyticsSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , AnalyticsApi(nullptr)
-    , EventHandler(nullptr)
-    , AnalyticsQueueLock()
-    , AnalyticsRecordQueue()
-    , UserAgentInfo(nullptr)
-    , AnalyticsQueueSendRate(std::chrono::seconds(60))
-    , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxQueueSize(25)
-{
-}
-
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
     , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient, UserServiceDefinition))
     , EventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
     , AnalyticsQueueLock()
@@ -168,7 +155,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
     std::vector<std::shared_ptr<chs::AnalyticsRecord>> Records;
     Records.push_back(Record);
 
-    NullResultCallback SendAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
+    NullResultCallback SendAnalyticsCallback = [&LogSystem = this->LogSystem, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -177,7 +164,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
 
         if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            LogSystem->LogMsg(common::LogLevel::Error,
+            LogSystem.LogMsg(common::LogLevel::Error,
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());
@@ -227,7 +214,7 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
     SetTimeSinceLastQueueSend(CurrentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
+    NullResultCallback SendBatchAnalyticsCallback = [&LogSystem = this->LogSystem, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -236,11 +223,11 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
         if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
+            LogSystem.LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
         }
         else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            LogSystem->LogMsg(common::LogLevel::Error,
+            LogSystem.LogMsg(common::LogLevel::Error,
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());

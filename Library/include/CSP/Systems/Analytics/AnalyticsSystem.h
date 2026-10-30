@@ -171,7 +171,7 @@ public:
     CSP_NO_EXPORT size_t GetMaxQueueSize() const { return MaxQueueSize; }
 
 private:
-    AnalyticsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    AnalyticsSystem() = delete;
     CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
         const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
     ~AnalyticsSystem();

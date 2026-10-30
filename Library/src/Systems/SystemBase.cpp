@@ -21,24 +21,15 @@
 namespace csp::systems
 {
 
-SystemBase::SystemBase()
-    : WebClient(nullptr)
-    , EventBusPtr(nullptr)
-    , LogSystem(nullptr)
-{
-}
-
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
+SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem& LogSystem)
     : WebClient(InWebClient)
     , EventBusPtr(EventBus)
     , LogSystem(LogSystem)
 {
 }
 
-SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
-    : WebClient(nullptr)
-    , EventBusPtr(EventBus)
-    , LogSystem(LogSystem)
+SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, EventBus, LogSystem)
 {
 }
 

@@ -129,7 +129,7 @@ public:
     CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::SequenceChangedNetworkEventData& NetworkEventData);
 
 private:
-    SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    SequenceSystem() = delete;
     SequenceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& AggregationServiceDefinition,
         csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
     ~SequenceSystem();
