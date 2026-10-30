@@ -132,9 +132,36 @@ bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& Scrip
         return false;
     }
 
-    qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), "<eval>", JS_EVAL_TYPE_MODULE);
-    bool HasErrors = Result.isException();
-    return !HasErrors;
+    csp::common::String ScriptName = "<unknown script>";
+    if (TheScriptContext->ScriptNameProvider)
+    {
+        ScriptName = TheScriptContext->ScriptNameProvider();
+    }
+
+    qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), ScriptName.c_str(), JS_EVAL_TYPE_MODULE);
+    if (Result.isException())
+    {
+        qjs::Value Exception = TheScriptContext->Context->getException();
+
+        // TODO:
+        // Format an error message and log it.
+        // The following operations to extract the 'Message' and 'Stack' can both throw exceptions for example if JS_GetPropertyStr is called on null.
+        // A try/catch here won't be sufficient. It would stop the crash but a failed conversion leaves behind a JS exception 
+        // in JSRuntime.current_exception. The JSRuntime exception slot is shared by every context which could result in 
+        // another script error reporting this dangling exception instead of its own.
+        // We will therefore need to ensure we discard this pending exception.
+
+        //std::string Message = Exception.as<std::string>();
+        //std::string Stack = (std::string)Exception["stack"];
+
+        // Temp log
+        CSP_LOG_FORMAT(common::LogLevel::Error, "RunScript Error encountered in: %s", ScriptName.c_str());
+
+        // TODO: Return the formatted error message so that it can be stored as the last error in EntityScript which calls this method.
+        return false;
+    }
+
+    return true;
 }
 
 bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
@@ -152,7 +179,10 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     return !HasErrors;
 }
 
-bool ScriptSystem::CreateContext(int64_t ContextId) { return TheScriptRuntime->AddContext(ContextId); }
+bool ScriptSystem::CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider)
+{
+    return TheScriptRuntime->AddContext(ContextId, ScriptNameProvider);
+}
 
 bool ScriptSystem::DestroyContext(int64_t ContextId) { return TheScriptRuntime->RemoveContext(ContextId); }
 

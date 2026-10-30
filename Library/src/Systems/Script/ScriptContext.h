@@ -21,6 +21,7 @@
 
 #include <map>
 #include <string>
+#include <functional>
 
 namespace csp::systems
 {
@@ -36,7 +37,8 @@ class ScriptContext
     friend class ScriptSystem;
 
 public:
-    ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId);
+    ScriptContext(
+        ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId, std::function<csp::common::String()> InScriptNameProvider);
     ~ScriptContext();
 
     void AddModule(const csp::common::String& ModuleName);
@@ -61,6 +63,7 @@ private:
     using ImportedModules = std::vector<std::string>;
 
     uint64_t ContextId;
+    std::function<csp::common::String()> ScriptNameProvider;
     ScriptSystem* TheScriptSystem;
 
     qjs::Context* Context;

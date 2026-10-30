@@ -123,12 +123,19 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    using ScriptNameProvider = std::function<csp::common::String()>;
+
     /**
      * @brief Create a new context with specified ID.
      * @param ContextId int64_t : The Id of the context to create, must be unique to other contexts.
+     * @param ScriptNameProvider ScriptNameProvider : A registered callback that can be called to get the current Entity name. This allows us to 
+     * get the name at the point the error has been thrown, which avoids issues with an Entity being renamed.
      * @return Whether the context was created successfully.
      */
-    CSP_NO_EXPORT virtual bool CreateContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool CreateContext(int64_t /*ContextId*/, ScriptNameProvider /*ScriptNameProvider*/)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+    }
 
     /**
      * @brief Destroy a pre-existing context with specified ID.

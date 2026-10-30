@@ -143,7 +143,7 @@ csp::common::String EntityScript::GetErrorText() { return LastError; }
 void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
 {
     EntityScriptComponent = InEnityScriptComponent;
-    ScriptRunner->CreateContext(Entity->GetId());
+    ScriptRunner->CreateContext(Entity->GetId(), [this]() { return Entity->GetName(); });
 }
 
 csp::common::String EntityScript::GetScriptSource()

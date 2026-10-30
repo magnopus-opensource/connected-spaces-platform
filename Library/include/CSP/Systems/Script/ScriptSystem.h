@@ -75,7 +75,7 @@ public:
 
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
-    bool CreateContext(int64_t ContextId) override;
+    bool CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider) override;
     bool DestroyContext(int64_t ContextId) override;
     bool BindContext(int64_t ContextId) override;
     bool ResetContext(int64_t ContextId) override;
