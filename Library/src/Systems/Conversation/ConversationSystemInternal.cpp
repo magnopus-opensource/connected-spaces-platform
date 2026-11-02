@@ -339,7 +339,7 @@ namespace
 
 ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
     systems::UserSystem* UserSystem, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(&EventBus, &LogSystem)
+    : SystemBase(&EventBus, LogSystem)
     , AssetSystem { AssetSystem }
     , SpaceSystem { SpaceSystem }
     , UserSystem { UserSystem }
@@ -827,7 +827,7 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         // 5. Process result
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
@@ -894,11 +894,11 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
         .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
-            MakeInvalid<multiplayer::AnnotationResult>(), *LogSystem))
+            MakeInvalid<multiplayer::AnnotationResult>(), LogSystem))
         // 8. Process result
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
@@ -920,7 +920,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         // 3. Send multiplayer event
         .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
+            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), LogSystem))
         // 4. Delete annoation asset
         .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
@@ -939,7 +939,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
@@ -977,7 +977,7 @@ void ConversationSystemInternal::GetAnnotation(
         // 5. Process result
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
@@ -1044,13 +1044,12 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
-            *LogSystem))
+            LogSystem))
         // 8. Process result
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            *LogSystem,
-            [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+            LogSystem, [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
             [Callback]([[maybe_unused]] const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
@@ -1074,7 +1073,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         // 3. Send multiplayer event
         .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
+            "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), LogSystem))
         // 4. Delete annoation asset
         .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(
@@ -1093,7 +1092,7 @@ void ConversationSystemInternal::DeleteAnnotation(
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
@@ -1117,7 +1116,7 @@ void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
         // 3. Process result
         .then(CreateAnnotationThumbnailCollectionResult())
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
-        .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
+        .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));
 }

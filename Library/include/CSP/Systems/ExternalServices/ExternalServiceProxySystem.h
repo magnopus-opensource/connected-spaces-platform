@@ -123,7 +123,7 @@ public:
     CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
 
 private:
-    ExternalServiceProxySystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    ExternalServiceProxySystem() = delete;
     CSP_NO_EXPORT ExternalServiceProxySystem(
         csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, common::LogSystem& LogSystem);
     ~ExternalServiceProxySystem();

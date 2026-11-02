@@ -399,7 +399,7 @@ public:
     CSP_NO_EXPORT void SetMultiplayerSystem(csp::systems::MultiplayerSystem& MultiplayerSystem);
 
 private:
-    SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    SpaceSystem() = delete;
     SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
         const csp::ServiceDefinition& AggregationServiceDefinition, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem,
         csp::common::LogSystem& LogSystem);

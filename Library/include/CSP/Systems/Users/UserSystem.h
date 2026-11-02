@@ -301,7 +301,7 @@ public:
     CSP_NO_EXPORT csp::common::IAuthContext& GetAuthContext();
 
 private:
-    UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    UserSystem() = delete;
     UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
         const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();

@@ -143,7 +143,7 @@ public:
         double ResolveTime, const csp::common::Array<csp::common::String>& Tags, AnchorResolutionResultCallback Callback);
 
 private:
-    AnchorSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    AnchorSystem() = delete;
     CSP_NO_EXPORT AnchorSystem(
         csp::web::WebClient* InWebClient, const csp::ServiceDefinition& SpatialDataServiceDefinition, csp::common::LogSystem& LogSystem);
     ~AnchorSystem();

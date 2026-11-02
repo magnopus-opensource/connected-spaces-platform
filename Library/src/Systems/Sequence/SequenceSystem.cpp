@@ -298,15 +298,9 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
         );
 }
 
-SequenceSystem::SequenceSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , SequenceAPI(nullptr)
-{
-}
-
 SequenceSystem::SequenceSystem(web::WebClient* WebClient, const csp::ServiceDefinition& AggregationServiceDefinition,
     multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(WebClient, &EventBus, &LogSystem)
+    : SystemBase(WebClient, &EventBus, LogSystem)
 {
     SequenceAPI = new chs::SequenceApi(WebClient, AggregationServiceDefinition);
 

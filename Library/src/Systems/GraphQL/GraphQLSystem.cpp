@@ -26,15 +26,9 @@ namespace chs = csp::systems::graphqlservice;
 namespace csp::systems
 {
 
-GraphQLSystem::GraphQLSystem()
-    : SystemBase(nullptr, nullptr, nullptr)
-    , GraphQLAPI(nullptr)
-{
-}
-
 GraphQLSystem::GraphQLSystem(
     csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     GraphQLAPI = new chs::GraphQLApi(InWebClient, AggregationServiceDefinition);
 }

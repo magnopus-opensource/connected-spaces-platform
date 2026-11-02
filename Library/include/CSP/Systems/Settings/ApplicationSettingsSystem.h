@@ -97,7 +97,7 @@ public:
         ApplicationSettingsResultCallback Callback);
 
 private:
-    ApplicationSettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    ApplicationSettingsSystem() = delete;
     CSP_NO_EXPORT ApplicationSettingsSystem(
         csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem);
     ~ApplicationSettingsSystem();
