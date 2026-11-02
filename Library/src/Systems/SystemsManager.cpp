@@ -190,7 +190,8 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 #endif
     }
 
-    // Using custom header as User-Agent is protected on web SKUs
+    // Every request sends the client user agent (e.g. for backend logging and analytics). Not all browsers allow overriding
+    // `User-Agent`, hence the custom header, which despite its name has nothing to do with `assets`.
     WebClient->SetDefaultHeader("X-AssetPlatform", ClientUserAgent.c_str());
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
