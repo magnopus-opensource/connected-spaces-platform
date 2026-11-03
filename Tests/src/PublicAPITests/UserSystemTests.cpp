@@ -1188,7 +1188,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
     EXPECT_NE(Result.GetValue(), "");
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();

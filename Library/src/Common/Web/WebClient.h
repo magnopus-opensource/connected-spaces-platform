@@ -89,7 +89,11 @@ public:
     /// @param AuthContext csp::common::IAuthContext& : The AuthContext for this object.
     virtual void SetAuthContext(csp::common::IAuthContext& AuthContext);
 
-    void SetWAFBypass(const std::optional<std::string>& Value);
+    /// @brief Sets a header that is added to every request sent by this client.
+    /// @details Default headers are applied in SendRequest, overwriting any header of the same name already set on the payload.
+    /// @param Key The header name.
+    /// @param Value The header value, or empty to stop adding the header.
+    void SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value);
 
 protected:
     /// @brief Send a http request
@@ -110,7 +114,7 @@ protected:
 private:
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
-    std::optional<std::string> WAFBypassValue;
+    HttpPayload::HeadersMap DefaultHeaders;
 
 #ifdef CSP_WASM
     csp::Queue<HttpRequest*> WasmRequests;

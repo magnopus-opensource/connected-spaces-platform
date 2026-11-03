@@ -30,7 +30,7 @@ class HttpPayload
 public:
     using HeadersMap = std::map<std::string, std::string>;
 
-    HttpPayload();
+    HttpPayload() = default;
     HttpPayload(const char* InContent);
     HttpPayload(const csp::common::String& InContent);
     ~HttpPayload();
