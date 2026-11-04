@@ -30,8 +30,29 @@
 #include "quickjs-libc.h"
 #endif
 
+#include <filesystem>
+#include <fmt/format.h>
 #include <map>
 #include <sstream>
+
+namespace
+{
+
+// Takes the exception from the shared slot on the JSRuntime (rt->current_exception), formats it into a one line error log and clears it.
+// qjs::Value frees the exception on destruction.
+csp::common::String ConsumeAndLogScriptException(qjs::Context& Context, const std::string& ScriptName, const std::string& FileName)
+{
+    qjs::Value Exception = Context.getException();
+
+    // Utility function to safely construct a one line log from the exception QuickJS has thrown.
+    // Operations to extract elements such as the 'message' and 'stack' can throw exceptions so this fuction ensures they are safely discarded.
+    const csp::common::String ErrorText = csp::systems::ScriptErrorUtils::FormatScriptError(Context.ctx, Exception.v, ScriptName, FileName);
+    CSP_LOG_ERROR_MSG(ErrorText);
+
+    return ErrorText;
+}
+
+} // namespace
 
 // Template specializations for some custom csp types we want to use
 template <> struct qjs::js_property_traits<csp::common::String>
@@ -123,37 +144,35 @@ void ScriptSystem::Shutdown()
 
 bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& ScriptText)
 {
-    // CSP_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
+    csp::common::String Error;
 
+    return RunScriptWithErrorLog(ContextId, ScriptText, Error);
+}
+
+bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::String& ScriptText, csp::common::String& OutError)
+{
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
     if (TheScriptContext == nullptr)
     {
+        OutError = fmt::format("Unable to run script: no script context exists with id {}", ContextId).c_str();
+        CSP_LOG_ERROR_MSG(OutError);
+
         return false;
     }
 
     csp::common::String ScriptName = "<unknown script>";
+    csp::common::String FileName = "<unknown file>";
     if (TheScriptContext->ScriptNameProvider)
     {
         ScriptName = TheScriptContext->ScriptNameProvider();
+        FileName = "Script_" + ScriptName;
     }
-
-    csp::common::String FileName = "Script_" + ScriptName;
 
     qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), FileName.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
-        JSContext* Ctx = TheScriptContext->Context->ctx;
-        // This will call JS_GetException which copies the exception from the shared exception slot on the JSRuntime (rt->current_exception) and then
-        // clears it. qjs::Value will free the value on destruction.
-        qjs::Value Exception = TheScriptContext->Context->getException();
+        OutError = ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName.c_str(), FileName.c_str());
 
-        // Utility function to safely construct a one line log from the exception QuickJS has thrown.
-        // Operations to extract elements such as the 'message' and 'stack' can throw exceptions so this fuction ensures they are safely discarded.
-        const std::string ErrorText = ScriptErrorUtils::FormatScriptError(Ctx, Exception.v, ScriptName.c_str(), FileName.c_str());
-
-        CSP_LOG_ERROR_MSG(ErrorText.c_str());
-
-        // TODO: Return the formatted error message so that it can be stored as the last error in EntityScript which calls this method.
         return false;
     }
 
@@ -167,12 +186,26 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
     if (TheScriptContext == nullptr)
     {
+        CSP_LOG_ERROR_FORMAT("Unable to run script file %s: no script context exists with id %lld", ScriptFilePath.c_str(), ContextId);
+
         return false;
     }
 
+    // evalFile uses the path as the eval filename, so stack frames reference the full path.
+    // If an exception is thrown, ConsumeAndLogScriptException() -> FormatScriptError() below will try to extract the linenumber from the exception
+    // which will require the full path.
+    const std::string FileName = ScriptFilePath.c_str();
+    const std::string ScriptName = std::filesystem::path(FileName).filename().string();
+
     qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
-    bool HasErrors = Result.isException();
-    return !HasErrors;
+    if (Result.isException())
+    {
+        ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName, FileName);
+
+        return false;
+    }
+
+    return true;
 }
 
 bool ScriptSystem::CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider)

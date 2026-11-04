@@ -54,35 +54,39 @@ bool EntityScript::Invoke()
     CheckBinding();
 
     HasLastError = false;
-    LastError = "Unknown Error";
+    LastError = "Not set";
 
     if (EntityScriptComponent == nullptr)
     {
         HasLastError = true;
         LastError = SCRIPT_ERROR_NO_COMPONENT;
-    }
-    else
-    {
-        const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
 
-        if (!ScriptSource.IsEmpty())
-        {
-            HasLastError = !ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
-        }
-        else
-        {
-            HasLastError = true;
-            LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
-        }
-    }
-
-    if (HasLastError)
-    {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
         }
+
+        return false;
     }
+
+    const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
+
+    if (ScriptSource.IsEmpty())
+    {
+        HasLastError = true;
+        LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
+
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
+        }
+
+        return false;
+    }
+
+    csp::common::String Error;
+    HasLastError = !ScriptRunner->RunScriptWithErrorLog(Entity->GetId(), ScriptSource, Error);
+    LastError = HasLastError ? Error : csp::common::String();
 
     return !HasLastError;
 }
@@ -98,6 +102,7 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     // If offline, just run the script
     if (RealtimeEnginePtr->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
     {
+        // This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
         return;
     }
@@ -106,6 +111,7 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEnginePtr);
     if (OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally())
     {
+        // This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
     }
     else

@@ -83,7 +83,7 @@ int32_t GetErrorLineNumber(JSContext* Ctx, JSValueConst Exception, const std::st
     return Line;
 }
 
-std::string FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std::string& ScriptName, const std::string& FileName)
+csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std::string& ScriptName, const std::string& FileName)
 {
     // Safely convert the JS value to a string, clearing any exception that may be thrown as a result of this conversion failing.
     const std::string Message = ToStdString(Ctx, Exception);
@@ -110,18 +110,18 @@ std::string FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std:
     // the stack trace, eg. "at <anonymous> (Script_ScriptHandlerErrorEntity:7)".
     const int32_t Line = GetErrorLineNumber(Ctx, Exception, Stack, FileName);
 
-    std::string Out = fmt::format("Script error in entity \"{}\"", ScriptName);
+    csp::common::String Out = fmt::format("Script error in entity \"{}\"", ScriptName).c_str();
 
     if (Line > 0)
     {
-        Out += fmt::format(" (line {})", Line);
+        Out += fmt::format(" (line {})", Line).c_str();
     }
 
-    Out += fmt::format(": {}", Message);
+    Out += fmt::format(": {}", Message).c_str();
 
     if (!Stack.empty())
     {
-        Out += fmt::format("\n{}", Stack);
+        Out += fmt::format("\n{}", Stack).c_str();
     }
 
     return Out;

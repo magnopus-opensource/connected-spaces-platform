@@ -16,6 +16,7 @@
 #pragma once
 
 #include "quickjs.h"
+#include "CSP/Common/String.h"
 
 #include <string>
 
@@ -44,6 +45,6 @@ int32_t GetErrorLineNumber(JSContext* Ctx, JSValueConst Exception, const std::st
 // Script error in entity "ScriptHandlerErrorEntity" (line 7): TypeError: not a function
 //    at <anonymous> (Script_ScriptHandlerErrorEntity:7)
 //    at <anonymous> (Script_ScriptHandlerErrorEntity:1)
-std::string FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std::string& ScriptName, const std::string& FileName);
+csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std::string& ScriptName, const std::string& FileName);
 
 } // namespace csp::systems::ScriptErrorUtils

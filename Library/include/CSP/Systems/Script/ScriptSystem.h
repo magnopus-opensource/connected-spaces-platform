@@ -67,6 +67,7 @@ public:
     /// @param ScriptText : The script to execute.
     /// @return a boolean representing success running the script.
     bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override;
+
     /// @brief Attempts to execute a script from a given file path in the given context.
     /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptFilePath  : The file path of the script to execute.
@@ -75,6 +76,7 @@ public:
 
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
+    bool RunScriptWithErrorLog(int64_t ContextId, const csp::common::String& ScriptText, csp::common::String& OutError) override;
     bool CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider) override;
     bool DestroyContext(int64_t ContextId) override;
     bool BindContext(int64_t ContextId) override;
