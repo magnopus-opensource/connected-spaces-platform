@@ -634,12 +634,26 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
     std::stringstream ss;
     ss << "import * as " << csp::systems::SCRIPT_NAMESPACE << " from \"" << csp::systems::SCRIPT_NAMESPACE << "\"; globalThis."
        << csp::systems::SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE << ";";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    qjs::Value EvalResult1 = Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    if (EvalResult1.isException())
+    {
+        JSValue Eval1Error = JS_GetException(Context->ctx);
+        JS_FreeValue(Context->ctx, Eval1Error);
+
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "QuickJS exception thrown while attempting to evaluate OKO module import into scripts.");
+    }
 
     // For script backwards compatibility
     ss.clear();
     ss << "globalThis." << csp::systems::OLD_SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE;
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    qjs::Value EvalResult2 = Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    if (EvalResult2.isException())
+    {
+        JSValue Eval2Error = JS_GetException(Context->ctx);
+        JS_FreeValue(Context->ctx, Eval2Error);
+
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "QuickJS exception thrown while making global property assignment for backwards compatibility.");
+    }
 }
 
 } // namespace csp::multiplayer

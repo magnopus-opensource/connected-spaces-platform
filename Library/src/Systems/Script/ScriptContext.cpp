@@ -115,8 +115,18 @@ uint64_t ScriptContext::GetId() const { return ContextId; }
 bool ScriptContext::ExistsInContext(const csp::common::String& ObjectName)
 {
     qjs::Value Result = Context->eval(ObjectName.c_str());
-    bool isExcept = Result.isException();
-    return !isExcept;
+
+    // The JSRuntime can only hold a single exception per context (current_exception) and so must be cleared via the
+    // call below to JS_GetException().
+    if (Result.isException())
+    {
+        JSValue err = JS_GetException(Context->ctx);
+        JS_FreeValue(Context->ctx, err);
+
+        return false;
+    }
+
+    return true;
 }
 
 void ScriptContext::AddImport(const csp::common::String& Url)
