@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Systems/Assets/AssetSystem.h"

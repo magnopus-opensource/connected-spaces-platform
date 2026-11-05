@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/version.h"
 #include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
@@ -420,7 +421,7 @@ public:
         return RootHierarchyEntities;
     }
 
-    std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
+    std::string GetFoundationVersion() { return CSP_FOUNDATION_COMMIT_ID; }
 
 private:
     csp::common::IRealtimeEngine* EntitySystem;
@@ -512,6 +513,10 @@ EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtim
 
 void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner)
 {
+    /*
+    * We looked at removing this as part of OF-1920 - However, it would be unsafe to do so.
+    * Instead we will address this as part of OF-1913
+    */
     if (csp::CSPFoundation::GetIsInitialised())
     {
         ScriptRunner.UnregisterScriptBinding(InEntityBinding);

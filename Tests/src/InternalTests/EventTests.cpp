@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "CSP/CSPFoundation.h"
 #include "Events/EventSystem.h"
 #include "TestHelpers.h"
 
