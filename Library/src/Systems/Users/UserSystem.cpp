@@ -16,7 +16,6 @@
 
 #include "CSP/Systems/Users/UserSystem.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/SharedEnums.h"
@@ -238,7 +237,7 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
     }
 
     auto Request = std::make_shared<chs_user::RefreshRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+    Request->SetDeviceId(LoginState->GetDeviceId());
     Request->SetUserId(Data->UserId);
     Request->SetRefreshToken(Data->RefreshToken);
 
@@ -275,13 +274,16 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 }
 
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
-    const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
+    const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
+    csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, LogSystem)
     , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient, UserServiceDefinition) }
     , ProfileAPI { new chs_user::ProfileApi(InWebClient, UserServiceDefinition) }
     , PingAPI { new chs_user::PingApi(InWebClient, UserServiceDefinition) }
     , StripeAPI { new chs_user::StripeApi(InWebClient, UserServiceDefinition) }
     , MultiplayerConnectionURI(InMultiplayerConnectionURI)
+    , DeviceId { DeviceId }
+    , Tenant { Tenant }
     , CurrentLoginState(std::make_shared<csp::common::LoginState>())
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState }
@@ -336,10 +338,10 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
     SetTokenOptions(TokenOptions, Options, CurrentLoginState);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+    Request->SetDeviceId(DeviceId.c_str());
     Request->SetEmail(Email);
     Request->SetPassword(Password);
-    Request->SetTenant(csp::CSPFoundation::GetTenant());
+    Request->SetTenant(Tenant.c_str());
 
     if (UserHasVerifiedAge.HasValue())
     {
@@ -409,7 +411,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
     SetTokenOptions(TokenOptions, Options, CurrentLoginState);
 
     auto Request = std::make_shared<chs_user::RefreshRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+    Request->SetDeviceId(DeviceId.c_str());
     Request->SetUserId(UserId);
     Request->SetRefreshToken(RefreshToken);
 
@@ -468,8 +470,8 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
     SetTokenOptions(TokenOptions, Options, CurrentLoginState);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-    Request->SetTenant(csp::CSPFoundation::GetTenant());
+    Request->SetDeviceId(DeviceId.c_str());
+    Request->SetTenant(Tenant.c_str());
 
     if (UserHasVerifiedAge.HasValue())
     {
@@ -526,8 +528,8 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
     }
 
     auto Request = std::make_shared<chs_user::LoginGuestRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-    Request->SetTenant(csp::CSPFoundation::GetTenant());
+    Request->SetDeviceId(DeviceId.c_str());
+    Request->SetTenant(Tenant.c_str());
 
     if (UserHasVerifiedAge.HasValue())
     {
@@ -629,10 +631,10 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
     }
 
     const auto Request = std::make_shared<chs_user::LoginSocialRequest>();
-    Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+    Request->SetDeviceId(DeviceId.c_str());
     Request->SetProvider(ConvertExternalAuthProvidersToString(AuthProvider));
     Request->SetToken(ThirdPartyToken);
-    Request->SetTenant(csp::CSPFoundation::GetTenant());
+    Request->SetTenant(Tenant.c_str());
 
     std::optional<csp::common::String> Client = ThirdPartyPlatformToString(ClientType);
     if (Client.has_value())
@@ -802,7 +804,7 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Di
     InitialSettings->SetContext("UserSettings");
     InitialSettings->SetSettings({ { "Newsletter", ReceiveNewsletter ? "true" : "false" } });
     Request->SetInitialSettings({ InitialSettings });
-    Request->SetTenant(csp::CSPFoundation::GetTenant());
+    Request->SetTenant(Tenant.c_str());
 
     Request->SetVerifiedAgeEighteen(HasVerifiedAge);
 
@@ -832,7 +834,7 @@ void UserSystem::UpgradeGuestAccount(
     Request->SetDisplayName(DisplayName);
     Request->SetEmail(Email);
     Request->SetPassword(Password);
-    Request->SetGuestDeviceId(csp::CSPFoundation::GetDeviceId());
+    Request->SetGuestDeviceId(DeviceId.c_str());
 
     const csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs_user::ProfileDto>(Callback, nullptr);
@@ -889,7 +891,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email, const csp::com
     {
         auto Request = std::make_shared<chs_user::ForgotPasswordRequest>();
         Request->SetEmail(Email);
-        Request->SetTenant(csp::CSPFoundation::GetTenant());
+        Request->SetTenant(Tenant.c_str());
 
         std::optional<csp::common::String> RedirectUrlValue;
         std::optional<csp::common::String> EmailLinkUrlValue;
@@ -952,13 +954,12 @@ void UserSystem::Ping(NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr PingResponseHandler
         = PingAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs_user::PingApi*>(PingAPI)->pingGet({ }, PingResponseHandler);
+    static_cast<chs_user::PingApi*>(PingAPI)->pingGet({}, PingResponseHandler);
 }
 
 void UserSystem::ResendVerificationEmail(
     const csp::common::String& InEmail, const csp::common::Optional<csp::common::String>& InRedirectUrl, NullResultCallback Callback)
 {
-    const csp::common::String& Tenant = CSPFoundation::GetTenant();
     std::optional<csp::common::String> RedirectUrl;
 
     if (InRedirectUrl.HasValue())
@@ -969,7 +970,8 @@ void UserSystem::ResendVerificationEmail(
     csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersEmailsEmailConfirm_emailRe_sendPost({ InEmail, Tenant, RedirectUrl }, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)
+        ->usersEmailsEmailConfirm_emailRe_sendPost({ InEmail, Tenant.c_str(), RedirectUrl }, ResponseHandler);
 }
 
 void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, StringResultCallback Callback)
@@ -999,7 +1001,8 @@ void UserSystem::NotifyRefreshTokenHasChanged()
         auto Snapshot = GetLoginState().GetSnapshotThreadSafe();
 
         LoginTokenInfoResult InternalResult;
-        InternalResult.FillLoginTokenInfo(Snapshot->AccessToken, Snapshot->AccessTokenExpiresAt, Snapshot->RefreshToken, Snapshot->RefreshTokenExpiresAt);
+        InternalResult.FillLoginTokenInfo(
+            Snapshot->AccessToken, Snapshot->AccessTokenExpiresAt, Snapshot->RefreshToken, Snapshot->RefreshTokenExpiresAt);
 
         RefreshTokenChangedCallback(InternalResult);
     }

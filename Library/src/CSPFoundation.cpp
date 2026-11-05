@@ -482,8 +482,6 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     // Apply feature flag overrides
     ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
 
-    csp::systems::SystemsManager::Instantiate(*Endpoints, *ClientUserAgentString, SignalRInject, WebClientInject);
-
     std::optional<std::string> NewDeviceId = LoadDeviceId();
     assert(NewDeviceId.has_value());
 
@@ -494,6 +492,9 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     }
 
     *DeviceId = NewDeviceId->c_str();
+
+    csp::systems::SystemsManager::Instantiate(*Endpoints, *ClientUserAgentString, SignalRInject, WebClientInject);
+
     IsInitialised = true;
 
     return true;

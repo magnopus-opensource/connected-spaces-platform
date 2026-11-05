@@ -188,7 +188,7 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
-    UserSystem = new csp::systems::UserSystem(WebClient, Endpoints.UserService, Endpoints.MultiplayerConnection.GetURI(), nullptr, *LogSystem);
+    UserSystem = new csp::systems::UserSystem(WebClient, Endpoints.UserService, Endpoints.MultiplayerConnection.GetURI(), CSPFoundation::GetDeviceId().c_str(), CSPFoundation::GetTenant().c_str(), nullptr, *LogSystem);
 
     WebClient->SetAuthContext(UserSystem->GetAuthContext());
 
@@ -224,8 +224,8 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
         = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
-    AnalyticsSystem
-        = new csp::systems::AnalyticsSystem(WebClient, Endpoints.UserService, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
+    AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, Endpoints.UserService, &(csp::CSPFoundation::GetClientUserAgentInfo()),
+        CSPFoundation::GetTenant().c_str(), *LogSystem);
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, Endpoints.AggregationService, *LogSystem);
     MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, Endpoints.MultiplayerService, *SpaceSystem, *LogSystem);
     SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
