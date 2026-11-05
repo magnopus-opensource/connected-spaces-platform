@@ -1103,6 +1103,9 @@ void OnlineRealtimeEngine::DisableLeaderElection()
          * This isn't true safety. In threaded destruction contexts, there is still a window where
          * this remains unsynchronized. Doing this guard closes the window significantly however until we
          * can actually sort out our initialization and de-initialization to make them bulletproof
+         * 
+         * We looked at removing this as part of OF-1920 - However, it would be unsafe to do so.
+         * Instead we will address this as part of OF-1912
          */
         if (csp::CSPFoundation::GetIsInitialised())
         {
