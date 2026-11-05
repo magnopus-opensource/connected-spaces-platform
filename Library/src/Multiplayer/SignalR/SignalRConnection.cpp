@@ -15,7 +15,6 @@
  */
 #include "SignalRConnection.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "SignalRClient.h"
@@ -62,13 +61,13 @@ public:
 #endif
 
 SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient,
-    csp::common::IAuthContext& AuthContext)
+    csp::common::IAuthContext& AuthContext, std::string_view DeviceId)
     : config(
-          [KeepAliveSeconds]
+          [KeepAliveSeconds, DeviceId]
           {
               auto clientConfig = signalr_client_config();
               clientConfig.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
-              clientConfig.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
+              clientConfig.set_http_headers({ { "X-DeviceUDID", DeviceId.data() } });
               return clientConfig;
           }())
     , Connection(hub_connection_builder::create(BaseUri)
