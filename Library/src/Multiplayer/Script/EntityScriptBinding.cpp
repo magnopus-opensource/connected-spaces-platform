@@ -513,6 +513,10 @@ EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtim
 
 void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner)
 {
+    /*
+    * We looked at removing this as part of OF-1920 - However, it would be unsafe to do so.
+    * Instead we will address this as part of OF-1913
+    */
     if (csp::CSPFoundation::GetIsInitialised())
     {
         ScriptRunner.UnregisterScriptBinding(InEntityBinding);
