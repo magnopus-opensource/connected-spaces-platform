@@ -420,7 +420,7 @@ public:
         return RootHierarchyEntities;
     }
 
-    std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
+    std::string GetFoundationVersion() { return CSP_FOUNDATION_COMMIT_ID; }
 
 private:
     csp::common::IRealtimeEngine* EntitySystem;

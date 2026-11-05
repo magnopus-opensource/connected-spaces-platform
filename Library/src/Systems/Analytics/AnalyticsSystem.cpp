@@ -55,8 +55,8 @@ std::shared_ptr<chs::AnalyticsRecord> CreateAnalyticsRecord(const csp::ClientUse
     String ClientVersion
         = fmt::format("{}/{}({})", UserAgentInfo->ClientSKU.c_str(), UserAgentInfo->ClientVersion.c_str(), UserAgentInfo->ClientEnvironment.c_str())
               .c_str();
-    String CSPVersion = fmt::format("CSP/{}({})", CSPFoundation::GetVersion().c_str(), CSPFoundation::GetBuildType().c_str()).c_str();
-
+    String CSPVersion = fmt::format("CSP/{}({})", CSP_FOUNDATION_COMMIT_ID, CSP_FOUNDATION_BUILD_TYPE).c_str();
+    
     std::vector<String> VersionsMatrix { ClientVersion, CSPVersion };
     Record->SetVersionMatrix(VersionsMatrix);
 
