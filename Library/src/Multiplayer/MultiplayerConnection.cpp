@@ -133,10 +133,10 @@ namespace
 }
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(
-    const csp::common::String& MultiplayerConnectionURI, csp::common::IAuthContext& AuthContext)
+    const csp::common::String& MultiplayerConnectionURI, csp::common::IAuthContext& AuthContext, const csp::common::String& DeviceId)
 {
     return new csp::multiplayer::SignalRConnection(
-        MultiplayerConnectionURI.c_str(), KEEP_ALIVE_INTERVAL, std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext);
+        MultiplayerConnectionURI.c_str(), KEEP_ALIVE_INTERVAL, std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext, DeviceId.c_str());
 }
 
 MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection)

@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/version.h"
 #include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
