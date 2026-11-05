@@ -303,7 +303,8 @@ public:
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
-        const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
+        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
@@ -335,6 +336,9 @@ private:
     UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
     AuthContext Auth;
+
+    std::string DeviceId;
+    std::string Tenant;
 };
 
 } // namespace csp::systems

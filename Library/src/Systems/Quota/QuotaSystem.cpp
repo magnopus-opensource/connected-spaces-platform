@@ -36,9 +36,10 @@ QuotaSystem::QuotaSystem()
 }
 
 QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& TrackingServiceDefinition, csp::common::LogSystem& LogSystem,
-    const csp::common::IAuthContext& Context)
+    const csp::common::IAuthContext& Context, std::string_view Tenant)
     : SystemBase(InWebClient, nullptr, &LogSystem)
     , Context { &Context }
+    , Tenant { Tenant }
 {
     QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient, TrackingServiceDefinition);
     QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient, TrackingServiceDefinition);
@@ -157,7 +158,7 @@ void QuotaSystem::SetUserTier(TierNames TierName, const csp::common::String& Use
 
     auto RequestBody = std::make_shared<chs::QuotaTierAssignmentDto>();
     RequestBody->SetTierName(TierNameEnumToString(TierName));
-    RequestBody->SetTenantName(CSPFoundation::GetTenant());
+    RequestBody->SetTenantName(Tenant.c_str());
 
     // There is an expiry timestamp in the DTO, but it isn't documented, and from experimenting
     // I could not get it to return a non rejected code, so omitting it.
