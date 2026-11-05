@@ -205,7 +205,8 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.
     auto* SignalRConnection = (SignalRInject == nullptr)
-        ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(Endpoints.MultiplayerConnection.GetURI(), UserSystem->GetAuthContext())
+        ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(
+              Endpoints.MultiplayerConnection.GetURI(), UserSystem->GetAuthContext(), CSPFoundation::GetDeviceId().c_str())
         : SignalRInject;
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
