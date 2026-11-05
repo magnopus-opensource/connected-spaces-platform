@@ -173,7 +173,7 @@ public:
 private:
     AnalyticsSystem() = delete;
     CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
-        const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
+        const csp::ClientUserAgent* AgentInfo, std::string_view Tenant, common::LogSystem& LogSystem);
     ~AnalyticsSystem();
 
     void SetTimeSinceLastQueueSend(std::chrono::milliseconds NewTimeSinceLastQueueSend);
@@ -191,6 +191,8 @@ private:
     std::chrono::milliseconds AnalyticsQueueSendRate;
     std::chrono::milliseconds TimeSinceLastQueueSend;
     size_t MaxQueueSize;
+
+    std::string Tenant;
 };
 
 } // namespace csp::systems

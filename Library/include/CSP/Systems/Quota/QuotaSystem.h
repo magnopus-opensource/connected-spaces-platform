@@ -110,7 +110,7 @@ public:
 private:
     QuotaSystem() = delete;
     CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& TrackingServiceDefinition,
-        csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context);
+        csp::common::LogSystem& LogSystem, const csp::common::IAuthContext& Context, std::string_view Tenant);
     ~QuotaSystem();
 
     csp::services::ApiBase* QuotaTierAssignmentAPI;
@@ -118,5 +118,7 @@ private:
     csp::services::ApiBase* QuotaActivityAPI;
 
     const csp::common::IAuthContext* Context;
+
+    std::string Tenant;
 };
 } // namespace csp::systems

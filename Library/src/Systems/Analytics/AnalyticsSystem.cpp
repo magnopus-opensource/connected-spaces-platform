@@ -16,7 +16,7 @@
 
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 
-#include "CSP/CSPFoundation.h"
+#include "CSP/version.h"
 #include "CallHelpers.h"
 #include "Common/DateTime.h"
 #include "Events/EventListener.h"
@@ -35,14 +35,14 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-std::shared_ptr<chs::AnalyticsRecord> CreateAnalyticsRecord(const csp::ClientUserAgent* UserAgentInfo, const String& ProductContextSection,
-    const String& Category, const String& InteractionType, const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata)
+std::shared_ptr<chs::AnalyticsRecord> CreateAnalyticsRecord(const csp::ClientUserAgent* UserAgentInfo, std::string_view Tenant, const String& ProductContextSection, const String& Category, const String& InteractionType,
+    const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata)
 {
     // Construct an AnalyticsRecord object
     auto Record = std::make_shared<chs::AnalyticsRecord>();
     Record->SetProductIdentifier("csp");
     Record->SetProductContext(UserAgentInfo->ClientSKU);
-    Record->SetTenantName(CSPFoundation::GetTenant());
+    Record->SetTenantName(Tenant.data());
     Record->SetProductContextSection(ProductContextSection);
     Record->SetCategory(Category);
     Record->SetInteractionType(InteractionType);
@@ -108,7 +108,7 @@ void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
 }
 
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
-    const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
+    const csp::ClientUserAgent* AgentInfo, std::string_view Tenant, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, LogSystem)
     , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient, UserServiceDefinition))
     , EventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
@@ -118,6 +118,7 @@ AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::Se
     , AnalyticsQueueSendRate(std::chrono::seconds(60))
     , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
     , MaxQueueSize(25)
+    , Tenant { Tenant }
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
 }
@@ -150,7 +151,8 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
         return;
     }
 
-    auto Record = CreateAnalyticsRecord(UserAgentInfo, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
+    auto Record
+        = CreateAnalyticsRecord(UserAgentInfo, Tenant, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
 
     std::vector<std::shared_ptr<chs::AnalyticsRecord>> Records;
     Records.push_back(Record);
@@ -190,7 +192,8 @@ void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, c
         return;
     }
 
-    auto Record = CreateAnalyticsRecord(UserAgentInfo, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
+    auto Record
+        = CreateAnalyticsRecord(UserAgentInfo, Tenant, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
 
     std::scoped_lock AnalyticsQueueLocker(AnalyticsQueueLock);
     AnalyticsRecordQueue.emplace_back(Record);
