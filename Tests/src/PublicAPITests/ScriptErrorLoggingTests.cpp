@@ -30,7 +30,10 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 #include <regex>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -329,4 +332,44 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, GetErrorTextReturnsScriptErr
 
     const std::string ErrorText = Entity->GetScript().GetErrorText().c_str();
     EXPECT_NE(ErrorText.find("not a function"), std::string::npos) << "GetErrorText() returned: " << ErrorText;
+}
+
+/*
+    A runtime error thrown when running a script from a file. This bypasses EntityScript entirely:
+    ScriptSystem::RunScriptFile -> qjs::Context::evalFile. The script is named after the file.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsReported)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+
+    constexpr int64_t ContextId = INT64_MAX;
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, []() { return csp::common::String("RunScriptFileError.js"); }));
+
+    // Assets are copied next to the test executable, and loaded relative to the working directory like the other asset tests.
+    const auto FilePath = std::filesystem::absolute("assets/RunScriptFileError.js");
+    const std::string ScriptText = ReadScriptFile(FilePath);
+    ASSERT_FALSE(ScriptText.empty()) << "Test script not found or empty at " << FilePath.string();
+
+    // Find the failing line from the test file.
+    const size_t ErrorLine = LineNumOf(ScriptText, "NotAFunction()");
+    ASSERT_NE(ErrorLine, 0u);
+
+    {
+        RAIILogCapture Capture;
+
+        const bool Succeeded = ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str());
+
+        EXPECT_FALSE(Succeeded);
+        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", "not a function", ErrorLine));
+    }
+
+    // The exception must have been consumed. A later, valid script in the same runtime should neither fail nor report it.
+    {
+        RAIILogCapture Capture;
+
+        EXPECT_TRUE(ScriptSystem.RunScript(ContextId, "const Valid = 1;"));
+        EXPECT_TRUE(Capture.ErrorMessages().empty());
+    }
+
+    ScriptSystem.DestroyContext(ContextId);
 }
