@@ -27,6 +27,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/PlatformTestUtils.h
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/RemoteFileManagerTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/SceneDescriptionTests.cpp
+	${CSP_TESTS_SOURCE_DIR}/InternalTests/ScriptErrorUtilsTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/SchedulerTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/ServicesTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/SignalRSerializerTests.cpp
