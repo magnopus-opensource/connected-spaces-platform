@@ -173,6 +173,11 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
     {
         OutError = ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName.c_str(), FileName.c_str());
 
+        if (ScriptErrorCallback)
+        {
+            ScriptErrorCallback(ScriptErrorData { ContextId, ScriptName.c_str(), OutError });
+        }
+
         return false;
     }
 
@@ -200,12 +205,27 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
-        ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName, FileName);
+        csp::common::String OutError = ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName, FileName);
+
+        if (ScriptErrorCallback)
+        {
+            ScriptErrorCallback(ScriptErrorData { ContextId, ScriptName.c_str(), OutError });
+        }
 
         return false;
     }
 
     return true;
+}
+
+void ScriptSystem::SetScriptErrorCallback(ScriptErrorCallbackHandler Callback)
+{
+    if (ScriptErrorCallback)
+    {
+        CSP_LOG_MSG(common::LogLevel::Warning, "ScriptErrorCallback has already been set. Previous callback overwritten.");
+    }
+
+    ScriptErrorCallback = std::move(Callback);
 }
 
 bool ScriptSystem::CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider)

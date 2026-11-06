@@ -373,3 +373,43 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
 
     ScriptSystem.DestroyContext(ContextId);
 }
+
+/*
+    Ensures that the ScriptErrorCallback is successfully fired when registered if a script error occurs.
+    Callback contains a ScriptErrorData struct with the ContextId, ScriptName and formatted ErrorMessage.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, ScriptErrorCallbackFiredTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& ScriptSystem = *SystemsManager.GetScriptSystem();
+
+    OfflineRealtimeEngine Engine { *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+
+    std::promise<csp::systems::ScriptErrorData> ScriptErrorPromise;
+    auto ScriptErrorFuture = ScriptErrorPromise.get_future();
+
+    auto ScriptErrorCallback = [&ScriptErrorPromise](csp::systems::ScriptErrorData Data) { ScriptErrorPromise.set_value(Data); };
+    ScriptSystem.SetScriptErrorCallback(ScriptErrorCallback);
+
+    const csp::common::String EntityName = "ScriptErrorTextEntity";
+    SpaceEntity* Entity = nullptr;
+    Engine.CreateEntity(EntityName, SpaceTransform {}, nullptr, [&Entity](SpaceEntity* NewEntity) { Entity = NewEntity; });
+
+    ASSERT_NE(Entity, nullptr);
+
+    const std::string ScriptText = R"xx(
+        ThisEntity.notARealFunction();
+    )xx";
+
+    Entity->GetScript().SetScriptSource(ScriptText.c_str());
+    ASSERT_FALSE(Entity->GetScript().Invoke());
+
+    EXPECT_TRUE(ScriptErrorFuture.wait_for(10s) == std::future_status::ready) << "Timed out after 10s waiting for ScriptErrorCallback.";
+    const csp::systems::ScriptErrorData Data = ScriptErrorFuture.get();
+
+    EXPECT_EQ(Data.ContextId, Entity->GetId());
+    EXPECT_EQ(Data.ScriptName, "ScriptErrorTextEntity");
+
+    const std::string ErrorText = Data.ErrorMessage.c_str();
+    EXPECT_NE(ErrorText.find("not a function"), std::string::npos) << "GetErrorText() returned: " << ErrorText;
+}
