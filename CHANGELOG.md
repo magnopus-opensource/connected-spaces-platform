@@ -18,6 +18,16 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1942] refac!: Remove the Voip System by @MAG-AdamThorn
   The `VoipSystem` is not being used by client applications and there are no plans to make use of it in the future. All clients manage Voip themselves directly.  We are therefore removing this system.
 
+### 🍰 🙌 New Features
+
+- [OF-1613] feat Provide richer error logging for scripts by @MAG-AdamThorn
+  Prior to this change, errors thrown by the scripting system were not helpful and it was not clear that the error even originated from a script. This ticket provides richer error logs, as well as a dedicated method by which clients can register a callback to receive them. when an error is thrown from a script the following is now output:
+  - it is made clear that the error comes from a script.
+  - the user is told from which script the script error comes from.
+  - the user is told the line number the error occurs on.
+  
+  As part of the changes made, a new `ScriptSystem::SetScriptErrorCallback()` method has been introduced to allow clients to set a callback to be fired when a script error occurs. In addition the existing `EntityScript::GetErrorText()` method now returns something sensible in the case that a QuickJS exception is thrown.
+
 ### 📔 📔 Documentation
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
