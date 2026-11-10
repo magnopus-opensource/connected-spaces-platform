@@ -47,7 +47,6 @@ class GraphQLSystem;
 class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
-class QuotaSystem;
 class SequenceSystem;
 class HotspotSequenceSystem;
 class ConversationSystemInternal;
@@ -151,10 +150,6 @@ public:
     /// @return ECommerceSystem : pointer to the ECommerce system class
     ECommerceSystem* GetECommerceSystem();
 
-    /// @brief Retrieves the Quota system.
-    /// @return QuotaSystem : pointer to the Quota system class
-    QuotaSystem* GetQuotaSystem();
-
     /// @brief Retrieves the Sequence system.
     /// @return SequenceSystem : pointer to the Sequence system class
     SequenceSystem* GetSequenceSystem();
@@ -223,7 +218,6 @@ private:
     MaintenanceSystem* MaintenanceSystem;
     EventTicketingSystem* EventTicketingSystem;
     ECommerceSystem* ECommerceSystem;
-    QuotaSystem* QuotaSystem;
     SequenceSystem* SequenceSystem;
     HotspotSequenceSystem* HotspotSequenceSystem;
     ConversationSystemInternal* ConversationSystem;

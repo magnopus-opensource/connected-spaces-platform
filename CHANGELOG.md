@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.2.0]
 
+### 🔥 ❗Breaking Changes
+
+- [NT-0] refac!: Remove the sinkhole Quota System by @MAG-AdamThorn
+  The QuotaSystem was a sinkhole system, in that it wrapped backend service endpoints without adding any business logic at the CSP level.
+  Now that client teams are making quota requests directly to the backend services, we can safely remove this sinkhole system and its tests.
+  
+  The following breaking changes have been made:
+  - The `Quota` and `QuotaSystem` classes have been removed.
+  - The `UserSystem::GetCheckoutSessionUrl()` method signature has changed to take a Tiername String as the first argument rather than a TierNames enum.
+  - The `SystemsManager::GetQuotaSystem()` method has been removed.
+
 ### 📔 📔 Documentation
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
