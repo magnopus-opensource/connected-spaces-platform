@@ -1202,7 +1202,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
         csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None);
 
-    auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, csp::systems::TierNames::Pro);
+    auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, "pro");
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
