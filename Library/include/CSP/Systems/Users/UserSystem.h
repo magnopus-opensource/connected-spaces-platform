@@ -275,7 +275,8 @@ public:
     CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& UserId, StringResultCallback Callback);
 
     /// @brief Get the checkout session Url for a user from Stripe
-    /// @param TierName csp::common::String : the tier of the checkout session needed
+    /// @param TierName csp::common::String : the tier for the checkout session
+    /// These are the tiers defined by the /tiers endpoint in the backend services
     /// @param Callback StringResultCallback : callback that contains the checkout session URL of the tier
     CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::common::String& TierName, StringResultCallback Callback);
 
