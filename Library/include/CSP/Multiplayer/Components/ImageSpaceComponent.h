@@ -44,6 +44,8 @@ enum class ImagePropertyKeys : uint16_t
     IsARVisible,
     IsEmissive,
     IsVirtualVisible,
+    BlendType,
+    AlphaTest,
     Num
 };
 
@@ -53,6 +55,14 @@ enum class DisplayMode
     SingleSided = 0,
     DoubleSided,
     DoubleSidedReversed
+};
+
+/// @brief The blend type supported by this image space component.
+enum class BlendType
+{
+    Opaque = 0,
+    Blend,
+    Mask
 };
 
 /// @ingroup ImageSpaceComponent
@@ -137,6 +147,22 @@ public:
     /// @brief Sets the display mode used by this image component.
     /// @param displayMode The display mode used by this image component.
     void SetDisplayMode(DisplayMode displayMode);
+
+    /// @brief Gets the blend type used by this image component.
+    /// @return The blend type used by this image component.
+    BlendType GetBlendType() const;
+
+    /// @brief Sets the blend type used by this image component.
+    /// @param blendType The blend type used by this image component.
+    void SetBlendType(BlendType blendType);
+
+    /// @brief Gets the alpha test value used by this image component used when the BlendType is set to Mask.
+    /// @return The alpha test used by this image component.
+    float GetAlphaTest() const;
+
+    /// @brief Sets the alpha test used by this image component.
+    /// @param alphaTest The alpha test used by this image component.
+    void SetAlphaTest(float alphaTest);
 
     /// @brief Checks if the image of this image component is emissive.
     /// @return True if the image of this image component is emissive, false otherwise.

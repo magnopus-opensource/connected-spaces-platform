@@ -205,6 +205,8 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     EXPECT_EQ(ImageComponent->GetIsVisible(), true);
     EXPECT_EQ(ImageComponent->GetIsARVisible(), true);
     EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(ImageComponent->GetBlendType(), 0);
+    EXPECT_EQ(ImageComponent->GetAlphaTest(), 0.0f);
 
     // Setup script
     const std::string ImageScriptText = R"xx(
@@ -221,6 +223,8 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
         image.isVisible = false;
         image.isARVisible = false;
         image.isVirtualVisible = false;
+        image.blendType = 1;
+        image.alphaTest = = 0.5;
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
@@ -243,6 +247,8 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     EXPECT_EQ(ImageComponent->GetIsVisible(), false);
     EXPECT_EQ(ImageComponent->GetIsARVisible(), false);
     EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(ImageComponent->GetBlendType(), 1);
+    EXPECT_EQ(ImageComponent->GetAlphaTest(), 0.5f);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
