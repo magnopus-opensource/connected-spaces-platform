@@ -36,7 +36,6 @@ class SystemsManager;
 class UserSystem;
 class SpaceSystem;
 class AssetSystem;
-class VoipSystem;
 class ScriptSystem;
 class PointOfInterestSystem;
 class PointOfInterestInternalSystem;
@@ -105,10 +104,6 @@ public:
     /// @brief Retrieves asset system.
     /// @return SpaceSystem : pointer to the asset system class
     AssetSystem* GetAssetSystem();
-
-    /// @brief Retrieves voip system.
-    /// @return SpaceSystem : pointer to the voip system class
-    VoipSystem* GetVoipSystem();
 
     /// @brief Retrieves script system.
     /// @return ScriptingSystem : pointer to the script system class
@@ -208,7 +203,6 @@ private:
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;
     ScriptSystem* ScriptSystem;
-    VoipSystem* VoipSystem;
     PointOfInterestInternalSystem* PointOfInterestSystem;
     AnchorSystem* AnchorSystem;
     csp::common::LogSystem* LogSystem;

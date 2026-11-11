@@ -99,7 +99,7 @@ public:
 /// backend services acting as a proxy for some other set of services.
 ///
 /// In situations where a CSP client application needs secure access to some other set of third-party
-/// services (like AI, VOIP, ECommerce etc), this system can be particularly helpful,
+/// services (like AI and ECommerce etc), this system can be particularly helpful,
 /// as it enables services that CSP interfaces with to own the responsibility of distributing secure tokens to those platforms.
 class CSP_API ExternalServiceProxySystem : public SystemBase
 {
