@@ -79,7 +79,6 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/OfflineRealtimeEngineTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/OnlineRealtimeEngineTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/PointOfInterestSystemTests.cpp
-    ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/QuotaSystemTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/RealtimeEngineEntityTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ReplicatedValueTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ScriptSystemTests.cpp

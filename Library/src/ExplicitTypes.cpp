@@ -34,7 +34,6 @@
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Maintenance/Maintenance.h"
 #include "CSP/Systems/Multiplayer/Scope.h"
-#include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/Sequence/Sequence.h"
 #include "CSP/Systems/ServiceStatus.h"
 #include "CSP/Systems/Spaces/Site.h"
@@ -83,8 +82,6 @@ template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
 template class CSP_API csp::common::Array<csp::systems::EAssetCollectionType>;
 template class CSP_API csp::common::Array<csp::systems::CartLine>;
 template class CSP_API csp::common::Array<csp::FeatureFlag>;
-template class CSP_API csp::common::Array<csp::systems::FeatureLimitInfo>;
-template class CSP_API csp::common::Array<csp::systems::FeatureQuotaInfo>;
 template class CSP_API csp::common::Array<csp::systems::HotspotGroup>;
 template class CSP_API csp::common::Array<csp::systems::LODAsset>;
 template class CSP_API csp::common::Array<csp::systems::ProductInfo>;
@@ -94,7 +91,6 @@ template class CSP_API csp::common::Array<csp::systems::Sequence>;
 template class CSP_API csp::common::Array<csp::systems::ServiceStatus>;
 template class CSP_API csp::common::Array<csp::systems::ShopifyStoreInfo>;
 template class CSP_API csp::common::Array<csp::systems::TicketedEvent>;
-template class CSP_API csp::common::Array<csp::systems::TierFeatures>;
 template class CSP_API csp::common::Array<csp::systems::VariantOptionInfo>;
 template class CSP_API csp::common::Array<csp::systems::VersionMetadata>;
 

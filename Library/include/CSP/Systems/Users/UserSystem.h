@@ -23,7 +23,6 @@
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
@@ -276,9 +275,10 @@ public:
     CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& UserId, StringResultCallback Callback);
 
     /// @brief Get the checkout session Url for a user from Stripe
-    /// @param Tier csp::systems::TierNames : the tier of the checkout session needed
+    /// @param TierName csp::common::String : the tier for the checkout session
+    /// These are the tiers defined by the /tiers endpoint in the backend services
     /// @param Callback StringResultCallback : callback that contains the checkout session URL of the tier
-    CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::common::String& TierName, StringResultCallback Callback);
 
     // Callback to receive access permission changes Data when a message is sent.
     typedef std::function<void(const csp::common::AccessControlChangedNetworkEventData&)> UserPermissionsChangedCallbackHandler;

@@ -980,11 +980,11 @@ void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, StringR
     static_cast<chs_user::StripeApi*>(StripeAPI)->vendorsStripeCustomer_portalsUserIdGet({ UserId }, ResponseHandler);
 };
 
-void UserSystem::GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback)
+void UserSystem::GetCheckoutSessionUrl(const csp::common::String& TierName, StringResultCallback Callback)
 {
     auto CheckoutSessionInfo = std::make_shared<chs_user::StripeCheckoutRequest>();
 
-    CheckoutSessionInfo->SetLookupKey(TierNameEnumToString(Tier));
+    CheckoutSessionInfo->SetLookupKey(TierName);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = StripeAPI->CreateHandler<StringResultCallback, CheckoutSessionUrlResult, void, chs_user::StripeCheckoutSessionDto>(Callback, nullptr);

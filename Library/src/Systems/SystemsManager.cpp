@@ -29,7 +29,6 @@
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
-#include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Settings/ApplicationSettingsSystem.h"
@@ -90,8 +89,6 @@ MaintenanceSystem* SystemsManager::GetMaintenanceSystem() { return MaintenanceSy
 EventTicketingSystem* SystemsManager::GetEventTicketingSystem() { return EventTicketingSystem; }
 
 ECommerceSystem* SystemsManager::GetECommerceSystem() { return ECommerceSystem; }
-
-QuotaSystem* SystemsManager::GetQuotaSystem() { return QuotaSystem; }
 
 SequenceSystem* SystemsManager::GetSequenceSystem() { return SequenceSystem; }
 
@@ -157,7 +154,6 @@ SystemsManager::SystemsManager()
     , MaintenanceSystem(nullptr)
     , EventTicketingSystem(nullptr)
     , ECommerceSystem(nullptr)
-    , QuotaSystem(nullptr)
     , SequenceSystem(nullptr)
     , HotspotSequenceSystem(nullptr)
     , ConversationSystem(nullptr)
@@ -229,7 +225,6 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
-    QuotaSystem = new csp::systems::QuotaSystem(WebClient, Endpoints.TrackingService, *LogSystem, UserSystem->GetAuthContext());
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
@@ -250,7 +245,6 @@ void SystemsManager::DestroySystems()
     delete ConversationSystem;
     delete HotspotSequenceSystem;
     delete SequenceSystem;
-    delete QuotaSystem;
     delete ECommerceSystem;
     delete EventTicketingSystem;
     delete MaintenanceSystem;
