@@ -321,6 +321,36 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
         EXPECT_TRUE(ScriptSystem.RunScript(ContextId, "const Valid = 1;"));
         EXPECT_TRUE(Capture.GetErrorMessages().empty());
     }
+}
+
+/*
+    Ensures that calls to run a script file with no path specified fail correctly.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RunScriptFileWithEmptyPathFails)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    constexpr int64_t ContextId = INT64_MAX;
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, nullptr));
+
+    RAIILogCapture Capture;
+    EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, ""));
+    EXPECT_FALSE(Capture.GetErrorMessages().empty());
+
+    ScriptSystem.DestroyContext(ContextId);
+}
+
+/*
+    Ensures that calls to run a script file with an incorrect path specified fail correctly.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RunScriptFileWithMissingFileFails)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    constexpr int64_t ContextId = INT64_MAX;
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, nullptr));
+
+    RAIILogCapture Capture;
+    EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, "assets/DoesNotExist.js"));
+    EXPECT_FALSE(Capture.GetErrorMessages().empty());
 
     ScriptSystem.DestroyContext(ContextId);
 }

@@ -187,39 +187,35 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
 
 bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
 {
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose,
-        fmt::format("RunScriptFile: {}\n", ScriptFilePath.c_str()).c_str());
+    if (ScriptFilePath.IsEmpty())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Unable to run script file: no file path was provided.");
+        return false;
+    }
 
-    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    if (TheScriptContext == nullptr)
+    std::ifstream File(ScriptFilePath.c_str(), std::ios::in | std::ios::binary);
+    if (!File.is_open())
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("Unable to run script file {0}: no script context exists with id {1}", ScriptFilePath.c_str(), ContextId)
-                .c_str());
-
+            fmt::format("Unable to run script file {}: the file does not exist or could not be opened.", ScriptFilePath.c_str()).c_str());
         return false;
     }
 
-    // evalFile uses the path as the eval filename, so stack frames reference the full path.
-    // If an exception is thrown, ConsumeAndLogScriptException() -> FormatScriptError() below will try to extract the linenumber from the exception
-    // which will require the full path.
-    const std::string FileName = ScriptFilePath.c_str();
-    const std::string ScriptName = std::filesystem::path(FileName).filename().string();
+    std::stringstream Buffer;
+    Buffer << File.rdbuf();
+    const std::string ScriptText = Buffer.str();
 
-    qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
-    if (Result.isException())
+    if (ScriptText.empty())
     {
-        csp::common::String OutError = ConsumeAndLogScriptException(LogSystem, *TheScriptContext->Context, ScriptName, FileName);
-
-        if (ScriptErrorCallback)
-        {
-            ScriptErrorCallback(ScriptErrorData { ContextId, ScriptName.c_str(), OutError });
-        }
-
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Error, fmt::format("Unable to run script file {}: the file is empty.", ScriptFilePath.c_str()).c_str());
         return false;
     }
 
-    return true;
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("RunScriptFile: {}\n", ScriptFilePath.c_str()).c_str());
+
+    csp::common::String Error;
+    return RunScriptWithErrorLog(ContextId, ScriptText.c_str(), Error);
 }
 
 void ScriptSystem::SetScriptErrorCallback(ScriptErrorCallbackHandler Callback)
