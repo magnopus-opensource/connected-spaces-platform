@@ -28,13 +28,13 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
-#include <cctype>
-#include <cstdio>
+#include <chrono>
+#include <cstdint>
 #include <filesystem>
-#include <fstream>
-#include <regex>
-#include <sstream>
+#include <future>
+#include <iostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 using namespace csp::multiplayer;
@@ -43,65 +43,32 @@ namespace
 {
 
 // Captures every message sent to the SystemsManager log system for the lifetime of the object.
-// Messages are still forwarded to stderr so they appear in the test output.
+// Messages are still forwarded to std::cerr so they appear in the test output.
 struct RAIILogCapture
 {
-    struct LogEntry
-    {
-        csp::common::LogLevel Level;
-        std::string Message;
-    };
-
     RAIILogCapture()
     {
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
             [this](csp::common::LogLevel Level, const csp::common::String& Message)
             {
-                fprintf(stderr, "%s\n", Message.c_str());
-                Entries.push_back({ Level, Message.c_str() });
+                std::cerr << Message.c_str() << '\n';
+                if (Level == csp::common::LogLevel::Error)
+                {
+                    ErrorMessages.push_back(Message.c_str());
+                }
             });
     }
 
     ~RAIILogCapture() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
 
-    void Clear() { Entries.clear(); }
+    const std::vector<std::string>& GetErrorMessages() const { return ErrorMessages; };
 
-    std::vector<std::string> ErrorMessages() const
-    {
-        std::vector<std::string> Messages;
-
-        for (const auto& Entry : Entries)
-        {
-            if (Entry.Level == csp::common::LogLevel::Error)
-            {
-                Messages.push_back(Entry.Message);
-            }
-        }
-
-        return Messages;
-    }
-
-    std::vector<LogEntry> Entries;
+private:
+    std::vector<std::string> ErrorMessages;
 };
 
-// Checks that the script error contains the specified string.
-bool ContainsCaseInsensitive(const std::string& ScriptErrorLog, const std::string& SearchWord)
-{
-    auto It = std::search(ScriptErrorLog.begin(), ScriptErrorLog.end(), SearchWord.begin(), SearchWord.end(),
-        [](char A, char B) { return std::tolower(static_cast<unsigned char>(A)) == std::tolower(static_cast<unsigned char>(B)); });
-
-    return It != ScriptErrorLog.end();
-}
-
-// Matches "<something>:13" or "line 13", without matching eg "130".
-bool ContainsLineNumber(const std::string& ScriptErrorLog, size_t LineNum)
-{
-    const std::regex LinePattern(fmt::format(R"((:|line\s*){}(\D|$))", LineNum), std::regex::icase);
-    return std::regex_search(ScriptErrorLog, LinePattern);
-}
-
 // Returns the line number (starting at 1) of the first line in ScriptErrorLog containing SearchStr, or 0 if not found.
-size_t LineNumOf(const std::string& ScriptErrorLog, const std::string& SearchStr)
+size_t LineNumOf(std::string_view ScriptErrorLog, std::string_view SearchStr)
 {
     const size_t Pos = ScriptErrorLog.find(SearchStr);
 
@@ -114,41 +81,26 @@ size_t LineNumOf(const std::string& ScriptErrorLog, const std::string& SearchStr
     return static_cast<size_t>(std::count(ScriptErrorLog.begin(), ScriptErrorLog.begin() + Pos, '\n')) + 1;
 }
 
-// Returns the full contents of a text script file, or an empty string if it can't be read.
-std::string ReadScriptFile(const std::filesystem::path& FilePath)
-{
-    std::ifstream File(FilePath);
-    std::stringstream Contents;
-    Contents << File.rdbuf();
-
-    return Contents.str();
-}
-
-// Checks that a single error level log message satisfies every acceptance criteria. Error logs must:
-// - Make it clear the error comes from a script.
-// - Contain the name of the script and entity it is associated with.
-// - Contain the line number the error occurred on.
+// Checks that an error log contains the error message written by ScriptErrorUtils::FormatScriptError().
+// All tests assume a line number so the error will be:
+// - Script error in entity "<entity name>" (line num)
 ::testing::AssertionResult HasScriptErrorLog(
-    const RAIILogCapture& Capture, const std::string& ScriptName, const std::string& ErrorText, size_t ExpectedLine)
+    const RAIILogCapture& Capture, std::string_view ScriptName, std::string_view ErrorText, size_t ExpectedLine)
 {
-    const auto ErrorMessages = Capture.ErrorMessages();
+    const std::string ExpectedError = fmt::format("Script error in entity \"{}\" (line {}): ", ScriptName, ExpectedLine);
+
+    const std::vector<std::string>& ErrorMessages = Capture.GetErrorMessages();
 
     for (const auto& Message : ErrorMessages)
     {
-        const bool IdentifiesAsScriptError = ContainsCaseInsensitive(Message, "script");
-        const bool IdentifiesScript = Message.find(ScriptName) != std::string::npos;
-        const bool ContainsErrorText = Message.find(ErrorText) != std::string::npos;
-        const bool ContainsLine = ContainsLineNumber(Message, ExpectedLine);
-
-        if (IdentifiesAsScriptError && IdentifiesScript && ContainsErrorText && ContainsLine)
+        if (Message.find(ExpectedError) != std::string::npos && Message.find(ErrorText) != std::string::npos)
         {
             return ::testing::AssertionSuccess();
         }
     }
 
     auto Failure = ::testing::AssertionFailure();
-    Failure << "No single error log message mentioned all of: 'script', script name: '" << ScriptName << "', error text: '" << ErrorText
-            << "', and line: " << ExpectedLine << ".\nError-level messages logged (" << ErrorMessages.size() << "):";
+    Failure << "No error log contained '" << ExpectedError << "' and '" << ErrorText << "'. Error messages (" << ErrorMessages.size() << "):";
 
     for (const auto& Message : ErrorMessages)
     {
@@ -265,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, SyntaxErrorInScriptIsReporte
 
 /*
     The scenario from the ticket: an error thrown inside a message handler (e.g. onTick, onClick).
-    The handler is called via generated code from EntityScript::PostMessageToScript, which currently produces a
+    The handler is called via generated code from EntityScript::PostMessageToScript, which would produce a
     stack of two anonymous <eval> frames:
         at <anonymous> (<eval>:N)   <- inside the handler, in the entity's script
         at <anonymous> (<eval>:1)   <- the generated "handler('message','params')" call
@@ -309,8 +261,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInMessageHandler
 }
 
 /*
-    EntityScript::GetErrorText is documented as returning the text of the last error, but currently always
-    returns "Unknown Error" for script failures because the exception is consumed inside quickjspp.hpp.
+    EntityScript::GetErrorText is documented as returning the text of the last error, but previously always
+    returned "Unknown Error" for script failures because the exception was consumed inside quickjspp.hpp.
 */
 CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, GetErrorTextReturnsScriptError)
 {
@@ -347,11 +299,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
 
     // Assets are copied next to the test executable, and loaded relative to the working directory like the other asset tests.
     const auto FilePath = std::filesystem::absolute("assets/RunScriptFileError.js");
-    const std::string ScriptText = ReadScriptFile(FilePath);
-    ASSERT_FALSE(ScriptText.empty()) << "Test script not found or empty at " << FilePath.string();
+    ASSERT_TRUE(std::filesystem::exists(FilePath)) << "Test script not found at " << FilePath.string();
 
     // Find the failing line from the test file.
-    const size_t ErrorLine = LineNumOf(ScriptText, "NotAFunction()");
+    const size_t ErrorLine = 4;
     ASSERT_NE(ErrorLine, 0u);
 
     {
@@ -368,7 +319,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
         RAIILogCapture Capture;
 
         EXPECT_TRUE(ScriptSystem.RunScript(ContextId, "const Valid = 1;"));
-        EXPECT_TRUE(Capture.ErrorMessages().empty());
+        EXPECT_TRUE(Capture.GetErrorMessages().empty());
     }
 
     ScriptSystem.DestroyContext(ContextId);
