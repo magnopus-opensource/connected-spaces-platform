@@ -116,8 +116,9 @@ bool ScriptContext::ExistsInContext(const csp::common::String& ObjectName)
 {
     qjs::Value Result = Context->eval(ObjectName.c_str());
 
-    // The JSRuntime can only hold a single exception per context (current_exception) and so must be cleared via the
-    // call below to JS_GetException().
+    // If the eval throws, the exception is stored in a single slot on the JSRuntime (rt->current_exception),
+    // which is shared by every context on that runtime. If an exception is thrown it must be cleared, otherwise
+    // an error from another script on this runtime could report this stale exception.
     if (Result.isException())
     {
         JSValue err = JS_GetException(Context->ctx);

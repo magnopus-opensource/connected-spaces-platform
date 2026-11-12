@@ -26,8 +26,8 @@ std::string ToStdString(JSContext* Ctx, JSValueConst Val)
     size_t Len = 0;
     // This call converts any JS value to a string.
     // This call can throw an exception, in which case JS_ToCStringLen returns nullptr and sets a new pending exception.
-    // The JSRuntime can only hold a single exception per context (current_exception) and so must be cleared via the
-    // call below to JS_GetException().
+    // If an exception is thrown it is stored in a single slot on the JSRuntime (rt->current_exception), which is shared by every context on that
+    // runtime. The exception must be cleared via the call below to JS_GetException().
     const char* Str = JS_ToCStringLen(Ctx, &Len, Val);
 
     if (Str == nullptr)
@@ -106,7 +106,7 @@ csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, co
         JS_FreeValue(Ctx, StackVal);
     }
 
-    // Syntax errors carry a separate lineNumber property. Runtime errors do not in which case extract the lineNumber from 
+    // Syntax errors carry a separate lineNumber property. Runtime errors do not in which case extract the lineNumber from
     // the stack trace, eg. "at <anonymous> (Script_ScriptHandlerErrorEntity:7)".
     const int32_t Line = GetErrorLineNumber(Ctx, Exception, Stack, FileName);
 
