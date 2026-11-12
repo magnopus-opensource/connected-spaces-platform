@@ -84,11 +84,15 @@ public:
         const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID of the asset associated with this component.
+    /// @note This asset ID is set to that of the original, source asset in the case where LODs are used via the LOD chain 
+    // for the asset collection associated with this component.
     /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
     /// @return The ID of the asset associated with this component.
     const csp::common::String& GetExternalResourceAssetId() const override;
 
     /// @brief Sets the ID of the asset associated with this component.
+    /// @note This asset ID should still be set to that of the original, source asset in the case where LODs are used via 
+    // the LOD chain for the asset collection associated with this component.
     /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset associated with this component.
     void SetExternalResourceAssetId(const csp::common::String& Value) override;
