@@ -25,6 +25,7 @@
 #include "TestHelpers.h"
 
 #include "fmt/format.h"
+#include "quickjspp.hpp"
 #include "gtest/gtest.h"
 
 #include <algorithm>
@@ -308,10 +309,31 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
     {
         RAIILogCapture Capture;
 
-        const bool Succeeded = ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str());
-
-        EXPECT_FALSE(Succeeded);
+        EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
         EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", "not a function", ErrorLine));
+    }
+
+    // Confirm that the exception was correctly cleared.
+    {
+        auto* Context = static_cast<qjs::Context*>(ScriptSystem.GetContext(ContextId));
+        qjs::Value Exception = Context->getException();
+        EXPECT_TRUE(JS_IsNull(Exception.v)) << "A QuickJS exception was left pending on the runtime after a failed script run.";
+    }
+
+    // Now throw another exception.
+    {
+        RAIILogCapture Capture;
+
+        EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
+        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", "not a function", ErrorLine));
+
+        // Confirm that a second different failure is reported as its own error, not the previous one.
+        EXPECT_FALSE(ScriptSystem.RunScript(ContextId, "\nthrow new Error(\"Second failure\");"));
+
+        const auto& Errors = Capture.GetErrorMessages();
+        ASSERT_EQ(Errors.size(), 2u);
+        EXPECT_NE(Errors[1].find("Second failure"), std::string::npos);
+        EXPECT_EQ(Errors[1].find("not a function"), std::string::npos);
     }
 
     // The exception must have been consumed. A later, valid script in the same runtime should neither fail nor report it.
@@ -385,7 +407,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, ScriptErrorCallbackFiredTest
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     ASSERT_FALSE(Entity->GetScript().Invoke());
 
-    EXPECT_TRUE(ScriptErrorFuture.wait_for(10s) == std::future_status::ready) << "Timed out after 10s waiting for ScriptErrorCallback.";
+    ASSERT_TRUE(ScriptErrorFuture.wait_for(10s) == std::future_status::ready) << "Timed out after 10s waiting for ScriptErrorCallback.";
     const csp::systems::ScriptErrorData Data = ScriptErrorFuture.get();
 
     EXPECT_EQ(Data.ContextId, Entity->GetId());
