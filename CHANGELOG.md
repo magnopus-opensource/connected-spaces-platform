@@ -29,6 +29,9 @@ All notable changes to this project will be documented in this file. For compile
   This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
   No client changes should have to be made to account for this.
 
+- [OB-6121] refac: Un-deprecate `ExternalResourceAssetId` for animated and static model components by @MAG-ThomasGreenhalgh
+  Un-deprecate `GetExternalResourceAssetId` and `SetExternalResourceAssetId` for both `AnimatedModelSpaceComponent` and `StaticModelSpaceComponent`.
+  Clients should continue to set the `ExternalResourceAssetId` to the id of the original model asset even when LODs are generated or set for the LOD chain of the collection.
 
 ## [7.1.0]
 
