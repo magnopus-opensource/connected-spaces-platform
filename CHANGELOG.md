@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file. For compile
   - The `Quota` and `QuotaSystem` classes have been removed.
   - The `UserSystem::GetCheckoutSessionUrl()` method signature has changed to take a Tiername String as the first argument rather than a TierNames enum.
   - The `SystemsManager::GetQuotaSystem()` method has been removed.
+  
+- [OF-1942] refac!: Remove the Voip System by @MAG-AdamThorn
+  The `VoipSystem` is not being used by client applications and there are no plans to make use of it in the future. All clients manage Voip themselves directly.  We are therefore removing this system.
 
 ### 📔 📔 Documentation
 

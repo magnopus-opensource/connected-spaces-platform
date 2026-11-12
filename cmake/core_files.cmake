@@ -73,8 +73,6 @@ set(CSP_CORE_PUBLIC_INCLUDES
     ${CSP_CORE_INCLUDE_DIR}/Users/Profile.h
     ${CSP_CORE_INCLUDE_DIR}/Users/ThirdPartyAuthentication.h
     ${CSP_CORE_INCLUDE_DIR}/Users/UserSystem.h
-
-    ${CSP_CORE_INCLUDE_DIR}/Voip/VoipSystem.h
 )
 
 set(CSP_CORE_SOURCES
@@ -153,8 +151,6 @@ set(CSP_CORE_SOURCES
     ${CSP_CORE_SOURCE_DIR}/Users/Profile.cpp
     ${CSP_CORE_SOURCE_DIR}/Users/ThirdPartyAuthentication.cpp
     ${CSP_CORE_SOURCE_DIR}/Users/UserSystem.cpp
-
-    ${CSP_CORE_SOURCE_DIR}/Voip/VoipSystem.cpp
 )
 
 set(CSP_CORE_PRIVATE_INCLUDES 
