@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [7.2.1]
+
+### New Features
+
+- [OW-2602] Add support for blend modes and alpha masking to image component
+    - BlendType which controls the way the image is blended into the scene. It has three values:
+        - Opaque, which is the current setting, is where mages are rendered into the scene and write to the depth buffer.
+        - Blend is where images are rendered to the scene but don't write to the depth buffer so blend with existing scene content. This is used with image formats the support an alpha channel such as PNG.
+        - Mask is where the decision to render a pixel or not is determined from the alpha channel of the image and is used in conjunction with AlphaTest. This is used with image formats the support an alpha channel such as PNG.
+    - AlphaTest is used when BlendType is set to Mask and is compared with values from the image's alpha channel. Alpha channel values less than this value are considered transparent and not rendered. The default value is zero making the whole image opaque.
+
 ## [7.2.0]
 
 ### 🔥 ❗Breaking Changes
@@ -29,17 +40,16 @@ All notable changes to this project will be documented in this file. For compile
   This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
   No client changes should have to be made to account for this.
 
-
 ## [7.1.0]
 
 ### 🔥 ❗Breaking Changes
 
 - [OF-1902] refac!: Remove redundant SSO flows by @MAG-AdamThorn
   Now that we have federated login, we no-longer require a means by which users can authenticate directly using third party SSO.
-  
-  The following public UserSystem methods have been removed.
-  - `UserSystem::GetThirdPartyProviderAuthorizeURL()`
-  - `UserSystem::LoginToThirdPartyAuthenticationProvider()`
+
+    The following public UserSystem methods have been removed.
+    - `UserSystem::GetThirdPartyProviderAuthorizeURL()`
+    - `UserSystem::LoginToThirdPartyAuthenticationProvider()`
 
 - [OF-1894] build!: Remove the legacy premake build system by @mag-lt
   Removes the premake scripts and `generate_solution*`, along with premake-only tooling, all submodules, and the
@@ -50,11 +60,11 @@ All notable changes to this project will be documented in this file. For compile
   The CMake build now compiles CSP as C++20, which is now the minimum standard required to build and consume CSP.
   The premake build has not been updated, as it is being phased out.
 
-  If you consume CSP via CMake, you should not need to do anything. `cxx_std_20` is a public usage requirement of the
-  library target, so your targets are moved to C++20 automatically. Otherwise, you need to compile any code that
-  includes CSP's headers as C++20.
+    If you consume CSP via CMake, you should not need to do anything. `cxx_std_20` is a public usage requirement of the
+    library target, so your targets are moved to C++20 automatically. Otherwise, you need to compile any code that
+    includes CSP's headers as C++20.
 
-  No C++20 features are used yet, in the public headers or internally, but we intend to start using them soon.
+    No C++20 features are used yet, in the public headers or internally, but we intend to start using them soon.
 
 - [OF-1666] feat!: Refactor CSP event deserialization by @MAG-mv
   This is mostly an internal refactor of the way CSP deserializes server events.
@@ -75,10 +85,10 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-5497] fix: Introduce mutex to control access to PocoWebSocket ptr by @MAG-AdamThorn
   Fix an issue whereby one thread may be trying to Send on the `PocoWebSocket` while it is being teared down by another thread. This was caused by `connection_impl::send()` only checking `connection_state == connected` before calling Send. However, it is only after the call to `CSPWebsocketClient::Stop()` returns that the connection state is changed. However, `ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader()` and entity creation both use the main thread via `CSPFoundation::Tick()`. The issue occurs when the connection state check made via send() passes while ReceiveThread is mid teardown.
 
-  To fix this issue I have introduced a new mutex (PocoWebSocketMutex) to control access to the PocoWebSocket pointer.
+    To fix this issue I have introduced a new mutex (PocoWebSocketMutex) to control access to the PocoWebSocket pointer.
 
-  A regression test has also been added (`SendStopRaceConditionRegressionTest`) which replicates the behaviour by having multiple threads call Send in a loop and then calling Stop, which ultimately deletes and nulls the `PocoWebSocket`. This test was failing as expected, but after making the changes to ensure Send/Stop coordinate their access to `PocoWebSocket`, it now passes reliably.
-  
+    A regression test has also been added (`SendStopRaceConditionRegressionTest`) which replicates the behaviour by having multiple threads call Send in a loop and then calling Stop, which ultimately deletes and nulls the `PocoWebSocket`. This test was failing as expected, but after making the changes to ensure Send/Stop coordinate their access to `PocoWebSocket`, it now passes reliably.
+
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Remove logger.h by @MAG-AdamThorn
@@ -89,18 +99,16 @@ All notable changes to this project will be documented in this file. For compile
 ### 🔩 🔧 Ci
 
 - Completed the migration of our build pipeline from TeamCity to GitHub Actions.
-  - `v6.49.0` is the final release produced via TeamCity.
-  - `v7.0.0` is the first release produced via GitHub Actions.
-  
-  Both releases contain identical changes.
+    - `v6.49.0` is the final release produced via TeamCity.
+    - `v7.0.0` is the first release produced via GitHub Actions.
+
+    Both releases contain identical changes.
 
 ### 🔥 ❗Breaking Changes
 
-- [NT-0] chore!: Remove SpaceID args from SiteInfo functions by @ElliotMorris
-           - `AddSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `AddSiteInfo(const SiteInfo&, Callback)`
-           - `RemoveSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `RemoveSiteInfo(const SiteInfo&, Callback)` 
-        The mutable input param was confusing and breaking const correctness assumptions, we always just put the spaceID provided
-        into the siteinfo anyway. Callers should now populate the space ID field in the site info object before passing to the function.           
+- [NT-0] chore!: Remove SpaceID args from SiteInfo functions by @ElliotMorris - `AddSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `AddSiteInfo(const SiteInfo&, Callback)` - `RemoveSiteInfo(const SpaceId&, SiteInfo&, Callback)` now `RemoveSiteInfo(const SiteInfo&, Callback)`
+  The mutable input param was confusing and breaking const correctness assumptions, we always just put the spaceID provided
+  into the siteinfo anyway. Callers should now populate the space ID field in the site info object before passing to the function.
 
 ### 🍰 🙌 New Features
 
@@ -108,56 +116,56 @@ All notable changes to this project will be documented in this file. For compile
   Clients already fetch most asset data themselves, from an `Asset`'s `Uri`. Materials were the exception, where CSP
   did the downloading and the parsing on their behalf. This brings materials in line with the rest.
 
-  Retrieving a material is now a two step process. `AssetSystem::GetMaterialInfo` and `AssetSystem::GetMaterialInfos`
-  report where materials can be downloaded from, as a `MaterialInfo`. Clients fetch those uris themselves, and pass
-  the data to `AssetSystem::ParseMaterial` along with the info it came from, to get a `Material`.
+    Retrieving a material is now a two step process. `AssetSystem::GetMaterialInfo` and `AssetSystem::GetMaterialInfos`
+    report where materials can be downloaded from, as a `MaterialInfo`. Clients fetch those uris themselves, and pass
+    the data to `AssetSystem::ParseMaterial` along with the info it came from, to get a `Material`.
 
-  The payload is passed back as a `BufferAssetDataSource`, as used elsewhere in the asset APIs. It is opaque to
-  clients, who only need to hand back the bytes they fetched.
+    The payload is passed back as a `BufferAssetDataSource`, as used elsewhere in the asset APIs. It is opaque to
+    clients, who only need to hand back the bytes they fetched.
 
-  Migrating from the material APIs, all of which are deprecated:
-  - `GetMaterial` becomes `GetMaterialInfo`, a fetch of the info's `Uri`, then `ParseMaterial`. In languages with
-    async/await that is two lines either side of the fetch, otherwise it is another level of nested callbacks.
-  - `GetMaterials` becomes `GetMaterialInfos`, then that same fetch and parse for each info. This one is more
-    involved, as CSP previously ran every download and joined the results. Clients now decide how to run them, and
-    get finer control over failures, which were previously logged and silently dropped from the results.
-  - `GetMaterialFromUri` becomes a fetch of the uri, then `ParseMaterialFromAssetCollection`. That covers material
-    data located without asking CSP, such as from a scene description, where there is no `MaterialInfo` to be had.
+    Migrating from the material APIs, all of which are deprecated:
+    - `GetMaterial` becomes `GetMaterialInfo`, a fetch of the info's `Uri`, then `ParseMaterial`. In languages with
+      async/await that is two lines either side of the fetch, otherwise it is another level of nested callbacks.
+    - `GetMaterials` becomes `GetMaterialInfos`, then that same fetch and parse for each info. This one is more
+      involved, as CSP previously ran every download and joined the results. Clients now decide how to run them, and
+      get finer control over failures, which were previously logged and silently dropped from the results.
+    - `GetMaterialFromUri` becomes a fetch of the uri, then `ParseMaterialFromAssetCollection`. That covers material
+      data located without asking CSP, such as from a scene description, where there is no `MaterialInfo` to be had.
 
-  Separately, CSP is getting out of downloading asset data altogether, so the remaining APIs that do it are
-  deprecated too:
-  - `DownloadAssetData` and `DownloadAssetDataEx` become a fetch of `Asset::Uri`.
-  - `GetAssetDataSize` becomes a HEAD request for `Asset::Uri`, reading its content-length.
+    Separately, CSP is getting out of downloading asset data altogether, so the remaining APIs that do it are
+    deprecated too:
+    - `DownloadAssetData` and `DownloadAssetDataEx` become a fetch of `Asset::Uri`.
+    - `GetAssetDataSize` becomes a HEAD request for `Asset::Uri`, reading its content-length.
 
-  Everything deprecated here will be removed in a future release.
+    Everything deprecated here will be removed in a future release.
 
 - [OF-1896] feat!: Add double support to `ReplicatedValue`. By @mag-lt.
   `ReplicatedValue` can now hold a `double` as well as a `float`, via `SetDouble`/`GetDouble` and a new `Double`
   case on the `ReplicatedValueType` enum. Component schemas can declare `double` properties, which behave as the
   other primitive types do.
 
-  This is a **breaking change** to custom events sent via the `NetworkEventBus`. Float event arguments were previously
-  sent using the wire type for doubles, leaving no way to tell the two apart. Each is now sent using the
-  corresponding wire type.
-  Clients need to be updated together. Entity and component replication are unaffected.
-  
+    This is a **breaking change** to custom events sent via the `NetworkEventBus`. Float event arguments were previously
+    sent using the wire type for doubles, leaving no way to tell the two apart. Each is now sent using the
+    corresponding wire type.
+    Clients need to be updated together. Entity and component replication are unaffected.
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-2824] fix: Retry failing requests on web platforms by @ElliotMorris
   CSP has a retry mechanism for certain failing requests, but it appears on web platforms, that mechanism has not been working since 2023,
-  ater [this](https://github.com/magnopus-opensource/connected-spaces-platform/commit/a73e98d559eb16771f1b8bf6254704ad082161e0) commit. 
+  ater [this](https://github.com/magnopus-opensource/connected-spaces-platform/commit/a73e98d559eb16771f1b8bf6254704ad082161e0) commit.
   Re-enable the retry mechanism as intended for web platforms. Non-web platforms are not effected, and have always had a retry mechanism.
-  
-  Codes that are retried are : 
+
+    Codes that are retried are :
     - 0 (Network error)
     - 429
     - 408
     - Anything above 500.
-  
-  This is historical, and could probably use some refinement.
 
-###  🔨 🔨 Chore
-  
+    This is historical, and could probably use some refinement.
+
+### 🔨 🔨 Chore
+
 - [NT-0] chore: Various bindings-motivated const correctness changes by @ElliotMorris
     - `Array<AssetCollection>&` arg made `const Array<AssetCollections>&` in `DeleteMultipleAssetCollections` and `CopyAssetcollectionsToSpace`
     - `Map<String,String>&` arg made const `Map<String,String>`& in `CreateMaterial`
@@ -171,30 +179,29 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1888] feat!: Extend component schemas with value constraints, string map properties, scripting opt-out, and an API to export built-in schemas as JSON. By @mag-lt.
 
-  Added to component schema:
-  - `range` (`min`/`max`) on `int` and `float` properties, and `options` (distinct set of named values) on `int`, `float` and `string` properties, which provides a way of expressing enum cases in a more general way. These constraints are checked by `ComponentBase::SetProperty`, and non-conforming values are rejected (with a warning in the log)
-  - `stringToStringMap` property type, bound into scripting as a plain JS object (which facilitates exposing `materialOverrides` to scripting).
-  - `scriptable` flag on components and properties to opt out of automatically binding into the script system, true when unspecified. False on a component opts the whole component out.
+    Added to component schema:
+    - `range` (`min`/`max`) on `int` and `float` properties, and `options` (distinct set of named values) on `int`, `float` and `string` properties, which provides a way of expressing enum cases in a more general way. These constraints are checked by `ComponentBase::SetProperty`, and non-conforming values are rejected (with a warning in the log)
+    - `stringToStringMap` property type, bound into scripting as a plain JS object (which facilitates exposing `materialOverrides` to scripting).
+    - `scriptable` flag on components and properties to opt out of automatically binding into the script system, true when unspecified. False on a component opts the whole component out.
 
-  Added to public API:
-  - `csp::GetComponentSchemasJson()`, which dumps the built-in schemas as pretty printed JSON.
+    Added to public API:
+    - `csp::GetComponentSchemasJson()`, which dumps the built-in schemas as pretty printed JSON.
 
-  Breaking API changes:
-  - Removed `IRealtimeEngine::GetComponentSchemaRegistry()` and `IComponentSchemaRegistry`. 
-  - `ComponentSchema` and `ComponentProperty` are no longer public types. Schema types are now internal. JSON is the only way to define a component schema.
-  - The realtime engine constructors taking `Array<ComponentSchema>` are now `CSP_NO_EXPORT`. Use the `List<String>` JSON overloads instead.
-  - No clients had adopted the above, so this shouldn't have any practical impact
+    Breaking API changes:
+    - Removed `IRealtimeEngine::GetComponentSchemaRegistry()` and `IComponentSchemaRegistry`.
+    - `ComponentSchema` and `ComponentProperty` are no longer public types. Schema types are now internal. JSON is the only way to define a component schema.
+    - The realtime engine constructors taking `Array<ComponentSchema>` are now `CSP_NO_EXPORT`. Use the `List<String>` JSON overloads instead.
+    - No clients had adopted the above, so this shouldn't have any practical impact
 
 ### 🐛 🔨 Bug Fixes
-  
+
 - [OB-5315] fix: Route remote script updates through the same binding path as local script updates go through. (OnSourceChanged). By @MAG-ElliotMorris
   Prior to this, we were not clearing the `MessageMap` or `PropertyMap` containers as we should, which meant any `subscribeToMessage`
   events would keep executing if the script was modified on a remote client.
   This also causes us to call `ResetContext` when the script is modified, which also seems like the right thing to be doing.
-  
 - [OF-1882] fix: Guard RealtimeEngine destruction pathway against null NetworkEventBus, which could cause crashes on out-of-order teardown in GC'd langauges. By @MAG-ElliotMorris
 
-###  🔨 🔨 Chore
+### 🔨 🔨 Chore
 
 - [NT-0] chore: Remove unreferenced `multiplayer::ExternalLinkActions`, `multiplayer::VideoPlayerActions` and `multiplayer::AnimatedModelActions` enums. By @MAG-ElliotMorris
 
@@ -210,14 +217,13 @@ All notable changes to this project will be documented in this file. For compile
   as these were never updated to do so. This is technically a breaking change (without doing a data migration on the server), but should be low impact
   in practice.
 
-###  🔨 🔨 Chore
+### 🔨 🔨 Chore
 
 - [OF-1835] chore: Remove handling for old AsyncCallCompleted event data structure. By@MAG-AdamThorn
   Remove backwards compatibility logic for legacy `AsyncCallCompleted` event data structure.
-  
 - [NT-0] chore: Add -fstandalone-debug to Emscripten Debug builds. By @MAG-ElliotMorris
   This should improve symbol availability when debugging in the browser.
-  
+
 📔 📔 Documentation
 
 - [NT-0] doc: Add additional clarifying docs to EventBus deregistration. By @MAG-ElliotMorris
@@ -228,6 +234,7 @@ All notable changes to this project will be documented in this file. For compile
 ### 🔌 API Changes
 
 #### NetworkEventBus
+
 - 🔄 **Updated:** `ListenNetworkEvent(NeworkEventRegistration Registration, NetworkEventCallback Callback)` → `ListenCustomNetworkEvent(String EventReceiverId, String EventName, NetworkEventCallback Callback)`
 - 🔄 **Updated:** `StopListenNetworkEvent(NeworkEventRegistration Registration)` → `StopListenCustomNetworkEvent(String EventReceiverId, String EventName)`
 
@@ -243,6 +250,7 @@ All notable changes to this project will be documented in this file. For compile
 - ➕ **Added:** `StopListenSequenceChangedEvent(String EventReceiverId)`
 
 #### SpaceSystem
+
 - ➖ **Removed:** `SetAsyncCallCompletedCallback()`
 - ➖ **Removed:** `OnAsyncCallCompletedEvent()`
 
@@ -254,7 +262,6 @@ All notable changes to this project will be documented in this file. For compile
   The existing NetworkEventBus tests have been updated to reflect the change to the `ListenNetworkEvent` and `StopListenNetworkEvent` method signatures. Tests have also been added to verify that the new Event Specialization methods work correctly. I have elected to test just those related to `AsyncCallCompleted` as they all delegate to shared logic internally.
   Please see the API Changes section above for further details.
 
-
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac!: Rename `GetSchemaProperty`/`SetSchemaProperty` on `ComponentBase` to `GetProperty`/`SetProperty`. By @mag-lt.
@@ -265,8 +272,8 @@ All notable changes to this project will be documented in this file. For compile
   Developers making changes within CSP should use `GetPropertyDirect`/`SetPropertyDirect` in the cases they'd
   traditionally have used the original methods.
 
-- [OF-1681] feat: Add SystemsManager::__SetWAFBypass to allow csp devs to bypass firewall restrictions in tests. By @MAG-mv
-  This is an internal Magnopus org function and shouldn't be used by third party clients. 
+- [OF-1681] feat: Add SystemsManager::\_\_SetWAFBypass to allow csp devs to bypass firewall restrictions in tests. By @MAG-mv
+  This is an internal Magnopus org function and shouldn't be used by third party clients.
   If set, this will cause the csp web client to send an additional header in requests.
 
 ## [6.45.0]
@@ -288,10 +295,10 @@ All notable changes to this project will be documented in this file. For compile
 ### 🔥 ❗Breaking Changes
 
 - [OF-1785] refac!: Remove legacy leadership election logic. By @MAG-AdamThorn
-  Now that server-side script leader election has been operating as the default election model for ~6 months, it is time to remove the legacy client-side leader election logic.  The `ClientProxy.h/.cpp` and `ClientElectionManager.h/.cpp` files have been removed and references to them cleared up. All temporary branching logic that allowed for both election models has been removed.
-  
-  Breaking change:
-  - The public methods `OnlineRealtimeEngine::EnableLeaderElection()` and `OnlineRealtimeEngine::DisableLeaderElection()` have been made `CSP_NO_EXPORT` and will no-longer be available to those consuming CSP via the C# or Javascript generated interop APIs.
+  Now that server-side script leader election has been operating as the default election model for ~6 months, it is time to remove the legacy client-side leader election logic. The `ClientProxy.h/.cpp` and `ClientElectionManager.h/.cpp` files have been removed and references to them cleared up. All temporary branching logic that allowed for both election models has been removed.
+
+    Breaking change:
+    - The public methods `OnlineRealtimeEngine::EnableLeaderElection()` and `OnlineRealtimeEngine::DisableLeaderElection()` have been made `CSP_NO_EXPORT` and will no-longer be available to those consuming CSP via the C# or Javascript generated interop APIs.
 
 ## [6.44.0]
 
@@ -344,15 +351,14 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1866] feat: Add public API for interacting with Components defined in terms of a Schema description. By @mag-lt.
   This adds the following public methods:
-  - `IRealtimeEngine::GetComponentSchemaRegistry()`: Returns a "registry" instance, a read-only type describing the Components known by the engine. This can be used to interrogate the shape of a Component at runtime. Currently this is populated by CSP with a corresponding Schema for each of the hardcoded Component types in the library. It is still not possible to register a new schema externally, but this will come in a future release.
-  - `SpaceEntity::AddComponentByTypeId(uint64_t TypeId)`: Allows adding a component that corresponds to a Schema with the given TypeId.
-  - `ComponentBase::GetTypeId()`: This returns the unique integer ID representing the component type. For traditional hardcoded components, this corresponds to casting the `ComponentType` to its underlying integer value. This supersedes `GetComponentType` in that it allows for representing an open vs closed set of components. Details of allocating these IDs in a unique fashion is still to be defined.
-  - `ComponentBase::GetSchemaProperty(uint16_t Key)`: Get the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, or null is returned. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
-  - `ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)`: Set the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, and the value must match the type declared there or it is ignored. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+    - `IRealtimeEngine::GetComponentSchemaRegistry()`: Returns a "registry" instance, a read-only type describing the Components known by the engine. This can be used to interrogate the shape of a Component at runtime. Currently this is populated by CSP with a corresponding Schema for each of the hardcoded Component types in the library. It is still not possible to register a new schema externally, but this will come in a future release.
+    - `SpaceEntity::AddComponentByTypeId(uint64_t TypeId)`: Allows adding a component that corresponds to a Schema with the given TypeId.
+    - `ComponentBase::GetTypeId()`: This returns the unique integer ID representing the component type. For traditional hardcoded components, this corresponds to casting the `ComponentType` to its underlying integer value. This supersedes `GetComponentType` in that it allows for representing an open vs closed set of components. Details of allocating these IDs in a unique fashion is still to be defined.
+    - `ComponentBase::GetSchemaProperty(uint16_t Key)`: Get the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, or null is returned. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
+    - `ComponentBase::SetSchemaProperty(uint16_t Key, const csp::common::ReplicatedValue& Value)`: Set the value of a property corresponding to the one declared with the given Key in the Schema. The Key must be in the Schema, and the value must match the type declared there or it is ignored. This supersedes the hardcoded wrapper methods typically written, trading off static typing for the flexibility of defining components externally.
 
 - [OW-2438] feat: Properties to support cinematic camera depth of field. By @MAG-ThomasGreenhalgh.
   Adds focus distance and depth of field enabled properties to the cinematic camera space component.
-  
 - [OF-1071] feat: Add support for third party auth with token. By @MAG-AdamThorn.
   Add support for third party authentication using a token provided by the third party provider. This is an alternate path for SSO to the one already provided, in that it expects the application to request the authorization token from the third party provider directly before passing it to CSP.
 
@@ -405,9 +411,9 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OB-4980] fix!: Address issues with third party authorization flow. By @MAG-AdamThorn
   The third party authorization flow is divided into three parts, with two of those handled via calls to CSP. This change addresses an issue whereby a call to the first CSP method would leave you in an invalid login state if you did not complete the authorization flow. In addition, the backend services are constructing the authorization URL that users require directly, rather than CSP constructing it from data returned. This will allow the services to account for changes required to the URL depending on client type and provider. This change introduces the following breaking changes:
-  1. Spelling of method `UserSystem::GetThirdPartyProviderAuthoriseURL()` Americanised to `UserSystem::GetThirdPartyProviderAuthorizeURL()`.
-  2. Method `UserSystem::GetThirdPartyProviderAuthorizeURL()` now takes an additional optional ClientType argument.
-  3. The values of enum `EThirdPartyPlatform` are now capitalized rather than upper case and the value `Web` has been added.
+    1. Spelling of method `UserSystem::GetThirdPartyProviderAuthoriseURL()` Americanised to `UserSystem::GetThirdPartyProviderAuthorizeURL()`.
+    2. Method `UserSystem::GetThirdPartyProviderAuthorizeURL()` now takes an additional optional ClientType argument.
+    3. The values of enum `EThirdPartyPlatform` are now capitalized rather than upper case and the value `Web` has been added.
 
 ## [6.34.0]
 
@@ -457,9 +463,9 @@ All notable changes to this project will be documented in this file. For compile
   the error handling behaviour which we can just do without. Login with email
   now, you probably already are.
   Removes username as an option from public api:
-  - UserSystem::Login
-  - UserSystem::CreateUser
-  - UserSystem::UpgradeGuestAccount
+    - UserSystem::Login
+    - UserSystem::CreateUser
+    - UserSystem::UpgradeGuestAccount
 
 ### 🐛 🔨 Bug Fixes
 
@@ -539,40 +545,40 @@ All notable changes to this project will be documented in this file. For compile
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
   all U's need equality. All equality operations are standard memberwise == comparison, of the like a c++20 =default would generate.
   The following types have been given new operators:
-  - MessageInfo
-  - ComponentUpdateInfo
-  - Asset
-  - AssetCollection
-  - CurrencyInfo
-  - ProductMediaInfo
-  - VariantOptionInfo
-  - ProductVariantInfo
-  - ProductInfo
-  - CartLine
-  - ShopifyStoreInfo
-  - TicketedEvent
-  - HotspotGroup
-  - Scope
-  - FeatureLimitInfo
-  - UserTierInfo
-  - FeatureQuotaInfo
-  - Sequence
-  - VersionMetadata
-  - ServiceStatus
-  - ServicesDeploymentStatus
-  - Site
-  - BasicSpace
-  - Space
-  - UserRoleInfo
-  - InviteUserRoleInfo
-  - OlyAnchorPosition
-  - OlyRotation
-  - Anchor
-  - AnchorResolution
-  - PointOfInterest
-  - BasicProfile
-  - Profile
-  - Array<T>
+    - MessageInfo
+    - ComponentUpdateInfo
+    - Asset
+    - AssetCollection
+    - CurrencyInfo
+    - ProductMediaInfo
+    - VariantOptionInfo
+    - ProductVariantInfo
+    - ProductInfo
+    - CartLine
+    - ShopifyStoreInfo
+    - TicketedEvent
+    - HotspotGroup
+    - Scope
+    - FeatureLimitInfo
+    - UserTierInfo
+    - FeatureQuotaInfo
+    - Sequence
+    - VersionMetadata
+    - ServiceStatus
+    - ServicesDeploymentStatus
+    - Site
+    - BasicSpace
+    - Space
+    - UserRoleInfo
+    - InviteUserRoleInfo
+    - OlyAnchorPosition
+    - OlyRotation
+    - Anchor
+    - AnchorResolution
+    - PointOfInterest
+    - BasicProfile
+    - Profile
+    - Array<T>
 
 ## [6.24.0]
 
@@ -623,16 +629,16 @@ All notable changes to this project will be documented in this file. For compile
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
 
-  This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
+    This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore
 
 - [OPE-3056] chore: Add exported symbols, equality operators, and hash implementation
   for types required for the common modules in the C# SWIG wrapper. This will be a
   common theme going forward.
-  - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
-  - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
-  - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+    - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
+    - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
+    - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
 
 ### 🐛 🔨 Bug Fixes
 
@@ -649,11 +655,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-4154] fix!: Improve how Hotspot sequence event data is handled by MAG-AdamThorn
   The existing implementation of `HotspotSequenceChangedNetworkEventData` was unnecessarily complex and confusing to developers. This event type has now been removed and new `SpaceId` and `SequenceType` properties have been added to the `SequenceChangedNetworkEventData`.
   This is a breaking change:
-  - `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
-  - `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
-  - When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
-    - SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
-    - SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
+    - `SequenceChangedNetworkEventData` no longer has a `HotspotData` member.
+    - `SequenceChangedNetworkEventData` has two new members, `SpaceId` (String) and `SequenceType` (ESequenceType enum).
+    - When renaming a Hotspot Sequence, access to the old and new names has been updated as follows:
+        - SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
+        - SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
 
 ## [6.19.0]
 

@@ -86,6 +86,23 @@ const auto Schema = ComponentSchema {
             },
         },
         {
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::BlendType),
+            "blendType",
+            EnumeratedValue<int64_t> {
+                static_cast<int64_t>(BlendType::Opaque),
+                {
+                    SchemaOption<int64_t> { "Opaque", static_cast<int64_t>(BlendType::Opaque) },
+                    SchemaOption<int64_t> { "Blend", static_cast<int64_t>(BlendType::Blend) },
+                    SchemaOption<int64_t> { "Mask", static_cast<int64_t>(BlendType::Mask) },
+                },
+            },
+        },
+        {
+            static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AlphaTest),
+            "AlphaTest",
+            PlainValue<float> { 0.0f },
+        },
+        {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::IsARVisible),
             "isARVisible",
             PlainValue<bool> { true },
@@ -236,4 +253,18 @@ void ImageSpaceComponent::SetDisplayMode(DisplayMode Value)
 {
     SetPropertyDirect(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode), static_cast<int64_t>(Value));
 }
+
+BlendType ImageSpaceComponent::GetBlendType() const
+{
+    return static_cast<BlendType>(GetIntegerProperty(static_cast<uint32_t>(ImagePropertyKeys::BlendType)));
+}
+
+void ImageSpaceComponent::SetBlendType(BlendType Value)
+{
+    SetPropertyDirect(static_cast<uint32_t>(ImagePropertyKeys::BlendType), static_cast<int64_t>(Value));
+}
+
+float ImageSpaceComponent::GetAlphaTest() const { return GetFloatProperty(static_cast<uint32_t>(ImagePropertyKeys::AlphaTest)); }
+
+void ImageSpaceComponent::SetAlphaTest(float Value) { SetPropertyDirect(static_cast<uint32_t>(ImagePropertyKeys::AlphaTest), Value); }
 } // namespace csp::multiplayer
