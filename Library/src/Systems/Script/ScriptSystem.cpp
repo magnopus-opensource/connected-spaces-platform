@@ -160,13 +160,13 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
         return false;
     }
 
-    csp::common::String ScriptName = "<unknown script>";
-    csp::common::String FileName = "<unknown file>";
-    if (TheScriptContext->ScriptNameProvider)
+    csp::common::String ScriptName = TheScriptContext->ScriptNameProvider();
+    if (ScriptName.IsEmpty())
     {
-        ScriptName = TheScriptContext->ScriptNameProvider();
-        FileName = "Script_" + ScriptName;
+        ScriptName = "<unknown script>";
     }
+
+    csp::common::String FileName = "Script_" + ScriptName;
 
     qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), FileName.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())

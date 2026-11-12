@@ -83,11 +83,11 @@ size_t LineNumOf(std::string_view ScriptErrorLog, std::string_view SearchStr)
 
 // Checks that an error log contains the error message written by ScriptErrorUtils::FormatScriptError().
 // All tests assume a line number so the error will be:
-// - Script error in entity "<entity name>" (line num)
+// - Script error in "<entity name>" (line num)
 ::testing::AssertionResult HasScriptErrorLog(
     const RAIILogCapture& Capture, std::string_view ScriptName, std::string_view ErrorText, size_t ExpectedLine)
 {
-    const std::string ExpectedError = fmt::format("Script error in entity \"{}\" (line {}): ", ScriptName, ExpectedLine);
+    const std::string ExpectedError = fmt::format("Script error in \"{}\" (line {}): ", ScriptName, ExpectedLine);
 
     const std::vector<std::string>& ErrorMessages = Capture.GetErrorMessages();
 

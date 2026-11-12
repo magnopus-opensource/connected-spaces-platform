@@ -42,7 +42,7 @@ int32_t GetErrorLineNumber(JSContext* Ctx, JSValueConst Exception, const std::st
 // This function will ensure pending exceptions are safely discarded.
 // 
 // Example formatted error:
-// Script error in entity "ScriptHandlerErrorEntity" (line 7): TypeError: not a function
+// Script error in "ScriptHandlerErrorEntity" (line 7): TypeError: not a function
 //    at <anonymous> (Script_ScriptHandlerErrorEntity:7)
 //    at <anonymous> (Script_ScriptHandlerErrorEntity:1)
 csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, const std::string& ScriptName, const std::string& FileName);

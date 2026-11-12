@@ -24,7 +24,7 @@ namespace csp::systems
 ScriptContext::ScriptContext(
     ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId, std::function<csp::common::String()> InScriptNameProvider)
     : ContextId(InContextId)
-    , ScriptNameProvider(InScriptNameProvider)
+    , ScriptNameProvider(InScriptNameProvider ? std::move(InScriptNameProvider) : [] { return csp::common::String(); })
     , TheScriptSystem(InScriptSystem)
     , Runtime(InRuntime)
 {

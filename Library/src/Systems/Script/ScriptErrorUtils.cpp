@@ -110,7 +110,7 @@ csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, co
     // the stack trace, eg. "at <anonymous> (Script_ScriptHandlerErrorEntity:7)".
     const int32_t Line = GetErrorLineNumber(Ctx, Exception, Stack, FileName);
 
-    csp::common::String Out = fmt::format("Script error in entity \"{}\"", ScriptName).c_str();
+    csp::common::String Out = fmt::format("Script error in \"{}\"", ScriptName).c_str();
 
     if (Line > 0)
     {
@@ -127,4 +127,4 @@ csp::common::String FormatScriptError(JSContext* Ctx, JSValueConst Exception, co
     return Out;
 }
 
-} // namespace csp::systems
+} // csp::systems::ScriptErrorUtils

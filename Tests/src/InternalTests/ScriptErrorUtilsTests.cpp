@@ -274,11 +274,11 @@ CSP_INTERNAL_TEST(CSPEngine, ScriptErrorUtilsTests, FormatsRuntimeError)
 
     const std::string Formatted = FormatScriptError(Context.ctx, Exception.v, "MyEntity", "Script_MyEntity").c_str();
 
-    EXPECT_NE(std::string(Formatted).find("Script error in entity \"MyEntity\" (line 3): TypeError"), std::string::npos);
+    EXPECT_NE(std::string(Formatted).find("Script error in \"MyEntity\" (line 3): TypeError"), std::string::npos);
 
     // Confirm that FormatScriptError added the stack trace after the one-line message.
     // QuickJS frames are formatted as shown on line 2 below:
-    // Script error in entity "MyEntity" (line 3): TypeError: cannot read property 'notAProperty' of null
+    // Script error in "MyEntity" (line 3): TypeError: cannot read property 'notAProperty' of null
     //     at<eval>(Script_MyEntity : 3)
     // The frame should point to this script's file and have the same line reported in the header.
     EXPECT_NE(Formatted.find("\n    at "), std::string::npos);
@@ -305,7 +305,7 @@ CSP_INTERNAL_TEST(CSPEngine, ScriptErrorUtilsTests, FormatsNonErrorThrow)
     qjs::Value Exception = Context.getException();
     const csp::common::String Formatted = FormatScriptError(Context.ctx, Exception.v, "MyEntity", "Script_MyEntity");
 
-    EXPECT_EQ(std::string(Formatted.c_str()), "Script error in entity \"MyEntity\": plain");
+    EXPECT_EQ(std::string(Formatted.c_str()), "Script error in \"MyEntity\": plain");
 }
 
 // Validate that a thrown null is formatted and the exceptions raised while inspecting it are cleared.
@@ -324,7 +324,7 @@ CSP_INTERNAL_TEST(CSPEngine, ScriptErrorUtilsTests, FormatsThrownNullClearsExcep
     ASSERT_TRUE(JS_IsNull(Exception.v));
 
     const csp::common::String Formatted = FormatScriptError(Context.ctx, Exception.v, "MyEntity", "Script_MyEntity");
-    EXPECT_EQ(std::string(Formatted.c_str()), "Script error in entity \"MyEntity\": null");
+    EXPECT_EQ(std::string(Formatted.c_str()), "Script error in \"MyEntity\": null");
 
     qjs::Value Pending = Context.getException();
     EXPECT_TRUE(JS_IsNull(Pending.v));
