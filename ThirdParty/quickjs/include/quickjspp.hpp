@@ -1297,6 +1297,17 @@ public:
 	template <typename T> Value(JSContext* ctx, T&& val) : ctx(ctx)
 	{
 		v = js_traits<std::decay_t<T>>::wrap(ctx, std::forward<T>(val));
+		/*
+		* CSP modification - diverges from upstream quickjspp.
+        * Upstream throws qjs::exception here if wrapping the value fails. This was originally disabled because
+        * no CSP caller currently handles an exception from this constructor.
+        * Originally a custom error dump method was called which relied on the CSP log system. This dependency has since been removed.
+		* 
+		if (JS_IsException(v))
+		{
+			throw exception {ctx};
+		}
+		*/
 	}
 
 	Value(JSValue&& v) noexcept : v(std::move(v)), ctx(nullptr)
