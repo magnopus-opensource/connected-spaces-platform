@@ -28,6 +28,11 @@
 
 #include <memory>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
 /// @brief Details of an error encountered when running a script.
@@ -78,7 +83,7 @@ public:
     /// So, expose a public factory function which at the moment is mainly for
     /// use in tests, but could just as well be used to instantiate the instance
     /// in the `SystemsManager`.
-    CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised();
+    CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised(csp::common::LogSystem& LogSystem);
 
     /// @brief Attempts to execute a script in a given context.
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
@@ -122,11 +127,14 @@ public:
     CSP_END_IGNORE
 
 private:
-    ScriptSystem();
+    ScriptSystem() = delete;
+    ScriptSystem(csp::common::LogSystem& LogSystem);
     ~ScriptSystem();
 
     class ScriptRuntime* TheScriptRuntime;
     ScriptErrorCallbackHandler ScriptErrorCallback;
+
+    csp::common::LogSystem& LogSystem;
 };
 
 } // namespace csp::systems

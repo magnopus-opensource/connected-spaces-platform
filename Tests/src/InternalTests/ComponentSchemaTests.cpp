@@ -44,7 +44,7 @@ class TestFixture final
 {
 public:
     TestFixture(const csp::common::Array<Schema>& Schemas)
-        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised())
+        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised(LogSystem))
         , Engine(LogSystem, *ScriptSystem, Schemas)
     {
     }

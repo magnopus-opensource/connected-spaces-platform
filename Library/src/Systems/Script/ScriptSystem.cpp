@@ -40,14 +40,14 @@ namespace
 
 // Takes the exception from the shared slot on the JSRuntime (rt->current_exception), formats it into a one line error log and clears it.
 // qjs::Value frees the exception on destruction.
-csp::common::String ConsumeAndLogScriptException(qjs::Context& Context, const std::string& ScriptName, const std::string& FileName)
+csp::common::String ConsumeAndLogScriptException(csp::common::LogSystem& LogSystem, qjs::Context& Context, const std::string& ScriptName, const std::string& FileName)
 {
     qjs::Value Exception = Context.getException();
 
     // Utility function to safely construct a one line log from the exception QuickJS has thrown.
     // Operations to extract elements such as the 'message' and 'stack' can throw exceptions so this fuction ensures they are safely discarded.
     const csp::common::String ErrorText = csp::systems::ScriptErrorUtils::FormatScriptError(Context.ctx, Exception.v, ScriptName, FileName);
-    CSP_LOG_ERROR_MSG(ErrorText);
+    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorText.c_str());
 
     return ErrorText;
 }
@@ -90,18 +90,19 @@ template <> struct qjs::js_traits<csp::common::String>
 namespace csp::systems
 {
 
-std::shared_ptr<ScriptSystem> ScriptSystem::MakeInitialised()
+std::shared_ptr<ScriptSystem> ScriptSystem::MakeInitialised(csp::common::LogSystem& LogSystem)
 {
-    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(), [](ScriptSystem* Ptr) { delete Ptr; });
+    auto Instance = std::shared_ptr<ScriptSystem>(new ScriptSystem(LogSystem), [](ScriptSystem* Ptr) { delete Ptr; });
 
     Instance->Initialise();
 
     return Instance;
 }
 
-ScriptSystem::ScriptSystem()
+ScriptSystem::ScriptSystem(csp::common::LogSystem& LogSystem)
     : csp::common::IJSScriptRunner()
     , TheScriptRuntime(nullptr)
+    , LogSystem(LogSystem)
 {
 }
 
@@ -111,7 +112,7 @@ void ScriptSystem::Initialise()
 {
     if (TheScriptRuntime != nullptr)
     {
-        CSP_LOG_ERROR_MSG("ScriptSystem::Initialise already called\n");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ScriptSystem::Initialise already called\n");
         return;
     }
 
@@ -155,7 +156,7 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
     if (TheScriptContext == nullptr)
     {
         OutError = fmt::format("Unable to run script: no script context exists with id {}", ContextId).c_str();
-        CSP_LOG_ERROR_MSG(OutError);
+        LogSystem.LogMsg(csp::common::LogLevel::Error, OutError);
 
         return false;
     }
@@ -171,7 +172,7 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
     qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), FileName.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
-        OutError = ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName.c_str(), FileName.c_str());
+        OutError = ConsumeAndLogScriptException(LogSystem, *TheScriptContext->Context, ScriptName.c_str(), FileName.c_str());
 
         if (ScriptErrorCallback)
         {
@@ -186,12 +187,15 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
 
 bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
 {
-    CSP_LOG_FORMAT(common::LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose,
+        fmt::format("RunScriptFile: {}\n", ScriptFilePath.c_str()).c_str());
 
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
     if (TheScriptContext == nullptr)
     {
-        CSP_LOG_ERROR_FORMAT("Unable to run script file %s: no script context exists with id %lld", ScriptFilePath.c_str(), ContextId);
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Unable to run script file {0}: no script context exists with id {1}", ScriptFilePath.c_str(), ContextId)
+                .c_str());
 
         return false;
     }
@@ -205,7 +209,7 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
-        csp::common::String OutError = ConsumeAndLogScriptException(*TheScriptContext->Context, ScriptName, FileName);
+        csp::common::String OutError = ConsumeAndLogScriptException(LogSystem, *TheScriptContext->Context, ScriptName, FileName);
 
         if (ScriptErrorCallback)
         {
@@ -222,7 +226,7 @@ void ScriptSystem::SetScriptErrorCallback(ScriptErrorCallbackHandler Callback)
 {
     if (ScriptErrorCallback)
     {
-        CSP_LOG_MSG(common::LogLevel::Warning, "ScriptErrorCallback has already been set. Previous callback overwritten.");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "ScriptErrorCallback has already been set.Previous callback overwritten.");
     }
 
     ScriptErrorCallback = std::move(Callback);
