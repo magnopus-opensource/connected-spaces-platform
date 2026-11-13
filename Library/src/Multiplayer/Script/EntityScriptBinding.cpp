@@ -29,6 +29,7 @@
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
+#include "Systems/Script/ScriptErrorUtils.h"
 
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
@@ -630,16 +631,29 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
     Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
-    // Always import OKO module into scripts
-    std::stringstream ss;
-    ss << "import * as " << csp::systems::SCRIPT_NAMESPACE << " from \"" << csp::systems::SCRIPT_NAMESPACE << "\"; globalThis."
-       << csp::systems::SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE << ";";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+	// Evaluates Source as a module. If it throws, logs the exception and clears it from the runtime.
+    const auto EvalAndLogOnError = [&](const std::string& Source, std::string_view Description)
+    {
+        qjs::Value Result = Context->eval(Source, "<import>", JS_EVAL_TYPE_MODULE);
+        if (!Result.isException())
+        {
+            return;
+        }
 
-    // For script backwards compatibility
-    ss.clear();
-    ss << "globalThis." << csp::systems::OLD_SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE;
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+        // Takes the exception from the runtime. qjs::Value frees it when it goes out of scope.
+        qjs::Value Exception = Context->getException();
+        const std::string Message = csp::systems::ScriptErrorUtils::ToStdString(Context->ctx, Exception.v);
+
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Error, fmt::format("Failed to {} for script context {}: {}", Description, ContextId, Message).c_str());
+    };
+
+    // Always import the OKO module into scripts.
+    EvalAndLogOnError(fmt::format("import * as {0} from \"{0}\"; globalThis.{0} = {0};", csp::systems::SCRIPT_NAMESPACE), "import the script module");
+
+    // For script backwards compatibility.
+    EvalAndLogOnError(fmt::format("globalThis.{} = {};", csp::systems::OLD_SCRIPT_NAMESPACE, csp::systems::SCRIPT_NAMESPACE),
+        "assign the backwards-compatible script namespace");
 }
 
 } // namespace csp::multiplayer

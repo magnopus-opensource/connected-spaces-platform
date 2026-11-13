@@ -236,13 +236,14 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
 class MockScriptRunner : public csp::common::IJSScriptRunner
 {
     bool RunScript(int64_t, const csp::common::String&) override { return false; }
+    bool RunScriptWithErrorLog(int64_t, const csp::common::String&, csp::common::String&) override { return false; }
     void RegisterScriptBinding(csp::common::IScriptBinding*) override { }
     void UnregisterScriptBinding(csp::common::IScriptBinding*) override { }
     bool BindContext(int64_t) override { return false; }
     bool ResetContext(int64_t) override { return false; }
     void* GetContext(int64_t) override { return nullptr; }
     void* GetModule(int64_t, const csp::common::String&) override { return nullptr; }
-    bool CreateContext(int64_t) override { return false; }
+    bool CreateContext(int64_t, std::function<csp::common::String()>) override { return false; }
     bool DestroyContext(int64_t) override { return false; }
     void SetModuleSource(csp::common::String, csp::common::String) override { }
     void ClearModuleSource(csp::common::String) override { }

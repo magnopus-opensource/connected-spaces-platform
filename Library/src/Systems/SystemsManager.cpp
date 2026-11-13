@@ -192,7 +192,7 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     WebClient->SetAuthContext(UserSystem->GetAuthContext());
 
-    ScriptSystem = new csp::systems::ScriptSystem();
+    ScriptSystem = new csp::systems::ScriptSystem(*LogSystem);
     ScriptSystem->Initialise();
 
     // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.

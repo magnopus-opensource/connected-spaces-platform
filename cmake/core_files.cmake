@@ -126,6 +126,7 @@ set(CSP_CORE_SOURCES
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptContext.cpp
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptRuntime.cpp
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptSystem.cpp
+	${CSP_CORE_SOURCE_DIR}/Script/ScriptErrorUtils.cpp
 
     ${CSP_CORE_SOURCE_DIR}/Sequence/Sequence.cpp
     ${CSP_CORE_SOURCE_DIR}/Sequence/SequenceSystem.cpp
@@ -165,6 +166,7 @@ set(CSP_CORE_PRIVATE_INCLUDES
 
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptContext.h
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptRuntime.h
+	${CSP_CORE_SOURCE_DIR}/Script/ScriptErrorUtils.h
 
     ${CSP_CORE_SOURCE_DIR}/Spaces/SpaceSystemHelpers.h
 

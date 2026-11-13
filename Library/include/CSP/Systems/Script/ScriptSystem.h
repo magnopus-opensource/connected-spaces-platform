@@ -28,8 +28,31 @@
 
 #include <memory>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
+/// @brief Details of an error encountered when running a script.
+class CSP_API ScriptErrorData
+{
+public:
+    /// @brief The id of the script context the error occurred in. For entity scripts, this is the id of the owning entity.
+    int64_t ContextId = 0;
+
+    /// @brief The name of the script that threw the error. For entity scripts this is the entity name, and for scripts run from a file it is
+    /// the file name.
+    csp::common::String ScriptName;
+
+    /// @brief The formatted error, including the script name, line number (where known), error text and stack trace.
+    /// This is the same text that is written to the log.
+    csp::common::String ErrorMessage;
+};
+
+/// @brief Callback invoked when a script encounters an error.
+typedef std::function<void(const ScriptErrorData& ErrorData)> ScriptErrorCallbackHandler;
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
 class CSP_API ScriptSystem : public csp::common::IJSScriptRunner
@@ -60,22 +83,32 @@ public:
     /// So, expose a public factory function which at the moment is mainly for
     /// use in tests, but could just as well be used to instantiate the instance
     /// in the `SystemsManager`.
-    CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised();
+    CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised(csp::common::LogSystem& LogSystem);
 
     /// @brief Attempts to execute a script in a given context.
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptText : The script to execute.
     /// @return a boolean representing success running the script.
     bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override;
+
     /// @brief Attempts to execute a script from a given file path in the given context.
     /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptFilePath  : The file path of the script to execute.
     /// @return a boolean representing success running the script.
     bool RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath);
 
+    /// @brief Sets a callback to be executed when a script error occurs.
+    /// @param Callback csp::systems::ScriptErrorCallbackHandler : the callback to execute when a script error occurs.
+    /// This will include a ScriptErrorData struct with the following data:
+    /// - ContextId
+    /// - ScriptName
+    /// - ErrorMessage
+    CSP_EVENT void SetScriptErrorCallback(ScriptErrorCallbackHandler Callback);
+
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
-    bool CreateContext(int64_t ContextId) override;
+    bool RunScriptWithErrorLog(int64_t ContextId, const csp::common::String& ScriptText, csp::common::String& OutError) override;
+    bool CreateContext(int64_t ContextId, ScriptNameProvider ScriptNameProvider) override;
     bool DestroyContext(int64_t ContextId) override;
     bool BindContext(int64_t ContextId) override;
     bool ResetContext(int64_t ContextId) override;
@@ -94,10 +127,14 @@ public:
     CSP_END_IGNORE
 
 private:
-    ScriptSystem();
+    ScriptSystem() = delete;
+    ScriptSystem(csp::common::LogSystem& LogSystem);
     ~ScriptSystem();
 
     class ScriptRuntime* TheScriptRuntime;
+    ScriptErrorCallbackHandler ScriptErrorCallback;
+
+    csp::common::LogSystem& LogSystem;
 };
 
 } // namespace csp::systems

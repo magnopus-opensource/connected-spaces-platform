@@ -33,7 +33,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ComponentPackerPreservesLargeComponentTyp
     constexpr auto LargeTypeId = std::numeric_limits<uint64_t>::max();
 
     auto LogSystem = csp::common::LogSystem {};
-    auto ScriptSystem = csp::systems::ScriptSystem::MakeInitialised();
+    auto ScriptSystem = csp::systems::ScriptSystem::MakeInitialised(LogSystem);
     auto Engine = csp::multiplayer::OfflineRealtimeEngine {
         LogSystem,
         *ScriptSystem,

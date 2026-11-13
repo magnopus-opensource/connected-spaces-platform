@@ -50,8 +50,8 @@ public:
 
     /**
      * @brief Attempts to execute a script in a given context.
-     * @param ContextId int64_t : The Id of the CSP script context in which to run the script.
-     *                  If the provided context does not exist, the script run will fail.
+     * @param ContextId int64_t : The Id of the CSP script context in which to run the script. If the provided context does not exist, the script run
+     * will fail.
      * @param ScriptText String& : The text of the script to be executed by the javascript engine.
      * @return Whether the script was successfully run.
      */
@@ -64,6 +64,19 @@ public:
         (void)ContextId;
         (void)ScriptText;
 
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+    }
+
+    /**
+     * @brief Attempts to execute a script in a given context. Will return a formatted error message in the event of a failure.
+     * @param ContextId int64_t : The Id of the CSP script context in which to run the script. If the provided context does not exist, the script run
+     * will fail.
+     * @param ScriptText String & : The text of the script to be executed by the javascript engine.
+     * @param OutError String& : Set to a formatted error message if any exception thrown.
+     * @return bool : true if the script ran without error.
+     */
+    CSP_NO_EXPORT virtual bool RunScriptWithErrorLog(int64_t /*ContextId*/, const String& /*ScriptText*/, String& /*OutError*/)
+    {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
@@ -123,12 +136,19 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    using ScriptNameProvider = std::function<csp::common::String()>;
+
     /**
      * @brief Create a new context with specified ID.
      * @param ContextId int64_t : The Id of the context to create, must be unique to other contexts.
+     * @param ScriptNameProvider ScriptNameProvider : A registered callback that can be called to get the current Entity name. This allows us to
+     * get the name at the point the error has been thrown, which avoids issues with an Entity being renamed.
      * @return Whether the context was created successfully.
      */
-    CSP_NO_EXPORT virtual bool CreateContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool CreateContext(int64_t /*ContextId*/, ScriptNameProvider /*ScriptNameProvider*/)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+    }
 
     /**
      * @brief Destroy a pre-existing context with specified ID.
