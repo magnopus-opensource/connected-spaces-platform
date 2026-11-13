@@ -236,6 +236,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
 class MockScriptRunner : public csp::common::IJSScriptRunner
 {
     bool RunScript(int64_t, const csp::common::String&) override { return false; }
+    bool RunScriptWithErrorLog(int64_t, const csp::common::String&, csp::common::String&) override { return false; }
     void RegisterScriptBinding(csp::common::IScriptBinding*) override { }
     void UnregisterScriptBinding(csp::common::IScriptBinding*) override { }
     bool BindContext(int64_t) override { return false; }
