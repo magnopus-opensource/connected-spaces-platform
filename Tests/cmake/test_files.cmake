@@ -87,6 +87,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SpaceSystemTestHelpers.h
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SpaceSystemTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SpaceTransformTests.cpp
+    ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SpatialDataTypesTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SystemResultTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/UserSystemTestHelpers.h
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/UserSystemTests.cpp

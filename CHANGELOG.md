@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [7.3.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix longitude range check in `GeoLocation::IsValid` by @MAG-ThomasGreenhalgh
+  `GeoLocation::IsValid` was incorrectly checking that latitude was <= 180 instead of longitude, so geo-locations with longitude values > 180 were passing the validity check.
+
 ## [7.2.0]
 
 ### 🔥 ❗Breaking Changes
