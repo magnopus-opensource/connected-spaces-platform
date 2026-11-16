@@ -224,7 +224,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
         image.isARVisible = false;
         image.isVirtualVisible = false;
         image.blendType = 1;
-        image.alphaTest = = 0.5;
+        image.alphaTest = 0.5;
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
