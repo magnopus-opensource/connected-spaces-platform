@@ -161,8 +161,8 @@ public:
     float GetAlphaTest() const;
 
     /// @brief Sets the alpha test used by this image component.
-    /// @param alphaTest The alpha test used by this image component.
-    void SetAlphaTest(float alphaTest);
+    /// @param Value The alpha test used by this image component.
+    void SetAlphaTest(float Value);
 
     /// @brief Checks if the image of this image component is emissive.
     /// @return True if the image of this image component is emissive, false otherwise.

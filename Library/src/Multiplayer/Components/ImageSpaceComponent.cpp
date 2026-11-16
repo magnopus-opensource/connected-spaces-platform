@@ -99,7 +99,7 @@ const auto Schema = ComponentSchema {
         },
         {
             static_cast<ComponentProperty::KeyType>(ImagePropertyKeys::AlphaTest),
-            "AlphaTest",
+            "alphaTest",
             PlainValue<float> { 0.0f },
         },
         {
