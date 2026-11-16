@@ -83,21 +83,27 @@ public:
     CSP_NO_EXPORT static std::unique_ptr<StaticModelSpaceComponent> TryMake(
         const schema::ComponentSchema& InSchema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    /* clang-format off */
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    /// @brief Gets the ID of the asset associated with this component.
+    /// @note This asset ID is set to that of the original, source asset in the case where LODs are used via the LOD chain 
+    // for the asset collection associated with this component.
+    /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
+    /// @return The ID of the asset associated with this component.
     const csp::common::String& GetExternalResourceAssetId() const override;
 
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    /// @brief Sets the ID of the asset associated with this component.
+    /// @note This asset ID should still be set to that of the original, source asset in the case where LODs are used via 
+    // the LOD chain for the asset collection associated with this component.
+    /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
+    /// @param Value The ID of the asset associated with this component.
     void SetExternalResourceAssetId(const csp::common::String& Value) override;
-    /* clang-format on */
 
     /// @brief Gets the ID of the asset collection associated with this component.
-    /// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
+    /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
     /// @return The ID of the asset collection associated with this component.
     const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
     /// @brief Sets the ID of the asset collection associated with this component.
-    /// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
+    /// @note To retrieve this component's static model asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
     void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 

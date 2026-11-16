@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [7.3.0]
+## [7.4.0]
 
 ### New Features
 
@@ -13,8 +13,30 @@ All notable changes to this project will be documented in this file. For compile
         - Mask is where the decision to render a pixel or not is determined from the alpha channel of the image and is used in conjunction with AlphaTest. This is used with image formats the support an alpha channel such as PNG.
     - AlphaTest is used when BlendType is set to Mask and is compared with values from the image's alpha channel. Alpha channel values less than this value are considered transparent and not rendered. The default value is zero making the whole image opaque.
 
+## [7.3.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix longitude range check in `GeoLocation::IsValid` by @MAG-ThomasGreenhalgh
+  `GeoLocation::IsValid` was incorrectly checking that latitude was <= 180 instead of longitude, so geo-locations with longitude values > 180 were passing the validity check.
+
 ## [7.2.0]
 
+### 🔥 ❗Breaking Changes
+
+- [NT-0] refac!: Remove the sinkhole Quota System by @MAG-AdamThorn
+  The QuotaSystem was a sinkhole system, in that it wrapped backend service endpoints without adding any business logic at the CSP level.
+  Now that client teams are making quota requests directly to the backend services, we can safely remove this sinkhole system and its tests.
+  
+  The following breaking changes have been made:
+  - The `Quota` and `QuotaSystem` classes have been removed.
+  - The `UserSystem::GetCheckoutSessionUrl()` method signature has changed to take a Tiername String as the first argument rather than a TierNames enum.
+  - The `SystemsManager::GetQuotaSystem()` method has been removed.
+  
+- [OF-1942] refac!: Remove the Voip System by @MAG-AdamThorn
+  The `VoipSystem` is not being used by client applications and there are no plans to make use of it in the future. All clients manage Voip themselves directly.  We are therefore removing this system.
+
+>>>>>>> origin/main
 ### 📔 📔 Documentation
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
@@ -26,6 +48,9 @@ All notable changes to this project will be documented in this file. For compile
   This affects MultiplayerConnection::GetClientId and NetworkEventBus::SendNetworkEventToClient.
   No client changes should have to be made to account for this.
 
+- [OB-6121] refac: Un-deprecate `ExternalResourceAssetId` for animated and static model components by @MAG-ThomasGreenhalgh
+  Un-deprecate `GetExternalResourceAssetId` and `SetExternalResourceAssetId` for both `AnimatedModelSpaceComponent` and `StaticModelSpaceComponent`.
+  Clients should continue to set the `ExternalResourceAssetId` to the id of the original model asset even when LODs are generated or set for the LOD chain of the collection.
 
 ## [7.1.0]
 

@@ -20,7 +20,7 @@
 namespace csp::systems
 {
 
-bool GeoLocation::IsValid() const { return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Latitude <= 180.0; }
+bool GeoLocation::IsValid() const { return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Longitude <= 180.0; }
 
 bool GeoLocation::operator==(const GeoLocation& Other) const
 {

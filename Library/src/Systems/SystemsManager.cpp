@@ -36,7 +36,6 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Spatial/AnchorSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "CSP/Systems/Voip/VoipSystem.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
@@ -69,8 +68,6 @@ SpaceSystem* SystemsManager::GetSpaceSystem() { return SpaceSystem; }
 AssetSystem* SystemsManager::GetAssetSystem() { return AssetSystem; }
 
 ScriptSystem* SystemsManager::GetScriptSystem() { return ScriptSystem; }
-
-VoipSystem* SystemsManager::GetVoipSystem() { return VoipSystem; }
 
 PointOfInterestSystem* SystemsManager::GetPointOfInterestSystem() { return PointOfInterestSystem; }
 
@@ -144,7 +141,6 @@ SystemsManager::SystemsManager()
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
     , ScriptSystem(nullptr)
-    , VoipSystem(nullptr)
     , PointOfInterestSystem(nullptr)
     , AnchorSystem(nullptr)
     , LogSystem(nullptr)
@@ -209,8 +205,6 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     // Set the NetworkEventBus now that it has been initialized.
     UserSystem->SetNetworkEventBus(MultiplayerConnection->GetEventBus());
 
-    VoipSystem = new csp::systems::VoipSystem();
-
     // SystemBase inheritors
 
     SpaceSystem = new csp::systems::SpaceSystem(
@@ -256,7 +250,6 @@ void SystemsManager::DestroySystems()
     delete AssetSystem;
     delete SpaceSystem;
     delete UserSystem;
-    delete VoipSystem;
     delete MultiplayerConnection; // Also deletes NetworkEventBus
     delete ScriptSystem;
     delete MultiplayerSystem;
