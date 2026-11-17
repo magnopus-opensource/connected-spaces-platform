@@ -156,11 +156,11 @@ public:
     /// @param blendType The blend type used by this image component.
     void SetBlendType(BlendType blendType);
 
-    /// @brief Gets the alpha test value used by this image component used when the BlendType is set to Mask.
+    /// @brief Gets the alpha test value used by this image component, used when the BlendType is set to Mask.
     /// @return The alpha test used by this image component.
     float GetAlphaTest() const;
 
-    /// @brief Sets the alpha test used by this image component.
+    /// @brief Sets the alpha test used by this image component, used when the BlendType is set to Mask.
     /// @param Value The alpha test used by this image component.
     void SetAlphaTest(float Value);
 
