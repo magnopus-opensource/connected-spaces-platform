@@ -102,7 +102,6 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     // If offline, just run the script
     if (RealtimeEnginePtr->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
     {
-        // This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
         return;
     }
@@ -111,7 +110,6 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEnginePtr);
     if (OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally())
     {
-        // This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
     }
     else

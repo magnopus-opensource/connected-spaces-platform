@@ -86,12 +86,14 @@ public:
     CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised(csp::common::LogSystem& LogSystem);
 
     /// @brief Attempts to execute a script in a given context.
+    /// This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptText : The script to execute.
     /// @return a boolean representing success running the script.
     bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override;
 
     /// @brief Attempts to execute a script from a given file path in the given context.
+    /// This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
     /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptFilePath  : The file path of the script to execute.
     /// @return a boolean representing success running the script.

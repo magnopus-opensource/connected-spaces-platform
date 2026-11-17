@@ -50,6 +50,7 @@ public:
 
     /**
      * @brief Attempts to execute a script in a given context.
+     * This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
      * @param ContextId int64_t : The Id of the CSP script context in which to run the script. If the provided context does not exist, the script run
      * will fail.
      * @param ScriptText String& : The text of the script to be executed by the javascript engine.
