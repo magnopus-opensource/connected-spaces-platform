@@ -14,6 +14,11 @@ All notable changes to this project will be documented in this file. For compile
   
   As part of the changes made, a new `ScriptSystem::SetScriptErrorCallback()` method has been introduced to allow clients to set a callback to be fired when a script error occurs. In addition the existing `EntityScript::GetErrorText()` method now returns something sensible in the case that a QuickJS exception is thrown.
 
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix longitude range check in `GeoLocation::IsValid` by @MAG-ThomasGreenhalgh
+  `GeoLocation::IsValid` was incorrectly checking that latitude was <= 180 instead of longitude, so geo-locations with longitude values > 180 were passing the validity check.
+
 ## [7.2.0]
 
 ### 🔥 ❗Breaking Changes
