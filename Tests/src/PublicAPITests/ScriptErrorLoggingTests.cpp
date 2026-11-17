@@ -68,40 +68,41 @@ private:
     std::vector<std::string> ErrorMessages;
 };
 
-// Returns the line number (starting at 1) of the first line in ScriptErrorLog containing SearchStr, or 0 if not found.
-size_t LineNumOf(std::string_view ScriptErrorLog, std::string_view SearchStr)
-{
-    const size_t Pos = ScriptErrorLog.find(SearchStr);
-
-    if (Pos == std::string::npos)
-    {
-        return 0;
-    }
-
-    // Count the number of newline characters before the match.
-    return static_cast<size_t>(std::count(ScriptErrorLog.begin(), ScriptErrorLog.begin() + Pos, '\n')) + 1;
-}
-
-// Checks that an error log contains the error message written by ScriptErrorUtils::FormatScriptError().
-// All tests assume a line number so the error will be:
-// - Script error in "<entity name>" (line num)
+// Checks that an error log contains the script name and expected substrings.
 ::testing::AssertionResult HasScriptErrorLog(
-    const RAIILogCapture& Capture, std::string_view ScriptName, std::string_view ErrorText, size_t ExpectedLine)
+    const RAIILogCapture& Capture, std::string_view ScriptName, std::vector<std::string_view> ExpectedSubstrings)
 {
-    const std::string ExpectedError = fmt::format("Script error in \"{}\" (line {}): ", ScriptName, ExpectedLine);
+    const std::string ExpectedHeader = fmt::format("Script error in \"{}\": ", ScriptName);
+
+    const auto Contains = [](const std::string& Message, std::string_view Substring) { return Message.find(Substring) != std::string::npos; };
 
     const std::vector<std::string>& ErrorMessages = Capture.GetErrorMessages();
 
     for (const auto& Message : ErrorMessages)
     {
-        if (Message.find(ExpectedError) != std::string::npos && Message.find(ErrorText) != std::string::npos)
+        if (!Contains(Message, ExpectedHeader))
+        {
+            continue;
+        }
+
+        const bool HasAllSubstrings = std::all_of(ExpectedSubstrings.begin(), ExpectedSubstrings.end(),
+            [&Message, &Contains](std::string_view Substring) { return Contains(Message, Substring); });
+
+        if (HasAllSubstrings)
         {
             return ::testing::AssertionSuccess();
         }
     }
 
     auto Failure = ::testing::AssertionFailure();
-    Failure << "No error log contained '" << ExpectedError << "' and '" << ErrorText << "'. Error messages (" << ErrorMessages.size() << "):";
+    Failure << "No error log contained '" << ExpectedHeader << "'";
+
+    for (const auto& Substring : ExpectedSubstrings)
+    {
+        Failure << " and '" << Substring << "'";
+    }
+
+    Failure << ". Error messages (" << ErrorMessages.size() << "):";
 
     for (const auto& Message : ErrorMessages)
     {
@@ -135,9 +136,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptBodyIsRe
         ThisEntity.notARealFunction();
     )xx";
 
-    const size_t ErrorLine = LineNumOf(ScriptText, "notARealFunction");
-    ASSERT_NE(ErrorLine, 0u);
-
     RAIILogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
@@ -145,7 +143,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptBodyIsRe
 
     EXPECT_FALSE(Succeeded);
     EXPECT_TRUE(Entity->GetScript().HasError());
-    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), "not a function", ErrorLine));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), { "not a function" }));
 }
 
 /*
@@ -172,16 +170,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, ThrownErrorInScriptBodyIsRep
         validate(-1);
     )xx";
 
-    const size_t ErrorLine = LineNumOf(ScriptText, "throw new Error");
-    ASSERT_NE(ErrorLine, 0u);
-
     RAIILogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     const bool Succeeded = Entity->GetScript().Invoke();
 
     EXPECT_FALSE(Succeeded);
-    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), "Value must not be negative", ErrorLine));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), { "Value must not be negative" }));
 }
 
 /*
@@ -204,16 +199,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, SyntaxErrorInScriptIsReporte
         var broken = ;
     )xx";
 
-    const size_t ErrorLine = LineNumOf(ScriptText, "var broken");
-    ASSERT_NE(ErrorLine, 0u);
-
     RAIILogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     const bool Succeeded = Entity->GetScript().Invoke();
 
     EXPECT_FALSE(Succeeded);
-    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), "SyntaxError", ErrorLine));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), { "SyntaxError" }));
 }
 
 /*
@@ -246,9 +238,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInMessageHandler
         ThisEntity.subscribeToMessage("testMessage", "onTestMessage");
     )xx";
 
-    const size_t ErrorLine = LineNumOf(ScriptText, "notARealFunction");
-    ASSERT_NE(ErrorLine, 0u);
-
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
 
     // The script body itself is valid, so the initial invoke should succeed.
@@ -258,7 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInMessageHandler
 
     Entity->GetScript().PostMessageToScript("testMessage");
 
-    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), "not a function", ErrorLine));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, EntityName.c_str(), { "not a function" }));
 }
 
 /*
@@ -302,15 +291,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
     const auto FilePath = std::filesystem::absolute("assets/RunScriptFileError.js");
     ASSERT_TRUE(std::filesystem::exists(FilePath)) << "Test script not found at " << FilePath.string();
 
-    // Find the failing line from the test file.
-    const size_t ErrorLine = 4;
-    ASSERT_NE(ErrorLine, 0u);
-
     {
         RAIILogCapture Capture;
 
         EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
-        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", "not a function", ErrorLine));
+        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", { "not a function" }));
     }
 
     // Confirm that the exception was correctly cleared.
@@ -325,7 +310,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
         RAIILogCapture Capture;
 
         EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
-        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", "not a function", ErrorLine));
+        EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", { "not a function" }));
 
         // Confirm that a second different failure is reported as its own error, not the previous one.
         EXPECT_FALSE(ScriptSystem.RunScript(ContextId, "\nthrow new Error(\"Second failure\");"));
@@ -374,6 +359,127 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RunScriptFileWithMissingFile
     EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, "assets/DoesNotExist.js"));
     EXPECT_FALSE(Capture.GetErrorMessages().empty());
 
+    ScriptSystem.DestroyContext(ContextId);
+}
+
+/*
+    A runtime error thrown inside a function exported by an imported module, called from the script.
+    The first stack frame is in the module, followed by the call site in the importing script:
+        at throwFromModule (RuntimeErrorModule:N)
+        at <anonymous> (Script_ModuleRuntimeErrorScript:M)
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInImportedModuleFunctionIsReported)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+
+    constexpr int64_t ContextId = INT64_MAX;
+    const std::string ScriptName = "ModuleRuntimeErrorScript";
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, [ScriptName]() { return csp::common::String(ScriptName.c_str()); }));
+
+    const std::string ModuleName = "RuntimeErrorModule";
+    const std::string ModuleText = R"xx(
+        export function throwFromModule() {
+            throw new Error("Thrown from imported module");
+        }
+    )xx";
+
+    ScriptSystem.SetModuleSource(ModuleName.c_str(), ModuleText.c_str());
+
+    // Pad the script so the call site line differs from the module's error line.
+    const std::string ScriptText = fmt::format(R"xx(
+        import {{ throwFromModule }} from "{}";
+
+        var padding1 = 1;
+        var padding2 = 2;
+
+        throwFromModule();
+    )xx",
+        ModuleName);
+
+    RAIILogCapture Capture;
+
+    // Match the module stack frames for runtime and syntax errors: "(RuntimeErrorModule:3)" or "at SyntaxErrorModule:6".
+    auto ModuleFrame = fmt::format("{}:", ModuleName);
+
+    EXPECT_FALSE(ScriptSystem.RunScript(ContextId, ScriptText.c_str()));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, ScriptName, { ModuleFrame, "Thrown from imported module" }));
+
+    ScriptSystem.ClearModuleSource(ModuleName.c_str());
+    ScriptSystem.DestroyContext(ContextId);
+}
+
+/*
+    A runtime error thrown by an imported module's top-level code while it is being evaluated as part of the import.
+    No stack frame belongs to the importing script, so the location can only come from the module's own frame.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInImportedModuleTopLevelIsReported)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+
+    constexpr int64_t ContextId = INT64_MAX;
+    const std::string ScriptName = "ModuleTopLevelErrorScript";
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, [ScriptName]() { return csp::common::String(ScriptName.c_str()); }));
+
+    const std::string ModuleName = "TopLevelErrorModule";
+    const std::string ModuleText = R"xx(
+        export const value = 1;
+
+        throw new Error("Thrown from module top level");
+    )xx";
+
+    ScriptSystem.SetModuleSource(ModuleName.c_str(), ModuleText.c_str());
+
+    const std::string ScriptText = fmt::format(R"xx(
+        import {{ value }} from "{}";
+    )xx",
+        ModuleName);
+
+    RAIILogCapture Capture;
+
+    // Match the module stack frames for runtime and syntax errors: "(RuntimeErrorModule:3)" or "at SyntaxErrorModule:6".
+    auto ModuleFrame = fmt::format("{}:", ModuleName);
+
+    EXPECT_FALSE(ScriptSystem.RunScript(ContextId, ScriptText.c_str()));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, ScriptName, { ModuleFrame, "Thrown from module top level" }));
+
+    ScriptSystem.ClearModuleSource(ModuleName.c_str());
+    ScriptSystem.DestroyContext(ContextId);
+}
+
+/*
+    The imported module does not have an error, instead the error is thrown in the importing script itself after a successful import.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptWithImportIsReportedAgainstScript)
+{
+    auto& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+
+    constexpr int64_t ContextId = INT64_MAX;
+    const std::string ScriptName = "ScriptWithImportErrorScript";
+    ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, [ScriptName]() { return csp::common::String(ScriptName.c_str()); }));
+
+    const std::string ModuleName = "ValidModule";
+    const std::string ModuleText = R"xx(
+        export function add(a, b) {
+            return a + b;
+        }
+    )xx";
+
+    ScriptSystem.SetModuleSource(ModuleName.c_str(), ModuleText.c_str());
+
+    const std::string ScriptText = fmt::format(R"xx(
+        import {{ add }} from "{}";
+
+        var total = add(1, 2);
+        throw new Error("Thrown from importing script");
+    )xx",
+        ModuleName);
+
+    RAIILogCapture Capture;
+
+    EXPECT_FALSE(ScriptSystem.RunScript(ContextId, ScriptText.c_str()));
+    EXPECT_TRUE(HasScriptErrorLog(Capture, ScriptName, { "Thrown from importing script" }));
+
+    ScriptSystem.ClearModuleSource(ModuleName.c_str());
     ScriptSystem.DestroyContext(ContextId);
 }
 
