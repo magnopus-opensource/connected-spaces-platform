@@ -29,7 +29,6 @@
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
-#include "Systems/Script/ScriptErrorUtils.h"
 
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
@@ -642,10 +641,10 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
 
         // Takes the exception from the runtime. qjs::Value frees it when it goes out of scope.
         qjs::Value Exception = Context->getException();
-        const std::string Message = csp::systems::ScriptErrorUtils::ToStdString(Context->ctx, Exception.v);
+        const auto Message = Exception.as<std::optional<std::string>>();
 
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, fmt::format("Failed to {} for script context {}: {}", Description, ContextId, Message).c_str());
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Failed to {} for script context {}: {}", Description, ContextId, Message.value_or("<unprintable value>")).c_str());
     };
 
     // Always import the OKO module into scripts.

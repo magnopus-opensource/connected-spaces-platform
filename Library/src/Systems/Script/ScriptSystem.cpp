@@ -19,7 +19,6 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"
-#include "Systems/Script/ScriptErrorUtils.h"
 #include "Systems/Script/ScriptRuntime.h"
 #include "quickjspp.hpp"
 
@@ -33,21 +32,28 @@
 #include <filesystem>
 #include <fmt/format.h>
 #include <map>
-#include <sstream>
 
 namespace
 {
 
-// Takes the exception from the shared slot on the JSRuntime (rt->current_exception), formats it into a one line error log and clears it.
-// qjs::Value frees the exception on destruction.
-csp::common::String ConsumeAndLogScriptException(csp::common::LogSystem& LogSystem, qjs::Context& Context, const std::string& ScriptName, const std::string& FileName)
+// Format the exception from the shared slot on the JSRuntime (rt->current_exception) into an error log and clears the exception slot.
+csp::common::String FormatScriptError(qjs::Context& Context, const std::string& ScriptName)
 {
     qjs::Value Exception = Context.getException();
+    const auto Message = Exception.as<std::optional<std::string>>();
+    const auto Stack = Exception.isError() ? Exception["stack"].as<std::optional<std::string>>() : std::nullopt;
 
-    // Utility function to safely construct a one line log from the exception QuickJS has thrown.
-    // Operations to extract elements such as the 'message' and 'stack' can throw exceptions so this fuction ensures they are safely discarded.
-    const csp::common::String ErrorText = csp::systems::ScriptErrorUtils::FormatScriptError(Context.ctx, Exception.v, ScriptName, FileName);
-    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorText.c_str());
+    if (!Message.has_value())
+    {
+        return fmt::format("Unknown script error in \"{}\"", ScriptName).c_str();
+    }
+
+    csp::common::String ErrorText = fmt::format("Script error in \"{}\": {}", ScriptName, Message.value()).c_str();
+
+    if (Stack.has_value())
+    {
+        ErrorText += fmt::format("\n{}", Stack.value()).c_str();
+    }
 
     return ErrorText;
 }
@@ -172,12 +178,14 @@ bool ScriptSystem::RunScriptWithErrorLog(int64_t ContextId, const csp::common::S
     qjs::Value Result = TheScriptContext->Context->eval(ScriptText.c_str(), FileName.c_str(), JS_EVAL_TYPE_MODULE);
     if (Result.isException())
     {
-        OutError = ConsumeAndLogScriptException(LogSystem, *TheScriptContext->Context, ScriptName.c_str(), FileName.c_str());
+        OutError = FormatScriptError(*TheScriptContext->Context, ScriptName.c_str());
 
         if (ScriptErrorCallback)
         {
             ScriptErrorCallback(ScriptErrorData { ContextId, ScriptName.c_str(), OutError });
         }
+        
+        LogSystem.LogMsg(csp::common::LogLevel::Error, OutError.c_str());
 
         return false;
     }
@@ -193,29 +201,45 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
         return false;
     }
 
-    std::ifstream File(ScriptFilePath.c_str(), std::ios::in | std::ios::binary);
-    if (!File.is_open())
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("Unable to run script file {}: the file does not exist or could not be opened.", ScriptFilePath.c_str()).c_str());
-        return false;
-    }
-
-    std::stringstream Buffer;
-    Buffer << File.rdbuf();
-    const std::string ScriptText = Buffer.str();
-
-    if (ScriptText.empty())
-    {
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Error, fmt::format("Unable to run script file {}: the file is empty.", ScriptFilePath.c_str()).c_str());
-        return false;
-    }
-
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("RunScriptFile: {}\n", ScriptFilePath.c_str()).c_str());
 
-    csp::common::String Error;
-    return RunScriptWithErrorLog(ContextId, ScriptText.c_str(), Error);
+    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
+    if (TheScriptContext == nullptr)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Unable to run script file {0}: no script context exists with id {1}", ScriptFilePath.c_str(), ContextId).c_str());
+        return false;
+    }
+
+    // evalFile uses the path as the eval filename, so stack frames reference the full path.
+    const std::string FileName = ScriptFilePath.c_str();
+    const std::string ScriptName = std::filesystem::path(FileName).filename().string();
+
+    try
+    {
+        qjs::Value Result = TheScriptContext->Context->evalFile(ScriptFilePath.c_str(), JS_EVAL_TYPE_MODULE);
+        if (Result.isException())
+        {
+            csp::common::String OutError = FormatScriptError(*TheScriptContext->Context, ScriptName);
+
+            if (ScriptErrorCallback)
+            {
+                ScriptErrorCallback(ScriptErrorData { ContextId, ScriptName.c_str(), OutError });
+            }
+            
+            LogSystem.LogMsg(csp::common::LogLevel::Error, OutError.c_str());
+
+            return false;
+        }
+    }
+    catch (const std::runtime_error&)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Unable to read script file {}: file does not exist or could not be opened.", ScriptFilePath.c_str()).c_str());
+        return false;
+    }
+    
+    return true;
 }
 
 void ScriptSystem::SetScriptErrorCallback(ScriptErrorCallbackHandler Callback)
