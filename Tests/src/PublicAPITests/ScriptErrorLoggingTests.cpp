@@ -45,11 +45,14 @@ namespace
 
 // Captures every message sent to the SystemsManager log system for the lifetime of the object.
 // Messages are still forwarded to std::cerr so they appear in the test output.
-struct RAIILogCapture
+struct LogCapture
 {
-    RAIILogCapture()
+    LogCapture()
     {
-        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        auto& SystemsManager = csp::systems::SystemsManager::Get();
+        auto& LogSystem = *SystemsManager.GetLogSystem();
+
+        LogSystem.SetLogCallback(
             [this](csp::common::LogLevel Level, const csp::common::String& Message)
             {
                 std::cerr << Message.c_str() << '\n';
@@ -60,7 +63,13 @@ struct RAIILogCapture
             });
     }
 
-    ~RAIILogCapture() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
+    ~LogCapture()
+    {
+        auto& SystemsManager = csp::systems::SystemsManager::Get();
+        auto& LogSystem = *SystemsManager.GetLogSystem();
+
+        LogSystem.SetLogCallback(nullptr);
+    }
 
     const std::vector<std::string>& GetErrorMessages() const { return ErrorMessages; };
 
@@ -69,8 +78,7 @@ private:
 };
 
 // Checks that an error log contains the script name and expected substrings.
-::testing::AssertionResult HasScriptErrorLog(
-    const RAIILogCapture& Capture, std::string_view ScriptName, std::vector<std::string_view> ExpectedSubstrings)
+::testing::AssertionResult HasScriptErrorLog(const LogCapture& Capture, std::string_view ScriptName, std::vector<std::string_view> ExpectedSubstrings)
 {
     const std::string ExpectedHeader = fmt::format("Script error in \"{}\": ", ScriptName);
 
@@ -136,7 +144,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptBodyIsRe
         ThisEntity.notARealFunction();
     )xx";
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     const bool Succeeded = Entity->GetScript().Invoke();
@@ -170,7 +178,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, ThrownErrorInScriptBodyIsRep
         validate(-1);
     )xx";
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     const bool Succeeded = Entity->GetScript().Invoke();
@@ -199,7 +207,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, SyntaxErrorInScriptIsReporte
         var broken = ;
     )xx";
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     Entity->GetScript().SetScriptSource(ScriptText.c_str());
     const bool Succeeded = Entity->GetScript().Invoke();
@@ -243,7 +251,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInMessageHandler
     // The script body itself is valid, so the initial invoke should succeed.
     ASSERT_TRUE(Entity->GetScript().Invoke());
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     Entity->GetScript().PostMessageToScript("testMessage");
 
@@ -292,7 +300,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
     ASSERT_TRUE(std::filesystem::exists(FilePath)) << "Test script not found at " << FilePath.string();
 
     {
-        RAIILogCapture Capture;
+        LogCapture Capture;
 
         EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
         EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", { "not a function" }));
@@ -307,7 +315,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
 
     // Now throw another exception.
     {
-        RAIILogCapture Capture;
+        LogCapture Capture;
 
         EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, FilePath.string().c_str()));
         EXPECT_TRUE(HasScriptErrorLog(Capture, "RunScriptFileError.js", { "not a function" }));
@@ -323,7 +331,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptFileIsRe
 
     // The exception must have been consumed. A later, valid script in the same runtime should neither fail nor report it.
     {
-        RAIILogCapture Capture;
+        LogCapture Capture;
 
         EXPECT_TRUE(ScriptSystem.RunScript(ContextId, "const Valid = 1;"));
         EXPECT_TRUE(Capture.GetErrorMessages().empty());
@@ -339,7 +347,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RunScriptFileWithEmptyPathFa
     constexpr int64_t ContextId = INT64_MAX;
     ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, nullptr));
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
     EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, ""));
     EXPECT_FALSE(Capture.GetErrorMessages().empty());
 
@@ -355,7 +363,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RunScriptFileWithMissingFile
     constexpr int64_t ContextId = INT64_MAX;
     ASSERT_TRUE(ScriptSystem.CreateContext(ContextId, nullptr));
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
     EXPECT_FALSE(ScriptSystem.RunScriptFile(ContextId, "assets/DoesNotExist.js"));
     EXPECT_FALSE(Capture.GetErrorMessages().empty());
 
@@ -396,7 +404,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInImportedModule
     )xx",
         ModuleName);
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     // Match the module stack frames for runtime and syntax errors: "(RuntimeErrorModule:3)" or "at SyntaxErrorModule:6".
     auto ModuleFrame = fmt::format("{}:", ModuleName);
@@ -434,7 +442,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInImportedModule
     )xx",
         ModuleName);
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     // Match the module stack frames for runtime and syntax errors: "(RuntimeErrorModule:3)" or "at SyntaxErrorModule:6".
     auto ModuleFrame = fmt::format("{}:", ModuleName);
@@ -474,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptErrorLoggingTests, RuntimeErrorInScriptWithImpo
     )xx",
         ModuleName);
 
-    RAIILogCapture Capture;
+    LogCapture Capture;
 
     EXPECT_FALSE(ScriptSystem.RunScript(ContextId, ScriptText.c_str()));
     EXPECT_TRUE(HasScriptErrorLog(Capture, ScriptName, { "Thrown from importing script" }));
