@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [7.4.0]
+## [7.3.0]
 
 ### New Features
 
@@ -12,8 +12,6 @@ All notable changes to this project will be documented in this file. For compile
         - Blend is where images are rendered to the scene but don't write to the depth buffer so blend with existing scene content. This is used with image formats the support an alpha channel such as PNG.
         - Mask is where the decision to render a pixel or not is determined from the alpha channel of the image and is used in conjunction with AlphaTest. This is used with image formats the support an alpha channel such as PNG.
     - AlphaTest is used when BlendType is set to Mask and is compared with values from the image's alpha channel. Alpha channel values less than this value are considered transparent and not rendered. The default value is zero making the whole image opaque.
-
-## [7.3.0]
 
 ### 🐛 🔨 Bug Fixes
 
@@ -36,7 +34,6 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1942] refac!: Remove the Voip System by @MAG-AdamThorn
   The `VoipSystem` is not being used by client applications and there are no plans to make use of it in the future. All clients manage Voip themselves directly.  We are therefore removing this system.
 
->>>>>>> origin/main
 ### 📔 📔 Documentation
 
 - [OB-3918] docs: Make Global/Local space statements in entity/component docs consistent and correct by @MAG-ElliotMorris.
