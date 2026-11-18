@@ -1,0 +1,37 @@
+# Produces a nightly prerelease publish using the main publish workflow
+# Does not run tests 
+
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '10 5 * * 1-5' # 05:10 UTC, Mon-Fri
+
+  workflow_dispatch:
+
+jobs:
+  get-date:
+    name: Get the date
+    runs-on: ubuntu-latest
+    steps:
+      - id: date
+        shell: bash
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+    outputs:
+      date: ${{ steps.date.outputs.date }}
+
+  nightly-build:
+    needs: get-date
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    with:
+      skip_tests: true
+      create_release: true
+      prerelease: true
+      release_number: Nightly-${{ needs.get-date.outputs.date }}
+      build_desktop: true
+      build_wasm: true
+      build_android: true
+      build_ios_visionos: false # Removed as target platform, delete entirely later
+      build_linux_unreal: true
+      build_legacy_wasm: false # Don't want to do an NPM publish, the need to do this will dissolve in a few weeks anyway
