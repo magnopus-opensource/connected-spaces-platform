@@ -13,7 +13,7 @@ name: Publish CSP
 on:
 
   workflow_dispatch:
-    inputs:
+    inputs: &publish_inputs
       skip_tests:
         type: boolean
         description: 'Whether tests should be skipped'
@@ -78,6 +78,10 @@ on:
         description: Build legacy WASM/NPM package
         required: true
         default: true
+
+  # Same inputs as workflow_dispatch, allows calling from other workflows (e.g. nightly-build.yml)
+  workflow_call:
+    inputs: *publish_inputs
 
 jobs:
   desktop:
