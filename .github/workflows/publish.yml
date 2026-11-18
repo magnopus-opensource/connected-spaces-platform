@@ -174,4 +174,4 @@ jobs:
       (
         inputs.skip_tests ||
         needs.live-desktop-tests.result == 'success'
-      ) && false
+      )
