@@ -1,0 +1,58 @@
+# Produces a nightly prerelease publish using the main publish workflow
+# Does not run tests 
+
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '10 5 * * 1-5' # 05:10 UTC, Mon-Fri
+
+jobs:
+  prepare:
+    name: Prepare to run nightly
+    runs-on: ubuntu-latest
+    permissions:
+      # Minimum permissions required to query previous nightly runs.
+      actions: read
+    steps:
+      - id: should-run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Check the github api to see if a run of the nightlies has succeeded against this SHA
+        # If so, no need to rerun it again.
+        run: |
+          count=$(gh api -X GET "repos/${{ github.repository }}/actions/workflows/nightly-build.yml/runs" \
+          -f head_sha=${{ github.sha }} -f status=success -f per_page=1 \
+          --jq '.total_count')
+
+          if [ "$count" -gt 0 ]; then
+            echo "Skipping, nightly build has already run for this SHA."
+            echo "should-run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should-run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - id: date
+        shell: bash
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+    outputs:
+      date: ${{ steps.date.outputs.date }}
+      should_run: ${{ steps.should-run.outputs.should-run }}
+
+  nightly-build:
+    name: Trigger Build + Publish
+    needs: prepare
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    if: needs.prepare.outputs.should_run == 'true'
+    with:
+      skip_tests: true
+      create_release: true
+      prerelease: true
+      release_number: Nightly-${{ needs.prepare.outputs.date }}
+      build_desktop: true
+      build_wasm: true
+      build_android: true
+      build_ios_visionos: false # Removed as target platform, delete entirely later
+      build_linux_unreal: true
+      build_legacy_wasm: false # Don't want to do an NPM publish, the need to do this will dissolve in a few weeks anyway
