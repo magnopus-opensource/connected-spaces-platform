@@ -32,6 +32,12 @@ on:
         required: true
         default: true
 
+      prerelease:
+        type: boolean
+        description: 'Whether Github release is marked as a prerelease'
+        required: true
+        default: false
+
       release_number:
         type: string
         description: 'Version number of this release'
@@ -127,6 +133,7 @@ jobs:
     with:
       release_number: ${{ inputs.release_number }}
       upload_legacy_wasm: ${{ inputs.build_legacy_wasm }}
+      prerelease: ${{ inputs.prerelease }}
 
     needs:
     - desktop
@@ -137,6 +144,7 @@ jobs:
     - ios-visionos
     - linux-unreal
 
+    # If a platform is set to run, it should succeed
     if: |
       always() &&
       inputs.create_release &&
