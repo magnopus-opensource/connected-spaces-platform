@@ -54,35 +54,39 @@ bool EntityScript::Invoke()
     CheckBinding();
 
     HasLastError = false;
-    LastError = "Unknown Error";
+    LastError = "Not set";
 
     if (EntityScriptComponent == nullptr)
     {
         HasLastError = true;
         LastError = SCRIPT_ERROR_NO_COMPONENT;
-    }
-    else
-    {
-        const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
 
-        if (!ScriptSource.IsEmpty())
-        {
-            HasLastError = !ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
-        }
-        else
-        {
-            HasLastError = true;
-            LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
-        }
-    }
-
-    if (HasLastError)
-    {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
         }
+
+        return false;
     }
+
+    const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
+
+    if (ScriptSource.IsEmpty())
+    {
+        HasLastError = true;
+        LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
+
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
+        }
+
+        return false;
+    }
+
+    csp::common::String Error;
+    HasLastError = !ScriptRunner->RunScriptWithErrorLog(Entity->GetId(), ScriptSource, Error);
+    LastError = HasLastError ? Error : csp::common::String();
 
     return !HasLastError;
 }
@@ -143,7 +147,7 @@ csp::common::String EntityScript::GetErrorText() { return LastError; }
 void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
 {
     EntityScriptComponent = InEnityScriptComponent;
-    ScriptRunner->CreateContext(Entity->GetId());
+    ScriptRunner->CreateContext(Entity->GetId(), [this]() { return Entity->GetName(); });
 }
 
 csp::common::String EntityScript::GetScriptSource()

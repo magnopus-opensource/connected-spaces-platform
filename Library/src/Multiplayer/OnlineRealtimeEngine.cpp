@@ -1032,6 +1032,7 @@ void OnlineRealtimeEngine::OnRemoteRunScriptEvent(const csp::common::Array<csp::
 
     if (LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str()))
     {
+        // This call may result in a QuickJS exception being thrown, in which case an error will be logged and the exception safely freed.
         ScriptRunner->RunScript(ContextId, ScriptText);
     }
     else

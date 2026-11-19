@@ -81,6 +81,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/PointOfInterestSystemTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/RealtimeEngineEntityTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ReplicatedValueTests.cpp
+	${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ScriptErrorLoggingTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ScriptSystemTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SequenceSystemTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/SettingsSystemTests.cpp

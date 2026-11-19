@@ -44,7 +44,7 @@ class TestFixture final
 {
 public:
     TestFixture(const csp::common::Array<Schema>& AdditionalComponents)
-        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised())
+        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised(LogSystem))
         , Engine(LogSystem, *ScriptSystem, AdditionalComponents)
     {
         LogSystem.SetSystemLevel(csp::common::LogLevel::VeryVerbose);

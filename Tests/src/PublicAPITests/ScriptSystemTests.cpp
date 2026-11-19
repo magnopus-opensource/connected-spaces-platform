@@ -132,7 +132,7 @@ TEST_P(ScriptBinding, ScriptBindingTest)
 
     constexpr int ContextId = 0;
 
-    ScriptSystem.CreateContext(ContextId);
+    ScriptSystem.CreateContext(ContextId, []() { return "EntityTest"; });
 
     qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem.GetModule(ContextId, "CSPTest");
 
