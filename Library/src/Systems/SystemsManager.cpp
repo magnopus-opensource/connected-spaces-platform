@@ -219,7 +219,7 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);
-    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, UserSystem->GetAuthContext(), *LogSystem);
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
