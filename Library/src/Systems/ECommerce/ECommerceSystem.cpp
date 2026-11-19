@@ -17,10 +17,10 @@
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
 #include "CSP/Common/LoginState.h"
-#include "Common/LoginStateData.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
+#include "Common/LoginStateData.h"
 #include "ECommerceSystemHelpers.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
@@ -55,9 +55,10 @@ void RemoveUrl(csp::common::String& Url)
 namespace csp::systems
 {
 
-ECommerceSystem::ECommerceSystem(
-    csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem)
+ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition,
+    const common::IAuthContext& AuthContext, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, LogSystem)
+    , AuthContext { AuthContext }
 {
     ShopifyAPI = new chs::ShopifyApi(InWebClient, AggregationServiceDefinition);
 }
@@ -132,12 +133,9 @@ void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActi
         ActiveParam = *IsActive;
     }
 
-    auto& SystemsManager = SystemsManager::Get();
-    const auto* UserSystem = SystemsManager.GetUserSystem();
-
     static_cast<chs::ShopifyApi*>(ShopifyAPI)
         ->vendorsShopifyUsersUserIdStorefrontsGet(
-            { UserSystem->GetLoginState().GetUserId(), ActiveParam, std::nullopt, std::nullopt }, ResponseHandler);
+            { AuthContext.GetLoginState().GetUserId(), ActiveParam, std::nullopt, std::nullopt }, ResponseHandler);
 }
 
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive,
