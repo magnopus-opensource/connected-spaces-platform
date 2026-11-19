@@ -16,16 +16,17 @@
 #include "Systems/Script/ScriptContext.h"
 
 #include "CSP/Systems/Script/ScriptSystem.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 
 namespace csp::systems
 {
 
-ScriptContext::ScriptContext(
-    ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId, std::function<csp::common::String()> InScriptNameProvider)
+ScriptContext::ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId,
+    std::function<csp::common::String()> InScriptNameProvider, csp::common::LogSystem& LogSystem)
     : ContextId(InContextId)
     , ScriptNameProvider(InScriptNameProvider ? std::move(InScriptNameProvider) : [] { return csp::common::String(); })
     , TheScriptSystem(InScriptSystem)
+    , LogSystem(LogSystem)
     , Runtime(InRuntime)
 {
     Initialise();
@@ -55,11 +56,11 @@ void ScriptContext::Initialise()
 
         if (Source.IsEmpty())
         {
-            CSP_LOG_ERROR_FORMAT("Module %s not found\n", Url.c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Module {} not found\n", Url.c_str());
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, std::nullopt };
         }
 
-        CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Log, "Loaded Module: {}\n", Url.c_str());
 
         return qjs::Context::ModuleData { Url.c_str(), Source.c_str(), std::nullopt };
     };
@@ -93,7 +94,7 @@ ScriptModule* ScriptContext::GetModule(const csp::common::String& ModuleName)
 
 void ScriptContext::AddModule(const csp::common::String& ModuleName)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
+    LogFormat(LogSystem, csp::common::LogLevel::Log, "AddModule: {}\n", ModuleName.c_str());
 
     ModuleMap::iterator It = Modules.find(ModuleName.c_str());
 
@@ -106,7 +107,7 @@ void ScriptContext::AddModule(const csp::common::String& ModuleName)
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Module %s already exists\n", ModuleName.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error, "Module {} already exists\n", ModuleName.c_str());
     }
 }
 

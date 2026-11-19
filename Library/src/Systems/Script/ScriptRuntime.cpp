@@ -16,7 +16,7 @@
 #include "Systems/Script/ScriptRuntime.h"
 
 #include "CSP/Systems/Script/ScriptSystem.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Systems/Script/ScriptContext.h"
 #include "quickjspp.hpp"
 
@@ -42,8 +42,9 @@ inline std::optional<std::string> ReadScriptModuleFile(std::filesystem::path con
 }
 #endif
 
-ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
+ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem, csp::common::LogSystem& LogSystem)
     : TheScriptSystem(InScriptSystem)
+    , LogSystem(LogSystem)
     , Runtime(new qjs::Runtime())
 {
 }
@@ -64,13 +65,13 @@ bool ScriptRuntime::AddContext(int64_t ContextId, std::function<csp::common::Str
 
     if (It == Contexts.end())
     {
-        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId, ScriptNameProvider);
+        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId, ScriptNameProvider, LogSystem);
         Contexts.insert(ContextMap::value_type(ContextId, TheScriptContext));
         return true;
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Context %lld already exists\n", ContextId);
+        LogFormat(LogSystem, csp::common::LogLevel::Error, "Context {} already exists\n", ContextId);
     }
 
     return false;
@@ -153,13 +154,13 @@ void ScriptRuntime::ResetContext(ScriptContext* Context) { Context->Reset(); }
 
 void ScriptRuntime::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
+    LogFormat(LogSystem, csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource {}\n", ModuleUrl.c_str());
     Modules[ModuleUrl.c_str()] = Source.c_str();
 }
 
 void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+    LogFormat(LogSystem, csp::common::LogLevel::Log, "AddModuleUrlAlias: {}-{}\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
 
     UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
 
@@ -169,7 +170,7 @@ void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, cons
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Module alias %s-%s already exists\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+        LogFormat(LogSystem, csp::common::LogLevel::Error, "Module alias {}-{} already exists\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
     }
 }
 
