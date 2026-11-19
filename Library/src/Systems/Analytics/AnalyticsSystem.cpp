@@ -176,7 +176,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
     };
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendAnalyticsCallback, nullptr);
+        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendAnalyticsCallback, nullptr, LogSystem);
 
     static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ Records }, ResponseHandler);
 }
@@ -243,7 +243,7 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
     };
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
+        = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr, LogSystem);
 
     static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueue }, ResponseHandler);
 

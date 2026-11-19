@@ -39,7 +39,7 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ScopeLeaderApi->CreateHandler<ScopesResultCallback, ScopesResult, void, services::DtoArray<chs::multiplayerservice::ScopeDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())
         ->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet({ ReferenceType, SpaceId }, ResponseHandler);
@@ -92,7 +92,7 @@ void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, cons
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ScopeLeaderApi->CreateHandler<ScopeResultCallback, ScopeResult, void, chs::multiplayerservice::ScopeDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())->scopesIdPut({ ScopeId, Dto }, ResponseHandler);
 }
@@ -101,7 +101,7 @@ void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, Scope
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = ScopeLeaderApi->CreateHandler<ScopeLeaderResultCallback, ScopeLeaderResult, void, chs::multiplayerservice::ScopeLeaderDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
 }
@@ -128,7 +128,7 @@ void MultiplayerSystem::__PerformLeaderElectionInScope(const csp::common::String
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = ScopeLeaderApi->CreateHandler<NullResultCallback, NullResult, void, chs::multiplayerservice::ScopeLeaderDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())
         ->scopesScopeIdLeader_electionPost({ ScopeId, csp::common::Convert(UserIdsToExclude) }, ResponseHandler);

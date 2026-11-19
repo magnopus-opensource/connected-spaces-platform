@@ -141,7 +141,7 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 
     // make a response object
     csp::services::DtoBase* InDto = nullptr;
-    csp::services::ApiResponseBase ResponseBase = csp::services::ApiResponseBase(InDto);
+    csp::services::ApiResponseBase ResponseBase = csp::services::ApiResponseBase(InDto, *LogSystem);
     ResponseBase.SetResponse(&MyTestResponse);
     ResponseBase.SetResponseCode(MyTestResponseCode, csp::web::EResponseCodes::ResponseOK);
 

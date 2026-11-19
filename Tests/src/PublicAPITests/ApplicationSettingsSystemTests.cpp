@@ -510,7 +510,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
     // Create a handler for the current mock function, which will allow emulation of the RESTful response in the EXPECT_CALL.
     auto ResponseHandler
         = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem(), csp::web::EResponseCodes::ResponseCreated);
 
     auto Request = std::make_shared<chs::ApplicationSettingsDto>();
     Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
@@ -560,7 +560,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
 
     auto ResponseHandler
         = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem(), csp::web::EResponseCodes::ResponseCreated);
 
     auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "", "", {} };
 
@@ -610,7 +610,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
 
     auto ResponseHandler
         = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem(), csp::web::EResponseCodes::ResponseOK);
 
     auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams { ApplicationSettings.ApplicationName,
         ApplicationSettings.Context, {} };
@@ -667,7 +667,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
 
     auto ResponseHandler
         = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem(), csp::web::EResponseCodes::ResponseOK);
 
     auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
         ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };
@@ -724,7 +724,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
 
     auto ResponseHandler
         = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseNotFound);
+            Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem(), csp::web::EResponseCodes::ResponseNotFound);
 
     auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
         ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };

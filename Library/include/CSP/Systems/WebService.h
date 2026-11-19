@@ -22,6 +22,11 @@
 #include <cstdint>
 #include <functional>
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::services
 {
 class ApiBase;
@@ -93,7 +98,7 @@ protected:
     ERequestFailureReason FailureReason;
 
 private:
-    ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
+    ERequestFailureReason ParseErrorCode(const csp::common::String& Value, csp::common::LogSystem& LogSystem);
 };
 
 } // namespace csp::systems

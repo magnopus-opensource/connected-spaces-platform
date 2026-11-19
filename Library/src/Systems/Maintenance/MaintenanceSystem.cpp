@@ -63,7 +63,7 @@ void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& Maintenanc
         };
         csp::services::ResponseHandlerPtr MaintenanceResponseHandler
             = MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
-                GetMaintenanceInfoCallback, nullptr);
+                GetMaintenanceInfoCallback, nullptr, LogSystem);
         static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(MaintenanceURL, MaintenanceResponseHandler);
     }
 }

@@ -94,7 +94,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
     POIInfo->SetPrototypeName(AssetCollection.Id);
 
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<POIResultCallback, POIResult, void, chs::PointOfInterestDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
@@ -111,7 +111,7 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = POIApiPtr->CreateHandler<POICollectionResultCallback, POICollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     // If the user has provided a type of POI to search for, prepare the corresponding search term string.
     // Otherwise, leave the term as null, to search for all POI types.
@@ -167,7 +167,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
     POIInfo->SetGroupId(Site.SpaceId);
 
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<SiteResultCallback, SiteResult, void, chs::PointOfInterestDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
@@ -178,7 +178,7 @@ void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCo
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = POIApiPtr->CreateHandler<SitesCollectionResultCallback, SitesCollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     std::vector<csp::common::String> SpaceID({ SpaceId });
 
@@ -192,7 +192,7 @@ void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCo
 void PointOfInterestSystem::DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseNoContent);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdDelete({ POIId }, ResponseHandler);
 }
@@ -300,7 +300,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
@@ -409,7 +409,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdPut({ SpaceGeoLocationId, POIInfo }, ResponseHandler);
 }
@@ -442,7 +442,7 @@ void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& Space
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = POIApiPtr->CreateHandler<SpaceGeoLocationCollectionResultCallback, SpaceGeoLocationCollectionResult, void,
-            csp::services::DtoArray<chs::PointOfInterestDto>>(CollectionCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            csp::services::DtoArray<chs::PointOfInterestDto>>(CollectionCallback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
         { std::nullopt, std::nullopt, SpacePOIType, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,

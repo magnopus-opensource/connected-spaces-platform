@@ -104,7 +104,7 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
 }
@@ -181,7 +181,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
 }
@@ -197,7 +197,7 @@ void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& 
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseNoContent);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsDelete({ IdsToBeDeleted }, ResponseHandler);
 }
@@ -211,7 +211,7 @@ void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& OriginLocat
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     std::optional<std::vector<csp::common::String>> AnchorTags;
 
@@ -280,7 +280,7 @@ void AnchorSystem::GetAnchorsInSpace(const csp::common::String& SpaceId, const c
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     std::vector<csp::common::String> ReferenceIds(1);
     ReferenceIds[0] = SpaceId;
@@ -299,7 +299,7 @@ void AnchorSystem::GetAnchorsByAssetCollectionId(const csp::common::String& Asse
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnchorsAPI->CreateHandler<AnchorCollectionResultCallback, AnchorCollectionResult, void, csp::services::DtoArray<chs::AnchorDto>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseOK);
 
     std::vector<csp::common::String> AssetCollectionIds(1);
     AssetCollectionIds[0] = AssetCollectionId;
@@ -325,7 +325,7 @@ void AnchorSystem::CreateAnchorResolution(const csp::common::String& AnchorId, b
     AnchorResolutionInfo->SetTags(csp::common::Convert(Tags));
 
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<csp::systems::AnchorResolutionResultCallback,
-        csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(Callback, nullptr);
+        csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(Callback, nullptr, LogSystem);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchor_resolutionsPost({ AnchorResolutionInfo }, ResponseHandler);
 }

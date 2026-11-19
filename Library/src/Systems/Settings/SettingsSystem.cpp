@@ -78,7 +78,7 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
-            InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
+            InternalCallback, nullptr, LogSystem, web::EResponseCodes::ResponseOK);
 
     static_cast<chs::SettingsApi*>(SettingsAPI)
         ->usersUserIdSettingsContextPut({ UserSystem->GetLoginState().GetUserId(), InContext, InSettings }, SettingsResponseHandler);
@@ -125,7 +125,7 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
-            InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
+            InternalCallback, nullptr, LogSystem, web::EResponseCodes::ResponseOK);
 
     static_cast<chs::SettingsApi*>(SettingsAPI)
         ->usersUserIdSettingsContextGet({ UserSystem->GetLoginState().GetUserId(), InContext, MyKey }, SettingsResponseHandler);

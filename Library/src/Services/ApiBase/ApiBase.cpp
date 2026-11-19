@@ -18,14 +18,17 @@
 namespace csp::services
 {
 
-ApiResponseBase::ApiResponseBase(DtoBase* InDto)
+ApiResponseBase::ApiResponseBase(DtoBase* InDto, csp::common::LogSystem& InLogSystem)
     : Dto(InDto)
+    , LogSystem(InLogSystem)
 {
 }
 
 EResponseCode ApiResponseBase::GetResponseCode() const { return ResponseCode; }
 
 DtoBase* ApiResponseBase::GetDto() const { return Dto; }
+
+csp::common::LogSystem& ApiResponseBase::GetLogSystem() const { return LogSystem; }
 
 void ApiResponseBase::SetResponse(csp::web::HttpResponse* InResponse) { Response = InResponse; }
 
