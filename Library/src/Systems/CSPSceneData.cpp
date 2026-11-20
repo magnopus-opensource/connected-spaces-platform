@@ -15,10 +15,10 @@
  */
 
 #include "CSP/Systems/CSPSceneData.h"
-#include "CSP/Systems/MCS/MCSSceneData.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/PrototypeService/Dto.h"
 #include "Services/UserService/Dto.h"
+#include "Systems/MCS/MCSSceneData.h"
 #include "Json/JsonSerializer.h"
 
 #include <numeric>
