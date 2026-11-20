@@ -18,6 +18,11 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::services::generated::prototypeservice
 {
 class AssetDetailDto;
@@ -27,11 +32,12 @@ class PrototypeDto;
 namespace csp::systems
 {
 
-EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType);
+EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType, csp::common::LogSystem& LogSystem);
 
-csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
+csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform, csp::common::LogSystem& LogSystem);
 
-void AssetDetailDtoToAsset(const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset);
+void AssetDetailDtoToAsset(
+    const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset, csp::common::LogSystem& LogSystem);
 
 void PrototypeDtoToAssetCollection(
     const csp::services::generated::prototypeservice::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection);

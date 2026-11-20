@@ -63,7 +63,7 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     size_t AssetDetailIndex = 0;
     for (const auto& AssetDetail : SceneData.AssetDetails)
     {
-        csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex]);
+        csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex], LogSystem);
         AssetDetailIndex++;
     }
 
