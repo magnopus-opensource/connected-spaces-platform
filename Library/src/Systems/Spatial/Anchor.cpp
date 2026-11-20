@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Spatial/Anchor.h"
+#include "Common/Systems/Log/LogFormat.h"
 
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
@@ -40,7 +41,7 @@ void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, 
     }
 }
 
-void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
+void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor, csp::common::LogSystem& LogSystem)
 {
     Anchor.Id = Dto.GetMgsId();
     Anchor.CreatedBy = Dto.GetCreatedBy();
@@ -55,7 +56,7 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", Name.c_str());
+            csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error, "Unknown third party anchor provider: {}", Name.c_str());
         }
     }
 
@@ -172,7 +173,7 @@ void AnchorResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     {
         AnchorResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        AnchorDtoToAnchor(*AnchorResponse, Anchor);
+        AnchorDtoToAnchor(*AnchorResponse, Anchor, ApiResponse->GetLogSystem());
     }
 }
 
@@ -198,7 +199,7 @@ void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
         for (size_t idx = 0; idx < AnchorsArray.size(); ++idx)
         {
-            AnchorDtoToAnchor(AnchorsArray[idx], Anchors[idx]);
+            AnchorDtoToAnchor(AnchorsArray[idx], Anchors[idx], ApiResponse->GetLogSystem());
         }
     }
 }
