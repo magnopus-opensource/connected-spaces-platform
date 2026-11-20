@@ -221,7 +221,8 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, UserSystem->GetAuthContext(), *LogSystem);
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), *LogSystem);
-    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
+    HotspotSequenceSystem
+        = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem->GetCurrentSpace(), MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
         = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, Endpoints.UserService, &(csp::CSPFoundation::GetClientUserAgentInfo()),

@@ -45,7 +45,7 @@ public:
     /** @endcond */
     CSP_END_IGNORE
 
-    HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
+    HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, const csp::systems::Space& CurrentSpace,
         csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
     /// @brief Create a Hotspot group
     /// @param GroupName csp::common::String : The unique grouping name
@@ -81,7 +81,6 @@ public:
     /// @param GroupName csp::common::String : The unique grouping name
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void DeleteHotspotGroup(const csp::common::String& GroupName, NullResultCallback Callback);
-    ~HotspotSequenceSystem();
 
     /// @brief This will delete any groups which only contain this item
     /// For any groups which contanin the given item and additional items, it will just update the group by removing the given item.
@@ -105,10 +104,9 @@ public:
     CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::SequenceChangedNetworkEventData& NetworkEventData);
 
 private:
-    HotspotSequenceSystem(
-        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+   
     csp::systems::SequenceSystem* SequenceSystem;
-    csp::systems::SpaceSystem* SpaceSystem;
+    const csp::systems::Space& CurrentSpace;
 
     HotspotSequenceChangedCallbackHandler HotspotSequenceChangedCallback;
 };

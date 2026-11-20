@@ -46,10 +46,9 @@ namespace
         return csp::common::String(Key.c_str() + ExpectedPrefix.Length(), Key.Length() - ExpectedPrefix.Length());
     }
 
-    void DeleteSequences(const std::vector<systems::Sequence>& Sequences, csp::systems::NullResultCallback Callback)
+    void DeleteSequences(
+        const std::vector<systems::Sequence>& Sequences, systems::SequenceSystem* SequenceSystem, csp::systems::NullResultCallback Callback)
     {
-        systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
-
         // Remove necessary sequences
         common::Array<common::String> DeletionKeys(Sequences.size());
 
@@ -71,11 +70,9 @@ namespace
         SequenceSystem->DeleteSequences(DeletionKeys, DeleteCallback);
     }
 
-    void UpdateSequences(
-        const std::vector<systems::Sequence>& Sequences, const csp::common::String& ItemToRemove, csp::systems::NullResultCallback Callback)
+    void UpdateSequences(const std::vector<systems::Sequence>& Sequences, const csp::common::String& ItemToRemove,
+        systems::SequenceSystem* SequenceSystem, csp::systems::NullResultCallback Callback)
     {
-        systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
-
         for (const auto& Sequence : Sequences)
         {
             // Remove key from items array
@@ -100,20 +97,19 @@ namespace
 
 } // namespace
 
-HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
+HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, const csp::systems::Space& CurrentSpace,
     csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(&EventBus, LogSystem)
+    , SequenceSystem { SequenceSystem }
+    , CurrentSpace { CurrentSpace }
 {
-    this->SequenceSystem = SequenceSystem;
-    this->SpaceSystem = SpaceSystem;
-
     RegisterSystemCallback();
 }
 
 void HotspotSequenceSystem::CreateHotspotGroup(
     const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
 
     auto CB = [Callback, SpaceId](const SequenceResult& Result)
     {
@@ -159,7 +155,7 @@ void HotspotSequenceSystem::CreateHotspotGroup(
 void HotspotSequenceSystem::RenameHotspotGroup(
     const csp::common::String& GroupName, const csp::common::String& NewGroupName, HotspotGroupResultCallback Callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
 
     const auto Key = CreateKey(GroupName, SpaceId);
     const auto NewKey = CreateKey(NewGroupName, SpaceId);
@@ -207,7 +203,7 @@ void HotspotSequenceSystem::RenameHotspotGroup(
 void HotspotSequenceSystem::UpdateHotspotGroup(
     const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
 
     auto CB = [Callback, SpaceId](const SequenceResult& Result)
     {
@@ -252,7 +248,7 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
 
 void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
 
     auto CB = [Callback, SpaceId](const SequenceResult& Result)
     {
@@ -296,7 +292,7 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
 
 void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callback)
 {
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
 
     auto CB = [Callback, SpaceId](const SequencesResult& Result)
     {
@@ -343,15 +339,9 @@ void HotspotSequenceSystem::DeleteHotspotGroup(const csp::common::String& GroupN
 {
     auto CB = [Callback](const NullResult& Result) { Callback(Result); };
 
-    const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const auto SpaceId = CurrentSpace.Id;
     const auto Key = CreateKey(GroupName, SpaceId);
     SequenceSystem->DeleteSequences({ Key }, CB);
-}
-
-HotspotSequenceSystem::~HotspotSequenceSystem()
-{
-    SpaceSystem = nullptr;
-    SequenceSystem = nullptr;
 }
 
 void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback /*Callback*/)
@@ -360,11 +350,10 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
     // The type provides no help, and you have to actually call GetUniqueComponentId on HotspotComponent
     // to get a `parentId:componentId` pattern.
 
-    systems::SpaceSystem* MySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
     csp::common::String ItemCopy = ItemID;
 
-    auto GetSequencesCallback = [ItemCopy](const systems::SequencesResult& SequencesResult)
+    auto GetSequencesCallback = [ItemCopy, SequenceSystem = SequenceSystem](const systems::SequencesResult& SequencesResult)
     {
         if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
         {
@@ -396,19 +385,12 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
 
         };
 
-        DeleteSequences(SequencesToDelete, CB);
-        UpdateSequences(SequencesToUpdate, ItemCopy, CB);
+        DeleteSequences(SequencesToDelete, SequenceSystem, CB);
+        UpdateSequences(SequencesToUpdate, ItemCopy, SequenceSystem, CB);
     };
 
     // Find all sequences containing this name
-    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { MySpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
-}
-
-HotspotSequenceSystem::HotspotSequenceSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, LogSystem)
-{
-    SpaceSystem = nullptr;
-    SequenceSystem = nullptr;
+    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { CurrentSpace.Id }, GetSequencesCallback);
 }
 
 void HotspotSequenceSystem::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback)
