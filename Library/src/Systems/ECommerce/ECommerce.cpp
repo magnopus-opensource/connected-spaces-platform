@@ -72,7 +72,8 @@ bool CartLine::operator!=(const CartLine& Other) const { return !(*this == Other
 bool CartInfo::operator!=(const CartInfo& Other) const { return !(*this == Other); }
 bool ShopifyStoreInfo::operator!=(const ShopifyStoreInfo& Other) const { return !(*this == Other); }
 
-void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, csp::systems::ProductInfo& ProductInfo)
+void ProductInfoDtoToProductInfo(
+    const chs_aggregation::ShopifyProductDto& Dto, csp::systems::ProductInfo& ProductInfo, csp::common::LogSystem& LogSystem)
 {
     ProductInfo.Id = Dto.GetId();
     ProductInfo.Title = Dto.GetTitle();
@@ -87,7 +88,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyProductDto missing Description");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing Description");
     }
 
     if (Dto.HasVariants())
@@ -106,7 +107,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyProductDto missing HasAvailableForSale");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing HasAvailableForSale");
             }
 
             if (VariantProductInformation[i]->HasImage())
@@ -140,7 +141,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyProductDto missing Image");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing Image");
             }
 
             if (Dto.GetVariants()[i]->HasSelectedOptions())
@@ -157,7 +158,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyProductDto missing SelectedOptions");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing SelectedOptions");
             }
 
             if (VariantProductInformation[i]->HasUnitPrice())
@@ -174,7 +175,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyProductDto missing UnitPrice");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing UnitPrice");
             }
 
             if (VariantProductInformation[i]->HasQuantityAvailable())
@@ -183,12 +184,12 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyProductDto missing QuantityAvailable");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing QuantityAvailable");
             }
         }
     }
     {
-        CSP_LOG_ERROR_MSG("ShopifyProductDto missing Variants");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing Variants");
     }
 
     if (Dto.HasTags())
@@ -204,7 +205,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyProductDto missing Tags");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing Tags");
     }
 
     if (Dto.HasMedia())
@@ -242,12 +243,12 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
         }
     }
     {
-        CSP_LOG_ERROR_MSG("ShopifyProductDto missing Media");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyProductDto missing Media");
     }
 }
 
-void ProductInfoDtoToProductInfoVariantCollection(
-    const std::vector<chs_aggregation::ShopifyProductDto>& DtoArray, csp::common::Array<ProductInfo>& ProductInfoCollection)
+void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregation::ShopifyProductDto>& DtoArray,
+    csp::common::Array<ProductInfo>& ProductInfoCollection, csp::common::LogSystem& LogSystem)
 {
     ProductInfoCollection = common::Array<csp::systems::ProductInfo>(ProductInfoCollection.Size());
     int TotalVariantIndex = 0; // Count the total number of variants included in the product Dto's
@@ -312,7 +313,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Image");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing Image");
                 }
 
                 if (VariantProductInformation->HasSelectedOptions())
@@ -329,7 +330,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing SelectedOptions");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing SelectedOptions");
                 }
 
                 if (VariantProductInformation->HasUnitPrice())
@@ -348,7 +349,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing UnitPrice");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing UnitPrice");
                 }
 
                 if (VariantProductInformation->HasQuantityAvailable())
@@ -357,7 +358,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing QuantityAvailable");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing QuantityAvailable");
                 }
 
                 if (Dto.HasTags())
@@ -373,7 +374,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Tags");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing Tags");
                 }
 
                 if (Dto.HasMedia())
@@ -412,7 +413,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Media");
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing Media");
                 }
 
                 TotalVariantIndex++;
@@ -420,12 +421,12 @@ void ProductInfoDtoToProductInfoVariantCollection(
         }
         else
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Variants");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "ShopifyProductDto missing Variants");
         }
     }
 }
 
-void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::systems::CartInfo& Cart)
+void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::systems::CartInfo& Cart, csp::common::LogSystem& LogSystem)
 {
     if (CartDto.HasSpaceId())
     {
@@ -433,7 +434,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartDto missing SpaceId");
     }
 
     if (CartDto.HasShopifyCartId())
@@ -446,7 +447,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartDto missing ShopifyCartId");
     }
 
     if (CartDto.HasLines())
@@ -466,7 +467,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartLineDto missing ShopifyCartLineId");
             }
 
             if (CartLineDto.HasProductVariantId())
@@ -475,7 +476,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartLineDto missing ProductVariantId");
             }
 
             if (CartLineDto.HasQuantity())
@@ -484,13 +485,13 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
             }
             else
             {
-                CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
+                LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartLineDto missing Quantity");
             }
         }
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartDto missing Lines");
     }
 
     if (CartDto.HasTotalQuantity())
@@ -499,11 +500,12 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyCartDto missing TotalQuantity");
     }
 }
 
-void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontDto& StoreDto, csp::systems::ShopifyStoreInfo& Store)
+void ShopifyStoreDtoToShopifyStoreInfo(
+    const chs_aggregation::ShopifyStorefrontDto& StoreDto, csp::systems::ShopifyStoreInfo& Store, csp::common::LogSystem& LogSystem)
 {
     if (StoreDto.HasId())
     {
@@ -511,7 +513,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing StoreId");
     }
 
     if (StoreDto.HasStoreName())
@@ -520,7 +522,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing StoreName");
     }
 
     if (StoreDto.HasSpaceOwnerId())
@@ -529,7 +531,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing SpaceOwnerId");
     }
 
     if (StoreDto.HasSpaceId())
@@ -538,7 +540,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing SpaceId");
     }
 
     if (StoreDto.HasIsEcommerceActive())
@@ -547,12 +549,12 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
     }
     else
     {
-        CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing IsEcommerceActive");
     }
 }
 
-void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
-    const std::vector<chs_aggregation::ShopifyStorefrontDto>& StoreDtos, csp::common::Array<csp::systems::ShopifyStoreInfo>& Stores)
+void ShopifyStoreDtoArrayToShopifyStoreInfoArray(const std::vector<chs_aggregation::ShopifyStorefrontDto>& StoreDtos,
+    csp::common::Array<csp::systems::ShopifyStoreInfo>& Stores, csp::common::LogSystem& LogSystem)
 {
     for (size_t i = 0; i < StoreDtos.size(); i++)
     {
@@ -565,7 +567,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
         }
         else
         {
-            CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing StoreId");
         }
 
         if (StoreDto.HasStoreName())
@@ -574,7 +576,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
         }
         else
         {
-            CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing StoreName");
         }
 
         if (StoreDto.HasSpaceOwnerId())
@@ -583,7 +585,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
         }
         else
         {
-            CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing SpaceOwnerId");
         }
 
         if (StoreDto.HasSpaceId())
@@ -592,7 +594,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
         }
         else
         {
-            CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing SpaceId");
         }
 
         if (StoreDto.HasIsEcommerceActive())
@@ -601,7 +603,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
         }
         else
         {
-            CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "ShopifyStorefrontDto missing IsEcommerceActive");
         }
     }
 }
@@ -620,7 +622,7 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         ProductInformationResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
-        ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation);
+        ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation, ApiResponse->GetLogSystem());
     }
 }
 
@@ -666,7 +668,7 @@ void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
     {
         Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        CartDtoToCartInfo(*Dto, Cart);
+        CartDtoToCartInfo(*Dto, Cart, ApiResponse->GetLogSystem());
     }
 }
 
@@ -685,7 +687,7 @@ void AddShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* Api
     {
         Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        ShopifyStoreDtoToShopifyStoreInfo(*Dto, Store);
+        ShopifyStoreDtoToShopifyStoreInfo(*Dto, Store, ApiResponse->GetLogSystem());
     }
 }
 
@@ -729,7 +731,7 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
 
         Products = csp::common::Array<csp::systems::ProductInfo>(VariantCount);
 
-        ProductInfoDtoToProductInfoVariantCollection(ProductsArray, Products);
+        ProductInfoDtoToProductInfoVariantCollection(ProductsArray, Products, ApiResponse->GetLogSystem());
     }
 }
 
@@ -754,7 +756,7 @@ void GetShopifyStoresResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
         Stores = csp::common::Array<csp::systems::ShopifyStoreInfo>(StoresArray.size());
 
-        ShopifyStoreDtoArrayToShopifyStoreInfoArray(StoresArray, Stores);
+        ShopifyStoreDtoArrayToShopifyStoreInfoArray(StoresArray, Stores, ApiResponse->GetLogSystem());
     }
 }
 } // namespace csp::systems
