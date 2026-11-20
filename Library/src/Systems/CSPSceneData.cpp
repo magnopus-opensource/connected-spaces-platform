@@ -15,6 +15,10 @@
  */
 
 #include "CSP/Systems/CSPSceneData.h"
+
+#include "CSP/CSPFoundation.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/PrototypeService/Dto.h"
 #include "Services/UserService/Dto.h"
@@ -33,7 +37,14 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     // enough to blow the stack
     csp::common::String SceneDescriptionStr = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
 
-    const auto SceneData = mcs::ParseSceneData(SceneDescriptionStr.c_str());
+    // TODO: Take the LogSystem as a constructor parameter instead, which is a public API change. Until then this
+    // keeps the behaviour of the singleton logging macros it replaced, logging through the SystemsManager's
+    // LogSystem once CSP is initialised and dropping messages otherwise.
+    auto SilentLogSystem = csp::common::LogSystem {};
+    SilentLogSystem.SetSystemLevel(csp::common::LogLevel::NoLogging);
+    auto& LogSystem = csp::CSPFoundation::GetIsInitialised() ? *csp::systems::SystemsManager::Get().GetLogSystem() : SilentLogSystem;
+
+    const auto SceneData = mcs::ParseSceneData(SceneDescriptionStr.c_str(), LogSystem);
 
     csp::systems::GroupDtoToSpace(SceneData.Group, Space);
 

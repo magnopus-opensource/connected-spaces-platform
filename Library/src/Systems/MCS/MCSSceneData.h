@@ -20,6 +20,11 @@
 #include "Services/SpatialDataService/Dto.h"
 #include "Services/UserService/Dto.h"
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems::mcs
 {
 /// @brief Internal mcs data structure which represents data in a scene.
@@ -35,6 +40,5 @@ public:
     std::vector<csp::services::generated::spatialdataservice::AnchorDto> Anchors;
 };
 
-SceneData ParseSceneData(const char* Json);
-
+SceneData ParseSceneData(const char* Json, csp::common::LogSystem& LogSystem);
 }

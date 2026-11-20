@@ -49,7 +49,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, SceneDataJson& Ob
 namespace csp::systems::mcs
 {
 
-SceneData ParseSceneData(const char* Json)
+SceneData ParseSceneData(const char* Json, csp::common::LogSystem&)
 {
     SceneDataJson Members;
     SceneData Obj;
