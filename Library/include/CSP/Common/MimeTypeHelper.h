@@ -20,13 +20,6 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
-namespace csp
-{
-
-class CSPFoundation;
-
-}
-
 namespace csp::common
 {
 

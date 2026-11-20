@@ -44,7 +44,7 @@ public:
     typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
 
     SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient,
-        csp::common::IAuthContext& AuthContext);
+        csp::common::IAuthContext& AuthContext, std::string_view DeviceId);
     virtual ~SignalRConnection();
 
     void Start(std::function<void(std::exception_ptr)> Callback) override;

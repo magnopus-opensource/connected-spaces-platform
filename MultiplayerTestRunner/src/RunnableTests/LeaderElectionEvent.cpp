@@ -16,7 +16,6 @@
 
 #include "LeaderElectionEvent.h"
 
-#include <CSP/CSPFoundation.h>
 #include <CSP/Multiplayer/OnlineRealtimeEngine.h>
 #include <CSP/Multiplayer/SpaceEntity.h>
 #include <CSP/Systems/Multiplayer/MultiplayerSystem.h>

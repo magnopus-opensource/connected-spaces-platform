@@ -15,7 +15,6 @@
  */
 
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "SpaceSystemTestHelpers.h"

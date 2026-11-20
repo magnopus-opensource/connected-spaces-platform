@@ -303,7 +303,8 @@ public:
 private:
     UserSystem() = delete;
     UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
-        const csp::common::String& InMultiplayerConnectionURI, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
+        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
@@ -322,6 +323,8 @@ private:
     csp::services::ApiBase* StripeAPI;
 
     csp::common::String MultiplayerConnectionURI;
+    std::string DeviceId;
+    std::string Tenant;
 
     std::shared_ptr<csp::common::LoginState> CurrentLoginState;
 
