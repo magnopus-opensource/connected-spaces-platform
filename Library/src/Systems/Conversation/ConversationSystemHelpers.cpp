@@ -183,7 +183,8 @@ common::Map<common::String, common::String> RemoveAnnotationMetadata(const Asset
     return MetadataMap;
 }
 
-void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info)
+void PopulateMessageInfoFromMetadata(
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info, csp::common::LogSystem& LogSystem)
 {
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
     {
@@ -191,12 +192,13 @@ void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String,
     }
     else
     {
-        CSP_LOG_WARN_MSG("No Message MetaData found");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "No Message MetaData found");
         Info.Message = "";
     }
 }
 
-multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
+multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(
+    const csp::systems::AssetCollection& MessageAssetCollection, csp::common::LogSystem& LogSystem)
 {
     multiplayer::MessageInfo Info;
     Info.ConversationId = MessageAssetCollection.ParentId;
@@ -209,7 +211,7 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
         Info.EditedTimestamp = MessageAssetCollection.UpdatedAt;
     }
 
-    PopulateMessageInfoFromMetadata(MessageAssetCollection.GetMetadataImmutable(), Info);
+    PopulateMessageInfoFromMetadata(MessageAssetCollection.GetMetadataImmutable(), Info, LogSystem);
 
     return Info;
 }
@@ -252,7 +254,8 @@ multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const As
     return Data;
 }
 
-multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
+multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(
+    const csp::systems::AssetCollection& ConversationAssetCollection, csp::common::LogSystem& LogSystem)
 {
     multiplayer::MessageInfo Info;
     Info.ConversationId = ConversationAssetCollection.Id;
@@ -264,7 +267,7 @@ multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(cons
         Info.EditedTimestamp = ConversationAssetCollection.UpdatedAt;
     }
 
-    PopulateMessageInfoFromMetadata(ConversationAssetCollection.GetMetadataImmutable(), Info);
+    PopulateMessageInfoFromMetadata(ConversationAssetCollection.GetMetadataImmutable(), Info, LogSystem);
 
     return Info;
 }

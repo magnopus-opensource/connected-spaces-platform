@@ -119,11 +119,11 @@ bool MessageInfo::operator==(const MessageInfo& Other) const
 
 bool MessageInfo::operator!=(const MessageInfo& Other) const { return !(*this == Other); }
 
-void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
+void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection, csp::common::LogSystem& LogSystem)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+    MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection, LogSystem);
 }
 
 csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return ConversationMessages; }
@@ -134,7 +134,8 @@ uint64_t MessageCollectionResult::GetTotalCount() const { return ResultTotalCoun
 
 void MessageCollectionResult::SetTotalCount(uint64_t Value) { ResultTotalCount = Value; }
 
-void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections)
+void MessageCollectionResult::FillMessageInfoCollection(
+    const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections, csp::common::LogSystem& LogSystem)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
@@ -144,7 +145,7 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 
     for (size_t idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
     {
-        MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
+        MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx], LogSystem);
         ConversationMessages[idx] = MsgInfo;
     }
 }
@@ -153,11 +154,11 @@ MessageInfo& ConversationResult::GetConversationInfo() { return ConvoInfo; }
 
 const MessageInfo& ConversationResult::GetConversationInfo() const { return ConvoInfo; }
 
-void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
+void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection, csp::common::LogSystem& LogSystem)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+    ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection, LogSystem);
 }
 
 uint64_t NumberOfRepliesResult::GetCount() const { return Count; }

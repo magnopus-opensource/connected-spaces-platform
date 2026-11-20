@@ -235,12 +235,12 @@ namespace
     }
 
     std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(multiplayer::ConversationEventType EventType,
-        std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::NetworkEventBus* NetworkEventBus)
+        std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
     {
-        return [EventType, ConersationCollection, NetworkEventBus]()
+        return [EventType, ConersationCollection, NetworkEventBus, &LogSystem]()
         {
             const multiplayer::MessageInfo& EventInfo
-                = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection);
+                = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection, LogSystem);
             auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
             return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
         };
@@ -248,11 +248,12 @@ namespace
 
     std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationMessageEvent(
         multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection,
-        multiplayer::NetworkEventBus* NetworkEventBus)
+        multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
     {
-        return [EventType, MessageCollection, NetworkEventBus]()
+        return [EventType, MessageCollection, NetworkEventBus, &LogSystem]()
         {
-            const multiplayer::MessageInfo& EventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection);
+            const multiplayer::MessageInfo& EventInfo
+                = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection, LogSystem);
             auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
             return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
         };
@@ -383,8 +384,8 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         };
 
-        multiplayer::MessageInfo MessageInfo
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(AddCommentContainerResult.GetAssetCollection());
+        multiplayer::MessageInfo MessageInfo = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
+            AddCommentContainerResult.GetAssetCollection(), LogSystem);
 
         SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, EventBusPtr, SignalRCallback);
     };
@@ -438,7 +439,7 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
         };
 
         multiplayer::MessageInfo MessageInfo
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection, LogSystem);
         SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBusPtr, SignalRCallback);
     };
 
@@ -496,7 +497,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
 
         // Ensure client has correct permissions to delete the conversation
         multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection(), LogSystem);
 
         if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
         {
@@ -543,7 +544,7 @@ void ConversationSystemInternal::GetMessagesFromConversation(const common::Strin
     const common::Optional<int>& ResultsMaxNumber, multiplayer::MessageCollectionResultCallback Callback)
 {
     // 1. Find asset collections
-    AssetCollectionsResultCallback GetMessagesCallback = [Callback](const AssetCollectionsResult& GetMessagesResult)
+    AssetCollectionsResultCallback GetMessagesCallback = [this, Callback](const AssetCollectionsResult& GetMessagesResult)
     {
         if (HandleConversationResult(GetMessagesResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
         {
@@ -553,7 +554,7 @@ void ConversationSystemInternal::GetMessagesFromConversation(const common::Strin
         // 2. Give result to caller
         multiplayer::MessageCollectionResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
         InternalResult.SetTotalCount(GetMessagesResult.GetTotalCount());
-        InternalResult.FillMessageInfoCollection(GetMessagesResult.GetAssetCollections());
+        InternalResult.FillMessageInfoCollection(GetMessagesResult.GetAssetCollections(), LogSystem);
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
     };
 
@@ -566,7 +567,7 @@ void ConversationSystemInternal::GetMessagesFromConversation(const common::Strin
 void ConversationSystemInternal::GetConversationInfo(const common::String& ConversationId, multiplayer::ConversationResultCallback Callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetConversationCallback = [ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
+    AssetCollectionResultCallback GetConversationCallback = [this, ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
     {
         if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
         {
@@ -575,7 +576,7 @@ void ConversationSystemInternal::GetConversationInfo(const common::String& Conve
 
         // 2. Give result to callers
         multiplayer::ConversationResult InternalResult(GetConversationResult.GetResultCode(), GetConversationResult.GetHttpResultCode());
-        InternalResult.FillConversationInfo(GetConversationResult.GetAssetCollection());
+        InternalResult.FillConversationInfo(GetConversationResult.GetAssetCollection(), LogSystem);
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
     };
 
@@ -595,8 +596,8 @@ void ConversationSystemInternal::UpdateConversation(
         }
 
         // Ensure client has correct permissions to delete the conversation
-        multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
+        multiplayer::MessageInfo Info = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
+            GetConversationResult.GetAssetCollection(), LogSystem);
 
         if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, true) == false)
         {
@@ -615,7 +616,7 @@ void ConversationSystemInternal::UpdateConversation(
 
             // 3. Send multiplayer event
             const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedConversationResult](multiplayer::ErrorCode Error)
+                = [this, Callback, GetUpdatedConversationResult](multiplayer::ErrorCode Error)
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
@@ -627,13 +628,13 @@ void ConversationSystemInternal::UpdateConversation(
 
                 multiplayer::ConversationResult Result(
                     GetUpdatedConversationResult.GetResultCode(), GetUpdatedConversationResult.GetHttpResultCode());
-                Result.FillConversationInfo(GetUpdatedConversationResult.GetAssetCollection());
+                Result.FillConversationInfo(GetUpdatedConversationResult.GetAssetCollection(), LogSystem);
 
                 INVOKE_IF_NOT_NULL(Callback, Result);
             };
 
             auto UpdatedInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
-                GetUpdatedConversationResult.GetAssetCollection());
+                GetUpdatedConversationResult.GetAssetCollection(), LogSystem);
 
             SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBusPtr, SignalRCallback);
         };
@@ -642,7 +643,7 @@ void ConversationSystemInternal::UpdateConversation(
         common::Map<common::String, common::String> ConversationAssetCollectionMetadata = ConversationAssetCollection.GetMetadataImmutable();
 
         multiplayer::MessageInfo NewConversationData
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection, LogSystem);
         NewConversationData.Message = NewData.NewMessage;
 
         common::Map<common::String, common::String> NewConversationMessageMetadata
@@ -660,7 +661,7 @@ void ConversationSystemInternal::UpdateConversation(
 void ConversationSystemInternal::GetMessageInfo(
     const common::String& /*ConversationId*/, const common::String& MessageId, multiplayer::MessageResultCallback Callback)
 {
-    const AssetCollectionResultCallback GetMessageCallback = [Callback](const AssetCollectionResult& GetMessageResult)
+    const AssetCollectionResultCallback GetMessageCallback = [this, Callback](const AssetCollectionResult& GetMessageResult)
     {
         if (HandleConversationResult(GetMessageResult, "The retrieval of the Message asset collection was not successful.", Callback) == false)
         {
@@ -668,7 +669,7 @@ void ConversationSystemInternal::GetMessageInfo(
         }
 
         multiplayer::MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
-        InternalResult.FillMessageInfo(GetMessageResult.GetAssetCollection());
+        InternalResult.FillMessageInfo(GetMessageResult.GetAssetCollection(), LogSystem);
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
     };
 
@@ -688,7 +689,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
 
         // Ensure client has correct permissions to delete the conversation
         multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection(), LogSystem);
 
         if (EnsureUserHasPermission(UserSystem->GetLoginState().GetUserId(), Info.UserId, false) == false)
         {
@@ -707,7 +708,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
             }
 
             multiplayer::MessageResult Result(GetUpdatedMessageResult.GetResultCode(), GetUpdatedMessageResult.GetHttpResultCode());
-            Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection());
+            Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection(), LogSystem);
 
             // 3. Send multiplayer event
             const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
@@ -730,7 +731,8 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
         const AssetCollection& MessageAssetCollection = GetMessageResult.GetAssetCollection();
         common::Map<common::String, common::String> MessageAssetCollectionMetadata = MessageAssetCollection.GetMetadataImmutable();
 
-        multiplayer::MessageInfo NewMessageData = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+        multiplayer::MessageInfo NewMessageData
+            = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection, LogSystem);
         NewMessageData.Message = NewData.NewMessage;
 
         common::Map<common::String, common::String> NewMessageMetadata
@@ -747,7 +749,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
 void ConversationSystemInternal::StoreConversationMessage(
     const multiplayer::MessageInfo& Info, const Space& Space, multiplayer::MessageResultCallback Callback) const
 {
-    const AssetCollectionResultCallback AddCommentCallback = [=](const AssetCollectionResult& AddCommentResult)
+    const AssetCollectionResultCallback AddCommentCallback = [=, this](const AssetCollectionResult& AddCommentResult)
     {
         if (HandleConversationResult(AddCommentResult, "The Comment asset collection creation was not successful.", Callback) == false)
         {
@@ -755,7 +757,7 @@ void ConversationSystemInternal::StoreConversationMessage(
         }
 
         multiplayer::MessageResult Result;
-        Result.FillMessageInfo(AddCommentResult.GetAssetCollection());
+        Result.FillMessageInfo(AddCommentResult.GetAssetCollection(), LogSystem);
         INVOKE_IF_NOT_NULL(Callback, Result);
     };
 
@@ -891,7 +893,8 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBusPtr))
+        .then(
+            SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBusPtr, LogSystem))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
             MakeInvalid<multiplayer::AnnotationResult>(), LogSystem))
@@ -918,7 +921,8 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBusPtr))
+        .then(SendConversationEvent(
+            multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBusPtr, LogSystem))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), LogSystem))
         // 4. Delete annoation asset
@@ -1041,7 +1045,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr, LogSystem))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
             LogSystem))
@@ -1071,7 +1075,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBusPtr))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBusPtr, LogSystem))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), LogSystem))
         // 4. Delete annoation asset
