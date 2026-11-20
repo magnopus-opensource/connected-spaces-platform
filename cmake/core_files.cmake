@@ -154,6 +154,7 @@ set(CSP_CORE_SOURCES
 set(CSP_CORE_PRIVATE_INCLUDES 
     ${CSP_CORE_SOURCE_DIR}/ResultHelpers.h
 
+    ${CSP_CORE_SOURCE_DIR}/Assets/AssetHelpers.h
     ${CSP_CORE_SOURCE_DIR}/Assets/LODHelpers.h
 
     ${CSP_CORE_SOURCE_DIR}/Conversation/ConversationSystemHelpers.h

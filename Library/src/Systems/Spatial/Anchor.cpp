@@ -40,11 +40,6 @@ void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, 
     }
 }
 
-} // namespace
-
-namespace csp::systems
-{
-
 void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
 {
     Anchor.Id = Dto.GetMgsId();
@@ -129,6 +124,11 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
         }
     }
 }
+
+} // namespace
+
+namespace csp::systems
+{
 
 OlyAnchorPosition::OlyAnchorPosition()
     : X(0.0)

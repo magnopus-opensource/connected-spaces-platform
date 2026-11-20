@@ -43,11 +43,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::services::generated::prototypeservice
-{
-class AssetDetailDto;
-}
-
 namespace csp::systems
 {
 class Asset;
@@ -75,19 +70,6 @@ enum class EAssetPlatform
 {
     DEFAULT
 };
-
-/// @brief Converts a received DTO type into a Connected Spaces Platform enum EAssetType.
-/// @param DTOAssetDetailType : The string defining the asset type given via the DTO.
-/// @returns the converted EAssetType value.
-EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType);
-
-/// @brief Converts a string platform definition to an EAssetPlatform value.
-EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform);
-
-/// @brief Converts the EAssetPlatform enum into a string value.
-csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
-
-void AssetDetailDtoToAsset(const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset);
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset which maps to a PrototypeService::AssetDetail.

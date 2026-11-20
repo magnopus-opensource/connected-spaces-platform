@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Assets/Asset.h"
+#include "Systems/Assets/AssetHelpers.h"
 
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -64,7 +65,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
     }
 }
 
-csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
+static csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
 {
     if (Platform == "Default")
     {

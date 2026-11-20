@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Systems/CSPSceneData.h"
+#include "Systems/Assets/AssetHelpers.h"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
