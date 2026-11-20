@@ -39,7 +39,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform, csp::c
 void AssetDetailDtoToAsset(
     const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset, csp::common::LogSystem& LogSystem);
 
-void PrototypeDtoToAssetCollection(
-    const csp::services::generated::prototypeservice::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection);
+void PrototypeDtoToAssetCollection(const csp::services::generated::prototypeservice::PrototypeDto& Dto,
+    csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::systems

@@ -54,7 +54,7 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     size_t PrototypesIndex = 0;
     for (const auto& Prototype : SceneData.Prototypes)
     {
-        csp::systems::PrototypeDtoToAssetCollection(Prototype, AssetCollections[PrototypesIndex]);
+        csp::systems::PrototypeDtoToAssetCollection(Prototype, AssetCollections[PrototypesIndex], LogSystem);
         PrototypesIndex++;
     }
 

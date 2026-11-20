@@ -15,7 +15,7 @@
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/Dto.h"
 #include "Systems/Assets/AssetHelpers.h"
@@ -29,7 +29,7 @@ namespace chs = csp::services::generated::prototypeservice;
 namespace
 {
 
-csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& DTOPrototypeType)
+csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& DTOPrototypeType, csp::common::LogSystem& LogSystem)
 {
     if (DTOPrototypeType == "Default")
         return csp::systems::EAssetCollectionType::DEFAULT;
@@ -43,8 +43,8 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
         return csp::systems::EAssetCollectionType::SPACE_THUMBNAIL;
     else
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Encountered unknown prototype type whilst processing an asset collection DTO: %s",
-            DTOPrototypeType.c_str());
+        csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Encountered unknown prototype type whilst processing an asset collection DTO: {}", DTOPrototypeType.c_str());
         return csp::systems::EAssetCollectionType::DEFAULT;
     }
 }
@@ -55,7 +55,8 @@ namespace csp::systems
 
 // Templated function capable of handling different PrototypeDto types whose schema match.
 // Currently known to be compatible with both chs::PrototypeDto and chs::CopiedPrototypeDto.
-template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+template <class PrototypeDto>
+void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
     if (Dto.HasId())
     {
@@ -69,7 +70,7 @@ template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeD
 
     if (Dto.HasType())
     {
-        AssetCollection.Type = ConvertDTOPrototypeType(Dto.GetType());
+        AssetCollection.Type = ConvertDTOPrototypeType(Dto.GetType(), LogSystem);
     }
 
     if (Dto.HasTags())
@@ -140,9 +141,9 @@ template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeD
     }
 }
 
-void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
-    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection);
+    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection, LogSystem);
 }
 
 AssetCollection::AssetCollection()
@@ -213,7 +214,7 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
         // Build the Dto from the response Json
         PrototypeResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection);
+        PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection, ApiResponse->GetLogSystem());
     }
 }
 
@@ -241,7 +242,7 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
         for (size_t i = 0; i < PrototypeArray.size(); ++i)
         {
-            PrototypeDtoToAssetCollection(PrototypeArray[i], AssetCollections[i]);
+            PrototypeDtoToAssetCollection(PrototypeArray[i], AssetCollections[i], ApiResponse->GetLogSystem());
         }
     }
 }
@@ -316,7 +317,7 @@ void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase
 
         for (size_t i = 0; i < CopiedPrototypesArray.size(); ++i)
         {
-            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i]);
+            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i], ApiResponse->GetLogSystem());
         }
     }
 }
