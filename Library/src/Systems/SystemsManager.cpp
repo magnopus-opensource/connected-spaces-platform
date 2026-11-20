@@ -215,7 +215,7 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
-    SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
+    SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *AssetSystem, UserSystem->GetAuthContext(), *LogSystem);
     GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);

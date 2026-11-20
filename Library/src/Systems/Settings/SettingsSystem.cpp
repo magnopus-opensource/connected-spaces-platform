@@ -46,8 +46,11 @@ namespace chs = csp::services::generated::userservice;
 namespace csp::systems
 {
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem)
+SettingsSystem::SettingsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
+    csp::systems::AssetSystem& AssetSystem, const common::IAuthContext& AuthContext, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, LogSystem)
+    , AssetSystem { AssetSystem }
+    , AuthContext { AuthContext }
 {
     SettingsAPI = new chs::SettingsApi(InWebClient, UserServiceDefinition);
 }
@@ -56,9 +59,6 @@ SettingsSystem::~SettingsSystem() { delete (SettingsAPI); }
 
 void SettingsSystem::SetSettingValue(const String& InContext, const String& InKey, const String& InValue, NullResultCallback Callback) const
 {
-    auto& SystemsManager = SystemsManager::Get();
-    const auto* UserSystem = SystemsManager.GetUserSystem();
-
     auto InSettings = std::make_shared<chs::SettingsDto>();
     std::map<String, String> NewSettings;
     NewSettings.clear();
@@ -81,13 +81,11 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
             InternalCallback, nullptr, LogSystem, web::EResponseCodes::ResponseOK);
 
     static_cast<chs::SettingsApi*>(SettingsAPI)
-        ->usersUserIdSettingsContextPut({ UserSystem->GetLoginState().GetUserId(), InContext, InSettings }, SettingsResponseHandler);
+        ->usersUserIdSettingsContextPut({ AuthContext.GetLoginState().GetUserId(), InContext, InSettings }, SettingsResponseHandler);
 }
 
 void SettingsSystem::GetSettingValue(const String& InContext, const String& InKey, StringResultCallback Callback) const
 {
-    auto& SystemsManager = SystemsManager::Get();
-    const auto* UserSystem = SystemsManager.GetUserSystem();
     std::vector<String> MyKey = { InKey };
 
     SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result)
@@ -128,7 +126,7 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
             InternalCallback, nullptr, LogSystem, web::EResponseCodes::ResponseOK);
 
     static_cast<chs::SettingsApi*>(SettingsAPI)
-        ->usersUserIdSettingsContextGet({ UserSystem->GetLoginState().GetUserId(), InContext, MyKey }, SettingsResponseHandler);
+        ->usersUserIdSettingsContextGet({ AuthContext.GetLoginState().GetUserId(), InContext, MyKey }, SettingsResponseHandler);
 }
 
 void SettingsSystem::SetNDAStatus(bool InValue, NullResultCallback Callback)
@@ -373,7 +371,7 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
             {
                 const auto& AvatarPortraitAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& PortraitResult)
+                AssetsResultCallback AvatarPortraitAssetCallback = [=, this](const AssetsResult& PortraitResult)
                 {
                     if (PortraitResult.GetResultCode() == EResultCode::Success)
                     {
@@ -391,9 +389,8 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 
                         auto& AvatarPortraitAsset = ((AssetsResult&)PortraitResult).GetAssets()[0];
                         AvatarPortraitAsset.MimeType = NewAvatarPortrait.GetMimeType();
-                        const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-                        AssetSystem->UploadAssetData(AvatarPortraitAssetCollection, AvatarPortraitAsset, NewAvatarPortrait, UploadCallback);
+                        AssetSystem.UploadAssetData(AvatarPortraitAssetCollection, AvatarPortraitAsset, NewAvatarPortrait, UploadCallback);
                     }
                     else
                     {
@@ -412,9 +409,7 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
         }
     };
 
-    auto* UserSystem = SystemsManager::Get().GetUserSystem();
-
-    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), AvatarPortraitAssetCollCallback);
+    GetAvatarPortraitAssetCollection(AuthContext.GetLoginState().GetUserId(), AvatarPortraitAssetCollCallback);
 }
 
 void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback)
@@ -493,7 +488,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
             {
                 const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& ThumbnailResult)
+                AssetsResultCallback ThumbnailAssetCallback = [=, this](const AssetsResult& ThumbnailResult)
                 {
                     if (ThumbnailResult.GetResultCode() == EResultCode::Success)
                     {
@@ -513,8 +508,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
                         ThumbnailAsset.FileName = SpaceSystemHelpers::GetUniqueAvatarThumbnailAssetName(
                             SpaceSystemHelpers::GetAssetFileExtension(NewAvatarPortrait.GetMimeType()));
                         ThumbnailAsset.MimeType = NewAvatarPortrait.GetMimeType();
-                        const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
-                        AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewAvatarPortrait, UploadCallback);
+                        AssetSystem.UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewAvatarPortrait, UploadCallback);
                     }
                     else
                     {
@@ -533,18 +527,12 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
         }
     };
 
-    auto* UserSystem = SystemsManager::Get().GetUserSystem();
-
-    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), ThumbnailAssetCollCallback);
+    GetAvatarPortraitAssetCollection(AuthContext.GetLoginState().GetUserId(), ThumbnailAssetCollCallback);
 }
 
 void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSource, NullResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [=, this](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -555,7 +543,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
         {
             const auto& PortraitAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            AssetResultCallback CreateAssetCallback = [=, this](const AssetResult& CreateAssetResult)
             {
                 if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -576,7 +564,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
                         INVOKE_IF_NOT_NULL(Callback, InternalResult);
                     };
 
-                    AssetSystem->UploadAssetData(PortraitAssetColl, CreateAssetResult.GetAsset(), ImageDataSource, UploadCallback);
+                    AssetSystem.UploadAssetData(PortraitAssetColl, CreateAssetResult.GetAsset(), ImageDataSource, UploadCallback);
                 }
                 else
                 {
@@ -588,8 +576,8 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
                 }
             };
 
-            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId();
-            AssetSystem->CreateAsset(PortraitAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
+            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + AuthContext.GetLoginState().GetUserId();
+            AssetSystem.CreateAsset(PortraitAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
         }
         else
         {
@@ -601,19 +589,15 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
         }
     };
 
-    const auto AvatarPortraitAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserSystem->GetLoginState().GetUserId();
+    const auto AvatarPortraitAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + AuthContext.GetLoginState().GetUserId();
 
-    AssetSystem->CreateAssetCollection(
+    AssetSystem.CreateAssetCollection(
         nullptr, nullptr, AvatarPortraitAssetCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollCallback);
 }
 
 void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& ImageDataSource, NullResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [=, this](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -624,7 +608,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
         {
             const auto& PortraitAvatarAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            AssetResultCallback CreateAssetCallback = [=, this](const AssetResult& CreateAssetResult)
             {
                 if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -647,10 +631,10 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 
                     Asset AvatarPortraitAsset = CreateAssetResult.GetAsset();
 
-                    AvatarPortraitAsset.FileName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId()
+                    AvatarPortraitAsset.FileName = AVATAR_PORTRAIT_ASSET_NAME + AuthContext.GetLoginState().GetUserId()
                         + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
                     AvatarPortraitAsset.MimeType = ImageDataSource.GetMimeType();
-                    AssetSystem->UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
+                    AssetSystem.UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
                 }
                 else
                 {
@@ -662,8 +646,8 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
                 }
             };
 
-            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId();
-            AssetSystem->CreateAsset(PortraitAvatarAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
+            const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + AuthContext.GetLoginState().GetUserId();
+            AssetSystem.CreateAsset(PortraitAvatarAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
         }
         else
         {
@@ -675,18 +659,15 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
         }
     };
 
-    const String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserSystem->GetLoginState().GetUserId();
+    const String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + AuthContext.GetLoginState().GetUserId();
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this space
-    AssetSystem->CreateAssetCollection(
+    AssetSystem.CreateAssetCollection(
         nullptr, nullptr, SpaceThumbnailAssetCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollCallback);
 }
 
 void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String InUserID, AssetCollectionsResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-
     AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::Failed)
@@ -703,7 +684,7 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String 
     Array<String> PrototypeNames = { AvatarPortraitAssetCollectionName };
     Array<EAssetCollectionType> PrototypeTypes = { EAssetCollectionType::DEFAULT };
 
-    AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, PrototypeTypes, nullptr, nullptr, nullptr, nullptr, GetAssetCollCallback);
+    AssetSystem.FindAssetCollections(nullptr, nullptr, PrototypeNames, PrototypeTypes, nullptr, nullptr, nullptr, nullptr, GetAssetCollCallback);
 }
 
 void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback)
@@ -719,15 +700,12 @@ void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortrai
         INVOKE_IF_NOT_NULL(Callback, AssetsResult);
     };
 
-    const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
-    AssetSystem->GetAssetsInCollection(AvatarPortraitAssetCollection, ThumbnailAssetCallback);
+    AssetSystem.GetAssetsInCollection(AvatarPortraitAssetCollection, ThumbnailAssetCallback);
 }
 
 void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 {
-    const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [this, AssetSystem, Callback](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [this, Callback](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -748,7 +726,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
             {
                 const auto& PortraitAvatarAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback PortraitAvatarAssetCallback = [=](const AssetsResult& PortraitResult)
+                AssetsResultCallback PortraitAvatarAssetCallback = [=, this](const AssetsResult& PortraitResult)
                 {
                     if (PortraitResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -757,7 +735,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 
                     if (PortraitResult.GetResultCode() == EResultCode::Success)
                     {
-                        NullResultCallback DeleteAssetCallback = [=](const NullResult& DeleteAssetResult)
+                        NullResultCallback DeleteAssetCallback = [=, this](const NullResult& DeleteAssetResult)
                         {
                             if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress)
                             {
@@ -779,7 +757,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
                                     INVOKE_IF_NOT_NULL(Callback, DeleteAssetCollResult);
                                 };
 
-                                AssetSystem->DeleteAssetCollection(PortraitAvatarAssetCollection, DeleteAssetCollCallback);
+                                AssetSystem.DeleteAssetCollection(PortraitAvatarAssetCollection, DeleteAssetCollCallback);
                             }
                             else
                             {
@@ -792,7 +770,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
                         };
 
                         const auto& PortraitAvatarAsset = PortraitResult.GetAssets()[0];
-                        AssetSystem->DeleteAsset(PortraitAvatarAssetCollection, PortraitAvatarAsset, DeleteAssetCallback);
+                        AssetSystem.DeleteAsset(PortraitAvatarAssetCollection, PortraitAvatarAsset, DeleteAssetCallback);
                     }
                     else
                     {
@@ -811,9 +789,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
         }
     };
 
-    auto* UserSystem = SystemsManager::Get().GetUserSystem();
-
-    GetAvatarPortraitAssetCollection(UserSystem->GetLoginState().GetUserId(), PortraitAvatarAssetCollCallback);
+    GetAvatarPortraitAssetCollection(AuthContext.GetLoginState().GetUserId(), PortraitAvatarAssetCollCallback);
 }
 
 void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, bool InAvatarVisible, NullResultCallback Callback)
