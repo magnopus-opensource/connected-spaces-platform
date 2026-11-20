@@ -20,12 +20,6 @@
 #include "Services/SpatialDataService/Dto.h"
 #include "Services/UserService/Dto.h"
 
-namespace csp::json
-{
-class JsonSerializer;
-class JsonDeserializer;
-} // namespace csp::json
-
 namespace csp::systems::mcs
 {
 /// @brief Internal mcs data structure which represents data in a scene.
@@ -41,7 +35,6 @@ public:
     std::vector<csp::services::generated::spatialdataservice::AnchorDto> Anchors;
 };
 
-}
+SceneData ParseSceneData(const char* Json);
 
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::systems::mcs::SceneData& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::mcs::SceneData& Obj);
+}

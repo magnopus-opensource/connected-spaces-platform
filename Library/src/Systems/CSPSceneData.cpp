@@ -19,7 +19,6 @@
 #include "Services/PrototypeService/Dto.h"
 #include "Services/UserService/Dto.h"
 #include "Systems/MCS/MCSSceneData.h"
-#include "Json/JsonSerializer.h"
 
 #include <numeric>
 
@@ -34,8 +33,7 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     // enough to blow the stack
     csp::common::String SceneDescriptionStr = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
 
-    mcs::SceneData SceneData;
-    csp::json::JsonDeserializer::Deserialize(SceneDescriptionStr.c_str(), SceneData);
+    const auto SceneData = mcs::ParseSceneData(SceneDescriptionStr.c_str());
 
     csp::systems::GroupDtoToSpace(SceneData.Group, Space);
 

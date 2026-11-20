@@ -18,38 +18,70 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Json/JsonSerializer.h"
 
-void ToJson(csp::json::JsonSerializer&, const csp::systems::mcs::SceneData&) { }
+namespace
+{
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::mcs::SceneData& Obj)
+// Each member of the scene's "data" object, serialised back to json for the DTOs to parse.
+struct SceneDataJson
+{
+    std::string Group;
+    std::string Prototypes;
+    std::string AssetDetails;
+    std::string Sequences;
+    std::string Anchors;
+};
+
+void FromJson(const csp::json::JsonDeserializer& Deserializer, SceneDataJson& Obj)
 {
     Deserializer.EnterMember("data");
 
-    std::string GroupJson = Deserializer.GetMemberAsString("group");
-    Obj.Group.FromJson(GroupJson.c_str());
+    Obj.Group = Deserializer.GetMemberAsString("group");
+    Obj.Prototypes = Deserializer.GetMemberAsString("prototypes");
+    Obj.AssetDetails = Deserializer.GetMemberAsString("assetDetails");
+    Obj.Sequences = Deserializer.GetMemberAsString("sequences");
+    Obj.Anchors = Deserializer.GetMemberAsString("anchors");
 
-    std::string PrototypesJson = Deserializer.GetMemberAsString("prototypes");
+    Deserializer.ExitMember();
+}
+
+} // namespace
+
+namespace csp::systems::mcs
+{
+
+SceneData ParseSceneData(const char* Json)
+{
+    SceneDataJson Members;
+    SceneData Obj;
+
+    if (!csp::json::JsonDeserializer::Deserialize(Json, Members))
+    {
+        return Obj;
+    }
+
+    Obj.Group.FromJson(Members.Group.c_str());
+
     csp::services::DtoArray<csp::services::generated::prototypeservice::PrototypeDto> PrototypesDto;
-    PrototypesDto.FromJson(PrototypesJson.c_str());
+    PrototypesDto.FromJson(Members.Prototypes.c_str());
 
     Obj.Prototypes = PrototypesDto.GetArray();
 
-    std::string AssetDetailsJson = Deserializer.GetMemberAsString("assetDetails");
     csp::services::DtoArray<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetailsDto;
-    AssetDetailsDto.FromJson(AssetDetailsJson.c_str());
+    AssetDetailsDto.FromJson(Members.AssetDetails.c_str());
 
     Obj.AssetDetails = AssetDetailsDto.GetArray();
 
-    std::string SequencesJson = Deserializer.GetMemberAsString("sequences");
     csp::services::DtoArray<csp::services::generated::aggregationservice::SequenceDto> SequencesDto;
-    SequencesDto.FromJson(SequencesJson.c_str());
+    SequencesDto.FromJson(Members.Sequences.c_str());
 
     Obj.Sequences = SequencesDto.GetArray();
 
-    std::string AnchorsJson = Deserializer.GetMemberAsString("anchors");
     csp::services::DtoArray<csp::services::generated::spatialdataservice::AnchorDto> AnchorssDto;
-    AnchorssDto.FromJson(AnchorsJson.c_str());
+    AnchorssDto.FromJson(Members.Anchors.c_str());
 
     Obj.Anchors = AnchorssDto.GetArray();
 
-    Deserializer.ExitMember();
+    return Obj;
+}
+
 }
