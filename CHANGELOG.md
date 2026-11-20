@@ -18,6 +18,11 @@ All notable changes to this project will be documented in this file. For compile
 
 - [NT-0] fix: Fix longitude range check in `GeoLocation::IsValid` by @MAG-ThomasGreenhalgh
   `GeoLocation::IsValid` was incorrectly checking that latitude was <= 180 instead of longitude, so geo-locations with longitude values > 180 were passing the validity check.
+  
+### 🔩 🔧 Ci
+
+- [OF-1948] ci: Add a new nightly build GH workflow by @MAG-AdamThorn
+  Add a new `nightly-build` workflow that will be triggered each morning at 05:10 UTC Monday - Friday, to create a publish of CSP using the existing `publish` workflow. Tests will not be run as part of nightly builds.
 
 ## [7.2.0]
 

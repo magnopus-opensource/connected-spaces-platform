@@ -31,9 +31,9 @@ function(get_version_from_git)
 
     set(CSP_BUILD_ID "${CSP_BUILD_ID}" PARENT_SCOPE)
 
-    # Get version tag
+    # Get latest tag that matches Major.Minor.Patch. (The wildcards are so we can match double digit numbers) 
     execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe --tags --always
+        COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0 --match "[0-9]*.[0-9]*.[0-9]*"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_TAG
         OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -45,9 +45,8 @@ function(get_version_from_git)
         return()
     endif()
 
-    # Convert to correct format
-    string(REGEX REPLACE "^v" "" CLEAN_TAG "${GIT_TAG}")
-    if(CLEAN_TAG MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(-.*)?$")
+    # Extract major/minor/patch
+    if(GIT_TAG MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(-.*)?$")
 
         set(CSP_VERSION_MAJOR ${CMAKE_MATCH_1})
         set(CSP_VERSION_MAJOR ${CMAKE_MATCH_1} PARENT_SCOPE)
@@ -59,7 +58,7 @@ function(get_version_from_git)
         set(CSP_VERSION "${CSP_VERSION_MAJOR}.${CSP_VERSION_MINOR}.${CSP_VERSION_PATCH}") 
         set(CSP_VERSION "${CSP_VERSION_MAJOR}.${CSP_VERSION_MINOR}.${CSP_VERSION_PATCH}" PARENT_SCOPE)
     else()
-        message(WARNING "Tag '${CLEAN_TAG}' does not match semver format")
+        message(WARNING "Tag '${GIT_TAG}' does not match semver format")
     endif()
    
 endfunction()
