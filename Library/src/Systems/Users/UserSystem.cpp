@@ -703,7 +703,7 @@ void UserSystem::FederatedLogin(
         return;
     }
 
-    auto DataOpt = csp::common::AuthDtoToLoginStateData(&AuthDetails);
+    auto DataOpt = csp::common::AuthDtoToLoginStateData(&AuthDetails, LogSystem);
 
     if (DataOpt.has_value() == false)
     {

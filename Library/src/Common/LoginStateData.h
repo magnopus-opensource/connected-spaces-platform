@@ -33,6 +33,8 @@ namespace csp::services::generated::userservice
 namespace csp::common
 {
 
+class LogSystem;
+
 /// @brief Data structure representing the user login state.
 /// This type allows us to extract the data from the LoginState class and control access to it via a mutex lock.
 class LoginStateData
@@ -108,6 +110,7 @@ private:
     csp::common::DateTime AccessTokenRefreshTime;
 };
 
-std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse);
+std::optional<LoginStateData> AuthDtoToLoginStateData(
+    const csp::services::generated::userservice::AuthDto* AuthResponse, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::common

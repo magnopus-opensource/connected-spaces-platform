@@ -19,7 +19,7 @@
 #include "CSP/Common/Settings.h"
 #include "Common/Convert.h"
 #include "Common/DateTime.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Dto.h"
 
@@ -49,7 +49,8 @@ csp::common::SettingsCollection MakeSettingsCollection(const csp::services::gene
 namespace csp::common
 {
 
-std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::generated::userservice::AuthDto* AuthResponse)
+std::optional<LoginStateData> AuthDtoToLoginStateData(
+    const csp::services::generated::userservice::AuthDto* AuthResponse, csp::common::LogSystem& LogSystem)
 {
     auto Data = LoginStateData();
 
@@ -87,8 +88,8 @@ std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::gener
 
     if (CurrentTime >= Expiry)
     {
-        CSP_LOG_FORMAT(
-            LogLevel::Error, "AccessToken Expired: %s %s", AuthResponse->GetAccessToken().c_str(), AuthResponse->GetAccessTokenExpiresAt().c_str());
+        LogFormat(LogSystem, LogLevel::Error, "AccessToken Expired: {} {}", AuthResponse->GetAccessToken().c_str(),
+            AuthResponse->GetAccessTokenExpiresAt().c_str());
 
         return std::nullopt;
     }
@@ -99,7 +100,7 @@ std::optional<LoginStateData> AuthDtoToLoginStateData(const csp::services::gener
 
     if (RefreshTime >= Expiry)
     {
-        CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", AuthResponse->GetRefreshToken().c_str(),
+        LogFormat(LogSystem, LogLevel::Error, "RefreshToken Expired: {} {}", AuthResponse->GetRefreshToken().c_str(),
             AuthResponse->GetRefreshTokenExpiresAt().c_str());
 
         return std::nullopt;

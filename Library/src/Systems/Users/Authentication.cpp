@@ -64,7 +64,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
         if (State)
         {
-            auto DataOpt = csp::common::AuthDtoToLoginStateData(AuthResponse);
+            auto DataOpt = csp::common::AuthDtoToLoginStateData(AuthResponse, ApiResponse->GetLogSystem());
 
             if (DataOpt.has_value() == false)
             {
