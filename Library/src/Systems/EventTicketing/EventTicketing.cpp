@@ -20,7 +20,7 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
-csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName)
+csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName, csp::common::LogSystem& LogSystem)
 {
     csp::systems::EventTicketingVendor Vendor = csp::systems::EventTicketingVendor::Unknown;
     if (VendorName == "eventbrite")
@@ -29,14 +29,14 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
     }
     else
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning,
+        LogSystem.LogMsg(csp::common::LogLevel::Warning,
             "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
     }
 
     return Vendor;
 }
 
-csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus)
+csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus, csp::common::LogSystem& LogSystem)
 {
     csp::systems::TicketStatus Status = csp::systems::TicketStatus::Unknown;
 
@@ -50,25 +50,25 @@ csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus
     }
     else
     {
-        CSP_LOG_MSG(
+        LogSystem.LogMsg(
             csp::common::LogLevel::Error, "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
     }
 
     return Status;
 }
 
-void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event)
+void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event, csp::common::LogSystem& LogSystem)
 {
     Event.Id = Dto.GetId();
     Event.SpaceId = Dto.GetSpaceId();
 
     if (Dto.HasVendorName())
     {
-        Event.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        Event.Vendor = VendorNameToEnum(Dto.GetVendorName(), LogSystem);
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceEventDto missing VendorName");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceEventDto missing VendorName");
         Event.Vendor = csp::systems::EventTicketingVendor::Unknown;
     }
 
@@ -78,7 +78,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventId");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceEventDto missing VendorEventId");
         Event.VendorEventId = "";
     }
 
@@ -88,7 +88,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventUri");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceEventDto missing VendorEventUri");
         Event.VendorEventUri = "";
     }
 
@@ -98,23 +98,23 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceEventDto missing IsTicketingActive");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceEventDto missing IsTicketingActive");
         Event.IsTicketingActive = false;
     }
 }
 
-void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::EventTicket& Ticket)
+void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::EventTicket& Ticket, csp::common::LogSystem& LogSystem)
 {
     Ticket.Id = Dto.GetId();
     Ticket.SpaceId = Dto.GetSpaceId();
 
     if (Dto.HasVendorName())
     {
-        Ticket.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        Ticket.Vendor = VendorNameToEnum(Dto.GetVendorName(), LogSystem);
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorName");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing VendorName");
         Ticket.Vendor = csp::systems::EventTicketingVendor::Unknown;
     }
 
@@ -124,7 +124,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorEventId");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing VendorEventId");
         Ticket.VendorEventId = "";
     }
 
@@ -134,17 +134,17 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorTicketId");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing VendorTicketId");
         Ticket.VendorTicketId = "";
     }
 
     if (Dto.HasTicketStatus())
     {
-        Ticket.Status = TicketStatusToEnum(*Dto.GetTicketStatus());
+        Ticket.Status = TicketStatusToEnum(*Dto.GetTicketStatus(), LogSystem);
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing UserId");
         Ticket.UserId = "";
     }
 
@@ -154,7 +154,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing UserId");
         Ticket.UserId = "";
     }
 
@@ -164,16 +164,17 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
     }
     else
     {
-        CSP_LOG_WARN_MSG("SpaceTicketDto missing EmailLower");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SpaceTicketDto missing EmailLower");
         Ticket.Email = "";
     }
 }
 
-void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)
+void VendorInfoDtoToVendorInfo(
+    const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo, csp::common::LogSystem& LogSystem)
 {
     if (Dto.HasVendorName())
     {
-        VendorInfo.Vendor = VendorNameToEnum(Dto.GetVendorName());
+        VendorInfo.Vendor = VendorNameToEnum(Dto.GetVendorName(), LogSystem);
     }
 
     if (Dto.HasClientId())
@@ -214,7 +215,7 @@ void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     {
         Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        SpaceEventDtoToTicketedEvent(*Dto, Event);
+        SpaceEventDtoToTicketedEvent(*Dto, Event, ApiResponse->GetLogSystem());
     }
 }
 
@@ -238,7 +239,7 @@ void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseB
 
         for (size_t idx = 0; idx < DtoArray.size(); ++idx)
         {
-            SpaceEventDtoToTicketedEvent(DtoArray[idx], Events[idx]);
+            SpaceEventDtoToTicketedEvent(DtoArray[idx], Events[idx], ApiResponse->GetLogSystem());
         }
     }
 }
@@ -258,7 +259,7 @@ void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     {
         Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        SpaceTicketDtoToEventTicket(*Dto, Ticket);
+        SpaceTicketDtoToEventTicket(*Dto, Ticket, ApiResponse->GetLogSystem());
     }
 }
 
@@ -293,7 +294,7 @@ void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiRespo
     {
         Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
+        VendorInfoDtoToVendorInfo(*Dto, VendorInfo, ApiResponse->GetLogSystem());
     }
 }
 
