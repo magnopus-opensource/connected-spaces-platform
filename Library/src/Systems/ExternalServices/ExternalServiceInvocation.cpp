@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "CSP/Systems/ExternalServices/ExternalServiceInvocation.h"
-#include "Debug/Logging.h"
-#include "Services/ApiBase/ApiBase.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/AggregationService/Dto.h"
+#include "Services/ApiBase/ApiBase.h"
 #include "Json/JsonParseHelper.h"
 
 #include <regex>
@@ -55,16 +55,16 @@ void ExternalServiceInvocationResult::OnResponse(const services::ApiResponseBase
             }
             else
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                    "The operation result Json field for an external service proxy invocation was invalid/missing. Response: %s",
+                csp::common::LogFormat(ApiResponse->GetLogSystem(), csp::common::LogLevel::Error,
+                    "The operation result Json field for an external service proxy invocation was invalid/missing. Response: {}",
                     Response->GetPayload().GetContent().c_str());
             }
         }
         else
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
+            csp::common::LogFormat(ApiResponse->GetLogSystem(), csp::common::LogLevel::Error,
                 "Encountered a malformed operation result Json string when attempting to process the response from an external service proxy "
-                "invocation result. Payload: %s",
+                "invocation result. Payload: {}",
                 Response->GetPayload().GetContent().c_str());
         }
     }
@@ -97,8 +97,8 @@ void GetAgoraTokenResult::OnResponse(const services::ApiResponseBase* ApiRespons
         }
         else
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                "Whilst the operation result for an Agora token request was valid Json, there was no 'token' result returned. Operation result: %s",
+            csp::common::LogFormat(ApiResponse->GetLogSystem(), csp::common::LogLevel::Error,
+                "Whilst the operation result for an Agora token request was valid Json, there was no 'token' result returned. Operation result: {}",
                 OperationResult.c_str());
         }
     }

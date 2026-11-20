@@ -88,7 +88,7 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
         if (MaintenanceInfoResponses.Size() == 0)
         {
-            CSP_LOG_MSG(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
+            ApiResponse->GetLogSystem().LogMsg(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
         }
 
         // Sort maintenance windows by latest date

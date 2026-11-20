@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/AggregationService/Api.h"
 
 namespace chs = csp::services::generated::aggregationservice;
@@ -331,8 +332,9 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
             if (FirstJSONMember->value.IsBool())
             {
                 SpaceIsTicketed = FirstJSONMember->value.GetBool();
-                CSP_LOG_FORMAT(common::LogLevel::VeryVerbose, "We found that the space with ID %s has ticketed status: %s",
-                    FirstJSONMember->name.GetString(), SpaceIsTicketed ? "true" : "false");
+                csp::common::LogFormat(ApiResponse->GetLogSystem(), common::LogLevel::VeryVerbose,
+                    "We found that the space with ID {} has ticketed status: {}", FirstJSONMember->name.GetString(),
+                    SpaceIsTicketed ? "true" : "false");
             }
             else
             {
@@ -346,7 +348,7 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
 
         if (ExpectedResponse == false)
         {
-            CSP_LOG_MSG(common::LogLevel::Error,
+            ApiResponse->GetLogSystem().LogMsg(common::LogLevel::Error,
                 "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
         }
     }
