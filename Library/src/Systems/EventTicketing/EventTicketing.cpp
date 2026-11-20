@@ -211,7 +211,7 @@ void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         SpaceEventDtoToTicketedEvent(*Dto, Event);
     }
@@ -230,7 +230,7 @@ void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseB
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<chs::SpaceEventDto>& DtoArray = TicketedEventCollectionResponse->GetArray();
         Events = csp::common::Array<csp::systems::TicketedEvent>(DtoArray.size());
@@ -255,7 +255,7 @@ void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         SpaceTicketDtoToEventTicket(*Dto, Ticket);
     }
@@ -290,7 +290,7 @@ void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiRespo
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
     }
@@ -311,7 +311,8 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
         auto InputText = Response->GetPayload().GetContent();
 
         rapidjson::Document ResponseJson;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(ResponseJson, InputText, "SpaceIsTicketedResult::OnResponse");
+        rapidjson::ParseResult ok
+            = csp::json::ParseWithErrorLogging(ResponseJson, InputText, "SpaceIsTicketedResult::OnResponse", ApiResponse->GetLogSystem());
         if (!ok)
         {
             return;

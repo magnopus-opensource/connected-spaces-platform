@@ -131,7 +131,7 @@ void ProfileResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProfileResponse->FromJson(Response->GetPayload().GetContent());
+        ProfileResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         ProfileDtoToProfile(*ProfileResponse, Profile);
     }
@@ -151,7 +151,7 @@ void BasicProfilesResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProfileDataResponse->FromJson(Response->GetPayload().GetContent());
+        ProfileDataResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<chs::ProfileLiteDto>& ProfileArray = ProfileDataResponse->GetArray();
         Profiles = csp::common::Array<csp::systems::BasicProfile>(ProfileArray.size());

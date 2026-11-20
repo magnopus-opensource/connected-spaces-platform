@@ -1208,7 +1208,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 
 void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadataResultCallback Callback)
 {
-    AssetCollectionsResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionsResult& Result)
+    AssetCollectionsResultCallback MetadataAssetCollCallback = [this, Callback](const AssetCollectionsResult& Result)
     {
         SpacesMetadataResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -1224,7 +1224,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 
                 auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
-                SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
+                SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection, LogSystem);
             }
 
             InternalResult.SetMetadata(SpacesMetadata);
@@ -1248,7 +1248,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
         return;
     }
 
-    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
+    AssetCollectionResultCallback MetadataAssetCollCallback = [this, Callback](const AssetCollectionResult& Result)
     {
         SpaceMetadataResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -1256,7 +1256,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
         {
             const auto& AssetCollection = Result.GetAssetCollection();
 
-            InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
+            InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection, LogSystem));
         }
 
         INVOKE_IF_NOT_NULL(Callback, InternalResult);

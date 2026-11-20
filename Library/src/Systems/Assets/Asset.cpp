@@ -255,7 +255,7 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
+        AssetDetailResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         AssetDetailDtoToAsset(*AssetDetailResponse, Asset);
     }
@@ -275,7 +275,7 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetsResponse->FromJson(Response->GetPayload().GetContent());
+        AssetsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         std::vector<chs::AssetDetailDto>& DetailsArray = AssetsResponse->GetArray();
         Assets = csp::common::Array<csp::systems::Asset>(DetailsArray.size());

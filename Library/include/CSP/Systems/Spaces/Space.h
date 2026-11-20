@@ -296,7 +296,7 @@ private:
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& JsonContent, csp::common::LogSystem& LogSystem);
 
     csp::common::Array<BasicSpace> Spaces;
     uint64_t ResultTotalCount = 0;

@@ -347,7 +347,7 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, ParseWithErrorLogging_LogsFailure)
     const csp::common::String InvalidJson = "{ invalid json }";
     rapidjson::Document Doc;
 
-    rapidjson::ParseResult Result = ParseWithErrorLogging(Doc, InvalidJson, "ParseWithErrorLogging_LogsFailure");
+    rapidjson::ParseResult Result = ParseWithErrorLogging(Doc, InvalidJson, "ParseWithErrorLogging_LogsFailure", LogSystem);
 
     EXPECT_NE(Result, rapidjson::kParseErrorNone);
     

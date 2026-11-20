@@ -657,7 +657,7 @@ void UserSystem::FederatedLogin(
 {
     chs_user::AuthDto AuthDetails;
 
-    AuthDetails.FromJson(FederatedLoginDetailsJson);
+    AuthDetails.FromJson(FederatedLoginDetailsJson, LogSystem);
 
     if (!AuthDetails.HasAccessToken())
     {

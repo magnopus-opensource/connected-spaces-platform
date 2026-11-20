@@ -28,6 +28,11 @@
 #include <string>
 #include <vector>
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::services
 {
 class DtoBase;
@@ -87,41 +92,41 @@ template <> rapidjson::Value TypeToJsonValue(const csp::common::String& Value, R
 
 template <> rapidjson::Value TypeToJsonValue(const rapidjson::Document& Value, RapidJsonAlloc& Allocator);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type, csp::common::LogSystem& LogSystem);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type, csp::common::LogSystem& LogSystem);
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type);
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type, csp::common::LogSystem& LogSystem);
 
-template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type);
+template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type, csp::common::LogSystem& LogSystem);
 
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& Value, T& Type, csp::common::LogSystem& LogSystem);
 
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& Value, T& Type, csp::common::LogSystem& LogSystem);
 
 template <class T,
     typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
+inline void JsonValueToType(const rapidjson::Value& Value, T& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type, csp::common::LogSystem& LogSystem);
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type);
+template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type, csp::common::LogSystem& LogSystem);
 
 // Catch-all template for notifying the user if no specialisation exists for serialising the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
@@ -253,7 +258,7 @@ template <class T> inline csp::common::String TypeToJsonString(const std::vector
 
 // Deserialisation function for types that derive from EnumBase
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>*>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
+inline void JsonValueToType(const rapidjson::Value& Value, T& Type, csp::common::LogSystem&)
 {
     Type.FromJson(CSP_TEXT(Value.GetString()));
 }
@@ -261,46 +266,46 @@ inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
 // Catch-all template for notifying the user if no specialisation exists for deserialising to the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON deserialisation! You should probably add support for it :)")]] inline void JsonValueToType(
-    const rapidjson::Value& /*Value*/, T& /*Type*/)
+    const rapidjson::Value& /*Value*/, T& /*Type*/, csp::common::LogSystem&)
 {
     assert(false && "Unsupported type for JSON deserialisation! You should probably add support for it :)");
 }
 
 // Deserialisation function for types that derive from DtoBase
 template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>*>
-inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
+inline void JsonValueToType(const rapidjson::Value& Value, T& Type, csp::common::LogSystem& LogSystem)
 {
-    Type.FromJson(Value.IsString() ? CSP_TEXT(Value.GetString()) : JsonObjectToString(Value));
+    Type.FromJson(Value.IsString() ? CSP_TEXT(Value.GetString()) : JsonObjectToString(Value), LogSystem);
 }
 
 // Partial template specialisations for JsonValueToType
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::optional<U>& Type, csp::common::LogSystem& LogSystem)
 {
     U Inner;
-    JsonValueToType(Value, Inner);
+    JsonValueToType(Value, Inner, LogSystem);
     Type = std::make_optional(Inner);
 }
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::shared_ptr<U>& Type, csp::common::LogSystem& LogSystem)
 {
     Type = std::make_shared<U>();
-    JsonValueToType(Value, *Type);
+    JsonValueToType(Value, *Type, LogSystem);
 }
 
-template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type)
+template <typename U> inline void JsonValueToType(const rapidjson::Value& Value, std::vector<U>& Type, csp::common::LogSystem& LogSystem)
 {
     assert(Value.IsArray());
 
     for (auto i = 0U; i < Value.Size(); ++i)
     {
         U Element;
-        JsonValueToType(Value[i], Element);
+        JsonValueToType(Value[i], Element, LogSystem);
         Type.push_back(Element);
     }
 }
 
-template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type)
+template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type, csp::common::LogSystem& LogSystem)
 {
     assert(Value.IsObject());
 
@@ -308,30 +313,36 @@ template <typename U, typename V> inline void JsonValueToType(const rapidjson::V
     {
         U ElementKey;
         V ElementValue;
-        JsonValueToType(Member.name, ElementKey);
-        JsonValueToType(Member.value, ElementValue);
+        JsonValueToType(Member.name, ElementKey, LogSystem);
+        JsonValueToType(Member.value, ElementValue, LogSystem);
         Type.emplace(std::make_pair(ElementKey, ElementValue));
     }
 }
 
 // Full template specialisations for JsonValueToType
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type) { Type = Value.GetBool(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type, csp::common::LogSystem&) { Type = Value.GetBool(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type) { Type = Value.GetInt(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, int32_t& Type, csp::common::LogSystem&) { Type = Value.GetInt(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type) { Type = Value.GetUint(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, uint32_t& Type, csp::common::LogSystem&) { Type = Value.GetUint(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type) { Type = Value.GetInt64(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, int64_t& Type, csp::common::LogSystem&) { Type = Value.GetInt64(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type) { Type = Value.GetUint64(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, uint64_t& Type, csp::common::LogSystem&) { Type = Value.GetUint64(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type) { Type = Value.GetFloat(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, float& Type, csp::common::LogSystem&) { Type = Value.GetFloat(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type) { Type = Value.GetDouble(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, double& Type, csp::common::LogSystem&) { Type = Value.GetDouble(); }
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type) { Type = Value.GetString(); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::common::String& Type, csp::common::LogSystem&)
+{
+    Type = Value.GetString();
+}
 
-template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type) { Type.CopyFrom(Value, Type.GetAllocator()); }
+template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type, csp::common::LogSystem&)
+{
+    Type.CopyFrom(Value, Type.GetAllocator());
+}
 
 } // namespace csp::web

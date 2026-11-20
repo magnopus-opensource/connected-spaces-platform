@@ -55,13 +55,14 @@ namespace SpaceSystemHelpers
 
     std::shared_ptr<csp::services::generated::userservice::GroupDto> DefaultGroupInfo();
 
-    csp::common::Map<csp::common::String, csp::common::String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection);
+    csp::common::Map<csp::common::String, csp::common::String> LegacyAssetConversion(
+        const systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem);
 
     std::vector<std::shared_ptr<csp::services::generated::userservice::GroupInviteDto>> GenerateGroupInvites(
         const common::Array<systems::InviteUserRoleInfo> InviteUsers);
 
-    void ConvertJsonMetadataToMapMetadata(
-        const csp::common::String& JsonMetadata, csp::common::Map<csp::common::String, csp::common::String>& OutMapMetadata);
+    void ConvertJsonMetadataToMapMetadata(const csp::common::String& JsonMetadata,
+        csp::common::Map<csp::common::String, csp::common::String>& OutMapMetadata, csp::common::LogSystem& LogSystem);
 
 } // namespace SpaceSystemHelpers
 

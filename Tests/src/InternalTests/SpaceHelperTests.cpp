@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "signalrclient/signalr_value.h"
 
@@ -180,7 +181,8 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataN
 
     Map<String, String> NotJsonObjectMetaDataMap;
 
-    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(NotJsonObject, NotJsonObjectMetaDataMap);
+    auto LogSystem = csp::common::LogSystem {};
+    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(NotJsonObject, NotJsonObjectMetaDataMap, LogSystem);
 
     ASSERT_EQ(NotJsonObjectMetaDataMap.Size(), 2);
 
@@ -201,7 +203,8 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataO
 
     Map<String, String> ObjectMetaDataMap;
 
-    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(JsonObject, ObjectMetaDataMap);
+    auto LogSystem = csp::common::LogSystem {};
+    csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(JsonObject, ObjectMetaDataMap, LogSystem);
 
     ASSERT_EQ(ObjectMetaDataMap.Size(), 1);
 

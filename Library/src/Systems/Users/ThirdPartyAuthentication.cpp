@@ -81,7 +81,7 @@ void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        InfoResponse->FromJson(Response->GetPayload().GetContent());
+        InfoResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         SocialProviderInfoDtoToProviderDetails(*InfoResponse, ProviderDetails);
     }

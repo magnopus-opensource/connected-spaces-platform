@@ -49,7 +49,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, SceneDataJson& Ob
 namespace csp::systems::mcs
 {
 
-SceneData ParseSceneData(const char* Json, csp::common::LogSystem&)
+SceneData ParseSceneData(const char* Json, csp::common::LogSystem& LogSystem)
 {
     SceneDataJson Members;
     SceneData Obj;
@@ -59,25 +59,25 @@ SceneData ParseSceneData(const char* Json, csp::common::LogSystem&)
         return Obj;
     }
 
-    Obj.Group.FromJson(Members.Group.c_str());
+    Obj.Group.FromJson(Members.Group.c_str(), LogSystem);
 
     csp::services::DtoArray<csp::services::generated::prototypeservice::PrototypeDto> PrototypesDto;
-    PrototypesDto.FromJson(Members.Prototypes.c_str());
+    PrototypesDto.FromJson(Members.Prototypes.c_str(), LogSystem);
 
     Obj.Prototypes = PrototypesDto.GetArray();
 
     csp::services::DtoArray<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetailsDto;
-    AssetDetailsDto.FromJson(Members.AssetDetails.c_str());
+    AssetDetailsDto.FromJson(Members.AssetDetails.c_str(), LogSystem);
 
     Obj.AssetDetails = AssetDetailsDto.GetArray();
 
     csp::services::DtoArray<csp::services::generated::aggregationservice::SequenceDto> SequencesDto;
-    SequencesDto.FromJson(Members.Sequences.c_str());
+    SequencesDto.FromJson(Members.Sequences.c_str(), LogSystem);
 
     Obj.Sequences = SequencesDto.GetArray();
 
     csp::services::DtoArray<csp::services::generated::spatialdataservice::AnchorDto> AnchorssDto;
-    AnchorssDto.FromJson(Members.Anchors.c_str());
+    AnchorssDto.FromJson(Members.Anchors.c_str(), LogSystem);
 
     Obj.Anchors = AnchorssDto.GetArray();
 

@@ -619,7 +619,7 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        ProductInformationResponse->FromJson(Response->GetPayload().GetContent());
+        ProductInformationResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation);
     }
 }
@@ -637,7 +637,7 @@ void CheckoutInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent());
+        CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         if (CheckoutInformationResponse->HasStoreUrl())
         {
@@ -664,7 +664,7 @@ void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         CartDtoToCartInfo(*Dto, Cart);
     }
@@ -683,7 +683,7 @@ void AddShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* Api
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        Dto->FromJson(Response->GetPayload().GetContent());
+        Dto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         ShopifyStoreDtoToShopifyStoreInfo(*Dto, Store);
     }
@@ -715,7 +715,7 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProductCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        ProductCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Products array
         std::vector<chs_aggregation::ShopifyProductDto>& ProductsArray = ProductCollectionResponse->GetArray();
@@ -747,7 +747,7 @@ void GetShopifyStoresResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ShopifyStoresResponse->FromJson(Response->GetPayload().GetContent());
+        ShopifyStoresResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Stores array
         std::vector<chs_aggregation::ShopifyStorefrontDto>& StoresArray = ShopifyStoresResponse->GetArray();

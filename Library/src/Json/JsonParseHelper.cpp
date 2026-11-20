@@ -15,7 +15,7 @@
  */
 
 #include "JsonParseHelper.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include <rapidjson/error/en.h>
 #include <string>
 
@@ -24,7 +24,8 @@ namespace csp::json
 
 const size_t PARSE_ERROR_CONTEXT_CHARS = 20;
 
-rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& Document, const csp::common::String& JsonString, const char* LogPrefix)
+rapidjson::Document& ParseWithErrorLogging(
+    rapidjson::Document& Document, const csp::common::String& JsonString, const char* LogPrefix, csp::common::LogSystem& LogSystem)
 {
     rapidjson::ParseResult ok = Document.Parse(JsonString.c_str());
     if (!ok)
@@ -41,8 +42,8 @@ rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& Document, const 
 
         const std::string Excerpt(JsonString.c_str() + Start, End - Start);
 
-        CSP_LOG_ERROR_FORMAT("Error: %s: JSON parse error: %s (at offset %zu). Context: %s", LogPrefix, rapidjson::GetParseError_En(ok.Code()),
-            ok.Offset(), Excerpt.c_str());
+        csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error, "Error: {}: JSON parse error: {} (at offset {}). Context: {}", LogPrefix,
+            rapidjson::GetParseError_En(ok.Code()), ok.Offset(), Excerpt.c_str());
     }
 
     // Return the document to follow the chaining pattern from rapidjson.

@@ -170,7 +170,7 @@ void AnchorResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         AnchorDtoToAnchor(*AnchorResponse, Anchor);
     }
@@ -190,7 +190,7 @@ void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Anchors array
         std::vector<chs::AnchorDto>& AnchorsArray = AnchorCollectionResponse->GetArray();
@@ -216,7 +216,7 @@ void AnchorResolutionResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         AnchorResolutionDtoToAnchorResolution(*AnchorResolutionResponse, AnchorResolution);
     }
 }
@@ -235,7 +235,7 @@ void AnchorResolutionCollectionResult::OnResponse(const csp::services::ApiRespon
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Anchors array
         std::vector<chs::AnchorResolutionDto>& AnchorsResolutionArray = AnchorResolutionCollectionResponse->GetArray();

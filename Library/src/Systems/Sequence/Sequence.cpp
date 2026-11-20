@@ -57,7 +57,7 @@ void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        SequenceResponse->FromJson(Response->GetPayload().GetContent());
+        SequenceResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         SequenceDtoToSequence(*SequenceResponse, Sequence);
     }
 }
@@ -74,7 +74,7 @@ void SequencesResult::OnResponse(const csp::services::ApiResponseBase* ApiRespon
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        SequencesResponse->FromJson(Response->GetPayload().GetContent());
+        SequencesResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<chs::SequenceDto>& SequenceArray = SequencesResponse->GetArray();
         Sequences = Array<systems::Sequence>(SequenceArray.size());

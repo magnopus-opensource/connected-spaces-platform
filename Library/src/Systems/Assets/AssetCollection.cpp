@@ -210,7 +210,7 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeResponse->FromJson(Response->GetPayload().GetContent());
+        PrototypeResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection);
     }
@@ -232,8 +232,8 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeDto->FromJson(Response->GetPayload().GetContent());
-        FillResultTotalCount(Response->GetPayload().GetContent());
+        PrototypeDto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
+        FillResultTotalCount(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<chs::PrototypeDto>& PrototypeArray = PrototypeDto->GetArray();
         AssetCollections = csp::common::Array<csp::systems::AssetCollection>(PrototypeArray.size());
@@ -245,12 +245,12 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
     }
 }
 
-void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent)
+void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent, csp::common::LogSystem& LogSystem)
 {
     assert(JsonContent.c_str());
 
     rapidjson::Document JsonDoc;
-    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "AssetCollectionsResult::FillResultTotalCount");
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "AssetCollectionsResult::FillResultTotalCount", LogSystem);
     if (!ok)
     {
         return;
@@ -305,7 +305,7 @@ void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        CopyResultDto->FromJson(Response->GetPayload().GetContent());
+        CopyResultDto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<std::shared_ptr<chs::CopiedPrototypeDto>>& CopiedPrototypesArray = CopyResultDto->GetPrototypes();
         AssetCollections = csp::common::Array<csp::systems::AssetCollection>(CopiedPrototypesArray.size());

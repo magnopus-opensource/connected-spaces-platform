@@ -81,12 +81,12 @@ public:
 
     virtual utility::string_t ToJson() const override { return utility::string_t(""); }
 
-    virtual void FromJson(const utility::string_t& Json) override
+    virtual void FromJson(const utility::string_t& Json, csp::common::LogSystem& LogSystem) override
     {
         assert(Json.c_str());
 
         rapidjson::Document JsonDoc;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson");
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson", LogSystem);
         if (!ok)
         {
             return;
@@ -101,7 +101,7 @@ public:
                 rapidjson::Value& Val = JsonDoc[i];
 
                 DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                Dto.FromJson(csp::web::JsonObjectToString(Val), LogSystem);
             }
         }
         else if (JsonDoc.HasMember("items"))
@@ -118,7 +118,7 @@ public:
                 rapidjson::Value& Val = JsonDoc["items"][i];
 
                 DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                Dto.FromJson(csp::web::JsonObjectToString(Val), LogSystem);
             }
         }
     }

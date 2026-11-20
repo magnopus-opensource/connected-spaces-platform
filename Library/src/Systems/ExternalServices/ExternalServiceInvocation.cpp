@@ -39,7 +39,7 @@ void ExternalServiceInvocationResult::OnResponse(const services::ApiResponseBase
 
         if (JsonPayload.HasParseError() == false)
         {
-            AuthResponse->FromJson(Response->GetPayload().GetContent());
+            AuthResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
             const std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
 
             if (OperationResult)
@@ -82,7 +82,8 @@ void GetAgoraTokenResult::OnResponse(const services::ApiResponseBase* ApiRespons
     {
         // Extract the Agora token from the observed operation result.
         rapidjson::Document OperationResultJson;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(OperationResultJson, OperationResult, "GetAgoraTokenResult::OnResponse");
+        rapidjson::ParseResult ok
+            = csp::json::ParseWithErrorLogging(OperationResultJson, OperationResult, "GetAgoraTokenResult::OnResponse", ApiResponse->GetLogSystem());
         if (!ok)
         {
             return;

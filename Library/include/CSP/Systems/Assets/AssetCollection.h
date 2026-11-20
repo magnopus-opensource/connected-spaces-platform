@@ -198,7 +198,7 @@ protected:
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& JsonContent, csp::common::LogSystem& LogSystem);
 
     csp::common::Array<AssetCollection> AssetCollections;
     uint64_t ResultTotalCount = 0;
