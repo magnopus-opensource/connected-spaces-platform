@@ -28,7 +28,6 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
-
 namespace csp::web
 {
 
@@ -39,6 +38,12 @@ class WebClient;
 namespace csp
 {
 class ServiceDefinition;
+
+namespace multiplayer
+{
+    class MultiplayerConnection;
+}
+
 } // namespace csp
 
 namespace csp::systems
@@ -154,7 +159,7 @@ public:
     /// @brief API to retrieve the Connected Spaces Platform supported 3rd party authentication providers
     /// @return Array of Connected Spaces Platform supported 3rd party authentication providers
     [[nodiscard]] csp::common::Array<EThirdPartyAuthenticationProviders> GetSupportedThirdPartyAuthenticationProviders() const;
-    
+
     /// @brief Alternative 3rd party authentication flow using a token
     /// Note: The steps are as follows:
     /// 1. Client application requests an authorization token from the third party provider directly.
@@ -305,7 +310,7 @@ private:
     UserSystem() = delete;
     UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
         const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
-        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus* InEventBus, csp::multiplayer::MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
@@ -339,6 +344,8 @@ private:
     UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
     AuthContext Auth;
+
+    csp::multiplayer::MultiplayerConnection& Connection;
 };
 
 } // namespace csp::systems

@@ -188,7 +188,7 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
-    UserSystem = new csp::systems::UserSystem(WebClient, Endpoints.UserService, Endpoints.MultiplayerConnection.GetURI(), CSPFoundation::GetDeviceId().c_str(), CSPFoundation::GetTenant().c_str(), nullptr, *LogSystem);
+    UserSystem = new csp::systems::UserSystem(WebClient, Endpoints.UserService, Endpoints.MultiplayerConnection.GetURI(), CSPFoundation::GetDeviceId().c_str(), CSPFoundation::GetTenant().c_str(), nullptr, *MultiplayerConnection, *LogSystem);
 
     WebClient->SetAuthContext(UserSystem->GetAuthContext());
 
