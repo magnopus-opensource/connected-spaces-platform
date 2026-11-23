@@ -121,49 +121,6 @@ std::optional<csp::common::String> ThirdPartyPlatformToString(const csp::common:
     return std::nullopt;
 }
 
-// Contains shared logic for logging in with a 3rd party provider - used by both LoginToThirdPartyAuthenticationProvider and
-// LoginToThirdPartyAuthenticationProviderWithToken.
-void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> CurrentLoginState,
-    csp::common::LogSystem& LogSystem, const csp::common::String& MultiplayerConnectionURI,
-    const std::shared_ptr<chs_user::LoginSocialRequest>& Request, bool CreateMultiplayerConnection,
-    csp::multiplayer::MultiplayerConnection& Connection, csp::systems::LoginStateResultCallback Callback)
-{
-    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
-    // ResponseHandler.
-    csp::systems::LoginStateResultCallback LoginStateResCallback
-        = [&LogSystem, MultiplayerConnectionURI, Callback, CreateMultiplayerConnection, LoginStateRef = CurrentLoginState, Connection = &Connection](
-              const csp::systems::LoginStateResult& LoginStateRes) mutable
-    {
-        if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
-        {
-            csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes, Connection = &Connection](csp::multiplayer::ErrorCode ErrCode)
-            {
-                if (ErrCode != csp::multiplayer::ErrorCode::None)
-                {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
-                }
-
-                Callback(LoginStateRes);
-            };
-
-            StartMultiplayerConnection(
-                *Connection, MultiplayerConnectionURI, ConnectionCallback,
-                LoginStateRes, LogSystem, CreateMultiplayerConnection);
-        }
-        else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
-        {
-            CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
-            Callback(LoginStateRes);
-        }
-    };
-
-    csp::services::ResponseHandlerPtr ResponseHandler = AuthenticationAPI->CreateHandler<csp::systems::LoginStateResultCallback,
-        csp::systems::LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(LoginStateResCallback, CurrentLoginState.get(), LogSystem);
-
-    static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogin_socialPost({ Request }, ResponseHandler);
-}
-
 void SetTokenOptions(const csp::common::Optional<csp::systems::TokenOptions>& TokenOptions, std::shared_ptr<chs_user::TokenOptions> Options,
     std::shared_ptr<csp::common::LoginState> LoginState)
 {
@@ -376,6 +333,8 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
+            NotifyRefreshTokenHasChanged();
+
             StartMultiplayerConnection(Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
         }
@@ -443,6 +402,8 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 Callback(LoginStateRes);
             };
 
+            NotifyRefreshTokenHasChanged();
+
             StartMultiplayerConnection(
                 Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
@@ -507,6 +468,8 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
                 Callback(LoginStateRes);
             };
 
+            NotifyRefreshTokenHasChanged();
+
             StartMultiplayerConnection(
                 Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
@@ -564,6 +527,8 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
                 Callback(LoginStateRes);
             };
 
+            NotifyRefreshTokenHasChanged();
+
             // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
             StartMultiplayerConnection(Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, false);
         }
@@ -597,6 +562,46 @@ void UserSystem::ResetThirdPartyAuthState()
     ThirdPartyClientType = "";
     ThirdPartyAuthRedirectURL = "";
     ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+}
+
+void UserSystem::LoginSocial(
+    const std::shared_ptr<chs_user::LoginSocialRequest>& Request, bool CreateMultiplayerConnection,
+    csp::systems::LoginStateResultCallback Callback)
+{
+    // CurrentLoginState captured by value in callback below. This ensures the shared_ptr stays alive until the callback is executed via the
+    // ResponseHandler.
+    csp::systems::LoginStateResultCallback LoginStateResCallback
+        = [this, Callback, CreateMultiplayerConnection](const csp::systems::LoginStateResult& LoginStateRes) mutable
+    {
+        if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+        {
+            csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
+                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+            {
+                if (ErrCode != csp::multiplayer::ErrorCode::None)
+                {
+                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                }
+
+                Callback(LoginStateRes);
+            };
+
+            NotifyRefreshTokenHasChanged();
+
+            StartMultiplayerConnection(
+                Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, CreateMultiplayerConnection);
+        }
+        else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
+            CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
+            Callback(LoginStateRes);
+        }
+    };
+
+    csp::services::ResponseHandlerPtr ResponseHandler = AuthenticationAPI->CreateHandler<csp::systems::LoginStateResultCallback,
+        csp::systems::LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(LoginStateResCallback, CurrentLoginState.get(), LogSystem);
+
+    static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogin_socialPost({ Request }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAuthenticationProviders AuthProvider,
@@ -653,7 +658,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
         Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
     }
 
-    LoginSocial(AuthenticationAPI, CurrentLoginState, LogSystem, MultiplayerConnectionURI, Request, CreateMultiplayerConnection, Connection, Callback);
+    LoginSocial(Request, CreateMultiplayerConnection, Callback);
 }
 
 void UserSystem::FederatedLogin(

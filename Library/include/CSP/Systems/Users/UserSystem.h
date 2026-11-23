@@ -46,6 +46,11 @@ namespace multiplayer
 
 } // namespace csp
 
+namespace csp::services::generated::userservice
+{
+class LoginSocialRequest;
+}
+
 namespace csp::systems
 {
 class UserSystem;
@@ -322,6 +327,9 @@ private:
 
     void NotifyRefreshTokenHasChanged();
     void ResetThirdPartyAuthState();
+
+    void LoginSocial(
+        const std::shared_ptr<csp::services::generated::userservice::LoginSocialRequest>& Request, bool CreateMultiplayerConnection, csp::systems::LoginStateResultCallback Callback);
 
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;

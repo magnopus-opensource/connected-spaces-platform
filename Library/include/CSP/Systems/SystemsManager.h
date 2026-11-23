@@ -32,7 +32,6 @@ class IRealtimeEngine;
 namespace csp::systems
 {
 
-class SystemsManager;
 class UserSystem;
 class SpaceSystem;
 class AssetSystem;
