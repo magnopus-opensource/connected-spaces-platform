@@ -121,14 +121,13 @@ namespace SpaceSystemHelpers
         }
     }
 
-    std::shared_ptr<chs::GroupDto> DefaultGroupInfo()
+    std::shared_ptr<chs::GroupDto> DefaultGroupInfo(const csp::common::String& UserId)
     {
         auto DefaultGroupInfo = std::make_shared<chs::GroupDto>();
 
         DefaultGroupInfo->SetGroupType("Space");
         DefaultGroupInfo->SetAutoModerator(false);
-        const auto* UserSystem = SystemsManager::Get().GetUserSystem();
-        DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().GetUserId());
+        DefaultGroupInfo->SetGroupOwnerId(UserId);
 
         return DefaultGroupInfo;
     }

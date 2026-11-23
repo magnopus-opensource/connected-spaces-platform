@@ -208,12 +208,12 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(
-        WebClient, Endpoints.UserService, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
+    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     AssetSystem = new csp::systems::AssetSystem(
         WebClient, Endpoints.PrototypeService, MultiplayerConnection->GetEventBus(), UserSystem->GetAuthContext(), *LogSystem);
+    SpaceSystem = new csp::systems::SpaceSystem(WebClient, Endpoints.UserService, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(),
+        *MultiplayerConnection, *AssetSystem, *PointOfInterestSystem, UserSystem->GetAuthContext(), *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
-    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
     SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *AssetSystem, UserSystem->GetAuthContext(), *LogSystem);
     GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, Endpoints.AggregationService, *LogSystem);

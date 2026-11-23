@@ -16,8 +16,8 @@
 
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/LoginState.h"
-#include "Common/LoginStateData.h"
 #include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
@@ -31,6 +31,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
+#include "Common/LoginStateData.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Services/AggregationService/Api.h"
@@ -63,13 +64,13 @@ constexpr const int MAX_SPACES_RESULTS = 100;
 
 // Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
 // The only difference is in the value they pass for the AsyncCall parameter.
-std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(csp::systems::UserSystem* UserSystem, const String& SpaceId,
+std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(const IAuthContext& AuthContext, const String& SpaceId,
     const String& NewName, csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy,
     bool AsyncCall)
 {
     auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
     Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().GetUserId());
+    Request->SetNewGroupOwnerId(AuthContext.GetLoginState().GetUserId());
     Request->SetNewUniqueName(NewName);
     Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
     Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
@@ -92,11 +93,15 @@ namespace csp::systems
 {
 
 SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
-    const csp::ServiceDefinition& AggregationServiceDefinition, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem,
-    csp::common::LogSystem& LogSystem)
+    const csp::ServiceDefinition& AggregationServiceDefinition, multiplayer::NetworkEventBus& EventBus,
+    csp::multiplayer::MultiplayerConnection& Connection, csp::systems::AssetSystem& AssetSystem,
+    systems::PointOfInterestInternalSystem& PointOfInterestSystem, const csp::common::IAuthContext& AuthContext, csp::common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, LogSystem)
-    , UserSystem(UserSystem)
     , CurrentSpace()
+    , Connection { Connection }
+    , AssetSystem { AssetSystem }
+    , PointOfInterestSystem { PointOfInterestSystem }
+    , AuthContext { AuthContext }
 {
     GroupAPI = new chs::GroupApi(WebClient, UserServiceDefinition);
     SpaceAPI = new chsaggregation::SpaceApi(WebClient, AggregationServiceDefinition);
@@ -110,12 +115,12 @@ SpaceSystem::~SpaceSystem()
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
-    const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags)
+    const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags, const csp::common::String& UserId)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
     async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
 
-    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
+    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo(UserId);
     GroupInfo->SetName(Name);
     GroupInfo->SetDescription(Description);
     GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
@@ -138,14 +143,13 @@ async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
 std::function<async::task<AssetCollectionResult>()> SpaceSystem::CreateSpaceMetadataAssetCollection(
     const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
 {
-    return [Space, Metadata]() -> async::task<AssetCollectionResult>
+    return [Space, Metadata, this]() -> async::task<AssetCollectionResult>
     {
         const auto Id = Space->GetSpace().Id;
         const auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
-        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         // Don't assign this AssetCollection to a space so any user can retrieve the metadata without joining the space
-        return AssetSystem->CreateAssetCollection(Id, nullptr, Name, Metadata, EAssetCollectionType::FOUNDATION_INTERNAL, nullptr);
+        return AssetSystem.CreateAssetCollection(Id, nullptr, Name, Metadata, EAssetCollectionType::FOUNDATION_INTERNAL, nullptr);
     };
 }
 
@@ -153,52 +157,46 @@ async::task<AssetCollectionResult> SpaceSystem::CreateSpaceThumbnailAssetCollect
 {
     const auto SpaceId = Space->GetSpace().Id;
     const auto Name = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users without joining the space
-    return AssetSystem->CreateAssetCollection(SpaceId, nullptr, Name, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Array<String>({ SpaceId }));
+    return AssetSystem.CreateAssetCollection(SpaceId, nullptr, Name, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Array<String>({ SpaceId }));
 }
 
 std::function<async::task<AssetResult>()> SpaceSystem::CreateSpaceThumbnailAsset(
     const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult)
 {
-    return [Space, AssetCollectionResult]() -> async::task<AssetResult>
+    return [Space, AssetCollectionResult, this]() -> async::task<AssetResult>
     {
         const auto SpaceId = Space->GetSpace().Id;
         const auto Name = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
-        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-        return AssetSystem->CreateAsset(AssetCollectionResult->GetAssetCollection(), Name, nullptr, nullptr, EAssetType::IMAGE);
+        return AssetSystem.CreateAsset(AssetCollectionResult->GetAssetCollection(), Name, nullptr, nullptr, EAssetType::IMAGE);
     };
 }
 
 std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAsset(
     const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data)
 {
-    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [AssetCollectionResult, Data, this](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
         UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
         UploadAsset.MimeType = Data.GetMimeType();
-        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-        return AssetSystem->UploadAssetDataEx(
-            AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
+        return AssetSystem.UploadAssetDataEx(AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
     };
 }
 
 std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAssetWithBuffer(
     const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data)
 {
-    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [AssetCollectionResult, Data, this](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
         UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
         UploadAsset.MimeType = Data.GetMimeType();
-        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-        return AssetSystem->UploadAssetDataEx(
-            AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
+        return AssetSystem.UploadAssetDataEx(AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
     };
 }
 
@@ -365,14 +363,14 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 /* EnterSpace Continuations */
 auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem)
 {
-    return [Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
+    return [Callback, &SpaceSystem, this](const SpaceResult& GetSpaceResult)
     {
         CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNecessary");
 
         /* Once we have permissions to discover a space, attempt to enter it */
         const auto& SpaceToJoin = GetSpaceResult.GetSpace();
 
-        const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
+        const String UserId = AuthContext.GetLoginState().GetUserId();
         const bool JoiningSpaceRequiresInvite = HasFlag(SpaceToJoin.Attributes, SpaceAttributes::RequiresInvite);
 
         // The user is known to the space if they are a user, moderator or creator. This is important if the space requires an invite.
@@ -464,8 +462,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     }
 
     // It's invalid to enter an online space without a multiplayer connection
-    if ((RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
-        && (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->IsConnected()))
+    if ((RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online) && (!Connection.IsConnected()))
     {
         CSP_LOG_MSG(csp::common::LogLevel::Error,
             "Cannot enter an online space without an established multiplayer connection. Did you create one when logging in?");
@@ -478,8 +475,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     // the pointer, shared_ptrs and weak_ptrs would solve this entirely if they could be passed across the interface.
     if (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
     {
-        csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetOnlineRealtimeEngine(
-            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
+        Connection.SetOnlineRealtimeEngine(static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
     }
 
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
@@ -592,20 +588,18 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
 
     // As the user is exiting the space, we now clear all scopes that they are registered to.
-    auto& SystemsManager = systems::SystemsManager::Get();
-    auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
 
     // If not connected, do not attempt to disconnect
-    if ((MultiplayerConnection != nullptr) && (MultiplayerConnection->IsConnected()))
+    if (Connection.IsConnected())
     {
-        MultiplayerConnection->StopListening()
+        Connection.StopListening()
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
-            .then(async::inline_scheduler(), [MultiplayerConnection]() { return MultiplayerConnection->ResetScopes(); })
+            .then(async::inline_scheduler(), [this]() { return Connection.ResetScopes(); })
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
-            .then(async::inline_scheduler(), [MultiplayerConnection]() { MultiplayerConnection->SetOnlineRealtimeEngine(nullptr); })
+            .then(async::inline_scheduler(), [this]() { Connection.SetOnlineRealtimeEngine(nullptr); })
             .then(systems::continuations::ReportSuccess(Callback, "Successfully exited space."))
             .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
-                [Callback, MultiplayerConnection]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
+                [Callback, this]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                 {
                     csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(
                         csp::common::LogLevel::Fatal, fmt::format("Error on exiting spaces: {}", exception.what()).c_str());
@@ -613,7 +607,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                     // Null the realtime engine pointer in the multiplayer connection such that it stops dispatching signalR updates.
                     // (Error paths are messy, what does failing to leave a space mean memory wise? This is why owned types with RAII work so
                     // much better).
-                    MultiplayerConnection->SetOnlineRealtimeEngine(nullptr);
+                    Connection.SetOnlineRealtimeEngine(nullptr);
                     Callback(MakeInvalid<NullResult>());
                 }));
     }
@@ -657,7 +651,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
 {
     auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
-    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags, AuthContext.GetLoginState().GetUserId())
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(systems::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
@@ -720,7 +714,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 {
     auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
-    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags, AuthContext.GetLoginState().GetUserId())
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(systems::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
@@ -822,7 +816,7 @@ void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
     csp::services::ResponseHandlerPtr ResponseHandler
         = GroupAPI->CreateHandler<SpacesResultCallback, SpacesResult, void, csp::services::DtoArray<chs::GroupDto>>(Callback, nullptr, LogSystem);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->usersUserIdGroupsGet({ UserSystem->GetLoginState().GetUserId() }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->usersUserIdGroupsGet({ AuthContext.GetLoginState().GetUserId() }, ResponseHandler);
 }
 
 void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, const Optional<bool>& InIsArchived,
@@ -1075,27 +1069,18 @@ void SpaceSystem::RemoveUserFromSpace(const String& SpaceId, const String& UserI
 }
 
 void SpaceSystem::AddSiteInfo(const Site& SiteInfo, SiteResultCallback Callback)
-{
-    auto& SystemsManager = SystemsManager::Get();
-    auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
-
-    POIInternalSystem->CreateSite(SiteInfo, Callback);
+{ 
+    PointOfInterestSystem.CreateSite(SiteInfo, Callback);
 }
 
 void SpaceSystem::RemoveSiteInfo(const Site& SiteInfo, NullResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
-
-    POIInternalSystem->DeleteSite(SiteInfo, Callback);
+    PointOfInterestSystem.DeleteSite(SiteInfo, Callback);
 }
 
 void SpaceSystem::GetSitesInfo(const String& SpaceId, SitesCollectionResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
-
-    POIInternalSystem->GetSites(SpaceId, Callback);
+    PointOfInterestSystem.GetSites(SpaceId, Callback);
 }
 
 void SpaceSystem::UpdateUserRole(const String& SpaceId, const UserRoleInfo& NewUserRoleInfo, NullResultCallback Callback)
@@ -1176,14 +1161,12 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
         return;
     }
 
-    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
+    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata, this](const AssetCollectionResult& Result)
     {
         if (Result.GetResultCode() == EResultCode::InProgress)
         {
             return;
         }
-
-        auto AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         if (Result.GetResultCode() == EResultCode::Failed)
         {
@@ -1200,7 +1183,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
         };
 
         const auto& AssetCollection = Result.GetAssetCollection();
-        AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, {}, UpdateAssetCollCallback);
+        AssetSystem.UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, {}, UpdateAssetCollCallback);
     };
 
     GetMetadataAssetCollection(SpaceId, MetadataAssetCollCallback);
@@ -1294,7 +1277,7 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection, this](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1324,8 +1307,7 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
             auto& ThumbnailAsset = ((csp::systems::AssetsResult&)AssetsResult).GetAssets()[0];
             ThumbnailAsset.MimeType = NewThumbnail.GetMimeType();
 
-            auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-            AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewThumbnail, UploadCallback);
+            AssetSystem.UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewThumbnail, UploadCallback);
         };
 
         GetSpaceThumbnailAsset(ThumbnailAssetCollection, ThumbnailAssetCallback);
@@ -1363,7 +1345,7 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback = [Callback, NewThumbnail, ThumbnailAssetCollection, this](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1394,8 +1376,8 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
             ThumbnailAsset.FileName
                 = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(NewThumbnail.GetMimeType()));
             ThumbnailAsset.MimeType = NewThumbnail.GetMimeType();
-            const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
-            AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewThumbnail, UploadCallback);
+
+            AssetSystem.UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewThumbnail, UploadCallback);
         };
 
         GetSpaceThumbnailAsset(ThumbnailAssetCollection, ThumbnailAssetCallback);
@@ -1473,15 +1455,13 @@ void SpaceSystem::DeleteUserFromSpaceBanList(const String& SpaceId, const String
 
 void SpaceSystem::GetMetadataAssetCollection(const String& SpaceId, AssetCollectionResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     auto MetadataAssetCollectionName = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
 
-    AssetSystem->GetAssetCollectionByName(MetadataAssetCollectionName, Callback);
+    AssetSystem.GetAssetCollectionByName(MetadataAssetCollectionName, Callback);
 }
 
 void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& SpaceIds, AssetCollectionsResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
     for (size_t item = 0; item < SpaceIds.Size(); ++item)
@@ -1489,7 +1469,7 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
 
-    AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
+    AssetSystem.FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
 }
 
 void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callback)
@@ -1503,7 +1483,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
         return;
     }
 
-    AssetCollectionResultCallback GetAssetCollCallback = [Callback](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback GetAssetCollCallback = [Callback, this](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1524,8 +1504,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
             INVOKE_IF_NOT_NULL(Callback, Result);
         };
 
-        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-        AssetSystem->DeleteAssetCollection(AssetCollResult.GetAssetCollection(), DeleteAssetCollCallback);
+        AssetSystem.DeleteAssetCollection(AssetCollResult.GetAssetCollection(), DeleteAssetCollCallback);
     };
 
     GetMetadataAssetCollection(SpaceId, GetAssetCollCallback);
@@ -1533,10 +1512,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
 
 void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const FileAssetDataSource& ImageDataSource, NullResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-    AssetCollectionResultCallback CreateAssetCollCallback
-        = [Callback, AssetSystem, SpaceId, ImageDataSource](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [Callback, SpaceId, ImageDataSource, this](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1557,7 +1533,7 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 
         const auto& ThumbnailAssetColl = AssetCollResult.GetAssetCollection();
 
-        AssetResultCallback CreateAssetCallback = [Callback, AssetSystem, ThumbnailAssetColl, ImageDataSource](const AssetResult& CreateAssetResult)
+        AssetResultCallback CreateAssetCallback = [Callback, this, ThumbnailAssetColl, ImageDataSource](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1587,11 +1563,11 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
             };
 
-            AssetSystem->UploadAssetData(ThumbnailAssetColl, CreateAssetResult.GetAsset(), ImageDataSource, UploadCallback);
+            AssetSystem.UploadAssetData(ThumbnailAssetColl, CreateAssetResult.GetAsset(), ImageDataSource, UploadCallback);
         };
 
         const auto UniqueAssetName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
-        AssetSystem->CreateAsset(ThumbnailAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
+        AssetSystem.CreateAsset(ThumbnailAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
     };
 
     const String SpaceThumbnailAssetCollectionName = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
@@ -1599,17 +1575,14 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this
     // space
-    AssetSystem->CreateAssetCollection(
+    AssetSystem.CreateAssetCollection(
         SpaceId, nullptr, SpaceThumbnailAssetCollectionName, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Tag, CreateAssetCollCallback);
 }
 
 void SpaceSystem::AddSpaceThumbnailWithBuffer(
     const csp::common::String& SpaceId, const BufferAssetDataSource& ImageDataSource, NullResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-    AssetCollectionResultCallback CreateAssetCollCallback
-        = [Callback, SpaceId, ImageDataSource, AssetSystem](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [Callback, SpaceId, ImageDataSource, this](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1630,7 +1603,7 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
 
         const auto& ThumbnailAssetColl = AssetCollResult.GetAssetCollection();
 
-        AssetResultCallback CreateAssetCallback = [Callback, ImageDataSource, ThumbnailAssetColl, AssetSystem](const AssetResult& CreateAssetResult)
+        AssetResultCallback CreateAssetCallback = [Callback, ImageDataSource, ThumbnailAssetColl, this](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1665,17 +1638,17 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(
             ThumbnailAsset.FileName
                 = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType()));
             ThumbnailAsset.MimeType = ImageDataSource.GetMimeType();
-            AssetSystem->UploadAssetData(ThumbnailAssetColl, ThumbnailAsset, ImageDataSource, UploadCallback);
+            AssetSystem.UploadAssetData(ThumbnailAssetColl, ThumbnailAsset, ImageDataSource, UploadCallback);
         };
 
         const auto UniqueAssetName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
-        AssetSystem->CreateAsset(ThumbnailAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
+        AssetSystem.CreateAsset(ThumbnailAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
     };
 
     const String SpaceThumbnailAssetCollectionName = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
     const Array<String> Tag({ SpaceId });
 
-    AssetSystem->CreateAssetCollection(
+    AssetSystem.CreateAssetCollection(
         SpaceId, nullptr, SpaceThumbnailAssetCollectionName, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Tag, CreateAssetCollCallback);
 }
 
@@ -1697,14 +1670,13 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
         INVOKE_IF_NOT_NULL(Callback, AssetCollResult);
     };
 
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     auto MetadataAssetCollectionName = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
 
     Array<csp::systems::EAssetCollectionType> PrototypeTypes = { EAssetCollectionType::SPACE_THUMBNAIL };
     Array<String> PrototypeTags = { SpaceId };
     Array<String> GroupIds = { SpaceId };
 
-    AssetSystem->FindAssetCollections(nullptr, nullptr, nullptr, PrototypeTypes, PrototypeTags, GroupIds, nullptr, nullptr, GetAssetCollCallback);
+    AssetSystem.FindAssetCollections(nullptr, nullptr, nullptr, PrototypeTypes, PrototypeTags, GroupIds, nullptr, nullptr, GetAssetCollCallback);
 }
 
 void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback)
@@ -1725,15 +1697,12 @@ void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCo
         INVOKE_IF_NOT_NULL(Callback, AssetsResult);
     };
 
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-    AssetSystem->GetAssetsInCollection(ThumbnailAssetCollection, ThumbnailAssetCallback);
+    AssetSystem.GetAssetsInCollection(ThumbnailAssetCollection, ThumbnailAssetCallback);
 }
 
 void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [Callback, AssetSystem, this](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [Callback, this](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1761,7 +1730,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
         const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-        AssetsResultCallback ThumbnailAssetCallback = [Callback, AssetSystem, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
+        AssetsResultCallback ThumbnailAssetCallback = [Callback, this, ThumbnailAssetCollection](const AssetsResult& AssetsResult)
         {
             if (AssetsResult.GetResultCode() == EResultCode::InProgress)
             {
@@ -1776,7 +1745,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                 return;
             }
 
-            NullResultCallback DeleteAssetCallback = [Callback, AssetSystem, ThumbnailAssetCollection](const NullResult& DeleteAssetResult)
+            NullResultCallback DeleteAssetCallback = [Callback, this, ThumbnailAssetCollection](const NullResult& DeleteAssetResult)
             {
                 if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -1812,11 +1781,11 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     INVOKE_IF_NOT_NULL(Callback, DeleteAssetCollResult);
                 };
 
-                AssetSystem->DeleteAssetCollection(ThumbnailAssetCollection, DeleteAssetCollCallback);
+                AssetSystem.DeleteAssetCollection(ThumbnailAssetCollection, DeleteAssetCollCallback);
             };
 
             const auto& ThumbnailAsset = AssetsResult.GetAssets()[0];
-            AssetSystem->DeleteAsset(ThumbnailAssetCollection, ThumbnailAsset, DeleteAssetCallback);
+            AssetSystem.DeleteAsset(ThumbnailAssetCollection, ThumbnailAsset, DeleteAssetCallback);
         };
 
         GetSpaceThumbnailAsset(ThumbnailAssetCollection, ThumbnailAssetCallback);
@@ -1827,9 +1796,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
 void SpaceSystem::GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
-    auto& SystemsManager = SystemsManager::Get();
-    auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
-    POIInternalSystem->GetSpaceGeoLocation(SpaceId, Callback);
+    PointOfInterestSystem.GetSpaceGeoLocation(SpaceId, Callback);
 }
 
 void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
@@ -1850,7 +1817,7 @@ void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceG
             return;
         }
 
-        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
+        auto UserId = AuthContext.GetLoginState().GetUserId();
 
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
@@ -1888,7 +1855,7 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, con
     SpaceGeoLocationResultCallback Callback)
 {
     SpaceGeoLocationResultCallback GetSpaceGeoLocationCallback
-        = [Callback, SpaceId, Location, Orientation, GeoFence](const SpaceGeoLocationResult& GetGeoLocationResult)
+        = [Callback, SpaceId, Location, Orientation, GeoFence, this](const SpaceGeoLocationResult& GetGeoLocationResult)
     {
         if (GetGeoLocationResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -1902,17 +1869,14 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, con
             return;
         }
 
-        auto& SystemsManager = SystemsManager::Get();
-        auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
-
         if (GetGeoLocationResult.HasGeoLocation)
         {
-            POIInternalSystem->UpdateSpaceGeoLocation(
+            PointOfInterestSystem.UpdateSpaceGeoLocation(
                 SpaceId, GetGeoLocationResult.GetSpaceGeoLocation().Id, Location, Orientation, GeoFence, Callback);
         }
         else
         {
-            POIInternalSystem->AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
+            PointOfInterestSystem.AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
         }
     };
 
@@ -1934,7 +1898,7 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, con
 
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
+        auto UserId = AuthContext.GetLoginState().GetUserId();
 
         // First check if the user is the owner
         bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
@@ -1961,15 +1925,12 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, con
 
 void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback)
 {
-    SpaceGeoLocationResultCallback GetSpaceGeoLocationCallback = [Callback](const SpaceGeoLocationResult& GetGeoLocationResult)
+    SpaceGeoLocationResultCallback GetSpaceGeoLocationCallback = [Callback, this](const SpaceGeoLocationResult& GetGeoLocationResult)
     {
         if (GetGeoLocationResult.GetResultCode() == EResultCode::InProgress)
         {
             return;
         }
-
-        auto& SystemsManager = SystemsManager::Get();
-        auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
 
         if (!GetGeoLocationResult.HasGeoLocation)
         {
@@ -1978,7 +1939,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
             return;
         }
 
-        POIInternalSystem->DeleteSpaceGeoLocation(GetGeoLocationResult.GetSpaceGeoLocation().Id, Callback);
+        PointOfInterestSystem.DeleteSpaceGeoLocation(GetGeoLocationResult.GetSpaceGeoLocation().Id, Callback);
     };
 
     // First refresh the space to ensure the user has access to the space
@@ -1999,7 +1960,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 
         const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-        auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().GetUserId();
+        auto UserId = AuthContext.GetLoginState().GetUserId();
 
         // First check if the user is the owner
         bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
@@ -2027,7 +1988,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
+    auto Request = ConstructDuplicateSpaceOptions(AuthContext, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr, LogSystem);
@@ -2045,7 +2006,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
 void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback)
 {
-    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
+    auto Request = ConstructDuplicateSpaceOptions(AuthContext, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::NullResultCallback, csp::systems::NullResult, void, chs::GroupDto>(Callback, nullptr, LogSystem);
