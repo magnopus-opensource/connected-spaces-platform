@@ -1,4 +1,4 @@
-# This workflow downloads all uploaded install artifcats (postfixed with -install),
+# This workflow downloads all uploaded install artifacts (postfixed with -install),
 # creates individual zip archives for each artifact, and uploads them as a Github release.
 
 name: Upload Releases
@@ -13,6 +13,11 @@ on:
       upload_legacy_wasm:
         type: boolean
         required: true
+
+      prerelease:
+        type: boolean
+        required: true
+        default: false
 
 jobs:
   upload-release:
@@ -79,7 +84,7 @@ jobs:
           name: CSP ${{ inputs.release_number }}
           target_commitish: ${{ github.sha }}
           draft: false
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |

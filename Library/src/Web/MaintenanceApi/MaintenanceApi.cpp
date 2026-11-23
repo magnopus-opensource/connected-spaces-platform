@@ -15,7 +15,6 @@
  */
 #include "Web/MaintenanceApi/MaintenanceApi.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"

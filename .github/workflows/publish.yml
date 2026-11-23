@@ -13,7 +13,7 @@ name: Publish CSP
 on:
 
   workflow_dispatch:
-    inputs:
+    inputs: &publish_inputs
       skip_tests:
         type: boolean
         description: 'Whether tests should be skipped'
@@ -31,6 +31,12 @@ on:
         description: 'Whether a Github release should be created'
         required: true
         default: true
+
+      prerelease:
+        type: boolean
+        description: 'Whether Github release is marked as a prerelease'
+        required: true
+        default: false
 
       release_number:
         type: string
@@ -72,6 +78,10 @@ on:
         description: Build legacy WASM/NPM package
         required: true
         default: true
+
+  # Same inputs as workflow_dispatch, allows calling from other workflows (e.g. nightly-build.yml)
+  workflow_call:
+    inputs: *publish_inputs
 
 jobs:
   desktop:
@@ -127,6 +137,7 @@ jobs:
     with:
       release_number: ${{ inputs.release_number }}
       upload_legacy_wasm: ${{ inputs.build_legacy_wasm }}
+      prerelease: ${{ inputs.prerelease }}
 
     needs:
     - desktop
@@ -137,6 +148,7 @@ jobs:
     - ios-visionos
     - linux-unreal
 
+    # If a platform is set to run, it should succeed
     if: |
       always() &&
       inputs.create_release &&

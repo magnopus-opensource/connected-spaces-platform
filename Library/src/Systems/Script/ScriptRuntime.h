@@ -44,7 +44,7 @@ public:
     ScriptRuntime(ScriptSystem* InScriptSystem);
     ~ScriptRuntime();
 
-    bool AddContext(int64_t ContextId);
+    bool AddContext(int64_t ContextId, std::function<csp::common::String()> ScriptNameProvider);
     bool RemoveContext(int64_t ContextId);
     bool BindContext(int64_t ContextId);
     bool ResetContext(int64_t ContextId);

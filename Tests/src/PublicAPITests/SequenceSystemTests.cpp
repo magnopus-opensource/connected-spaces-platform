@@ -15,7 +15,6 @@
  */
 
 #include "Awaitable.h"
-#include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"

@@ -21,8 +21,10 @@
 namespace csp::systems
 {
 
-ScriptContext::ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId)
+ScriptContext::ScriptContext(
+    ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId, std::function<csp::common::String()> InScriptNameProvider)
     : ContextId(InContextId)
+    , ScriptNameProvider(InScriptNameProvider ? std::move(InScriptNameProvider) : [] { return csp::common::String(); })
     , TheScriptSystem(InScriptSystem)
     , Runtime(InRuntime)
 {
@@ -113,8 +115,19 @@ uint64_t ScriptContext::GetId() const { return ContextId; }
 bool ScriptContext::ExistsInContext(const csp::common::String& ObjectName)
 {
     qjs::Value Result = Context->eval(ObjectName.c_str());
-    bool isExcept = Result.isException();
-    return !isExcept;
+
+    // If the eval throws, the exception is stored in a single slot on the JSRuntime (rt->current_exception),
+    // which is shared by every context on that runtime. If an exception is thrown it must be cleared, otherwise
+    // an error from another script on this runtime could report this stale exception.
+    if (Result.isException())
+    {
+        JSValue err = JS_GetException(Context->ctx);
+        JS_FreeValue(Context->ctx, err);
+
+        return false;
+    }
+
+    return true;
 }
 
 void ScriptContext::AddImport(const csp::common::String& Url)

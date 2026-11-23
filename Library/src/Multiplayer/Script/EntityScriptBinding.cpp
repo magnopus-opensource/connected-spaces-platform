@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/version.h"
 #include "Multiplayer/ComponentSchemaHelpers.h"
 #include "Multiplayer/ComponentSchemaRegistry.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
@@ -420,7 +421,7 @@ public:
         return RootHierarchyEntities;
     }
 
-    std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
+    std::string GetFoundationVersion() { return CSP_FOUNDATION_COMMIT_ID; }
 
 private:
     csp::common::IRealtimeEngine* EntitySystem;
@@ -512,6 +513,10 @@ EntityScriptBinding* EntityScriptBinding::BindEntitySystem(csp::common::IRealtim
 
 void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner)
 {
+    /*
+    * We looked at removing this as part of OF-1920 - However, it would be unsafe to do so.
+    * Instead we will address this as part of OF-1913
+    */
     if (csp::CSPFoundation::GetIsInitialised())
     {
         ScriptRunner.UnregisterScriptBinding(InEntityBinding);
@@ -630,16 +635,29 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
     Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
-    // Always import OKO module into scripts
-    std::stringstream ss;
-    ss << "import * as " << csp::systems::SCRIPT_NAMESPACE << " from \"" << csp::systems::SCRIPT_NAMESPACE << "\"; globalThis."
-       << csp::systems::SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE << ";";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+	// Evaluates Source as a module. If it throws, logs the exception and clears it from the runtime.
+    const auto EvalAndLogOnError = [&](const std::string& Source, std::string_view Description)
+    {
+        qjs::Value Result = Context->eval(Source, "<import>", JS_EVAL_TYPE_MODULE);
+        if (!Result.isException())
+        {
+            return;
+        }
 
-    // For script backwards compatibility
-    ss.clear();
-    ss << "globalThis." << csp::systems::OLD_SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE;
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+        // Takes the exception from the runtime. qjs::Value frees it when it goes out of scope.
+        qjs::Value Exception = Context->getException();
+        const auto Message = Exception.as<std::optional<std::string>>();
+
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Failed to {} for script context {}: {}", Description, ContextId, Message.value_or("<unprintable value>")).c_str());
+    };
+
+    // Always import the OKO module into scripts.
+    EvalAndLogOnError(fmt::format("import * as {0} from \"{0}\"; globalThis.{0} = {0};", csp::systems::SCRIPT_NAMESPACE), "import the script module");
+
+    // For script backwards compatibility.
+    EvalAndLogOnError(fmt::format("globalThis.{} = {};", csp::systems::OLD_SCRIPT_NAMESPACE, csp::systems::SCRIPT_NAMESPACE),
+        "assign the backwards-compatible script namespace");
 }
 
 } // namespace csp::multiplayer

@@ -15,7 +15,6 @@
  */
 #include "Systems/Script/ScriptRuntime.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
 #include "Systems/Script/ScriptContext.h"
@@ -59,13 +58,13 @@ ScriptRuntime::~ScriptRuntime()
     delete (Runtime);
 }
 
-bool ScriptRuntime::AddContext(int64_t ContextId)
+bool ScriptRuntime::AddContext(int64_t ContextId, std::function<csp::common::String()> ScriptNameProvider)
 {
     ContextMap::iterator It = Contexts.find(ContextId);
 
     if (It == Contexts.end())
     {
-        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId);
+        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId, ScriptNameProvider);
         Contexts.insert(ContextMap::value_type(ContextId, TheScriptContext));
         return true;
     }

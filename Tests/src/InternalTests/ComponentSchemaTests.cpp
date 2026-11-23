@@ -16,7 +16,6 @@
 
 #include "TestHelpers.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
@@ -44,7 +43,7 @@ class TestFixture final
 {
 public:
     TestFixture(const csp::common::Array<Schema>& Schemas)
-        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised())
+        : ScriptSystem(csp::systems::ScriptSystem::MakeInitialised(LogSystem))
         , Engine(LogSystem, *ScriptSystem, Schemas)
     {
     }
