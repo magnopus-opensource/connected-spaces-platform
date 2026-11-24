@@ -42,8 +42,6 @@ set(CSP_CORE_PUBLIC_INCLUDES
     ${CSP_CORE_INCLUDE_DIR}/Maintenance/Maintenance.h
     ${CSP_CORE_INCLUDE_DIR}/Maintenance/MaintenanceSystem.h
 
-    ${CSP_CORE_INCLUDE_DIR}/MCS/MCSSceneData.h
-
     ${CSP_CORE_INCLUDE_DIR}/Multiplayer/MultiplayerSystem.h
     ${CSP_CORE_INCLUDE_DIR}/Multiplayer/Scope.h
     ${CSP_CORE_INCLUDE_DIR}/Multiplayer/ScopeLeader.h
@@ -117,7 +115,7 @@ set(CSP_CORE_SOURCES
     ${CSP_CORE_SOURCE_DIR}/Maintenance/Maintenance.cpp
     ${CSP_CORE_SOURCE_DIR}/Maintenance/MaintenanceSystem.cpp
 
-    ${CSP_CORE_INCLUDE_DIR}/MCS/MCSSceneData.cpp
+    ${CSP_CORE_SOURCE_DIR}/MCS/MCSSceneData.cpp
 
     ${CSP_CORE_SOURCE_DIR}/Multiplayer/MultiplayerSystem.cpp
     ${CSP_CORE_SOURCE_DIR}/Multiplayer/Scope.cpp
@@ -156,12 +154,15 @@ set(CSP_CORE_SOURCES
 set(CSP_CORE_PRIVATE_INCLUDES 
     ${CSP_CORE_SOURCE_DIR}/ResultHelpers.h
 
+    ${CSP_CORE_SOURCE_DIR}/Assets/AssetHelpers.h
     ${CSP_CORE_SOURCE_DIR}/Assets/LODHelpers.h
 
     ${CSP_CORE_SOURCE_DIR}/Conversation/ConversationSystemHelpers.h
     ${CSP_CORE_SOURCE_DIR}/Conversation/ConversationSystemInternal.h
 
     ${CSP_CORE_SOURCE_DIR}/ECommerce/ECommerceSystemHelpers.h
+
+    ${CSP_CORE_SOURCE_DIR}/MCS/MCSSceneData.h
 
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptContext.h
     ${CSP_CORE_SOURCE_DIR}/Script/ScriptRuntime.h

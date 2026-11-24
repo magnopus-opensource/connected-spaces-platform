@@ -138,7 +138,7 @@ void POIResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        POIResponse->FromJson(Response->GetPayload().GetContent());
+        POIResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         PointOfInterestDtoToPointOfInterest(*POIResponse, POI);
     }
@@ -158,7 +158,7 @@ void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        POICollectionResponse->FromJson(Response->GetPayload().GetContent());
+        POICollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from response in our POIs array
         std::vector<chs::PointOfInterestDto>& POIArray = POICollectionResponse->GetArray();

@@ -17,6 +17,7 @@
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "MCS/MCSTypes.h"
+#include "Systems/Assets/AssetHelpers.h"
 
 #include "Common/Encode.h"
 #include "Multiplayer/MultiplayerConstants.h"
@@ -138,7 +139,7 @@ csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobCh
 
     ParsedEvent.AssetId = std::get<std::string>(Components.at(ASSET_ID).GetValue()).c_str();
     ParsedEvent.Version = std::get<std::string>(Components.at(VERSION).GetValue()).c_str();
-    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(std::get<std::string>(Components.at(ASSET_TYPE).GetValue()).c_str());
+    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(std::get<std::string>(Components.at(ASSET_TYPE).GetValue()).c_str(), LogSystem);
     ParsedEvent.AssetCollectionId = std::get<std::string>(Components.at(ASSET_COLLECTION_ID).GetValue()).c_str();
 
     return ParsedEvent;

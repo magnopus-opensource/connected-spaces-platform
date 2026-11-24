@@ -54,7 +54,7 @@ CSP_START_IGNORE
 class AuthContext : public csp::common::IAuthContext
 {
 public:
-    AuthContext(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> LoginState);
+    AuthContext(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp::common::LoginState> LoginState, csp::common::LogSystem& LogSystem);
 
     const csp::common::LoginState& GetLoginState() const override;
 
@@ -65,6 +65,7 @@ public:
 private:
     csp::services::ApiBase* AuthenticationAPI;
     std::shared_ptr<csp::common::LoginState> LoginState;
+    csp::common::LogSystem& LogSystem;
 };
 CSP_END_IGNORE
 

@@ -17,10 +17,11 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include "CSP/Common/LoginState.h"
-#include "Common/LoginStateData.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/LoginStateData.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Debug/Logging.h"
 #include "Json/JsonParseHelper.h"
 
@@ -80,15 +81,15 @@ namespace SpaceSystemHelpers
         }
     }
 
-    void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata)
+    void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata, csp::common::LogSystem& LogSystem)
     {
         rapidjson::Document Json;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(Json, JsonMetadata, "ConvertJsonMetadataToMapMetadata");
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(Json, JsonMetadata, "ConvertJsonMetadataToMapMetadata", LogSystem);
         if (!ok || !Json.IsObject())
         {
             if (ok)
             {
-                CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+                LogSystem.LogMsg(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
             }
 
             OutMapMetadata["site"] = "Void";
@@ -114,8 +115,8 @@ namespace SpaceSystemHelpers
             }
             else
             {
-                CSP_LOG_FORMAT(LogLevel::Error, "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)", Member.name.GetString(),
-                    Member.value.GetType());
+                csp::common::LogFormat(LogSystem, LogLevel::Error, "Unsupported JSON type in space metadata! (Key = {}, Value Type = {})",
+                    Member.name.GetString(), static_cast<int>(Member.value.GetType()));
             }
         }
     }
@@ -148,7 +149,7 @@ namespace SpaceSystemHelpers
         return IdFound;
     }
 
-    Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection)
+    Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
     {
         Map<String, String> SpacesMetadata;
 
@@ -159,11 +160,11 @@ namespace SpaceSystemHelpers
         // Convert old JSON metadata to key-value metadata
         if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
         {
-            CSP_LOG_FORMAT(common::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
+            csp::common::LogFormat(LogSystem, common::LogLevel::Verbose, "Converting old space metadata (Space ID: {})", SpaceId.c_str());
 
             const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
             Map<String, String> NewMetadata;
-            ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
+            ConvertJsonMetadataToMapMetadata(Json, NewMetadata, LogSystem);
 
             SpacesMetadata = NewMetadata;
         }

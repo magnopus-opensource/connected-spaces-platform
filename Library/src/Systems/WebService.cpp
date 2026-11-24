@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/WebService.h"
 
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/ApiBase/ApiBase.h"
 
 namespace csp::systems
@@ -83,7 +84,7 @@ void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
 
     if (Result == EResultCode::Failed && Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
     {
-        FailureReason = ParseErrorCode(Headers.at("x-errorcode").c_str());
+        FailureReason = ParseErrorCode(Headers.at("x-errorcode").c_str(), ApiResponse->GetLogSystem());
     }
 }
 
@@ -105,7 +106,7 @@ void ResultBase::SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCo
     HttpResponseCode = HttpResCode;
 }
 
-ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
+ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value, csp::common::LogSystem& LogSystem)
 {
     static const std::map<csp::common::String, csp::systems::ERequestFailureReason> XErrorCodeToFailureReason = {
         { "join_onbehalfnotallowed", csp::systems::ERequestFailureReason::AddUserToSpaceDenied },
@@ -150,8 +151,8 @@ ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Valu
         return Reason->second;
     }
 
-    CSP_LOG_ERROR_FORMAT(
-        "Unknown XErrorCode string encountered whilst converting the string to ERequestFailureReason enum value. Value passed in was %s.",
+    csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error,
+        "Unknown XErrorCode string encountered whilst converting the string to ERequestFailureReason enum value. Value passed in was {}.",
         Value.c_str());
     return ERequestFailureReason::Unknown;
 }

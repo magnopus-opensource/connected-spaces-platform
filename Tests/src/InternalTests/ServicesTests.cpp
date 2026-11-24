@@ -23,7 +23,8 @@ using namespace csp::services;
 CSP_INTERNAL_TEST(CSPEngine, ServicesTests, IsValidResponseCodeTest)
 {
     DtoBase* InDto = nullptr;
-    ApiResponseBase ResponseBase = ApiResponseBase(InDto);
+    auto LogSystem = csp::common::LogSystem {};
+    ApiResponseBase ResponseBase = ApiResponseBase(InDto, LogSystem);
 
     // 201 SUCCESS
     ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseCreated, csp::web::EResponseCodes::ResponseOK);

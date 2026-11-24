@@ -149,7 +149,7 @@ void SpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupResponse->FromJson(Response->GetPayload().GetContent());
+        GroupResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         GroupDtoToSpace(*GroupResponse, Space);
 
         if (GroupResponse->HasGroupCode())
@@ -173,7 +173,7 @@ void SpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupsResponse->FromJson(Response->GetPayload().GetContent());
+        GroupsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from response in our Groups array
         std::vector<chs_users::GroupDto>& GroupArray = GroupsResponse->GetArray();
@@ -200,7 +200,7 @@ void BasicSpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        LiteGroupResponse->FromJson(Response->GetPayload().GetContent());
+        LiteGroupResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         GroupLiteDtoToBasicSpace(*LiteGroupResponse, Space);
     }
@@ -222,8 +222,8 @@ void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GroupsResponse->FromJson(Response->GetPayload().GetContent());
-        FillResultTotalCount(Response->GetPayload().GetContent());
+        GroupsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
+        FillResultTotalCount(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from response in our Groups array
         std::vector<chs_users::GroupLiteDto>& GroupArray = GroupsResponse->GetArray();
@@ -236,12 +236,12 @@ void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     }
 }
 
-void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
+void BasicSpacesResult::FillResultTotalCount(const String& JsonContent, csp::common::LogSystem& LogSystem)
 {
     assert(JsonContent.c_str());
 
     rapidjson::Document JsonDoc;
-    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "BasicSpacesResult::FillResultTotalCount");
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "BasicSpacesResult::FillResultTotalCount", LogSystem);
     if (!ok)
     {
         return;
@@ -280,7 +280,7 @@ void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiR
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PendingInvitesResponse->FromJson(Response->GetPayload().GetContent());
+        PendingInvitesResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from response in our pending invites array
         std::vector<chs_users::GroupInviteDto>& PendingInvitesArray = PendingInvitesResponse->GetArray();
@@ -307,7 +307,7 @@ void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent());
+        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from response in our accepted invites array
         std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
@@ -380,7 +380,7 @@ void SpaceGeoLocationResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GeoLocationPOIResponse->FromJson(Response->GetPayload().GetContent());
+        GeoLocationPOIResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         HasGeoLocation = true;
 
@@ -399,7 +399,7 @@ void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiRespon
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        GeoLocationPOIsResponse->FromJson(Response->GetPayload().GetContent());
+        GeoLocationPOIsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         std::vector<chs_spatial::PointOfInterestDto>& POIDtos = GeoLocationPOIsResponse->GetArray();
         GeoLocations = Array<SpaceGeoLocation>(POIDtos.size());

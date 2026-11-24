@@ -141,7 +141,7 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
     TokenInfo->SetParameters(Convert(ProxyParams.Parameters));
 
     auto ResponseHandler = ExternalServiceProxyMock->CreateHandler<csp::systems::StringResultCallback, csp::systems::ExternalServiceInvocationResult,
-        void, chs_aggregation::ServiceResponse>(Callback, nullptr);
+        void, chs_aggregation::ServiceResponse>(Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem());
     ExternalServiceProxyMock->service_proxyPost({ TokenInfo }, ResponseHandler, csp::common::CancellationToken::Dummy());
 
     auto Result = ResultFuture.get();

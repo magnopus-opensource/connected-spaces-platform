@@ -19,9 +19,15 @@
 #include "CSP/Common/String.h"
 #include <rapidjson/document.h>
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::json
 {
 
-rapidjson::Document& ParseWithErrorLogging(rapidjson::Document& document, const csp::common::String& JsonString, const char* LogPrefix);
+rapidjson::Document& ParseWithErrorLogging(
+    rapidjson::Document& document, const csp::common::String& JsonString, const char* LogPrefix, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::json

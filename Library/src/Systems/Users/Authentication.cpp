@@ -60,11 +60,11 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
+        AuthResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         if (State)
         {
-            auto DataOpt = csp::common::AuthDtoToLoginStateData(AuthResponse);
+            auto DataOpt = csp::common::AuthDtoToLoginStateData(AuthResponse, ApiResponse->GetLogSystem());
 
             if (DataOpt.has_value() == false)
             {
@@ -149,7 +149,7 @@ void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiRe
 
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
+        CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         if (CheckoutSessionResponse->HasCheckoutUrl())
         {
@@ -167,7 +167,7 @@ void CustomerPortalUrlResult::OnResponse(const services::ApiResponseBase* ApiRes
 
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
+        CustomerPortalResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         if (CustomerPortalResponse->HasCustomerPortalUrl())
         {

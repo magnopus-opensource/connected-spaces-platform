@@ -44,11 +44,14 @@ enum class EResponseCode : uint8_t
 class ApiResponseBase
 {
 public:
-    ApiResponseBase(DtoBase* InDto);
+    ApiResponseBase(DtoBase* InDto, csp::common::LogSystem& InLogSystem);
     virtual ~ApiResponseBase() = default;
 
     EResponseCode GetResponseCode() const;
     DtoBase* GetDto() const;
+
+    /// @brief The LogSystem to log to whilst handling this response.
+    csp::common::LogSystem& GetLogSystem() const;
 
     void SetResponse(csp::web::HttpResponse* Response);
     csp::web::HttpResponse* GetMutableResponse();
@@ -61,6 +64,7 @@ protected:
     csp::web::EResponseCodes HttpResponseCode = csp::web::EResponseCodes::ResponseInit;
     DtoBase* Dto;
     csp::web::HttpResponse* Response = nullptr;
+    csp::common::LogSystem& LogSystem;
 
 private:
     bool IsValidResponseCode(int ResponseCodeA, int ResponseCodeB);
@@ -77,12 +81,12 @@ public:
 
     virtual utility::string_t ToJson() const override { return utility::string_t(""); }
 
-    virtual void FromJson(const utility::string_t& Json) override
+    virtual void FromJson(const utility::string_t& Json, csp::common::LogSystem& LogSystem) override
     {
         assert(Json.c_str());
 
         rapidjson::Document JsonDoc;
-        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson");
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson", LogSystem);
         if (!ok)
         {
             return;
@@ -97,7 +101,7 @@ public:
                 rapidjson::Value& Val = JsonDoc[i];
 
                 DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                Dto.FromJson(csp::web::JsonObjectToString(Val), LogSystem);
             }
         }
         else if (JsonDoc.HasMember("items"))
@@ -114,7 +118,7 @@ public:
                 rapidjson::Value& Val = JsonDoc["items"][i];
 
                 DtoType& Dto = Array[i];
-                Dto.FromJson(csp::web::JsonObjectToString(Val));
+                Dto.FromJson(csp::web::JsonObjectToString(Val), LogSystem);
             }
         }
     }
@@ -134,7 +138,7 @@ private:
 template <class DtoType> class ApiResponse : public ApiResponseBase
 {
 public:
-    ApiResponse();
+    ApiResponse(csp::common::LogSystem& LogSystem);
     virtual ~ApiResponse();
 };
 
@@ -164,9 +168,10 @@ template <typename CallbackType, typename ResponseType, typename ResponseDependT
 class ApiResponseHandler : public ApiResponseHandlerBase
 {
 public:
-    ApiResponseHandler(const CallbackType& InCallback, ResponseDependType* InDepend, csp::web::EResponseCodes InValidResponse,
-        async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
-        : ResponseObject(InDepend)
+    ApiResponseHandler(const CallbackType& InCallback, ResponseDependType* InDepend, csp::common::LogSystem& InLogSystem,
+        csp::web::EResponseCodes InValidResponse, async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
+        : ApiResp(InLogSystem)
+        , ResponseObject(InDepend)
         , ResponseObjectPtr(&ResponseObject)
         , ValidResponse(InValidResponse)
         , Callback(InCallback)
@@ -228,13 +233,13 @@ public:
     virtual ~ApiBase() { }
 
     template <typename CallbackType, typename ResponseType, typename ResponseDependType, typename DtoType>
-    ResponseHandlerPtr CreateHandler(const CallbackType& InCallback, ResponseDependType* InDepend,
+    ResponseHandlerPtr CreateHandler(const CallbackType& InCallback, ResponseDependType* InDepend, csp::common::LogSystem& LogSystem,
         csp::web::EResponseCodes InValidResponseCode = csp::web::EResponseCodes::ResponseOK,
         async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
     {
         // This gets owned by the HttpRequest and gets deleted in it's destructor once the request is complete
         ResponseHandlerPtr Handler = new ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
-            InCallback, InDepend, InValidResponseCode, std::move(InOnResponseEventTask));
+            InCallback, InDepend, LogSystem, InValidResponseCode, std::move(InOnResponseEventTask));
         return Handler;
     }
 
@@ -247,8 +252,8 @@ public:
 //
 
 template <class DtoType>
-ApiResponse<DtoType>::ApiResponse()
-    : ApiResponseBase(new DtoType())
+ApiResponse<DtoType>::ApiResponse(csp::common::LogSystem& LogSystem)
+    : ApiResponseBase(new DtoType(), LogSystem)
 {
 }
 

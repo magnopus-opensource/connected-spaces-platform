@@ -2550,8 +2550,9 @@ TEST_P(AssetCollectionTypeDtoMock, AssetCollectionTypeDtoMockTest)
     csp::systems::AssetCollectionResultCallback Callback
         = [&ResultPromise](const csp::systems::AssetCollectionResult& Result) { ResultPromise.set_value(Result); };
 
-    csp::services::ResponseHandlerPtr ResponseHandler = PrototypeServiceMock->CreateHandler<csp::systems::AssetCollectionResultCallback,
-        csp::systems::AssetCollectionResult, void, csp::services::generated::prototypeservice::PrototypeDto>(Callback, nullptr);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = PrototypeServiceMock->CreateHandler<csp::systems::AssetCollectionResultCallback, csp::systems::AssetCollectionResult, void,
+            csp::services::generated::prototypeservice::PrototypeDto>(Callback, nullptr, *csp::systems::SystemsManager::Get().GetLogSystem());
 
     RAIIMockLogger MockLogger {};
     if (ExpectedLogMessage.IsEmpty() == false)

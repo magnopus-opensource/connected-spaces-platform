@@ -43,7 +43,7 @@ public:
     virtual ~DtoBase() { }
 
     virtual utility::string_t ToJson() const;
-    virtual void FromJson(const utility::string_t& /*Json*/) { }
+    virtual void FromJson(const utility::string_t& /*Json*/, csp::common::LogSystem&) { }
 };
 
 class EnumBase
@@ -67,7 +67,7 @@ public:
     virtual ~NullDto() { }
 
     utility::string_t ToJson() const override;
-    void FromJson(const utility::string_t& /*Json*/) override { }
+    void FromJson(const utility::string_t& /*Json*/, csp::common::LogSystem&) override { }
 };
 
 } // namespace csp::services

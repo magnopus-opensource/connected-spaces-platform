@@ -57,7 +57,7 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->spacesSpaceIdEventsPost({ SpaceId, Request }, ResponseHandler);
 }
@@ -91,7 +91,7 @@ void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceI
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->spacesSpaceIdEventsEventIdPut({ SpaceId, EventId, Request }, ResponseHandler);
 }
@@ -109,7 +109,7 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = EventTicketingAPI->CreateHandler<TicketedEventCollectionResultCallback, TicketedEventCollectionResult, void,
-            csp::services::DtoArray<chs::SpaceEventDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            csp::services::DtoArray<chs::SpaceEventDto>>(Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     const auto RequestSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
     const auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
@@ -134,7 +134,7 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = EventTicketingAPI->CreateHandler<EventTicketResultCallback, EventTicketResult, void, chs::SpaceTicketDto>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     std::optional<csp::common::String> RequestOnBehalfOfUserId = std::nullopt;
     if (OnBehalfOfUserId.HasValue())
@@ -151,7 +151,7 @@ void EventTicketingSystem::GetVendorAuthorizeInfo(
     EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthorizeInfoCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler = EventTicketingAPI->CreateHandler<TicketedEventVendorAuthorizeInfoCallback,
-        TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+        TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
         ->vendorsVendorNameUsersUserIdProvider_infoGet({ GetVendorNameString(Vendor), UserId, std::nullopt }, ResponseHandler);
@@ -162,7 +162,7 @@ void EventTicketingSystem::GetIsSpaceTicketed(const csp::common::String& SpaceId
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = EventTicketingAPI->CreateHandler<SpaceIsTicketedResultCallback, SpaceIsTicketedResult, void, csp::services::DtoArray<chs::StringDataPage>>(
-            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+            Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     std::vector<csp::common::String> RequestSpaceId;
     RequestSpaceId.push_back(SpaceId);

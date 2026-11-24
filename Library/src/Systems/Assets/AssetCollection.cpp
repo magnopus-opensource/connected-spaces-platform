@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
-#include "Debug/Logging.h"
-#include "Json/JsonParseHelper.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/Dto.h"
+#include "Systems/Assets/AssetHelpers.h"
+#include "Json/JsonParseHelper.h"
 
 #include <assert.h>
 #include <charconv>
@@ -28,7 +29,7 @@ namespace chs = csp::services::generated::prototypeservice;
 namespace
 {
 
-csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& DTOPrototypeType)
+csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::String& DTOPrototypeType, csp::common::LogSystem& LogSystem)
 {
     if (DTOPrototypeType == "Default")
         return csp::systems::EAssetCollectionType::DEFAULT;
@@ -42,8 +43,8 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
         return csp::systems::EAssetCollectionType::SPACE_THUMBNAIL;
     else
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Encountered unknown prototype type whilst processing an asset collection DTO: %s",
-            DTOPrototypeType.c_str());
+        csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error,
+            "Encountered unknown prototype type whilst processing an asset collection DTO: {}", DTOPrototypeType.c_str());
         return csp::systems::EAssetCollectionType::DEFAULT;
     }
 }
@@ -54,7 +55,8 @@ namespace csp::systems
 
 // Templated function capable of handling different PrototypeDto types whose schema match.
 // Currently known to be compatible with both chs::PrototypeDto and chs::CopiedPrototypeDto.
-template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+template <class PrototypeDto>
+void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
     if (Dto.HasId())
     {
@@ -68,7 +70,7 @@ template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeD
 
     if (Dto.HasType())
     {
-        AssetCollection.Type = ConvertDTOPrototypeType(Dto.GetType());
+        AssetCollection.Type = ConvertDTOPrototypeType(Dto.GetType(), LogSystem);
     }
 
     if (Dto.HasTags())
@@ -139,9 +141,9 @@ template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeD
     }
 }
 
-void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
-    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection);
+    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection, LogSystem);
 }
 
 AssetCollection::AssetCollection()
@@ -210,9 +212,9 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeResponse->FromJson(Response->GetPayload().GetContent());
+        PrototypeResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection);
+        PrototypeDtoToAssetCollection(*PrototypeResponse, AssetCollection, ApiResponse->GetLogSystem());
     }
 }
 
@@ -232,25 +234,25 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        PrototypeDto->FromJson(Response->GetPayload().GetContent());
-        FillResultTotalCount(Response->GetPayload().GetContent());
+        PrototypeDto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
+        FillResultTotalCount(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<chs::PrototypeDto>& PrototypeArray = PrototypeDto->GetArray();
         AssetCollections = csp::common::Array<csp::systems::AssetCollection>(PrototypeArray.size());
 
         for (size_t i = 0; i < PrototypeArray.size(); ++i)
         {
-            PrototypeDtoToAssetCollection(PrototypeArray[i], AssetCollections[i]);
+            PrototypeDtoToAssetCollection(PrototypeArray[i], AssetCollections[i], ApiResponse->GetLogSystem());
         }
     }
 }
 
-void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent)
+void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent, csp::common::LogSystem& LogSystem)
 {
     assert(JsonContent.c_str());
 
     rapidjson::Document JsonDoc;
-    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "AssetCollectionsResult::FillResultTotalCount");
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "AssetCollectionsResult::FillResultTotalCount", LogSystem);
     if (!ok)
     {
         return;
@@ -305,7 +307,7 @@ void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        CopyResultDto->FromJson(Response->GetPayload().GetContent());
+        CopyResultDto->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         const std::vector<std::shared_ptr<chs::CopiedPrototypeDto>>& CopiedPrototypesArray = CopyResultDto->GetPrototypes();
         AssetCollections = csp::common::Array<csp::systems::AssetCollection>(CopiedPrototypesArray.size());
@@ -315,7 +317,7 @@ void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase
 
         for (size_t i = 0; i < CopiedPrototypesArray.size(); ++i)
         {
-            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i]);
+            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i], ApiResponse->GetLogSystem());
         }
     }
 }

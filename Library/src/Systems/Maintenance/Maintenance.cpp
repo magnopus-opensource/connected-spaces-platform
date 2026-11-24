@@ -49,8 +49,8 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         rapidjson::Document JsonDoc;
-        rapidjson::ParseResult ok
-            = csp::json::ParseWithErrorLogging(JsonDoc, ApiResponse->GetResponse()->GetPayload().GetContent(), "MaintenanceInfoResult::OnResponse");
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(
+            JsonDoc, ApiResponse->GetResponse()->GetPayload().GetContent(), "MaintenanceInfoResult::OnResponse", ApiResponse->GetLogSystem());
         if (!ok)
         {
             return;
@@ -88,7 +88,7 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
         if (MaintenanceInfoResponses.Size() == 0)
         {
-            CSP_LOG_MSG(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
+            ApiResponse->GetLogSystem().LogMsg(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
         }
 
         // Sort maintenance windows by latest date

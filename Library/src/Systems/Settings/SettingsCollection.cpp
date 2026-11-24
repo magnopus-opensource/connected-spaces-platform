@@ -78,7 +78,7 @@ void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* 
         if (Response->GetPayload().GetContent().Length() > 0)
         {
             // Build the Dto from the response Json
-            SettingsResponse->FromJson(Response->GetPayload().GetContent());
+            SettingsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
             SettingsDtoToSettingsCollection(*SettingsResponse, SettingsCollection);
         }

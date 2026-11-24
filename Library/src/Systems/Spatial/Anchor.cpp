@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Spatial/Anchor.h"
+#include "Common/Systems/Log/LogFormat.h"
 
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
@@ -40,12 +41,7 @@ void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, 
     }
 }
 
-} // namespace
-
-namespace csp::systems
-{
-
-void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
+void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor, csp::common::LogSystem& LogSystem)
 {
     Anchor.Id = Dto.GetMgsId();
     Anchor.CreatedBy = Dto.GetCreatedBy();
@@ -60,7 +56,7 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", Name.c_str());
+            csp::common::LogFormat(LogSystem, csp::common::LogLevel::Error, "Unknown third party anchor provider: {}", Name.c_str());
         }
     }
 
@@ -130,6 +126,11 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
     }
 }
 
+} // namespace
+
+namespace csp::systems
+{
+
 OlyAnchorPosition::OlyAnchorPosition()
     : X(0.0)
     , Y(0.0)
@@ -170,9 +171,9 @@ void AnchorResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        AnchorDtoToAnchor(*AnchorResponse, Anchor);
+        AnchorDtoToAnchor(*AnchorResponse, Anchor, ApiResponse->GetLogSystem());
     }
 }
 
@@ -190,7 +191,7 @@ void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* Ap
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Anchors array
         std::vector<chs::AnchorDto>& AnchorsArray = AnchorCollectionResponse->GetArray();
@@ -198,7 +199,7 @@ void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
         for (size_t idx = 0; idx < AnchorsArray.size(); ++idx)
         {
-            AnchorDtoToAnchor(AnchorsArray[idx], Anchors[idx]);
+            AnchorDtoToAnchor(AnchorsArray[idx], Anchors[idx], ApiResponse->GetLogSystem());
         }
     }
 }
@@ -216,7 +217,7 @@ void AnchorResolutionResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
-        AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         AnchorResolutionDtoToAnchorResolution(*AnchorResolutionResponse, AnchorResolution);
     }
 }
@@ -235,7 +236,7 @@ void AnchorResolutionCollectionResult::OnResponse(const csp::services::ApiRespon
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent());
+        AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         // Extract data from the response into our Anchors array
         std::vector<chs::AnchorResolutionDto>& AnchorsResolutionArray = AnchorResolutionCollectionResponse->GetArray();

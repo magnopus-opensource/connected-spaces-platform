@@ -34,17 +34,9 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::services::generated::prototypeservice
-{
-class PrototypeDto;
-}
-
 namespace csp::systems
 {
 class AssetCollection;
-
-void PrototypeDtoToAssetCollection(
-    const csp::services::generated::prototypeservice::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection);
 
 enum class EAssetCollectionType
 {
@@ -198,7 +190,7 @@ protected:
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& JsonContent, csp::common::LogSystem& LogSystem);
 
     csp::common::Array<AssetCollection> AssetCollections;
     uint64_t ResultTotalCount = 0;

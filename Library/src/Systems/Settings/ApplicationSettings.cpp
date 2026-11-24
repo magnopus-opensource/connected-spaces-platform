@@ -60,7 +60,7 @@ void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase*
         if (Response->GetPayload().GetContent().Length() > 0)
         {
             // Build the Dto from the response Json
-            ApplicationSettingsResponse->FromJson(Response->GetPayload().GetContent());
+            ApplicationSettingsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
             ApplicationSettingsDtoToApplicationSettings(*ApplicationSettingsResponse, ApplicationSettings);
         }

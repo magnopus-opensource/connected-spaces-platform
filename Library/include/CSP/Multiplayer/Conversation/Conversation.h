@@ -162,7 +162,7 @@ private:
     explicit MessageResult(void*) {};
     MessageResult() = default;
 
-    void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
+    void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection, csp::common::LogSystem& LogSystem);
 
     MessageInfo MsgInfo;
 };
@@ -208,7 +208,8 @@ private:
     explicit MessageCollectionResult(uint64_t ResultTotalCount)
         : ResultTotalCount(ResultTotalCount) {};
 
-    void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
+    void FillMessageInfoCollection(
+        const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections, csp::common::LogSystem& LogSystem);
 
     csp::common::Array<MessageInfo> ConversationMessages;
     uint64_t ResultTotalCount = 0;
@@ -242,7 +243,7 @@ private:
     explicit ConversationResult(void*) {};
     ConversationResult() = default;
 
-    void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
+    void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection, csp::common::LogSystem& LogSystem);
 
     MessageInfo ConvoInfo;
 };

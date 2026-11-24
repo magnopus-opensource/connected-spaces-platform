@@ -53,7 +53,7 @@ void GraphQLSystem::RunRequest(const csp::common::String RequestBody, GraphQLRec
     strm << QueryTextStr;
 
     csp::services::ResponseHandlerPtr GraphQLResponseHandler
-        = GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr);
+        = GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr, LogSystem);
     static_cast<chs::GraphQLApi*>(GraphQLAPI)->Query(strm.str().c_str(), GraphQLResponseHandler);
 }
 

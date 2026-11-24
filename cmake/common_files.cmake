@@ -115,6 +115,7 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     ${CSP_COMMON_SOURCE_DIR}/Queue.h
     ${CSP_COMMON_SOURCE_DIR}/Result.h
     ${CSP_COMMON_SOURCE_DIR}/Scheduler.h
+    ${CSP_COMMON_SOURCE_DIR}/Systems/Log/LogFormat.h
     ${CSP_COMMON_SOURCE_DIR}/ThreadPool.h
     ${CSP_COMMON_SOURCE_DIR}/UUIDGenerator.h
     ${CSP_COMMON_SOURCE_DIR}/Wrappers.h

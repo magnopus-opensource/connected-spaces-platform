@@ -38,8 +38,8 @@ inline const char* BoolToApiString(bool Val) { return Val ? "true" : "false"; }
 /// service. The class is templated to allow specialized functions to customize the result object used to process the response sent back from
 /// services.
 template <class ResultType>
-void InvokeOperationWithResult(
-    csp::services::ApiBase* InExternalServiceProxyApi, const ExternalServicesOperationParams& Params, StringResultCallback Callback)
+void InvokeOperationWithResult(csp::services::ApiBase* InExternalServiceProxyApi, const ExternalServicesOperationParams& Params,
+    StringResultCallback Callback, csp::common::LogSystem& LogSystem)
 {
     auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
     TokenInfo->SetServiceName(Params.ServiceName);
@@ -48,7 +48,8 @@ void InvokeOperationWithResult(
     TokenInfo->SetParameters(Convert(Params.Parameters));
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = InExternalServiceProxyApi->CreateHandler<StringResultCallback, ResultType, void, chs_aggregation::ServiceResponse>(Callback, nullptr);
+        = InExternalServiceProxyApi->CreateHandler<StringResultCallback, ResultType, void, chs_aggregation::ServiceResponse>(
+            Callback, nullptr, LogSystem);
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(InExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
 }
 
@@ -63,7 +64,7 @@ ExternalServiceProxySystem::~ExternalServiceProxySystem() { delete (ExternalServ
 
 void ExternalServiceProxySystem::InvokeOperation(const ExternalServicesOperationParams& Params, StringResultCallback Callback)
 {
-    InvokeOperationWithResult<ExternalServiceInvocationResult>(ExternalServiceProxyApi, Params, Callback);
+    InvokeOperationWithResult<ExternalServiceInvocationResult>(ExternalServiceProxyApi, Params, Callback, LogSystem);
 }
 
 void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback)
@@ -84,7 +85,7 @@ void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& P
     AgoraUserTokenParams.Parameters["shareVideo"] = BoolToApiString(Params.ShareVideo);
     AgoraUserTokenParams.Parameters["shareScreen"] = BoolToApiString(Params.ShareScreen);
 
-    InvokeOperationWithResult<GetAgoraTokenResult>(ExternalServiceProxyApi, AgoraUserTokenParams, Callback);
+    InvokeOperationWithResult<GetAgoraTokenResult>(ExternalServiceProxyApi, AgoraUserTokenParams, Callback, LogSystem);
 }
 
 } // namespace csp::systems

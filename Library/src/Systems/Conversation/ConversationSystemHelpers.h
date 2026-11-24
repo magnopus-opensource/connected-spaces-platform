@@ -52,8 +52,10 @@ namespace ConversationSystemHelpers
     common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationUpdateParams& AnnotationData,
         const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId);
     common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection);
-    multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& ConversationAssetCollection);
-    multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
+    multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(
+        const AssetCollection& ConversationAssetCollection, csp::common::LogSystem& LogSystem);
+    multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(
+        const AssetCollection& MessageAssetCollection, csp::common::LogSystem& LogSystem);
     multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
     bool HasAnnotationMetadata(const AssetCollection& MessageAssetCollection);
     CSP_NO_EXPORT std::unordered_map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Assets/Asset.h"
+#include "Systems/Assets/AssetHelpers.h"
 
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -27,7 +28,7 @@ namespace chs = csp::services::generated::prototypeservice;
 namespace csp::systems
 {
 
-csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType)
+csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType, csp::common::LogSystem& LogSystem)
 {
     if (DTOAssetDetailType == "Image")
         return csp::systems::EAssetType::IMAGE;
@@ -59,12 +60,12 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::TEXT;
     else
     {
-        CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Type!");
+        LogSystem.LogMsg(common::LogLevel::Error, "Unsupported Asset Type!");
         return csp::systems::EAssetType::IMAGE;
     }
 }
 
-csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
+static csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform, csp::common::LogSystem& LogSystem)
 {
     if (Platform == "Default")
     {
@@ -72,12 +73,12 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
     }
     else
     {
-        CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Platform!");
+        LogSystem.LogMsg(common::LogLevel::Error, "Unsupported Asset Platform!");
         return EAssetPlatform::DEFAULT;
     }
 }
 
-csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
+csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform, csp::common::LogSystem& LogSystem)
 {
     switch (Platform)
     {
@@ -85,7 +86,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
         return "Default";
     }
 
-    CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Platform!");
+    LogSystem.LogMsg(common::LogLevel::Error, "Unsupported Asset Platform!");
     return "Default";
 }
 
@@ -94,7 +95,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 namespace csp::systems
 {
 
-void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset)
+void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset, csp::common::LogSystem& LogSystem)
 {
     if (Dto.HasPrototypeId())
     {
@@ -123,7 +124,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 
     if (Dto.HasAssetType())
     {
-        Asset.Type = ConvertDTOAssetDetailType(Dto.GetAssetType());
+        Asset.Type = ConvertDTOAssetDetailType(Dto.GetAssetType(), LogSystem);
     }
 
     if (Dto.HasSupportedPlatforms())
@@ -134,7 +135,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         for (size_t i = 0; i < Platforms.size(); ++i)
         {
             // TODO Move this to a separate function when we have some different values than DEFAULT
-            Asset.Platforms[i] = ConvertStringToAssetPlatform(Platforms[i]);
+            Asset.Platforms[i] = ConvertStringToAssetPlatform(Platforms[i], LogSystem);
         }
     }
 
@@ -255,9 +256,9 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
+        AssetDetailResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
-        AssetDetailDtoToAsset(*AssetDetailResponse, Asset);
+        AssetDetailDtoToAsset(*AssetDetailResponse, Asset, ApiResponse->GetLogSystem());
     }
 }
 
@@ -275,7 +276,7 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        AssetsResponse->FromJson(Response->GetPayload().GetContent());
+        AssetsResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         std::vector<chs::AssetDetailDto>& DetailsArray = AssetsResponse->GetArray();
         Assets = csp::common::Array<csp::systems::Asset>(DetailsArray.size());
@@ -283,7 +284,7 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
         // Extract data from response in our Projects array
         for (size_t i = 0; i < DetailsArray.size(); ++i)
         {
-            AssetDetailDtoToAsset(DetailsArray[i], Assets[i]);
+            AssetDetailDtoToAsset(DetailsArray[i], Assets[i], ApiResponse->GetLogSystem());
         }
     }
 }

@@ -80,7 +80,7 @@ void SequenceSystem::CreateSequence(const String& SequenceKey, const String& Ref
     const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr, LogSystem);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
         ->sequencesPut(
@@ -107,7 +107,7 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
     const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr, LogSystem);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
         ->sequencesPut(
@@ -146,7 +146,7 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
         }
 
         csp::services::ResponseHandlerPtr ResponseHandler
-            = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+            = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr, LogSystem);
 
         const auto Sequence = Result.GetSequence();
 
@@ -205,7 +205,8 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
     std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
+        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(
+            Callback, nullptr, LogSystem);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
         ->sequencesGet(
@@ -232,7 +233,8 @@ void SequenceSystem::GetAllSequencesContainingItems(
     std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
+        = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(
+            Callback, nullptr, LogSystem);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
         ->sequencesGet(
@@ -261,7 +263,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
         return;
     }
     csp::services::ResponseHandlerPtr ResponseHandler
-        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
+        = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr, LogSystem);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
         ->sequencesKeysKeyGet({ csp::common::Encode::URI(SequenceKey, true) }, // Key
@@ -288,7 +290,7 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
         EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
     }
     csp::services::ResponseHandlerPtr ResponseHandler = SequenceAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
+        Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseNoContent);
 
     std::vector<String> SequenceKeys = Convert(EncodedSequenceKeys);
     static_cast<chs::SequenceApi*>(SequenceAPI)

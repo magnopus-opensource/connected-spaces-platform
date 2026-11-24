@@ -30,7 +30,7 @@ template <> inline rapidjson::Value TypeToJsonValue(const csp::web::HttpPayload&
     return rapidjson::Value("", Allocator);
 }
 
-template <> inline void JsonValueToType(const rapidjson::Value& /*Value*/, csp::web::HttpPayload& /*Type*/)
+template <> inline void JsonValueToType(const rapidjson::Value& /*Value*/, csp::web::HttpPayload& /*Type*/, csp::common::LogSystem&)
 {
     assert(false && "This function is just a stub. Please flesh it out!");
 }

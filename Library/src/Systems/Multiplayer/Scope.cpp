@@ -78,7 +78,7 @@ void ScopeResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ScopeResponse->FromJson(Response->GetPayload().GetContent());
+        ScopeResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         DtoToScope(*ScopeResponse, Scope);
     }
 }
@@ -99,7 +99,7 @@ void ScopesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     {
         // Build the Dto from the response Json
         auto* ScopesResponse = static_cast<csp::services::DtoArray<chs::multiplayerservice::ScopeDto>*>(ApiResponse->GetDto());
-        ScopesResponse->FromJson(Response->GetPayload().GetContent());
+        ScopesResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
 
         std::vector<chs::multiplayerservice::ScopeDto>& ScopesArray = ScopesResponse->GetArray();
         Scopes = csp::common::Array<Scope>(ScopesArray.size());

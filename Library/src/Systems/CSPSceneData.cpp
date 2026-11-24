@@ -15,11 +15,15 @@
  */
 
 #include "CSP/Systems/CSPSceneData.h"
-#include "CSP/Systems/MCS/MCSSceneData.h"
+#include "Systems/Assets/AssetHelpers.h"
+
+#include "CSP/CSPFoundation.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/PrototypeService/Dto.h"
 #include "Services/UserService/Dto.h"
-#include "Json/JsonSerializer.h"
+#include "Systems/MCS/MCSSceneData.h"
 
 #include <numeric>
 
@@ -34,8 +38,14 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     // enough to blow the stack
     csp::common::String SceneDescriptionStr = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
 
-    mcs::SceneData SceneData;
-    csp::json::JsonDeserializer::Deserialize(SceneDescriptionStr.c_str(), SceneData);
+    // TODO: Take the LogSystem as a constructor parameter instead, which is a public API change. Until then this
+    // keeps the behaviour of the singleton logging macros it replaced, logging through the SystemsManager's
+    // LogSystem once CSP is initialised and dropping messages otherwise.
+    auto SilentLogSystem = csp::common::LogSystem {};
+    SilentLogSystem.SetSystemLevel(csp::common::LogLevel::NoLogging);
+    auto& LogSystem = csp::CSPFoundation::GetIsInitialised() ? *csp::systems::SystemsManager::Get().GetLogSystem() : SilentLogSystem;
+
+    const auto SceneData = mcs::ParseSceneData(SceneDescriptionStr.c_str(), LogSystem);
 
     csp::systems::GroupDtoToSpace(SceneData.Group, Space);
 
@@ -44,7 +54,7 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     size_t PrototypesIndex = 0;
     for (const auto& Prototype : SceneData.Prototypes)
     {
-        csp::systems::PrototypeDtoToAssetCollection(Prototype, AssetCollections[PrototypesIndex]);
+        csp::systems::PrototypeDtoToAssetCollection(Prototype, AssetCollections[PrototypesIndex], LogSystem);
         PrototypesIndex++;
     }
 
@@ -53,7 +63,7 @@ CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDe
     size_t AssetDetailIndex = 0;
     for (const auto& AssetDetail : SceneData.AssetDetails)
     {
-        csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex]);
+        csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex], LogSystem);
         AssetDetailIndex++;
     }
 

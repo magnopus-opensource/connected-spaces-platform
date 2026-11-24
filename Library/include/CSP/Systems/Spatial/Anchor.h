@@ -22,11 +22,6 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services::generated::spatialdataservice
-{
-class AnchorDto;
-}
-
 namespace csp::services
 {
 
@@ -63,8 +58,6 @@ public:
     bool operator==(const OlyAnchorPosition& Other) const;
     bool operator!=(const OlyAnchorPosition& Other) const;
 };
-
-void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::AnchorDto& Dto, csp::systems::Anchor& Anchor);
 
 /// @ingroup Anchor System
 /// @brief Data representation of an Anchor

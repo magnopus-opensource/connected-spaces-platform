@@ -18,7 +18,7 @@ void ScopeLeaderResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ScopeLeaderResponse->FromJson(Response->GetPayload().GetContent());
+        ScopeLeaderResponse->FromJson(Response->GetPayload().GetContent(), ApiResponse->GetLogSystem());
         DtoToScopeLeader(*ScopeLeaderResponse, Leader);
     }
 }
