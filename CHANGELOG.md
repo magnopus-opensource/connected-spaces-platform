@@ -16,9 +16,9 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OW-2602] Add support for blend modes and alpha masking to image component by @MAG-me
     - BlendType which controls the way the image is blended into the scene. It has three values:
-        - Opaque, which is the current setting, is where mages are rendered into the scene and write to the depth buffer.
+        - Opaque, which is the current setting, is where images are rendered into the scene and write to the depth buffer.
         - Blend is where images are rendered to the scene but don't write to the depth buffer so blend with existing scene content. This is used with image formats that support an alpha channel such as PNG.
-        - Mask is where the decision to render a pixel or not is determined from the alpha channel of the image and is used in conjunction with AlphaTest. This is used with image formats the support an alpha channel such as PNG.
+        - Mask is where the decision to render a pixel or not is determined from the alpha channel of the image and is used in conjunction with AlphaTest. This is used with image formats that support an alpha channel such as PNG.
     - AlphaTest is used when BlendType is set to Mask and is compared with values from the image's alpha channel. Alpha channel values less than this value are considered transparent and not rendered. The default value is zero making the whole image opaque.
 
 ### 🐛 🔨 Bug Fixes
