@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [7.4.0]
+
+### 🔩 🔧 Ci
+- [NT-0] ci: Trigger tests as part of nightly builds by @MAG-AdamThorn
+  We recently started running automated nightly builds. These were initially configured to not run tests. However, we hope to soon be in a position to promote these builds to full publishes instead of relying on a separate publish workflow. It is therefore important that tests are run as part of this automation. This change updates the skip_tests flag.
+
 ## [7.3.0]
 
 ### 🍰 🙌 New Features
