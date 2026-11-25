@@ -21,6 +21,7 @@
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/LoginStateData.h"
