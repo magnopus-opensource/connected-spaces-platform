@@ -1,4 +1,4 @@
-# Triggers a nightly prerelease via `.github/workflows/publish.yml` (with tests skipped).
+# Triggers a nightly prerelease via `.github/workflows/publish.yml`.
 # Guards against duplicate releases by checking if a successful run already exists for the current SHA.
 
 name: Nightly Build
@@ -47,7 +47,7 @@ jobs:
     secrets: inherit
     if: needs.prepare.outputs.should_run == 'true'
     with:
-      skip_tests: true
+      skip_tests: false
       create_release: true
       prerelease: true
       release_number: Nightly-${{ needs.prepare.outputs.date }}
