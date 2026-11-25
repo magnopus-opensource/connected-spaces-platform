@@ -16,9 +16,10 @@
 
 #include "Awaitable.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -843,17 +844,17 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicket
     auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
     EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "SpaceId: %s", Space.Id.c_str());
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "CreatorUserId: %s", EventCreatorUserId.c_str());
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "AttendeeUserId: %s", EventAttendeeUserId.c_str());
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "SpaceId: {}", Space.Id);
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "CreatorUserId: {}", EventCreatorUserId);
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "AttendeeUserId: {}", EventAttendeeUserId);
 
     auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(
         EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, EventCreatorUserId);
     EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Success);
     auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "Login to Eventbrite as the event creator and paste the following URL into your browser: %s",
-        VendorAuthInfo.AuthorizeEndpoint.c_str());
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display,
+        "Login to Eventbrite as the event creator and paste the following URL into your browser: {}", VendorAuthInfo.AuthorizeEndpoint);
 
     auto [TicketedEventResult] = AWAIT_PRE(EventTicketingSystem, CreateTicketedEvent, RequestPredicate, Space.Id,
         csp::systems::EventTicketingVendor::Eventbrite, TestVendorEventId, TestVendorEventUri, true);
@@ -929,17 +930,17 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicket
     auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
     EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "SpaceId: %s", Space.Id.c_str());
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "CreatorUserId: %s", EventCreatorUserId.c_str());
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "AttendeeUserId: %s", EventAttendeeUserId.c_str());
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "SpaceId: {}", Space.Id);
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "CreatorUserId: {}", EventCreatorUserId);
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display, "AttendeeUserId: {}", EventAttendeeUserId);
 
     auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(
         EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, EventCreatorUserId);
     EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Success);
     auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
-    CSP_LOG_FORMAT(csp::common::LogLevel::Display, "Login to Eventbrite as the event creator and paste the following URL into your browser: %s",
-        VendorAuthInfo.AuthorizeEndpoint.c_str());
+    LogFormat(*SystemsManager.GetLogSystem(), csp::common::LogLevel::Display,
+        "Login to Eventbrite as the event creator and paste the following URL into your browser: {}", VendorAuthInfo.AuthorizeEndpoint);
 
     auto [TicketedEventResult] = AWAIT_PRE(EventTicketingSystem, CreateTicketedEvent, RequestPredicate, Space.Id,
         csp::systems::EventTicketingVendor::Eventbrite, TestVendorEventId, TestVendorEventUri, true);
