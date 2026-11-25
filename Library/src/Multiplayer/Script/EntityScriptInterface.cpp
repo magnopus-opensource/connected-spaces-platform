@@ -46,8 +46,6 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetPosition() const
 
 void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
 {
-    // CSP_LOG_FORMAT(LogLevel::VeryVerbose, "EntityScriptWrapper::SetPosition { %.2f, %.2f, %.2f }\n", Pos[0], Pos[1], Pos[2]);
-
     const csp::common::Vector3 NewPosition(Pos[0], Pos[1], Pos[2]);
     const csp::common::Vector3& CurrentPosition = Entity->GetPosition();
 
