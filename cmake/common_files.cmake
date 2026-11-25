@@ -139,8 +139,6 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     ${CSP_SOURCE_DIR}/CallHelpers.h
     ${CSP_SOURCE_DIR}/WrapperGenUtils.h
 
-    ${CSP_SOURCE_DIR}/Debug/Logging.h
-
     ${CSP_SOURCE_DIR}/EmscriptenBindings/CallbackQueue.h
 
     ${CSP_SOURCE_DIR}/Events/Event.h

@@ -18,7 +18,6 @@
 
 #include "CSP/Common/Array.h"
 
-#include "Debug/Logging.h"
 #include "Json/JsonSerializer.h"
 
 namespace

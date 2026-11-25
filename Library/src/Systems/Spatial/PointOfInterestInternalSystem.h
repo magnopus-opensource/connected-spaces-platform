@@ -18,7 +18,6 @@
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spatial/PointOfInterestSystem.h"
 #include "Common/Web/WebClient.h"
-#include "Debug/Logging.h"
 
 namespace csp::systems
 {

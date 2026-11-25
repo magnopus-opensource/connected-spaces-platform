@@ -39,7 +39,6 @@
 #endif
 
 #include "Common/Web/Uri.h"
-#include "Debug/Logging.h"
 
 #include <algorithm>
 #include <chrono>

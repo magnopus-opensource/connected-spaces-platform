@@ -23,7 +23,6 @@
 #include <signalrclient/signalr_exception.h>
 
 // Needs broken ... it's just for profiling we could probably just remove
-#include "Debug/Logging.h"
 
 #if ENABLE_SIGNALR_LOGGING
 #include <iostream>

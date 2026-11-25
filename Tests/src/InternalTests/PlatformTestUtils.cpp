@@ -16,7 +16,6 @@
 
 #include "PlatformTestUtils.h"
 
-#include "Debug/Logging.h"
 #include "TestHelpers.h"
 
 #ifdef CSP_WASM

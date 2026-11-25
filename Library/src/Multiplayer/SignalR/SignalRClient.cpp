@@ -30,7 +30,6 @@
 #include <thread>
 
 // Only used in this file for profiling macros. Still needs broken
-#include "Debug/Logging.h"
 
 using namespace signalr;
 

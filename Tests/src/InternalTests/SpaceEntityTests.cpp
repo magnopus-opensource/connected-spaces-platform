@@ -25,7 +25,6 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "RAIIMockLogger.h"

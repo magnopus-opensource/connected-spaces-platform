@@ -17,12 +17,11 @@
 #include "CSP/Systems/Users/Authentication.h"
 
 #include "CSP/Common/LoginState.h"
-#include "Common/LoginStateData.h"
 #include "CSP/Common/Settings.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
-#include "Debug/Logging.h"
+#include "Common/LoginStateData.h"
 #include "Events/EventSystem.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/ApiBase/ApiBase.h"

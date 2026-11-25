@@ -20,7 +20,6 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 #include "Mocks/SignalRConnectionMock.h"
 #include "Multiplayer/ComponentSchema.h"
 #include "Multiplayer/MCS/MCSTypes.h"
