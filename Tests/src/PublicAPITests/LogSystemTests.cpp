@@ -24,10 +24,11 @@
 #include "gtest/gtest.h"
 #include <atomic>
 
-void LogMessageLevelTest(const csp::common::LogLevel Level, const csp::common::String& TestMsg, std::atomic_bool& LogConfirmed, bool Expected)
+void LogMessageLevelTest(const csp::common::LogLevel Level, const csp::common::String& TestMsg, std::atomic_bool& LogConfirmed, bool Expected,
+    csp::common::LogSystem& LogSystem)
 {
     LogConfirmed = false;
-    CSP_LOG_MSG(Level, TestMsg);
+    LogSystem.LogMsg(Level, TestMsg);
     if (Expected)
     {
         EXPECT_TRUE(LogConfirmed);
@@ -51,98 +52,98 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
     LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test the default
-    CSP_LOG_MSG(csp::common::LogLevel::All, TestMsg);
+    LogSystem.LogMsg(csp::common::LogLevel::All, TestMsg);
     EXPECT_TRUE(LogConfirmed);
 
     // No Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::NoLogging);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Fatal Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Fatal);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Error Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Error);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Warning Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Warning);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Display Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Display);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Log Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Log);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, false, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // Verbose Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::Verbose);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, false, LogSystem);
 
     // VeryVerbose Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, true);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, true, LogSystem);
 
     // All Logging Level
     LogSystem.SetSystemLevel(csp::common::LogLevel::All);
-    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true);
-    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, true);
+    LogMessageLevelTest(csp::common::LogLevel::Fatal, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Error, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Warning, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Display, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Log, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::Verbose, TestMsg, LogConfirmed, true, LogSystem);
+    LogMessageLevelTest(csp::common::LogLevel::VeryVerbose, TestMsg, LogConfirmed, true, LogSystem);
 
     LogSystem.ClearAllCallbacks();
 
