@@ -59,20 +59,15 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
 }
 } // namespace
 
-LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword)
+LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword, csp::systems::UserSystem& UserSystem)
+    : UserSystem { UserSystem }
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& UserSystem = *SystemsManager.GetUserSystem();
-
     LogIn(UserSystem, AccountLoginEmail.c_str(), AccountPassword.c_str(), true, csp::systems::EResultCode::Success,
         csp::systems::ERequestFailureReason::None);
 }
 
 LoginRAII::~LoginRAII()
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& UserSystem = *SystemsManager.GetUserSystem();
-
     std::promise<csp::systems::NullResult> ResultPromise;
     std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
 

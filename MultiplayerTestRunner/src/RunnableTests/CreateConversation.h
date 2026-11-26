@@ -18,6 +18,11 @@
 
 #include "../CLIArgs.h"
 
+namespace csp::systems
+{
+class SystemsManager;
+}
+
 namespace csp::multiplayer
 {
 class OnlineRealtimeEngine;
@@ -28,5 +33,5 @@ namespace CreateConversation
 /*
  * Example test that creates a conversation component with a conversation message
  */
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
+void RunTest(csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
 } // namespace CreateConversation

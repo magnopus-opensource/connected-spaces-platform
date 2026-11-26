@@ -20,7 +20,6 @@
 #include <CSP/Multiplayer/SpaceEntity.h>
 #include <CSP/Systems/Multiplayer/MultiplayerSystem.h>
 #include <CSP/Systems/Spaces/SpaceSystem.h>
-#include <CSP/Systems/SystemsManager.h>
 #include <CSP/Systems/Users/UserSystem.h>
 
 #include <future>

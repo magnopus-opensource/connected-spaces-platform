@@ -16,6 +16,11 @@
 
 #pragma once
 
+namespace csp::systems
+{
+class SystemsManager;
+}
+
 namespace csp::multiplayer
 {
 class OnlineRealtimeEngine;
@@ -26,5 +31,5 @@ namespace LeaderElection
 /*
  * Test that waits to be made the leader of a scope, and then disconnects, re-triggering leadership election.
  */
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
+void RunTest(csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
 } // namespace LeaderElection

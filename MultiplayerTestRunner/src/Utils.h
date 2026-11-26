@@ -27,7 +27,9 @@ namespace csp
 {
 namespace systems
 {
+    class SystemsManager;
     class ResultBase;
+    class UserSystem;
 }
 namespace common
 {
@@ -42,7 +44,7 @@ std::string GetUniqueString();
 
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
-csp::systems::Profile CreateTestUser(bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+csp::systems::Profile CreateTestUser(csp::systems::UserSystem& UserSystem, bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 // Assert a type is move capable
