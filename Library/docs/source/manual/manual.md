@@ -46,7 +46,6 @@ Documentation on processes and principles that the library adheres to.
    documentation/adding_components
    documentation/data_driven_components
    documentation/branching_strategy
-   documentation/wrapper_generator_specs
    documentation/script_system
    documentation/expected_application_flow
    documentation/multiplayer_state_replication

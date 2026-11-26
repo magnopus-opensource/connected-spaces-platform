@@ -15,8 +15,6 @@ Please install the following packages:
  - `brew install llvm`
  - `brew install --cask docker`
  - `brew install cmake`
- - `pip3 install chevron`
- - `pip3 install jinja2`
  - `pip3 install gitpython`
 
 ***

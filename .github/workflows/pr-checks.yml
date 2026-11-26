@@ -3,7 +3,6 @@
 #  - Builds csp for wasm
 #  - Builds csp for android
 #  - Builds csp for iOS and visionOS
-#  - Builds csp using legacy wasm wrapper
 #  - Runs csp local tests on Linux
 
 name: PR Checks
@@ -34,13 +33,6 @@ jobs:
     uses: ./.github/workflows/ios-visionos-build.yml
     with:
       upload_install: false
-
-  legacy-wasm:
-    uses: ./.github/workflows/legacy-wasm-build.yml
-    secrets: inherit
-    with:
-      upload_package: false
-      run_tests: true
 
   linux-unreal:
     uses: ./.github/workflows/linux-unreal-build.yml

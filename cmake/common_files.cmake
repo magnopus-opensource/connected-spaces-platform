@@ -81,8 +81,6 @@ set(CSP_COMMON_SOURCES
     ${CSP_SOURCE_DIR}/CSPFoundation.cpp
     ${CSP_SOURCE_DIR}/ExplicitTypes.cpp
 
-    ${CSP_SOURCE_DIR}/EmscriptenBindings/CallbackQueue.cpp
-
     ${CSP_SOURCE_DIR}/Events/Event.cpp
     ${CSP_SOURCE_DIR}/Events/EventDispatcher.cpp
     ${CSP_SOURCE_DIR}/Events/EventId.cpp
@@ -137,11 +135,8 @@ set(CSP_COMMON_PRIVATE_INCLUDES
     # Files that exist at the root of the Library folder.
     # We will need to sort these files when we do the formal modularization work.
     ${CSP_SOURCE_DIR}/CallHelpers.h
-    ${CSP_SOURCE_DIR}/WrapperGenUtils.h
 
     ${CSP_SOURCE_DIR}/Debug/Logging.h
-
-    ${CSP_SOURCE_DIR}/EmscriptenBindings/CallbackQueue.h
 
     ${CSP_SOURCE_DIR}/Events/Event.h
     ${CSP_SOURCE_DIR}/Events/EventDispatcher.h
