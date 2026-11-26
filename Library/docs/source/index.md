@@ -24,14 +24,9 @@ If you want to build CSP for your own use case follow the instructions below.
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each supported platform are below.
+Build instructions for all supported platforms are below.
 
-- [Building for Web](manual/building/web)
-- [Building for Windows](manual/building/windows)
-- [Building for C#](manual/building/csharp)
-- [Building for Android](manual/building/android)
-- [Building for MacOS](manual/building/macos)
-- [Building for IOS](manual/building/ios)
+- [CSP Build System](manual/building/build-system)
 
 ****
 
