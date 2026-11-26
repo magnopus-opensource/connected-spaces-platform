@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.4.0]
 
+### 💫 💥 Code Refactors
+
+- [OF-1919] refac: Stop using the `LogSystem` through the `SystemsManager` singleton internally by @mag-lt
+  A step towards CSP not relying on global state, so it can be used more broadly, e.g. with more than one instance at a time. Internally, logging now goes through a `LogSystem` passed in rather than one fetched from the `SystemsManager` singleton, and the logging and profiling macros have been removed. A handful of minor logs and the internal profiling markers were dropped along the way. The old macros also quietly skipped logging once CSP had shut down, so callbacks for requests still in flight at shutdown, which was already fragile, may now fail in slightly different ways.
+
 ### 🔩 🔧 Ci
 - [NT-0] ci: Trigger tests as part of nightly builds by @MAG-AdamThorn
   We recently started running automated nightly builds. These were initially configured to not run tests. However, we hope to soon be in a position to promote these builds to full publishes instead of relying on a separate publish workflow. It is therefore important that tests are run as part of this automation. This change updates the skip_tests flag.
