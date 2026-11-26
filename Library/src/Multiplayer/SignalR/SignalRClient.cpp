@@ -30,7 +30,6 @@
 #include <thread>
 
 // Only used in this file for profiling macros. Still needs broken
-#include "Debug/Logging.h"
 
 using namespace signalr;
 
@@ -147,8 +146,6 @@ CSPHttpClient::CSPHttpClient(csp::common::IAuthContext& AuthContext)
 void CSPHttpClient::send(
     const std::string& /*url*/, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
 {
-    CSP_PROFILE_SCOPED();
-
     SignalRResponseReceiver SignalRConnectionReceiver;
     csp::web::HttpPayload PayLoad;
     PayLoad.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));

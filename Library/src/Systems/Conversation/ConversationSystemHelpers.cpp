@@ -17,10 +17,10 @@
 
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/DateTime.h"
-#include "Debug/Logging.h"
 
 namespace csp::systems::ConversationSystemHelpers
 {

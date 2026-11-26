@@ -19,6 +19,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CallHelpers.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
 #include "Systems/ResultHelpers.h"
@@ -81,7 +82,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
         POIInfo->SetTags(DTOTags);
     }
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT, LogSystem);
     POIInfo->SetType(TypeString);
 
     POIInfo->SetOwner(Owner);
@@ -118,7 +119,7 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
     std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
     if (Type.HasValue())
     {
-        TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
+        TypeOption = PointOfInterestHelpers::TypeToString(*Type, LogSystem).c_str();
     }
 
     static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
@@ -145,7 +146,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
     uniqueName.Append(Site.SpaceId);
     POIInfo->SetName(uniqueName);
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT, LogSystem);
     POIInfo->SetType(TypeString);
 
     POIInfo->SetOwner(Site.SpaceId);
@@ -203,7 +204,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 {
     auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
     POIInfo->SetType(TypeString);
 
     chs::LocalizedString POITitle;
@@ -225,7 +226,8 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
     {
         if (!Location->IsValid())
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid GeoLocation. Latitude(-90<>90): {:f}, Longitude(-180<>180): {:f}",
+                Location->Latitude, Location->Longitude);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -242,7 +244,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
     {
         if (*Orientation < 0.0f || *Orientation > 360.0f)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid Orientation(0-360): {:f}", *Orientation);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -257,7 +259,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
         const auto Size = GeoFence->Size();
         if (Size < 4)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid GeoFence: Not enough points(4): {}", Size);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -266,7 +268,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
         if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
         {
-            CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Invalid GeoFence: First and last not the same.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -281,7 +283,8 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
             if (!GeoFenceLocation.IsValid())
             {
-                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
+                LogFormat(LogSystem, csp::common::LogLevel::Error,
+                    "Invalid GeoFence GeoLocation. Latitude(-90<>90): {:f}, Longitude(-180<>180): {:f}", GeoFenceLocation.Latitude,
                     GeoFenceLocation.Longitude);
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -311,7 +314,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 {
     auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
     POIInfo->SetType(TypeString);
 
     chs::LocalizedString POITitle;
@@ -333,7 +336,8 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
     {
         if (!Location->IsValid())
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid GeoLocation. Latitude(-90<>90): {:f}, Longitude(-180<>180): {:f}",
+                Location->Latitude, Location->Longitude);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -350,7 +354,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
     {
         if (*Orientation < 0.0f || *Orientation > 360.0f)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid Orientation(0-360): {:f}", *Orientation);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -366,7 +370,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
         if (Size < 4)
         {
-            CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Invalid GeoFence: Not enough points(4): {}", Size);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -375,7 +379,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
         if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
         {
-            CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Invalid GeoFence: First and last not the same.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
 
@@ -390,7 +394,8 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
             if (!GeoFenceLocation.IsValid())
             {
-                CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
+                LogFormat(LogSystem, csp::common::LogLevel::Error,
+                    "Invalid GeoFence GeoLocation. Latitude(-90<>90): {:f}, Longitude(-180<>180): {:f}", GeoFenceLocation.Latitude,
                     GeoFenceLocation.Longitude);
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -416,7 +421,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
 void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
-    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE, LogSystem);
 
     std::vector<csp::common::String> SpaceIds({ SpaceId });
 

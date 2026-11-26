@@ -16,7 +16,6 @@
 #include "Common/Web/HttpPayload.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Debug/Logging.h"
 #include <fmt/format.h>
 
 #include <cstdio>

@@ -19,7 +19,6 @@
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 #include "PlatformTestUtils.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"

@@ -20,10 +20,12 @@
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/Convert.h"
 #include "Common/LoginStateData.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Common/UUIDGenerator.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
@@ -74,7 +76,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
  * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
  *
  * "HHH:MM:SS" supports durations greater than 4 days */
-bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
+bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength, csp::common::LogSystem& LogSystem)
 {
     if (ExpiryLength.IsEmpty())
     {
@@ -87,7 +89,7 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
         return true;
     }
 
-    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
+    LogSystem.LogMsg(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
 }
 
@@ -136,11 +138,12 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                        csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
                 }
 
                 Callback(LoginStateRes);
@@ -151,7 +154,7 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Login Failed. Code: {}", LoginStateRes.GetHttpResultCode());
             Callback(LoginStateRes);
         }
     };
@@ -163,15 +166,15 @@ void LoginSocial(csp::services::ApiBase* AuthenticationAPI, std::shared_ptr<csp:
 }
 
 void SetTokenOptions(const csp::common::Optional<csp::systems::TokenOptions>& TokenOptions, std::shared_ptr<chs_user::TokenOptions> Options,
-    std::shared_ptr<csp::common::LoginState> LoginState)
+    std::shared_ptr<csp::common::LoginState> LoginState, csp::common::LogSystem& LogSystem)
 {
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength, LogSystem))
     {
         Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
         LoginState->UpdateAccessTokenExpiry(TokenOptions->AccessTokenExpiryLength);
     }
 
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength, LogSystem))
     {
         Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
         LoginState->UpdateRefreshTokenExpiry(TokenOptions->RefreshTokenExpiryLength);
@@ -185,7 +188,7 @@ namespace csp::systems
 
 const char* EMPTY_SPACE_STRING = " ";
 
-csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticationProviders Provider)
+csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticationProviders Provider, csp::common::LogSystem& LogSystem)
 {
     switch (Provider)
     {
@@ -199,7 +202,7 @@ csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticati
         return "Netflix";
     default:
     {
-        CSP_LOG_FORMAT(common::LogLevel::Error, "Unsupported Provider Type requested: %d, returning Google", static_cast<uint8_t>(Provider));
+        LogFormat(LogSystem, common::LogLevel::Error, "Unsupported Provider Type requested: {}, returning Google", static_cast<uint8_t>(Provider));
         return "Google";
     }
     }
@@ -316,13 +319,13 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
 {
     if (Email.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::Login, Email must not be empty.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::Login, Email must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
         return;
     }
     if (Password.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::Login, Password must not be empty.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::Login, Password must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
         return;
     }
@@ -337,7 +340,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -360,11 +363,12 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem = LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                        csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
                     Callback(LoginStateRes);
                     return;
@@ -378,7 +382,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Login Failed. Code: {}", LoginStateRes.GetHttpResultCode());
             Callback(LoginStateRes);
         }
     };
@@ -395,7 +399,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 {
     if (UserId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::LoginWithRefreshToken, UserId must not be empty.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::LoginWithRefreshToken, UserId must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
         return;
     }
@@ -410,7 +414,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::RefreshRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -427,11 +431,12 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem = LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                        csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
                     Callback(LoginStateRes);
                     return;
@@ -469,7 +474,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
         return;
     }
 
-    SetTokenOptions(TokenOptions, Options, CurrentLoginState);
+    SetTokenOptions(TokenOptions, Options, CurrentLoginState, LogSystem);
 
     auto Request = std::make_shared<chs_user::LoginRequest>();
     Request->SetDeviceId(DeviceId.c_str());
@@ -490,11 +495,12 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem = LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                        csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
                     Callback(LoginStateRes);
                     return;
@@ -545,12 +551,12 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                = [&LogSystem = LogSystem, Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
                 if (ErrCode != csp::multiplayer::ErrorCode::None)
                 {
                     // It would be extremely strange to hit this branch, but it remains here just in case.
-                    CSP_LOG_ERROR_FORMAT("Unexpected error connecting MultiplayerConnection. This is strange! : %s",
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "Unexpected error connecting MultiplayerConnection. This is strange! : {}",
                         csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
                     Callback(LoginStateRes);
                     return;
@@ -601,8 +607,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
 {
     if (AuthProvider == EThirdPartyAuthenticationProviders::Invalid)
     {
-        CSP_LOG_ERROR_MSG("UserSystem::LoginToThirdPartyAuthenticationProviderWithToken() - EThirdPartyAuthenticationProviders::Invalid was passed "
-                          "as an AuthProvider.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "UserSystem::LoginToThirdPartyAuthenticationProviderWithToken() - EThirdPartyAuthenticationProviders::Invalid was passed "
+            "as an AuthProvider.");
 
         csp::systems::LoginStateResult ErrorResult;
         ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -613,8 +620,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
 
     if (ThirdPartyToken.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::LoginToThirdPartyAuthenticationProviderWithToken() - a ThirdPartyToken must be provided. Please acquire a "
-                          "token from the third party provider directly before making this call.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "UserSystem::LoginToThirdPartyAuthenticationProviderWithToken() - a ThirdPartyToken must be provided. Please acquire a "
+            "token from the third party provider directly before making this call.");
 
         csp::systems::LoginStateResult ErrorResult;
         ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -634,7 +642,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProviderWithToken(EThirdPartyAut
 
     const auto Request = std::make_shared<chs_user::LoginSocialRequest>();
     Request->SetDeviceId(DeviceId.c_str());
-    Request->SetProvider(ConvertExternalAuthProvidersToString(AuthProvider));
+    Request->SetProvider(ConvertExternalAuthProvidersToString(AuthProvider, LogSystem));
     Request->SetToken(ThirdPartyToken);
     Request->SetTenant(Tenant.c_str());
 
@@ -661,7 +669,7 @@ void UserSystem::FederatedLogin(
 
     if (!AuthDetails.HasAccessToken())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: AccessToken was not provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::FederatedLogin() - Parsing error: AccessToken was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -672,7 +680,7 @@ void UserSystem::FederatedLogin(
 
     if (!AuthDetails.HasRefreshToken())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: RefreshToken was not provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::FederatedLogin() - Parsing error: RefreshToken was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -683,7 +691,7 @@ void UserSystem::FederatedLogin(
 
     if (!AuthDetails.HasUserId())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: UserId was not provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::FederatedLogin() - Parsing error: UserId was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -694,7 +702,7 @@ void UserSystem::FederatedLogin(
 
     if (!AuthDetails.HasDeviceId())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::FederatedLogin() - Parsing error: DeviceId was not provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserSystem::FederatedLogin() - Parsing error: DeviceId was not provided.");
 
         csp::systems::LoginStateResult BadResult;
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
@@ -729,11 +737,12 @@ void UserSystem::FederatedLogin(
     Result.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
     csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-        = [Callback, CurrentLoginState = this->CurrentLoginState](csp::multiplayer::ErrorCode ErrCode)
+        = [&LogSystem = LogSystem, Callback, CurrentLoginState = this->CurrentLoginState](csp::multiplayer::ErrorCode ErrCode)
     {
         if (ErrCode != csp::multiplayer::ErrorCode::None)
         {
-            CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Error connecting MultiplayerConnection: {}",
+                csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
             Callback(MakeInvalid<LoginStateResult>());
             return;
         }
@@ -764,7 +773,8 @@ void UserSystem::Logout(NullResultCallback Callback)
     {
         if (ErrCode != csp::multiplayer::ErrorCode::None)
         {
-            CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Error disconnecting MultiplayerConnection: {}",
+                csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
         }
 
         const auto Data = CurrentLoginState->GetSnapshotThreadSafe();
@@ -1022,7 +1032,8 @@ void UserSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register UserSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Error: Failed to register UserSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 

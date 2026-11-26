@@ -15,9 +15,9 @@
  */
 #include "CSP/Systems/Spaces/UserRoles.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "Common/Web/HttpResponse.h"
-#include "Debug/Logging.h"
 
 namespace csp::systems
 {
@@ -38,7 +38,7 @@ bool InviteUserRoleInfoCollection::operator!=(const InviteUserRoleInfoCollection
 namespace UserRolesHelpers
 {
 
-    bool GetUserRole(const Space& Space, const csp::common::String& UserId, UserRoleInfo& OutRoleInfo)
+    bool GetUserRole(const Space& Space, const csp::common::String& UserId, UserRoleInfo& OutRoleInfo, csp::common::LogSystem& LogSystem)
     {
         OutRoleInfo = { UserId, SpaceUserRole::User };
 
@@ -66,7 +66,7 @@ namespace UserRolesHelpers
             }
         }
 
-        CSP_LOG_ERROR_MSG("UserId is not a member of the Space");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "UserId is not a member of the Space");
         return false;
     }
 } // namespace UserRolesHelpers
@@ -75,7 +75,8 @@ csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() { re
 
 const csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles() const { return UserRoles; }
 
-void UserRoleCollectionResult::FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds)
+void UserRoleCollectionResult::FillUsersRoles(
+    const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds, csp::common::LogSystem& LogSystem)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
@@ -85,7 +86,7 @@ void UserRoleCollectionResult::FillUsersRoles(const Space& Space, const csp::com
     {
         auto& currentUserId = RequestedUserIds[idx];
         UserRoleInfo currentRoleInfo;
-        if (true == UserRolesHelpers::GetUserRole(Space, currentUserId, currentRoleInfo))
+        if (true == UserRolesHelpers::GetUserRole(Space, currentUserId, currentRoleInfo, LogSystem))
         {
             UserRoles[idx] = currentRoleInfo;
         }

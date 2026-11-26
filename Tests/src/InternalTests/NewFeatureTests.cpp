@@ -24,9 +24,8 @@
 #include "PublicTestBase.h"
 #include "TestHelpers.h"
 
-#include "Debug/Logging.h"
-
 #include <gtest/gtest.h>
+#include <iostream>
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ListTest)
 {
@@ -193,9 +192,9 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
 class MyCoolClass
 {
 public:
-    MyCoolClass() { CSP_LOG_MSG(csp::common::LogLevel::Log, "MyCoolClass::MyCoolClass() called!"); }
+    MyCoolClass() { std::cout << "MyCoolClass::MyCoolClass() called!" << std::endl; }
 
-    ~MyCoolClass() { CSP_LOG_MSG(csp::common::LogLevel::Log, "MyCoolClass::~MyCoolClass() called!"); }
+    ~MyCoolClass() { std::cout << "MyCoolClass::~MyCoolClass() called!" << std::endl; }
 };
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, OptionalAssignmentOperatorTest)

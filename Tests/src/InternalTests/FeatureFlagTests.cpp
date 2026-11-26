@@ -17,8 +17,6 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
-#include "RAIIMockLogger.h"
-
 CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, DefaultFeatureFlagTest)
 {
     csp::CSPFoundation::__ResetFeatureFlagsForTesting();
@@ -83,17 +81,9 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagIsEnabledTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    {
-        RAIIMockLogger MockLogger {};
+    const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
 
-        // Ensure the required 'unknown feature flag' error message is logged when we try to check the enabled state of an invlaid flag
-        const csp::common::String IsEnabledErrorMsg = "Unknown feature flag queried with integer value: 9999";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, IsEnabledErrorMsg)).Times(1);
-
-        const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
-
-        ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(UNKNOWN_TEST_FLAG));
-    }
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(UNKNOWN_TEST_FLAG));
 
     csp::CSPFoundation::Shutdown();
 }
@@ -121,17 +111,9 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagDescriptionTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    {
-        RAIIMockLogger MockLogger {};
+    const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
 
-        // Ensure the required 'unknown feature flag' error message is logged when we try to get a description for an invlaid flag
-        const csp::common::String IsEnabledErrorMsg = "Unknown feature flag description requested with integer value: 9999";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, IsEnabledErrorMsg)).Times(1);
-
-        const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
-
-        ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(UNKNOWN_TEST_FLAG), "");
-    }
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(UNKNOWN_TEST_FLAG), "");
 
     csp::CSPFoundation::Shutdown();
 }

@@ -28,7 +28,6 @@
 #include <thread>
 
 // For the profiling stuff ... needs broken, or just removed.
-#include "Debug/Logging.h"
 
 using namespace std::chrono_literals;
 
@@ -77,8 +76,6 @@ CSPWebSocketClientPOCO::ParsedURIInfo CSPWebSocketClientPOCO::ParseMultiplayerSe
 
 void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     try
     {
         CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint = ParseMultiplayerServiceUriEndPoint(MultiplayerUri);
@@ -130,8 +127,6 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
 
 void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     // Guards PocoWebSocket and the StopFlag against concurrent Start/Send/Stop.
     auto ShouldProceed = [this]()
     {
@@ -211,8 +206,6 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 
 void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     int Flags = Poco::Net::WebSocket::SendFlags::FRAME_BINARY; // Assume binary as we don't support JSON anymore
     auto Length = static_cast<int>(Message.size());
     auto Succeeded = false;
@@ -273,8 +266,6 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 
 void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
 {
-    CSP_PROFILE_SCOPED();
-
     if (!Callback)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "Receive() called with a null callback, aborting Receive operation.");
@@ -330,8 +321,6 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
     for (;;)
     {
-        CSP_PROFILE_SCOPED();
-
         if (StopFlag)
         {
             return;

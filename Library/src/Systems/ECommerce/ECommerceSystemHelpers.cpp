@@ -17,7 +17,6 @@
 
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 
 namespace chs = csp::services::generated::aggregationservice;
 

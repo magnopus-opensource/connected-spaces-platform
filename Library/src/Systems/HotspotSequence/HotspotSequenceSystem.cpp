@@ -20,7 +20,8 @@
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
-#include "Debug/Logging.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Systems/ResultHelpers.h"
 
@@ -115,7 +116,7 @@ void HotspotSequenceSystem::CreateHotspotGroup(
 {
     const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto CB = [&LogSystem = LogSystem, Callback, SpaceId](const SequenceResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -140,7 +141,8 @@ void HotspotSequenceSystem::CreateHotspotGroup(
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::CreateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "HotspotSequenceSystem::CreateHotspotGroup - Failed to deconstruct key: {}",
+                Data.Key.c_str());
 
             Callback(MakeInvalid<HotspotGroupResult>());
 
@@ -164,7 +166,7 @@ void HotspotSequenceSystem::RenameHotspotGroup(
     const auto Key = CreateKey(GroupName, SpaceId);
     const auto NewKey = CreateKey(NewGroupName, SpaceId);
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto CB = [&LogSystem = LogSystem, Callback, SpaceId](const SequenceResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -189,7 +191,8 @@ void HotspotSequenceSystem::RenameHotspotGroup(
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::RenameHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "HotspotSequenceSystem::RenameHotspotGroup - Failed to deconstruct key: {}",
+                Data.Key.c_str());
 
             Callback(MakeInvalid<HotspotGroupResult>());
 
@@ -209,7 +212,7 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
 {
     const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto CB = [&LogSystem = LogSystem, Callback, SpaceId](const SequenceResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -234,7 +237,8 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::UpdateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "HotspotSequenceSystem::UpdateHotspotGroup - Failed to deconstruct key: {}",
+                Data.Key.c_str());
 
             Callback(MakeInvalid<HotspotGroupResult>());
 
@@ -254,7 +258,7 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
 {
     const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequenceResult& Result)
+    auto CB = [&LogSystem = LogSystem, Callback, SpaceId](const SequenceResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -279,7 +283,8 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+            LogFormat(
+                LogSystem, csp::common::LogLevel::Error, "HotspotSequenceSystem::GetHotspotGroup - Failed to deconstruct key: {}", Data.Key.c_str());
 
             Callback(MakeInvalid<HotspotGroupResult>());
 
@@ -298,7 +303,7 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
 {
     const auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
 
-    auto CB = [Callback, SpaceId](const SequencesResult& Result)
+    auto CB = [&LogSystem = LogSystem, Callback, SpaceId](const SequencesResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -327,7 +332,8 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
             }
             else
             {
-                CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroups - Failed to deconstruct key: %s", Data[i].Key.c_str());
+                LogFormat(LogSystem, csp::common::LogLevel::Error, "HotspotSequenceSystem::GetHotspotGroups - Failed to deconstruct key: {}",
+                    Data[i].Key.c_str());
             }
         }
 

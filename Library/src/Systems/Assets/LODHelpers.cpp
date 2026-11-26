@@ -15,8 +15,6 @@
  */
 #include "LODHelpers.h"
 
-#include "Debug/Logging.h"
-
 #include <algorithm>
 #include <optional>
 #include <string>

@@ -106,47 +106,48 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetUniqueAvatarThumbnailAssetName
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, GetAssetFileExtensionTest)
 {
+    auto LogSystem = csp::common::LogSystem {};
     String AssetFileExtension;
 
     const String PngMimeType = "image/png";
     const String PngExtension = ".png";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(PngMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(PngMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, PngExtension);
 
     const String JpegMimeType = "image/jpeg";
     const String JpegExtension = ".jpeg";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(JpegMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(JpegMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, JpegExtension);
 
     const String GifMimeType = "image/gif";
     const String GifExtension = ".gif";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(GifMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(GifMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, GifExtension);
 
     const String ApngMimeType = "image/apng";
     const String ApngExtension = ".apng";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(ApngMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(ApngMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, ApngExtension);
 
     const String AvifMimeType = "image/avif";
     const String AvifExtension = ".avif";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(AvifMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(AvifMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, AvifExtension);
 
     const String SvgxmlMimeType = "image/svg+xml";
     const String SvgxmlExtension = ".svg";
 
-    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(SvgxmlMimeType);
+    AssetFileExtension = csp::systems::SpaceSystemHelpers::GetAssetFileExtension(SvgxmlMimeType, LogSystem);
 
     EXPECT_EQ(AssetFileExtension, SvgxmlExtension);
 }
@@ -173,6 +174,7 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, IdCheckInValidTest)
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataNotObjectTest)
 {
+    auto LogSystem = csp::common::LogSystem {};
     const String MetaSiteData = "Void";
     const String MetaDataSiteKey = "site";
     const String MetaDataMultiplayerVersionKey = "multiplayerVersion";
@@ -181,7 +183,6 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataN
 
     Map<String, String> NotJsonObjectMetaDataMap;
 
-    auto LogSystem = csp::common::LogSystem {};
     csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(NotJsonObject, NotJsonObjectMetaDataMap, LogSystem);
 
     ASSERT_EQ(NotJsonObjectMetaDataMap.Size(), 2);
@@ -197,13 +198,13 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataN
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataObjectTest)
 {
+    auto LogSystem = csp::common::LogSystem {};
     const String MetaSiteData = "ObjectVoid";
     const String MetaDataSiteKey = "ObjectSite";
     const String JsonObject = "{\"" + MetaDataSiteKey + "\" :\"" + MetaSiteData + "\"}";
 
     Map<String, String> ObjectMetaDataMap;
 
-    auto LogSystem = csp::common::LogSystem {};
     csp::systems::SpaceSystemHelpers::ConvertJsonMetadataToMapMetadata(JsonObject, ObjectMetaDataMap, LogSystem);
 
     ASSERT_EQ(ObjectMetaDataMap.Size(), 1);

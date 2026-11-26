@@ -21,14 +21,14 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
-csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor& Vendor)
+csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor& Vendor, csp::common::LogSystem& LogSystem)
 {
     switch (Vendor)
     {
     case csp::systems::EventTicketingVendor::Eventbrite:
         return "eventbrite";
     default:
-        CSP_LOG_WARN_MSG("Unknown ticketed event vendor");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "Unknown ticketed event vendor");
         return "Unknown";
     }
 }
@@ -50,7 +50,7 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 {
     auto Request = std::make_shared<chs::SpaceEventDto>();
 
-    Request->SetVendorName(GetVendorNameString(Vendor));
+    Request->SetVendorName(GetVendorNameString(Vendor, LogSystem));
     Request->SetVendorEventId(VendorEventId);
     Request->SetVendorEventUri(VendorEventUri);
     Request->SetIsTicketingActive(IsTicketingActive);
@@ -71,7 +71,7 @@ void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceI
 
     if (Vendor.HasValue())
     {
-        Request->SetVendorName(GetVendorNameString(*Vendor));
+        Request->SetVendorName(GetVendorNameString(*Vendor, LogSystem));
     }
 
     if (VendorEventId.HasValue())
@@ -144,7 +144,7 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
 
     static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
         ->spacesSpaceIdVendorsVendorNameEventsVendorEventIdTicketsVendorTicketIdPut(
-            { SpaceId, GetVendorNameString(Vendor), VendorEventId, VendorTicketId, RequestOnBehalfOfUserId }, ResponseHandler);
+            { SpaceId, GetVendorNameString(Vendor, LogSystem), VendorEventId, VendorTicketId, RequestOnBehalfOfUserId }, ResponseHandler);
 }
 
 void EventTicketingSystem::GetVendorAuthorizeInfo(
@@ -154,7 +154,7 @@ void EventTicketingSystem::GetVendorAuthorizeInfo(
         TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(Callback, nullptr, LogSystem, csp::web::EResponseCodes::ResponseCreated);
 
     static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
-        ->vendorsVendorNameUsersUserIdProvider_infoGet({ GetVendorNameString(Vendor), UserId, std::nullopt }, ResponseHandler);
+        ->vendorsVendorNameUsersUserIdProvider_infoGet({ GetVendorNameString(Vendor, LogSystem), UserId, std::nullopt }, ResponseHandler);
 }
 
 void EventTicketingSystem::GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback)

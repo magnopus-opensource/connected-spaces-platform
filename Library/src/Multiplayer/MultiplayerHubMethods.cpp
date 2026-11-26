@@ -16,15 +16,15 @@
 
 #include "CSP//Multiplayer/MultiplayerHubMethods.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "Debug/Logging.h"
 
 #include <fmt/format.h>
 
 namespace csp::multiplayer
 {
 
-bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::common::String>& MethodNames) const
+bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::common::String>& MethodNames, csp::common::LogSystem& LogSystem) const
 {
     for (const auto& Method : *this)
     {
@@ -33,7 +33,7 @@ bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::c
         {
             const auto Message = fmt::format("Failed to resolve the Multiplayer Hub Method: {0}", Method.second);
 
-            CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Fatal, Message.c_str());
             return false;
         }
     }

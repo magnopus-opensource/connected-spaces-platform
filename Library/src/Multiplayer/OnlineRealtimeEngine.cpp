@@ -881,7 +881,7 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     if (!EntityToUpdate->GetStatePatcher()->HasPendingPatch())
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
-        // etc. CSP_LOG_MSG(csp::common::LogLevel::Log, "Skipped patch message send as no data changed");
+        // etc.
         return;
     }
 

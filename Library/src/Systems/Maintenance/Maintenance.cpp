@@ -108,7 +108,6 @@ const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
     }
     else
     {
-        CSP_LOG_MSG(common::LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
         return GetDefaultMaintenanceInfo();
     }
 }

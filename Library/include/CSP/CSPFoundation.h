@@ -33,6 +33,11 @@ class CSPEngine_FeatureFlagTests_UnkownFeatureFlagDescriptionTest_Test;
 #endif
 CSP_END_IGNORE
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems
 {
 class ServicesDeploymentStatus;
@@ -126,8 +131,10 @@ public:
     /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
     /// @param ServicesDeploymentStatus const csp::systems::ServicesDeploymentStatus& : The current status information against which the service
     /// definition is compared.
+    /// @param LogSystem csp::common::LogSystem& : LogSystem to report the evaluated state to.
     /// @return bool : true if all services are available, false otherwise
-    CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const;
+    CSP_NO_EXPORT bool CheckPrerequisites(
+        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, csp::common::LogSystem& LogSystem) const;
 
 private:
     csp::common::String URI;

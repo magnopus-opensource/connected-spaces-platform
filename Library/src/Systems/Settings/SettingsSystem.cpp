@@ -21,9 +21,11 @@
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/LoginStateData.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -373,15 +375,16 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
             {
                 const auto& AvatarPortraitAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& PortraitResult)
+                AssetsResultCallback AvatarPortraitAssetCallback = [=, &LogSystem = LogSystem](const AssetsResult& PortraitResult)
                 {
                     if (PortraitResult.GetResultCode() == EResultCode::Success)
                     {
-                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                        UriResultCallback UploadCallback = [=, &LogSystem = LogSystem](const UriResult& UploadResult)
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                                LogFormat(LogSystem, csp::common::LogLevel::Log,
+                                    "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}",
                                     static_cast<int>(UploadResult.GetResultCode()), UploadResult.GetHttpResultCode());
                             }
 
@@ -493,16 +496,17 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
             {
                 const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& ThumbnailResult)
+                AssetsResultCallback ThumbnailAssetCallback = [=, &LogSystem = LogSystem](const AssetsResult& ThumbnailResult)
                 {
                     if (ThumbnailResult.GetResultCode() == EResultCode::Success)
                     {
-                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                        UriResultCallback UploadCallback = [=, &LogSystem = LogSystem](const UriResult& UploadResult)
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-                                    (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
+                                LogFormat(LogSystem, csp::common::LogLevel::Log,
+                                    "The Space thumbnail upload data has failed. ResCode: {}, HttpResCode: {}", (int)UploadResult.GetResultCode(),
+                                    UploadResult.GetHttpResultCode());
                             }
 
                             const NullResult InternalResult(UploadResult);
@@ -511,7 +515,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 
                         auto& ThumbnailAsset = ((AssetsResult&)ThumbnailResult).GetAssets()[0];
                         ThumbnailAsset.FileName = SpaceSystemHelpers::GetUniqueAvatarThumbnailAssetName(
-                            SpaceSystemHelpers::GetAssetFileExtension(NewAvatarPortrait.GetMimeType()));
+                            SpaceSystemHelpers::GetAssetFileExtension(NewAvatarPortrait.GetMimeType(), LogSystem));
                         ThumbnailAsset.MimeType = NewAvatarPortrait.GetMimeType();
                         const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
                         AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewAvatarPortrait, UploadCallback);
@@ -544,7 +548,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [=, &LogSystem = LogSystem](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -555,7 +559,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
         {
             const auto& PortraitAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            AssetResultCallback CreateAssetCallback = [=, &LogSystem = LogSystem](const AssetResult& CreateAssetResult)
             {
                 if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -564,11 +568,11 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
 
                 if (CreateAssetResult.GetResultCode() == EResultCode::Success)
                 {
-                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                    UriResultCallback UploadCallback = [=, &LogSystem = LogSystem](const UriResult& UploadResult)
                     {
                         if (UploadResult.GetResultCode() == EResultCode::Failed)
                         {
-                            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
+                            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: {}, HttpResCode: {}",
                                 (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                         }
 
@@ -580,7 +584,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
                 }
                 else
                 {
-                    CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: {}, HttpResCode: {}",
                         (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
 
                     const NullResult InternalResult(CreateAssetResult);
@@ -593,7 +597,7 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
         }
         else
         {
-            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: {}, HttpResCode: {}",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
             const NullResult InternalResult(AssetCollResult);
@@ -613,7 +617,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    AssetCollectionResultCallback CreateAssetCollCallback = [=, &LogSystem = LogSystem](const AssetCollectionResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
         {
@@ -624,7 +628,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
         {
             const auto& PortraitAvatarAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            AssetResultCallback CreateAssetCallback = [=, &LogSystem = LogSystem](const AssetResult& CreateAssetResult)
             {
                 if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -633,11 +637,11 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 
                 if (CreateAssetResult.GetResultCode() == EResultCode::Success)
                 {
-                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                    UriResultCallback UploadCallback = [=, &LogSystem = LogSystem](const UriResult& UploadResult)
                     {
                         if (UploadResult.GetResultCode() == EResultCode::Failed)
                         {
-                            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
+                            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: {}, HttpResCode: {}",
                                 (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                         }
 
@@ -648,13 +652,13 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
                     Asset AvatarPortraitAsset = CreateAssetResult.GetAsset();
 
                     AvatarPortraitAsset.FileName = AVATAR_PORTRAIT_ASSET_NAME + UserSystem->GetLoginState().GetUserId()
-                        + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
+                        + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType(), LogSystem);
                     AvatarPortraitAsset.MimeType = ImageDataSource.GetMimeType();
                     AssetSystem->UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
                 }
                 else
                 {
-                    CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
+                    LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: {}, HttpResCode: {}",
                         (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
 
                     const NullResult InternalResult(CreateAssetResult);
@@ -667,7 +671,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
         }
         else
         {
-            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: {}, HttpResCode: {}",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
             const NullResult InternalResult(AssetCollResult);
@@ -687,11 +691,11 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String 
     auto& SystemsManager = SystemsManager::Get();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    AssetCollectionsResultCallback GetAssetCollCallback = [=, &LogSystem = LogSystem](const AssetCollectionsResult& AssetCollResult)
     {
         if (AssetCollResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset collection retrieval has failed. ResCode: {}, HttpResCode: {}",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
         }
 
@@ -708,11 +712,11 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String 
 
 void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback)
 {
-    AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& AssetsResult)
+    AssetsResultCallback ThumbnailAssetCallback = [=, &LogSystem = LogSystem](const AssetsResult& AssetsResult)
     {
         if (AssetsResult.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset retrieval has failed. ResCode: %d, HttpResCode: %d",
+            LogFormat(LogSystem, LogLevel::Error, "The Avatar Portrait asset retrieval has failed. ResCode: {}, HttpResCode: {}",
                 (int)AssetsResult.GetResultCode(), AssetsResult.GetHttpResultCode());
         }
 
@@ -748,7 +752,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
             {
                 const auto& PortraitAvatarAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback PortraitAvatarAssetCallback = [=](const AssetsResult& PortraitResult)
+                AssetsResultCallback PortraitAvatarAssetCallback = [=, &LogSystem = LogSystem](const AssetsResult& PortraitResult)
                 {
                     if (PortraitResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -757,7 +761,7 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 
                     if (PortraitResult.GetResultCode() == EResultCode::Success)
                     {
-                        NullResultCallback DeleteAssetCallback = [=](const NullResult& DeleteAssetResult)
+                        NullResultCallback DeleteAssetCallback = [=, &LogSystem = LogSystem](const NullResult& DeleteAssetResult)
                         {
                             if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress)
                             {
@@ -766,12 +770,12 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 
                             if (DeleteAssetResult.GetResultCode() == EResultCode::Success)
                             {
-                                NullResultCallback DeleteAssetCollCallback = [=](const NullResult& DeleteAssetCollResult)
+                                NullResultCallback DeleteAssetCollCallback = [=, &LogSystem = LogSystem](const NullResult& DeleteAssetCollResult)
                                 {
                                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::Failed)
                                     {
-                                        CSP_LOG_FORMAT(LogLevel::Error,
-                                            "The Portrait Avatar asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
+                                        LogFormat(LogSystem, LogLevel::Error,
+                                            "The Portrait Avatar asset collection deletion has failed. ResCode: {}, HttpResCode: {}",
                                             (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
                                     }
 
@@ -783,7 +787,8 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
                             }
                             else
                             {
-                                CSP_LOG_FORMAT(LogLevel::Error, "The Portrait Avatar asset deletion was not successful. ResCode: %d, HttpResCode: %d",
+                                LogFormat(LogSystem, LogLevel::Error,
+                                    "The Portrait Avatar asset deletion was not successful. ResCode: {}, HttpResCode: {}",
                                     (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
 
                                 NullResult InternalResult(DeleteAssetResult);
@@ -835,18 +840,18 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 {
     if (!Callback)
     {
-        CSP_LOG_ERROR_MSG("SettingsSystem::GetAvatarInfo(): Callback must not my empty!");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "SettingsSystem::GetAvatarInfo(): Callback must not my empty!");
 
         return;
     }
 
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    StringResultCallback GetSettingCallback = [=, &LogSystem = LogSystem](const StringResult& Result)
     {
         AvatarInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
         if (Result.GetResultCode() == EResultCode::Failed)
         {
-            CSP_LOG_ERROR_MSG("Failed to retrieve avatar info.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Failed to retrieve avatar info.");
 
             Callback(InternalResult);
             return;
@@ -856,7 +861,7 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
         if (Value.IsEmpty())
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Whilst avatar info was successfully returned, no avatar settings data was found.");
+            LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Whilst avatar info was successfully returned, no avatar settings data was found.");
             Callback(InternalResult);
             return;
         }
@@ -865,8 +870,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         rapidjson::ParseResult ok = Json.Parse(Value.c_str());
         if (!ok)
         {
-            CSP_LOG_ERROR_FORMAT(
-                "Failed to parse avatar info JSON data. Error: %s, Offset: %zu", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            LogFormat(LogSystem, csp::common::LogLevel::Error, "Failed to parse avatar info JSON data. Error: {}, Offset: {}",
+                rapidjson::GetParseError_En(ok.Code()), ok.Offset());
             Callback(InternalResult);
             return;
         }
@@ -878,7 +883,7 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         }
         else
         {
-            CSP_LOG_ERROR_MSG("Whilst avatar info was successfully returned with data, no avatar type was included.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Whilst avatar info was successfully returned with data, no avatar type was included.");
         }
 
         // Avatar identifier (used to identify or locate the actual avatar asset)
@@ -889,7 +894,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         else
         {
             // No identifier field was present in the json
-            CSP_LOG_ERROR_MSG("Whilst avatar info was successfully returned with data, no avatar identifier was included.");
+            LogSystem.LogMsg(
+                csp::common::LogLevel::Error, "Whilst avatar info was successfully returned with data, no avatar identifier was included.");
         }
 
         // Avatar visibility

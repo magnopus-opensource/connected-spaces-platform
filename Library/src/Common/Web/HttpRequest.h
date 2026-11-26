@@ -75,6 +75,7 @@ public:
     const HttpResponse& GetResponse() const;
 
     IHttpResponseHandler* GetCallback() const;
+    WebClient* GetClient() const;
 
     void SetResponseCode(EResponseCodes InReponseCode);
     void SetResponseData(const char* Data, size_t DataLength);

@@ -23,7 +23,6 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "MultiplayerTestRunnerProcess.h"
@@ -126,7 +125,6 @@ TEST_P(ScriptBinding, ScriptBindingTest)
     auto Fn = [&TestMessage](const char* Str)
     {
         TestMessage = Str;
-        CSP_LOG_MSG(csp::common::LogLevel::Log, Str);
         std::cout << Str << "\n";
     };
 

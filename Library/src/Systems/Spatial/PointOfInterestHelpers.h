@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "Debug/Logging.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
 namespace csp::systems
 {
@@ -25,7 +25,7 @@ class PointOfInterestHelpers
 public:
     // Enum to string conversion utilities. This rovides a centralized mechanism for mapping between the two
     // and should be used for all POI type/string conversions internally.
-    static csp::common::String TypeToString(EPointOfInterestType Type)
+    static csp::common::String TypeToString(EPointOfInterestType Type, csp::common::LogSystem& LogSystem)
     {
         csp::common::String String;
 
@@ -43,7 +43,7 @@ public:
         }
         default:
         {
-            CSP_LOG_ERROR_MSG(
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
                 "Unkwnown POI type detected when attempting to derive its string representation. The type string being returned will be empty.");
             break;
         }

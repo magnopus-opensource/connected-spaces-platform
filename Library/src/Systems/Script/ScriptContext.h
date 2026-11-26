@@ -16,15 +16,21 @@
 #pragma once
 
 #include "CSP/Common/String.h"
-#include "Debug/Logging.h"
 #include "quickjspp.hpp"
 
 #include <map>
 #include <string>
 #include <functional>
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems
 {
+
+class ScriptSystem;
 
 struct ScriptModule
 {
@@ -37,8 +43,8 @@ class ScriptContext
     friend class ScriptSystem;
 
 public:
-    ScriptContext(
-        ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId, std::function<csp::common::String()> InScriptNameProvider);
+    ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId,
+        std::function<csp::common::String()> InScriptNameProvider, csp::common::LogSystem& LogSystem);
     ~ScriptContext();
 
     void AddModule(const csp::common::String& ModuleName);
@@ -65,6 +71,7 @@ private:
     uint64_t ContextId;
     std::function<csp::common::String()> ScriptNameProvider;
     ScriptSystem* TheScriptSystem;
+    csp::common::LogSystem& LogSystem;
 
     qjs::Context* Context;
     qjs::Runtime* Runtime;

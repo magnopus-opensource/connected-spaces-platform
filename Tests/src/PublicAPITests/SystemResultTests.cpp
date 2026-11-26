@@ -21,7 +21,6 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"

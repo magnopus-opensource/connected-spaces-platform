@@ -84,8 +84,6 @@ const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
 
 void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 {
-    // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
-
     SetPropertyDirect(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
     Parent->GetScript().OnSourceChanged(Value);
 }

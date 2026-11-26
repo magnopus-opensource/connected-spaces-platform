@@ -20,6 +20,7 @@
 #include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CallHelpers.h"
+#include "Common/Systems/Log/LogFormat.h"
 #include "LODHelpers.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/PrototypeService/Api.h"
@@ -334,7 +335,8 @@ void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, c
     }
 }
 
-std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::systems::AssetCollection& AssetCollection)
+std::optional<EShaderType> GetShaderTypeFromMaterialCollection(
+    const csp::systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem)
 {
     std::optional<EShaderType> Result = {};
 
@@ -347,7 +349,7 @@ std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::system
     {
         // Please note: Older Spaces built when only GLTF materials were supported will not have stored
         // shader type metadata in the Material Asset Collection. We therefore default to a standard shader type.
-        CSP_LOG_MSG(LogLevel::Verbose, "Shader type metadata missing from Material Asset Collection, defaulting to Standard shader type.");
+        LogSystem.LogMsg(LogLevel::Verbose, "Shader type metadata missing from Material Asset Collection, defaulting to Standard shader type.");
         Result = EShaderType::Standard;
     }
 
@@ -380,7 +382,7 @@ void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetColl
 
     if (PrototypeId.IsEmpty())
     {
-        CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
+        LogSystem.LogMsg(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -454,7 +456,7 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 
     if (PrototypeId.IsEmpty())
     {
-        CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
+        LogSystem.LogMsg(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -494,7 +496,7 @@ void AssetSystem::DeleteMultipleAssetCollections(const csp::common::Array<AssetC
 {
     if (SourceAssetCollectionIDs.Size() == 0)
     {
-        CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to delete.");
+        LogSystem.LogMsg(LogLevel::Error, "No source asset collections were provided whilst attempting to delete.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
         return;
@@ -509,7 +511,7 @@ void AssetSystem::DeleteMultipleAssetCollections(const csp::common::Array<AssetC
 
     if (AssetCollectionIds.size() == 0)
     {
-        CSP_LOG_MSG(LogLevel::Error, "No asset collections could be converted to to required format to delete.");
+        LogSystem.LogMsg(LogLevel::Error, "No asset collections could be converted to to required format to delete.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
         return;
@@ -526,7 +528,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(const csp::common::Array<AssetColl
 {
     if (SourceAssetCollections.Size() == 0)
     {
-        CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
+        LogSystem.LogMsg(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
         return;
@@ -546,7 +548,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(const csp::common::Array<AssetColl
     // Verify we have a valid space ID to copy from.
     if (SourceSpaceId.IsEmpty())
     {
-        CSP_LOG_MSG(LogLevel::Error,
+        LogSystem.LogMsg(LogLevel::Error,
             "An asset with no space ID was provided whilst attempting to perform a copy to another space. All assets must have a valid space ID.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
@@ -556,7 +558,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(const csp::common::Array<AssetColl
     // Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
     if (!AssetCollectionsBelongToSameSpace)
     {
-        CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
+        LogSystem.LogMsg(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
         return;
@@ -1033,7 +1035,7 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, c
 {
     if (AssetCollectionIds.IsEmpty())
     {
-        CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+        LogSystem.LogMsg(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
 
@@ -1204,7 +1206,7 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 {
     if (AssetCollectionIds.IsEmpty())
     {
-        CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+        LogSystem.LogMsg(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
 
@@ -1262,11 +1264,11 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, cons
     auto FormFile = std::make_shared<web::HttpPayload>();
     AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
 
-    UriResultCallback InternalCallback = [Callback, Asset](const UriResult& Result)
+    UriResultCallback InternalCallback = [&LogSystem = LogSystem, Callback, Asset](const UriResult& Result)
     {
         if (Result.GetFailureReason() != ERequestFailureReason::None)
         {
-            CSP_LOG_ERROR_MSG(String("Asset with Id %s has failed to upload").c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Error, String("Asset with Id %s has failed to upload").c_str());
         }
 
         INVOKE_IF_NOT_NULL(Callback, Result);
@@ -1384,7 +1386,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
 
         if (!ValidateNewLODLevelForChain(Chain, LODLevel))
         {
-            CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
+            LogSystem.LogMsg(LogLevel::Error, "LOD level already exists in chain");
 
             INVOKE_IF_NOT_NULL(Callback, Result);
 
@@ -1492,7 +1494,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
     }
     else
     {
-        CSP_LOG_MSG(LogLevel::Error, "Specified shader type invalid.");
+        LogSystem.LogMsg(LogLevel::Error, "Specified shader type invalid.");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
         return;
     }
@@ -1595,10 +1597,10 @@ async::task<MaterialResult> AssetSystem::DownloadMaterial(const MaterialInfo& In
 }
 
 static std::optional<MaterialInfo> MakeMaterialInfo(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri, csp::common::LogSystem& LogSystem);
 
 static std::vector<MaterialInfo> CollectMaterialInfos(
-    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets)
+    const csp::common::Array<AssetCollection>& AssetCollections, const csp::common::Array<Asset>& Assets, csp::common::LogSystem& LogSystem)
 {
     auto Infos = std::vector<MaterialInfo>();
     Infos.reserve(Assets.Size());
@@ -1609,14 +1611,14 @@ static std::vector<MaterialInfo> CollectMaterialInfos(
                 [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
             AssetCollection != std::end(AssetCollections))
         {
-            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri))
+            if (const auto Info = MakeMaterialInfo(*AssetCollection, Asset.Id, Asset.Uri, LogSystem))
             {
                 Infos.push_back(*Info);
             }
         }
         else
         {
-            CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "A Material Collection with the specified Id was not found.");
         }
     }
 
@@ -1645,7 +1647,7 @@ std::function<async::task<MaterialsResult>(const MaterialInfosResult&)> AssetSys
 
         return async::when_all(DownloadTasks)
             .then(
-                [](std::vector<async::task<MaterialResult>> DownloadTasks) -> MaterialsResult
+                [&LogSystem = LogSystem](std::vector<async::task<MaterialResult>> DownloadTasks) -> MaterialsResult
                 {
                     auto DownloadedMaterials = std::vector<Material*>();
                     DownloadedMaterials.reserve(DownloadTasks.size());
@@ -1661,7 +1663,7 @@ std::function<async::task<MaterialsResult>(const MaterialInfosResult&)> AssetSys
                         }
                         catch (const std::exception& Exception)
                         {
-                            CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials: %s", Exception.what());
+                            LogFormat(LogSystem, csp::common::LogLevel::Error, "AssetSystem::GetMaterials: {}", Exception.what());
                         }
                     }
 
@@ -1710,10 +1712,10 @@ async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common
 
         return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
             .then(
-                [AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
+                [&LogSystem = LogSystem, AssetCollections](const AssetsResult& GetAssetsResult) -> MaterialInfosResult
                 {
                     const auto& Assets = GetAssetsResult.GetAssets();
-                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets);
+                    const auto Infos = CollectMaterialInfos(AssetCollections, Assets, LogSystem);
 
                     if (!Assets.IsEmpty() && Infos.empty())
                     {
@@ -1732,7 +1734,7 @@ async::task<MaterialInfosResult> AssetSystem::GetMaterialInfos(const csp::common
 void AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId, MaterialInfosResultCallback Callback)
 {
     GetMaterialInfos(SpaceId).then(
-        [Callback](async::task<MaterialInfosResult> Result)
+        [&LogSystem = LogSystem, Callback](async::task<MaterialInfosResult> Result)
         {
             try
             {
@@ -1740,7 +1742,7 @@ void AssetSystem::GetMaterialInfos(const csp::common::String& SpaceId, MaterialI
             }
             catch (const std::exception& Exception)
             {
-                CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterialInfos failed: %s", Exception.what());
+                LogFormat(LogSystem, csp::common::LogLevel::Error, "AssetSystem::GetMaterialInfos failed: {}", Exception.what());
                 Callback(MakeInvalid<MaterialInfosResult>());
             }
             catch (...)
@@ -1755,7 +1757,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
     GetMaterialInfos(SpaceId)
         .then(DownloadAllMaterials())
         .then(
-            [Callback](async::task<MaterialsResult> Result)
+            [&LogSystem = LogSystem, Callback](async::task<MaterialsResult> Result)
             {
                 try
                 {
@@ -1763,7 +1765,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                 }
                 catch (const std::exception& Exception)
                 {
-                    CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials failed: %s", Exception.what());
+                    LogFormat(LogSystem, csp::common::LogLevel::Error, "AssetSystem::GetMaterials failed: {}", Exception.what());
                     Callback(MakeInvalid<MaterialsResult>());
                 }
                 catch (...)
@@ -1788,7 +1790,7 @@ void AssetSystem::GetMaterialInfo(
         // 2. Get asset
         const AssetCollection& FoundAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
+        auto GetAssetCB = [&LogSystem = LogSystem, Callback, FoundAssetCollection](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
@@ -1798,7 +1800,7 @@ void AssetSystem::GetMaterialInfo(
 
             // 3. Resolve the material info
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
-            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri);
+            const auto Info = MakeMaterialInfo(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, LogSystem);
 
             if (!Info.has_value())
             {
@@ -1831,13 +1833,13 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 }
 
 static std::optional<MaterialInfo> MakeMaterialInfo(
-    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri, csp::common::LogSystem& LogSystem)
 {
-    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+    const auto ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection, LogSystem);
 
     if (!ShaderType.has_value())
     {
-        CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Material contains an invalid shader type.");
         return {};
     }
 
@@ -1868,7 +1870,7 @@ Material* AssetSystem::ParseMaterialFromAssetCollection(
     // A uri is only needed to fetch the data, which the caller has already done
     const auto UnusedUri = csp::common::String();
 
-    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri);
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, UnusedUri, LogSystem);
 
     if (!Info.has_value())
     {
@@ -1881,7 +1883,7 @@ Material* AssetSystem::ParseMaterialFromAssetCollection(
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
     const csp::common::String& Uri, MaterialResultCallback Callback)
 {
-    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri);
+    const auto Info = MakeMaterialInfo(AssetCollection, AssetId, Uri, LogSystem);
 
     if (!Info.has_value())
     {
@@ -1894,7 +1896,7 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
 
 void AssetSystem::DownloadMaterial(const MaterialInfo& Info, MaterialResultCallback Callback)
 {
-    auto DownloadMaterialCallback = [Callback, Info](const AssetDataResult& DownloadResult)
+    auto DownloadMaterialCallback = [&LogSystem = LogSystem, Callback, Info](const AssetDataResult& DownloadResult)
     {
         if (DownloadResult.GetResultCode() != EResultCode::Success)
         {
@@ -1908,7 +1910,7 @@ void AssetSystem::DownloadMaterial(const MaterialInfo& Info, MaterialResultCallb
 
         if (!DeserializationResult)
         {
-            CSP_LOG_ERROR_MSG("Failed to deserialize material");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Failed to deserialize material");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
 
@@ -1945,14 +1947,16 @@ void AssetSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register AssetSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Error: Failed to register AssetSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
     if (!MaterialChangedCallback && !AssetDetailBlobChangedCallback)
     {
-        CSP_LOG_ERROR_MSG("Error: Neither MaterialChangedCallback nor AssetDetailBlobChangedCallback were set, not registering AssetSystem to "
-                          "AssetDetailBlobChanged.\nPlease set either callback before registering.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Error: Neither MaterialChangedCallback nor AssetDetailBlobChangedCallback were set, not registering AssetSystem to "
+            "AssetDetailBlobChanged.\nPlease set either callback before registering.");
         return;
     }
 

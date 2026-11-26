@@ -16,9 +16,10 @@
 #pragma once
 
 #include "Awaitable.h"
-#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 

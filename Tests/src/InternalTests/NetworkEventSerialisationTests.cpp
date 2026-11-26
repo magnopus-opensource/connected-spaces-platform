@@ -20,7 +20,6 @@
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "TestHelpers.h"
 
-#include <Debug/Logging.h>
 #include <gtest/gtest.h>
 #include <signalrclient/signalr_value.h>
 

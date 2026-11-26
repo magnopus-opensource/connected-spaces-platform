@@ -15,7 +15,7 @@
  */
 #include "CSP/Systems/Script/ScriptSystem.h"
 
-#include "Debug/Logging.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"
 #include "Systems/Script/ScriptRuntime.h"
@@ -121,7 +121,7 @@ void ScriptSystem::Initialise()
         return;
     }
 
-    TheScriptRuntime = new ScriptRuntime(this);
+    TheScriptRuntime = new ScriptRuntime(this, LogSystem);
 
 #if defined(SCRIPTS_INCLUDE_STD_LIBS)
     js_std_init_handlers(TheScriptRuntime->Runtime->rt);

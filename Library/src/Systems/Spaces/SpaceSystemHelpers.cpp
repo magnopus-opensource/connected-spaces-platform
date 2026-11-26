@@ -19,10 +19,10 @@
 #include "CSP/Common/LoginState.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/LoginStateData.h"
 #include "Common/Systems/Log/LogFormat.h"
-#include "Debug/Logging.h"
 #include "Json/JsonParseHelper.h"
 
 using namespace csp::common;
@@ -58,7 +58,7 @@ namespace SpaceSystemHelpers
 
     String GetUniqueAvatarThumbnailAssetName(const String& Extension) { return String(AVATAR_THUMBNAIL_ASSET_NAME_PREFIX) + Extension; }
 
-    String GetAssetFileExtension(const String& MimeType)
+    String GetAssetFileExtension(const String& MimeType, csp::common::LogSystem& LogSystem)
     {
         if (MimeType == "image/png")
             return ".png";
@@ -76,7 +76,7 @@ namespace SpaceSystemHelpers
             return ".webp";
         else
         {
-            CSP_LOG_MSG(LogLevel::Error, "Mimetype File Extension Not Supported");
+            LogSystem.LogMsg(LogLevel::Error, "Mimetype File Extension Not Supported");
             return ".buffer";
         }
     }

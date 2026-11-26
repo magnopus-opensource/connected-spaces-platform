@@ -27,6 +27,11 @@ namespace qjs
 class Runtime;
 }
 
+namespace csp::common
+{
+class LogSystem;
+} // namespace csp::common
+
 namespace csp::systems
 {
 
@@ -41,7 +46,7 @@ public:
     using ModuleSourceMap = std::map<std::string, std::string>;
     using UrlAliasMap = std::map<std::string, std::string>;
 
-    ScriptRuntime(ScriptSystem* InScriptSystem);
+    ScriptRuntime(ScriptSystem* InScriptSystem, csp::common::LogSystem& LogSystem);
     ~ScriptRuntime();
 
     bool AddContext(int64_t ContextId, std::function<csp::common::String()> ScriptNameProvider);
@@ -65,6 +70,7 @@ public:
     bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
 
     ScriptSystem* TheScriptSystem;
+    csp::common::LogSystem& LogSystem;
     qjs::Runtime* Runtime;
 
     ContextMap Contexts;

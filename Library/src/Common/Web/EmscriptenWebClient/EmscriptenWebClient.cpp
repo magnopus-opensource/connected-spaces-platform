@@ -21,7 +21,6 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Debug/Logging.h"
 
 #include <assert.h>
 #include <emscripten/emscripten.h>
@@ -93,7 +92,11 @@ void OnFetchError(emscripten_fetch_t* Fetch)
 
     if (Request->Retry(static_cast<csp::web::EResponseCodes>(Fetch->status)))
     {
-        CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
+        if (auto* LogSystem = Request->GetClient()->GetLogSystem())
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning, "Retrying failed emscripten request\n");
+        }
+
         // Delete the fetch memory, otherwise we'd leak every retry. This was a patch job as this was forgotten about initially.
         // You might think we also should be deleting Request like OnFetchSuccessOrError does but we don't that's allocated in SendRequest and
         // should only be deallocated when the entire request is finished, retries and all.

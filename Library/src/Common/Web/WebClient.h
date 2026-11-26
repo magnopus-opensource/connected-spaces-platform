@@ -95,6 +95,9 @@ public:
     /// @param Value The header value, or empty to stop adding the header.
     void SetDefaultHeader(const std::string& Key, const std::optional<std::string>& Value);
 
+    /// @brief The LogSystem this client logs to, null if it does not log.
+    csp::common::LogSystem* GetLogSystem() const;
+
 protected:
     /// @brief Send a http request
     /// @param Request Details of the web request headers and payload

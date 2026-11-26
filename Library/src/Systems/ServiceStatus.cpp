@@ -16,7 +16,6 @@
 
 #include "CSP/Systems/ServiceStatus.h"
 
-#include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"
 

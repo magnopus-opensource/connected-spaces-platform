@@ -46,7 +46,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
     GetSettingsByContext(ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
-            {}, {}))
+            {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -60,7 +60,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
     GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
-            "Failed to get application settings", {}, {}, {}))
+            "Failed to get application settings", {}, {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -72,7 +72,7 @@ void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSetting
     CreateSettingsByContext(ApplicationSettings)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
-            {}, {}, {}))
+            {}, {}, {}, LogSystem))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -86,7 +86,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
 
     if (ApplicationSettings.ApplicationName.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG(
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
@@ -94,7 +94,8 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
 
     if (ApplicationSettings.Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
@@ -122,7 +123,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     if (ApplicationName.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG(
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
@@ -130,7 +131,8 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     if (Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
@@ -154,7 +156,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     if (ApplicationName.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG(
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
             "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
@@ -162,7 +164,8 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     if (Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            "Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }

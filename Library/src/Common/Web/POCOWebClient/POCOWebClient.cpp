@@ -18,10 +18,9 @@
 
 #include "POCOWebClient.h"
 
-#include "Debug/Logging.h"
-
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "Common/Systems/Log/LogFormat.h"
 
 #include <Poco/File.h>
 #include <Poco/MD5Engine.h>
@@ -256,8 +255,6 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest, const std::st
 
 void POCOWebClient::Get(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -279,8 +276,6 @@ void POCOWebClient::Get(HttpRequest& Request)
 
 void POCOWebClient::Post(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("POST %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -308,8 +303,6 @@ void POCOWebClient::Post(HttpRequest& Request)
 
 void POCOWebClient::Put(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("PUT %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -336,8 +329,6 @@ void POCOWebClient::Put(HttpRequest& Request)
 
 void POCOWebClient::Delete(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("DELETE %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -361,8 +352,6 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
 void POCOWebClient::Head(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("HEAD %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -384,8 +373,6 @@ void POCOWebClient::Head(HttpRequest& Request)
 
 void POCOWebClient::Patch(HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED_FORMAT("PATCH %s", Request.GetUri().GetAsStdString().c_str());
-
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
     // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
@@ -414,8 +401,6 @@ void POCOWebClient::Patch(HttpRequest& Request)
 void POCOWebClient::ProcessResponseAsync(
     Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPResponse& PocoResponse, std::istream& ResponseStream, HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED();
-
     std::streamsize ContentLength = PocoResponse.getContentLength();
 
     if (ContentLength == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH || ContentLength == 0)
@@ -467,8 +452,6 @@ void POCOWebClient::ProcessResponseAsync(
 void POCOWebClient::ProcessRequestAsync(
     Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPRequest& /*PocoRequest*/, std::ostream& RequestStream, HttpRequest& Request)
 {
-    CSP_PROFILE_SCOPED();
-
     size_t ContentLength = Request.GetPayload().GetContent().Length();
 
     if (ContentLength == 0)
@@ -509,9 +492,9 @@ void POCOWebClient::SetFileUploadContentFromFile(
         Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
         SetFileUploadContent(Payload, Source, Version);
     }
-    else
+    else if (LogSystem != nullptr)
     {
-        CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
+        LogFormat(*LogSystem, csp::common::LogLevel::Warning, "File not found. Path given: {}", FilePath);
     }
 }
 
