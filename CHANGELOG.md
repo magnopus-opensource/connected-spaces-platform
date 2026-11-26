@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file. For compile
 ### 🔩 🔧 Ci
 - [NT-0] ci: Trigger tests as part of nightly builds by @MAG-AdamThorn
   We recently started running automated nightly builds. These were initially configured to not run tests. However, we hope to soon be in a position to promote these builds to full publishes instead of relying on a separate publish workflow. It is therefore important that tests are run as part of this automation. This change updates the skip_tests flag.
+  
+- [OF-1939] ci: Introduce feature branch builds by @MAG-AdamThorn
+  Prior to our migration to GitHub Actions for our CICD, we had the concept of Feature Releases. This allowed developers to build their branch for a specific set of build targets for testing. This change adds support for that using our existing `Publish CSP` workflow.
 
 ## [7.3.0]
 
