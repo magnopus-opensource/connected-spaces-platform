@@ -1,10 +1,15 @@
-# This workflow performs the following actions:
+# This workflow performs the following optional actions:
 #  - Builds csp for all desktop platforms
 #  - Builds csp for wasm
 #  - Builds csp for android
 #  - Builds csp for iOS and visionOS
-#  - Optionally runs csp live tests on Linux
-#  - Optionally uploads artifacts to GitHub
+#  - Builds csp using legacy wasm wrapper
+#  - Runs csp live tests on Linux
+#  - Uploads artifacts to GitHub
+#  - Creates a GitHub release
+#  - Uploads legacy wasm artifact to NPM
+#
+# For feature builds, set create_release: false and upload_build_artifacts: true
 
 name: Publish CSP
 
@@ -24,9 +29,16 @@ on:
         required: false
         default: "*"
       
+      # Setting create_release: false and upload_build_artifacts: true uploads artifacts only with no release made.
       create_release:
         type: boolean
         description: 'Whether a Github release should be created'
+        required: true
+        default: true
+
+      upload_build_artifacts:
+        type: boolean
+        description: 'Whether build artifacts should be uploaded (always on when create_release is set)'
         required: true
         default: true
 
@@ -76,36 +88,75 @@ on:
     inputs: *publish_inputs
 
 jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release_number input
+        if: inputs.create_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_NUMBER: ${{ inputs.release_number }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Releases can only be created from main (got $GITHUB_REF). Untick create_release for a feature build."
+            exit 1
+          fi
+          pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "$PRERELEASE" != "true" && ! "$RELEASE_NUMBER" =~ $pattern ]]; then
+            echo "::error::Invalid release_number '$RELEASE_NUMBER'. Releases must be major.minor.patch (eg 7.4.0)."
+            exit 1
+          fi
+          # Exit codes: 0 = exists, 2 = does not exist, anything else = network/auth error.
+          status=0
+          GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --tags \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "refs/tags/${RELEASE_NUMBER}" >/dev/null || status=$?
+
+          if [[ $status -eq 0 ]]; then
+            echo "::error::Tag '$RELEASE_NUMBER' already exists."
+            exit 1
+          elif [[ $status -ne 2 ]]; then
+            echo "::error::Could not check whether tag '$RELEASE_NUMBER' exists (git exit code $status)."
+            exit 1
+          fi
+
   desktop:
+    needs: validate-inputs
     if: inputs.build_desktop
     uses: ./.github/workflows/desktop-build.yml
     with:
       upload_test_build: ${{ !inputs.skip_tests }}
-      upload_install: ${{ inputs.create_release }}
+      upload_install: ${{ inputs.upload_build_artifacts || inputs.create_release }}
 
   wasm:
+    needs: validate-inputs
     if: inputs.build_wasm
     uses: ./.github/workflows/wasm-build.yml
     with:
-      upload_install: ${{ inputs.create_release }}
+      upload_install: ${{ inputs.upload_build_artifacts || inputs.create_release }}
 
   android:
+    needs: validate-inputs
     if: inputs.build_android
     uses: ./.github/workflows/android-build.yml
     with:
-      upload_install: ${{ inputs.create_release }}
+      upload_install: ${{ inputs.upload_build_artifacts || inputs.create_release }}
 
   ios-visionos:
+    needs: validate-inputs
     if: inputs.build_ios_visionos
     uses: ./.github/workflows/ios-visionos-build.yml
     with:
-      upload_install: ${{ inputs.create_release }}
+      upload_install: ${{ inputs.upload_build_artifacts || inputs.create_release }}
 
   linux-unreal:
+    needs: validate-inputs
     if: inputs.build_linux_unreal
     uses: ./.github/workflows/linux-unreal-build.yml
     with:
-      upload_install: ${{ inputs.create_release }}
+      upload_install: ${{ inputs.upload_build_artifacts || inputs.create_release }}
 
   live-desktop-tests:
     if: inputs.build_desktop && !inputs.skip_tests
@@ -122,6 +173,7 @@ jobs:
       prerelease: ${{ inputs.prerelease }}
 
     needs:
+    - validate-inputs
     - desktop
     - wasm
     - live-desktop-tests
@@ -133,6 +185,7 @@ jobs:
     if: |
       always() &&
       inputs.create_release &&
+      needs.validate-inputs.result == 'success' &&
       (!inputs.build_desktop || needs.desktop.result == 'success') &&
       (!inputs.build_wasm || needs.wasm.result == 'success') &&
       (!inputs.build_android || needs.android.result == 'success') &&

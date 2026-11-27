@@ -49,6 +49,7 @@ jobs:
     with:
       skip_tests: false
       create_release: true
+      upload_build_artifacts: true
       prerelease: true
       release_number: Nightly-${{ needs.prepare.outputs.date }}
       build_desktop: true
