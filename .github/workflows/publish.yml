@@ -29,7 +29,7 @@ on:
         required: false
         default: "*"
       
-      # Setting create_release: false and upload_build_artifacts: true uploads artifacts only, with no release or npm publish made.
+      # Setting create_release: false and upload_build_artifacts: true uploads artifacts only with no release made.
       create_release:
         type: boolean
         description: 'Whether a Github release should be created'
@@ -115,8 +115,16 @@ jobs:
             echo "::error::Invalid release_number '$RELEASE_NUMBER'. $error_msg."
             exit 1
           fi
-          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_NUMBER}" >/dev/null 2>&1; then
+          # Exit codes: 0 = exists, 2 = does not exist, anything else = network/auth error.
+          status=0
+          GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --tags \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "refs/tags/${RELEASE_NUMBER}" >/dev/null || status=$?
+
+          if [[ $status -eq 0 ]]; then
             echo "::error::Tag '$RELEASE_NUMBER' already exists."
+            exit 1
+          elif [[ $status -ne 2 ]]; then
+            echo "::error::Could not check whether tag '$RELEASE_NUMBER' exists (git exit code $status)."
             exit 1
           fi
 
