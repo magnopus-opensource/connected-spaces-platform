@@ -104,15 +104,9 @@ jobs:
             echo "::error::Releases can only be created from main (got $GITHUB_REF). Untick create_release for a feature build."
             exit 1
           fi
-          if [[ "$PRERELEASE" == "true" ]]; then
-            pattern='^Nightly-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
-            error_msg="Prereleases are only used for nightly builds. Expected: Nightly-YYYY-MM-DD"
-          else
-            pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
-            error_msg="Releases must be major.minor.patch (eg 7.4.0)"
-          fi
-          if [[ ! "$RELEASE_NUMBER" =~ $pattern ]]; then
-            echo "::error::Invalid release_number '$RELEASE_NUMBER'. $error_msg."
+          pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "$PRERELEASE" != "true" && ! "$RELEASE_NUMBER" =~ $pattern ]]; then
+            echo "::error::Invalid release_number '$RELEASE_NUMBER'. Releases must be major.minor.patch (eg 7.4.0)."
             exit 1
           fi
           # Exit codes: 0 = exists, 2 = does not exist, anything else = network/auth error.
