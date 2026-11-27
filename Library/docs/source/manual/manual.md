@@ -46,7 +46,6 @@ Documentation on processes and principles that the library adheres to.
    documentation/adding_components
    documentation/data_driven_components
    documentation/branching_strategy
-   documentation/wrapper_generator_specs
    documentation/script_system
    documentation/expected_application_flow
    documentation/multiplayer_state_replication
@@ -63,12 +62,7 @@ If you're forking CSP for your own purposes, or seeking to contribute back, you 
    :maxdepth: 1
    :titlesonly:
 
-   building/web
-   building/windows
-   building/csharp
-   building/android
-   building/macos
-   building/ios
+   building/build-system
 ```
 
 ## Debugging
@@ -82,7 +76,5 @@ CSP itself is also debuggable, and in this section you can learn how to dive ins
    :maxdepth: 1
    :titlesonly:
 
-   debugging/debugging_unity
-   debugging/debugging_web
    debugging/performance_profiling
 ```

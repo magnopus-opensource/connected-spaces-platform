@@ -3,10 +3,8 @@
 #  - Builds csp for wasm
 #  - Builds csp for android
 #  - Builds csp for iOS and visionOS
-#  - Builds csp using legacy wasm wrapper
 #  - Optionally runs csp live tests on Linux
 #  - Optionally uploads artifacts to GitHub
-#  - Optionally uploads legacy wasm artifact to NPM
 
 name: Publish CSP
 
@@ -73,12 +71,6 @@ on:
         required: true
         default: true
 
-      build_legacy_wasm:
-        type: boolean
-        description: Build legacy WASM/NPM package
-        required: true
-        default: true
-
   # Same inputs as workflow_dispatch, allows calling from other workflows (e.g. nightly-build.yml)
   workflow_call:
     inputs: *publish_inputs
@@ -115,15 +107,6 @@ jobs:
     with:
       upload_install: ${{ inputs.create_release }}
 
-  legacy-wasm:
-    if: inputs.build_legacy_wasm
-    uses: ./.github/workflows/legacy-wasm-build.yml
-    secrets: inherit
-    with:
-      upload_package: ${{ inputs.create_release }}
-      run_tests: ${{ !inputs.skip_tests }}
-      release_number: ${{ inputs.release_number }}
-
   live-desktop-tests:
     if: inputs.build_desktop && !inputs.skip_tests
     uses: ./.github/workflows/live-mcs-tests-run.yml
@@ -136,14 +119,12 @@ jobs:
     uses: ./.github/workflows/upload-releases.yml
     with:
       release_number: ${{ inputs.release_number }}
-      upload_legacy_wasm: ${{ inputs.build_legacy_wasm }}
       prerelease: ${{ inputs.prerelease }}
 
     needs:
     - desktop
     - wasm
     - live-desktop-tests
-    - legacy-wasm
     - android
     - ios-visionos
     - linux-unreal
@@ -154,27 +135,9 @@ jobs:
       inputs.create_release &&
       (!inputs.build_desktop || needs.desktop.result == 'success') &&
       (!inputs.build_wasm || needs.wasm.result == 'success') &&
-      (!inputs.build_legacy_wasm || needs.legacy-wasm.result == 'success') &&
       (!inputs.build_android || needs.android.result == 'success') &&
       (!inputs.build_ios_visionos || needs.ios-visionos.result == 'success') &&
       (!inputs.build_linux_unreal || needs.linux-unreal.result == 'success') &&
-      (
-        inputs.skip_tests ||
-        needs.live-desktop-tests.result == 'success'
-      )
-
-  publish-npm:
-    uses: ./.github/workflows/publish-legacy-npm.yml
-    secrets: inherit
-
-    needs:
-    - legacy-wasm
-    - live-desktop-tests
-
-    if: |
-      always() &&
-      inputs.create_release &&
-      needs.legacy-wasm.result == 'success' &&
       (
         inputs.skip_tests ||
         needs.live-desktop-tests.result == 'success'

@@ -56,4 +56,3 @@ jobs:
       build_android: true
       build_ios_visionos: true
       build_linux_unreal: true
-      build_legacy_wasm: false # Don't want to do an NPM publish, the need to do this will dissolve in a few weeks anyway

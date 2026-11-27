@@ -1,2 +1,0 @@
-Git URL: https://github.com/belav/csharpier
-Version: 0.9.9

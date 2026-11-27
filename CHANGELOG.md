@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [7.4.0]
 
+### 🔨 🔨 Chore
+- [NT-0] chore: Remove legacy wrapper generator by @MAG-ElliotMorris
+  Interop functionality is now provided by two downstream bindings repos, for [unity](https://github.com/magnopus-opensource/connected-spaces-platform-unity) and [web](https://github.com/magnopus-opensource/connected-spaces-platform-web).
+  Also removes the in-repo wasm tests, as these are provided by the downstream web bindings repo.
+
 ### 🔩 🔧 Ci
 - [NT-0] ci: Trigger tests as part of nightly builds by @MAG-AdamThorn
   We recently started running automated nightly builds. These were initially configured to not run tests. However, we hope to soon be in a position to promote these builds to full publishes instead of relying on a separate publish workflow. It is therefore important that tests are run as part of this automation. This change updates the skip_tests flag.
