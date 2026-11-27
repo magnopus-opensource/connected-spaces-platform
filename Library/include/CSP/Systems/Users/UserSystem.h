@@ -315,12 +315,13 @@ private:
     UserSystem() = delete;
     UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
         const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
-        csp::multiplayer::NetworkEventBus* InEventBus, csp::multiplayer::MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
-    // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call this method to set it after the NetworkEventBus has been
-    // constructed.
+    // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call these methods to set the MultiplayerConnection 
+    // and NetworkEventBus after they have been constructed.
+    void SetMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Connection);
     void SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus);
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
@@ -353,7 +354,7 @@ private:
 
     AuthContext Auth;
 
-    csp::multiplayer::MultiplayerConnection& Connection;
+    csp::multiplayer::MultiplayerConnection* Connection;
 };
 
 } // namespace csp::systems

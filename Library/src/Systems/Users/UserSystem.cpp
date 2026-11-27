@@ -236,7 +236,7 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
     const csp::common::String& InMultiplayerConnectionURI, std::string_view DeviceId, std::string_view Tenant,
-    csp::multiplayer::NetworkEventBus* InEventBus, csp::multiplayer::MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem)
+    csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, LogSystem)
     , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient, UserServiceDefinition) }
     , ProfileAPI { new chs_user::ProfileApi(InWebClient, UserServiceDefinition) }
@@ -248,7 +248,6 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefin
     , CurrentLoginState(std::make_shared<csp::common::LoginState>())
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState, LogSystem }
-    , Connection { Connection }
 {
 }
 
@@ -335,7 +334,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
 
             NotifyRefreshTokenHasChanged();
 
-            StartMultiplayerConnection(Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
+            StartMultiplayerConnection(*Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -405,7 +404,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
             NotifyRefreshTokenHasChanged();
 
             StartMultiplayerConnection(
-                Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
+                *Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
         }
         else
@@ -471,7 +470,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             NotifyRefreshTokenHasChanged();
 
             StartMultiplayerConnection(
-                Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
+                *Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes,
                 LogSystem, CreateMultiplayerConnection);
         }
         else
@@ -530,7 +529,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
             NotifyRefreshTokenHasChanged();
 
             // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
-            StartMultiplayerConnection(Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, false);
+            StartMultiplayerConnection(*Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, false);
         }
         else
         {
@@ -589,7 +588,7 @@ void UserSystem::LoginSocial(
             NotifyRefreshTokenHasChanged();
 
             StartMultiplayerConnection(
-                Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, CreateMultiplayerConnection);
+                *Connection, MultiplayerConnectionURI, ConnectionCallback, LoginStateRes, LogSystem, CreateMultiplayerConnection);
         }
         else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
@@ -752,7 +751,7 @@ void UserSystem::FederatedLogin(
         Callback(SuccessResult);
     };
 
-    StartMultiplayerConnection(Connection, MultiplayerConnectionURI, ConnectionCallback, Result, LogSystem,
+    StartMultiplayerConnection(*Connection, MultiplayerConnectionURI, ConnectionCallback, Result, LogSystem,
         CreateMultiplayerConnection);
 }
 
@@ -793,7 +792,7 @@ void UserSystem::Logout(NullResultCallback Callback)
         static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogoutPost({ Request }, ResponseHandler);
     };
 
-    Connection.Disconnect(ErrorCallback);
+    Connection->Disconnect(ErrorCallback);
 }
 
 void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email,
@@ -1054,5 +1053,10 @@ void UserSystem::OnAccessControlChangedEvent(const csp::common::AccessControlCha
 }
 
 csp::common::IAuthContext& UserSystem::GetAuthContext() { return Auth; }
+
+void UserSystem::SetMultiplayerConnection(csp::multiplayer::MultiplayerConnection& InConnection)
+{ 
+    Connection = &InConnection;
+}
 
 } // namespace csp::systems
