@@ -40,7 +40,6 @@ namespace csp::systems
 {
 
 class SpaceSystem;
-class SystemsManager;
 class SystemBase;
 
 } // namespace csp::systems

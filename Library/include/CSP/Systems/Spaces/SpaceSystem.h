@@ -60,8 +60,10 @@ class ServiceDefinition;
 namespace csp::systems
 {
 
-class UserSystem;
+class AssetSystem;
+class IAuthContext;
 class MultiplayerSystem;
+class PointOfInterestInternalSystem;
 
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Group.
@@ -400,9 +402,13 @@ public:
 
 private:
     SpaceSystem() = delete;
+
     SpaceSystem(csp::web::WebClient* WebClient, const csp::ServiceDefinition& UserServiceDefinition,
-        const csp::ServiceDefinition& AggregationServiceDefinition, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem,
+        const csp::ServiceDefinition& AggregationServiceDefinition, csp::multiplayer::NetworkEventBus& EventBus,
+        csp::multiplayer::MultiplayerConnection& Connection, csp::systems::AssetSystem& AssetSystem,
+        csp::systems::PointOfInterestInternalSystem& PointOfInterestSystem, const csp::common::IAuthContext& AuthContext,
         csp::common::LogSystem& LogSystem);
+
     ~SpaceSystem();
 
     // Space Metadata
@@ -422,7 +428,7 @@ private:
 
     // CreateSpace Continuations
     async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, const csp::common::String& UserId);
     std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
         const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata);
     async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space);
@@ -446,11 +452,14 @@ private:
     auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
 
-    UserSystem* UserSystem;
-
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;
     Space CurrentSpace;
+
+    csp::multiplayer::MultiplayerConnection& Connection;
+    systems::AssetSystem& AssetSystem;
+    systems::PointOfInterestInternalSystem& PointOfInterestSystem;
+    const common::IAuthContext& AuthContext;
 
     csp::systems::MultiplayerSystem* MultiplayerSystem;
 };

@@ -37,12 +37,10 @@ std::string GetUniqueString()
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
+csp::systems::Profile CreateTestUser(csp::systems::UserSystem& UserSystem, bool AgeVerified /* = true */,
+    csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
     csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ /* = None */)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& UserSystem = *SystemsManager.GetUserSystem();
-
     std::promise<csp::systems::ProfileResult> ResultPromise;
     std::future<csp::systems::ProfileResult> ResultFuture = ResultPromise.get_future();
 

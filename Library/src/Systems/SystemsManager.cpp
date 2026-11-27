@@ -203,25 +203,27 @@ void SystemsManager::CreateSystems(const csp::EndpointURIs& Endpoints, const csp
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 
-    // Set the NetworkEventBus now that it has been initialized.
+    // Set the MultiplayerConnection and EventBus now that they have been initialized.
+    UserSystem->SetMultiplayerConnection(*MultiplayerConnection);
     UserSystem->SetNetworkEventBus(MultiplayerConnection->GetEventBus());
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(
-        WebClient, Endpoints.UserService, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
+    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     AssetSystem = new csp::systems::AssetSystem(
         WebClient, Endpoints.PrototypeService, MultiplayerConnection->GetEventBus(), UserSystem->GetAuthContext(), *LogSystem);
+    SpaceSystem = new csp::systems::SpaceSystem(WebClient, Endpoints.UserService, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(),
+        *MultiplayerConnection, *AssetSystem, *PointOfInterestSystem, UserSystem->GetAuthContext(), *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
-    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, Endpoints.SpatialDataService, *LogSystem);
     ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
-    SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *LogSystem);
+    SettingsSystem = new csp::systems::SettingsSystem(WebClient, Endpoints.UserService, *AssetSystem, UserSystem->GetAuthContext(), *LogSystem);
     GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, Endpoints.AggregationService, *LogSystem);
-    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, *LogSystem);
+    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, Endpoints.AggregationService, UserSystem->GetAuthContext(), *LogSystem);
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, Endpoints.AggregationService, MultiplayerConnection->GetEventBus(), *LogSystem);
-    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
+    HotspotSequenceSystem
+        = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem->GetCurrentSpace(), MultiplayerConnection->GetEventBus(), *LogSystem);
     ConversationSystem
         = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, Endpoints.UserService, &(csp::CSPFoundation::GetClientUserAgentInfo()),

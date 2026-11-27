@@ -50,6 +50,9 @@ class ServiceDefinition;
 namespace csp::systems
 {
 
+class AssetSystem;
+class IAuthContext;
+
 /// @ingroup Settings System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' settings service.
 /// Offers methods for storing and retrieving client settings.
@@ -153,8 +156,8 @@ public:
 
 private:
     SettingsSystem() = delete;
-    CSP_NO_EXPORT SettingsSystem(
-        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT SettingsSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& UserServiceDefinition,
+        csp::systems::AssetSystem& AssetSystem, const common::IAuthContext& AuthContext, csp::common::LogSystem& LogSystem);
     ~SettingsSystem();
 
     void SetSettingValue(const csp::common::String& InContext, const csp::common::String& InKey, const csp::common::String& InValue,
@@ -168,6 +171,9 @@ private:
     void GetAvatarPortraitAssetCollection(const csp::common::String InUserID, AssetCollectionsResultCallback Callback);
     void GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback);
     void RemoveAvatarPortrait(NullResultCallback Callback);
+
+    csp::systems::AssetSystem& AssetSystem;
+    const common::IAuthContext& AuthContext;
 };
 
 } // namespace csp::systems

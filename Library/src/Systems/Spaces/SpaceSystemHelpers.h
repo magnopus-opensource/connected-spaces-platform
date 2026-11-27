@@ -53,7 +53,7 @@ namespace SpaceSystemHelpers
 
     bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids);
 
-    std::shared_ptr<csp::services::generated::userservice::GroupDto> DefaultGroupInfo();
+    std::shared_ptr<csp::services::generated::userservice::GroupDto> DefaultGroupInfo(const csp::common::String& UserId);
 
     csp::common::Map<csp::common::String, csp::common::String> LegacyAssetConversion(
         const systems::AssetCollection& AssetCollection, csp::common::LogSystem& LogSystem);

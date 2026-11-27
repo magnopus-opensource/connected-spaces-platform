@@ -29,11 +29,11 @@
 namespace CreateAvatar
 {
 
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
+void RunTest(
+    csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
     using namespace csp::multiplayer;
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
 
     const auto uuid = Utils::GetUniqueString();

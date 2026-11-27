@@ -18,6 +18,7 @@
 #include "../../include/ProcessDescriptors.h"
 #include "../LoginRAII.h"
 #include "../Utils.h"
+#include "CSP/Systems/SystemsManager.h"
 
 #include "CSP/Common/String.h"
 #include <gtest/gtest.h>
@@ -26,8 +27,17 @@
 /* Initialize CSP before the suite begins with a fixture */
 class LoginRAIITest : public ::testing::Test
 {
+public:
+    LoginRAIITest()
+        : SystemsManager { csp::systems::SystemsManager::Get() }
+    {
+       
+    }
+
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
+
+    csp::systems::SystemsManager& SystemsManager;
 };
 
 TEST_F(LoginRAIITest, TestValidLogin)
@@ -35,8 +45,8 @@ TEST_F(LoginRAIITest, TestValidLogin)
     {
         // Check the process descriptor is printed.
         ::testing::internal::CaptureStdout();
-        auto TestUser = Utils::CreateTestUser();
-        LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
+        auto TestUser = Utils::CreateTestUser(*SystemsManager.GetUserSystem());
+        LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword, *SystemsManager.GetUserSystem() };
         EXPECT_NE(::testing::internal::GetCapturedStdout().find(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR), std::string::npos);
         ::testing::internal::CaptureStdout(); // GetCapturedStdout stops capturing, so we want to start again for the logout descriptor
     }
@@ -49,7 +59,7 @@ TEST_F(LoginRAIITest, TestInvalidLogin)
     ::testing::internal::CaptureStdout();
     try
     {
-        LoginRAII login { "FakeName", "FakePassword" };
+        LoginRAII login { "FakeName", "FakePassword", *SystemsManager.GetUserSystem() };
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {

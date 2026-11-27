@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
 #include <memory>
@@ -31,7 +32,7 @@
 class SpaceRAII
 {
 public:
-    SpaceRAII(std::optional<std::string> SpaceId);
+    SpaceRAII(std::optional<std::string> SpaceId, csp::systems::SystemsManager& SystemsManager);
     ~SpaceRAII();
 
     SpaceRAII(const SpaceRAII&) = delete;
@@ -59,5 +60,6 @@ public:
 private:
     bool CreatedThisSpace = false; // If we created this space, we should destroy it when done.
     std::string SpaceId;
+    csp::systems::SystemsManager& SystemsManager;
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine;
 };

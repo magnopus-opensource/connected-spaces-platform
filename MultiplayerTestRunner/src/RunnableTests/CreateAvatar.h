@@ -18,6 +18,11 @@
 
 #include "../CLIArgs.h"
 
+namespace csp::systems
+{
+class SystemsManager;
+}
+
 namespace csp::multiplayer
 {
 class OnlineRealtimeEngine;
@@ -28,5 +33,5 @@ namespace CreateAvatar
 /*
  * Example test that simply creates an avatar in a room.
  */
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
+void RunTest(csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
 } // namespace CreateAvatar

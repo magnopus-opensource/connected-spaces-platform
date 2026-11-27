@@ -19,6 +19,8 @@
 #include "../RunnableTests/CreateAvatar.h"
 #include "../SpaceRAII.h"
 #include "../Utils.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Systems/SystemsManager.h"
 
 #include "CSP/Common/String.h"
 #include <gtest/gtest.h>
@@ -33,17 +35,26 @@
 /* Initialize CSP before the suite begins with a fixture */
 class RunnableTests : public ::testing::Test
 {
+public:
+    RunnableTests()
+        : SystemsManager { csp::systems::SystemsManager::Get() }
+    {
+
+    }
+
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
+
+    csp::systems::SystemsManager& SystemsManager;
 };
 
 TEST_F(RunnableTests, CreateAvatar)
 {
     // Login
-    auto TestUser = Utils::CreateTestUser();
-    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser(*SystemsManager.GetUserSystem());
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword, *SystemsManager.GetUserSystem() };
     // Make a throwaway space
-    SpaceRAII Space({});
+    SpaceRAII Space({}, SystemsManager);
 
-    CreateAvatar::RunTest(Space.GetRealtimeEngine());
+    CreateAvatar::RunTest(SystemsManager, Space.GetRealtimeEngine());
 }

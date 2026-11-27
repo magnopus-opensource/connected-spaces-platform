@@ -30,9 +30,8 @@
 namespace LeaderElectionTick
 {
 
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
+void RunTest(csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     auto& MultiplayerSystem = *SystemsManager.GetMultiplayerSystem();

@@ -23,5 +23,5 @@ namespace EventBusPing
 /*
  * Test that listens for an "EventPingRequest" event using the event bus, then sends it back to the sender as "EventPingResponse"
  */
-void RunTest();
+void RunTest(csp::systems::SystemsManager& SystemsManager);
 } // namespace ReceiveEventBusevent

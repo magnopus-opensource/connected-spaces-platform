@@ -21,6 +21,7 @@
 #include "../Utils.h"
 
 #include "CSP/Common/String.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include <gtest/gtest.h>
@@ -29,8 +30,17 @@
 /* Initialize CSP before the suite begins with a fixture */
 class SpaceRAIITest : public ::testing::Test
 {
+public:
+    SpaceRAIITest()
+        : SystemsManager { csp::systems::SystemsManager::Get() }
+    {
+     
+    }
+
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
+
+    csp::systems::SystemsManager& SystemsManager;
 };
 
 TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
@@ -38,11 +48,11 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
     ::testing::internal::CaptureStdout();
 
     // Login
-    auto TestUser = Utils::CreateTestUser();
-    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser(*SystemsManager.GetUserSystem());
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword, *SystemsManager.GetUserSystem() };
     {
         // Check the create space and joined space process descriptors are printed when we don't provide a spaceID
-        SpaceRAII Space({});
+        SpaceRAII Space({}, SystemsManager );
         const auto CapturedOut = ::testing::internal::GetCapturedStdout();
         const auto CreatedSpaceDescriptorPos = CapturedOut.find(MultiplayerTestRunner::ProcessDescriptors::CREATED_SPACE_DESCRIPTOR);
         const auto JoinedSpaceDescriptorPos = CapturedOut.find(MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR);
@@ -65,7 +75,7 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
     try
     {
         ::testing::internal::CaptureStdout();
-        SpaceRAII Space({});
+        SpaceRAII Space({}, SystemsManager);
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {
@@ -88,17 +98,16 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
     // Login
-    auto TestUser = Utils::CreateTestUser();
-    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser(*SystemsManager.GetUserSystem());
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword, *SystemsManager.GetUserSystem() };
     // Create a space
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     csp::systems::Space TestSpace = SpaceRAII::CreateDefaultTestSpace(SpaceSystem);
 
     {
         ::testing::internal::CaptureStdout();
         // Check the create space and joined space process descriptors are printed when we don't provide a spaceID
-        SpaceRAII Space(std::optional<std::string> { TestSpace.Id.c_str() });
+        SpaceRAII Space(std::optional<std::string> { TestSpace.Id.c_str() }, SystemsManager);
         const auto CapturedOut = ::testing::internal::GetCapturedStdout();
         const auto CreatedSpaceDescriptorPos = CapturedOut.find(MultiplayerTestRunner::ProcessDescriptors::CREATED_SPACE_DESCRIPTOR);
         const auto JoinedSpaceDescriptorPos = CapturedOut.find(MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR);
@@ -121,7 +130,7 @@ TEST_F(SpaceRAIITest, TestUseInvalidExistingSpace)
     try
     {
         ::testing::internal::CaptureStdout();
-        SpaceRAII Space(std::make_optional(Invalid_SpaceID));
+        SpaceRAII Space(std::make_optional(Invalid_SpaceID), SystemsManager);
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {

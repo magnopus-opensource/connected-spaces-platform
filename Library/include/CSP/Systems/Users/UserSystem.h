@@ -28,7 +28,6 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
-
 namespace csp::web
 {
 
@@ -39,7 +38,18 @@ class WebClient;
 namespace csp
 {
 class ServiceDefinition;
+
+namespace multiplayer
+{
+    class MultiplayerConnection;
+}
+
 } // namespace csp
+
+namespace csp::services::generated::userservice
+{
+class LoginSocialRequest;
+}
 
 namespace csp::systems
 {
@@ -154,7 +164,7 @@ public:
     /// @brief API to retrieve the Connected Spaces Platform supported 3rd party authentication providers
     /// @return Array of Connected Spaces Platform supported 3rd party authentication providers
     [[nodiscard]] csp::common::Array<EThirdPartyAuthenticationProviders> GetSupportedThirdPartyAuthenticationProviders() const;
-    
+
     /// @brief Alternative 3rd party authentication flow using a token
     /// Note: The steps are as follows:
     /// 1. Client application requests an authorization token from the third party provider directly.
@@ -309,14 +319,18 @@ private:
     ~UserSystem();
 
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
-    // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call this method to set it after the NetworkEventBus has been
-    // constructed.
+    // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call these methods to set the MultiplayerConnection 
+    // and NetworkEventBus after they have been constructed.
+    void SetMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Connection);
     void SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus);
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
     void ResetThirdPartyAuthState();
+
+    void LoginSocial(
+        const std::shared_ptr<csp::services::generated::userservice::LoginSocialRequest>& Request, bool CreateMultiplayerConnection, csp::systems::LoginStateResultCallback Callback);
 
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;
@@ -339,6 +353,8 @@ private:
     UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
     AuthContext Auth;
+
+    csp::multiplayer::MultiplayerConnection* Connection;
 };
 
 } // namespace csp::systems

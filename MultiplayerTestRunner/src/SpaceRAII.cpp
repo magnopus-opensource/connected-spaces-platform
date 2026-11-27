@@ -29,10 +29,10 @@ namespace
 
 } // namespace
 
-SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
-    : RealtimeEngine(csp::systems::SystemsManager::Get().MakeOnlineRealtimeEngine())
+SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId, csp::systems::SystemsManager& SystemsManager)
+    : SystemsManager { SystemsManager }
+    , RealtimeEngine { std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> { SystemsManager.MakeOnlineRealtimeEngine() } }
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
 
     // If the user hasn't provided a spaceID, we'll make our own.
@@ -82,7 +82,6 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
 
 SpaceRAII::~SpaceRAII()
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
 
     // Leave space

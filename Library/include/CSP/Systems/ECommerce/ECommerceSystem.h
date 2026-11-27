@@ -35,6 +35,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp::common
+{
+class IAuthContext;
+}
+
 namespace csp
 {
 class ServiceDefinition;
@@ -120,10 +125,11 @@ public:
 
 private:
     ECommerceSystem() = delete;
-    CSP_NO_EXPORT ECommerceSystem(
-        csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& AggregationServiceDefinition,
+        const common::IAuthContext& AuthContext, csp::common::LogSystem& LogSystem);
     ~ECommerceSystem();
 
+    const common::IAuthContext& AuthContext;
     csp::services::ApiBase* ShopifyAPI;
 };
 

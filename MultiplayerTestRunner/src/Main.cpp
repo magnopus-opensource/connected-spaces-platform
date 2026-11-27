@@ -17,16 +17,19 @@
 #include "../include/ErrorCodes.h"
 #include "../include/ProcessDescriptors.h"
 #include "CLIArgs.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "LoginRAII.h"
 #include "RunnableTests/ClearScriptSource.h"
 #include "RunnableTests/CreateAvatar.h"
 #include "RunnableTests/CreateConversation.h"
 #include "RunnableTests/EventBusPing.h"
 #include "RunnableTests/LeaderElection.h"
-#include "RunnableTests/LeaderElectionTick.h"
 #include "RunnableTests/LeaderElectionEvent.h"
+#include "RunnableTests/LeaderElectionTick.h"
 #include "SpaceRAII.h"
 #include "Utils.h"
+
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 
 #include "CSP/Common/String.h"
 #include <chrono>
@@ -58,25 +61,26 @@
  * By this point, the client should be logged in and inside a space, hence tests need not concern themselves with space creation and cleanup.
  * This function blocks until the timeout has elapsed.
  */
-void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_point ProgramStartTime, SpaceRAII& SpaceRAII)
+void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_point ProgramStartTime, SpaceRAII& SpaceRAII,
+    csp::systems::SystemsManager& SystemsManager)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     switch (Settings.TestIdentifier)
     {
     case TestIdentifier::CREATE_AVATAR:
-        CreateAvatar::RunTest(SpaceRAII.GetRealtimeEngine());
+        CreateAvatar::RunTest(SystemsManager, SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::CREATE_CONVERSATION:
-        CreateConversation::RunTest(SpaceRAII.GetRealtimeEngine());
+        CreateConversation::RunTest(SystemsManager, SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::EVENT_BUS_PING:
-        EventBusPing::RunTest();
+        EventBusPing::RunTest(SystemsManager);
         break;
     case TestIdentifier::LEADER_ELECTION:
-        LeaderElection::RunTest(SpaceRAII.GetRealtimeEngine());
+        LeaderElection::RunTest(SystemsManager, SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::LEADER_ELECTION_TICK:
-        LeaderElectionTick::RunTest(SpaceRAII.GetRealtimeEngine());
+        LeaderElectionTick::RunTest(SystemsManager, SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::LEADER_ELECTION_EVENT:
         LeaderElectionEvent::RunTest(SpaceRAII.GetRealtimeEngine());
@@ -126,15 +130,17 @@ int main(int argc, char* argv[])
         std::cout << "Initializing Multiplayer Test Runner with Endpoint : " << Settings.Endpoint << std::flush;
         Utils::InitialiseCSPWithUserAgentInfo(Settings.Endpoint.c_str());
 
+        csp::systems::SystemsManager& SystemsManager = csp::systems::SystemsManager::Get();
+
         // Log in
-        LoginRAII LoggedIn { Settings.LoginEmailAndPassword.first, Settings.LoginEmailAndPassword.second };
+        LoginRAII LoggedIn { Settings.LoginEmailAndPassword.first, Settings.LoginEmailAndPassword.second, *SystemsManager.GetUserSystem() };
 
         // Enter space (creating one if it dosen't exist)
-        SpaceRAII Space { Settings.SpaceId };
+        SpaceRAII Space { Settings.SpaceId, SystemsManager };
         Settings.SpaceId = Space.GetSpaceId(); // We need to update the settings as a new space may have been created
 
         // Run the specified test according to the TestIdentifier. Wont return earlier than timeout.
-        RunTest(Settings, ProgramStartTime, Space);
+        RunTest(Settings, ProgramStartTime, Space, SystemsManager);
 
         return 0;
     }

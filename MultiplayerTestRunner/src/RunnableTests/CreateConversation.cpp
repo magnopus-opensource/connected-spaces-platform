@@ -36,7 +36,7 @@ when receiving 2 patches, the first being the initial component creation, and th
 the ConversationId property update.
 This scenario would fail if events arent correctly stored, and then flushed when receiving the conversation id
 */
-void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
+void RunTest(csp::systems::SystemsManager& SystemsManager, csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
     // Ensure patch rate limiting is off, as we're sending patches in quick succession.
     RealtimeEngine.SetEntityPatchRateLimitEnabled(false);
